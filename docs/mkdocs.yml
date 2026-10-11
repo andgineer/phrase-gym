@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: phrase_gym
+site_url: https://andgineer.github.io/phrase-gym
+site_author: Andrey Sorokin
+
+# Repository
+repo_name: phrase_gym
+repo_url: https://github.com/andgineer/phrase-gym
+edit_uri: edit/master/docs
+docs_dir: 'src/LANGUAGE'
+site_dir: 'SITE_DIR'
+
+plugins:
+  - awesome-pages
+  - search:
+      lang: LANGUAGE
+  - mkdocstrings:
+        handlers:
+          python:
+            options:
+              show_root_heading: true
+
+markdown_extensions:
+  - abbr
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets:
+      base_path: 'docs/includes'
+  - admonition
+
+extra:
+  alternate:
+    - name: English
+      link: /phrase-gym/
+      lang: en
+    - name: Русский
+      link: /phrase-gym/ru/
+      lang: ru
+
+nav:
+  - index.md
+  - installation.md
