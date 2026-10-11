@@ -15,11 +15,14 @@ Status: **not started**, 2026-10-11. Depends on P2 contracts and P3 working dril
 
 - Add the leased jobs table/worker, explicit provider configuration, bounded retries, deduplication and structured failure states.
 - Define generation outputs for target realizations, chunk boundaries, cue masks, competing-completion analysis, short dialogue turns and on-demand explanations.
+- As part of adding a phrase to the app database, have the LLM prepare variants hiding different words/meaningful chunks where the phrase permits useful alternatives. Store checked versions with that phrase for selection across later sessions; do not generate fresh random masks during practice or require a fixed number of variants. Support a single reliable cue and an explicit no-reliable-cue preparation outcome.
 - Run deterministic checks before linguistic review: schema, language tags, chunk reconstruction, target/slot references, audio text and allowed help exposure.
 - Store provider, model, prompt version, input hash and review outcome. Publish only a reviewed revision; regeneration must not alter an active session.
 - Generate model/cue audio once and cache it. Verify the selected language/voice rather than silently substituting an unrelated locale. Preserve supplied actor audio when appropriate.
 
 **Acceptance:** provider timeout/rejection/malformed output leaves a recoverable draft; restart recovers leased work; retries do not publish duplicate targets or assets; practising existing content remains possible while all providers are unavailable. Paid escalation is disabled unless configured deliberately.
+
+Demonstrate the accepted variant lifecycle: add a phrase → LLM prepares candidates → check and store usable variants → practise one → start a later session with another suitable version of the same target. Also cover a phrase with only one reliable variant. All versions must retain one target schedule; reloading an active session must preserve its selected cue.
 
 ## P5.3 — Evaluate generated material
 

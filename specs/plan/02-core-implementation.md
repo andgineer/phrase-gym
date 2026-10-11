@@ -7,6 +7,7 @@ Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected prod
 - Extend the user-created `phrase-gym` scaffold, preserving its Python src layout, hatchling/uv packaging, Click entry point, pytest, Invoke and build/CI conventions. Replace placeholder CLI/docs/metadata with real app behaviour at this phase. Add the selected client/server modules and documented run/check/build commands; legacy tooling stays separate.
 - Establish the same-origin API/static-client path, explicit runtime configuration and separate application data directory.
 - Define Pydantic contracts, generated client types and schema compatibility checks. Keep prototype fixtures usable as contract examples.
+- Implement first launch with an empty database: ask for native language and persist it in app settings for phrase explanations. Reuse the setting across restarts; keep target-language metadata separate. The first-launch/settings presentation follows the reviewed prototype.
 - Implement the deterministic client reducer independently of rendering and a clock-injected server domain layer independently of HTTP.
 
 **Acceptance:** clean checkout/environment can run the documented commands; types are checked separately from the client build; invalid requests fail with actionable errors; no provider credentials reach the client. No authentication/hosting assumption is hidden in a development-only convenience.
@@ -32,8 +33,9 @@ Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected prod
 ## P3.1 — End-to-end session
 
 - Implement the session planner and pinned manifest for due/new targets with approved cues, review groups and schedule versions.
-- Build introduction, prompt, response, meaningful help, alternative/unclear-cue handling, repair and results from the reviewed P1 flow. Include the session recording switch: recording-on own-take replay → model reveal/playback → self-check, and recording-off silent Reveal & compare with manual model audio.
+- Build one Start session entry, prompt, response, meaningful help, an on-request full-phrase/explanation card in the learner's language, alternative/unclear-cue handling, repair and results from the reviewed P1 flow. No separate home learning/rehearsal modes or compulsory introduction based only on a new database item. Include the session recording switch: recording-on own-take replay → model reveal/playback → self-check, and recording-off silent Reveal & compare with manual model audio.
 - Implement pause/resume with a local checkpoint and server session state. Save support/exposure before transitioning.
+- Automatically persist every learner take's audio and metadata in the database, including rerecordings. Link each take to its timestamp, target/session/attempt, cue revision and support history. Keep pending audio locally until the database acknowledges it, retry idempotently and never overwrite earlier takes. No manual Save control, automatic expiry or historical progress-comparison UI is required.
 - Add deterministic cue rotation and delayed retry selection. Do not generate cues in the UI or make an AI request a prerequisite for advancing.
 
 **Acceptance:** complete the seven P1 walkthroughs with durable state. Reload after a model reveal retains assisted status. A cue reported unclear is excluded from subsequent selection pending review. The first complete vertical slice works with fixed fixture content and no connected model provider.
@@ -67,6 +69,8 @@ Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected prod
 
 Integrate the library, reviewed content import, due list, complete session, dialogues, contextual explanations and explicit cue reports. Show preparing/ready states and saved/pending outcomes accurately. Handle empty collection, no due items, missing audio and unavailable backend without losing history.
 
-**Exit gate:** the user can learn and revisit both phrase and word/frame targets locally; all critical domain/integration cases pass; the browser suite covers one complete normal session and meaningful failure paths. This is the first useful implementation, not yet the phone/offline release. Basic optional recording and automated comparison belong to this core slice. Durable saving/retention, upload and device resilience arrive in P4; live content sources and AI preparation in P5.
+**Exit gate:** the user can learn and revisit both phrase and word/frame targets locally; all critical domain/integration cases pass; the browser suite covers one complete normal session and meaningful failure paths. This is the first useful implementation, not yet the phone/offline release. Basic optional recording, automated comparison and durable database storage of every take belong to this core slice. P4 hardens device/offline resilience and transfer recovery; live content sources and AI preparation arrive in P5. Historical recording-comparison UI is deferred.
 
 Additional acceptance: the recording-off path never demands microphone permission or claims spoken production. Turning recording off affects subsequent attempts only. An automatic playback failure offers explicit recovery; it does not silently grade the attempt or lose a playable take. Self-check still distinguishes alternative wording from cue ambiguity. A successful rerecording preserves the original attempt and help history.
+
+Recording-storage acceptance: initial takes and retries remain as separate database records with their audio after session completion and application restart; resending the same take creates no duplicate. Recoverable interrupted audio is marked incomplete. Storage failure never claims a successful save, and no test relies on a manual Save action or a historical comparison screen.

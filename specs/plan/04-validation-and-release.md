@@ -2,13 +2,13 @@
 
 Status: **not started**, 2026-10-11. P4 follows the core trainer and P1 audio probe. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
 
-## P4.1 — Record, compare and keep selected takes
+## P4.1 — Record, compare and retain every take reliably
 
 Harden the basic recording/comparison adapter already included in P3. Preserve the agreed session switch, visible state, start/stop/cancel, automatic learner-take → model comparison and manual replay/rerecord controls. Validate recording-off silent practice independently. Ask for the microphone only when the learner chooses recording. Stop tracks on exit; label interrupted/empty clips rather than presenting them as completed speech.
 
-Persist a take locally before offering it as saved; upload it independently of the attempt event and show pending/saved state. Define a proposed retention policy in the prototype review: keep explicitly saved/pinned takes and an opted-in baseline recording; discard unsaved temporary takes after comparison/session completion. Offer deletion without deleting the learning target or its textual practice history.
+Harden the automatic storage already included in P3: retain every take's audio and metadata in the app database, including retries, with no manual Save step or automatic expiry. Persist pending audio locally, transfer it independently of the attempt event and distinguish pending transfer from acknowledged database storage. Recoverable interrupted takes retain their audio with an incomplete status. Historical progress-comparison UI is deferred; keep the existing immediate self/model replay controls.
 
-**Acceptance:** denied/ignored permission does not trap the learner; real recordings play on the supported devices; upload retry creates one recording; comparison uses the intended model revision; quota failure does not claim a recording was saved. No voice is automatically submitted to an external model.
+**Acceptance:** denied/ignored permission does not trap the learner; real recordings play on the supported devices; upload retry creates one recording while a new take creates a separate record; comparison uses the intended model revision; all takes survive session completion/restart and database restore; quota failure does not claim a recording was saved. No voice is automatically submitted to an external model.
 
 ## P4.2 — Downloaded sessions and reconnection
 
@@ -38,7 +38,7 @@ Recommend the smallest private deployment that passes the measurements: one API 
 
 ## P6.2 — Backup, restore and upgrade
 
-- Back up SQLite consistently and include all referenced media, schema version and app version. Keep an explicit policy for saved takes and later deletions in backups.
+- Back up SQLite consistently, including every learner-recording BLOB, and include referenced model media, schema version and app version. Verify that all takes, including retries, are retained on restore; historical-comparison UI is not needed to verify audio persistence.
 - Restore to an isolated directory/instance and verify content, due dates, attempts, personal notes and playable audio.
 - Rehearse a schema upgrade and app rollback. If a migration is not backward compatible, rollback means restoring the matching snapshot, not running old code on new tables.
 - Keep worker crash recovery, missing-media reconciliation and download-pack compatibility in the runbook.

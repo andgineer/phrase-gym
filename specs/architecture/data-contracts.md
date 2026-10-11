@@ -18,14 +18,19 @@ Use opaque UUIDs for internal identities; source identifiers are references, not
 | `attempt` | Unique event/attempt IDs, target and cue revisions, review group, actual response modality (recorded speech / silent / explicitly reported unrecorded speech / unknown), exposed chunks, help/media failures, self-report, timestamps and optional recording ID. |
 | `review_state` | Unique `(learner_id, target_id)`, due time, interval/coverage data, algorithm version, concurrency version. |
 | `review_receipt` | Unique review group per learner/target; accepted attempt, schedule effect and before/after version. |
-| `media_asset` | Hash, MIME type, byte size, duration, storage key, provenance and readiness. Original and normalized versions are linked. |
-| `recording` | Learner, target/attempt, media reference, saved/pinned state and deletion state. No recording is required for an attempt. |
+| `media_asset` | Model/cue audio: hash, MIME type, byte size, duration, storage key, provenance and readiness. Original and normalized versions are linked. Learner recordings use database audio storage below. |
+| `recording` | Stable take ID, learner, target/session/attempt and cue/content revision links, captured timestamp, audio bytes (BLOB in SQLite), hash, MIME type, byte size, duration when known, capture/completeness status and persistence acknowledgement. Support/exposure is retained through attempt history. Every take is automatically kept; no saved/pinned opt-in flag. A new take gets a new ID and does not replace earlier audio. No recording is required for a recording-off attempt. |
 | `content_job` | Kind, canonical input hash, state, lease owner/expiry, retry count, result/error and provider/prompt provenance. |
 | `cue_report`, `learner_note` | Cue-specific quality feedback and target-specific personal notes; neither is a schedule. |
+| `app_settings` | Persist the native-language selection collected on first launch with an empty database; use it as the explanation language on subsequent starts. Keep it separate from target languages. Exact locale/schema shape is an implementation proposal. |
 
 Compatible editorial/context revisions keep the target and schedule; retain recall coverage only for unchanged required chunks, with an explicit mapping for renamed chunk IDs. A source edit must not silently replace the required expression or meaning.
 
+For the accepted add-time cue-preparation flow, link the LLM preparation job and its checked `cue_variant` results to the phrase's realization revision. Persist cue presentation in session/attempt history, including a displayed cue on a subsequently abandoned attempt, so selection can vary the hidden parts across sessions. Store zero, one or several candidates as appropriate; only reviewed usable cues enter retrieval practice. These variants do not create additional targets or schedules. The exact history schema and selection policy remain implementation proposals.
+
 A singleton learner profile is enough for the personal app. Do not add public account management, organizations or shared courses to the first implementation.
+
+The accepted first-launch flow collects native language when the database is empty and persists it in app settings for explanations. A previously saved setting is reused; an empty phrase collection alone does not require asking again. Proposed content shape: a versioned explanation linked to the realization/target revision and explanation locale, with meaning/translation and usage information. Record opening the explanation and full-model exposure on the existing attempt, preserving whether it happened before or after the response. Keep that content out of the ordinary drill until explicitly requested. The exact explanation schema and preparation/caching policy are still proposals.
 
 ## Example realization and cues
 
@@ -64,7 +69,7 @@ IDs above are readable fixture identifiers, not the production UUID format. Thes
 | `POST /api/v1/sessions/{id}/events` | Ordered event batch; return per-event receipts, last accepted sequence and authoritative schedule changes. |
 | `GET /api/v1/sessions/{id}` | Retrieve the checkpoint/receipts needed to reconcile a resumed client. |
 | `POST /api/v1/cue-reports` | Record ambiguity or inappropriate context without grading a memory failure. |
-| `POST /api/v1/recordings` and `DELETE /recordings/{id}` | Idempotent upload/attachment or explicit deletion; failed upload does not discard the practice event. |
+| `POST /api/v1/recordings`, `GET /recordings/{id}/audio` | Automatically persist every take's audio and metadata in the database, with idempotent upload/attachment and private playback. Acknowledge storage only after commit. Failed transfer retains pending audio and does not discard the practice event. Historical browsing/comparison and deletion UI are not first-version requirements. |
 | `GET /api/v1/media/{id}` | Private media delivery with byte-range support, MIME type and immutable content identity. |
 | `POST /api/v1/preparation-jobs`, `GET /preparation-jobs/{id}` | Durable asynchronous preparation and status. Polling suffices initially; no streaming chat API. |
 
@@ -106,16 +111,18 @@ The adapter should be a new output destination, not a Phrase Gym implementation 
 
 A download manifest lists the schema version, app compatibility, immutable content/cue revisions and asset hashes/sizes. Mark a pack ready only after required assets are verified. A failed download leaves no misleading offline-ready state.
 
-IndexedDB holds the session checkpoint, immutable attempts pending acknowledgement and locally saved recording blobs. Cache Storage holds the app shell and downloaded model audio. Quota failure must be visible; never discard an unacknowledged attempt or saved recording just to make cache space. Evict acknowledged replaceable model assets first. Sync on foreground/resume/retry; do not require background sync support.
+IndexedDB holds the session checkpoint, immutable attempts pending acknowledgement and every captured recording awaiting database acknowledgement. Cache Storage holds the app shell and downloaded model audio. Quota failure must be visible; never discard an unacknowledged attempt or pending recording just to make cache space. Local copies may be evicted after durable database storage is verified; that does not delete the retained recording from the database. Evict replaceable model assets first. Sync on foreground/resume/retry; do not require background sync support.
 
 Content is immutable within a session. Service-worker updates wait until the session is checkpointed or ended; keep compatible assets for the active pack. A server schema change that cannot read an old event must return a recoverable incompatibility response, not clear the outbox.
 
 ## Media and jobs
 
-Write uploaded media to a temporary file, validate size/type/decoding, compute its hash and move it atomically before committing a ready reference. Handle an orphaned file or a missing file after a crash through reconciliation. Keep media garbage collection away from active sessions and backup snapshots.
+For model/cue media files, write to a temporary file, validate size/type/decoding, compute its hash and move it atomically before committing a ready reference. Handle an orphaned file or a missing file after a crash through reconciliation. Keep media garbage collection away from active sessions and backup snapshots.
+
+For learner takes, persist audio bytes and recording metadata together in the database. Validate and record format/completeness; preserve available interrupted audio without presenting it as completed speech. Use the same take ID on upload retry so a lost acknowledgement does not duplicate a recording. Distinct takes remain distinct even if their audio hashes match. Recording storage does not itself advance a review schedule. No automatic expiry or cleanup of retained database recordings is part of the policy.
 
 A worker claims a job with a lease in a short transaction, then performs external work outside the lock. Renew the lease for long work. After a crash, expiry permits retry; the canonical input hash deduplicates publication, even if an external provider was called twice. Store bounded error details, expose a retry action and cap provider work. Jobs do not carry database locks across network calls.
 
 ## Comparison sequence contract
 
-Recording mode must not be inferred merely from the presence or absence of a recording row. Record the requested mode, actual capture outcome, model exposure timing and learner self-report separately. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. Retention/upload policy remains open; the optional-recording decision does not authorize automatic external AI processing.
+Recording mode must not be inferred merely from the presence or absence of a recording row. Record the requested mode, actual capture outcome, model exposure timing and learner self-report separately. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. All audio takes are automatically retained in the app database, including rerecordings, with no manual Save action or automatic expiry. Historical progress-comparison UI is deferred. This storage requirement does not authorize automatic external AI processing.

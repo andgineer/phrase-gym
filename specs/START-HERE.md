@@ -2,6 +2,8 @@
 
 Handoff updated **2026-10-11**. The complete project context is in `~/projects/phrase-gym/specs/`. Read this file before using any earlier plan or archive.
 
+**Current session, 2026-10-11:** the user asked to continue discussing app prototypes and functionality and to preserve all decisions in `specs/`. Design discussion has resumed; application implementation has not been requested. See the [current discussion record](design/interaction-design.md#resumed-prototype-discussion-2026-10-11). Continue recording accepted choices in the relevant decision documents and distinguish proposals from acceptance.
+
 ## What the user wants
 
 **Phrase Gym** trains selected words in useful phrases, fixed expressions and specific prepared dialogues until they can be used readily in the intended situations. The purpose is automatic access to useful language. It is not a general AI speaking partner: open-ended conversation and free role-play were explicitly rejected, including as future directions.
@@ -21,7 +23,7 @@ Key user statements:
 ## Read in this order
 
 1. [Accepted targeted-drilling decision](decision-targeted-drilling.md): scope, introductions, phrase-specific cues, varying hidden chunks, whole-phrase responses, alternatives, support and one schedule per target.
-2. [Recording and comparison decision](decision-recording-and-comparison.md): the latest endorsed interaction flow, optional session recording, automated self/model playback and the unresolved stopping choice.
+2. [Recording and comparison decision](decision-recording-and-comparison.md): the latest endorsed interaction flow, optional session recording, automated self/model playback and manual stop by default; the stop-method setting is deferred beyond the first version.
 3. [Interaction design](design/interaction-design.md): concrete screens, controls and step-by-step examples, with agreed behaviour separated from visual proposals.
 4. [Implementation roadmap](plan/implementation-plan.md): current status, scaffold constraints and future phases. [Next-session brief](plan/next-session.md) is the implementation handoff.
 5. [Architecture](architecture.md), [learning engine](architecture/learning-engine.md), [data contracts](architecture/data-contracts.md): technical recommendations, not automatically approved decisions.
@@ -39,18 +41,23 @@ The stopped attempt produced temporary source, fixtures and a browser prototype 
 
 - Name: **Phrase Gym**. Repository description: “A language trainer for automatic use of words and phrases through guided recall, spaced repetition, and targeted dialogue drills.”
 - Train both words in useful phrases and fixed phrases/constructions; rehearse specific dialogues with defined targets. Source rollout remains a separate choice.
-- Introduce each expression and its use before recall. Broad situations cannot demand an arbitrary exact sentence.
+- The main screen starts one session; no separate Learn new material or Rehearse entry modes. Phrases are expected to have been encountered in source material. Start from the drill, with a visible action to show the complete phrase and an explanation in the learner's language when forgotten or unclear. No compulsory app introduction for every newly added item.
+- Normal drills use the target language; the learner's language belongs on the explicitly opened explanation card. Broad situations cannot demand an arbitrary exact sentence. Keep track of explanation/model exposure when returning to practice.
+- First launch with an empty database asks for native language and stores it in app settings for explanations. Russian is selected for the current sketch; it is not a hard-coded app default.
 - Use enough meaningful, phrase-specific cue material from any part of the expression. Show necessary disambiguation initially. Deliberately vary hidden chunks when useful; no random masks or letter puzzles.
+- When adding a phrase to the app database, have the LLM prepare alternate hidden-word/chunk cues where useful variants are possible. Check and store them with the phrase so a later session can show a different version. Do not force multiple variants or generate random gaps during practice.
 - The response is the whole phrase. Fixed targets have explicit equivalents; word/frame tasks define what may vary.
 - Ambiguous cues and valid alternatives are not memory failures. Self-comparison remains available; AI/ASR grading is not required.
 - Preserve support/exposure history. Reading a model, immediate echo, partial-cue retrieval, shown-word usage and silent practice are different evidence.
 - One learning target has one schedule across examples, cue variants and dialogue appearances.
 - Provide a session-level recording switch, self-recording/replay controls and automated comparison when recording is on. The endorsed working order is learner recording → complete phrase/model → self-check.
+- Manual stopping is the default and the only stopping method in the first version. The compact drill starts capture with a microphone-icon button; during capture it becomes a stop icon plus **Stop recording**. Omit “Say the whole phrase aloud.” and “Ready when you are.” The complete-phrase task and automatic comparison remain unchanged. Choosing manual versus automatic stop belongs in later app settings; the selector and automatic stopping are deferred beyond the first version.
+- Automatically store all learner recordings, including retries, as audio and metadata in the app database from the first version. No manual Save action or automatic expiry. A UI for comparing progress across historical recordings is deferred; immediate self/model comparison remains core.
 - Recording off permits practice when the learner cannot speak. It must not require microphone permission or imply demonstrated spoken performance; audio is manually requested in this mode.
 - No deployment, Git initialization, course enrollment, echo-words output switch or Anki migration is authorized by this handoff.
 
 ## Still open
 
-Manual recording stop was recommended; silence-based stop was offered as an alternative, but the user did not choose between them. Final visual styling, navigation, recording retention/defaults, platform/device feasibility, review policy numbers, first-source rollout and hosting also remain open. The user endorsed the recording proposal with “great”; this does not turn every previous mockup or technical assumption into a decision.
+Final visual styling, navigation, recording on/off defaults, platform/device feasibility, review policy numbers, first-source rollout and hosting remain open. Manual recording stop and automatic retention of all recordings in the database are accepted. The stop-method setting, automatic-stop detection details and historical recording-comparison UI are deferred. The earlier endorsement of the recording flow does not turn every previous mockup or technical assumption into a decision.
 
 Keep the context focused: consult active documents first. The archives preserve historical material, including rejected ideas and misleading claims from the aborted implementation attempt, so they must never override this handoff.

@@ -13,7 +13,7 @@ An item is a fixed phrase, or a selected word sense or reusable construction lea
 - the wording that must be recalled and any permitted substitutions or equivalents;
 - phrase-specific cues, including versions that hide different meaningful chunks;
 - one review history covering all its exercises and dialogue appearances;
-- optional explanations, a personal note and the learner's recordings.
+- an explanation in the learner's language available on request, an optional personal note and the learner's recordings.
 
 ## Sources
 
@@ -24,9 +24,11 @@ Both source types are in the product's scope. Their first-version rollout and an
 
 ## Core practice
 
-The learner first hears and sees the complete expression in context. A recall attempt then provides its purpose or partner line and enough phrase-specific material to identify the intended expression. The learner says the **whole phrase**, compares with the model and repairs difficulties. Later attempts can hide different chunks of the same target.
+The learner is expected to have encountered the phrase in its source material at least once. A session can therefore begin with a recall attempt: its purpose or partner line and enough phrase-specific material identify the intended expression. The learner says the **whole phrase**, compares with the model and repairs difficulties. If the phrase is forgotten or not understood, a button on the drill opens the complete phrase and an explanation in the learner's language. No mandatory in-app introduction is needed simply because an item is new to the database. Later attempts can hide different chunks of the same target.
 
 Cues are chosen separately for each expression. They need not start at the beginning. Additional help can reveal more meaningful material or the full model. Required disambiguating cues are present from the start; explanations and translations remain on request.
+
+When a phrase is added to the app database, the LLM prepares cue variants hiding different words or meaningful chunks wherever useful alternatives are possible. Checked variants are saved with the same phrase for reuse, allowing the next practice session to show a different version. Every version still requests the whole phrase. Reuse a single reliable cue when the phrase does not support alternatives; do not force ambiguous masks. All versions share one target and schedule.
 
 Specific dialogues are learned and rehearsed by side. Partner lines play; selected target lines are recalled with suitable cues; supporting lines can remain available to read. A difficult exchange can be practised separately before returning to the dialogue. Controlled changes of details can exercise a word or frame without changing the learning objective.
 
@@ -40,19 +42,21 @@ Progress must distinguish visible-model repetition, partial-cue recall and indep
 
 ## Supporting capabilities
 
-These are desired capabilities; their first-version inclusion remains open:
+Automatic retention of all recordings is agreed for the first version. Other supporting capabilities below remain candidates unless separately accepted:
 
-- **Saved recordings:** keep selected takes or an early baseline for later comparison; retention and saving policy remain open. Session recording/replay itself is agreed core behaviour, described below.
-- **Contextual help:** request a simple target-language explanation or a translation for a word or sentence. Translations are absent by default.
+- **Recording history — storage now, comparison UI later:** automatically keep every take's audio and metadata in the app database, including retries, linked to its target, date, cue and practice conditions. No manual Save action or automatic expiry. A UI for comparing historical recordings/progress is deferred; immediate self/model replay remains core.
+- **Explanation card — agreed:** a visible action on the drill shows the full phrase and an explanation in the learner's language. Normal drills keep learner-language translations/explanations hidden. Exact layout, depth and additional word-level help remain design choices.
 - **Help with a difficult item:** useful examples, a personal mnemonic, or a reliable explanation of word origins, related words and common confusions. AI may assist with preparation.
 - **Speech feedback:** optionally identify dropped or changed target words. Handle uncertain recognition explicitly and retain self-checking against the model.
 - **Library:** find an item and its sources, model audio, notes, recordings and progress.
 
 ## Session formats and languages
 
-The app should support learning new items, reviewing due targets and rehearsing specific dialogues. Short daily sessions and eyes-free practice are desired; session duration and hands-free cue delivery, help requests and outcome reporting remain to be designed.
+The main screen has one **Start session** action, without separate learning-new-material and rehearsal modes. Previously encountered phrases, words in phrases and prepared dialogue material use the same session entry. Learning/explanation is available directly from the drill when needed. The session's exact material selection/mixing remains to be designed. Short daily sessions and eyes-free practice are desired; session duration and hands-free controls remain open.
 
-Learning material stays in the target language. The product is intended for several languages, including English, Serbian and German, with appropriate voices and on-demand translation. Which languages ship first remains part of the first-version decision.
+Normal drill content stays in the target language. The explicit explanation card may use the learner's language for meaning, translation and usage. The product is intended for several target languages, including English, Serbian and German, with appropriate voices. Which languages ship first remains part of the first-version decision; do not infer an explanation-language default from the target language.
+
+On first launch with an empty database, ask for the learner's native language and save it as an app setting. Use that saved language for phrase explanations on subsequent visits. The native language and each phrase's target language are separate. The current sketch uses Russian as requested by the user.
 
 ## Boundaries
 
@@ -64,4 +68,4 @@ The next implementation phase is [prototyping](plan/01-prototyping.md). Architec
 
 Provide an optional session-level recording switch. With recording on, the learner records the complete response, then the app automatically plays the learner's take, reveals the complete phrase and plays the model before self-check. Keep controls for replaying either version and recording another try. With recording off, support silent practice through Reveal & compare; model audio plays only on request. Record the actual practice modality and do not infer spoken performance from silent work.
 
-The stop-by-button versus stop-on-silence choice is unresolved; manual Stop & compare was recommended. See the [decision](decision-recording-and-comparison.md) and [concrete screen flow](design/interaction-design.md).
+Manual Stop recording is the accepted default and the only stopping method in the first version. Choosing manual versus automatic stop after a pause belongs in app settings in a later version; the selector and automatic stopping are deferred beyond the first version. Recording on/off remains a separate session-level switch. See the [decision](decision-recording-and-comparison.md) and [concrete screen flow](design/interaction-design.md).

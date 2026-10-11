@@ -12,7 +12,7 @@ Include deliberate counterexamples: a broad situation with multiple valid answer
 
 **Deliverables:** versioned fixture JSON plus a short human-readable cue review sheet. AI may draft candidates during this task, but initial material is reviewed before use. No runtime generator is needed.
 
-**Acceptance:** each practice cue has a clear task and rationale; the learner is never required to guess an unintroduced expression; rotating masks retain identity; full-sentence output is explicit; word-use practice is distinguished from recalling that word. Record what remains ambiguous instead of claiming all-language uniqueness.
+**Acceptance:** each practice cue has a clear task and rationale; the learner is never required to guess an unintroduced expression; rotating masks retain identity; the response contract is the whole phrase, without restoring the rejected repeated instruction on the drill card; word-use practice is distinguished from recalling that word. Record what remains ambiguous instead of claiming all-language uniqueness.
 
 ## P1.2 — Interaction prototype
 
@@ -20,15 +20,17 @@ After implementation is requested in the new session, build a disposable mobile-
 
 Required walkthroughs:
 
-1. New phrase: complete model and purpose → guided recall → complete spoken response → comparison.
-2. Known phrase: reviewed cue → response → self-check → another target → return with a different hidden chunk.
-3. Stuck learner: additional meaningful help/full model → spoken repair → later retry, with support retained in the result.
+1. Forgotten or unclear source phrase: drill → explicit explanation action → complete phrase and explanation in the learner's language → return/practice with exposure retained → response and comparison. Also show that a newly imported but already familiar phrase can be drilled without a compulsory introduction. All paths share one Start session entry.
+2. Known phrase: reviewed cue → response → self-check → another target → return with a different hidden chunk. Also demonstrate a later session selecting a different stored cue when a suitable alternative exists, plus reuse for a phrase with only one reliable cue. Fixtures stand in for the add-time LLM preparation pipeline at this prototype stage.
+3. Stuck learner: additional meaningful help or the full phrase/explanation card → supported repair → later retry, with support retained in the result. Opening explanation alone is not a failure grade; returning to the drill hides learner-language help.
 4. Word/frame: fixed learning objective with permitted substitutions; a shown target word is recorded as use, not word recall.
 5. Different wording: distinguish practising the selected target from reporting an unclear cue; neither implies that valid English is wrong.
 6. Specific dialogue: introduce the exchange → partner turn → cued learner turn → supporting line → isolate a hard turn and return to the exchange.
 7. Pause/exit/reload: show what is resumed and what help has already been used.
 
 Use the discussed one-expression screen with context above the cue as the recommended starting proposal. Final visual style is still open; neither old mockup is preselected or approved. Compare help placement, answer checking and difficulty reporting with the user. Include a small session result with one entry per target, not separate card statistics per mask.
+
+Show a visible explanation action from the drill, including before any response, and full phrase plus native-language meaning/use on the explanation card. Native-language explanation must disappear from the ordinary drill on return while exposure remains recorded. Also validate the first-launch native-language question with an empty database and reuse of the persisted setting on a later launch. There is one Start session entry, not separate Learn new material/Rehearse modes.
 
 **Deliverables:** runnable prototype under `prototypes/drill-flow/`, fixture set and observed usability findings. It can be discarded; its existence is not production readiness.
 
@@ -46,7 +48,7 @@ Build a small standalone probe under `prototypes/audio-probe/`. Test on the user
 | Interruptions | Permission ignored/denied, incoming interruption, background/foreground, locked screen and headphone disconnect. Record actual limits. |
 | Recovery | Reload between steps; incomplete recording is not presented as complete; supported practice still works when recording fails. |
 | Prepared assets | A small downloaded session plays after disconnecting; missing asset produces a clear recovery path. |
-| Local writes | Attempt journal and saved take survive normal restart; quota failure is handled. Do not simulate persistence by merely retaining an in-memory object. |
+| Local writes | Attempt journal and every captured take pending database storage survive normal restart; quota failure is handled. No manual Save step. Do not simulate persistence by merely retaining an in-memory object. End-to-end database retention is implemented in P3 and hardened in P4. |
 
 Detect formats rather than assuming WebM or MP4 across devices. An audio-only request must not request camera permission. Stop microphone tracks when recording ends or the app exits the recording state. Do not upload probe recordings to any third-party model; delete disposable test takes through an explicit local control.
 
@@ -62,7 +64,7 @@ Use the prototypes to finalize:
 - what counts as a reviewed cue and which chunks constitute the target;
 - whether the proposed review-policy eligibility and coverage rules are understandable;
 - whether foreground PWA audio meets the required first-release use, or a native client must be considered;
-- recording defaults/retention, first languages, and the first source/intake milestone.
+- recording on/off defaults, first languages, and the first source/intake milestone. Retention is decided: automatically keep all learner audio in the database; historical-comparison UI is deferred.
 
 Short prototype use can establish clarity and technical feasibility. It cannot demonstrate long-term retention or automatic real-world use. Plan delayed pilot observations in P6; do not market a successful walkthrough as a learning-effectiveness study.
 
@@ -70,6 +72,6 @@ Short prototype use can establish clarity and technical feasibility. It cannot d
 
 ## Latest interaction requirement
 
-The [recording decision](../decision-recording-and-comparison.md) is part of P1's scope. Demonstrate the recording-on sequence without additional playback taps after finishing the take, plus interruption and playback-failure recovery. Keep the initial cue visible during the learner replay; reveal the full target for model comparison afterward. Automatic stop on silence is not an accepted requirement. Demonstrate recording-off silent practice as a complete session path and preserve mode changes and support on reload.
+The [recording decision](../decision-recording-and-comparison.md) is part of P1's scope. Demonstrate the recording-on sequence without additional playback taps after finishing the take, plus interruption and playback-failure recovery. Keep the initial cue visible during the learner replay; reveal the full target for model comparison afterward. Use the accepted manual Stop recording. Automatic stopping and the app-settings choice of stopping method are deferred beyond the first version. Demonstrate recording-off silent practice as a complete session path and preserve mode changes and support on reload.
 
-Final visual style, stopping mechanism and retention/defaults remain design decisions. Do not treat a text-only implementation or a passing reducer suite as completion of this interaction/audio gate.
+Final visual style and recording on/off defaults remain design decisions. Manual stopping and retention of all recordings in the database are resolved; do not reopen them as first-version blockers. Historical progress-comparison UI is deferred. Do not treat a text-only implementation or a passing reducer suite as completion of this interaction/audio gate.

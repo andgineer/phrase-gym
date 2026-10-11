@@ -10,8 +10,8 @@ The agreed learning-behaviour baseline is [targeted drilling](../decision-target
 |---|---|---|---|
 | **P1 — Prototype and validate** | Review the discussed cue/response/help design, both recording modes and automated learner/model comparison on the phone. | [Prototyping](01-prototyping.md) | Agreed drilling decision only |
 | **P2 — Foundation and content** | Open a real local app, import a reviewed collection and hear its model audio. | [Core implementation](02-core-implementation.md) | P1 findings and selected scope |
-| **P3 — Complete core trainer** | Practise phrases/words/dialogues with optional recording and automated comparison, silent mode, pause/resume and durable due reviews. | [Core implementation](02-core-implementation.md) | P2 |
-| **P4 — Phone reliability** | Save/compare voice takes and complete a prepared session through a connection loss without losing or duplicating reviews. | [Validation and release](04-validation-and-release.md) | P3; P1 audio probe |
+| **P3 — Complete core trainer** | Practise phrases/words/dialogues with optional recording, automated comparison, automatic database storage of every take, silent mode, pause/resume and durable due reviews. | [Core implementation](02-core-implementation.md) | P2 |
+| **P4 — Phone reliability** | Reliably retain voice takes and complete a prepared session through a connection loss without losing recordings or duplicating reviews. | [Validation and release](04-validation-and-release.md) | P3; P1 audio probe |
 | **P5 — Content preparation and intake** | Prepare reviewed material with AI and send selected words/phrases from echo-words into the same trainer. | [Content and integrations](03-content-and-integrations.md) | P2 contracts; P3 working drills |
 | **P6 — Private pilot and release** | Use the app on a chosen private HTTPS host, with measured behaviour, backups and a tested recovery path. | [Validation and release](04-validation-and-release.md) | P3–P5; actual device evidence |
 
@@ -19,7 +19,7 @@ P4 and P5 can be developed independently after the core is stable. Choose the ho
 
 ## Recommended first release
 
-Include fixed expressions and selected words/frames from the beginning, with reviewed partial cues, meaningful mask changes, introduction/model help, spoken self-check, repair, bounded dialogues and one target schedule. The first useful local slice is P3, including basic session recording/replay and silent mode; P4 adds device resilience, durable saved takes and offline completion. Recommend completing P5 before calling the source-replacement workflow finished.
+Include fixed expressions and selected words/frames from the beginning, with reviewed partial cues, meaningful mask changes, introduction/model help, spoken self-check, repair, bounded dialogues and one target schedule. The first useful local slice is P3, including session recording/replay, automatic database storage of every take and silent mode; P4 adds device resilience, transfer recovery and offline completion. Historical progress-comparison UI is deferred. Recommend completing P5 before calling the source-replacement workflow finished.
 
 Use a reviewed manual content package while building the core. This stages integration work without redefining the product as phrases-only. Support explicit language metadata throughout; use the learner's English material first, plus fixtures that catch assumptions about Serbian/German text. The actual launch language set remains a prototype/pilot choice.
 
@@ -45,4 +45,4 @@ Use the [next-session brief](next-session.md). The current task was discussion, 
 
 When implementation is requested, start **P1.1: prepare the small reviewed content and cue set**, then the interaction prototype and real audio probe. Preserve the user-created Python src layout, rich-click entry point, hatchling/uv packaging, pytest, Invoke, quality checks, documentation and CI workflows. Replace `src/phrase_gym/main.py` and other template examples only as part of authorized implementation. Do not create another `spec/` folder or replace the scaffold wholesale.
 
-The interaction walkthrough must include the agreed optional recording and automated own-take → model comparison, not just a text-only demonstration. Design the manual/automatic stop choice explicitly, validate on the real phone and record P1.4 decisions before production foundation work.
+The interaction walkthrough must include the agreed optional recording and automated own-take → model comparison, not just a text-only demonstration. Use the accepted manual Stop recording in the first version; automatic stopping and its app-settings selector are deferred beyond that version. Validate the manual recording/comparison flow on the real phone and record remaining P1.4 decisions before production foundation work.

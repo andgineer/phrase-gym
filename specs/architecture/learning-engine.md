@@ -10,10 +10,12 @@ For fixed phrases, preserve the requested wording and permitted equivalents. For
 
 ## Cue eligibility and selection
 
+The accepted preparation timing is phrase intake: when adding a phrase to the database, have the LLM prepare useful alternate masks, check them and persist them for later sessions. Session selection consumes this prepared set. Different hidden parts must not require a live LLM request during a drill.
+
 1. Only published, reviewed cue variants are eligible. All chunk IDs must resolve within the pinned realization revision and reconstruct the original text exactly, including punctuation and spacing.
 2. A cue must state the task, supply its use context and retain enough distinguishing language. Store plausible competing answers and why the chosen anchors distinguish the intended learned expression. This is a review aid, not a proof of universal uniqueness.
 3. Do not generate a gap by removing the first N words, random positions or individual letters. The implementation renders authored chunk references.
-4. Prefer a recently successful cue when support is still needed; otherwise choose a reviewed alternative that requires recall of a different meaningful chunk. Start with a deterministic rotation among eligible variants, avoiding immediate repetition when alternatives exist. The prototype tests whether this is useful; no difficulty ranking is inferred from character count.
+4. Carry cue-presentation history across sessions so the next session can choose a reviewed alternative that requires recall of a different meaningful chunk. The proposed selector uses deterministic rotation among eligible variants, avoiding the last shown version when suitable alternatives exist; a recently successful cue may be reused when support is still needed. If only one reliable cue exists, reuse it. Exact selection/adaptation rules remain to be validated; no difficulty ranking is inferred from character count.
 5. Full-model practice is always available as an explicit fallback. If there is no reliable retrieval cue, offer model practice and flag preparation work; do not manufacture an ambiguous test at runtime.
 6. Record all exposed chunks, including audio and requested help. A lexical target that remained visible was used, not retrieved. Track recall coverage by required chunk; do not permanently label an entire phrase learned when the same part is always supplied.
 
@@ -22,9 +24,9 @@ For fixed phrases, preserve the requested wording and permitted equivalents. For
 ```mermaid
 stateDiagram-v2
     [*] --> Prepared
-    Prepared --> Introduce: new material
-    Prepared --> Prompt: known target
-    Introduce --> Prompt: learner ready
+    Prepared --> Prompt: source-encountered target
+    Prompt --> Explain: full phrase and explanation requested
+    Explain --> Prompt: return with exposure retained
     Prompt --> Speaking: recording on / learner starts
     Speaking --> OwnPlayback: take finishes
     OwnPlayback --> ModelPlayback: replay ends
@@ -47,7 +49,7 @@ The interface can pause from any state. Persist the phase, current target/cue re
 
 Commit a completed attempt to the local journal before advancing. On a connected client, submit it immediately and retain it until acknowledged. Do not block a spoken turn on generation, transcription or background media upload.
 
-For new material, introduce the whole expression and its purpose before retrieval. An immediate guided repetition is learning practice, not delayed independent recall. A tentative prototype session interleaves different targets before returning to a changed cue; exact session length is chosen through use, not fixed as a learning requirement.
+A new database item may already have been encountered in its source, so database novelty alone must not force an introduction. One session entry leads to the drill, with an explanation action available even before any response. That action reveals the full phrase and explanation in the learner's language; ordinary drill content remains in the target language. Opening help is not itself a failure grade. Record exposure and any explanation shown; returning to the cue or immediately repeating the model is assisted practice, not delayed independent recall. A tentative prototype session interleaves different targets before revisiting a target; exact session length and explanation-return behaviour remain to be reviewed.
 
 ## Dialogues
 
