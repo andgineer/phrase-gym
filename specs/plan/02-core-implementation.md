@@ -18,6 +18,7 @@ Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected prod
 - Implement manual package import: dry-run validation, staged report and explicit publish. Import both fixed phrases and word/frame material.
 - Implement duplicate/re-import handling using stable source IDs. Meaning changes are reconciled explicitly; text similarity and array positions cannot silently merge targets.
 - Implement collection/detail APIs and the selected prototype's minimal navigation. Default content is target-language; explanatory help remains requested.
+- Add lesson identity/membership and the agreed smart phrase lookup: title-substring lesson filtering, phrase-text and intent matching, direct Show & explain, lesson links and complete lesson phrase lists. Choose the search mechanism from P1 query evidence; retain one target/schedule across memberships. Search results must reference stored phrases.
 
 **Acceptance:** import twice without duplication; reorder or rename source material without resetting identity; rejected chunk references never enter practice; a source update does not rewrite an earlier attempt's content. At least one fixture in another language catches English-only tokenization assumptions.
 
@@ -33,16 +34,19 @@ Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected prod
 ## P3.1 — End-to-end session
 
 - Implement the session planner and pinned manifest for due/new targets with approved cues, review groups and schedule versions.
+- Scope Start session to All lessons under spaced repetition by default, or the selected lesson. Use the same scoped entry from Start lesson drill. Resolve due-only versus all-phrase eligibility for a selected lesson before implementing that branch; do not create per-lesson schedules.
 - Build one Start session entry, prompt, response, meaningful help, an on-request full-phrase/explanation card in the learner's language, alternative/unclear-cue handling, repair and results from the reviewed P1 flow. No separate home learning/rehearsal modes or compulsory introduction based only on a new database item. Include the session recording switch: recording-on own-take replay → model reveal/playback → self-check, and recording-off silent Reveal & compare with manual model audio.
 - Implement pause/resume with a local checkpoint and server session state. Save support/exposure before transitioning.
 - Automatically persist every learner take's audio and metadata in the database, including rerecordings. Link each take to its timestamp, target/session/attempt, cue revision and support history. Keep pending audio locally until the database acknowledges it, retry idempotently and never overwrite earlier takes. No manual Save control, automatic expiry or historical progress-comparison UI is required.
+- Support recording directly on Show & explain with the complete phrase visible during capture and learner/model comparison. Reuse recording controls, the session switch and storage; persist full-model exposure and classify these as supported practice. Returning to the drill preserves that support and any earlier attempt's separate outcome.
+- Keep Show & explain usable when entered through reference lookup outside a scheduled drill. Retain exposure and any optional recordings without manufacturing a review grade/session. Preserve an active drill when browsing its lesson; explicit lesson-start behavior during an existing session must follow the reviewed navigation, not silently abandon work.
 - Add deterministic cue rotation and delayed retry selection. Do not generate cues in the UI or make an AI request a prerequisite for advancing.
 
 **Acceptance:** complete the seven P1 walkthroughs with durable state. Reload after a model reveal retains assisted status. A cue reported unclear is excluded from subsequent selection pending review. The first complete vertical slice works with fixed fixture content and no connected model provider.
 
 ## P3.2 — Review and transaction correctness
 
-- Implement the selected `ReviewPolicy`, initially the proposed conservative policy if P1 confirms it. Version its parameters and outcome mapping.
+- Implement the selected `ReviewPolicy`; the latest recommendation is [FSRS with 0.90 default retention and explicit recall grading](../design/answer-card-and-review-policy.md). Version parameters and outcome mapping. Automatic target-state updates use ordinary ratings; no experiment, calibration task or effectiveness-validation feature is required from the learner.
 - Store all attempts; maintain one schedule per target. Track required-chunk coverage without creating sibling schedules.
 - Atomically persist event receipt and allowed schedule update. Add idempotency/payload conflict handling, ordered event batches and schedule compare-and-swap.
 - Implement one active session, explicit takeover and late-event handling. Establish clock-skew rules and use a controlled clock in tests.

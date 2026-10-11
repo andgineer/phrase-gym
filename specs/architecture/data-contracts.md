@@ -13,6 +13,8 @@ Use opaque UUIDs for internal identities; source identifiers are references, not
 | `realization` | Target revision, complete sentence, purpose/context, ordered chunks with stable IDs, required recall chunk IDs, model audio references. Chunks concatenate exactly to the sentence. |
 | `cue_variant` | Realization revision, visible chunk IDs, purpose/partner cue, help layers, modality, optional cue audio, competing-completion notes, publication status and provenance. |
 | `source_item` + links | Source namespace, stable external ID, source revision/hash and target links. Unique import identity; two sources may reference one reviewed target. |
+| `lesson` + membership links | Stable lesson ID, title, source references and ordered phrase/realization links. A target may belong to several lessons without duplicating its schedule. |
+| `phrase_search_document` | Proposed versioned text/intent/topic/synonym index tied to stored phrase and lesson IDs. Exact search mechanism and metadata preparation are open; conceptual results must resolve to existing phrases. |
 | `dialogue_revision` | Ordered turns, speaker roles, supporting text, target/realization/cue links and audio. References pin revisions, not mutable text. |
 | `session` | Learner/device, immutable manifest, requested recording mode and its change events, policy/schema versions, status and last accepted event sequence. |
 | `attempt` | Unique event/attempt IDs, target and cue revisions, review group, actual response modality (recorded speech / silent / explicitly reported unrecorded speech / unknown), exposed chunks, help/media failures, self-report, timestamps and optional recording ID. |
@@ -31,6 +33,12 @@ For the accepted add-time cue-preparation flow, link the LLM preparation job and
 A singleton learner profile is enough for the personal app. Do not add public account management, organizations or shared courses to the first implementation.
 
 The accepted first-launch flow collects native language when the database is empty and persists it in app settings for explanations. A previously saved setting is reused; an empty phrase collection alone does not require asking again. Proposed content shape: a versioned explanation linked to the realization/target revision and explanation locale, with meaning/translation and usage information. Record opening the explanation and full-model exposure on the existing attempt, preserving whether it happened before or after the response. Keep that content out of the ordinary drill until explicitly requested. The exact explanation schema and preparation/caching policy are still proposals.
+
+### Lesson selection and reference lookup
+
+The accepted [navigation/search requirements](../decision-session-navigation-and-search.md) add lesson-title substring filtering, conceptual phrase lookup and full lesson phrase lists. Proposed API reads are `GET /api/v1/lessons?q=...`, `/lessons/{id}/phrases` and `/phrases/search?q=...`; use stable identities and paginate without restricting a lesson list to due items. Session creation carries an explicit scope, All lessons by default or one lesson ID. All lessons uses the spaced-repetition planner. Selected-lesson eligibility is still open.
+
+Lookup does not require a scheduled session or attempt. Proposed extension: a practice/exposure context records full phrase/model/explanation exposure from lookup and lesson browsing, with an optional scheduled-session/attempt link. Optional explanation recordings outside a drill attach to this context and target; do not fabricate a review group to satisfy a foreign key. Keep audio retention identical. Actual content exposure may inform later support history, but merely searching, opening a phrase or listing a lesson must not generate a success receipt or advance due dates. Browsing must not take over or discard an active scheduled session. The precise context schema and active-session navigation are design work, not implemented contracts.
 
 ## Example realization and cues
 

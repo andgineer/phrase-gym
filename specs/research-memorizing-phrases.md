@@ -2,6 +2,8 @@
 
 Reviewed 2026-10-10. This is the focused evidence record for the [accepted drilling decisions](decision-targeted-drilling.md). It does not establish the entire proposed app workflow as a tested or optimal teaching method.
 
+Extended on 2026-10-11 by the [answer-grading and scheduling evidence review](research-answer-card-and-scheduling.md), which informs a [concrete design recommendation](design/answer-card-and-review-policy.md). The user wants a scientifically grounded method to use normally, with no learner-run validation or special assessment feature.
+
 ## Findings relevant to the decisions
 
 | Primary source | What was studied and found | What it supports, and the limit |

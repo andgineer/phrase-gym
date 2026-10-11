@@ -12,6 +12,8 @@ AI may improve the material and the drilling process. Every exercise must have a
 
 Accepted clarification, 2026-10-11: the main screen has a **Start session** button. Do not split entry into separate Learn new material and Rehearse modes. This changes navigation, not the scope of prepared phrase/dialogue practice.
 
+The [navigation and search decision](decision-session-navigation-and-search.md) adds a searchable lesson selector (default All lessons according to spaced repetition), separate smart phrase lookup opening Show & explain, and a path from that card to the complete lesson phrase list and a lesson drill. Lookup is a reference action, not a completed review. Whether an explicitly selected lesson includes only due phrases or all its phrases remains open.
+
 Phrases come from source material where the learner is expected to have encountered them at least once. Start with the drill rather than forcing an in-app introduction for every newly added target. Prior exposure does not imply the learner remembers or understands the phrase: the drill must have a readily available button that opens the complete phrase and an explanation in the learner's language.
 
 Keep normal drill content in the target language, without the learner-language explanation visible. The explicit explanation/learning card may use the learner's language for meaning, translation and usage clarification. Opening it is learning/help, not evidence of failed recall by itself. Preserve that exposure when returning to the drill. Exact labels, layout, explanation depth and the return interaction are proposals to review.

@@ -13,7 +13,7 @@ The agreed learning-behaviour baseline is [targeted drilling](../decision-target
 | **P3 — Complete core trainer** | Practise phrases/words/dialogues with optional recording, automated comparison, automatic database storage of every take, silent mode, pause/resume and durable due reviews. | [Core implementation](02-core-implementation.md) | P2 |
 | **P4 — Phone reliability** | Reliably retain voice takes and complete a prepared session through a connection loss without losing recordings or duplicating reviews. | [Validation and release](04-validation-and-release.md) | P3; P1 audio probe |
 | **P5 — Content preparation and intake** | Prepare reviewed material with AI and send selected words/phrases from echo-words into the same trainer. | [Content and integrations](03-content-and-integrations.md) | P2 contracts; P3 working drills |
-| **P6 — Private pilot and release** | Use the app on a chosen private HTTPS host, with measured behaviour, backups and a tested recovery path. | [Validation and release](04-validation-and-release.md) | P3–P5; actual device evidence |
+| **P6 — Private release and reliability** | Use the app on a chosen private HTTPS host, with working audio, backups and a tested recovery path. No learner-run effectiveness pilot. | [Engineering checks and release](04-validation-and-release.md) | P3–P5; actual device evidence |
 
 P4 and P5 can be developed independently after the core is stable. Choose the host in P6; a temporary development HTTPS endpoint needed for P1 is not a hosting decision.
 

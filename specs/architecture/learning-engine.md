@@ -2,6 +2,8 @@
 
 Proposed implementation behaviour, 2026-10-11. Derived from the [agreed drills](../decision-targeted-drilling.md); the exact defaults below must be tested during [prototyping](../plan/01-prototyping.md). They are not new claims about research-proven learning intervals or cue difficulty.
 
+**Latest recommendation:** the [research-based answer-card and review design](../design/answer-card-and-review-policy.md) recommends Not yet / With effort / Recalled and an FSRS-based policy with 0.90 default retention, automatic target-state updates and a separate repair queue. It supersedes the fixed ladder below as the assistant's preferred proposal. User acceptance of exact labels/parameters is still pending. The user has explicitly rejected learner-run validation, in-app experiments and special assessment sessions; testing here means software/content/device checks by the implementer.
+
 ## Separate the learning target from its presentation
 
 One `LearningTarget` represents a fixed expression or a selected word sense/construction. A `Realization` is one complete sentence or dialogue line using it. A `CueVariant` specifies which meaningful chunks of that realization remain visible/audible, its purpose and additional help layers. A dialogue turn points to the same target and realization.
@@ -27,6 +29,10 @@ stateDiagram-v2
     Prepared --> Prompt: source-encountered target
     Prompt --> Explain: full phrase and explanation requested
     Explain --> Prompt: return with exposure retained
+    Explain --> SupportedRecording: optional recording / full model visible
+    SupportedRecording --> SupportedOwnPlayback: learner taps Stop recording
+    SupportedOwnPlayback --> SupportedModelPlayback: learner replay ends
+    SupportedModelPlayback --> Explain: replay or repeat / model remains visible
     Prompt --> Speaking: recording on / learner starts
     Speaking --> OwnPlayback: take finishes
     OwnPlayback --> ModelPlayback: replay ends
@@ -77,11 +83,11 @@ Store observations rather than a single ambiguous “correct” flag:
 
 Self-checking is the initial assessment method. A later ASR component can return evidence and uncertainty but cannot silently replace the learner's report or penalize a valid alternative. No speech recognizer is a dependency of the first useful trainer.
 
-## Review policy v1 — a proposed starting point
+## Earlier fixed-policy proposal — retained for provenance
 
-Keep a `ReviewPolicy` interface from the beginning. Recommend a small deterministic policy for the first pilot, because the meaning of a successful partially cued response is still being tested. **FSRS is an alternative after defining a stable grading criterion**, not a reason to map every supported attempt to “Good.” Its library exposes card/rating updates, but that does not validate this app's cue regimen. See the [official py-fsrs project](https://github.com/open-spaced-repetition/py-fsrs).
+Keep a `ReviewPolicy` interface from the beginning. The older recommendation was a small deterministic policy while considering FSRS later. After the user's research request, the [current recommendation](../design/answer-card-and-review-policy.md#scheduler-preferred-candidate) is FSRS with explicit recall grading and support classification. Neither policy was user-approved. The older defaults below are historical alternatives, not instructions to implement a 30-day cap, universal one-day lapse reset or per-level chunk-coverage gate. Do not offer a policy experiment to the learner.
 
-Prototype defaults, to confirm before production use:
+Earlier defaults, preserved only to explain the change in recommendation:
 
 - One schedule row per learner/target, with a policy version, target revision, interval level, next due time and concurrency version.
 - Initial deliberate exposure schedules the first delayed review in one day; it is not a successful memory test.
@@ -119,3 +125,5 @@ Offline reports retain both occurrence time and receipt time. Accept a claimed o
 Persist the session's requested recording mode and the actual response modality of each attempt. A mode change is an event; it must not relabel earlier practice. Track recording/playback failures independently of recall outcomes. No recording does not prove silence, and replaying a take does not prove correctness.
 
 The agreed recording-on sequence is response → automatic own-take playback → model reveal/playback → self-check. Keep model help exposure before a response separate from post-response comparison. Rerecording during repair retains earlier difficulty and exposure. Recording-off silent practice is useful practice but cannot silently receive spoken-recall credit. Resolve its schedule effect explicitly when the review policy is chosen; the proposed interval defaults above do not settle that question.
+
+On Show & explain, optional recording and the learner/model playback sequence operate with the complete phrase visible throughout. This is an accepted supported-practice path, not an answer-reveal bug. Persist full-model exposure before capture and retain each take under the same target/history. Keep any earlier drill attempt's evidence unchanged; a supported take cannot retroactively repair its grade or count as independent recall. Respect the existing session recording switch and never request a microphone merely to open the explanation card.

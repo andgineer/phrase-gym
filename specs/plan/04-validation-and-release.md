@@ -45,13 +45,11 @@ Recommend the smallest private deployment that passes the measurements: one API 
 
 **Acceptance:** demonstrated recovery from the backup with matching representative counts and playable media; acknowledged progress survives process restart; a failed update can be reversed without guessing which database/media files belong together.
 
-## P6.3 — Personal pilot
+## P6.3 — Ordinary use and issue correction
 
-Run a small reviewed set through multiple real sessions over several days. Track cue clarity, successful production with the exact support shown, requests for extra help, delayed recall, changed-mask performance, dialogue use, retries and technical interruptions. Separate preparation quality from learner performance.
+The user explicitly rejected having to validate learning effectiveness. Deliver the selected scientifically grounded defaults and let the learner use ordinary sessions. Do not require a personal efficacy pilot, special delayed tests, transfer-assessment sessions, policy comparisons or calibration work. The earlier proposal for such learner work is withdrawn.
 
-Ask the learner about friction, misleading prompts and whether the drilled expressions become easier to retrieve in the intended situations. Optional transfer checks must allow valid alternative wording and cannot define failure merely by absence of one selected sentence. This is a personal product pilot, not a controlled efficacy study.
-
-Refine cue rotation, coverage rules, interval defaults and session size from observations. Preserve policy versions so results remain interpretable. Do not advertise automatic fluency or an optimal schedule from a handful of sessions.
+The implementation team checks software behavior, content quality and device reliability. User-reported unclear cues and technical faults can be corrected through the normal product controls. Normal review outcomes drive automatic scheduling; different prepared contexts are ordinary learning exercises. Do not claim guaranteed fluency or an optimum from personal usage history.
 
 ## Release gate
 

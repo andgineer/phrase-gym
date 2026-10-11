@@ -45,14 +45,16 @@ Progress must distinguish visible-model repetition, partial-cue recall and indep
 Automatic retention of all recordings is agreed for the first version. Other supporting capabilities below remain candidates unless separately accepted:
 
 - **Recording history — storage now, comparison UI later:** automatically keep every take's audio and metadata in the app database, including retries, linked to its target, date, cue and practice conditions. No manual Save action or automatic expiry. A UI for comparing historical recordings/progress is deferred; immediate self/model replay remains core.
-- **Explanation card — agreed:** a visible action on the drill shows the full phrase and an explanation in the learner's language. Normal drills keep learner-language translations/explanations hidden. Exact layout, depth and additional word-level help remain design choices.
+- **Explanation card — agreed:** a visible action on the drill shows the full phrase and an explanation in the learner's language. The learner can also record a practice take here with the full phrase visible, followed by the same automatic learner/model comparison. The session recording switch still applies. Store these takes and classify them as practice with the model shown. Normal drills keep learner-language translations/explanations hidden; returning retains the help history. Exact layout, depth and additional word-level help remain design choices.
 - **Help with a difficult item:** useful examples, a personal mnemonic, or a reliable explanation of word origins, related words and common confusions. AI may assist with preparation.
 - **Speech feedback:** optionally identify dropped or changed target words. Handle uncertain recognition explicitly and retain self-checking against the model.
-- **Library:** find an item and its sources, model audio, notes, recordings and progress.
+- **Library:** basic smart phrase lookup and navigation to the lesson's complete phrase list are now agreed. Broader library views for sources, notes and progress remain candidates; historical recording-comparison UI remains deferred.
 
 ## Session formats and languages
 
-The main screen has one **Start session** action, without separate learning-new-material and rehearsal modes. Previously encountered phrases, words in phrases and prepared dialogue material use the same session entry. Learning/explanation is available directly from the drill when needed. The session's exact material selection/mixing remains to be designed. Short daily sessions and eyes-free practice are desired; session duration and hands-free controls remain open.
+The main screen has one **Start session** action, without separate learning-new-material and rehearsal modes. A searchable lesson dropdown defaults to **All lessons**, drawing phrases according to spaced repetition; entered characters filter lesson titles (`rap` → Building rapport). Selecting a lesson limits the session to that lesson; whether this includes due phrases only or every phrase remains open. Exact queue mixing and duration also remain open.
+
+A separate **Find a phrase** control supports both text fragments and smart matching for concepts absent from the wording, such as `greetings`. Opening a result goes directly to Show & explain for reference; browsing alone does not complete a review or advance its schedule. That card links to its lesson's list of all phrases, which includes a Start lesson drill action. See the [navigation/search decision](decision-session-navigation-and-search.md) for accepted requirements and implementation proposals. Learning/explanation remains available from every drill. Short daily sessions and eyes-free practice are desired; hands-free controls remain open.
 
 Normal drill content stays in the target language. The explicit explanation card may use the learner's language for meaning, translation and usage. The product is intended for several target languages, including English, Serbian and German, with appropriate voices. Which languages ship first remains part of the first-version decision; do not infer an explanation-language default from the target language.
 
@@ -62,7 +64,7 @@ On first launch with an empty database, ask for the learner's native language an
 
 Open-ended AI conversation, free role-play and a general AI speaking partner are excluded. Grammar courses, long reading exercises, social sharing and exporting to Anki are also outside this concept.
 
-The next implementation phase is [prototyping](plan/01-prototyping.md). Architecture and implementation plans are recommendations; remaining functional choices are resolved through concrete prototypes and pilot evidence. Deployment remains a later phase.
+The next implementation phase is [prototyping](plan/01-prototyping.md). Architecture and implementation plans are recommendations; resolve remaining functional choices through concrete design discussion and engineering checks. The user rejects learner-run effectiveness validation, experiments and special assessment sessions. Choose scientifically grounded usable defaults and adapt scheduling from ordinary ratings. Deployment remains a later phase.
 
 ## Agreed recording and silent-practice modes
 

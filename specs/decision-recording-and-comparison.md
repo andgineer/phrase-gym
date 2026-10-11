@@ -28,6 +28,20 @@ With recording off:
 
 Silent practice is not reported as spoken performance. Recording being off also cannot prove whether the learner spoke; explicit support for unrecorded spoken practice was not separately designed. Record only what the app observes or the learner explicitly reports.
 
+## Recording on the explanation card
+
+Accepted on 2026-10-11: the user answered **yes** to allowing a practice recording on Show & explain while the full phrase remains visible, using the same learner/model comparison.
+
+- Provide optional recording directly on the explanation card; the learner need not return to the masked drill to practise saying the phrase.
+- Keep the complete target-language phrase visible during capture, learner replay and model playback. This is explicitly requested model help, so it is the intended exception to withholding the answer during a recall attempt.
+- Use the same microphone-icon start control and stop-icon **Stop recording** control. After stopping, automatically play the learner take, then the model, with replay and another take available.
+- Record these attempts as **practice with the model shown**, retaining explanation/audio exposure. They are not independent recall, do not erase an earlier difficulty and do not create another target or review schedule.
+- Store every take in the database under the existing retention policy, including all explanation-card retries.
+- Respect the session recording switch. When off, keep explanation and manually requested model audio usable without microphone permission or recording. Do not turn recording on merely because the explanation card opens.
+- Returning to the masked drill retains the model/explanation exposure; hiding the phrase again does not reset it.
+
+This resolves the earlier read/listen-only versus record-on-card choice in favour of recording on the card. Exact control placement and explanation content remain visual/content design proposals.
+
 ## Stopping the recording: manual by default; settings choice deferred
 
 Accepted on 2026-10-11 after the user reviewed the discussion sketch:

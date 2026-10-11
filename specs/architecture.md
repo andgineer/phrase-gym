@@ -132,7 +132,7 @@ Choose the Oracle VM or always-on laptop only after measuring the built app alon
 |---|---|---|
 | Interaction layout and help controls | Prototype several concrete flows against the agreed drills; do not inherit an earlier mockup. | P1 |
 | Browser versus native client | PWA, conditional on required device/audio behaviour. | P1 |
-| Review algorithm | Transparent conservative policy behind a replaceable interface; do not infer independent recall from visible target words. | P1/P3 |
+| Review algorithm | Current recommendation: FSRS with 0.90 default retention and explicit recall/support classification, behind a replaceable interface. See the research-based answer-card/review proposal. No learner-run validation. | Design decision / P3 engineering checks |
 | First release inputs | Both phrases and words through one import contract; live echo-words adapter follows the core. | P1/P5 |
 | AI publication controls | Review initial generated material before it enters practice. | P5 |
 | Hands-free scope | Foreground first; assess background/headset/locked-screen behaviour after the device probe. Recording retention is already decided: keep all audio in the database. | P1/P4 |
