@@ -24,6 +24,18 @@ Reviewed `d579829` using another fresh `gpt-6.1-sol` agent with high reasoning. 
 
 Verification: `uv run inv pre` passed every hook with zero pyrefly errors, followed by `uv run inv test`: **37 Python, 4 client and 32 real-browser tests passed**. An initial full-gate attempt found a TypeScript constructor-cast error in the genuine-audio instrumentation; the type was corrected and the complete ordered gate rerun. The playback tests explicitly restore the synthetic fixture reference binding rather than depend on previous editorial tests retaining it.
 
-## Remaining review work
+## Iteration 3
 
-Run iteration 3 against the fixed tree in another fresh Sol 6.1 session. Stop on a clean actionable review. If findings still require fixes, assess convergence before exceeding the user's three-iteration limit and obtain confirmation for further review work. This record is not real-device, linguistic/content or deployment acceptance.
+Reviewed `c2650dd` using a third fresh `gpt-6.1-sol` agent with high reasoning. One finding was accepted: explanation exposures could be recorded while first-launch setup hid the materials, or while an exposure write kept the materials behind Loading. Navigating away before the acknowledgement could therefore save support evidence for content never displayed.
+
+First-launch/configuration states now defer content display and exposure creation. For an eligible phrase route, retain the event before revealing the materials and send its acknowledgement independently of route loading. A focused reference-exposure composable owns retention, pending/sending state and explicit retry; pending writes display a saving status rather than a false failure. Closing Settings reloads the current route. Browser cases cover the first-launch deep bookmark, configuration/history navigation and held exposure writes with and without navigation; visible visits retain their event until the real server acknowledges it.
+
+Verification: `uv run inv pre` passed all hooks with zero pyrefly errors, then `uv run inv test` passed **37 Python, 4 client and 38 real-browser tests**. The main route composable is 220 lines; exposure and pagination responsibilities remain separate. No additional backend or architecture defect was established by this reviewer.
+
+## Convergence stop
+
+The three reviews produced **3 → 3 → 1 accepted findings**, all addressed. None of the later reviews reported an earlier fix recurring. The loop is narrowing, but it has not reached a clean independent review of the final tree; establishing that would require iteration 4. Stop here under the user's iteration limit and wait for confirmation.
+
+The remaining convergence problem is coverage of interactions between loading, visibility, cancellation and durable evidence. Original tests largely followed completed requests and single actions; they missed ordinary typing, repeated actions, pending starts and setup-hidden content. The P2 plan describes the main flows but does not organize these transitions into a complete acceptance checklist. This calls for a focused state/failure matrix and coverage audit, not a new product scope or wholesale architecture change.
+
+The concrete proposed continuation is in [P2 convergence proposal](../p2-review-convergence.md). It is pending user approval. No fourth review, push, provider call or deployment has occurred. Actual-device, linguistic/content and deployment acceptance remain outside these checks.

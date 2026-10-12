@@ -12,6 +12,7 @@ defineProps<{
   playing: boolean
   audioError: string
   pendingExposure: unknown
+  exposureSaving: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const emit = defineEmits<{ reference: []; retryExposure: [] }>()
@@ -41,7 +42,8 @@ const emit = defineEmits<{ reference: []; retryExposure: [] }>()
       </ul>
     </div>
     <p v-else>{{ t.noExplanation }}</p>
-    <div v-if="pendingExposure" class="error" role="alert">
+    <p v-if="exposureSaving" role="status">{{ t.exposureSaving }}</p>
+    <div v-else-if="pendingExposure" class="error" role="alert">
       {{ t.exposureFailed }} <button @click="emit('retryExposure')">{{ t.retry }}</button>
     </div>
     <nav class="lesson-links">

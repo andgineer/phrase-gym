@@ -13,13 +13,27 @@ test.beforeEach(async ({ request }, testInfo) => {
   }
 })
 
-test('first launch and persisted native-language settings', async ({ page }) => {
-  await page.goto('/learn/en')
+test('first launch and persisted native-language settings', async ({ page, request }) => {
+  const collection = await (
+    await request.get('/api/v1/phrases/search?language=en&q=greetings')
+  ).json()
+  let exposures = 0
+  await page.route('**/api/v1/exposures', async (route) => {
+    exposures += 1
+    await route.continue()
+  })
+  await page.goto(`/learn/en/phrases/${collection.items[0].id}`)
   await expect(page.getByRole('heading', { name: 'Make it yours' })).toBeVisible()
+  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(page.locator('.phrase-card')).toHaveCount(0)
+  expect(exposures).toBe(0)
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled()
   await page.getByLabel('Native language', { exact: true }).selectOption('ru')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page.locator('.explanation')).toBeVisible()
+  await expect.poll(() => exposures).toBe(1)
+  await page.getByRole('link', { name: 'Phrase Gym' }).click()
   await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()

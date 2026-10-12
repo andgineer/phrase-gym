@@ -1,12 +1,12 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, language } from '../api'
-import type { ExposureInput, Lesson, LessonPage, Phrase, PhrasePage } from '../api'
-import { flushExposures, retainExposure, sendExposure } from '../exposures'
+import type { Lesson, LessonPage, Phrase, PhrasePage } from '../api'
 import { languageNames } from '../i18n'
 import { usePreferences } from './usePreferences'
 import { usePagination } from './usePagination'
 import { useReferenceAudio } from './useReferenceAudio'
+import { useReferenceExposure } from './useReferenceExposure'
 
 export function useLibrary() {
   const route = useRoute()
@@ -20,7 +20,7 @@ export function useLibrary() {
   const total = ref(0)
   const hasCollection = ref(false)
   const selectedLesson = ref('')
-  const pendingExposure = ref<ExposureInput | null>(null)
+  const { pendingExposure, exposureSaving, prepareExposure, saveExposure } = useReferenceExposure()
   let requestVersion = 0
   const routeParts = computed(() => route.path.split('/').filter(Boolean))
   const currentLanguage = computed(() =>
@@ -44,16 +44,6 @@ export function useLibrary() {
   })
   const lessonTitle = ref('')
 
-  async function saveExposure() {
-    const payload = pendingExposure.value
-    if (!payload) return
-    try {
-      if ((await sendExposure(payload)) && pendingExposure.value?.id === payload.id)
-        pendingExposure.value = null
-    } catch {
-      /* Keep the same ID for explicit retry; no review is fabricated. */
-    }
-  }
   async function saveSettings() {
     error.value = ''
     try {
@@ -118,7 +108,7 @@ export function useLibrary() {
     loading.value = true
     try {
       await preferences.load()
-      if (version !== requestVersion) return
+      if (version !== requestVersion || firstLaunch.value || configuring.value) return
       const lang = currentLanguage.value
       if (!lang) {
         if (
@@ -132,18 +122,11 @@ export function useLibrary() {
       const base = `language=${lang}`
       if (kind.value === 'phrases' && routeParts.value[3]) {
         const item = await api<Phrase>(`/phrases/${routeParts.value[3]}?${base}`)
-        if (version !== requestVersion) return
-        // Reference lookup exposes the answer before any response, independently of review.
-        pendingExposure.value = {
-          id: crypto.randomUUID(),
-          target_id: item.id,
-          revision: item.revision,
-          language: lang,
-          kind: 'explanation',
-        }
-        retainExposure(pendingExposure.value)
+        if (version !== requestVersion || firstLaunch.value || configuring.value) return
+        prepareExposure(item, lang)
         phrase.value = item
-        await saveExposure()
+        loading.value = false
+        void saveExposure()
       } else if (kind.value === 'lessons' && routeParts.value[3]) {
         const page = await api<PhrasePage>(`/lessons/${routeParts.value[3]}/phrases?${base}`)
         if (version !== requestVersion) return
@@ -178,6 +161,9 @@ export function useLibrary() {
   watch([currentLanguage, lessonQuery], () => {
     selectedLesson.value = ''
   })
+  watch(configuring, (value) => {
+    if (!value) loadRoute()
+  })
   watch(() => route.fullPath, loadRoute)
   watch([locale, currentLanguage], () => {
     document.documentElement.lang = locale.value
@@ -187,7 +173,6 @@ export function useLibrary() {
   })
   onMounted(() => {
     loadRoute()
-    flushExposures().catch(() => {})
   })
 
   return {
@@ -208,6 +193,7 @@ export function useLibrary() {
     playing,
     audioError,
     pendingExposure,
+    exposureSaving,
     currentLanguage,
     locale,
     t,

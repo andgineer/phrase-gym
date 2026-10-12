@@ -48,6 +48,8 @@ Run instructions are in [prototypes/README.md](../../prototypes/README.md). The 
 
 ## Production foundation and next work
 
+The requested P2 fresh-session review loop has reached its three-iteration stop: 3, 3 and 1 findings were addressed and the ordered full gate passed (37 Python, 4 client, 38 browser). The final fixed tree has not received a clean independent review. Wait for the user's confirmation of the [convergence proposal](p2-review-convergence.md) before a fourth review; see the [review evidence](evidence/p2-review-loop-2026-10-12.md). This pause applies to that review loop, not to a separately authorized task.
+
 - Persistent native language and native/learning UI preference; `/learn/{language}` bookmarks; four initial UI locales; per-tab explicit routes win.
 - Stable source-to-target identities, immutable content revisions, pinned dialogue bindings, staged/manual publication with stale-content rejection and atomic rollback.
 - Language-scoped lesson filtering, concept/text lookup, complete lesson phrase lists and materials/exposure logging without recall grades.

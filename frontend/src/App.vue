@@ -24,6 +24,7 @@ const {
   playing,
   audioError,
   pendingExposure,
+  exposureSaving,
   currentLanguage,
   t,
   firstLaunch,
@@ -112,6 +113,7 @@ const {
             :playing="playing"
             :audio-error="audioError"
             :pending-exposure="pendingExposure"
+            :exposure-saving="exposureSaving"
             :link="link"
             @reference="playReference"
             @retry-exposure="saveExposure"

@@ -35,6 +35,7 @@ const en = {
   retry: 'Retry',
   loading: 'Loading…',
   exposureFailed: 'Could not save this reference exposure. Retry before continuing.',
+  exposureSaving: 'Saving reference visit…',
   more: 'Show more',
   selectLesson: 'Open selected lesson',
 }
@@ -74,6 +75,7 @@ const ru: Messages = {
   retry: 'Повторить',
   loading: 'Загрузка…',
   exposureFailed: 'Не удалось сохранить просмотр материала. Повторите перед продолжением.',
+  exposureSaving: 'Сохраняем просмотр материала…',
   more: 'Показать ещё',
   selectLesson: 'Открыть выбранный урок',
 }
@@ -112,6 +114,7 @@ const sr: Messages = {
   retry: 'Pokušaj ponovo',
   loading: 'Učitavanje…',
   exposureFailed: 'Prikaz materijala nije sačuvan. Pokušaj ponovo pre nastavka.',
+  exposureSaving: 'Čuvanje prikaza materijala…',
   more: 'Prikaži još',
   selectLesson: 'Otvori izabranu lekciju',
 }
@@ -151,6 +154,7 @@ const de: Messages = {
   loading: 'Laden…',
   exposureFailed:
     'Die Materialansicht konnte nicht gespeichert werden. Versuche es vor dem Fortfahren erneut.',
+  exposureSaving: 'Materialansicht wird gespeichert…',
   more: 'Mehr anzeigen',
   selectLesson: 'Ausgewählte Lektion öffnen',
 }
