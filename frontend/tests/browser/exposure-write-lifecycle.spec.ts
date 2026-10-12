@@ -29,11 +29,16 @@ test('explicit exposure retry sends the same retained payload and acknowledges i
   expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), key)).toEqual(
     payloads[0],
   )
+  const acknowledgement = page.waitForResponse(
+    (response) => response.url().endsWith('/api/v1/exposures') && response.status() === 200,
+  )
   await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+  expect((await (await acknowledgement).json()).id).toBe(payloads[0].id)
+  await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.getByRole('alert')).toHaveCount(0)
   expect(payloads).toHaveLength(2)
   expect(payloads[1]).toEqual(payloads[0])
-  expect(await page.evaluate((key) => localStorage.getItem(key), key)).toBeNull()
+  await expect.poll(() => page.evaluate((key) => localStorage.getItem(key), key)).toBeNull()
 })
 
 test('a previous visit acknowledgement cannot clear a later failed visit', async ({ page }) => {
@@ -75,8 +80,13 @@ test('a previous visit acknowledgement cannot clear a later failed visit', async
   )
   await expect(page.getByRole('alert')).toContainText('Could not save this reference exposure')
   retry = true
+  const acknowledgement = page.waitForResponse(
+    (response) => response.url().endsWith('/api/v1/exposures') && response.status() === 200,
+  )
   await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+  expect((await (await acknowledgement).json()).id).toBe(payloads[1].id)
+  await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.getByRole('alert')).toHaveCount(0)
   expect(payloads[2]).toEqual(payloads[1])
-  expect(await page.evaluate((key) => localStorage.getItem(key), secondKey)).toBeNull()
+  await expect.poll(() => page.evaluate((key) => localStorage.getItem(key), secondKey)).toBeNull()
 })

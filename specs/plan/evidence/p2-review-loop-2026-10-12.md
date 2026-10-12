@@ -59,4 +59,21 @@ All browser cases now use an automatic fixture reset on the disposable server; s
 
 Audit verification: `uv run inv pre` converged with every hook passing and pyrefly reporting zero errors, followed by `uv run inv test`: **37 Python, 4 client and 70 browser tests passed**. Browser fixture isolation also removed the accumulated-content slowdown in per-keystroke search checks; every scenario passed in both Chromium and WebKit.
 
-Next: run the approved fourth fresh Sol 6.1 review. If that review is clean, close the review loop; otherwise assess/fix its findings and obtain confirmation before another iteration. No push, deployment, P1 restart or real provider measurement is part of this continuation.
+The approved fourth review follows. No push, deployment, P1 restart or real provider measurement is part of this continuation.
+
+## Iteration 4
+
+Reviewed audit commit `f1ac5ac` using a fourth fresh `gpt-6.1-sol` agent with high reasoning, after explicit user confirmation. The reviewer inspected the complete P2 foundation and ran all 37 Python tests. Two findings were reproduced against the real disposable server in Chromium and accepted:
+
+1. Concurrent fire-and-forget language preference PATCHes could save Serbian, then let a held older English request overwrite it. The current tab remained Serbian, but a reload at `/` restored English. All preference mutations now use one per-tab ordered write queue; pending route-language changes coalesce to the latest choice. A failed older write does not strand the latest queued choice. Native/UI settings submissions share the queue and retain their submission order.
+2. Concurrent initial settings GETs could return an old null-native response after setup had already saved a native language through another read. That late response reverted the UI to first launch while the database remained configured. Initial loads now share one pending read across route changes, exposing setup only after it completes. Initialization failure clears the pending read and allows explicit retry.
+
+Seven new scenarios passed in Chromium/WebKit (**14 targeted browser checks**): held initial success/error with navigation and setup, held language success/error followed by Serbian or German (including coalesced intermediate choice), and overlapping native-language submissions with reload. The preferences adapter remains one focused module under 100 lines.
+
+The fourth review did not report previous fixes recurring. The remaining gap was shared settings effects: route-response guards covered screen data, but initialization reads and background mutation ordering were outside the original transition audit. The checklist now states their ownership, ordering, failure and reload behavior explicitly. This continues to narrow the lifecycle coverage rather than change the learning product or its architecture.
+
+The first full gate after these fixes passed Python/client checks and 83 browser cases, but an exposure-retry test read local storage before acknowledgement. Its error alert had disappeared because retry entered saving; that did not mean the save had completed. The trace showed the retry request still pending. The retry tests now await the matching server receipt, finished saving state and removal of the retained event, preserving the original assertion. The complete ordered gate was rerun after that correction.
+
+Final verification: `uv run inv pre` passed every hook with zero pyrefly errors, followed by `uv run inv test`: **37 Python, 4 client and 84 real-browser checks passed**. The fourth-pass fixes are committed locally to main with their regression coverage and clarified acceptance rules.
+
+The final tree has no clean independent review yet. Stop before iteration 5 and ask for confirmation of one further fresh Sol 6.1 review of the corrected P2 implementation, including shared settings lifecycle. No fifth review has been started.

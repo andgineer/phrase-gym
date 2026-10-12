@@ -48,7 +48,7 @@ Run instructions are in [prototypes/README.md](../../prototypes/README.md). The 
 
 ## Production foundation and next work
 
-After the P2 three-iteration stop (3, 3 and 1 findings addressed), the user approved the [transition-coverage checklist](p2-review-convergence.md), its audit and one additional fresh Sol 6.1 review. Apply that checklist and consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for the current fourth-review status. No further confirmation is required for this approved continuation; extending beyond it requires confirmation if more justified findings remain.
+After the P2 three-iteration stop, the user approved the [transition checklist](p2-review-convergence.md), its audit and one additional fresh Sol 6.1 review. That fourth review found two shared-preference races, now addressed. The final tree has not received a clean independent review. Wait for user confirmation before iteration 5; consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for verification and the remaining convergence gap. This stop applies to the review loop, not separately authorized work.
 
 - Persistent native language and native/learning UI preference; `/learn/{language}` bookmarks; four initial UI locales; per-tab explicit routes win.
 - Stable source-to-target identities, immutable content revisions, pinned dialogue bindings, staged/manual publication with stale-content rejection and atomic rollback.
