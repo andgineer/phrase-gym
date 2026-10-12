@@ -1,45 +1,49 @@
-# Brief for the next session
+# Next-session handoff — P1 closed
 
-Updated **2026-10-12**. The user has now requested P1 implementation; new disposable deliverables are available. Start with [P1 evidence](evidence/p1-2026-10-12.md), [the review handoff](p1-review.md) and [prototype walkthroughs](../../prototypes/README.md). User/device/content acceptance remains pending; P2 has not begun. The following handoff retains the original requirements and execution sequence.
+Updated **2026-10-12**. The user asked to finish P1 and continue in a fresh session. The disposable prototype is version **0.1.6**. P1 design/prototype work is closed at the user's direction; P2 production implementation has not started. Remaining device/content checks below are carried forward, not claimed passed.
 
 ## Read first
 
 1. [START-HERE](../START-HERE.md) and [agent guidance](../agent-guide.md).
-2. **[Consolidated implementation plan](implementation-plan.md)** — the complete scope, current defaults, phase sequence, acceptance checklist and remaining choices. This is the main execution handoff; do not reconstruct requirements from chat history or earlier sketches.
-3. The relevant linked phase file when beginning that phase: [P1 prototype](01-prototyping.md), [P2–P3 core](02-core-implementation.md), [P5 content/integrations](03-content-and-integrations.md), [P4/P6 reliability/release](04-validation-and-release.md).
+2. [Unified practice-card decision](../decision-unified-practice-card.md): the latest accepted interaction, including the final removal of rating confirmation/Undo. This overrides older contradictory screen and recording-mode descriptions.
+3. [Consolidated plan](implementation-plan.md), then [P2–P3 implementation](02-core-implementation.md), [architecture](../architecture.md) and the relevant data contracts.
+4. [Echo-words integration reference](../reference/echo-words-audio.md) and [prototype walkthroughs](../../prototypes/README.md).
 
-The user required design discussion and a written plan before implementation in a new session. The latest requests authorized P1 implementation and reviews, followed by direct-main commits and a preference for manual prototype review. **P1 prototypes have been implemented; none is yet user-approved and no phase gate has passed.** Follow the new session's actual request; do not automatically start coding because this handoff exists.
+No chat-history search is needed. Do not restart the three-iteration fresh-session review loop or rebuild P1. The user prefers manual prototype feedback and proportionate checks. Follow the next session's actual instruction before beginning P2.
 
-## Requirements that must survive
+## Final interaction to implement
 
-- Train selected words in useful phrases, fixed expressions and specific prepared dialogues. Always request the whole phrase with enough meaningful identifying material. No free conversation, role-play, random masks or letter puzzles.
-- One Start session. Prior source exposure is expected, but Show & explain is available immediately when material is forgotten or unclear. No mandatory introduction for every new DB item and no Learn/Rehearse split.
-- Ask for native language at first launch and store it for explanations. A learning-language selector has bookmarkable URLs. UI can use native language or follow the learning language, independently of explanations; no arbitrary UI-language dropdown. Scope lessons/search/sessions to the selected learning language and preserve each language's progress.
-- Home has searchable lesson selection, default All lessons under spaced repetition, and separate concept-aware phrase lookup. `rap` finds Building rapport; `greetings` can find phrases without that literal word. Lookup opens Show & explain, which links to the lesson's full phrase list and Start lesson drill. Browsing is not a graded review.
-- Keep the drill compact: mic icon only to start; stop icon plus Stop recording during capture; no “Say the whole phrase aloud.” or “Ready when you are.” Manual stop is the only V1 method; its automatic-stop setting is deferred.
-- Recording is optional per session. When on: learner take → automatic own playback with cue retained → full phrase/reference playback → self-check. Recording off requires no microphone and keeps reference audio manual. **Model is rejected as an audio-button label; Reference is the working replacement.**
-- Show & explain also permits recording, with the full phrase visible throughout capture and comparison. Preserve support history and the original attempt's result.
-- Keep **all learner takes' audio and metadata in the DB from V1**, including rerecordings and recoverable interrupted clips. No manual Save, overwrite or automatic expiry. Historical progress-comparison UI is deferred; immediate playback remains core.
-- The LLM prepares checked alternate hidden-word/chunk cues at phrase intake where useful; store for later sessions. One reliable cue is acceptable. All cues/examples/dialogue appearances share one target schedule.
-- Preserve course/actor audio; generate missing whole-phrase reference clips during preparation, never as a dependency of advancing a drill. Follow the inspected [echo-words audio guidance](../reference/echo-words-audio.md), including Serbian speech-only Cyrillic conversion and matching-language fallback.
-- The learner will not run effectiveness experiments, special assessment sessions, calibration tasks or tune a learning algorithm. Choose usable scientific defaults; engineering/content/device checks are the implementer's work.
+- One practice card throughout: meaningful masked phrase/situation, recording and replay, Reference audio, Show answer, inline Show & explain, and three colored/icon ratings. Recording is optional on every attempt; self-check works without microphone permission.
+- Recording or Show answer reveals the full phrase in place. Keep the controls. Show & explain sits beside Show answer, visually differentiated by a blue book-icon link, and expands phrase-specific meaning/usage/chunk details inside the card.
+- One round audio control: microphone when idle, stop icon during recording, stop icon during playback. Stop playback returns it to a microphone. **Press again to stop recording** appears only during capture and disappears on stop.
+- Rating buttons remain available before/after recording and after help: red repeat icon / Not yet, amber clock / With effort, green check / Recalled. Disable them during active capture/permission. A rating saves and advances quietly.
+- **Removed:** recording On/Off switch, Practice again, Other answer / problem, I couldn’t recall it, Continue without a recall grade, idle microphone-ready message, saved-rating banner and Undo UI. Accidental-rating correction is deferred. Do not restore these from older plans.
+- Retain the original response's evidence when rerecording. Save every take's audio and metadata, including recoverable interrupted takes, without manual Save or expiry. Replay uses the latest take. Supported ratings retain support metadata and must not masquerade as independent recall for scheduling.
+- Native language supplies explanations. From version one, UI may use native language or follow the selected learning language; first-launch and Settings controls exist. Learning-language URLs are bookmarkable and scope sessions/search/lessons independently.
+- One Start session, searchable lesson selection and separate concept lookup. Lookup opens phrase materials without grading; materials link to the complete lesson list. No mandatory introduction per new database item.
+- Train selected words in useful phrases, fixed expressions and prepared dialogues; whole-phrase responses, reviewed meaningful masks, one schedule per target. No free conversation/role-play, random masks or learner effectiveness experiments.
 
-## Concrete recommendations to carry forward
+## Workspace and production direction
 
-The master plan includes the proposed Not yet / With effort / Recalled outcomes, separate extra practice, FSRS at 0.90 desired retention, bounded separated retries, purposeful chunk coverage and varied prepared contexts. It also proposes `/learn/{language}`, a native/learning UI-mode toggle, a due-only selected-lesson default with optional Practice all, and per-language reference-voice configuration.
+- Commit directly to **main**, as explicitly requested. Current work is committed locally; do not infer a request to push or deploy.
+- `prototypes/` is a disposable browser implementation/fixture/probe, not the production code location. `src/phrase_gym` still contains the user's Python scaffold. Build the real application in the project source layout during P2; agree a clear frontend location if the recommended Vue/TypeScript client is retained. Do not create another hidden/temporary implementation.
+- Preserve the scaffold's uv/hatchling, CLI/package conventions, tests and CI where applicable. Vue/TypeScript PWA + Python/FastAPI/SQLite remains the recommended production stack, not installed functionality or a fully accepted platform decision.
+- The user rejects macOS-only audio solutions and wants the same engines and llmbroker approach as nearby **echo-words**. Reinspect its current implementation when integrating: Piper/Edge, full-phrase caching, Serbian speech-only Cyrillic conversion, language-correct fallback, actor/course audio priority. Existing Samantha WAVs are disposable test assets, not a production dependency.
+- The user reports copying provider keys into `.env`. Keep it ignored and server-side; do not print, commit or bundle secrets. No provider calls or external audio uploads were made in P1.
+- P2–P3 implement the trainer and durable recordings; P5 handles intake/LLM preparation and source integration. Prepare checked cue variants at intake rather than making generation a dependency of each drill step.
+- FSRS parameters, selected-lesson due-only/all policy, session budgets, initial source rollout and deployment details remain recommendations/choices. Do not present them as approved merely because a prototype exists.
 
-Keep these recommendations distinct from explicitly agreed requirements. Use them to build a concrete prototype rather than ask the learner to invent parameters. Recording defaults on, accepted in the [P1 manual feedback](../decision-p1-manual-feedback.md), which also requires version-one UI switching, renames full-answer help and removes the problem submenu. The selected-lesson policy, final styling, exact preference presentation, session budget and release/host choices remain listed in [remaining choices](implementation-plan.md#remaining-choices-and-proposed-defaults). Do not treat request for consolidation as blanket acceptance of all details.
+## Open evidence and risks to carry forward
 
-## Start when implementation is requested
+1. **Safari/headset clipping:** user reports recurring mid-take clipping on Safari, MacBook Pro M1, external headset. The prototype now reuses a microphone stream between takes, requests voice processing off, uses optional play-and-record Audio Session support, and releases on pause/navigation/background/completion. Synthetic Chromium/WebKit checks passed; the user has not confirmed the actual-headset fix. Verify this early in production audio work, and do not claim it resolved.
+2. Actual iPhone Safari/installed-PWA microphone, headset, interruptions and persistence have not been verified. A phone-reachable trusted HTTPS origin is still needed for those checks. Treat these as release dependencies, not reasons to restart general prototype review.
+3. Real actor/course clips and prepared Serbian reference audio remain incomplete; Serbian text/translation and listening quality need appropriate content checks. Twelve manual fixtures/two dialogues are examples, not a production content pack.
+4. P1 uses IndexedDB and fixture review receipts, not durable server-side recording storage or production FSRS. Browser-origin data is not a backup. Concept search uses a hand-authored index; real retrieval quality is not established.
 
-P1.1/P1.2 deliverables and the P1.3 probe now exist. Continue with their walkthrough/device/content review rather than rebuilding them. The original sequence was a small reviewed content/cue pack, then the complete interaction prototype and actual-device audio/storage probe. Include language/bookmark navigation, search/lesson routes, revised answer/help states and both recording modes, not just a text-only card. Earlier HTML illustrations simulate audio, contain some obsolete labels and do not implement the newest language behaviour; their existence grants no phase credit or visual approval.
+## Verification and running
 
-P2–P3 build the local trainer using reviewed manual packages. P3 must already persist every recording; that is not postponed to reliability work. P5 supplies the agreed add-time LLM preparation and live source handoff before claiming the complete planned feature set. Record phase evidence and user walkthrough corrections under `specs/`; do not represent software tests as a study of the learner.
+The last substantive change passed **12 core checks, 9 browser walkthroughs, 16 regressions and 2 audio-continuity runs**. The final banner/Undo removal reruns the affected browser/regression suites; see the [closeout record](evidence/p1-closeout-2026-10-12.md). These are software checks, not real-headset or iPhone acceptance.
 
-## Preserve the workspace and external sources
+Run instructions are in [prototypes/README.md](../../prototypes/README.md). The current session used `http://127.0.0.1:8873/learn/en`; do not assume its process survives a session/app restart. Browser data stays with its origin. If needed, restart the documented server on the same port. No private recordings or secrets belong in the handoff.
 
-The real starting point is the user's scaffold: `src/phrase_gym`, rich-click entry point, hatchling/uv, pytest, Invoke, quality tooling, documentation and CI/release conventions. The current CLI file-conversion behaviour is a template to replace during authorized implementation. Proposed production stack is Vue/TypeScript, FastAPI and SQLite with learner audio BLOBs and local reference media; it is not installed app functionality.
-
-There was no Git repository at handoff; do not initialize Git merely to run checks. All development context stays under `specs/`, plural. Leave legacy phrase-shadowing, vault notes, echo-words and Anki data unchanged unless their modification is actually requested. Deployments, source-output switches and course enrollment are not authorized by a planning document.
-
-The stopped temporary implementation and its test/build results are [archived history](../archive/README.md), not a baseline to resume. Historical lockfile/documentation-build observations do not justify unsolicited dependency upgrades; reproduce any relevant issue during actual implementation. The local research, decision, architecture and audio-reference documents preserve the needed context without another chat-history hunt.
+Suggested next request: **Read specs/START-HERE.md and specs/plan/next-session.md, then begin P2 from this handoff. Commit directly to main.**

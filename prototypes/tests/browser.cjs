@@ -179,13 +179,13 @@ async function waitPhase(page, phase) {
       },
     );
     await check(
-      "Self-check before recording, Undo and separated retries",
+      "Self-check before recording, quiet advancement and separated retries",
       async (page) => {
         await onboard(page);
         await tap(page, "[data-action=start]");
         await tap(page, '[data-action=grade][data-rating="1"]');
-        await tap(page, "[data-action=undo]");
-        await tap(page, '[data-action=grade][data-rating="1"]');
+        assert.equal(await page.locator("[data-action=undo]").count(), 0);
+        assert.equal(await page.getByText("Previous rating saved").count(), 0);
         await page.getByText("Prototype diagnostics", { exact: true }).click();
         await tap(page, "[data-action=clock]");
         for (let i = 0; i < 2; i++)

@@ -8,7 +8,6 @@ import {
   snapshotAttempt,
   finalize,
   next,
-  undo,
   RETRY_MS,
 } from "./core.mjs";
 import { dictionaries, languageNames, criteria } from "./i18n.mjs";
@@ -53,7 +52,6 @@ let route,
   showSettings = false;
 let error = "",
   message = "",
-  lastUndo = JSON.parse(sessionStorage.getItem("pg-undo") || "null"),
   lastTake = null,
   clockOffset = 0;
 const tabId = sessionStorage.getItem("pg-tab") || crypto.randomUUID();
@@ -121,7 +119,6 @@ function parseRoute() {
 async function persist() {
   try {
     sessionStorage.setItem("pg-return", JSON.stringify(returnRoute));
-    sessionStorage.setItem("pg-undo", JSON.stringify(lastUndo));
     const owner = JSON.parse(localStorage.getItem("pg-owner") || "null");
     if (session() && owner?.tabId === tabId)
       await db.put("sessions", session());
@@ -424,7 +421,7 @@ function render(focus = false) {
             : home();
   app.innerHTML =
     header +
-    `<main>${settings()}${audio.pending && !audio.recorder ? `<div class="error" role="alert">${t("storageFailed")}${button("retry-storage", t("retryStorage"))}</div>` : ""}${error ? `<div class="error" role="alert">${esc(error)}</div>` : ""}${message ? `<p class="status" role="status">${esc(message)}</p>` : ""}${lastUndo?.language === language ? `<div class="status row">${t("savedGrade")}${button("undo", t("undo"))}</div>` : ""}${body}</main><footer><span>P1 · ${pack.revision}</span><a href="/audio-probe/">${t("report")}</a></footer>`;
+    `<main>${settings()}${audio.pending && !audio.recorder ? `<div class="error" role="alert">${t("storageFailed")}${button("retry-storage", t("retryStorage"))}</div>` : ""}${error ? `<div class="error" role="alert">${esc(error)}</div>` : ""}${message ? `<p class="status" role="status">${esc(message)}</p>` : ""}${body}</main><footer><span>P1 · ${pack.revision}</span><a href="/audio-probe/">${t("report")}</a></footer>`;
   if (focus) {
     const h = app.querySelector("h1");
     if (h) {
@@ -463,7 +460,6 @@ async function startSession(dialogueId = null, lessonOverride = null) {
     dialogueId,
   );
   lastTake = null;
-  lastUndo = null;
   await navigate(`/learn/${language}/session`);
 }
 async function beginAttempt(modality = "silent-recall") {
@@ -483,14 +479,11 @@ async function beginAttempt(modality = "silent-recall") {
 }
 async function grade(result, reason = null) {
   if (!session().attempt) await beginAttempt();
-  const before = structuredClone(session());
   const s = structuredClone(session());
   const saved = finalize(s, s.attempt, result, now());
   saved.reason = reason;
-  let undoState = null;
   s.isolated = false;
   next(s, now());
-  undoState = { eventId: saved.id, before, language };
   state = await db.commitSessionEvent(
     s,
     { type: "result", at: now(), ...saved },
@@ -498,7 +491,6 @@ async function grade(result, reason = null) {
   );
   sessions[language] = s;
   if (s.finished) audio.releaseMicrophone();
-  lastUndo = undoState;
   await persist();
   await prepare();
   render(true);
@@ -646,7 +638,6 @@ async function dispatch(action, el) {
   }
   if (action === "finish") {
     if (session()) session().finished = true;
-    lastUndo = null;
     await navigate(homePath());
     return;
   }
@@ -770,38 +761,6 @@ async function dispatch(action, el) {
     render();
     return;
   }
-  if (action === "undo") {
-    if (lastUndo?.language !== language) return;
-    ++comparisonGeneration;
-    autoComparePending = false;
-    await audio.cancel();
-    const current = structuredClone(session()),
-      previous = lastUndo.before;
-    const event = current.grades.find((g) => g.id === lastUndo.eventId);
-    undo(current, lastUndo.eventId);
-    current.attempt.takeId = event?.takeId;
-    current.queue = previous.queue;
-    current.cursor = previous.cursor;
-    current.completed = previous.completed;
-    current.repairs = previous.repairs;
-    state = await db.commitSessionEvent(
-      current,
-      {
-        id: crypto.randomUUID(),
-        type: "undo",
-        at: now(),
-        eventId: lastUndo.eventId,
-        targetId: event.targetId,
-      },
-      state,
-    );
-    sessions[language] = current;
-    lastUndo = null;
-    await persist();
-    await prepare();
-    render();
-    return;
-  }
   if (action === "retry-storage") {
     await audio.retryStorage();
     await persist();
@@ -858,7 +817,7 @@ async function download() {
   if (!navigator.serviceWorker)
     throw new Error("Offline download requires a secure origin.");
   const registration = await navigator.serviceWorker.ready;
-  const cache = await caches.open("phrase-gym-p1-v6");
+  const cache = await caches.open("phrase-gym-p1-v7");
   for (const target of pack.targets.filter(
     (t) => t.language === language && t.audio.url,
   )) {

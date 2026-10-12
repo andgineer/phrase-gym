@@ -1,4 +1,4 @@
-const CACHE = "phrase-gym-p1-v6";
+const CACHE = "phrase-gym-p1-v7";
 const SHELL = [
   "/drill-flow/index.html",
   "/drill-flow/app.mjs",

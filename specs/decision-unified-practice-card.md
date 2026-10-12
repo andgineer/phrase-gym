@@ -38,3 +38,9 @@ Chromium and WebKit each encoded and stored three generated-tone takes with one 
 Show **Press again to stop recording** beside the audio controls only while actively recording; hide it immediately when capture stops, including during processing/playback. Do not show the former Microphone ready until you pause label. Localize the instruction in all three UI languages.
 
 Rename **Original result retained** to **Previous rating saved**. This banner confirms the self-check rating for the preceding phrase and accompanies Undo; it is not a message about the current recording.
+
+## Final P1 simplification — version 0.1.6
+
+The user accepted removing the saved-rating banner and its Undo button. A rating saves and advances quietly. Accidental-rating correction is deferred until it proves useful; do not restore it from older screen plans. Underlying historical correction records/core helpers need not be deleted.
+
+The user asked to finish P1 and continue in a new session. P1 prototype work is closed with the current interaction decisions captured; unresolved real-device/audio/content evidence is carried forward explicitly in [the next-session handoff](plan/next-session.md). Closing the prototype phase is not a claim that those checks passed.

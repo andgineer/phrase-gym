@@ -49,6 +49,11 @@ async function capture(page, ms = 700) {
     ],
   });
   async function check(name, operation) {
+    if (
+      process.env.PHRASE_GYM_TEST_FILTER &&
+      !name.includes(process.env.PHRASE_GYM_TEST_FILTER)
+    )
+      return;
     const context = await browser.newContext({
       permissions: ["microphone"],
       serviceWorkers: "block",
@@ -123,7 +128,7 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Undo and regrade create exactly one separated retry",
+      "One original failure creates exactly one separated retry",
       async (page) => {
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=hint]");
@@ -134,8 +139,7 @@ async function capture(page, ms = 700) {
           await tap(page, "[data-action=hint]");
           await tap(page, '[data-action=grade][data-rating="3"]');
         }
-        await tap(page, "[data-action=undo]");
-        await tap(page, '[data-action=grade][data-rating="3"]');
+
         let s = await session(page);
         assert.equal(s.queue.filter((i) => i.retry).length, 1);
         assert.equal(s.repairs[0].attempts, 1);
@@ -147,7 +151,7 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Original recording evidence survives later takes and Undo; replay uses latest take",
+      "Original recording evidence survives later takes and reload; replay uses latest take",
       async (page) => {
         await tap(page, "[data-action=start]");
         await capture(page, 650);
@@ -171,8 +175,15 @@ async function capture(page, ms = 700) {
           await page.evaluate(() => window.replayBytes),
           latest.blobBytes,
         );
-        await tap(page, '[data-action=grade][data-rating="3"]');
-        await tap(page, "[data-action=undo]");
+        await page.reload();
+        await page.evaluate(() => {
+          const createURL = URL.createObjectURL;
+          URL.createObjectURL = function (blob) {
+            window.replayBytes = blob.size;
+            return createURL.call(URL, blob);
+          };
+        });
+        assert.equal((await session(page)).attempt.takeId, original.id);
         assert.equal(await page.locator("[data-action=play-own]").count(), 1);
         await tap(page, "[data-action=play-own]");
         assert.equal(
@@ -291,7 +302,7 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Undo ends active capture and retains the interrupted take",
+      "Pause ends active capture and retains the interrupted take",
       async (page) => {
         await page.evaluate(() => {
           window.streams = [];
@@ -309,7 +320,7 @@ async function capture(page, ms = 700) {
         await tap(page, '[data-action=grade][data-rating="3"]');
         await tap(page, "[data-action=record]");
         await page.waitForTimeout(700);
-        await tap(page, "[data-action=undo]");
+        await tap(page, "[data-action=pause]");
         assert.equal(
           await page.evaluate(
             () =>
@@ -325,7 +336,8 @@ async function capture(page, ms = 700) {
           takes.find((t) => t.targetId === "en-see").status,
           "incomplete",
         );
-        assert.equal((await session(page)).attempt.targetId, "en-day");
+        assert.equal((await session(page)).attempt, null);
+        await tap(page, "[data-action=resume]");
         assert.equal(await page.locator("[data-action=grade]").count(), 3);
       },
     );

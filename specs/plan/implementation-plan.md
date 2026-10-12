@@ -4,7 +4,7 @@
 
 Updated **2026-10-12** with P1 implementation evidence. Originally consolidated on 2026-10-11 at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
 
-**Status, 2026-10-12:** the user requested P1 implementation. New runnable prototypes and a fixture pack exist under `prototypes/`; [P1 evidence](evidence/p1-2026-10-12.md) and [the review handoff](p1-review.md) record what was built/tested and what remains pending. Every implementation gate remains unpassed: P1 still needs user/device/content review, and P2 has not started. Production source remains the user-created Python scaffold. Archived code was not used as the baseline.
+**Status, 2026-10-12:** P1 prototype/design work is closed at the user's request; prototype 0.1.6 captures the final interaction. P2 has not started. Read [the next-session handoff](next-session.md) and [closeout evidence](evidence/p1-closeout-2026-10-12.md). Device/audio/content gaps are carried forward explicitly, not claimed passed. The unified-card decision supersedes older interaction requirements below, including separate practice/recording modes and Undo.
 
 **Status convention:** **Agreed** identifies explicit user requirements. **Recommended** identifies the concrete design/engineering choice to carry into the next prototype, without claiming the user already selected its exact controls or values. **Open** identifies remaining product choices. No learning-effectiveness experiment, calibration task, special assessment session or algorithm tuning is required from the learner.
 
