@@ -10,6 +10,8 @@ Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.m
 - Latest accepted decisions override older screen sketches and plans. Record new decisions clearly, without turning recommendations into approvals.
 - P1 is a disposable interaction reference. Production work belongs in `src/phrase_gym` and the user-selected `frontend/`; see the [foundation decision](decision-production-foundation.md). Preserve the user's Python scaffold conventions and avoid unrelated dependency changes.
 
+Read the accepted [device-language and Settings decision](decision-device-language-and-settings.md) when working on P2 preferences.
+
 ## Product constraints
 
 - Train words in useful phrases, fixed expressions and prepared dialogues; whole-phrase responses and meaningful reviewed cues. No free conversation/role-play, random masks or letter puzzles.

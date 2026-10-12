@@ -2,7 +2,13 @@
 import type { Language } from '../api'
 import { languages, languageNames } from '../i18n'
 import type { Messages } from '../i18n'
-defineProps<{ t: Messages; native: Language | ''; useLearning: boolean; firstLaunch: boolean }>()
+defineProps<{
+  t: Messages
+  native: Language | ''
+  useLearning: boolean
+  firstLaunch: boolean
+  saving: boolean
+}>()
 const emit = defineEmits<{
   save: []
   'update:native': [Language]
@@ -20,6 +26,7 @@ const emit = defineEmits<{
         }}<select
           :aria-label="t.native"
           :value="native"
+          :disabled="saving"
           @change="emit('update:native', ($event.target as HTMLSelectElement).value as Language)"
         >
           <option disabled value="">{{ t.native }}</option>
@@ -32,10 +39,11 @@ const emit = defineEmits<{
         ><input
           type="checkbox"
           :checked="useLearning"
+          :disabled="saving"
           @change="emit('update:useLearning', ($event.target as HTMLInputElement).checked)"
         />{{ t.learningUI }}</label
       >
-      <button class="primary" type="submit" :disabled="!native">{{ t.save }}</button>
+      <button class="primary" type="submit" :disabled="!native || saving">{{ t.save }}</button>
     </form>
   </section>
 </template>

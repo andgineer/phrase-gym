@@ -6,6 +6,8 @@ Read [the next-session handoff](plan/next-session.md) and [agent guidance](agent
 
 ## Current authoritative decisions
 
+The [device-language and Settings decision](decision-device-language-and-settings.md) simplifies P2 preferences: URL-owned language, best-effort browser restoration and one Settings save at a time. It overrides earlier server-language write ordering/cache requirements.
+
 The [unified practice-card decision](decision-unified-practice-card.md) is the latest interaction specification. It supersedes older separate cue/check/practice screens and intermediate manual-feedback designs.
 
 - One practice card with optional recording, reference/replay and colored/icon self-check buttons. Recording or Show answer fills the gaps; explanation expands inline.

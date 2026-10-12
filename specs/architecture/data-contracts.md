@@ -24,7 +24,7 @@ Use opaque UUIDs for internal identities; source identifiers are references, not
 | `recording` | Stable take ID, learner, target/session/attempt and cue/content revision links, captured timestamp, audio bytes (BLOB in SQLite), hash, MIME type, byte size, duration when known, capture/completeness status and persistence acknowledgement. Support/exposure is retained through attempt history. Every take is automatically kept; no saved/pinned opt-in flag. A new take gets a new ID and does not replace earlier audio. No recording is required for a recording-off attempt. |
 | `content_job` | Kind, canonical input hash, state, lease owner/expiry, retry count, result/error and provider/prompt provenance. |
 | `cue_report`, `learner_note` | Cue-specific quality feedback and target-specific personal notes; neither is a schedule. |
-| `app_settings` | Native language collected on first launch, plus proposed `ui_language_mode` (`native` or `learning`) and last-used learning language for a bare-URL fallback. Explanation language derives from native language; effective UI language derives from the mode and current URL's learning language. No independent arbitrary UI locale selector. Exact field names and preference default are proposals. |
+| `app_settings` | Native language collected on first launch and `ui_language_mode` (`native` or `learning`). Bare-URL language restoration is best-effort browser storage, outside this server row. Explanation language derives from native language; effective UI language derives from the mode and current URL's learning language. No independent arbitrary UI locale selector. These two fields are the implemented Settings contract. |
 
 Compatible editorial/context revisions keep the target and schedule; retain recall coverage only for unchanged required chunks, with an explicit mapping for renamed chunk IDs. A source edit must not silently replace the required expression or meaning.
 
@@ -38,7 +38,7 @@ The accepted first-launch flow collects native language when the database is emp
 
 ### Learning language and interface locale
 
-The [language decision](../decision-languages-and-audio-labels.md) requires a learning-language selector with bookmarkable URLs, separate from the native explanation language. Recommended route prefix: `/learn/{language}` with stable language codes. An explicit route is authoritative over last-used settings, including across tabs, reload and Back/Forward. Include the language in lesson/phrase routes and read/session requests; validate that selected content belongs to it. Derive UI locale per tab from `ui_language_mode`; use native language for explanations regardless of that mode. UI preference changes do not modify target identity, recordings or review state.
+The [language decision](../decision-languages-and-audio-labels.md) requires a learning-language selector with bookmarkable URLs, separate from the native explanation language. Recommended route prefix: `/learn/{language}` with stable language codes. An explicit route is authoritative over device-local language restoration, including across tabs, reload and Back/Forward. Include the language in lesson/phrase routes and read/session requests; validate that selected content belongs to it. Derive UI locale per tab from `ui_language_mode`; use native language for explanations regardless of that mode. UI preference changes do not modify target identity, recordings or review state.
 
 ### Lesson selection and reference lookup
 
@@ -142,3 +142,5 @@ A worker claims a job with a lease in a short transaction, then performs externa
 ## Comparison sequence contract
 
 Recording mode must not be inferred merely from the presence or absence of a recording row. Record the requested mode, actual capture outcome, model exposure timing and learner self-report separately. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. All audio takes are automatically retained in the app database, including rerecordings, with no manual Save action or automatic expiry. Historical progress-comparison UI is deferred. This storage requirement does not authorize automatic external AI processing.
+
+The [device-language and Settings decision](../decision-device-language-and-settings.md) removes the server language preference and navigation writes. Migration 0002 removes the legacy JSON field.

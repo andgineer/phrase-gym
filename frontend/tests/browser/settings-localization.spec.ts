@@ -12,7 +12,7 @@ for (const [language, settings, native] of [
     request,
   }) => {
     await request.put('/api/v1/settings', {
-      data: { native_language: language, ui_language_mode: 'native', last_learning_language: 'en' },
+      data: { native_language: language, ui_language_mode: 'native' },
     })
     await page.goto('/learn/en')
     await page.getByRole('button', { name: settings, exact: true }).click()

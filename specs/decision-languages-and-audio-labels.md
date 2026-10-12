@@ -51,3 +51,5 @@ Recommended navigation rules:
 - Preserve an in-progress session when switching language. Proposed behaviour: pause it and expose Resume on return; never relabel its language or discard recordings. Finish/stop active capture before navigating. Viewing a different language in another tab does not itself start or take over a session; existing single-active-session rules still apply.
 
 Route mechanics, the preference control/default and session-resume presentation are recommendations for the next sketch. No learning-effectiveness test or new assessment feature follows from these changes.
+
+The accepted [device-language and Settings decision](decision-device-language-and-settings.md) specifies the current restoration policy: best-effort browser storage, no server learning-language preference, and one pending Settings save. It supersedes earlier server preference synchronization requirements.

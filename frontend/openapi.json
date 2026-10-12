@@ -59,44 +59,6 @@
         }
       }
     },
-    "/api/v1/settings/language": {
-      "patch": {
-        "summary": "Remember Language",
-        "operationId": "remember_language_api_v1_settings_language_patch",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LanguagePreference"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Settings"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/imports/validate": {
       "post": {
         "summary": "Validate Import",
@@ -1341,26 +1303,6 @@
         ],
         "title": "ImportReport"
       },
-      "LanguagePreference": {
-        "properties": {
-          "last_learning_language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Last Learning Language"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "last_learning_language"
-        ],
-        "title": "LanguagePreference"
-      },
       "Lesson": {
         "properties": {
           "id": {
@@ -1905,23 +1847,6 @@
             ],
             "title": "Ui Language Mode",
             "default": "native"
-          },
-          "last_learning_language": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "en",
-                  "ru",
-                  "sr",
-                  "de"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Learning Language"
           }
         },
         "additionalProperties": false,
@@ -1948,23 +1873,6 @@
             ],
             "title": "Ui Language Mode",
             "default": "native"
-          },
-          "last_learning_language": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "en",
-                  "ru",
-                  "sr",
-                  "de"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Learning Language"
           }
         },
         "additionalProperties": false,

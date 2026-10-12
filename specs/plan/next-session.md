@@ -48,7 +48,7 @@ Run instructions are in [prototypes/README.md](../../prototypes/README.md). The 
 
 ## Production foundation and next work
 
-After the P2 three-iteration stop, the user approved the [transition checklist](p2-review-convergence.md), its audit and fourth/fifth fresh Sol 6.1 reviews. The fifth found one cross-workflow preference-cache overwrite, now addressed along with a settings accessible-label mismatch found during integration. The final tree has not received a clean independent review. Wait for confirmation before iteration 6; consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for verification and the remaining convergence gap. This stop applies to the review loop, not separately authorized work.
+After five P2 review iterations, the user approved simplifying the optional language-restoration invariant rather than extending the generic loop. The [accepted decision](../decision-device-language-and-settings.md) makes restoration device-local, removes navigation preference writes and permits one pending Settings save. Targeted backend coverage and one bounded fresh Sol 6.1 review are part of this batch. Consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for results; do not restart an open-ended loop.
 
 - Persistent native language and native/learning UI preference; `/learn/{language}` bookmarks; four initial UI locales; per-tab explicit routes win.
 - Stable source-to-target identities, immutable content revisions, pinned dialogue bindings, staged/manual publication with stale-content rejection and atomic rollback.

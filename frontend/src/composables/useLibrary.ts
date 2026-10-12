@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, language } from '../api'
 import type { Lesson, LessonPage, Phrase, PhrasePage } from '../api'
 import { languageNames } from '../i18n'
+import { rememberLanguage, restoredLanguage } from '../learningLanguage'
 import { usePreferences } from './usePreferences'
 import { usePagination } from './usePagination'
 import { useReferenceAudio } from './useReferenceAudio'
@@ -27,7 +28,8 @@ export function useLibrary() {
     routeParts.value[0] === 'learn' ? language(routeParts.value[1]) : null,
   )
   const preferences = usePreferences(currentLanguage)
-  const { settings, native, useLearning, configuring, firstLaunch, locale, t } = preferences
+  const { settings, native, useLearning, configuring, savingSettings, firstLaunch, locale, t } =
+    preferences
   const { playing, audioError, stopAudio, playReference } = useReferenceAudio(
     () => phrase.value,
     () => t.value.audioFailed,
@@ -45,10 +47,10 @@ export function useLibrary() {
   const lessonTitle = ref('')
 
   async function saveSettings() {
+    if (savingSettings.value) return
     error.value = ''
     try {
-      await preferences.save()
-      await loadRoute()
+      if (await preferences.save()) await loadRoute()
     } catch (cause) {
       error.value = String(cause)
     }
@@ -107,15 +109,17 @@ export function useLibrary() {
     audioError.value = ''
     loading.value = true
     try {
+      if (currentLanguage.value) rememberLanguage(currentLanguage.value)
       await preferences.load()
       if (version !== requestVersion || firstLaunch.value || configuring.value) return
       const lang = currentLanguage.value
       if (!lang) {
+        const restored = restoredLanguage()
         if (
           (route.path === '/' || route.path === '/learn' || route.path === '/learn/') &&
-          settings.value?.last_learning_language
+          restored
         ) {
-          await router.replace(`/learn/${settings.value?.last_learning_language}`)
+          await router.replace(`/learn/${restored}`)
         }
         return
       }
@@ -149,9 +153,6 @@ export function useLibrary() {
       } else {
         error.value = t.value.unavailable
       }
-      if (version === requestVersion && settings.value?.native_language && !error.value) {
-        preferences.rememberLanguage(lang)
-      }
     } catch (cause) {
       if (version === requestVersion) error.value = String(cause)
     } finally {
@@ -181,6 +182,7 @@ export function useLibrary() {
     native,
     useLearning,
     configuring,
+    savingSettings,
     error,
     loading,
     phrase,

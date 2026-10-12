@@ -8,7 +8,7 @@ for (const view of ['lookup', 'lesson', 'lessons']) {
     request,
   }) => {
     await request.put('/api/v1/settings', {
-      data: { native_language: 'ru', ui_language_mode: 'learning', last_learning_language: 'en' },
+      data: { native_language: 'ru', ui_language_mode: 'learning' },
     })
     const { token, lessonId } = await publishPagedLibrary(request)
     const path =

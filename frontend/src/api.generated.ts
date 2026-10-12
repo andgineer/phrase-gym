@@ -22,23 +22,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/settings/language": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Remember Language */
-        patch: operations["remember_language_api_v1_settings_language_patch"];
-        trace?: never;
-    };
     "/api/v1/imports/validate": {
         parameters: {
             query?: never;
@@ -455,14 +438,6 @@ export interface components {
             /** Base Content Version */
             base_content_version: string;
         };
-        /** LanguagePreference */
-        LanguagePreference: {
-            /**
-             * Last Learning Language
-             * @enum {string}
-             */
-            last_learning_language: "en" | "ru" | "sr" | "de";
-        };
         /** Lesson */
         Lesson: {
             /**
@@ -655,8 +630,6 @@ export interface components {
              * @enum {string}
              */
             ui_language_mode: "native" | "learning";
-            /** Last Learning Language */
-            last_learning_language?: ("en" | "ru" | "sr" | "de") | null;
         };
         /** SettingsUpdate */
         SettingsUpdate: {
@@ -671,8 +644,6 @@ export interface components {
              * @enum {string}
              */
             ui_language_mode: "native" | "learning";
-            /** Last Learning Language */
-            last_learning_language?: ("en" | "ru" | "sr" | "de") | null;
         };
         /** TargetInput */
         TargetInput: {
@@ -764,39 +735,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SettingsUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Settings"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    remember_language_api_v1_settings_language_patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LanguagePreference"];
             };
         };
         responses: {

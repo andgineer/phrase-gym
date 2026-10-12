@@ -8,7 +8,6 @@ test.beforeEach(async ({ request }, testInfo) => {
       data: {
         native_language: 'ru',
         ui_language_mode: 'learning',
-        last_learning_language: 'en',
       },
     })
   }
@@ -92,9 +91,10 @@ test('native UI, bare fallback, invalid language and empty collection', async ({
     data: {
       native_language: 'ru',
       ui_language_mode: 'native',
-      last_learning_language: 'sr',
     },
   })
+  await page.goto('/learn/sr')
+  await expect(page.locator('h1')).toHaveText('Библиотека')
   await page.goto('/')
   await expect(page).toHaveURL(/\/learn\/sr$/)
   await expect(page.locator('h1')).toHaveText('Библиотека')

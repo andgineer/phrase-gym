@@ -6,7 +6,7 @@ test('search fields retain focus through each query response and pending request
   request,
 }) => {
   await request.put('/api/v1/settings', {
-    data: { native_language: 'ru', ui_language_mode: 'learning', last_learning_language: 'en' },
+    data: { native_language: 'ru', ui_language_mode: 'learning' },
   })
   await page.goto('/learn/en')
   await expect(page.getByRole('status')).toHaveCount(0)

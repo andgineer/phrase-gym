@@ -3,7 +3,7 @@ import { test } from './fixtures'
 
 test.beforeEach(async ({ request }) => {
   await request.put('/api/v1/settings', {
-    data: { native_language: 'ru', ui_language_mode: 'learning', last_learning_language: 'en' },
+    data: { native_language: 'ru', ui_language_mode: 'learning' },
   })
 })
 
@@ -35,11 +35,6 @@ for (const kind of ['phrases', 'lessons']) {
     ).json()
     await page.goto(`/learn/sr/${kind}/${collection.items[0].id}`)
     await expect(page.getByRole('status')).toHaveCount(0)
-    await expect
-      .poll(
-        async () => (await (await request.get('/api/v1/settings')).json()).last_learning_language,
-      )
-      .toBe('sr')
     await page.goto('/')
     await expect(page).toHaveURL(/\/learn\/sr$/)
     await expect(page.getByRole('heading', { name: 'Biblioteka', exact: true })).toBeVisible()

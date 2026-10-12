@@ -12,6 +12,7 @@ const {
   native,
   useLearning,
   configuring,
+  savingSettings,
   error,
   loading,
   phrase,
@@ -64,7 +65,9 @@ const {
             </option>
           </select></label
         >
-        <button class="quiet" @click="configuring = !configuring">{{ t.settings }}</button>
+        <button class="quiet" :disabled="savingSettings" @click="configuring = !configuring">
+          {{ t.settings }}
+        </button>
       </div>
     </header>
     <main>
@@ -75,6 +78,7 @@ const {
         v-if="firstLaunch || configuring"
         :t="t"
         :first-launch="firstLaunch"
+        :saving="savingSettings"
         v-model:native="native"
         v-model:use-learning="useLearning"
         @save="saveSettings"
