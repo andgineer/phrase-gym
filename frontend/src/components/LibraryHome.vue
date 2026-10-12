@@ -15,6 +15,7 @@ defineProps<{
   selectedLesson: string
   hasCollection: boolean
   loading: boolean
+  failed: boolean
   loadingMore: boolean
   loadingMoreLessons: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
@@ -73,8 +74,8 @@ const emit = defineEmits<{
           :value="phraseQuery"
           @input="emit('query', 'q', $event)"
       /></label>
-      <p v-if="!loading && !hasCollection" class="muted">{{ t.empty }}</p>
-      <p v-else-if="!loading && !results.length">{{ t.noMatches }}</p>
+      <p v-if="!loading && !failed && !hasCollection" class="muted">{{ t.empty }}</p>
+      <p v-else-if="!loading && !failed && !results.length">{{ t.noMatches }}</p>
       <ul class="phrase-list">
         <li v-for="item in results" :key="item.id">
           <RouterLink :to="link('phrases', item.id)" :lang="language"

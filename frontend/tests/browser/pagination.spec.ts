@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs'
-import { randomUUID } from 'node:crypto'
-import { test, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from './fixtures'
+import { publishPagedLibrary } from './paged-library'
 
 for (const view of ['lookup', 'lesson', 'lessons']) {
   test(`${view} pagination serializes repeated clicks without hiding items`, async ({
@@ -10,33 +10,10 @@ for (const view of ['lookup', 'lesson', 'lessons']) {
     await request.put('/api/v1/settings', {
       data: { native_language: 'ru', ui_language_mode: 'learning', last_learning_language: 'en' },
     })
-    const token = randomUUID()
-    const fixture = JSON.parse(readFileSync('../fixtures/manual-en.json', 'utf8'))
-    const targets = Array.from({ length: 120 }, (_, index) => ({
-      ...fixture.targets[0],
-      source_id: `target-${index}`,
-      concepts: [token],
-    }))
-    const lessons = Array.from({ length: 100 }, (_, index) => ({
-      source_id: `lesson-${index}`,
-      title: `${token} ${String(index).padStart(3, '0')}`,
-      target_source_ids: index === 0 ? targets.map((t) => t.source_id) : [targets[index].source_id],
-    }))
-    const staged = await (
-      await request.post('/api/v1/imports', {
-        data: { ...fixture, namespace: token, targets, lessons, dialogues: [] },
-      })
-    ).json()
-    expect(staged.status).toBe('staged')
-    expect(
-      (
-        await request.post(`/api/v1/imports/${staged.id}/publish`, { data: { reviewed: true } })
-      ).ok(),
-    ).toBe(true)
-    const catalog = await (await request.get(`/api/v1/lessons?language=en&q=${token}`)).json()
+    const { token, lessonId } = await publishPagedLibrary(request)
     const path =
       view === 'lesson'
-        ? `/learn/en/lessons/${catalog.items[0].id}`
+        ? `/learn/en/lessons/${lessonId}`
         : `/learn/en?${view === 'lessons' ? 'lessonQ' : 'q'}=${token}`
     await page.goto(path)
     const section =

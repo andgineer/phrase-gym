@@ -48,6 +48,8 @@ APIs are under `/api/v1`; inspect `/docs` for the contract. Reads include settin
 
 The client uses `/learn/{language}` plus language-preserving phrase/lesson routes. Explicit routes win over the last-language preference in every tab. A bare route restores the last language; invalid routes show selection and supported empty languages show an empty library. UI follows native or learning language; missing native explanations are explicit rather than falling back to the UI language. Back navigation retains the original search and complete lesson list. Start session/drill controls remain disabled with an explanation until P3.
 
+Search refreshes keep inputs mounted and distinguish failed requests from empty results. Pagination failures retain loaded lesson/phrase lists and permit retry; stale query/page responses cannot change a newer route. The [accepted transition checklist](p2-review-convergence.md) defines the pending/success/failure/cancellation behavior and its coverage.
+
 Reference lookup logs an idempotent exposure with server receipt time and no recall grade. First-launch/configuration-hidden materials create no exposure. Each pending event has its own localStorage key, retained before revealing the materials and removed only after server acknowledgement. Saving runs independently of display and navigation; pending writes show a saving status, failed writes offer retry. Reload retries failed exposure writes using the same event ID. This small reference-event outbox is not the future learner-audio store: P3 must use IndexedDB for every pending take and session checkpoint, and persist recordings as SQLite BLOBs.
 
 ## Reference audio

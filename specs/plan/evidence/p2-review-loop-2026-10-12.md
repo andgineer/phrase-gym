@@ -38,4 +38,25 @@ The three reviews produced **3 → 3 → 1 accepted findings**, all addressed. N
 
 The remaining convergence problem is coverage of interactions between loading, visibility, cancellation and durable evidence. Original tests largely followed completed requests and single actions; they missed ordinary typing, repeated actions, pending starts and setup-hidden content. The P2 plan describes the main flows but does not organize these transitions into a complete acceptance checklist. This calls for a focused state/failure matrix and coverage audit, not a new product scope or wholesale architecture change.
 
-The concrete proposed continuation is in [P2 convergence proposal](../p2-review-convergence.md). It is pending user approval. No fourth review, push, provider call or deployment has occurred. Actual-device, linguistic/content and deployment acceptance remain outside these checks.
+The user subsequently approved the [P2 convergence checklist](../p2-review-convergence.md), coverage audit and one additional fresh Sol 6.1 review. The three-iteration stop above is historical; the approved continuation is below. Actual-device, linguistic/content and deployment acceptance remain outside these checks.
+
+## Approved transition-coverage audit
+
+Existing coverage established normal navigation/history/tabs, per-keystroke search, three-page pagination, cancelled pending audio, setup-hidden materials, held exposure writes, reload recovery and canonical/legacy identities. Missing deterministic cases were added:
+
+| Checklist area | Coverage after the audit |
+|---|---|
+| Query/navigation | `search.spec.ts` and `search-lifecycle.spec.ts`: typing/focus while pending, held old success/error responses followed by a new query or language, failed current query and explicit retry. Existing library walkthroughs retain Back/Forward search/navigation coverage. |
+| Pagination | `pagination.spec.ts` and `pagination-lifecycle.spec.ts`: repeated clicks, all 120 distinct phrases/100 lessons, failure with same-offset retry and navigation before a held page response, across lookup, full lessons and lesson selection. |
+| Language/lesson selection | `library.spec.ts` and `navigation.spec.ts`: independent tabs/bookmarks/history, first-launch deep bookmark, native/UI preferences, language restoration from phrase/lesson bookmarks and filter/selection coherence. |
+| Playback | `reference-audio.spec.ts`: genuine audio players with held delivery, Stop/navigation/background cancellation, delivery failure and a successful explicit retry. Background coverage dispatches a controlled visibility event; it is not actual-device acceptance. |
+| Exposure evidence | `library.spec.ts`, `reference-exposures.spec.ts`, `exposure-storage.spec.ts` and `exposure-write-lifecycle.spec.ts`: hidden setup/settings, held/failed writes, navigation/reload, local storage failure/recovery, exact-payload retry and an old visit's acknowledgement while a later visit remains failed. |
+| Content/media identity | `test_content_identity.py`, `test_media_identity.py` and existing import/media integration cases: reordered keys, significant array order, legacy IDs/fingerprints, changed objectives/provenance and original-byte recovery. |
+
+The audit reproduced two additional failure-state defects before fixing them: failed search claimed No matches, and a failed full-lesson page request hid the already loaded list and retry control. Empty/no-match text is now suppressed on failed queries, and lesson lists remain visible after page failures. The first targeted Chromium run passed 10 cases and failed these two assertions; after correction, the relevant 32 cases passed across Chromium/WebKit. Assertions were retained.
+
+All browser cases now use an automatic fixture reset on the disposable server; settings, content revisions, exposures and media metadata do not carry between cases. Each test configures its own preferences; pagination packages use a shared responsibility-specific helper. Original synthetic reference bindings no longer depend on prior editorial test order. The test reset endpoint is only registered in `tests/browser_server.py`.
+
+Audit verification: `uv run inv pre` converged with every hook passing and pyrefly reporting zero errors, followed by `uv run inv test`: **37 Python, 4 client and 70 browser tests passed**. Browser fixture isolation also removed the accumulated-content slowdown in per-keystroke search checks; every scenario passed in both Chromium and WebKit.
+
+Next: run the approved fourth fresh Sol 6.1 review. If that review is clean, close the review loop; otherwise assess/fix its findings and obtain confirmation before another iteration. No push, deployment, P1 restart or real provider measurement is part of this continuation.

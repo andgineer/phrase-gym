@@ -18,6 +18,8 @@ Implement the coverage in the [consolidated plan](implementation-plan.md); these
 
 **Acceptance:** clean checkout/environment can run the documented commands; types are checked separately from the client build; invalid requests fail with actionable errors; no provider credentials reach the client. No authentication/hosting assumption is hidden in a development-only convenience.
 
+The accepted [P2 transition checklist](p2-review-convergence.md) specifies loading, success, failure and cancellation for navigation, pagination, reference audio and exposure persistence. It is part of P2 acceptance, including deterministic request-gated browser cases and isolated fixture/settings state.
+
 Language acceptance: first-launch native language survives restart; direct English/Serbian bookmarks, reload and Back/Forward resolve the URL language; two tabs do not overwrite each other's language view. Native-language UI and learning-language UI both retain native-language explanations. Changing a route does not relabel an existing session or reset progress. On a bare/invalid/empty language route, follow the reviewed restore/selection state without serving another language under the wrong URL.
 
 ## P2.2 — Durable content and identities

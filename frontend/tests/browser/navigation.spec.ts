@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from './fixtures'
 
 test.beforeEach(async ({ request }) => {
   await request.put('/api/v1/settings', {

@@ -119,7 +119,7 @@ const {
             @retry-exposure="saveExposure"
           />
           <LessonView
-            v-else-if="kind === 'lessons' && !error"
+            v-else-if="kind === 'lessons' && (!error || results.length > 0)"
             :t="t"
             :language="currentLanguage"
             :lesson-title="lessonTitle"
@@ -142,6 +142,7 @@ const {
             v-model:selected-lesson="selectedLesson"
             :has-collection="hasCollection"
             :loading="loading"
+            :failed="Boolean(error)"
             :loading-more="loadingMore"
             :loading-more-lessons="loadingMoreLessons"
             :link="link"

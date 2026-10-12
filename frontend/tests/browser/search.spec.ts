@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from './fixtures'
 
 test('search fields retain focus through each query response and pending requests', async ({
   page,

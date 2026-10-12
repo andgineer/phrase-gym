@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { test, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from './fixtures'
 
 test.beforeEach(async ({ request }, testInfo) => {
   if (testInfo.title !== 'first launch and persisted native-language settings') {
