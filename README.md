@@ -5,13 +5,14 @@
 | Name                                                          |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/phrase\_gym/\_\_about\_\_.py                              |        1 |        0 |    100% |           |
-| src/phrase\_gym/api/app.py                                    |       56 |        9 |     84% | 58-66, 74 |
+| src/phrase\_gym/api/app.py                                    |       59 |        9 |     85% | 65-73, 81 |
 | src/phrase\_gym/api/boundary.py                               |       50 |        0 |    100% |           |
 | src/phrase\_gym/api/exposures.py                              |        6 |        0 |    100% |           |
 | src/phrase\_gym/api/imports.py                                |       18 |        0 |    100% |           |
 | src/phrase\_gym/api/library.py                                |       25 |        0 |    100% |           |
 | src/phrase\_gym/api/media.py                                  |       18 |        1 |     94% |        18 |
 | src/phrase\_gym/api/parameters.py                             |        5 |        0 |    100% |           |
+| src/phrase\_gym/api/sessions.py                               |       16 |        0 |    100% |           |
 | src/phrase\_gym/api/settings.py                               |        9 |        0 |    100% |           |
 | src/phrase\_gym/clock.py                                      |        3 |        0 |    100% |           |
 | src/phrase\_gym/config.py                                     |       15 |        0 |    100% |           |
@@ -27,6 +28,7 @@
 | src/phrase\_gym/contracts/imports.py                          |        9 |        0 |    100% |           |
 | src/phrase\_gym/contracts/library.py                          |       10 |        0 |    100% |           |
 | src/phrase\_gym/contracts/media.py                            |       24 |        0 |    100% |           |
+| src/phrase\_gym/contracts/sessions.py                         |       20 |        0 |    100% |           |
 | src/phrase\_gym/contracts/settings.py                         |        7 |        0 |    100% |           |
 | src/phrase\_gym/errors.py                                     |        4 |        0 |    100% |           |
 | src/phrase\_gym/main.py                                       |       96 |       22 |     77% |47-48, 70-72, 85, 92-93, 114-131, 138-143 |
@@ -34,10 +36,13 @@
 | src/phrase\_gym/migrations/env.py                             |        5 |        0 |    100% |           |
 | src/phrase\_gym/migrations/versions/0001\_foundation.py       |       20 |        2 |     90% |    95-107 |
 | src/phrase\_gym/migrations/versions/0002\_device\_language.py |       16 |        1 |     94% |        27 |
+| src/phrase\_gym/migrations/versions/0003\_sessions.py         |       12 |        2 |     83% |     39-40 |
 | src/phrase\_gym/serialization.py                              |        3 |        0 |    100% |           |
+| src/phrase\_gym/sessions/planning.py                          |       40 |        1 |     98% |        60 |
+| src/phrase\_gym/sessions/service.py                           |       70 |        0 |    100% |           |
 | src/phrase\_gym/settings.py                                   |       13 |        0 |    100% |           |
-| src/phrase\_gym/storage.py                                    |       93 |        0 |    100% |           |
-| **TOTAL**                                                     |  **969** |   **47** | **95%** |           |
+| src/phrase\_gym/storage.py                                    |      102 |        0 |    100% |           |
+| **TOTAL**                                                     | **1139** |   **50** | **96%** |           |
 
 
 ## Setup coverage badge
