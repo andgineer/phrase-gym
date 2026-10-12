@@ -1,0 +1,972 @@
+{
+  "schemaVersion": 1,
+  "revision": "p1-2026-10-12.2",
+  "review": {
+    "method": "Implementer editorial comparison against competing completions; no learner or native-speaker approval claimed",
+    "limits": "Serbian linguistic review and course/actor audio are pending; synthetic English clips are feasibility fixtures, not the production voice choice."
+  },
+  "lessons": [
+    {
+      "id": "rapport",
+      "language": "en",
+      "title": "Building rapport"
+    },
+    {
+      "id": "requests",
+      "language": "en",
+      "title": "Useful requests"
+    },
+    {
+      "id": "sr-rapport",
+      "language": "sr",
+      "title": "Upoznavanje i razgovor"
+    },
+    {
+      "id": "sr-cafe",
+      "language": "sr",
+      "title": "U kafiću"
+    }
+  ],
+  "targets": [
+    {
+      "id": "en-day",
+      "revision": 1,
+      "language": "en",
+      "lesson": "rapport",
+      "kind": "fixed",
+      "text": "How has your day been so far?",
+      "chunks": [
+        "How has",
+        "your day",
+        "been so far?"
+      ],
+      "purpose": "Ask a colleague about today up to now. Use the learned “so far” question.",
+      "meaning": {
+        "en": "A question about how today has gone up to this point. Present perfect links the earlier part of today with now.",
+        "ru": "Как проходит твой день? Вопрос о дне до настоящего момента.",
+        "sr": "Kako ti prolazi dan do ovog trenutka? Neformalno pitanje kolegi."
+      },
+      "allowed": [
+        "How's your day been so far?"
+      ],
+      "slots": {},
+      "search": [
+        "greetings",
+        "colleague",
+        "small talk",
+        "day"
+      ],
+      "cues": [
+        {
+          "id": "en-day-cue-1",
+          "context": "Ask a colleague about today up to now. Recall the learned present-perfect question.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "How was your day? (completed day)",
+            "How is your day going? (different selected expression)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-day-cue-2",
+          "context": "On an afternoon call, ask about your friend’s experience of today up to now. Recall the learned question.",
+          "hidden": [
+            2
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "How was your day? (completed day)",
+            "How is your day going? (different selected expression)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-day.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "How has your day been so far?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-day",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-see",
+      "revision": 1,
+      "language": "en",
+      "lesson": "rapport",
+      "kind": "fixed",
+      "text": "It’s good to see you again.",
+      "chunks": [
+        "It’s good",
+        "to see you",
+        "again."
+      ],
+      "purpose": "Welcome someone you have met before. Use the learned “good to see” expression.",
+      "meaning": {
+        "en": "A warm welcome to someone you already know.",
+        "ru": "Рад снова тебя видеть. Для человека, с которым вы уже знакомы.",
+        "sr": "Drago mi je da ponovo vidim poznatu osobu."
+      },
+      "allowed": [
+        "It is good to see you again."
+      ],
+      "slots": {},
+      "search": [
+        "greetings",
+        "welcome",
+        "reunion"
+      ],
+      "cues": [
+        {
+          "id": "en-see-cue-1",
+          "context": "Welcome someone you have met before, using the learned warm greeting.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Nice to meet you. (first meeting)",
+            "It’s nice to see you again. (allowed meaning, different selected target)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-see-cue-2",
+          "context": "At a reunion, welcome a familiar colleague using the learned warm greeting.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Nice to meet you. (first meeting)",
+            "It’s nice to see you again. (allowed meaning, different selected target)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-see.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "It’s good to see you again.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-see",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-name",
+      "revision": 1,
+      "language": "en",
+      "lesson": "rapport",
+      "kind": "fixed",
+      "text": "I don’t think we’ve met before.",
+      "chunks": [
+        "I don’t think",
+        "we’ve met",
+        "before."
+      ],
+      "purpose": "Introduce yourself to a new colleague. Use the learned tentative “I don’t think” opener.",
+      "meaning": {
+        "en": "A tentative way to introduce yourself when you probably have not met before.",
+        "ru": "Кажется, мы раньше не встречались. Мягкое начало знакомства.",
+        "sr": "Mislim da se ranije nismo sreli. Uvod u upoznavanje."
+      },
+      "allowed": [
+        "I do not think we have met before."
+      ],
+      "slots": {},
+      "search": [
+        "greetings",
+        "introductions",
+        "new colleague"
+      ],
+      "cues": [
+        {
+          "id": "en-name-cue-1",
+          "context": "Introduce yourself to a new colleague. Use the learned tentative statement about a possible earlier meeting.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Have we met before? (different question)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-name-cue-2",
+          "context": "At a workshop, introduce yourself using the learned tentative statement about a possible earlier meeting.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Have we met before? (different question)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-name.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "I don’t think we’ve met before.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-name",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-touch",
+      "revision": 1,
+      "language": "en",
+      "lesson": "rapport",
+      "kind": "fixed",
+      "text": "Let’s keep in touch.",
+      "chunks": [
+        "Let’s keep",
+        "in touch."
+      ],
+      "purpose": "End a friendly exchange by proposing future contact. Use “keep”.",
+      "meaning": {
+        "en": "A proposal to maintain contact after parting.",
+        "ru": "Давай оставаться на связи. Предложение поддерживать контакт.",
+        "sr": "Ostanimo u kontaktu. Predlog na kraju razgovora."
+      },
+      "allowed": [
+        "Let us keep in touch."
+      ],
+      "slots": {},
+      "search": [
+        "goodbye",
+        "contact",
+        "friends"
+      ],
+      "cues": [
+        {
+          "id": "en-touch-cue-1",
+          "context": "End a friendly exchange by proposing future contact. Use “keep”.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Let’s stay in touch. (valid alternative; selected wording uses keep)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-touch.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "Let’s keep in touch.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-touch",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-mind",
+      "revision": 1,
+      "language": "en",
+      "lesson": "requests",
+      "kind": "frame",
+      "text": "Would you mind opening the window?",
+      "chunks": [
+        "Would you mind",
+        "opening",
+        "the window?"
+      ],
+      "purpose": "Ask politely for the window to be opened, using “Would you mind”.",
+      "meaning": {
+        "en": "A polite request. Would you mind takes an -ing form; opening changes to closing only when the requested action changes.",
+        "ru": "Не мог бы ты открыть окно? После mind употребляется форма на -ing.",
+        "sr": "Ljubazan zahtev da se otvori prozor. Posle mind ide glagol na -ing."
+      },
+      "allowed": [
+        "Would you mind closing the window? [only in the closing situation]"
+      ],
+      "slots": {
+        "opening": [
+          "opening",
+          "closing"
+        ]
+      },
+      "search": [
+        "request",
+        "polite",
+        "window"
+      ],
+      "cues": [
+        {
+          "id": "en-mind-cue-1",
+          "context": "Ask politely for the window to be opened, using the learned question with an -ing complement.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Could you open the window? (valid alternative)",
+            "Would you mind to open the window? (incorrect form)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-mind-cue-2",
+          "context": "The meeting room is warm. Ask for the window to be opened using the learned polite question.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Could you open the window? (valid alternative)",
+            "Would you mind to open the window? (incorrect form)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-mind.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "Would you mind opening the window?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-mind",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-look",
+      "revision": 1,
+      "language": "en",
+      "lesson": "requests",
+      "kind": "word-recall",
+      "text": "Could you look into this for me?",
+      "chunks": [
+        "Could you",
+        "look into",
+        "this for me?"
+      ],
+      "purpose": "Ask someone to investigate a problem. Retrieve the learned two-word verb (not just inspect visually).",
+      "meaning": {
+        "en": "A request to investigate a problem. Look into is not the same as merely looking at something.",
+        "ru": "Можешь разобраться с этим для меня? Look into означает исследовать проблему.",
+        "sr": "Molba da neko istraži problem. Look into znači istražiti."
+      },
+      "allowed": [
+        "Could you look into this for me, please?"
+      ],
+      "slots": {},
+      "search": [
+        "investigate",
+        "problem",
+        "help"
+      ],
+      "cues": [
+        {
+          "id": "en-look-cue-1",
+          "context": "Ask someone to investigate a problem. Retrieve the learned two-word verb (not just inspect visually).",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Could you look at this for me? (inspection rather than investigation)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-look.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "Could you look into this for me?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-look",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-use",
+      "revision": 1,
+      "language": "en",
+      "lesson": "requests",
+      "kind": "word-use",
+      "text": "I’m looking forward to meeting you next week.",
+      "chunks": [
+        "I’m looking forward to",
+        "meeting you",
+        "next week."
+      ],
+      "purpose": "Use the supplied construction “looking forward to” to express anticipation of meeting next week.",
+      "meaning": {
+        "en": "Anticipation of a future meeting. The construction is supplied: this task practises using it with an -ing complement, not retrieving the construction itself.",
+        "ru": "С нетерпением жду встречи на следующей неделе. После to здесь используется -ing.",
+        "sr": "Radujem se sastanku sledeće nedelje. Posle looking forward to ide oblik na -ing."
+      },
+      "allowed": [
+        "I am looking forward to meeting you next week."
+      ],
+      "slots": {},
+      "search": [
+        "anticipation",
+        "meeting",
+        "future"
+      ],
+      "cues": [
+        {
+          "id": "en-use-cue-1",
+          "context": "Use the supplied construction “looking forward to” to express anticipation of meeting next week.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "I’m looking forward to meet you. (incorrect complement)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-use-cue-2",
+          "context": "An upcoming work visit: express anticipation of meeting next week, using the supplied “looking forward to”.",
+          "hidden": [
+            2
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "I’m looking forward to meet you. (incorrect complement)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-use.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "I’m looking forward to meeting you next week.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": false,
+      "source": {
+        "id": "prototype-authored:en-use",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "en-long",
+      "revision": 1,
+      "language": "en",
+      "lesson": "requests",
+      "kind": "fixed",
+      "text": "If I understand you correctly, you’d like us to finish this by Friday.",
+      "chunks": [
+        "If I understand you correctly,",
+        "you’d like us to",
+        "finish this by Friday."
+      ],
+      "purpose": "Confirm a Friday deadline using the learned “If I understand you correctly” lead-in.",
+      "meaning": {
+        "en": "A check of your understanding of a deadline. You’d means you would.",
+        "ru": "Если я правильно тебя понимаю, ты хочешь, чтобы мы закончили это к пятнице. Проверка понимания.",
+        "sr": "Provera da li je rok za završetak petak."
+      },
+      "allowed": [
+        "If I understand you correctly, you would like us to finish this by Friday."
+      ],
+      "slots": {},
+      "search": [
+        "deadline",
+        "clarification",
+        "work"
+      ],
+      "cues": [
+        {
+          "id": "en-long-cue-1",
+          "context": "Check your understanding of a Friday deadline using the learned conditional lead-in.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "So you need this on Friday? (valid paraphrase, different target)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "en-long-cue-2",
+          "context": "Your colleague has explained a project deadline. Check your understanding of Friday as the deadline, using the learned conditional lead-in.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "So you need this on Friday? (valid paraphrase, different target)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "generated",
+        "url": "/media/en-long.wav",
+        "engine": "macOS say (prototype only)",
+        "voice": "Samantha",
+        "locale": "en-US",
+        "speechInput": "If I understand you correctly, you’d like us to finish this by Friday.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:en-long",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "sr-day",
+      "revision": 1,
+      "language": "sr",
+      "lesson": "sr-rapport",
+      "kind": "fixed",
+      "text": "Kako ti protiče dan?",
+      "chunks": [
+        "Kako ti",
+        "protiče",
+        "dan?"
+      ],
+      "purpose": "Pitaj kolegu kako mu ide današnji dan. Koristi naučeni glagol “protiče”.",
+      "meaning": {
+        "en": "How is your day going? Informal address to one person; protiče describes how time is passing.",
+        "ru": "Как проходит твой день? Неформальное обращение к одному человеку.",
+        "sr": "Neformalno pitanje o toku dana."
+      },
+      "allowed": [
+        "Kako ti protiče dan danas?"
+      ],
+      "slots": {},
+      "search": [
+        "greetings",
+        "pozdrav",
+        "dan",
+        "colleague"
+      ],
+      "cues": [
+        {
+          "id": "sr-day-cue-1",
+          "context": "Pitaj kolegu o današnjem danu. Koristi naučeno pitanje o tome kako vreme prolazi.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Kako si? (opšte stanje)",
+            "Kako ti ide dan? (prirodna alternativa; drugi glagol)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "sr-day-cue-2",
+          "context": "U popodnevnom razgovoru pitaj prijatelja o današnjem danu. Koristi naučeni glagol za prolazak vremena.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Kako si? (opšte stanje)",
+            "Kako ti ide dan? (prirodna alternativa; drugi glagol)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "missing",
+        "url": null,
+        "engine": null,
+        "voice": "Samantha",
+        "locale": "sr-RS",
+        "speechInput": "Kako ti protiče dan?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:sr-day",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "sr-see",
+      "revision": 1,
+      "language": "sr",
+      "lesson": "sr-rapport",
+      "kind": "fixed",
+      "text": "Drago mi je što te ponovo vidim.",
+      "chunks": [
+        "Drago mi je",
+        "što te",
+        "ponovo vidim."
+      ],
+      "purpose": "Pozdravi poznatu osobu. Koristi naučeno “Drago mi je” i “ponovo”.",
+      "meaning": {
+        "en": "I’m glad to see you again. Informal address to someone you know.",
+        "ru": "Рад снова тебя видеть. Неформальное обращение к знакомому.",
+        "sr": "Drago mi je da ponovo vidim poznatu osobu."
+      },
+      "allowed": [
+        "Drago mi je što te opet vidim."
+      ],
+      "slots": {},
+      "search": [
+        "greetings",
+        "pozdrav",
+        "reunion"
+      ],
+      "cues": [
+        {
+          "id": "sr-see-cue-1",
+          "context": "Pozdravi poznatu osobu i izrazi zadovoljstvo zbog novog susreta. Koristi naučeni izraz.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Drago mi je da te upoznam. (prvi susret)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "sr-see-cue-2",
+          "context": "Na okupljanju pozdravi poznatu osobu i izrazi zadovoljstvo zbog novog susreta. Koristi naučeni izraz.",
+          "hidden": [
+            2
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Drago mi je da te upoznam. (prvi susret)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "missing",
+        "url": null,
+        "engine": null,
+        "voice": "Samantha",
+        "locale": "sr-RS",
+        "speechInput": "Drago mi je što te ponovo vidim.",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:sr-see",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "sr-coffee",
+      "revision": 1,
+      "language": "sr",
+      "lesson": "sr-cafe",
+      "kind": "frame",
+      "text": "Mogu li da dobijem jednu kafu, molim vas?",
+      "chunks": [
+        "Mogu li da dobijem",
+        "jednu kafu,",
+        "molim vas?"
+      ],
+      "purpose": "Naruči jednu kafu koristeći naučeno “Mogu li da dobijem”.",
+      "meaning": {
+        "en": "Could I have a coffee, please? One coffee uses jednu kafu; one tea uses jedan čaj.",
+        "ru": "Можно мне один кофе, пожалуйста? Вежливый заказ. При замене напитка учитывайте род и падеж.",
+        "sr": "Ljubazna porudžbina jedne kafe. Za čaj: jedan čaj."
+      },
+      "allowed": [
+        "Mogu li da dobijem jedan čaj, molim vas? [u situaciji sa čajem]"
+      ],
+      "slots": {
+        "jednu kafu": [
+          "jednu kafu",
+          "jedan čaj"
+        ]
+      },
+      "search": [
+        "cafe",
+        "coffee",
+        "order",
+        "kafa"
+      ],
+      "cues": [
+        {
+          "id": "sr-coffee-cue-1",
+          "context": "Naruči kafu koristeći naučenu ljubaznu molbu u obliku pitanja.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Dajte mi kafu. (druga forma zahteva)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "sr-coffee-cue-2",
+          "context": "U drugom kafiću želiš kafu. Ljubazno naruči jednu šoljicu koristeći naučeno pitanje.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Dajte mi kafu. (druga forma zahteva)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "missing",
+        "url": null,
+        "engine": null,
+        "voice": "Samantha",
+        "locale": "sr-RS",
+        "speechInput": "Mogu li da dobijem jednu kafu, molim vas?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:sr-coffee",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    },
+    {
+      "id": "sr-bill",
+      "revision": 1,
+      "language": "sr",
+      "lesson": "sr-cafe",
+      "kind": "fixed",
+      "text": "Mogu li da dobijem račun, molim vas?",
+      "chunks": [
+        "Mogu li da dobijem",
+        "račun,",
+        "molim vas?"
+      ],
+      "purpose": "Posle pića zatraži račun koristeći naučeni izraz “Mogu li da dobijem”.",
+      "meaning": {
+        "en": "Could I have the bill, please? A polite request at the end of a visit.",
+        "ru": "Можно мне счёт, пожалуйста? Вежливая просьба после заказа.",
+        "sr": "Ljubazan zahtev za račun posle pića."
+      },
+      "allowed": [
+        "Mogu li da dobijem račun, molim Vas?"
+      ],
+      "slots": {},
+      "search": [
+        "bill",
+        "payment",
+        "cafe",
+        "račun"
+      ],
+      "cues": [
+        {
+          "id": "sr-bill-cue-1",
+          "context": "Posle pića zatraži iznos za plaćanje koristeći naučenu ljubaznu molbu.",
+          "hidden": [
+            0
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Mogu li da platim? (pitanje o plaćanju)"
+          ],
+          "status": "editorially-checked"
+        },
+        {
+          "id": "sr-bill-cue-2",
+          "context": "Na kraju posete drugom kafiću zatraži iznos za plaćanje koristeći naučenu ljubaznu molbu.",
+          "hidden": [
+            1
+          ],
+          "rationale": "Identifying anchors and a selected-expression context distinguish the learned target; complementary masks retain the same wording and purpose.",
+          "competitors": [
+            "Mogu li da platim? (pitanje o plaćanju)"
+          ],
+          "status": "editorially-checked"
+        }
+      ],
+      "audio": {
+        "origin": "missing",
+        "url": null,
+        "engine": null,
+        "voice": "Samantha",
+        "locale": "sr-RS",
+        "speechInput": "Mogu li da dobijem račun, molim vas?",
+        "preparationVersion": 1,
+        "sourceRevision": 1
+      },
+      "due": true,
+      "source": {
+        "id": "prototype-authored:sr-bill",
+        "kind": "P1 fixture, not imported course content",
+        "priorExposure": "Ordinary drill assumes prior source exposure; Show & explain is available before a response."
+      }
+    }
+  ],
+  "coverageSeed": {
+    "en-day": {
+      "hiddenCounts": [
+        0,
+        0,
+        2
+      ],
+      "lastCue": "en-day-cue-2"
+    }
+  },
+  "dialogues": [
+    {
+      "id": "break",
+      "language": "en",
+      "title": "A colleague on a break",
+      "lesson": "rapport",
+      "turns": [
+        {
+          "speaker": "partner",
+          "text": "Hi! Good to see you."
+        },
+        {
+          "speaker": "learner",
+          "target": "en-see"
+        },
+        {
+          "speaker": "partner",
+          "text": "You too. I’ve just finished a meeting."
+        },
+        {
+          "speaker": "learner",
+          "target": "en-day"
+        },
+        {
+          "speaker": "partner",
+          "text": "Pretty well, thanks. Let’s catch up another time."
+        },
+        {
+          "speaker": "learner",
+          "target": "en-touch"
+        }
+      ]
+    },
+    {
+      "id": "cafe",
+      "language": "sr",
+      "title": "Kratak razgovor u kafiću",
+      "lesson": "sr-cafe",
+      "turns": [
+        {
+          "speaker": "partner",
+          "text": "Dobar dan. Izvolite."
+        },
+        {
+          "speaker": "learner",
+          "target": "sr-coffee"
+        },
+        {
+          "speaker": "partner",
+          "text": "Naravno. Evo vaše kafe."
+        },
+        {
+          "speaker": "support",
+          "text": "Hvala vam."
+        },
+        {
+          "speaker": "partner",
+          "text": "Da li želite još nešto?"
+        },
+        {
+          "speaker": "learner",
+          "target": "sr-bill"
+        },
+        {
+          "speaker": "partner",
+          "text": "Izvolite račun."
+        }
+      ]
+    }
+  ],
+  "rejectedCues": [
+    {
+      "id": "broad",
+      "cue": "Greet someone.",
+      "reason": "Many valid answers; cannot grade one exact expression."
+    },
+    {
+      "id": "leak",
+      "cue": "Could you look into […]?",
+      "reason": "Reveals the objective in a word-retrieval task; usable only as word-use, not word recall."
+    },
+    {
+      "id": "unknown",
+      "cue": "[…] the bullet.",
+      "target": "Bite the bullet.",
+      "reason": "Unfamiliar expression without established source exposure; show meaning before supported practice."
+    },
+    {
+      "id": "ambiguous",
+      "cue": "Mogu li da dobijem […], molim vas?",
+      "reason": "Without an order/bill situation, both coffee and bill fit. Context is required."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Brief for the next session
 
-Updated **2026-10-11** after the user asked to put the complete discussion into the implementation plan.
+Updated **2026-10-12**. The user has now requested P1 implementation; new disposable deliverables are available. Start with [P1 evidence](evidence/p1-2026-10-12.md), [the review handoff](p1-review.md) and [prototype walkthroughs](../../prototypes/README.md). User/device/content acceptance remains pending; P2 has not begun. The following handoff retains the original requirements and execution sequence.
 
 ## Read first
 
@@ -8,7 +8,7 @@ Updated **2026-10-11** after the user asked to put the complete discussion into 
 2. **[Consolidated implementation plan](implementation-plan.md)** — the complete scope, current defaults, phase sequence, acceptance checklist and remaining choices. This is the main execution handoff; do not reconstruct requirements from chat history or earlier sketches.
 3. The relevant linked phase file when beginning that phase: [P1 prototype](01-prototyping.md), [P2–P3 core](02-core-implementation.md), [P5 content/integrations](03-content-and-integrations.md), [P4/P6 reliability/release](04-validation-and-release.md).
 
-The user required design discussion and a written plan before implementation in a new session. The latest request consolidated documentation only. **No app implementation has started, no prototype is approved, and no phase gate has passed.** Follow the new session's actual request; do not automatically start coding because this handoff exists.
+The user required design discussion and a written plan before implementation in a new session. The latest requests authorized P1 implementation and reviews, followed by direct-main commits and a preference for manual prototype review. **P1 prototypes have been implemented; none is yet user-approved and no phase gate has passed.** Follow the new session's actual request; do not automatically start coding because this handoff exists.
 
 ## Requirements that must survive
 
@@ -32,7 +32,7 @@ Keep these recommendations distinct from explicitly agreed requirements. Use the
 
 ## Start when implementation is requested
 
-Begin P1.1 with a small reviewed content/cue pack, then the complete interaction prototype and actual-device audio/storage probe. Include language/bookmark navigation, search/lesson routes, revised answer/help states and both recording modes, not just a text-only card. Earlier HTML illustrations simulate audio, contain some obsolete labels and do not implement the newest language behaviour; their existence grants no phase credit or visual approval.
+P1.1/P1.2 deliverables and the P1.3 probe now exist. Continue with their walkthrough/device/content review rather than rebuilding them. The original sequence was a small reviewed content/cue pack, then the complete interaction prototype and actual-device audio/storage probe. Include language/bookmark navigation, search/lesson routes, revised answer/help states and both recording modes, not just a text-only card. Earlier HTML illustrations simulate audio, contain some obsolete labels and do not implement the newest language behaviour; their existence grants no phase credit or visual approval.
 
 P2–P3 build the local trainer using reviewed manual packages. P3 must already persist every recording; that is not postponed to reliability work. P5 supplies the agreed add-time LLM preparation and live source handoff before claiming the complete planned feature set. Record phase evidence and user walkthrough corrections under `specs/`; do not represent software tests as a study of the learner.
 

@@ -2,6 +2,7 @@
 
 **[Start here](START-HERE.md)** for the full handoff and the current status. This folder is the authoritative development context for `~/projects/phrase-gym`.
 
+- [P1 implementation evidence](plan/evidence/p1-2026-10-12.md), [review handoff](plan/p1-review.md) and [runnable prototypes](../prototypes/README.md)
 - [Session decisions and corrections](session-decisions-2026-10-11.md)
 - [Targeted-drilling decision](decision-targeted-drilling.md)
 - [Recording and comparison decision](decision-recording-and-comparison.md)

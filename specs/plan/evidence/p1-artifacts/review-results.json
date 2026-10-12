@@ -1,0 +1,69 @@
+{
+  "syntheticMicrophone": true,
+  "results": [
+    {
+      "name": "Visible search and lesson answers create support, never review receipts",
+      "status": "pass"
+    },
+    {
+      "name": "A stale browsing tab cannot overwrite review receipts or cue coverage",
+      "status": "pass"
+    },
+    {
+      "name": "Undo and regrade create exactly one separated retry",
+      "status": "pass"
+    },
+    {
+      "name": "Original recording remains replayable after explanation practice and Undo",
+      "status": "pass"
+    },
+    {
+      "name": "Unsaved audio survives advancement and blocks replacement until recovery",
+      "status": "pass"
+    },
+    {
+      "name": "Pausing a delayed reference cancels playback and resumes the original self-check",
+      "status": "pass"
+    },
+    {
+      "name": "Actor and generated imports coexist and actor audio remains selected",
+      "status": "pass"
+    },
+    {
+      "name": "Undo ends active capture and retains the interrupted take",
+      "status": "pass"
+    },
+    {
+      "name": "Failed result transactions roll back every store and allow one retry",
+      "status": "pass"
+    },
+    {
+      "name": "Explanation capture disables replay and reference never plays into a live microphone",
+      "status": "pass"
+    },
+    {
+      "name": "Home can enable recording for a new session after Finish",
+      "status": "pass"
+    },
+    {
+      "name": "Reveal exposure survives a finished session without rewriting the original grade",
+      "status": "pass"
+    },
+    {
+      "name": "Automatic comparison journals answer exposure for the following session",
+      "status": "pass"
+    },
+    {
+      "name": "Probe Stop cancels both manual and automatic delayed reference playback",
+      "status": "pass"
+    },
+    {
+      "name": "Starting capture cancels delayed manual reference playback on both surfaces",
+      "status": "pass"
+    },
+    {
+      "name": "Stopping learner replay preserves original eligibility and logs the revealed answer",
+      "status": "pass"
+    }
+  ]
+}

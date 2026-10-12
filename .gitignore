@@ -1,4 +1,5 @@
 .DS_Store
+.env
 .idea/
 .venv/
 build/
@@ -13,3 +14,7 @@ pytest-coverage.txt
 *.py-e
 **/.setup-scripts/
 allure-results/
+
+# Disposable prototype dependencies and private local configuration
+**/node_modules/
+prototypes/.local/

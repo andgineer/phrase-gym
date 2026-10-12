@@ -1,8 +1,8 @@
 # Phrase Gym — consolidated implementation plan
 
-Updated **2026-10-11** at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
+Updated **2026-10-12** with P1 implementation evidence. Originally consolidated on 2026-10-11 at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
 
-**Status:** planning only. The active project is the user-created Python scaffold. No approved runnable app/prototype exists and every implementation gate remains unpassed. This request consolidates the plan; it does not start application implementation or turn earlier sketches/archived code into the baseline.
+**Status, 2026-10-12:** the user requested P1 implementation. New runnable prototypes and a fixture pack exist under `prototypes/`; [P1 evidence](evidence/p1-2026-10-12.md) and [the review handoff](p1-review.md) record what was built/tested and what remains pending. Every implementation gate remains unpassed: P1 still needs user/device/content review, and P2 has not started. Production source remains the user-created Python scaffold. Archived code was not used as the baseline.
 
 **Status convention:** **Agreed** identifies explicit user requirements. **Recommended** identifies the concrete design/engineering choice to carry into the next prototype, without claiming the user already selected its exact controls or values. **Open** identifies remaining product choices. No learning-effectiveness experiment, calibration task, special assessment session or algorithm tuning is required from the learner.
 
@@ -199,7 +199,7 @@ Do not reopen settled manual stop, automatic storage of every take, recording on
 
 ## Execution handoff and scaffold
 
-When a future session requests implementation, read [the next-session brief](next-session.md) and begin **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
+P1 deliverables now exist; review the linked evidence and starting-point handoff before beginning P2. The original execution order was **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
 
 Preserve `src/phrase_gym`, the rich-click entry point, hatchling/uv, pytest, Invoke, quality checks, documentation and CI conventions. Replace scaffold template behaviour only during authorized implementation. Keep all development context in `specs/`, plural. Do not install or extract the stopped temporary implementation as the starting app.
 

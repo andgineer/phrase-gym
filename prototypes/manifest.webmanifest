@@ -1,0 +1,17 @@
+{
+  "name": "Phrase Gym · P1 prototype",
+  "short_name": "Phrase Gym",
+  "start_url": "/learn/en",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f4ed",
+  "theme_color": "#244b40",
+  "icons": [
+    {
+      "src": "/shared/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

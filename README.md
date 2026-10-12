@@ -8,7 +8,7 @@ A language trainer for automatic use of words and phrases through guided recall,
 
 Start with [specs/START-HERE.md](specs/START-HERE.md) for the complete goal, accepted decisions, design discussion, open choices and current status. The [next-session brief](specs/plan/next-session.md) and [roadmap](specs/plan/implementation-plan.md) guide future work.
 
-The app source is still the user-created scaffold. No approved prototype or implemented app is present in active source. Historical experiments are clearly labelled under `specs/archive/`; they do not establish approval or completed milestones. All development documentation lives under `specs/` (plural).
+The app source is still the user-created scaffold. New disposable **P1 prototypes** are runnable under `prototypes/`; see [run instructions](prototypes/README.md) and [verification/pending acceptance](specs/plan/evidence/p1-2026-10-12.md). They are not yet user-approved; P1’s exit gate remains open and P2 has not begun. Historical experiments are clearly labelled under `specs/archive/`; they do not establish approval or completed milestones. All development documentation lives under `specs/` (plural).
 
 # Documentation
 

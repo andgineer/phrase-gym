@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#244b40" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/shared/style.css" />
+    <title>Phrase Gym · audio probe</title>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/learn/en">Phrase Gym</a><span>Device probe</span>
+    </header>
+    <main>
+      <p class="eyebrow">P1.3 · local test data</p>
+      <h1>Audio & storage</h1>
+      <p>
+        This probe uses the same capture, local storage and playback code as the
+        drill. Test on Safari and an installed home-screen app separately.
+      </p>
+      <pre id="capabilities"></pre>
+      <div class="card">
+        <label for="target">Prepared phrase</label
+        ><select id="target"></select>
+        <p id="phrase" class="cue"></p>
+        <label class="check"
+          ><input type="checkbox" id="mode" />Recording on</label
+        ><label class="check"
+          ><input type="checkbox" id="visible" />Full phrase visible during
+          capture</label
+        >
+        <p id="status" class="status" role="status">
+          Recording off. Reference playback is manual.
+        </p>
+        <div class="row">
+          <button
+            id="record"
+            class="primary"
+            hidden
+            aria-label="Start recording"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <rect x="9" y="2" width="6" height="13" rx="3" />
+              <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8" />
+            </svg></button
+          ><button id="stop-recording" class="primary" hidden>
+            ■ Stop recording</button
+          ><button id="cancel" hidden>Cancel microphone request</button
+          ><button id="reveal">Reveal & compare</button
+          ><button id="own" disabled>▶ My recording</button
+          ><button id="reference">▶ Reference</button
+          ><button id="stop">Stop playback</button
+          ><button id="retry" hidden>Retry local storage</button>
+          <button id="inspect-reference">Inspect reference / seek</button>
+        </div>
+        <audio id="inspect" controls hidden></audio>
+        <p id="provenance" class="notice muted"></p>
+      </div>
+      <details>
+        <summary>Import actor/course or prepared audio</summary>
+        <p>
+          Choose a whole-phrase clip matching the selected phrase and language.
+          The original file is retained locally with its provenance. No uploads
+          or synthesis occur here.
+        </p>
+        <label
+          >Origin<select id="origin">
+            <option value="actor">Actor/course recording</option>
+            <option value="generated">Generated recording</option>
+          </select></label
+        ><label
+          >Source / performer / engine / voice<input
+            id="source"
+            placeholder="Required provenance" /></label
+        ><label class="check"
+          ><input type="checkbox" id="matches" />I checked the complete wording
+          and language against this target</label
+        ><input id="asset" type="file" accept="audio/*" /><button id="import">
+          Import reference
+        </button>
+      </details>
+      <details>
+        <summary>Local storage inspection</summary>
+        <p>
+          Every nonempty take, including interrupted captures and extra takes,
+          is stored automatically in IndexedDB. This is prototype staging, not
+          the P3 app database. No expiry or overwrite. The controls below apply
+          only to disposable probe data.
+        </p>
+        <div id="takes"></div>
+        <div class="row">
+          <button id="refresh">Refresh saved-take metadata</button
+          ><button id="delete-takes" class="danger">
+            Delete local test takes</button
+          ><button id="download">Download prepared assets</button>
+        </div>
+      </details>
+      <section class="block">
+        <h2>Capability report</h2>
+        <label
+          >OS / device / browser version<input
+            id="device"
+            placeholder="e.g. iPhone model, iOS version, Safari"
+        /></label>
+        <div id="scenarios"></div>
+        <label
+          >Notes<textarea
+            id="notes"
+            rows="4"
+            placeholder="Observed errors, encoding, headphones, recovery…"
+          ></textarea></label
+        ><button id="export">Export report (no audio)</button>
+        <p class="notice muted">
+          Unperformed checks stay untested. Synthetic input and browser
+          emulation are engineering checks, not actual microphone/device
+          evidence.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="/audio-probe/probe.mjs"></script>
+  </body>
+</html>

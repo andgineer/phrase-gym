@@ -1,0 +1,50 @@
+[
+  {
+    "target": "en-day",
+    "durationSeconds": 1.727,
+    "rms": 5065.9,
+    "bytes": 82958
+  },
+  {
+    "target": "en-see",
+    "durationSeconds": 1.553,
+    "rms": 5141.2,
+    "bytes": 74602
+  },
+  {
+    "target": "en-name",
+    "durationSeconds": 1.726,
+    "rms": 5012.9,
+    "bytes": 82928
+  },
+  {
+    "target": "en-touch",
+    "durationSeconds": 1.398,
+    "rms": 4448.7,
+    "bytes": 67162
+  },
+  {
+    "target": "en-mind",
+    "durationSeconds": 1.744,
+    "rms": 6230.3,
+    "bytes": 83788
+  },
+  {
+    "target": "en-look",
+    "durationSeconds": 1.565,
+    "rms": 5093.9,
+    "bytes": 75218
+  },
+  {
+    "target": "en-use",
+    "durationSeconds": 2.539,
+    "rms": 5976.4,
+    "bytes": 121938
+  },
+  {
+    "target": "en-long",
+    "durationSeconds": 4.165,
+    "rms": 5069.1,
+    "bytes": 199998
+  }
+]

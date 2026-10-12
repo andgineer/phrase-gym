@@ -2,9 +2,15 @@
 
 Read [START-HERE](START-HERE.md), the drilling, recording and [navigation/search decisions](decision-session-navigation-and-search.md), [interaction design](design/interaction-design.md) and [next-session brief](plan/next-session.md). Current user instructions take precedence over this record. This project uses the user's Python scaffold; all development context is under `specs/`.
 
+**Implementation update, 2026-10-12:** the current user request authorized P1. New disposable prototypes are runnable; see [evidence](plan/evidence/p1-2026-10-12.md) and [review handoff](plan/p1-review.md). P1 acceptance remains pending and P2 has not begun. Prior discussion-only restrictions below describe the preceding session, not a prohibition on the current P1 task.
+
 For implementation scope, use the [consolidated implementation plan](plan/implementation-plan.md) and its linked phase files. It preserves all discussion through the language/audio inspection, with agreed requirements, recommended defaults, deferred work and remaining choices distinguished. Do not reconstruct the product from an old sketch or interpret this documentation-consolidation request as permission to begin coding.
 
 The user explicitly stopped premature coding and asked for design discussion followed by a written plan for another session/model. Do not automatically continue the archived prototype. No approved app/prototype exists in active source. Respond to the new session's actual request; unresolved visual decisions require discussion before being treated as accepted.
+
+## Current workflow preference, 2026-10-12
+
+The user explicitly authorizes commits directly to `main`; do not create a branch by default. This supersedes the older no-commit/scaffold-only handoff restrictions for the current P1 review work. Three fresh Sol 6.1 reviews were completed; see [the review-loop report](plan/evidence/p1-review-loop-2026-10-12.md). Pause before a fourth review and prioritize the manual P1 walkthrough. The user rejects a macOS-only audio dependency; carry the echo-words Piper/Edge approach and llmbroker preparation into the production scope discussion. Keep `.env` private.
 
 ## Working with the user
 
