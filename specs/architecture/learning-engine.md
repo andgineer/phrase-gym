@@ -1,8 +1,8 @@
 # Learning engine and review policy
 
-Proposed implementation behaviour, 2026-10-11. Derived from the [agreed drills](../decision-targeted-drilling.md); the exact defaults below must be tested during [prototyping](../plan/01-prototyping.md). They are not new claims about research-proven learning intervals or cue difficulty.
+Proposed implementation behaviour, 2026-10-11. Derived from the [agreed drills](../decision-targeted-drilling.md) and [research-based design](../design/answer-card-and-review-policy.md). Prototyping checks interaction clarity and software/device behaviour; it does not ask the learner to establish effective intervals.
 
-**Latest recommendation:** the [research-based answer-card and review design](../design/answer-card-and-review-policy.md) recommends Not yet / With effort / Recalled and an FSRS-based policy with 0.90 default retention, automatic target-state updates and a separate repair queue. It supersedes the fixed ladder below as the assistant's preferred proposal. User acceptance of exact labels/parameters is still pending. The user has explicitly rejected learner-run validation, in-app experiments and special assessment sessions; testing here means software/content/device checks by the implementer.
+**Current recommendation:** Not yet / With effort / Recalled and an FSRS-based policy with 0.90 default retention, automatic target-state updates and a separate repair queue. The active flow below incorporates it; the former fixed ladder is historical. User acceptance of exact labels/parameters is still pending. The user has explicitly rejected learner-run validation, in-app experiments and special assessment sessions; testing here means software/content/device checks by the implementer.
 
 ## Separate the learning target from its presentation
 
@@ -17,9 +17,10 @@ The accepted preparation timing is phrase intake: when adding a phrase to the da
 1. Only published, reviewed cue variants are eligible. All chunk IDs must resolve within the pinned realization revision and reconstruct the original text exactly, including punctuation and spacing.
 2. A cue must state the task, supply its use context and retain enough distinguishing language. Store plausible competing answers and why the chosen anchors distinguish the intended learned expression. This is a review aid, not a proof of universal uniqueness.
 3. Do not generate a gap by removing the first N words, random positions or individual letters. The implementation renders authored chunk references.
-4. Carry cue-presentation history across sessions so the next session can choose a reviewed alternative that requires recall of a different meaningful chunk. The proposed selector uses deterministic rotation among eligible variants, avoiding the last shown version when suitable alternatives exist; a recently successful cue may be reused when support is still needed. If only one reliable cue exists, reuse it. Exact selection/adaptation rules remain to be validated; no difficulty ranking is inferred from character count.
+4. Carry cue-presentation and hidden-chunk recall history across sessions. Among clear cues with comparable support, prefer one covering an under-practised or previously difficult chunk; use time since presentation and stable ordering as tie breakers. Avoid repeating the last version when a suitable complementary cue exists, but reuse one reliable cue if necessary. This selector is a design recommendation, not a research-derived difficulty formula; character count does not measure difficulty. Persistent coverage replaces the earlier requirement to retrieve every chunk at every interval level.
 5. Full-model practice is always available as an explicit fallback. If there is no reliable retrieval cue, offer model practice and flag preparation work; do not manufacture an ambiguous test at runtime.
 6. Record all exposed chunks, including audio and requested help. A lexical target that remained visible was used, not retrieved. Track recall coverage by required chunk; do not permanently label an entire phrase learned when the same part is always supplied.
+7. During ordinary reviews, use different prepared situations or dialogue turns where appropriate to the same meaning/use. Fixed expressions retain their target wording; word/frame tasks may use reviewed realizations with allowed substitutions. Retain disambiguating anchors and comparable support; do not create random situations, mandatory zero-hint tests or additional schedules.
 
 ## Session behaviour
 
@@ -41,21 +42,27 @@ stateDiagram-v2
     SilentRecall --> Compare: reveal requested / audio manual
     Speaking --> ModelHelp: reveal requested
     ModelHelp --> Compare: model-assisted response
-    Compare --> Commit: target matched
-    Compare --> Repair: wants another try
-    Compare --> Alternative: different wording
-    Alternative --> Repair: practise selected target
-    Alternative --> Commit: cue unclear / no grade
-    Repair --> Commit: repeat full expression
-    Commit --> Prompt: next or delayed retry
-    Commit --> Summary: session complete
+    Compare --> Grade: valid original retrieval attempt
+    Grade --> Commit: Not yet / With effort / Recalled
+    Compare --> SupportedPractice: model/help before response
+    Compare --> Alternative: other answer / problem
+    Alternative --> Grade: allowed equivalent or confirmed target failure
+    Alternative --> NoGrade: unclear cue / technical problem
+    Commit --> SupportedPractice: optional extra practice / result retained
+    SupportedPractice --> Continue: no new long-term grade
+    NoGrade --> Continue: retain unresolved due obligation
+    Commit --> Continue: result tap advances
+    Continue --> Prompt: next target
+    Continue --> Repair: queued retry after intervening time/material
+    Repair --> Compare: retain repair-group identity
+    Continue --> Summary: session complete
 ```
 
 The interface can pause from any state. Persist the phase, current target/cue revision, help already used, media position where reliable, attempt identity and completed events. Resume an interrupted recording as interrupted; never invent a completed recording or a failed recall. Starting after viewing the full model is assisted practice until a later eligible attempt.
 
 Commit a completed attempt to the local journal before advancing. On a connected client, submit it immediately and retain it until acknowledged. Do not block a spoken turn on generation, transcription or background media upload.
 
-A new database item may already have been encountered in its source, so database novelty alone must not force an introduction. One session entry leads to the drill, with an explanation action available even before any response. That action reveals the full phrase and explanation in the learner's language; ordinary drill content remains in the target language. Opening help is not itself a failure grade. Record exposure and any explanation shown; returning to the cue or immediately repeating the model is assisted practice, not delayed independent recall. A tentative prototype session interleaves different targets before revisiting a target; exact session length and explanation-return behaviour remain to be reviewed.
+A new database item may already have been encountered in its source, so database novelty alone must not force an introduction. One session entry leads to the drill, with an explanation action available even before any response. That action reveals the full phrase and explanation in the learner's language; ordinary drill content remains in the target language. Opening help is not itself a failure grade. Record exposure and any explanation shown; returning to the cue or immediately repeating the model is assisted practice, not delayed independent recall. Follow the separated-retry rules below after help or failure. Persistent difficulty returns to meaning/cue repair rather than an endless repetition loop.
 
 ## Dialogues
 
@@ -71,35 +78,36 @@ Store observations rather than a single ambiguous “correct” flag:
 
 | Observation | Record | Scheduling meaning |
 |---|---|---|
-| Target reproduced with the planned partial cue | `target_matched`, planned visible/hidden chunks, self-report or assessment origin | May qualify for the reviewed task, subject to the policy below; not proof of independent speech. |
+| Target reproduced with the planned partial cue | `target_matched`, planned visible/hidden chunks, self-report or assessment origin; With effort or Recalled | An eligible first observation maps to Hard/2 or Good/3 respectively; cued-retrieval evidence, not proof of independent speech. |
 | Target word/frame is still shown | `controlled_use`, visible required material | Practice evidence only; does not advance lexical-recall progress. |
 | Additional phrase material/full model used before responding | `extra_help` or `model_exposed` | Assisted attempt; later repair cannot erase that support. |
-| Learner cannot retrieve a clearly specified target | `target_not_retrieved` | An eligible recall difficulty, followed by repair. |
+| Learner cannot retrieve a clearly specified target | `target_not_retrieved`, Not yet | An eligible first observation maps to Again/1, followed by repair. Hard is never a forgotten or partially recalled answer. |
 | Different natural wording is offered | `alternative_response` | No automatic memory failure. Offer target practice or report unclear cue. |
 | Cue is ambiguous | `cue_reported`, reason and cue revision | No grade; prevent that variant from being selected again for this learner until reviewed. |
 | Audio, recording or recognition fails | `technical_failure` / `assessment_uncertain` | No grade; offer self-check or repeat the technical step. |
-| Silent practice | `silent_practice`, actual support, self-report if supplied | Not spoken-performance evidence; do not automatically apply a spoken-recall grade. Its exact review effect remains to be decided. |
+| Silent practice | `silent_practice`, actual support, original-attempt self-report | Proposed rule: deliberate retrieval before reveal can use the same memory ratings; reading/recognition cannot. It supplies no spoken-performance evidence. |
 | Skipped or abandoned | `skipped` / incomplete session | No failure. Already committed attempts remain saved. |
 
 Self-checking is the initial assessment method. A later ASR component can return evidence and uncertainty but cannot silently replace the learner's report or penalize a valid alternative. No speech recognizer is a dependency of the first useful trainer.
 
-## Earlier fixed-policy proposal — retained for provenance
+## Current adaptive policy recommendation
 
-Keep a `ReviewPolicy` interface from the beginning. The older recommendation was a small deterministic policy while considering FSRS later. After the user's research request, the [current recommendation](../design/answer-card-and-review-policy.md#scheduler-preferred-candidate) is FSRS with explicit recall grading and support classification. Neither policy was user-approved. The older defaults below are historical alternatives, not instructions to implement a 30-day cap, universal one-day lapse reset or per-level chunk-coverage gate. Do not offer a policy experiment to the learner.
+Implement a versioned `ReviewPolicy` adapter around a maintained, pinned FSRS library. Use population parameters and **0.90 desired retention** for the declared cued-retrieval task. Normal eligible ratings update the target's difficulty/stability and next due time using actual elapsed time. No learner tuning, calibration task or effectiveness experiment is part of this policy.
 
-Earlier defaults, preserved only to explain the change in recommendation:
+- Map **Not yet → Again/1**, **With effort → Hard/2**, **Recalled → Good/3**. Omit Easy from the initial interface. Grade the original response before feedback; Practice again is a separate action. Model help before any attempt is exposure, not an inferred failure.
+- Keep one target schedule across cues, contexts, lessons and dialogue appearances. Persist coverage separately; incomplete coverage guides the next cue without a per-interval promotion gate.
+- A newly imported item can begin with an ordinary retrieval attempt. After study without a valid retrieval grade, schedule a next-day learning check as a fallback, explicitly without inventing a successful grade.
+- After failure, give model/meaning feedback, offer supported practice, then queue a retrieval retry roughly **5–10 minutes** later and after **at least two other targets** when feasible. Otherwise defer to a later session; never make the learner wait for a timer. These are chosen implementation defaults for applying spacing.
+- Aim for one successful separated retry; allow at most **two extra retrieval attempts per target per session**. Persistent failure calls for meaning/cue repair and continuation later. Immediate model-visible takes remain optional practice, with every recording retained.
+- Only the first eligible finalized observation in a review group updates the long-term state. Repairs preserve that first result and are logged separately. Disable library learning/relearning steps in this adapter so a second queue does not duplicate the app's repair loop.
+- Let the library compute intervals and lapse adjustments from history. No universal one-day reset or permanent 30-day ceiling. Overdue items use their actual elapsed time; missed days do not reset a course.
+- Search, explanation exposure, invalid cues, technical problems and skips do not fabricate successful or failed reviews. A no-grade event leaves the due obligation unresolved. Log support, optional extra practice and exposure even when they do not change due dates.
 
-- One schedule row per learner/target, with a policy version, target revision, interval level, next due time and concurrency version.
-- Initial deliberate exposure schedules the first delayed review in one day; it is not a successful memory test.
-- Start with configurable interval levels of **1, 3, 7, 14 and 30 days**, measured from the accepted review time. These are transparent engineering defaults, not claimed optimal intervals or a research result.
-- An eligible successful due review advances at most one level. Keep the maximum level at 30 days until pilot evidence supports another configuration. A prompted observation is labelled as such throughout.
-- For a fixed phrase, require a successful reviewed rotation to have demanded recall of every required chunk across the current level before advancing; a chunk always displayed does not count. Keep coverage as metadata on the one schedule, not as additional schedules.
-- For a word/frame, the required lexical/construction material must actually have been hidden and retrieved. Showing the target and asking for a sentence is controlled-use practice only.
-- Additional help or failure during an eligible due recall resets the proposed level to one-day review and queues a same-session repair. The learner can repeat successfully, but those immediate repetitions do not earn a longer interval.
-- A successful but incomplete chunk-coverage review stays at its current level; choose a complementary cue at the next review. Invalid cues and technical failures leave the due obligation unresolved rather than downgrading the learner.
-- Put a repair retry after two other targets when available, otherwise at the end. Cap retries at two per target per session; leave the next review visible rather than creating an endless loop. These are configurable UX defaults to validate in P1.
+The full [answer-card policy](../design/answer-card-and-review-policy.md) defines assistance, silent recall and session-selection recommendations. The estimated retention applies to the recorded task; it is not a spoken-fluency percentage.
 
-These rules may be simplified after the prototype if coverage tracking imposes unnecessary reviews; any change is versioned and documented. The architecture does not assume that an interval level measures spontaneous fluency.
+### Superseded proposal, for provenance only
+
+The earlier unapproved recommendation used levels of 1/3/7/14/30 days, a one-day lapse reset, a 30-day ceiling, every-chunk coverage at each level and retries after two intervening targets regardless of elapsed time. It is withdrawn as the preferred design. Do not implement it or expose it as a learner-run comparison policy.
 
 ## One review update, regardless of repetitions or devices
 
@@ -124,6 +132,6 @@ Offline reports retain both occurrence time and receipt time. Accept a claimed o
 
 Persist the session's requested recording mode and the actual response modality of each attempt. A mode change is an event; it must not relabel earlier practice. Track recording/playback failures independently of recall outcomes. No recording does not prove silence, and replaying a take does not prove correctness.
 
-The agreed recording-on sequence is response → automatic own-take playback → model reveal/playback → self-check. Keep model help exposure before a response separate from post-response comparison. Rerecording during repair retains earlier difficulty and exposure. Recording-off silent practice is useful practice but cannot silently receive spoken-recall credit. Resolve its schedule effect explicitly when the review policy is chosen; the proposed interval defaults above do not settle that question.
+The agreed recording-on sequence is response → automatic own-take playback → model reveal/playback → self-check. Keep model help exposure before a response separate from post-response comparison. Rerecording during repair retains earlier difficulty and exposure. The current policy recommendation allows deliberate silent retrieval to update memory scheduling using the same outcome definitions, with modality retained; it never supplies spoken-performance credit.
 
 On Show & explain, optional recording and the learner/model playback sequence operate with the complete phrase visible throughout. This is an accepted supported-practice path, not an answer-reveal bug. Persist full-model exposure before capture and retain each take under the same target/history. Keep any earlier drill attempt's evidence unchanged; a supported take cannot retroactively repair its grade or count as independent recall. Respect the existing session recording switch and never request a microphone merely to open the explanation card.

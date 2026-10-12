@@ -2,6 +2,8 @@
 
 Status: **not started**, 2026-10-11. P4 follows the core trainer and P1 audio probe. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
 
+Use the [consolidated plan's acceptance checklist](implementation-plan.md#end-to-end-acceptance-checklist) as release coverage, including language URLs/UI separation, search/navigation, revised recall outcomes, reference audio and every recording's retention. Checks in this file concern implementation reliability, not learner-run learning-effectiveness validation.
+
 ## P4.1 — Record, compare and retain every take reliably
 
 Harden the basic recording/comparison adapter already included in P3. Preserve the agreed session switch, visible state, start/stop/cancel, automatic learner-take → model comparison and manual replay/rerecord controls. Validate recording-off silent practice independently. Ask for the microphone only when the learner chooses recording. Stop tracks on exit; label interrupted/empty clips rather than presenting them as completed speech.
@@ -20,13 +22,15 @@ Harden the automatic storage already included in P3: retain every take's audio a
 
 **Acceptance scenarios:** download completely then disable network; finish and reconnect; retry after server commit but lost response; close/reopen while offline; exhaust storage; change content while a pack is offline; take over on another device; deliver an old outbox later. Each produces one acknowledged attempt history and no duplicate schedule advancement. Preserve recoverable events even if a version cannot be applied.
 
+Language/session acceptance: downloaded packs retain their pinned learning language and content revisions. Switching language or opening another bookmarked tab cannot relabel a pack, discard pending recordings or silently take over the active session. Resume follows the original language/history and preserves exposure; UI locale changes do not change speech/text assets.
+
 Only prepared-session completion is promised at this milestone. Do not label arbitrary library access, new imports, generation, or new due-session creation as offline-capable.
 
 ## P4.3 — Accessibility and device checks
 
 Repeat critical flows on the actual iPhone in Safari and installed mode, with speaker and headphones. Check text scaling, focus order, touch targets, readable cue gaps, VoiceOver labels, light/dark contrast, interruptions and visible support state. Test non-Latin and longer-text fixtures where relevant.
 
-Automate reducer, persistence and browser state tests, including Chromium and WebKit where supported. Record actual-device audio results separately; an automated desktop WebKit pass cannot stand in for an iPhone recording test. Fix silent failures and misleading saved/graded states before pilot use.
+Automate reducer, persistence and browser state tests, including Chromium and WebKit where supported. Record actual-device audio results separately; an automated desktop WebKit pass cannot stand in for an iPhone recording test. Fix silent failures and misleading saved/graded states before release.
 
 ## P6.1 — Choose and prepare the host
 
@@ -40,6 +44,7 @@ Recommend the smallest private deployment that passes the measurements: one API 
 
 - Back up SQLite consistently, including every learner-recording BLOB, and include referenced model media, schema version and app version. Verify that all takes, including retries, are retained on restore; historical-comparison UI is not needed to verify audio persistence.
 - Restore to an isolated directory/instance and verify content, due dates, attempts, personal notes and playable audio.
+- Include every learning language, native-language/UI-mode settings, source mappings, reference-audio provenance and preparation job state in recovery checks. Verify unfinished jobs can recover without duplicating content or replacing an imported actor clip.
 - Rehearse a schema upgrade and app rollback. If a migration is not backward compatible, rollback means restoring the matching snapshot, not running old code on new tables.
 - Keep worker crash recovery, missing-media reconciliation and download-pack compatibility in the runbook.
 
@@ -56,6 +61,7 @@ The implementation team checks software behavior, content quality and device rel
 Release only when:
 
 - the agreed cue/response/help/dialogue flow has been reviewed and works in the implementation;
+- native-language setup, separate UI modes, learning-language bookmarks and scoped home/search/lesson routes work together, with all accepted requirements from the master plan covered;
 - both fixed phrases and words/frames work through the same target model;
 - one schedule per target, support accounting and idempotent event handling pass the critical tests;
 - generated material and live source intake pass their separate quality/contract checks for the selected scope;

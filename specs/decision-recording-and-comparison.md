@@ -2,6 +2,8 @@
 
 2026-10-11. This supplements the [targeted-drilling decision](decision-targeted-drilling.md). The user explicitly requested recording/replay controls, a session-level option for times when they cannot speak, and automatic playback of their own version when recording is enabled. They endorsed the flow below and subsequently selected manual stopping and automatic database retention of all recordings.
 
+**Later terminology correction:** the user rejected **Model** as the audio-button label because it suggests computer-generated speech. The current working replacement is **Reference**; **My recording** remains the learner take. Reference audio may be imported professional-actor/course speech or generated speech. Preserve the source and the comparison sequence. Older “model” terminology below describes an example answer, not its provenance; see the [language/audio decision](decision-languages-and-audio-labels.md).
+
 ## Agreed behaviour and endorsed working flow
 
 Recording has a **session-level on/off switch**, accessible during practice as well as session setup. Switching it off allows the session to continue without recording. A microphone is not a prerequisite for using the trainer.
@@ -12,10 +14,10 @@ With recording on:
 2. The learner presses the **microphone-icon button** and says the complete phrase aloud. Give the icon-only control an accessible Start recording name.
 3. While actively recording, the same button shows a **stop icon and “Stop recording”**. The learner taps it to finish. Manual stop is the agreed default and the only stopping method in the first version.
 4. Automatically play **the learner's recording first**, with the initial cue still visible.
-5. Then reveal the complete phrase and play **the model**.
-6. Offer the learner's self-check: **Got it**, **Try again**, or the different-wording/unclear-cue route.
+5. Then reveal the complete phrase and play **the reference recording**.
+6. Offer the learner's self-check. The endorsed sketch used **Got it**, **Try again**, and a different-wording/unclear-cue route. The subsequent [research-based recommendation](design/answer-card-and-review-policy.md) proposes **Not yet / With effort / Recalled**, with Practice again separate; exact revised labels/policy remain proposals. The accepted recording/comparison sequence is unchanged.
 
-The comparison screen retains **Play my recording**, **Play model**, and **Record another try**. The learner can interrupt playback. Rerecording belongs to the same target and practice history; it does not erase the first attempt or support already used.
+The comparison screen retains **My recording**, **Reference**, and **Record another try** (with accessible Play my recording / Play reference audio names). The learner can interrupt playback. Rerecording belongs to the same target and practice history; it does not erase the first attempt or support already used.
 
 This automation concerns the comparison sequence. Automatic recording start, automatic grading and automatic advancement to the next target were not requested or agreed. Playback is sequential, not two voices overlaid. The app must not reveal or play the answer before the attempted response, except when the learner explicitly requests model help.
 

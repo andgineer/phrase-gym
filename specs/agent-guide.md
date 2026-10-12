@@ -2,11 +2,15 @@
 
 Read [START-HERE](START-HERE.md), the drilling, recording and [navigation/search decisions](decision-session-navigation-and-search.md), [interaction design](design/interaction-design.md) and [next-session brief](plan/next-session.md). Current user instructions take precedence over this record. This project uses the user's Python scaffold; all development context is under `specs/`.
 
+For implementation scope, use the [consolidated implementation plan](plan/implementation-plan.md) and its linked phase files. It preserves all discussion through the language/audio inspection, with agreed requirements, recommended defaults, deferred work and remaining choices distinguished. Do not reconstruct the product from an old sketch or interpret this documentation-consolidation request as permission to begin coding.
+
 The user explicitly stopped premature coding and asked for design discussion followed by a written plan for another session/model. Do not automatically continue the archived prototype. No approved app/prototype exists in active source. Respond to the new session's actual request; unresolved visual decisions require discussion before being treated as accepted.
 
 ## Working with the user
 
 - Reply and write project documents in English. Normal drill content stays in the target language; the explicitly opened explanation card shows the complete phrase and explanation in the learner's language.
+- Keep native/explanation language, selected learning language and interface language separate. The app needs a learning-language selector with bookmarkable URLs. UI may use native language or follow the learning language; no arbitrary UI-language dropdown. Drill content stays in the learning language regardless of UI translation. See the [language/audio decision](decision-languages-and-audio-labels.md); route format and a binary preference control are recommendations.
+- The user rejected **Model** for the reference-audio button. Use **Reference** as the working replacement, whether audio is actor/course-supplied or generated. Do not infer provenance from the pedagogical term “model” in older specifications.
 - Use one Start session entry, not separate home modes for learning new material and rehearsal. Expect prior source exposure, but never assume the learner still remembers or understands the phrase. Make explanation/help available directly from the drill; no mandatory introduction for every new database item.
 - Home's lesson selector defaults to all lessons according to spaced repetition and filters lesson titles by entered characters. Separate phrase lookup supports conceptual search beyond literal wording and opens Show & explain. That card links to the full lesson phrase list with an action to drill the lesson. Lookup/browsing alone is not a completed review. See the navigation decision for open policy and search details.
 - For choices, explain the user-visible effect, compare concrete alternatives and state a recommendation. Do not treat a recommendation as accepted.

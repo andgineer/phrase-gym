@@ -2,11 +2,15 @@
 
 Updated 2026-10-11. This is a written design for review and future prototyping, not an implemented or visually approved app. The [drilling decision](../decision-targeted-drilling.md) and [recording decision](../decision-recording-and-comparison.md) define agreed behaviour. The final visual style and complete navigation remain open.
 
-**Latest answer-card recommendation:** following the user's academic-research request, [Not yet / With effort / Recalled](answer-card-and-review-policy.md) replaces Got it / Try again as the assistant's recommended grading design. Keep extra practice separate from the original result and give ambiguous cues/technical failures a no-grade route. Earlier labels below describe prior sketches, not a decision overriding this proposal. The user explicitly rejected effectiveness-validation work: no in-app experiment, special assessment session or calibration task.
+**Latest answer-card recommendation:** following the user's academic-research request, [Not yet / With effort / Recalled](answer-card-and-review-policy.md) replaces Got it / Try again as the assistant's recommended grading design. The active flow below reflects it; older sketches retain their historical labels. Keep extra practice separate from the original result and give ambiguous cues/technical failures a no-grade route. The user explicitly rejected effectiveness-validation work: no in-app experiment, special assessment session or calibration task.
 
 ## Main practice screen
 
 The main screen has one **Start session** button. Learning new material and rehearsal are not separate home-screen entry modes. Phrases are expected to have been encountered in source material, but the drill must support forgetting and lack of understanding without requiring the learner to leave the session.
+
+**Accepted language addition:** provide a learning-language selector, with its selection in the URL for bookmarks. Recommended header: `Phrase Gym    English ▾`, above lesson selection and phrase lookup. Those controls operate within the selected learning language; All lessons no longer implies a queue spanning all studied languages. Example proposed routes: `/learn/en` and `/learn/sr`. See the [language/audio decision](../decision-languages-and-audio-labels.md).
+
+**UI language is separate:** buttons, menus and status text use either the learner's native language or the current learning language. Explanations remain in the native language; phrases, situations and partner lines remain in the learning language. Recommend one settings preference, Use learning language for the interface, instead of an independent language dropdown. Preference presentation/default and route syntax are proposals. English labels in this specification are working copy to localize.
 
 **Accepted starting-screen controls:** a searchable lesson dropdown defaults to All lessons according to spaced repetition. Entered characters filter lesson titles (`rap` → Building rapport and other matching titles). A separate phrase search matches both entered phrase fragments and concepts absent from the wording (`greetings` → appropriate greetings). Selecting a phrase opens Show & explain for reference, without starting/completing a review. See the [navigation/search decision](../decision-session-navigation-and-search.md).
 
@@ -42,41 +46,46 @@ The learner says “How has your day been so far?” in full. The missing chunk 
 | Cue | Compact situation/partner line, identifying phrase chunks, microphone-icon button. | Read/hear the cue and press the microphone button. |
 | Recording | The same cue; the primary button now has a stop icon and Stop recording label. | Say the whole phrase, then tap Stop recording. Manual stop is the first-version behaviour and the default. |
 | Own version | Automatic playback of the just-recorded take; keep the initial cue visible. | Listen; interrupt playback if desired. |
-| Model | Reveal the complete phrase and automatically play its model audio after the learner take. | Compare the two versions. |
-| Self-check | Got it, Try again, Different wording; replay controls remain available. | Report the result or practise another take. |
-| Continue | Advance explicitly to the next item or appropriate repair/return. | Continue when ready; automatic advancement was not agreed. |
+| Reference | Reveal the complete phrase and automatically play its reference audio after the learner take. It may be an imported actor/course recording or generated speech. | Compare the two versions. |
+| Self-check | Recommended: Not yet, With effort, Recalled; replay controls, Practice again and Other answer / problem remain available. | Rate the original recall: incorrect/missing, correct with substantial effort, or correct without substantial difficulty. Extra practice is a separate choice. |
+| Continue | Recommended: a result tap saves the observation and advances, with Undo. Supported practice uses Continue without a recall grade. | Explicit learner action advances; playback completion never grades or advances automatically. If extra practice was requested, retain the original result before making another take. |
 
 Comparison controls:
 
 ```text
      How has your day been so far?
 
-      ▶ My recording    ▶ Model
-         ↻ Record another try
+      ▶ My recording    ▶ Reference
 
-     Got it → Next phrase
-     Try again    Different wording
+        How did you recall it?
+     Not yet   With effort   Recalled
+
+      Practice again   Show & explain
+           Other answer / problem
+              What counts? ▾
 ```
 
 Recording is optional for the session and the switch is accessible during practice. Recording start is an explicit learner action. **Manual Stop recording is the accepted default and the only stopping method in the first version.** Choosing manual versus automatic stop after a pause belongs in later app settings; the selector and automatic stopping are deferred beyond the first version. Do not silently turn “automation” into automatic grading or a permanent open microphone.
+
+The user rejected **Model** as an audio-button label. **Reference** is the recommended working replacement throughout the drill and explanation card, with the accessible name Play reference audio. Its wording does not imply a particular audio source. Earlier sketches and pedagogical references to “model” must not override this correction.
 
 All takes are automatically retained in the app database from the first version, including rerecordings. There is no Save recording step; recording another try does not replace earlier audio. Preserve target, date/time, cue and support context for a future progress-comparison interface. That historical interface is deferred; the immediate self/model replay controls above remain core.
 
 ## Recording-off / cannot-speak interaction
 
-Show the same phrase-specific task and use **Reveal & compare** as the primary action. The learner can recall silently, reveal the full phrase and request model audio manually. No microphone permission is needed. Keep help, repair and alternative/unclear-cue reporting available. Describe the result as silent practice rather than spoken performance.
+Show the same phrase-specific task and use **Reveal & compare** as the primary action. The learner can recall silently, reveal the full phrase and request model audio manually. No microphone permission is needed. Keep help, repair and alternative/unclear-cue reporting available. Recommended: deliberate silent retrieval uses the same three memory ratings, with modality retained; reading/recognition alone is exposure. No spoken-performance result is inferred.
 
 The session switch controls recording; a future explicit unrecorded-spoken mode would require clear wording and evidence handling. Do not claim that disabling a microphone proves whether the learner spoke.
 
 ## Explanation card and return to the drill
 
-**Accepted behaviour:** expect prior source exposure and begin with the drill; do not force an in-app introduction merely because a phrase is new to the database. The learner may still have forgotten or never understood it. A visible action opens a learning/explanation card showing the complete phrase and explanation in the learner's native language. Native-language content is absent from the ordinary drill. This replaces the earlier mandatory new-item introduction and separate home learning/rehearsal proposal.
+**Accepted behaviour:** expect prior source exposure and begin with the drill; do not force an in-app introduction merely because a phrase is new to the database. The learner may still have forgotten or never understood it. A visible action opens a learning/explanation card showing the complete target-language phrase and explanation in the learner's native language. Native-language translations/explanations are absent from the ordinary drill; UI controls may nevertheless use that language under the interface preference. This replaces the earlier mandatory new-item introduction and separate home learning/rehearsal proposal.
 
-**Compact presentation is the chosen direction. Proposed Show & explain layout:** keep the current phrase and session context; replace the drill body with the full target-language phrase, model-audio and practice-recording controls, a concise native-language meaning and usage explanation, and an optional expandable phrase breakdown/example. The current sketch places Listen and the microphone control together below the complete phrase. A Back to drill control returns to the same cue. Exact placement, detailed content and navigation presentation remain under review.
+**Compact presentation is the chosen direction. Proposed Show & explain layout:** keep the current phrase and session context; replace the drill body with the full target-language phrase, Reference and practice-recording controls, a concise native-language meaning and usage explanation, and an optional expandable phrase breakdown/example. Earlier sketches place Listen and the microphone control together below the complete phrase; use Reference as the current working label. A Back to drill control returns to the same cue. Exact placement, detailed content and navigation presentation remain under review.
 
 **Accepted recording on this card:** the learner can record while the full phrase remains visible. Microphone → Stop recording → automatic learner playback → model playback stays on the explanation card, with the phrase visible throughout. Replay either version or make another take as needed. The session recording switch applies here too; recording-off mode permits explanation and manually requested model audio with no microphone access. Every recorded take is stored and marked as practice with the model shown, linked to the same target/history. The current sketch demonstrates these states with simulated audio and capture.
 
-Opening explanation alone does not imply failure. Record which full model, explanation and audio were exposed and when. Return to target-language-only practice with that help retained in history; immediately hiding the phrase again does not make the next response independent recall. Help requested after an attempt does not retroactively change that attempt's support. After repair, revisit the target after intervening material where possible. A second successful take does not erase earlier difficulty or help.
+Opening explanation alone does not imply failure. Record which full model, explanation and audio were exposed and when. Return to target-language-only practice with that help retained in history; immediately hiding the phrase again does not make the next response independent recall. Help requested after an attempt does not retroactively change that attempt's support. Recommended: after help before any attempt, show a supported-practice state with Continue / Practice again, without independent-recall grading. Revisit after intervening material and time under the [repair policy](answer-card-and-review-policy.md#concrete-session-rules). A second successful take does not erase earlier difficulty or help. Persistent difficulty returns to meaning or cue repair.
 
 Necessary distinguishing material still belongs in the initial cue. Additional meaningful hints may be offered where useful; the full phrase/explanation route is always available without first failing or exhausting hints.
 
@@ -133,5 +142,7 @@ Sketch checks: JavaScript syntax and referenced controls were checked. A standal
 The user requested the two home controls and lesson route described above. The [dedicated decision](../decision-session-navigation-and-search.md) preserves the accepted behavior and separates search-engine, ranking and selected-lesson policy proposals. Lookup and list browsing must not advance schedules; retain exposure to full phrases without reporting it as an independent retrieval attempt.
 
 The latest navigation sketch is `/Users/andrei_sorokin2/.codex/visualizations/2026/10/11/01a12a6f-c63e-7d32-a9c9-be0bbc8da9ae/session-and-lookup.html`. It starts on Home, supports title filtering with `rap`, literal phrase search and illustrative intent matching with `greetings`, then Show & explain → lesson → all phrases → Start lesson drill. Each sample phrase has its own Russian explanation. Back navigation retains the query; explanation recording and compact drill controls remain available. The earlier `drill-and-explanation.html` remains the focused card sketch.
+
+These navigation/earlier card sketches retain the former self-check labels. The focused `answer-card-research.html` illustration described in the [current answer-card proposal](answer-card-and-review-policy.md#discussion-illustration) is the latest grading sketch. Neither sketch implements a scheduler; the active written flow above takes precedence over obsolete labels.
 
 The sample search uses six authored phrases and intent terms across three illustrative lessons. Starting a lesson opens one example drill; it does not demonstrate a real due queue or settle selected-lesson eligibility. Audio/capture are simulated and no database writes occur. Visual styling remains proposed. Static syntax/control checks and local state-transition checks are distinct from actual browser/device verification; the earlier browser-preview limitation still applies.
