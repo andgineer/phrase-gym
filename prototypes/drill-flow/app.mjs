@@ -329,7 +329,7 @@ function captureControls() {
 }
 function replayControls() {
   const disabled = busy() ? "disabled" : "";
-  return `<div class="audio-controls">${captureControls()}<div class="replay-controls">${button("play-own", "▶ " + t("myRecording"), "", !lastTake || busy() ? "disabled" : "")}${button("play-reference", "▶ " + t("reference"), "", disabled)}</div></div>`;
+  return `<div class="audio-controls">${captureControls()}<div class="replay-controls">${button("play-own", "▶ " + t("myRecording"), "", !lastTake || busy() ? "disabled" : "")}${button("play-reference", "▶ " + t("reference"), "", disabled)}</div></div>${audio.recorder?.state === "recording" ? `<p class="notice" role="status">${t("stopRecordingHint")}</p>` : ""}`;
 }
 function phraseDetails(target) {
   return `<section class="phrase-details" id="phrase-details"><h2>${t("meaning")}</h2><p lang="${prefs.native}">${esc(target.meaning[prefs.native])}</p><h3>${t("breakdown")}</h3><p lang="${language}">${target.chunks.map(esc).join(" / ")}</p><h3>${t("allowed")}</h3><p lang="${language}">${target.allowed.map(esc).join("<br>")}</p></section>`;
@@ -373,7 +373,7 @@ function drill() {
   const locked = audio.recorder || audio.requesting;
   const book =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg>';
-  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${dialogueContext(s, item)}<div class="card practice-card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${replayControls()}${audio.stream && !audio.recorder ? `<p class="notice muted">${t("micReady")}</p>` : ""}<div class="answer-actions">${button("hint", t("showAnswer"), "", shown || locked ? "disabled" : "")}${button("explain", book + t("explain"), "materials-link", `aria-expanded="${!!s.explanationOpen}" aria-controls="phrase-details" ${locked ? "disabled" : ""}`)}</div>${s.explanationOpen ? phraseDetails(target) : ""}${ratings(locked)}${gradingCriteria()}</div>${engineering()}`;
+  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${dialogueContext(s, item)}<div class="card practice-card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${replayControls()}<div class="answer-actions">${button("hint", t("showAnswer"), "", shown || locked ? "disabled" : "")}${button("explain", book + t("explain"), "materials-link", `aria-expanded="${!!s.explanationOpen}" aria-controls="phrase-details" ${locked ? "disabled" : ""}`)}</div>${s.explanationOpen ? phraseDetails(target) : ""}${ratings(locked)}${gradingCriteria()}</div>${engineering()}`;
 }
 function ratings(disabled = false) {
   return `<div class="ratings">${[1, 2, 3].map((rating, index) => button("grade", `<span class="rating-icon" aria-hidden="true">${["↻", "◷", "✓"][index]}</span><span>${t(["notYet", "effort", "recalled"][index])}</span>`, `rating rating-${rating}`, `data-rating="${rating}" ${disabled ? "disabled" : ""}`)).join("")}</div>`;
@@ -556,7 +556,9 @@ async function compare() {
     route.kind === surface &&
     targetHere()?.id === target.id &&
     session() === s;
-  const take = await audio.stop(true);
+  const completion = audio.stop(true);
+  render();
+  const take = await completion;
   if (!take || !current()) return;
   lastTake = take;
   if (isDrill() && s.attempt && take.attemptId === s.attempt.id)
@@ -856,7 +858,7 @@ async function download() {
   if (!navigator.serviceWorker)
     throw new Error("Offline download requires a secure origin.");
   const registration = await navigator.serviceWorker.ready;
-  const cache = await caches.open("phrase-gym-p1-v5");
+  const cache = await caches.open("phrase-gym-p1-v6");
   for (const target of pack.targets.filter(
     (t) => t.language === language && t.audio.url,
   )) {

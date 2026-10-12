@@ -79,7 +79,7 @@ const keys = [
   "supportedContinue",
   "learningMaterials",
   "materialsDescription",
-  "micReady",
+  "stopRecordingHint",
 ];
 const en = [
   "Settings",
@@ -139,7 +139,7 @@ const en = [
   "Retry local storage",
   "Take retained locally",
   "Local storage failed; keep this tab open and retry.",
-  "Original result retained",
+  "Previous rating saved",
   "Extra practice with phrase shown",
   "Choose the original result before extra practice",
   "Prepared dialogue",
@@ -162,7 +162,7 @@ const en = [
   "Continue without a recall grade",
   "Learning materials",
   "Meaning, usage and phrase breakdown",
-  "Microphone ready until you pause.",
+  "Press again to stop recording.",
 ];
 const ru = [
   "Настройки",
@@ -222,7 +222,7 @@ const ru = [
   "Повторить сохранение",
   "Запись сохранена локально",
   "Ошибка локального хранилища; оставьте вкладку открытой и повторите.",
-  "Первая оценка сохранена",
+  "Предыдущая оценка сохранена",
   "Дополнительная практика с открытой фразой",
   "Сначала оцените первую попытку",
   "Подготовленный диалог",
@@ -245,7 +245,7 @@ const ru = [
   "Продолжить без оценки вспоминания",
   "Учебные материалы",
   "Значение, употребление и разбор фразы",
-  "Микрофон готов до паузы в занятии.",
+  "Нажмите ещё раз, чтобы остановить запись.",
 ];
 const sr = [
   "Podešavanja",
@@ -305,7 +305,7 @@ const sr = [
   "Ponovi čuvanje",
   "Snimak je sačuvan lokalno",
   "Greška lokalnog skladišta; ostavite karticu otvorenu i pokušajte ponovo.",
-  "Prvobitna ocena je sačuvana",
+  "Prethodna ocena je sačuvana",
   "Dodatna vežba sa prikazanom frazom",
   "Prvo oceni prvobitni pokušaj",
   "Pripremljeni dijalog",
@@ -328,7 +328,7 @@ const sr = [
   "Nastavi bez ocene prisećanja",
   "Materijal za učenje",
   "Značenje, upotreba i delovi fraze",
-  "Mikrofon je spreman do pauze.",
+  "Pritisnite ponovo da zaustavite snimanje.",
 ];
 export const dictionaries = Object.fromEntries(
   Object.entries({ en, ru, sr }).map(([code, values]) => [

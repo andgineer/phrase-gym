@@ -44,11 +44,11 @@ Use the probe's result selectors for observed results. Untested cases stay untes
 
 ## Current manual-feedback prototype
 
-Version **0.1.4** follows the [unified practice-card decision](../specs/decision-unified-practice-card.md). Native/learning UI switching is available at first launch and in Settings. One card always offers recording, replay, reference and red/amber/green self-check buttons. There is no recording switch, Practice again, problem submenu or supported-only Continue button.
+Version **0.1.5** follows the [unified practice-card decision](../specs/decision-unified-practice-card.md). Native/learning UI switching is available at first launch and in Settings. One card always offers recording, replay, reference and red/amber/green self-check buttons. There is no recording switch, Practice again, problem submenu or supported-only Continue button.
 
 Show answer fills the gaps. The adjacent blue book-icon Show & explain action expands meaning, usage and phrase breakdown within the same card. Recording is optional; use Show answer and rate without accessing the microphone. Supported ratings retain their support metadata rather than being counted as independent recall.
 
-The round microphone becomes a stop control while recording or playing audio. Stopping playback restores the microphone. After the first explicit recording request, the microphone connection remains ready between takes to avoid repeated headset/audio-route initialization. Only explicit takes are recorded. Pause, leaving practice, backgrounding or finishing releases the microphone; the ready note makes this visible.
+The round microphone becomes a stop control while recording or playing audio. Stopping playback restores the microphone. After the first explicit recording request, the microphone connection remains ready between takes to avoid repeated headset/audio-route initialization. Only explicit takes are recorded. Pause, leaving practice, backgrounding or finishing releases the microphone. Show **Press again to stop recording** only during active capture; remove it as soon as capture stops. There is no idle microphone-ready label. The Undo banner says **Previous rating saved**, referring to the rating for the preceding phrase.
 
 ## Walkthroughs
 
