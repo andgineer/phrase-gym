@@ -14,6 +14,16 @@ The lesson selector's accessible label also follows the existing UI locale rathe
 
 Verification after fixes: `uv run inv pre` converged with every hook passing and pyrefly reporting zero errors, then `uv run inv test` passed **37 Python, 4 client and 22 real-browser tests**. The original baseline also passed its full gate; these were behavior gaps in passing tests. One new array-order test initially assumed two existing cues; its fixture was corrected to supply two reviewed variants before checking that their order remains significant. No assertion was weakened.
 
+## Iteration 2
+
+Reviewed `d579829` using another fresh `gpt-6.1-sol` agent with high reasoning. Three findings were reproduced in real Chromium and accepted:
+
+1. A pending reference start was not considered active; repeated clicks created an untracked player that kept playing after navigation. Mark playback active before awaiting its start, so Stop, navigation and background cancellation retain ownership of the single player. Browser tests hold the actual media response, inspect genuine audio elements and verify pending-start cancellation without orphan playback or a false error.
+2. Lesson filtering hid the selected option while its navigation link retained the old lesson. Changing the lesson filter now clears the selection and link; a browser case selects the next matching lesson and verifies its destination.
+3. Phrase/lesson bookmarks did not become the last-used learning language. Remember the language after every successful supported content route and update the tab's cached fallback as well. Browser cases enter direct Serbian phrase and lesson URLs, observe persisted settings and verify restoration from `/`.
+
+Verification: `uv run inv pre` passed every hook with zero pyrefly errors, followed by `uv run inv test`: **37 Python, 4 client and 32 real-browser tests passed**. An initial full-gate attempt found a TypeScript constructor-cast error in the genuine-audio instrumentation; the type was corrected and the complete ordered gate rerun. The playback tests explicitly restore the synthetic fixture reference binding rather than depend on previous editorial tests retaining it.
+
 ## Remaining review work
 
-Run iteration 2 against the fixed tree in another fresh Sol 6.1 session. Stop on a clean actionable review; otherwise assess and fix justified findings and continue within the user's iteration limit. This record is not real-device, linguistic/content or deployment acceptance.
+Run iteration 3 against the fixed tree in another fresh Sol 6.1 session. Stop on a clean actionable review. If findings still require fixes, assess convergence before exceeding the user's three-iteration limit and obtain confirmation for further review work. This record is not real-device, linguistic/content or deployment acceptance.

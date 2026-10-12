@@ -37,6 +37,7 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
     configuring.value = false
   }
   function rememberLanguage(lang: Language) {
+    if (settings.value) settings.value.last_learning_language = lang
     api('/settings/language', {
       method: 'PATCH',
       body: JSON.stringify({ last_learning_language: lang }),

@@ -34,8 +34,8 @@ export function useReferenceAudio(phrase: () => Phrase | null, failure: () => st
       }
     }
     try {
+      playing.value = true
       await playback.play()
-      if (audio === playback) playing.value = true
     } catch {
       if (audio === playback) {
         stopAudio()

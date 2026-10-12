@@ -163,12 +163,11 @@ export function useLibrary() {
         results.value = phrasePage.items
         total.value = phrasePage.total
         hasCollection.value = collection.total > 0
-        // This is a fallback preference only; a tab's explicit route always wins.
-        if (settings.value?.native_language) {
-          preferences.rememberLanguage(lang)
-        }
       } else {
         error.value = t.value.unavailable
+      }
+      if (version === requestVersion && settings.value?.native_language && !error.value) {
+        preferences.rememberLanguage(lang)
       }
     } catch (cause) {
       if (version === requestVersion) error.value = String(cause)
@@ -176,7 +175,7 @@ export function useLibrary() {
       if (version === requestVersion) loading.value = false
     }
   }
-  watch(currentLanguage, () => {
+  watch([currentLanguage, lessonQuery], () => {
     selectedLesson.value = ''
   })
   watch(() => route.fullPath, loadRoute)
