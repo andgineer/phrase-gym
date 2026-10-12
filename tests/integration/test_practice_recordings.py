@@ -116,6 +116,7 @@ def test_recording_byte_ranges_and_capture_support_are_pinned(client, package):
     attempt = result["session"]["attempts"][0]
     first = client.post("/api/v1/recordings", json=take(attempt, capture_event_id=capture["id"]))
     assert first.status_code == 200, first.text
+    _, result = apply(client, result["session"], "capture_complete")
     _, result = apply(client, result["session"], "respond", modality="recorded")
     assert result["receipts"][0]["capture_supported"] is True
     assert result["session"]["attempts"][0]["original"]["supported"] is False
@@ -125,3 +126,21 @@ def test_recording_byte_ranges_and_capture_support_are_pinned(client, package):
     assert partial.headers["content-range"] == f"bytes 0-9/{len(wav_bytes())}"
     assert client.get(path, headers={"Range": "bytes=-10"}).content == wav_bytes()[-10:]
     assert client.get(path, headers={"Range": "bytes=999999-"}).status_code == 416
+
+
+def test_unfinished_capture_and_recovered_incomplete_take_never_promote_schedule(client, package):
+    session = session_fixture(client, package)
+    _, result = apply(client, session, "present")
+    _, result = apply(client, result["session"], "respond", modality="recorded")
+    assert not result["session"]["attempts"][0]["revealed"]
+    _, result = apply(client, result["session"], "rate", rating="recalled")
+    assert result["receipts"][0]["eligibility_reason"] == "technical_failure"
+    assert not result["receipts"][0]["schedule_changed"]
+    _, result = apply(client, result["session"], "present")
+    _, result = apply(client, result["session"], "respond", modality="recorded")
+    body = take(result["session"]["attempts"][1], complete=False)
+    assert client.post("/api/v1/recordings", json=body).status_code == 200
+    _, result = apply(client, result["session"], "capture_complete")
+    _, result = apply(client, result["session"], "rate", rating="recalled")
+    assert result["receipts"][0]["eligibility_reason"] == "technical_failure"
+    assert not result["receipts"][0]["schedule_changed"]

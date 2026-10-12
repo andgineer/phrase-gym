@@ -203,7 +203,7 @@ Do not reopen settled manual stop, automatic storage of every take, recording on
 
 ## Execution handoff and scaffold
 
-P1 and P2 are closed; review their evidence and the current handoff before beginning P3. The original execution order was **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
+P1, P2 and P3 core engineering are closed; review their evidence and the current handoff before beginning P4 or P5. The original execution order was **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
 
 Preserve `src/phrase_gym`, the rich-click entry point, hatchling/uv, pytest, Invoke, quality checks, documentation and CI conventions. Replace scaffold template behaviour only during authorized implementation. Keep all development context in `specs/`, plural. Do not install or extract the stopped temporary implementation as the starting app.
 

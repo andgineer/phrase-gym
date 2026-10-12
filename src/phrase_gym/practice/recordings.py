@@ -63,6 +63,12 @@ class RecordingService:
                     raise DomainError("Take ID already has different audio or metadata", 409)
                 return self.receipt(previous)
             self.validate_context(transaction, payload)
+            if payload.attempt_id and not payload.complete:
+                attempt = transaction.get(AttemptRow, str(payload.attempt_id))
+                if attempt is not None:
+                    evidence = AttemptEvidence.model_validate_json(attempt.payload)
+                    evidence.technical_failure = True
+                    attempt.payload = evidence.model_dump_json()
             row = RecordingRow(
                 id=str(payload.id),
                 target_id=str(payload.target_id),

@@ -120,8 +120,11 @@ function leavePractice() {
         <template v-else>
           <SessionLauncher ref="launcher" :engine="practice" :pt="pt" />
           <PracticePanel
+            :key="practice.session.value?.id"
             v-if="
-              kind === 'practice' && practice.session.value?.manifest.language === currentLanguage
+              kind === 'practice' &&
+              practice.session.value?.manifest.language === currentLanguage &&
+              practice.session.value?.id === practice.routeId.value
             "
             :engine="practice"
             :pt="pt"

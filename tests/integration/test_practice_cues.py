@@ -41,7 +41,12 @@ def test_cue_selection_uses_persistent_hidden_chunk_history(client, package, con
         with database.write() as transaction:
             schedule = transaction.get(ScheduleRow, chosen["phrase"]["id"])
             schedule.due_at = (NOW - timedelta(days=1)).isoformat()
-        second = start(client, takeover_session_id=first["id"]).json()
+        response = start(
+            client,
+            takeover_session_id=first["id"] if first["status"] == "active" else None,
+        )
+        assert response.status_code == 200, response.text
+        second = response.json()
         selected = next(
             t for t in second["manifest"]["targets"] if t["phrase"]["id"] == chosen["phrase"]["id"]
         )

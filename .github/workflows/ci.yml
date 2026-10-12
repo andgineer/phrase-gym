@@ -133,7 +133,8 @@ jobs:
 
 
   client-build:
-    runs-on: ubuntu-latest
+    # Native WebKit MediaRecorder is unavailable in the Linux Playwright build.
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5

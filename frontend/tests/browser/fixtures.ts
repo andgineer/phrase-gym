@@ -1,6 +1,23 @@
 import { test as base } from '@playwright/test'
 
-export const test = base.extend<{ isolatedLibrary: void }>({
+export const test = base.extend<{ isolatedLibrary: void; silentPlayback: void }>({
+  silentPlayback: [
+    async ({ context }, use) => {
+      await context.addInitScript(() => {
+        const play = HTMLMediaElement.prototype.play
+        const volumes: number[] = []
+        Object.assign(window, { __testPlaybackVolumes: volumes })
+        HTMLMediaElement.prototype.play = function () {
+          // Keep native decoding/playback events while silencing synthetic test tones.
+          this.volume = 0
+          volumes.push(this.volume)
+          return play.call(this)
+        }
+      })
+      await use()
+    },
+    { auto: true },
+  ],
   isolatedLibrary: [
     async ({ request }, use) => {
       const response = await request.post('/_test/reset')

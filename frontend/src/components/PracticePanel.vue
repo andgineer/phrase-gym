@@ -40,6 +40,13 @@ const media = useCardAudio(
     )
       await action('failure', { reason: 'Capture unavailable or interrupted' })
   },
+  async () => {
+    if (
+      session.value?.id === captureContext?.sessionId &&
+      session.value?.cursor === captureContext?.step
+    )
+      await action('capture_complete')
+  },
 )
 const { capturing, requesting, processing, error: captureError } = media.capture
 const { playing, error: audioError } = media.audio
@@ -64,15 +71,25 @@ async function prepare() {
     await media.refresh(item.value.phrase.id)
   } catch {}
 }
-watch([() => session.value?.cursor, () => session.value?.status, intro], prepare, {
-  immediate: true,
-})
+watch(
+  [() => session.value?.id, () => session.value?.cursor, () => session.value?.status, intro],
+  prepare,
+  {
+    immediate: true,
+  },
+)
 async function help(kind: 'answer' | 'explain' | 'reference') {
+  const origin = session.value
+  const reference = `/api/v1/media/${item.value?.phrase.content.reference_audio_id}`
   media.audio.stop()
   try {
     await action(kind)
-    if (kind === 'reference')
-      void media.audio.play(`/api/v1/media/${item.value?.phrase.content.reference_audio_id}`)
+    if (
+      kind === 'reference' &&
+      session.value?.id === origin?.id &&
+      session.value?.cursor === origin?.cursor
+    )
+      void media.audio.play(reference)
   } catch {}
 }
 async function rate(rating: RecallRating) {
@@ -123,8 +140,8 @@ async function isolate() {
       </button>
       <button @click="emit('leave')">{{ pt.back }}</button>
     </div>
-    <div v-if="session.status === 'completed'" class="card">
-      <h1>{{ pt.complete }}</h1>
+    <div v-if="session.status === 'completed' || session.status === 'superseded'" class="card">
+      <h1>{{ session.status === 'completed' ? pt.complete : pt.results }}</h1>
       <div v-if="session.manifest.dialogue" :lang="session.manifest.language">
         <p v-for="(turn, index) in session.manifest.dialogue.content.turns" :key="index">
           <strong>{{ turn.speaker }}:</strong> {{ turn.text }}
@@ -177,14 +194,17 @@ async function isolate() {
             <strong>{{ turn.speaker }}:</strong> {{ turn.text }}
             <button
               v-if="turn.audio_id"
-              :disabled="capturing || requesting || processing"
+              :disabled="capturing || requesting || processing || ratingBusy || !ready"
               @click="media.audio.play(`/api/v1/media/${turn.audio_id}`)"
             >
               ▶ {{ pt.reference }}
             </button>
           </p>
         </template>
-        <button :disabled="capturing || requesting || processing" @click="isolate">
+        <button
+          :disabled="capturing || requesting || processing || ratingBusy || !ready"
+          @click="isolate"
+        >
           {{ pt.isolate }}
         </button>
       </section>

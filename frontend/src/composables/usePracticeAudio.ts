@@ -7,6 +7,7 @@ export function usePracticeAudio() {
   let sequence = 0
   let lastUrl = ''
   let resolvePlayback: (() => void) | null = null
+  let live = true
   function stop() {
     sequence++
     audio?.pause()
@@ -17,6 +18,7 @@ export function usePracticeAudio() {
     resolvePlayback = null
   }
   async function play(url: string): Promise<boolean> {
+    if (!live) return false
     stop()
     lastUrl = url
     error.value = ''
@@ -54,6 +56,7 @@ export function usePracticeAudio() {
   }
   onMounted(() => document.addEventListener('visibilitychange', background))
   onUnmounted(() => {
+    live = false
     stop()
     document.removeEventListener('visibilitychange', background)
   })

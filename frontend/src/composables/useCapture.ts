@@ -91,6 +91,7 @@ export function useCapture(options: CaptureOptions) {
       await options.retain(take)
       if (token !== generation) return
       const chunks: Blob[] = []
+      let byteLength = 0
       let writes = Promise.resolve()
       const started = performance.now()
       interrupted = false
@@ -98,7 +99,16 @@ export function useCapture(options: CaptureOptions) {
         resolveStop = resolve
       })
       capture.ondataavailable = (event) => {
-        if (event.data.size) chunks.push(event.data)
+        if (event.data.size) {
+          chunks.push(event.data)
+          byteLength += event.data.size
+          // Leave headroom for the final encoder chunk below the server's 12 MiB limit.
+          if (byteLength >= 8 * 1024 * 1024) {
+            error.value = 'Recording reached the storage limit; the captured audio is retained.'
+            void stop(true)
+            void options.failure().catch(() => {})
+          }
+        }
         writes = writes
           .then(async () => {
             take.audio = await new Blob(chunks, { type: take.mime_type }).arrayBuffer()

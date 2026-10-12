@@ -14,6 +14,7 @@ export function useCardAudio(
   context: () => Promise<Context>,
   referenceUrl: () => string,
   failure: () => Promise<void>,
+  completed: () => Promise<void> = async () => {},
 ) {
   const takes = useTakeJournal()
   const audio = usePracticeAudio()
@@ -48,6 +49,11 @@ export function useCardAudio(
     retain: takes.retain,
     failure,
     finished: async (take) => {
+      if (take.complete) {
+        try {
+          await completed()
+        } catch {}
+      }
       if (!live) {
         void takes.flush()
         return

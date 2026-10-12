@@ -24,8 +24,8 @@ export function sessionCard(session: PracticeSession, pending: PracticeInput[]):
         type: event.kind,
         modality: event.modality === 'recorded' ? 'recorded' : 'self_report',
       })
-      if (event.kind === 'respond') state = { ...state, revealed: true }
     }
+    if (event.kind === 'capture_complete') state = { ...state, revealed: true }
     if (event.kind === 'reference')
       state = {
         ...state,

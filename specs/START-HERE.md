@@ -2,6 +2,8 @@
 
 Updated **2026-10-12**. **P1 and P2 engineering work are closed. P3 core engineering implementation and verification are complete: sessions, events, recordings, FSRS, repairs and prepared dialogues are integrated. P4 device/offline work is next.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
 
+The [three-round fresh Sol 6.1 P3 review](plan/evidence/p3-review-loop-2026-10-12.md) converged with 5 → 1 → 0 findings. The corrected core passes 104 Python tests, eight client tests and 138 browser checks; reported CI configuration/docs failures are corrected locally and synthetic test replay is silenced.
+
 Read [the next-session handoff](plan/next-session.md), [agent guidance](agent-guide.md) and [P3 verification evidence](plan/evidence/p3-core-2026-10-12.md). They contain the final interaction, production foundation, workflow preferences and unresolved work. Read [the P2 runbook](plan/p2-runbook.md) for actual run/import/check commands and [the foundation decision](decision-production-foundation.md) for module boundaries. No chat-history hunt is necessary.
 
 P2 was closed at the user's request with [closeout evidence](plan/evidence/p2-closeout-2026-10-12.md). [Open problems](open-problems.md) include user-confirmed continuing mid-recording clipping, untested iPhone/PWA behavior and incomplete real reference/content acceptance. Carry these forward; do not restart the P2 review loop or audio investigation by default.

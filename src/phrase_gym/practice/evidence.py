@@ -11,7 +11,7 @@ from phrase_gym.contracts.practice import (
     PracticeInput,
 )
 from phrase_gym.contracts.sessions import PlannedTarget, SessionStep
-from phrase_gym.practice.tables import AttemptRow, ChunkHistoryRow
+from phrase_gym.practice.tables import AttemptRow, ChunkHistoryRow, PracticeEvent
 from phrase_gym.tables import ExposureRow, SessionRow
 
 
@@ -33,10 +33,20 @@ def recent_support(transaction: Session, target_id: str, now: datetime) -> bool:
     supported = any(
         datetime.fromisoformat(e.received_at) >= now - timedelta(minutes=5) for e in recent
     )
-    supported |= any(
-        a.revealed and (a.finalized_at or a.presented_at) >= now - timedelta(minutes=5)
-        for a in (AttemptEvidence.model_validate_json(r.payload) for r in earlier)
+    attempt_ids = {UUID(row.id) for row in earlier}
+    events = transaction.scalars(
+        select(PracticeEvent).where(
+            PracticeEvent.session_id.in_({row.session_id for row in earlier}),
+        ),
     )
+    for row in events:
+        event = PracticeInput.model_validate_json(row.payload)
+        if event.kind not in ("answer", "explain", "reference", "capture_complete"):
+            continue
+        receipt = EventReceipt.model_validate_json(row.receipt)
+        if receipt.attempt_id in attempt_ids and receipt.occurred_at >= now - timedelta(minutes=5):
+            supported = True
+            break
     return supported
 
 
@@ -97,9 +107,13 @@ def observe(evidence: AttemptEvidence, event: PracticeInput, now: datetime) -> N
     if event.kind == "explain":
         evidence.expanded = True
     if event.kind == "respond":
+        evidence.capture_pending = True
+    if event.kind == "capture_complete":
         evidence.revealed = True
+        evidence.capture_pending = False
     if event.kind == "failure":
         evidence.technical_failure = True
+        evidence.capture_pending = False
 
 
 def refresh_support(

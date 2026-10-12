@@ -38,27 +38,33 @@ export function useTakeJournal() {
       for (const take of volatile.values()) await retain(take)
       const entries = await journalEntries<StoredTake>('take:')
       pendingTakes.value = entries.length
+      const failures: string[] = []
       for (const { key, value: take } of entries) {
         if (take.status === 'capturing') continue
-        const { audio, status: _status, owner: _owner, ...metadata } = take
-        const receipt = await api<RecordingReceipt>('/recordings', {
-          method: 'POST',
-          body: JSON.stringify({ ...metadata, audio_base64: base64(audio) }),
-        })
-        const digest = await crypto.subtle.digest('SHA-256', audio)
-        const checksum = Array.from(new Uint8Array(digest), (b) =>
-          b.toString(16).padStart(2, '0'),
-        ).join('')
-        if (
-          receipt.id !== take.id ||
-          receipt.byte_length !== audio.byteLength ||
-          receipt.sha256 !== checksum ||
-          receipt.complete !== take.complete
-        )
-          throw new Error('Recording acknowledgement did not match the retained take')
-        await journalDelete(key)
-        pendingTakes.value--
+        try {
+          const { audio, status: _status, owner: _owner, ...metadata } = take
+          const receipt = await api<RecordingReceipt>('/recordings', {
+            method: 'POST',
+            body: JSON.stringify({ ...metadata, audio_base64: base64(audio) }),
+          })
+          const digest = await crypto.subtle.digest('SHA-256', audio)
+          const checksum = Array.from(new Uint8Array(digest), (b) =>
+            b.toString(16).padStart(2, '0'),
+          ).join('')
+          if (
+            receipt.id !== take.id ||
+            receipt.byte_length !== audio.byteLength ||
+            receipt.sha256 !== checksum ||
+            receipt.complete !== take.complete
+          )
+            throw new Error('Recording acknowledgement did not match the retained take')
+          await journalDelete(key)
+          pendingTakes.value--
+        } catch (cause) {
+          failures.push(`Recording ${take.id}: ${String(cause)}. Audio remains on this device.`)
+        }
       }
+      error.value = failures.join('\n')
     })()
       .catch((cause) => {
         error.value = String(cause)

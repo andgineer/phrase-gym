@@ -36,7 +36,7 @@ def review_reason(transaction: Session, context: ReviewContext) -> str | None:
             is not None,
             "reported_cue",
         ),
-        (evidence.technical_failure, "technical_failure"),
+        (evidence.technical_failure or evidence.capture_pending, "technical_failure"),
         (evidence.original is None or evidence.original.supported, "supported"),
         (evidence.repair, "repair"),
         (

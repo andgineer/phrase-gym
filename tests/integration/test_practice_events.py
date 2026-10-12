@@ -21,6 +21,8 @@ def test_eligible_rating_idempotent_original_snapshot_and_completion(client, pac
     _, receipt = apply(client, session, "respond", modality="recorded")
     session = receipt["session"]
     assert session["attempts"][0]["original"]["modality"] == "self_report"
+    _, receipt = apply(client, session, "capture_complete")
+    session = receipt["session"]
     rated, result = apply(client, session, "rate", rating="with_effort")
     assert result["receipts"][0]["schedule_changed"]
     assert result["receipts"][0]["eligibility_reason"] == "eligible"
@@ -52,6 +54,7 @@ def test_help_before_response_is_not_recall_and_has_learning_check(client, packa
     _, result = apply(client, session, "present")
     _, result = apply(client, result["session"], "explain")
     _, result = apply(client, result["session"], "respond", modality="recorded")
+    _, result = apply(client, result["session"], "capture_complete")
     _, result = apply(client, result["session"], "rate", rating="recalled")
     attempt = result["session"]["attempts"][0]
     assert attempt["original"]["supported"]

@@ -43,23 +43,38 @@ const emit = defineEmits<{
       <button
         class="microphone"
         :class="{ capturing }"
-        :disabled="requesting || processing"
+        :disabled="requesting || processing || ratingBusy"
         :aria-label="capturing ? pt.stopRecording : playing ? pt.stop : pt.record"
         @click="emit('control')"
       >
         <span aria-hidden="true">{{ capturing || playing ? '■' : '🎙' }}</span>
       </button>
-      <button :disabled="!hasTake || capturing || requesting || processing" @click="emit('mine')">
+      <button
+        :disabled="!hasTake || capturing || requesting || processing || ratingBusy"
+        @click="emit('mine')"
+      >
         ▶ {{ pt.mine }}
       </button>
-      <button :disabled="capturing || requesting || processing" @click="emit('reference')">
+      <button
+        :disabled="capturing || requesting || processing || ratingBusy"
+        @click="emit('reference')"
+      >
         ▶ {{ pt.reference }}
       </button>
     </div>
     <p v-if="capturing" role="status">{{ pt.stopHint }}</p>
     <div class="answer-controls">
-      <button :disabled="capturing || requesting" @click="emit('answer')">{{ pt.answer }}</button>
-      <button class="explain-link" :disabled="capturing || requesting" @click="emit('explain')">
+      <button
+        :disabled="capturing || requesting || processing || ratingBusy"
+        @click="emit('answer')"
+      >
+        {{ pt.answer }}
+      </button>
+      <button
+        class="explain-link"
+        :disabled="capturing || requesting || processing || ratingBusy"
+        @click="emit('explain')"
+      >
         📖 {{ pt.explain }}
       </button>
     </div>

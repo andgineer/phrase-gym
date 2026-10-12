@@ -8,16 +8,16 @@ import { languageNames } from '../i18n'
 const props = defineProps<{ engine: ReturnType<typeof usePracticeSession>; pt: PracticeMessages }>()
 const router = useRouter()
 const requested = ref<{ language: Language; lessonId?: string; dialogueId?: string } | null>(null)
-const { session, busy, error } = props.engine
+const { openSession: session, busy, error } = props.engine
 const open = computed(
   () => session.value?.status === 'active' || session.value?.status === 'paused',
 )
 async function navigate() {
-  const state = session.value
+  const state = session.value ?? props.engine.session.value
   if (state) await router.push(`/learn/${state.manifest.language}/practice/${state.id}`)
 }
 async function resume() {
-  if (session.value?.status === 'paused') await props.engine.transition('active')
+  if (session.value?.status === 'paused') await props.engine.transition('active', session.value)
   requested.value = null
   await navigate()
 }

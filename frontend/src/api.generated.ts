@@ -465,6 +465,11 @@ export interface components {
              * @default false
              */
             technical_failure: boolean;
+            /**
+             * Capture Pending
+             * @default false
+             */
+            capture_pending: boolean;
             /** Rating */
             rating?: ("not_yet" | "with_effort" | "recalled") | null;
             /**
@@ -916,7 +921,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "present" | "respond" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
+            kind: "present" | "respond" | "capture_complete" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
             /**
              * Modality
              * @default self_report

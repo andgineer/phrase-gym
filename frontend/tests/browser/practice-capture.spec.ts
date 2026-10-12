@@ -113,6 +113,13 @@ test('recoverable interrupted capture is retained as incomplete after reload', a
   await expect.poll(async () => (await (await request.get(path)).json()).length).toBe(1)
   const rows = await (await request.get(path)).json()
   expect(rows[0].complete).toBe(false)
+  await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Recalled' }).click()
+  await expect
+    .poll(async () => (await (await request.get(`/api/v1/sessions/${sessionId}`)).json()).cursor)
+    .toBe(1)
+  const rated = await (await request.get(`/api/v1/sessions/${sessionId}`)).json()
+  expect(rated.attempts[0].eligibility_reason).toBe('technical_failure')
 })
 
 test('lookup recording stays supported without creating a review session', async ({

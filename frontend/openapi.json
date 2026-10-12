@@ -1340,6 +1340,11 @@
             "title": "Technical Failure",
             "default": false
           },
+          "capture_pending": {
+            "type": "boolean",
+            "title": "Capture Pending",
+            "default": false
+          },
           "rating": {
             "anyOf": [
               {
@@ -2605,6 +2610,7 @@
             "enum": [
               "present",
               "respond",
+              "capture_complete",
               "answer",
               "explain",
               "reference",

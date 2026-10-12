@@ -18,6 +18,7 @@ class PracticeInput(Contract):
     kind: Literal[
         "present",
         "respond",
+        "capture_complete",
         "answer",
         "explain",
         "reference",
@@ -60,6 +61,7 @@ class AttemptEvidence(Contract):
     revealed: bool = False
     expanded: bool = False
     technical_failure: bool = False
+    capture_pending: bool = False
     rating: RecallRating | None = None
     presented_at: datetime
     finalized_at: datetime | None = None

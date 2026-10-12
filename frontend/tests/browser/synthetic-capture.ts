@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
-export async function syntheticCapture(page: Page) {
-  await page.addInitScript(() => {
+export async function syntheticCapture(page: Page, holdPermission = false) {
+  await page.addInitScript((holdPermission) => {
     const context = new AudioContext()
     const oscillator = context.createOscillator()
     oscillator.frequency.value = 440
@@ -21,6 +21,8 @@ export async function syntheticCapture(page: Page) {
       value: {
         getUserMedia: async () => {
           requests++
+          if (holdPermission)
+            await new Promise<void>((resolve) => Object.assign(window, { __allowCapture: resolve }))
           return destination.stream
         },
       },
@@ -29,7 +31,7 @@ export async function syntheticCapture(page: Page) {
       get: () => destination.stream.getAudioTracks()[0]?.readyState,
     })
     Object.defineProperty(window, '__captureRequests', { get: () => requests })
-  })
+  }, holdPermission)
 }
 export async function retainedAudio(page: Page): Promise<number> {
   return page.evaluate(async () => {
