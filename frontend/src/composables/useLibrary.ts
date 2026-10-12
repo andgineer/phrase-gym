@@ -163,7 +163,8 @@ export function useLibrary() {
     selectedLesson.value = ''
   })
   watch(configuring, (value) => {
-    if (!value) loadRoute()
+    if (value) stopAudio()
+    else loadRoute()
   })
   watch(() => route.fullPath, loadRoute)
   watch([locale, currentLanguage], () => {

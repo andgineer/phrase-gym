@@ -48,7 +48,7 @@ Run instructions are in [prototypes/README.md](../../prototypes/README.md). The 
 
 ## Production foundation and next work
 
-After five P2 review iterations, the user approved simplifying the optional language-restoration invariant rather than extending the generic loop. The [accepted decision](../decision-device-language-and-settings.md) makes restoration device-local, removes navigation preference writes and permits one pending Settings save. Targeted backend coverage and one bounded fresh Sol 6.1 review are part of this batch. Consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for results; do not restart an open-ended loop.
+After five P2 review iterations, the user approved simplifying the optional language-restoration invariant rather than extending the generic loop. The [accepted decision](../decision-device-language-and-settings.md) makes restoration device-local, removes navigation preference writes and permits one pending Settings save. Targeted backend coverage and the bounded fresh Sol 6.1 review are complete. The reviewer found one playback cancellation defect when opening Settings, corrected with pending/active playback regressions. Consult the [review evidence](evidence/p2-review-loop-2026-10-12.md) for final verification; do not restart an open-ended loop.
 
 - Persistent native language and native/learning UI preference; `/learn/{language}` bookmarks; four initial UI locales; per-tab explicit routes win.
 - Stable source-to-target identities, immutable content revisions, pinned dialogue bindings, staged/manual publication with stale-content rejection and atomic rollback.

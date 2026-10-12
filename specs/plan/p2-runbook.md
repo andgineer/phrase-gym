@@ -82,7 +82,7 @@ Supported containers are WAV, MP3, Vorbis Ogg and audio MP4/M4A, up to 12 MiB. W
 
 Media identity includes the bytes hash, MIME type and provenance. Upload retries reuse that identity; changed performer/voice/preparation settings cannot silently reuse a metadata identity. File content is addressed by SHA-256 and original bytes are preserved. Generated-audio metadata requires engine/voice/exact speech input; generation adapters themselves remain P5 work. Use the echo-words Piper/Edge/llmbroker guidance then, not macOS voices.
 
-Publish validates exact text, language and role for reference/partner clips. Cue audio text must equal precisely the ordered visible chunks; a full-answer or headword-only clip cannot be substituted. A target without its full reference remains audio-missing/not retrieval-ready. Browser playback begins on a gesture and stops on navigation/background. Missing or damaged files return a recovery error, never another language's fallback.
+Publish validates exact text, language and role for reference/partner clips. Cue audio text must equal precisely the ordered visible chunks; a full-answer or headword-only clip cannot be substituted. A target without its full reference remains audio-missing/not retrieval-ready. Browser playback begins on a gesture and stops on navigation, opening Settings or backgrounding. Missing or damaged files return a recovery error, never another language's fallback.
 
 Files are staged, flushed and atomically moved before metadata commit. A crash may leave an orphan hash, which is reported and reusable on retry. Reconcile with:
 

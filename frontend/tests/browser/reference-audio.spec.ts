@@ -21,7 +21,7 @@ test.beforeEach(async ({ request }) => {
   })
 })
 
-for (const action of ['stop', 'navigate', 'background']) {
+for (const action of ['stop', 'navigate', 'background', 'settings']) {
   test(`pending reference playback is cancellable by ${action} without orphan players`, async ({
     page,
   }) => {
@@ -52,8 +52,13 @@ for (const action of ['stop', 'navigate', 'background']) {
       })
       await expect(page.getByRole('button', { name: 'Reference', exact: true })).toBeVisible()
     }
-    await page.getByRole('button', { name: 'Back', exact: true }).click()
-    await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()
+    if (action === 'settings') {
+      await page.getByRole('button', { name: 'Settings', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible()
+    } else {
+      await page.getByRole('button', { name: 'Back', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()
+    }
     release()
     const state = await page.evaluate(() => {
       const players = (window as unknown as { referencePlayers: HTMLAudioElement[] })
@@ -96,4 +101,33 @@ test('failed reference delivery offers a working explicit playback retry', async
       ),
     ),
   ).toBe(true)
+})
+
+test('Settings hides materials and cancels active Reference playback', async ({ page }) => {
+  await capturePlayers(page)
+  await page.goto('/learn/en?q=greetings')
+  await page.getByRole('link', { name: /How has your day/ }).click()
+  await page.getByRole('button', { name: 'Reference', exact: true }).click()
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (window as unknown as { referencePlayers: HTMLAudioElement[] }).referencePlayers.some(
+          (player) => !player.paused,
+        ),
+      ),
+    )
+    .toBe(true)
+  await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible()
+  await expect(page.locator('.phrase-card')).toHaveCount(0)
+  expect(
+    await page.evaluate(() =>
+      (window as unknown as { referencePlayers: HTMLAudioElement[] }).referencePlayers.every(
+        (player) => player.paused && player.getAttribute('src') === '',
+      ),
+    ),
+  ).toBe(true)
+  await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Reference', exact: true })).toBeVisible()
+  await expect(page.getByRole('alert')).toHaveCount(0)
 })
