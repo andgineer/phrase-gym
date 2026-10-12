@@ -32,6 +32,12 @@ async function onboard(page) {
   await page.goto(origin + "/learn/en");
   await page.locator("#first-native").selectOption("en");
   await tap(page, "[data-action=onboard]");
+  await page.locator("#recording-mode").uncheck();
+  await page.waitForFunction(async () =>
+    (await (await import("/shared/storage.mjs")).all("events")).some(
+      (e) => e.type === "recording-mode" && e.enabled === false,
+    ),
+  );
 }
 async function capture(page, ms = 700) {
   await tap(page, "[data-action=record]");
@@ -85,6 +91,7 @@ async function capture(page, ms = 700) {
         await tap(page, "[data-action=pause]");
         await page.goto(origin + "/learn/en/lesson/rapport");
         await page.locator("[data-action=lesson-start]").waitFor();
+        await page.locator("#recording-mode").uncheck();
         await tap(page, "[data-action=lesson-start]");
         await tap(page, "[data-action=reveal]");
         assert.equal((await session(page)).attempt.eligible, false);

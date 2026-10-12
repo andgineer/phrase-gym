@@ -255,7 +255,7 @@ $("delete-takes").onclick = () =>
 $("download").onclick = () =>
   run(async () => {
     await navigator.serviceWorker.ready;
-    const cache = await caches.open("phrase-gym-p1-v2");
+    const cache = await caches.open("phrase-gym-p1-v3");
     for (const t of pack.targets.filter((t) => t.audio.url)) {
       const response = await fetch(t.audio.url);
       if (!response.ok) throw new Error("Prepared clip missing.");

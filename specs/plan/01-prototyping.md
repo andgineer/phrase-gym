@@ -76,7 +76,7 @@ Use the prototypes to finalize:
 - what counts as a reviewed cue and which chunks constitute the target;
 - whether the proposed review-policy eligibility and coverage rules are understandable;
 - whether foreground PWA audio meets the required first-release use, or a native client must be considered;
-- recording on/off defaults, first languages, and the first source/intake milestone. Retention is decided: automatically keep all learner audio in the database; historical-comparison UI is deferred.
+- first languages and the first source/intake milestone. Recording defaults on, accepted on 2026-10-12. Retention is decided: automatically keep all learner audio in the database; historical-comparison UI is deferred.
 - selected-lesson due-only versus all-phrase behaviour, session size/empty-queue handling, and the concrete native/learning UI preference and language-switch/resume presentation. Use the master plan's proposed routes/defaults to make these reviewable; multi-language URLs and separate explanation/UI roles are already required.
 
 Short prototype use establishes clarity and technical feasibility, not long-term learning effectiveness. P6 covers ordinary use, reliability and issue correction. The user explicitly rejected delayed effectiveness pilots, special assessment sessions and calibration tasks; none is required to choose or use the recommended method.
@@ -87,4 +87,4 @@ Short prototype use establishes clarity and technical feasibility, not long-term
 
 The [recording decision](../decision-recording-and-comparison.md) is part of P1's scope. Demonstrate the recording-on sequence without additional playback taps after finishing the take, plus interruption and playback-failure recovery. Keep the initial cue visible during the learner replay; reveal the full target for model comparison afterward. Use the accepted manual Stop recording. Automatic stopping and the app-settings choice of stopping method are deferred beyond the first version. Demonstrate recording-off silent practice as a complete session path and preserve mode changes and support on reload.
 
-Final visual style and recording on/off defaults remain design decisions. Manual stopping and retention of all recordings in the database are resolved; do not reopen them as first-version blockers. Historical progress-comparison UI is deferred. Do not treat a text-only implementation or a passing reducer suite as completion of this interaction/audio gate.
+Final visual style remains a design decision. Recording defaults on, accepted on 2026-10-12. Manual stopping and retention of all recordings in the database are resolved; do not reopen them as first-version blockers. Historical progress-comparison UI is deferred. Do not treat a text-only implementation or a passing reducer suite as completion of this interaction/audio gate.

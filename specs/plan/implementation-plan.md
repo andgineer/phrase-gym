@@ -20,7 +20,7 @@ Open-ended AI conversation, free role-play and a general speaking partner are ex
 
 **Agreed:** ask for native language on first launch with an empty database, save it in app settings and reuse it for explanations. Russian is the current sketch's explanation language, not a universal default.
 
-Provide a learning-language selector: the learner studies several languages concurrently. Store the selected language in the URL so bookmarks open a specific language. UI controls may use the native language or the selected learning language. Do not add an independent dropdown of arbitrary UI languages. Phrase/situation/partner-line content stays in the learning language; explanations stay native even when buttons use the learning language.
+Provide a learning-language selector: the learner studies several languages concurrently. Store the selected language in the URL so bookmarks open a specific language. From the very first version, UI controls can use the native language or the selected learning language. Do not add an independent dropdown of arbitrary UI languages. Phrase/situation/partner-line content stays in the learning language; explanations stay native even when buttons use the learning language.
 
 **Recommended:** header language selector; `/learn/en`, `/learn/sr` and equivalent stable-code routes; browser titles such as Phrase Gym: English. A settings toggle, **Use learning language for the interface**, expresses the two modes, initially off. Exact route syntax, control placement and preference default remain proposals.
 
@@ -40,11 +40,13 @@ Lookup, opening an explanation and browsing displayed phrases record exposure wh
 
 **Open:** whether an explicitly selected lesson drills due phrases only or all its phrases. Recommend due-only with a separate optional Practice all action; do not treat this recommendation as an answered user question. See the [navigation decision](../decision-session-navigation-and-search.md).
 
+The [manual-feedback decision](../decision-p1-manual-feedback.md) supersedes earlier hint/problem-control proposals: label full-phrase help **Show answer**, and remove **Other answer / problem** entirely.
+
 ### 4. Compact drill and recording flow
 
 **Agreed:** show a compact situation/partner line and enough meaningful phrase-specific chunks to identify the intended expression. Necessary disambiguation is present initially. Avoid random gaps, first-letter puzzles and broad situations that demand one arbitrary exact sentence. Ambiguous cues and valid alternatives are not automatic failures.
 
-Recording is optional per session, with the switch available during practice. With recording on:
+Recording defaults on and remains optional per session, with the switch available during practice. Resume preserves the session’s explicit choice. With recording on:
 
 1. Show the cue and an **icon-only microphone button**, with an accessible Start recording name.
 2. Start only on the learner's action. During capture show a stop icon and **Stop recording**.
@@ -94,7 +96,7 @@ The user requested the best scientifically grounded practical approach and expli
 | **With effort** | Correct recall using the planned cue, with substantial retrieval difficulty. It never means forgotten or partly correct. | Hard / 2 |
 | **Recalled** | Correct recall without substantial difficulty; ordinary hesitation is fine. | Good / 3 |
 
-Keep **Practice again** separate: a desire to improve pronunciation/flow is not a failure. Preserve/rate the original attempt before rerecording; later success cannot replace it. **Other answer / problem** handles valid equivalents, unclear cues and technical problems. An allowed equivalent can be correct; ambiguity/technical failure receives no grade.
+Keep **Practice again** separate: a desire to improve pronunciation/flow is not a failure. Preserve/rate the original attempt before rerecording; later success cannot replace it. The user removed **Other answer / problem** entirely on 2026-10-12; do not replace it with a skip/report submenu. An allowed equivalent can still be correct; technical failure does not automatically create a memory-failure grade.
 
 Recommend one result tap saves and advances, with Undo correcting the original event. If extra practice was already requested, retain the result before entering practice. Keep criteria in a collapsed What counts? area. No separate Easy button, predicted interval labels, second confidence question, numerical fluency score or cue-to-microphone speed grading.
 
@@ -180,7 +182,7 @@ Record completed phase evidence in `specs/plan/evidence/`: build/version, device
 |---|---|
 | Selected-lesson due-only versus all | Due-only with optional Practice all; user answer remains open. |
 | Exact answer labels, FSRS/repair/coverage details | Carry the concrete recommendation above into the prototype. Do not ask the learner to choose scientific parameters or validate effectiveness. |
-| Recording on/off initial preference | Still open; independent of the already settled manual stop and all-recording retention. |
+| Recording on/off initial preference | Accepted on 2026-10-12: on, with explicit microphone start; preserve the mode on resume. |
 | UI preference and language routes | Header selector, `/learn/{language}`, native/learning UI toggle initially off; exact layout/default remains proposed. Multi-language URLs themselves are required. |
 | Final visual styling and explanation depth | Keep the agreed compactness; calm styling and expandable phrase breakdown are recommendations, not approved visual design. |
 | Session length, new-item limits and empty due queue | Establish a usable flow in P1 without adding learning experiments. |

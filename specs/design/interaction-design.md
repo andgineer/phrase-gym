@@ -47,7 +47,7 @@ The learner says “How has your day been so far?” in full. The missing chunk 
 | Recording | The same cue; the primary button now has a stop icon and Stop recording label. | Say the whole phrase, then tap Stop recording. Manual stop is the first-version behaviour and the default. |
 | Own version | Automatic playback of the just-recorded take; keep the initial cue visible. | Listen; interrupt playback if desired. |
 | Reference | Reveal the complete phrase and automatically play its reference audio after the learner take. It may be an imported actor/course recording or generated speech. | Compare the two versions. |
-| Self-check | Recommended: Not yet, With effort, Recalled; replay controls, Practice again and Other answer / problem remain available. | Rate the original recall: incorrect/missing, correct with substantial effort, or correct without substantial difficulty. Extra practice is a separate choice. |
+| Self-check | Recommended: Not yet, With effort, Recalled; replay controls and Practice again remain available. Other answer / problem was removed by user request on 2026-10-12. | Rate the original recall: incorrect/missing, correct with substantial effort, or correct without substantial difficulty. Extra practice is a separate choice. |
 | Continue | Recommended: a result tap saves the observation and advances, with Undo. Supported practice uses Continue without a recall grade. | Explicit learner action advances; playback completion never grades or advances automatically. If extra practice was requested, retain the original result before making another take. |
 
 Comparison controls:
@@ -61,7 +61,6 @@ Comparison controls:
      Not yet   With effort   Recalled
 
       Practice again   Show & explain
-           Other answer / problem
               What counts? ▾
 ```
 
@@ -97,7 +96,7 @@ When adding a phrase to the database, the LLM prepares alternate versions hiding
 
 ## Different wording and unclear cues
 
-The earlier compact outcome proposal was **Got it**, **Try again**, **Different wording**. The current research-informed recommendation is **Not yet**, **With effort**, **Recalled**, with Practice again separate and an Other answer / problem route. See the [answer-card design](answer-card-and-review-policy.md) for exact scoring and supported-practice states; these labels remain a recommendation.
+The earlier compact outcome proposal was **Got it**, **Try again**, **Different wording**. The current research-informed recommendation is **Not yet**, **With effort**, **Recalled**, with Practice again separate. The user removed the Other answer / problem route on 2026-10-12. See the [answer-card design](answer-card-and-review-policy.md) for exact scoring and supported-practice states; these labels remain a recommendation.
 
 Good alternative English is not automatically a memory failure. An unclear cue needs correction. For fixed phrases, show explicitly allowed equivalents; for words/frames, show which parts may vary. Keep one target/result history across changed masks and recordings.
 

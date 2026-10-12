@@ -32,7 +32,7 @@ The [functional description](../functional-description.md) remains a draft of su
 | Visual style | Calm, focused screen recommended; stronger gym-like styling offered as an alternative. Neither selected. | Design discussion and P1 walkthrough. |
 | First inputs | Phrases and word/frame targets share manual import; live echo-words handoff follows the core. | Confirm first-release scope in P1; implement P5. |
 | Recording retention — resolved | Automatically store all recordings' audio and metadata in the app database from the first version, including retries; no manual Save or automatic expiry. | P3 persistence; P4 recovery validation. Historical progress-comparison UI is deferred. |
-| Language inventory and supporting features | Multi-language switching and separated native/UI languages are required. Initial content/UI-translation inventory, recording on/off defaults and detailed help controls remain release/design choices. | P1/P4; language and audio decision above. |
+| Language inventory and supporting features | Multi-language switching and separated native/UI languages are required. UI switching is required in version one and recording defaults on. Full-answer help is Show answer; Other answer / problem is removed. Initial content/UI-translation inventory remains a release choice. | P1/P4; language and audio decision above. |
 | Host and access | Private HTTPS; measure the named Oracle VM and laptop options. | P6, after there is a build to measure. |
 
 Automatic speech grading, eyes-free/locked-screen operation and old Anki migration are separate possible additions. Open-ended AI conversation and free role-play remain excluded entirely. Additional course enrolment is not authorized and is not needed for these plans.

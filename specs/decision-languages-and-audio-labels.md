@@ -12,6 +12,8 @@ The accepted learner-take → reference playback order is unchanged. Earlier spe
 
 The user subsequently requested inspecting `../echo-words` for multilingual audio generation. Its [implementation findings](reference/echo-words-audio.md) are recorded as guidance for missing reference clips: per-language voices, Serbian script preparation, caching and language-correct fallback. Imported course/actor audio keeps priority. No new engine setting was explicitly selected by that inspection request.
 
+**First-version scope confirmed, 2026-10-12:** switching the UI to the learning language is required in the very first version. P1 now offers the toggle during first launch and in Settings. See [manual feedback](decision-p1-manual-feedback.md).
+
 ## Three separate language roles
 
 | Role | Required behaviour |

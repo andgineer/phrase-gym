@@ -12,6 +12,10 @@ The user explicitly stopped premature coding and asked for design discussion fol
 
 The user explicitly authorizes commits directly to `main`; do not create a branch by default. This supersedes the older no-commit/scaffold-only handoff restrictions for the current P1 review work. Three fresh Sol 6.1 reviews were completed; see [the review-loop report](plan/evidence/p1-review-loop-2026-10-12.md). Pause before a fourth review and prioritize the manual P1 walkthrough. The user rejects a macOS-only audio dependency; carry the echo-words Piper/Edge approach and llmbroker preparation into the production scope discussion. Keep `.env` private.
 
+## Accepted manual feedback, 2026-10-12
+
+Follow the [manual-feedback decision](decision-p1-manual-feedback.md): UI-language switching belongs in version one; recording defaults on with explicit microphone start; full-answer help is called Show answer; remove Other answer / problem entirely, without a replacement skip/report action. Existing session mode choices survive resume.
+
 ## Working with the user
 
 - Reply and write project documents in English. Normal drill content stays in the target language; the explicitly opened explanation card shows the complete phrase and explanation in the learner's language.

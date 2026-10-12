@@ -53,11 +53,10 @@ let route,
   showSettings = false;
 let error = "",
   message = "",
-  problemOpen = false,
   lastUndo = JSON.parse(sessionStorage.getItem("pg-undo") || "null"),
   lastTake = null,
   clockOffset = 0,
-  lookupRecording = false;
+  lookupRecording = true;
 const tabId = sessionStorage.getItem("pg-tab") || crypto.randomUUID();
 sessionStorage.setItem("pg-tab", tabId);
 const now = () => Date.now() + clockOffset;
@@ -167,7 +166,6 @@ async function navigate(path, replace = false) {
   parseRoute();
   error = "";
   message = "";
-  problemOpen = false;
   await prepare();
   render(true);
 }
@@ -309,7 +307,7 @@ function lessonView() {
     )
     .join(
       "",
-    )}</div>${policyOptions()}${modeSwitch(session()?.recording || lookupRecording)}${button("lesson-start", t("lessonDrill"), "primary")}`;
+    )}</div>${policyOptions()}${modeSwitch(lookupRecording)}${button("lesson-start", t("lessonDrill"), "primary")}`;
 }
 function captureControls(recording, supported = false) {
   if (audio.requesting)
@@ -368,22 +366,19 @@ function drill() {
   let actions;
   if (s.phase === "check") {
     const supported = !s.attempt?.eligible;
-    actions = `${replayControls()}<p class="notice muted">${supported ? t("support") : s.attempt.modality === "silent-recall" ? t("silent") : t("original")}</p>${s.practiceRequested ? `<p role="status">${t("chooseResult")}</p>` : ""}${supported ? button("supported-continue", t("supportedContinue"), "primary") : ratings()}<div class="row block">${button("practice", t("practice"))}${button("explain", t("explain"))}${button("problem", t("problem"), "subtle")}</div>${gradingCriteria()}`;
+    actions = `${replayControls()}<p class="notice muted">${supported ? t("support") : s.attempt.modality === "silent-recall" ? t("silent") : t("original")}</p>${s.practiceRequested ? `<p role="status">${t("chooseResult")}</p>` : ""}${supported ? button("supported-continue", t("supportedContinue"), "primary") : ratings()}<div class="row block">${button("practice", t("practice"))}${button("explain", t("explain"))}</div>${gradingCriteria()}`;
   } else if (s.phase === "practice") {
     actions = `<p class="status">${t("savedGrade")} · ${t("practiceGrade")}</p>${captureControls(s.recording, true)}${replayControls()}<div class="row block">${button("continue-practice", s.isolated ? t("returnExchange") : t("continue"), "primary")}${button("explain", t("explain"))}</div>`;
   } else {
-    actions = `${captureControls(s.recording)}<div class="row block">${button("explain", t("explain"), "subtle", busy() ? "disabled" : "")}${button("hint", t("additionalHelp"), "subtle", busy() ? "disabled" : "")}${button("missed", t("missedBeforeHelp"), "subtle", busy() ? "disabled" : "")}</div>${s.help.length ? `<p class="notice muted">${t("support")}</p>` : ""}`;
+    actions = `${captureControls(s.recording)}<div class="row block">${button("explain", t("explain"), "subtle", busy() ? "disabled" : "")}${button("hint", t("showAnswer"), "subtle", busy() ? "disabled" : "")}${button("missed", t("missedBeforeHelp"), "subtle", busy() ? "disabled" : "")}</div>${s.help.length ? `<p class="notice muted">${t("support")}</p>` : ""}`;
   }
-  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${modeSwitch(s.recording)}${dialogueContext(s, item)}<div class="card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${actions}</div>${problemOpen ? problemPanel() : ""}${engineering()}`;
+  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${modeSwitch(s.recording)}${dialogueContext(s, item)}<div class="card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${actions}</div>${engineering()}`;
 }
 function ratings() {
   return `<div class="ratings">${[1, 2, 3].map((rating, index) => button("grade", t(["notYet", "effort", "recalled"][index]), rating === 3 ? "primary" : "", `data-rating="${rating}"`)).join("")}</div>`;
 }
 function gradingCriteria() {
   return `<details><summary>${t("counts")}</summary><p>${criteria[prefs.learningUI ? language : prefs.native]}</p></details>`;
-}
-function problemPanel() {
-  return `<section class="card"><h2>${t("problem")}</h2><p lang="${language}">${activeTarget().allowed.map(esc).join("<br>")}</p><div class="stack">${button("equivalent", t("equivalent"))}${button("no-grade", t("otherWording"), "", 'data-reason="valid-other-wording"')}${button("no-grade", t("unclear"), "", 'data-reason="unclear-cue"')}${button("no-grade", t("technical"), "", 'data-reason="technical-problem"')}${button("problem", t("cancel"))}</div></section>`;
 }
 function results() {
   const s = session(),
@@ -401,7 +396,7 @@ function results() {
     )}</div>${pending.length ? `<p class="status">${t("pendingRetries")}</p>` : ""}<div class="row">${button("home", t("home"), "primary")}${button("finish", t("newSession"))}</div>`;
 }
 function engineering() {
-  return `<details><summary>Prototype diagnostics</summary><p>Fixture due flags and review receipts only; FSRS is implemented in P3. Defaults and visual design are proposals. Recording starts off. The local keyword index demonstrates concept lookup; it is not an evaluated semantic-search system.</p><div class="row">${button("clock", "Advance probe clock +5 min")}${button("download", t("download"))}${button("export", "Export metadata (no audio)")}${button("reset", t("reset"), "danger")}</div><pre>${esc(JSON.stringify({ fixture: pack.revision, clockOffset, coverage: state.coverage[activeTarget()?.id], repairs: session()?.repairs }, null, 2))}</pre></details>`;
+  return `<details><summary>Prototype diagnostics</summary><p>Fixture due flags and review receipts only; FSRS is implemented in P3. Visual design and review-policy parameters are proposals. Recording starts on; microphone capture starts only when requested. The local keyword index demonstrates concept lookup; it is not an evaluated semantic-search system.</p><div class="row">${button("clock", "Advance probe clock +5 min")}${button("download", t("download"))}${button("export", "Export metadata (no audio)")}${button("reset", t("reset"), "danger")}</div><pre>${esc(JSON.stringify({ fixture: pack.revision, clockOffset, coverage: state.coverage[activeTarget()?.id], repairs: session()?.repairs }, null, 2))}</pre></details>`;
 }
 function render(focus = false) {
   const ui = prefs.learningUI ? language : prefs.native || "en";
@@ -414,7 +409,9 @@ function render(focus = false) {
       languageNames,
     )
       .map(([code, name]) => `<option value="${code}">${name}</option>`)
-      .join("")}</select></label>${button("onboard", t("save"), "primary")}`;
+      .join(
+        "",
+      )}</select></label><label class="check"><input type="checkbox" id="first-ui-mode" ${prefs.learningUI ? "checked" : ""}>${t("learningUI")}</label>${button("onboard", t("save"), "primary")}`;
   } else
     body =
       route.kind === "phrase"
@@ -455,7 +452,7 @@ async function startSession(dialogueId = null, lessonOverride = null) {
   if (!(await claim())) return;
   const fresh = await db.get("settings", "history");
   if (fresh) state = fresh;
-  const recording = document.querySelector("#recording-mode")?.checked || false;
+  const recording = document.querySelector("#recording-mode")?.checked ?? true;
   sessions[language] = makeSession(
     pack,
     language,
@@ -503,7 +500,6 @@ async function grade(result, reason = null) {
   );
   sessions[language] = s;
   lastUndo = undoState;
-  problemOpen = false;
   await persist();
   await prepare();
   render(true);
@@ -607,7 +603,10 @@ async function dispatch(action, el) {
   if (action === "onboard") {
     const code = document.querySelector("#first-native").value;
     if (!code) return;
-    await updatePreferences({ native: code });
+    await updatePreferences({
+      native: code,
+      learningUI: document.querySelector("#first-ui-mode").checked,
+    });
     await prepare();
     await persist();
     render();
@@ -668,8 +667,7 @@ async function dispatch(action, el) {
   }
   if (action === "hint") {
     session().hint = true;
-    session().help.push("extra-anchor");
-    await expose(activeTarget(), "extra-anchor");
+    await expose(activeTarget(), "full-phrase");
     message = t("support");
     await persist();
     render();
@@ -781,23 +779,6 @@ async function dispatch(action, el) {
     render();
     return;
   }
-  if (action === "problem") {
-    problemOpen = !problemOpen;
-    render();
-    return;
-  }
-  if (action === "equivalent") {
-    problemOpen = false;
-    message = t("equivalent");
-    render();
-    return;
-  }
-  if (action === "no-grade") {
-    await grade(null, el.dataset.reason);
-    message = t("problemSaved");
-    render();
-    return;
-  }
   if (action === "undo") {
     if (lastUndo?.language !== language) return;
     ++comparisonGeneration;
@@ -886,7 +867,7 @@ async function download() {
   if (!navigator.serviceWorker)
     throw new Error("Offline download requires a secure origin.");
   const registration = await navigator.serviceWorker.ready;
-  const cache = await caches.open("phrase-gym-p1-v2");
+  const cache = await caches.open("phrase-gym-p1-v3");
   for (const target of pack.targets.filter(
     (t) => t.language === language && t.audio.url,
   )) {

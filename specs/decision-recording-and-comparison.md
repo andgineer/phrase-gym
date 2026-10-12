@@ -6,6 +6,8 @@
 
 ## Agreed behaviour and endorsed working flow
 
+**Accepted default, 2026-10-12:** recording starts **on**. Capture still starts only when the learner presses the microphone button; a resumed session retains its selected mode. See [manual feedback](decision-p1-manual-feedback.md).
+
 Recording has a **session-level on/off switch**, accessible during practice as well as session setup. Switching it off allows the session to continue without recording. A microphone is not a prerequisite for using the trainer.
 
 With recording on:
@@ -15,7 +17,7 @@ With recording on:
 3. While actively recording, the same button shows a **stop icon and “Stop recording”**. The learner taps it to finish. Manual stop is the agreed default and the only stopping method in the first version.
 4. Automatically play **the learner's recording first**, with the initial cue still visible.
 5. Then reveal the complete phrase and play **the reference recording**.
-6. Offer the learner's self-check. The endorsed sketch used **Got it**, **Try again**, and a different-wording/unclear-cue route. The subsequent [research-based recommendation](design/answer-card-and-review-policy.md) proposes **Not yet / With effort / Recalled**, with Practice again separate; exact revised labels/policy remain proposals. The accepted recording/comparison sequence is unchanged.
+6. Offer the learner's self-check. The endorsed sketch used **Got it**, **Try again**, and a different-wording/unclear-cue route. The subsequent [research-based recommendation](design/answer-card-and-review-policy.md) proposes **Not yet / With effort / Recalled**, with Practice again separate; exact revised labels/policy remain proposals. The accepted recording/comparison sequence is unchanged. The user removed the different-wording/problem submenu on 2026-10-12; keep only the ordinary self-check and separate practice controls.
 
 The comparison screen retains **My recording**, **Reference**, and **Record another try** (with accessible Play my recording / Play reference audio names). The learner can interrupt playback. Rerecording belongs to the same target and practice history; it does not erase the first attempt or support already used.
 
@@ -75,7 +77,7 @@ Accepted on 2026-10-11:
 - Keep available audio from interrupted takes with an honest incomplete status. An empty or failed capture without audio remains a capture event, not a fabricated recording.
 - **A historical progress-comparison interface is deferred.** The first version stores the recordings and retains the already agreed immediate self/model replay controls. A recordings timeline, baseline picker or progress-scoring feature is not required now.
 
-This supersedes the assistant's proposal to retain only explicitly saved takes. Recording on/off defaults remain open. Automatic storage in the app database does not authorize sending recordings to an external AI service.
+This supersedes the assistant's proposal to retain only explicitly saved takes. Recording defaults on, as accepted on 2026-10-12. Automatic storage in the app database does not authorize sending recordings to an external AI service.
 
 ## Implementation implications to validate
 

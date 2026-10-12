@@ -86,7 +86,7 @@ export function makeSession(
     queue,
     cursor: 0,
     created: now,
-    recording: false,
+    recording: true,
     phase: "cue",
     help: [],
     attempt: null,

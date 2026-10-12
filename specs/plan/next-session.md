@@ -28,7 +28,7 @@ The user required design discussion and a written plan before implementation in 
 
 The master plan includes the proposed Not yet / With effort / Recalled outcomes, separate extra practice, FSRS at 0.90 desired retention, bounded separated retries, purposeful chunk coverage and varied prepared contexts. It also proposes `/learn/{language}`, a native/learning UI-mode toggle, a due-only selected-lesson default with optional Practice all, and per-language reference-voice configuration.
 
-Keep these recommendations distinct from explicitly agreed requirements. Use them to build a concrete prototype rather than ask the learner to invent parameters. The selected-lesson policy, recording on/off default, final styling, exact preference presentation, session budget and release/host choices remain listed in [remaining choices](implementation-plan.md#remaining-choices-and-proposed-defaults). Do not treat request for consolidation as blanket acceptance of all details.
+Keep these recommendations distinct from explicitly agreed requirements. Use them to build a concrete prototype rather than ask the learner to invent parameters. Recording defaults on, accepted in the [P1 manual feedback](../decision-p1-manual-feedback.md), which also requires version-one UI switching, renames full-answer help and removes the problem submenu. The selected-lesson policy, final styling, exact preference presentation, session budget and release/host choices remain listed in [remaining choices](implementation-plan.md#remaining-choices-and-proposed-defaults). Do not treat request for consolidation as blanket acceptance of all details.
 
 ## Start when implementation is requested
 

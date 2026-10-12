@@ -40,7 +40,9 @@ Keep criteria in a collapsible **What counts?** help area rather than repeating 
 
 **Separate actions:** Practice again is a request for extra practice, not a failure grade. Replaying audio is not a new attempt. Before a rerecording, preserve/rate the original attempt; later success cannot replace it. Pronunciation/flow practice can follow correct recall without declaring the word forgotten. A noticeable accent alone is not an error in recalling the target. Serious word-form errors and comprehension problems require appropriate repair, not just a speed score.
 
-**Other answer / problem** opens a small branch: valid alternative, unclear cue, or technical problem. An explicitly allowed equivalent is a correct answer. A natural alternative to an ambiguous task is not an automatic failure; retain the response and flag the cue. If the learner confirms that a clearly requested target could not be recalled, Not yet remains appropriate. Do not silently turn all differences in wording into either success or failure.
+**Accepted simplification, 2026-10-12:** remove **Other answer / problem** and its submenu entirely, without a replacement skip/report action. An explicitly allowed equivalent remains a correct answer under What counts?; technical capture failures still create no automatic memory grade. See [manual feedback](../decision-p1-manual-feedback.md).
+
+The full-phrase help control is **Show answer**, replacing the misleading Additional hint label. It reveals the whole phrase and records full-phrase exposure; subtler hints are not required for version one.
 
 ## Assistance and mode states
 

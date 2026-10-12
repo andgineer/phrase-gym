@@ -42,13 +42,17 @@ The app has a manifest and service worker. On Safari, use Add to Home Screen and
 
 Use the probe's result selectors for observed results. Untested cases stay untested; export the metadata-only report. Do not put private recordings in evidence or source control. Temporary certificate keys also stay outside the repository.
 
+## Accepted manual feedback, 2026-10-12
+
+Choose native-language UI or **Use learning language for the interface** at first launch; change it later under **⚙ Settings**. Explanations retain the native language. Fresh sessions default to recording on; capture starts only when you press the microphone. Existing sessions retain their selected mode on resume. **Show answer** reveals the full phrase without an explanation and records supported exposure. **Other answer / problem** has been removed entirely. See [the decision](../specs/decision-p1-manual-feedback.md).
+
 ## Walkthroughs
 
 1. Search lesson titles for `rap`, then clear/select All lessons. Search phrases for `greetings`; the matching wording does not contain that concept. Inspect an explanation, return with the query intact, visit its complete lesson list and start a lesson drill. Browsing creates exposure, never a recall result.
-2. Start a familiar-item session directly. Reveal after silent retrieval and choose Not yet, With effort or Recalled. What counts? gives the original-attempt criteria. Silent work is memory evidence only.
+2. Turn recording off and start a familiar-item session directly. Reveal after silent retrieval and choose Not yet, With effort or Recalled. What counts? gives the original-attempt criteria. Silent work is memory evidence only.
 3. On a cue, open Show & explain before responding, then return. The drill hides native-language meaning but retains support. Reveal now offers Continue without a recall grade. A separate I couldn’t recall it action can record one reported failure before help.
-4. Request Practice again on the answer card. First retain the original result; extra practice shows the complete phrase and cannot overwrite that result. Undo corrects the original event while retaining takes/history. Other answer / problem distinguishes allowed equivalents, other valid wording, ambiguous cues and technical failures.
-5. Enable recording. Start with the microphone icon, stop manually, listen to the learner take with the cue retained, then see/hear the complete reference. Replay either version. Empty/failed capture creates no memory grade. Missing/blocked audio offers manual recovery.
+4. Request Practice again on the answer card. First retain the original result; extra practice shows the complete phrase and cannot overwrite that result. Undo corrects the original event while retaining takes/history. Allowed equivalents count as correct under What counts?
+5. Leave recording on (or enable it after the silent walkthrough). Start with the microphone icon, stop manually, listen to the learner take with the cue retained, then see/hear the complete reference. Replay either version. Empty/failed capture creates no memory grade. Missing/blocked audio offers manual recovery.
 6. Open Show & explain with recording on. The full phrase stays visible during capture and both playback stages. Its take is supported practice. Turn recording off to use explanation and manually requested reference audio without microphone access.
 7. Open a prepared dialogue from Home. Partner/supporting lines surround target turns. Practise this turn isolates difficulty; retain its original result, practise, and continue into the next partner turn. There is one target identity across the dialogue and ordinary drill.
 8. Pause, reload and resume. Switch to Serbian and back; the English session/history remain. Open English and Serbian in separate tabs; URL languages remain independent. Explicit session takeover pauses the old view (a prototype lease, not a production concurrency guarantee).

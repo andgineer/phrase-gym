@@ -1,5 +1,7 @@
 # Phrase Gym — functional description
 
+**Accepted P1 feedback, 2026-10-12:** UI-language switching is required in version one; recording defaults on with explicit microphone start; full-answer help is labelled Show answer; Other answer / problem is removed entirely. See [the decision](decision-p1-manual-feedback.md).
+
 Updated 2026-10-11. **Draft supporting scope. The agreed baseline is [targeted drilling](decision-targeted-drilling.md); there is no approved prototype or active app implementation. [Optional recording and comparison](decision-recording-and-comparison.md) is an additional agreed interaction requirement.** Other features below remain recommendations for design discussion and [prototyping](plan/01-prototyping.md), not additional approved requirements. See the [architecture](architecture.md) and [implementation roadmap](plan/implementation-plan.md) for the proposed work.
 
 ## Purpose and learning targets

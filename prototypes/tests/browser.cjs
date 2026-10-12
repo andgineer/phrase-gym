@@ -22,11 +22,21 @@ async function read(page, store) {
     }));
   }, store);
 }
-async function onboard(page, native = "en") {
+async function onboard(page, native = "en", options = {}) {
   await page.goto(origin + "/learn/en");
   await page.locator("#first-native").selectOption(native);
+  if (options.learningUI) await page.locator("#first-ui-mode").check();
   await tap(page, "[data-action=onboard]");
   await page.locator("#phrase-search").waitFor();
+  assert.equal(await page.locator("#recording-mode").isChecked(), true);
+  if (!options.recording) {
+    await page.locator("#recording-mode").uncheck();
+    await page.waitForFunction(async () =>
+      (await (await import("/shared/storage.mjs")).all("events")).some(
+        (e) => e.type === "recording-mode" && e.enabled === false,
+      ),
+    );
+  }
 }
 async function waitPhase(page, phase) {
   await page.waitForFunction(async (phase) => {
@@ -69,6 +79,69 @@ async function waitPhase(page, phase) {
     }
   }
   try {
+    await check(
+      "First-launch UI choice, default-on recording, honest answer reveal and simplified card",
+      async (page) => {
+        await page.addInitScript(() => {
+          window.microphoneRequests = 0;
+          const original = navigator.mediaDevices.getUserMedia.bind(
+            navigator.mediaDevices,
+          );
+          navigator.mediaDevices.getUserMedia = (...args) => {
+            window.microphoneRequests++;
+            return original(...args);
+          };
+        });
+        await onboard(page, "ru", { recording: true, learningUI: true });
+        assert.equal(await page.locator("html").getAttribute("lang"), "en");
+        await tap(page, "[data-action=settings]");
+        await page.locator("#ui-mode").uncheck();
+        await page.waitForFunction(
+          () => document.documentElement.lang === "ru",
+        );
+        await tap(page, "[data-action=settings]");
+        await tap(page, "[data-action=start]");
+        assert.equal(await page.locator("[data-action=record]").count(), 1);
+        assert.equal(await page.evaluate(() => window.microphoneRequests), 0);
+        assert.equal(
+          await page.locator("[data-action=hint]").innerText(),
+          "Показать ответ",
+        );
+        await tap(page, "[data-action=hint]");
+        assert.equal(
+          await page.locator(".cue").innerText(),
+          "How has your day been so far?",
+        );
+        await page.locator("#recording-mode").uncheck();
+        await page.locator("[data-action=reveal]").waitFor();
+        await tap(page, "[data-action=reveal]");
+        const current = (await read(page, "sessions"))[0];
+        assert.equal(current.attempt.eligible, false);
+        assert.ok(current.attempt.support.includes("full-phrase"));
+        assert.equal(
+          await page
+            .locator("[data-action=problem], [data-action=no-grade]")
+            .count(),
+          0,
+        );
+        assert.equal(
+          await page.locator("[data-action=supported-continue]").count(),
+          1,
+        );
+        await page.reload();
+        assert.equal(await page.locator("#recording-mode").isChecked(), false);
+        await tap(page, "[data-action=settings]");
+        await page.locator("#ui-mode").check();
+        await page.waitForFunction(
+          () => document.documentElement.lang === "en",
+        );
+        await page.locator("#language").selectOption("sr");
+        await page.waitForFunction(
+          () => document.documentElement.lang === "sr",
+        );
+        assert.equal(await page.evaluate(() => window.microphoneRequests), 0);
+      },
+    );
     await check(
       "Language roles, concept lookup, lesson navigation, exposure and reload",
       async (page, context) => {
@@ -141,7 +214,7 @@ async function waitPhase(page, phase) {
       },
     );
     await check(
-      "Original grades, extra practice, Undo, no-grade problems and summary",
+      "Original grades, extra practice, Undo and simplified self-check",
       async (page) => {
         await onboard(page);
         await tap(page, "[data-action=start]");
@@ -164,10 +237,8 @@ async function waitPhase(page, phase) {
         );
         await tap(page, "[data-action=continue-practice]");
         await tap(page, "[data-action=reveal]");
-        await tap(page, "[data-action=problem]");
-        await tap(page, "[data-action=no-grade][data-reason=unclear-cue]");
-        s = (await read(page, "sessions"))[0];
-        assert.equal(s.grades.at(-1).scheduleUpdated, false);
+        assert.equal(await page.locator("[data-action=problem]").count(), 0);
+        await tap(page, '[data-action=grade][data-rating="3"]');
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=resume]");
         await page.screenshot({
@@ -364,6 +435,8 @@ async function waitPhase(page, phase) {
           .waitFor();
         await context.setOffline(true);
         await page.reload();
+        assert.equal(await page.locator("#recording-mode").isChecked(), true);
+        await page.locator("#recording-mode").uncheck();
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=reveal]");
         await tap(page, "[data-action=play-reference]");
