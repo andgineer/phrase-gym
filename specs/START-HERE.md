@@ -1,10 +1,12 @@
 # Phrase Gym — start here
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 Handoff updated **2026-10-12**. The complete project context is in `~/projects/phrase-gym/specs/`. Read this file before using any earlier plan or archive.
 
 **Current work, 2026-10-12:** the user explicitly requested implementation of **P1**. New disposable fixtures, interaction prototype and audio/storage probe now live in `prototypes/`. See [run/walkthrough instructions](../prototypes/README.md), [P1 evidence](plan/evidence/p1-2026-10-12.md) and [review handoff](plan/p1-review.md). Software checks pass; user walkthrough, actual iPhone/device checks and authentic actor/Serbian audio remain pending. **P1 is not passed and P2 has not begun.** The Python application scaffold is preserved. Earlier discussion-only restrictions describe the prior session, not this new authorization.
 
-**Latest manual feedback:** UI-language switching is required in version one, recording defaults on, full-answer help is labelled **Show answer**, and **Other answer / problem** is removed. See [accepted feedback](decision-p1-manual-feedback.md).
+**Latest manual feedback:** UI-language switching is required in version one, recording is optional directly on the unified card without a mode switch, full-answer help is labelled **Show answer**, **Other answer / problem** and **I couldn’t recall it** are removed, and **Show & explain** is a visually distinct action beside Show answer that expands materials inside the card. See [accepted feedback](decision-p1-manual-feedback.md).
 
 **Latest review follow-up:** three fresh Sol 6.1 reviews found and corrected P1 defects; see [the review-loop report](plan/evidence/p1-review-loop-2026-10-12.md). Pause before a fourth automated review; the recommended next P1 step is the user’s manual walkthrough. The user rejects macOS-only audio dependence, asks to reuse echo-words’ Piper/Edge engines and llmbroker, and authorizes commits directly to `main`. Production source remains a P2 scope decision.
 
@@ -69,8 +71,8 @@ The stopped attempt produced temporary source, fixtures and a browser prototype 
 - Ambiguous cues and valid alternatives are not memory failures. Self-comparison remains available; AI/ASR grading is not required.
 - Preserve support/exposure history. Reading a model, immediate echo, partial-cue retrieval, shown-word usage and silent practice are different evidence.
 - One learning target has one schedule across examples, cue variants and dialogue appearances.
-- Recording defaults on. Provide a session-level recording switch, self-recording/replay controls and automated comparison when recording is on. The endorsed working order is learner recording → complete phrase/model → self-check.
-- Show & explain also supports recording with the complete phrase visible throughout capture and learner/model comparison. These are model-supported practice attempts, stored like all other takes and linked to the same target/history. The session recording switch applies on both cards.
+- Provide recording/replay controls directly on the practice card, without a session-level recording switch; self-check also works without recording. The endorsed working order is learner recording → complete phrase/model → self-check.
+- Show & explain also supports recording with the complete phrase visible throughout capture and learner/model comparison. These are model-supported practice attempts, stored like all other takes and linked to the same target/history. Recording is directly available without a mode switch.
 - Manual stopping is the default and the only stopping method in the first version. The compact drill starts capture with a microphone-icon button; during capture it becomes a stop icon plus **Stop recording**. Omit “Say the whole phrase aloud.” and “Ready when you are.” The complete-phrase task and automatic comparison remain unchanged. Choosing manual versus automatic stop belongs in later app settings; the selector and automatic stopping are deferred beyond the first version.
 - Automatically store all learner recordings, including retries, as audio and metadata in the app database from the first version. No manual Save action or automatic expiry. A UI for comparing progress across historical recordings is deferred; immediate self/model comparison remains core.
 - Recording off permits practice when the learner cannot speak. It must not require microphone permission or imply demonstrated spoken performance; audio is manually requested in this mode.

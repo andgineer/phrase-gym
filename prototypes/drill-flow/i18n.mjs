@@ -46,7 +46,6 @@ const keys = [
   "meaning",
   "returnDrill",
   "showAnswer",
-  "missedBeforeHelp",
   "permission",
   "capturing",
   "ownPlayback",
@@ -78,6 +77,9 @@ const keys = [
   "reset",
   "confirmReset",
   "supportedContinue",
+  "learningMaterials",
+  "materialsDescription",
+  "micReady",
 ];
 const en = [
   "Settings",
@@ -127,7 +129,6 @@ const en = [
   "Meaning & use",
   "Back to drill",
   "Show answer",
-  "I couldn’t recall it",
   "Waiting for microphone permission",
   "Recording…",
   "Playing my recording",
@@ -159,6 +160,9 @@ const en = [
   "Reset disposable prototype",
   "Delete all prototype state and local test takes?",
   "Continue without a recall grade",
+  "Learning materials",
+  "Meaning, usage and phrase breakdown",
+  "Microphone ready until you pause.",
 ];
 const ru = [
   "Настройки",
@@ -208,7 +212,6 @@ const ru = [
   "Значение и употребление",
   "Назад к упражнению",
   "Показать ответ",
-  "Не смог вспомнить",
   "Ожидание доступа к микрофону",
   "Идёт запись…",
   "Воспроизведение моей записи",
@@ -240,6 +243,9 @@ const ru = [
   "Сбросить временные данные",
   "Удалить все данные прототипа и локальные пробные записи?",
   "Продолжить без оценки вспоминания",
+  "Учебные материалы",
+  "Значение, употребление и разбор фразы",
+  "Микрофон готов до паузы в занятии.",
 ];
 const sr = [
   "Podešavanja",
@@ -289,7 +295,6 @@ const sr = [
   "Značenje i upotreba",
   "Nazad na vežbu",
   "Prikaži odgovor",
-  "Nisam mogao da se setim",
   "Čekanje dozvole za mikrofon",
   "Snimanje…",
   "Reprodukcija mog snimka",
@@ -321,6 +326,9 @@ const sr = [
   "Obriši privremene podatke",
   "Obrisati sve podatke prototipa i lokalne probne snimke?",
   "Nastavi bez ocene prisećanja",
+  "Materijal za učenje",
+  "Značenje, upotreba i delovi fraze",
+  "Mikrofon je spreman do pauze.",
 ];
 export const dictionaries = Object.fromEntries(
   Object.entries({ en, ru, sr }).map(([code, values]) => [

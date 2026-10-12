@@ -1,5 +1,7 @@
 # Phrase Gym — consolidated implementation plan
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](../decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 Updated **2026-10-12** with P1 implementation evidence. Originally consolidated on 2026-10-11 at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
 
 **Status, 2026-10-12:** the user requested P1 implementation. New runnable prototypes and a fixture pack exist under `prototypes/`; [P1 evidence](evidence/p1-2026-10-12.md) and [the review handoff](p1-review.md) record what was built/tested and what remains pending. Every implementation gate remains unpassed: P1 still needs user/device/content review, and P2 has not started. Production source remains the user-created Python scaffold. Archived code was not used as the baseline.
@@ -100,7 +102,7 @@ Keep **Practice again** separate: a desire to improve pronunciation/flow is not 
 
 Recommend one result tap saves and advances, with Undo correcting the original event. If extra practice was already requested, retain the result before entering practice. Keep criteria in a collapsed What counts? area. No separate Easy button, predicted interval labels, second confidence question, numerical fluency score or cue-to-microphone speed grading.
 
-Help before any attempt uses a supported-practice state with Continue / Practice again, not an independent-recall success. An explicitly reported failed retrieval before help may receive Not yet once. Deliberate silent recall before reveal can use the memory ratings with its modality retained; reading, displayed-word use and immediate imitation cannot. Search/explanation exposure is logged without a fabricated grade.
+Help before any attempt uses a supported-practice state with Continue / Practice again, not an independent-recall success. The separate I couldn’t recall it shortcut is removed by user request. Show answer stays inside the drill; Show & explain sits outside it as visually distinct supplementary learning materials. Opening either must not fabricate a failure. Deliberate silent recall before reveal can use the memory ratings with its modality retained; reading, displayed-word use and immediate imitation cannot. Search/explanation exposure is logged without a fabricated grade.
 
 ### Schedule and retry automatically
 

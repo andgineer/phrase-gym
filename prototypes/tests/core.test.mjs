@@ -212,3 +212,21 @@ test("Cue situations do not supply the hidden chunk verbatim", () => {
       }
   }
 });
+
+test("supported self-check saves its rating without promotion and retains later retrieval", () => {
+  const s = fresh();
+  s.help = ["explanation"];
+  const first = attempt(s);
+  const grade = finalize(s, first, 3, 1000);
+  assert.equal(grade.result, 3);
+  assert.equal(grade.scheduleUpdated, false);
+  assert.equal(s.repairs.length, 1);
+  const supportedRetry = {
+    ...first,
+    id: crypto.randomUUID(),
+    finalized: undefined,
+    retry: true,
+  };
+  finalize(s, supportedRetry, 3, 1000 + RETRY_MS);
+  assert.equal(s.repairs[0].done, false);
+});

@@ -11,8 +11,10 @@ export async function referenceRecord(target) {
 }
 
 export class AudioFlow {
-  constructor(change = () => {}) {
+  constructor(change = () => {}, { keepReady = false } = {}) {
     this.change = change;
+    this.keepReady = keepReady;
+    this.previousSessionType = null;
     this.player = null;
     this.recorder = null;
     this.stream = null;
@@ -64,7 +66,7 @@ export class AudioFlow {
           );
         player.addEventListener(
           "cancelled",
-          () => reject(new Error("Playback stopped.")),
+          () => reject(new DOMException("Playback stopped.", "AbortError")),
           { once: true },
         );
         player.play().catch(reject);
@@ -72,7 +74,10 @@ export class AudioFlow {
     } finally {
       player.pause();
       if (source instanceof Blob) URL.revokeObjectURL(url);
-      if (this.player === player) this.player = null;
+      if (this.player === player) {
+        this.player = null;
+        this.change("idle");
+      }
     }
   }
   async reference(target) {
@@ -88,6 +93,16 @@ export class AudioFlow {
         "Reference audio is missing. Download assets while connected or import the clip.",
       );
     return response.blob();
+  }
+  releaseMicrophone() {
+    this.stream?.getTracks().forEach((track) => track.stop());
+    this.stream = null;
+    if (this.previousSessionType !== null) {
+      try {
+        navigator.audioSession.type = this.previousSessionType;
+      } catch {}
+      this.previousSessionType = null;
+    }
   }
   async start(metadata) {
     if (this.recorder || this.requesting)
@@ -107,13 +122,30 @@ export class AudioFlow {
         typeof MediaRecorder === "undefined"
       ) {
         throw new Error(
-          "Recording needs a secure origin and MediaRecorder. Recording-off practice is available.",
+          "Recording needs a secure origin and MediaRecorder. You can still reveal and rate without recording.",
         );
       }
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
+      if (navigator.audioSession && this.previousSessionType === null) {
+        this.previousSessionType = navigator.audioSession.type;
+        try {
+          navigator.audioSession.type = "play-and-record";
+        } catch {}
+      }
+      const reusable =
+        this.keepReady &&
+        this.stream
+          ?.getAudioTracks()
+          .some((track) => track.readyState === "live");
+      stream = reusable
+        ? this.stream
+        : await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+            video: false,
+          });
       if (token !== this.generation) {
         stream.getTracks().forEach((t) => t.stop());
         return null;
@@ -128,6 +160,19 @@ export class AudioFlow {
         status: "incomplete",
         bytes: 0,
         ...metadata,
+        captureSettings: Object.fromEntries(
+          Object.entries(stream.getAudioTracks()[0].getSettings()).filter(
+            ([key]) =>
+              [
+                "echoCancellation",
+                "noiseSuppression",
+                "autoGainControl",
+                "sampleRate",
+                "channelCount",
+                "latency",
+              ].includes(key),
+          ),
+        ),
       };
       const chunks = [];
       let writes = Promise.resolve();
@@ -154,7 +199,7 @@ export class AudioFlow {
           this.change("capture-error");
         };
         recorder.onstop = async () => {
-          stream.getTracks().forEach((t) => t.stop());
+          if (!this.keepReady) this.releaseMicrophone();
           const final = {
             ...take,
             blob: new Blob(chunks, { type: recorder.mimeType }),
@@ -180,7 +225,6 @@ export class AudioFlow {
             this.change("storage-error", error);
           }
           this.recorder = null;
-          this.stream = null;
           this.change(final.bytes ? "captured" : "empty");
           resolve(final);
         };
@@ -192,7 +236,7 @@ export class AudioFlow {
     } catch (error) {
       stream?.getTracks().forEach((t) => t.stop());
       this.recorder = null;
-      this.stream = null;
+      this.releaseMicrophone();
       this.change("capture-error", error);
       throw error;
     } finally {
@@ -203,14 +247,16 @@ export class AudioFlow {
     if (!this.recorder) return null;
     this.take.status = complete ? "complete" : "incomplete";
     if (this.recorder.state !== "inactive") this.recorder.stop();
-    this.stream?.getTracks().forEach((t) => t.stop());
+    // Wait for the final dataavailable/onstop flush before releasing tracks.
     return this.completion;
   }
   async cancel() {
     ++this.generation;
     this.requesting = false;
     this.stopPlayback();
-    return this.stop(false);
+    const take = await this.stop(false);
+    this.releaseMicrophone();
+    return take;
   }
   async retryStorage() {
     if (!this.pending) return;

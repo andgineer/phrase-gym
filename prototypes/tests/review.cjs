@@ -32,12 +32,6 @@ async function onboard(page) {
   await page.goto(origin + "/learn/en");
   await page.locator("#first-native").selectOption("en");
   await tap(page, "[data-action=onboard]");
-  await page.locator("#recording-mode").uncheck();
-  await page.waitForFunction(async () =>
-    (await (await import("/shared/storage.mjs")).all("events")).some(
-      (e) => e.type === "recording-mode" && e.enabled === false,
-    ),
-  );
 }
 async function capture(page, ms = 700) {
   await tap(page, "[data-action=record]");
@@ -60,6 +54,7 @@ async function capture(page, ms = 700) {
       serviceWorkers: "block",
     });
     const page = await context.newPage();
+    page.setDefaultTimeout(10000);
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     try {
@@ -82,7 +77,7 @@ async function capture(page, ms = 700) {
         await page.locator("#phrase-search").fill("day");
         await idle(page);
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, false);
         assert.ok(
           (await session(page)).attempt.support.includes("search-result"),
@@ -91,9 +86,8 @@ async function capture(page, ms = 700) {
         await tap(page, "[data-action=pause]");
         await page.goto(origin + "/learn/en/lesson/rapport");
         await page.locator("[data-action=lesson-start]").waitFor();
-        await page.locator("#recording-mode").uncheck();
         await tap(page, "[data-action=lesson-start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, false);
         assert.ok(
           (await session(page)).attempt.support.includes("lesson-list"),
@@ -107,7 +101,7 @@ async function capture(page, ms = 700) {
         await second.goto(origin + "/learn/sr");
         await second.locator("#phrase-search").waitFor();
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         await tap(page, '[data-action=grade][data-rating="3"]');
         const before = await history(page);
         await tap(second, "[data-action=settings]");
@@ -132,12 +126,12 @@ async function capture(page, ms = 700) {
       "Undo and regrade create exactly one separated retry",
       async (page) => {
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         await tap(page, '[data-action=grade][data-rating="1"]');
         await page.getByText("Prototype diagnostics", { exact: true }).click();
         await tap(page, "[data-action=clock]");
         for (let i = 0; i < 2; i++) {
-          await tap(page, "[data-action=reveal]");
+          await tap(page, "[data-action=hint]");
           await tap(page, '[data-action=grade][data-rating="3"]');
         }
         await tap(page, "[data-action=undo]");
@@ -145,7 +139,7 @@ async function capture(page, ms = 700) {
         let s = await session(page);
         assert.equal(s.queue.filter((i) => i.retry).length, 1);
         assert.equal(s.repairs[0].attempts, 1);
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         await tap(page, '[data-action=grade][data-rating="3"]');
         s = await session(page);
         assert.equal(s.queue[s.cursor].retry, false);
@@ -153,15 +147,17 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Original recording remains replayable after explanation practice and Undo",
+      "Original recording evidence survives later takes and Undo; replay uses latest take",
       async (page) => {
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await capture(page, 650);
         const original = (await read(page, "takes"))[0];
         await tap(page, "[data-action=explain]");
         await capture(page, 1400);
-        await tap(page, "[data-action=back]");
+        const latest = (await read(page, "takes")).sort(
+          (a, b) => b.created - a.created,
+        )[0];
+        await tap(page, "[data-action=explain]");
         assert.equal((await session(page)).attempt.takeId, original.id);
         await page.evaluate(() => {
           window.objectURL = URL.createObjectURL;
@@ -173,7 +169,7 @@ async function capture(page, ms = 700) {
         await tap(page, "[data-action=play-own]");
         assert.equal(
           await page.evaluate(() => window.replayBytes),
-          original.blobBytes,
+          latest.blobBytes,
         );
         await tap(page, '[data-action=grade][data-rating="3"]');
         await tap(page, "[data-action=undo]");
@@ -181,7 +177,7 @@ async function capture(page, ms = 700) {
         await tap(page, "[data-action=play-own]");
         assert.equal(
           await page.evaluate(() => window.replayBytes),
-          original.blobBytes,
+          latest.blobBytes,
         );
       },
     );
@@ -196,7 +192,6 @@ async function capture(page, ms = 700) {
             return window.originalPut.call(this, value);
           };
         });
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await capture(page);
         assert.equal((await read(page, "takes")).length, 0);
@@ -227,7 +222,6 @@ async function capture(page, ms = 700) {
     await check(
       "Pausing a delayed reference cancels playback and resumes the original self-check",
       async (page) => {
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await page.evaluate(() => {
           window.playCalls = 0;
@@ -310,7 +304,6 @@ async function capture(page, ms = 700) {
             return stream;
           };
         });
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await capture(page, 650);
         await tap(page, '[data-action=grade][data-rating="3"]');
@@ -341,7 +334,7 @@ async function capture(page, ms = 700) {
       async (page) => {
         await tap(page, "[data-action=start]");
         for (const failingStore of ["events", "settings", "sessions"]) {
-          await tap(page, "[data-action=reveal]");
+          await tap(page, "[data-action=hint]");
           const before = await session(page);
           const oldHistory = await history(page);
           const events = await read(page, "events");
@@ -381,7 +374,7 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Explanation capture disables replay and reference never plays into a live microphone",
+      "Explanation capture disables replay and reference never plays into an active take",
       async (page) => {
         await page.evaluate(() => {
           window.streams = [];
@@ -397,14 +390,11 @@ async function capture(page, ms = 700) {
           const play = HTMLMediaElement.prototype.play;
           HTMLMediaElement.prototype.play = function () {
             window.plays.push(
-              window.streams.some((s) =>
-                s.getTracks().some((t) => t.readyState === "live"),
-              ),
+              !!document.querySelector("[data-action=stop-recording]"),
             );
             return play.call(this);
           };
         });
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=explain]");
         await tap(page, "[data-action=record]");
@@ -427,60 +417,53 @@ async function capture(page, ms = 700) {
       },
     );
     await check(
-      "Home can enable recording for a new session after Finish",
+      "Every new session allows recording or self-check without a mode switch",
       async (page) => {
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=finish]");
-        await page.locator("#recording-mode").check();
-        await page.waitForFunction(async () =>
-          (await (await import("/shared/storage.mjs")).all("events")).some(
-            (e) => e.type === "recording-mode" && e.enabled,
-          ),
-        );
         await tap(page, "[data-action=start]");
-        assert.equal((await session(page)).recording, true);
+        assert.equal(await page.locator("#recording-mode").count(), 0);
         assert.equal(await page.locator("[data-action=record]").count(), 1);
+        assert.equal(await page.locator("[data-action=grade]").count(), 3);
       },
     );
     await check(
       "Reveal exposure survives a finished session without rewriting the original grade",
       async (page) => {
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         await tap(page, '[data-action=grade][data-rating="1"]');
         assert.equal((await history(page)).reviewed["en-day"].result, 1);
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=finish]");
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, false);
         assert.ok(
           (await session(page)).attempt.support.includes("answer-reveal"),
         );
-        await tap(page, "[data-action=supported-continue]");
+        await tap(page, '[data-action=grade][data-rating="3"]');
         assert.equal((await history(page)).reviewed["en-day"].result, 1);
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=finish]");
         await tap(page, "[data-action=start]");
         await page.getByText("Prototype diagnostics", { exact: true }).click();
         await tap(page, "[data-action=clock]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, true);
       },
     );
     await check(
       "Automatic comparison journals answer exposure for the following session",
       async (page) => {
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await capture(page, 650);
         await tap(page, '[data-action=grade][data-rating="1"]');
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=finish]");
-        await page.locator("#recording-mode").uncheck();
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, false);
         assert.ok(
           (await session(page)).attempt.support.includes("answer-reveal"),
@@ -540,12 +523,10 @@ async function capture(page, ms = 700) {
     await check(
       "Starting capture cancels delayed manual reference playback on both surfaces",
       async (page) => {
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=explain]");
         for (const probe of [false, true]) {
           if (probe) {
-            await tap(page, "[data-action=back]");
             await tap(page, "[data-action=pause]");
             await page.goto(origin + "/audio-probe/");
             await page.locator("#mode").check();
@@ -569,6 +550,7 @@ async function capture(page, ms = 700) {
             .locator(probe ? "#reference" : "[data-action=play-reference]")
             .click();
           await waiting;
+          if (!probe) await page.locator("[data-action=stop-audio]").click();
           await page
             .locator(probe ? "#record" : "[data-action=record]")
             .click();
@@ -591,7 +573,6 @@ async function capture(page, ms = 700) {
     await check(
       "Stopping learner replay preserves original eligibility and logs the revealed answer",
       async (page) => {
-        await page.locator("#recording-mode").check();
         await tap(page, "[data-action=start]");
         await tap(page, "[data-action=record]");
         await page.waitForTimeout(1400);
@@ -611,9 +592,8 @@ async function capture(page, ms = 700) {
         await tap(page, '[data-action=grade][data-rating="1"]');
         await tap(page, "[data-action=pause]");
         await tap(page, "[data-action=finish]");
-        await page.locator("#recording-mode").uncheck();
         await tap(page, "[data-action=start]");
-        await tap(page, "[data-action=reveal]");
+        await tap(page, "[data-action=hint]");
         assert.equal((await session(page)).attempt.eligible, false);
         assert.ok(
           (await session(page)).attempt.support.includes("answer-reveal"),

@@ -86,14 +86,14 @@ export function makeSession(
     queue,
     cursor: 0,
     created: now,
-    recording: true,
     phase: "cue",
     help: [],
     attempt: null,
     grades: [],
     repairs: [],
     completed: [],
-    practiceRequested: false,
+    answerShown: false,
+    explanationOpen: false,
     dialogueId,
     finished: queue.length === 0,
   };
@@ -114,7 +114,7 @@ export function snapshotAttempt(
     targetRevision: target.revision,
     cueId: session.cueId,
     created: now,
-    modality: session.recording ? "recorded" : "silent-recall",
+    modality: "silent-recall",
     support,
     eligible: support.length === 0 && target.kind !== "word-use",
     retry: item.retry,
@@ -146,7 +146,7 @@ export function finalize(session, attempt, result, now) {
   session.grades.push(event);
   attempt.result = result;
   attempt.finalized = now;
-  if (result === 1 || (result === null && attempt.support.length)) {
+  if (result === 1 || (!attempt.eligible && attempt.support.length)) {
     const existing = session.repairs.find(
       (r) => r.targetId === attempt.targetId,
     );
@@ -165,7 +165,8 @@ export function finalize(session, attempt, result, now) {
     }
   }
   const repair = session.repairs.find((r) => r.targetId === attempt.targetId);
-  if (attempt.retry && repair && result >= 2) repair.done = true;
+  if (attempt.retry && attempt.eligible && repair && result >= 2)
+    repair.done = true;
   return event;
 }
 
@@ -196,7 +197,8 @@ export function next(session, now) {
   session.phase = "cue";
   session.captureSupported = false;
   session.hint = false;
-  session.practiceRequested = false;
+  session.answerShown = false;
+  session.explanationOpen = false;
   session.finished = session.cursor >= session.queue.length;
   return session;
 }
@@ -220,6 +222,7 @@ export function undo(session, eventId) {
   };
   session.cueId = grade.cueId;
   session.help = [...grade.support];
-  session.practiceRequested = false;
+  session.answerShown = false;
+  session.explanationOpen = false;
   return true;
 }

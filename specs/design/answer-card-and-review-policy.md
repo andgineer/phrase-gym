@@ -1,5 +1,7 @@
 # Proposal: answer card and adaptive review policy
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](../decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 2026-10-11. Requested research/design work; **proposal for discussion, not user acceptance of the exact controls or application implementation**. Based on the [evidence review](../research-answer-card-and-scheduling.md). Preserve already accepted whole-phrase drills, recording sequence, manual stop, all-recording retention, optional silent practice, compact presentation, on-request native-language explanation, prepared cues and one schedule per target.
 
 **Accepted user constraint:** choose the best-supported practical approach and let the learner use it normally. The user explicitly rejected being asked to validate learning effectiveness. Do not add experiments, validation screens, special assessment sessions, policy A/B tests, calibration tasks or a requirement to prove that the method works for them. Ordinary answer ratings drive automatic scheduling. Software correctness checks are an engineering responsibility.
@@ -42,12 +44,12 @@ Keep criteria in a collapsible **What counts?** help area rather than repeating 
 
 **Accepted simplification, 2026-10-12:** remove **Other answer / problem** and its submenu entirely, without a replacement skip/report action. An explicitly allowed equivalent remains a correct answer under What counts?; technical capture failures still create no automatic memory grade. See [manual feedback](../decision-p1-manual-feedback.md).
 
-The full-phrase help control is **Show answer**, replacing the misleading Additional hint label. It reveals the whole phrase and records full-phrase exposure; subtler hints are not required for version one.
+The full-phrase help control is **Show answer**, replacing the misleading Additional hint label. It reveals the whole phrase and records full-phrase exposure; subtler hints are not required for version one. Remove the separate I couldn’t recall it action. Present Show & explain outside the drill card as supplementary learning materials, visually distinct from answer and rating controls.
 
 ## Assistance and mode states
 
 - **Normal graded attempt:** only the planned, reviewed cue was available before the response. Comparison afterward does not invalidate that original response. Grade that response, not the later echo.
-- **Help before any attempt:** opening Show & explain is an exposure, not evidence that the learner tried and failed. The card says **Practised with help** and offers Continue / Practice again, without asking for an independent-recall success. Keep a later retrieval check pending. If the learner explicitly reports inability to recall a clear target before help, record that failure once.
+- **Help before any attempt:** opening Show & explain is an exposure, not evidence that the learner tried and failed. The card says **Practised with help** and offers Continue / Practice again, without asking for an independent-recall success. Keep a later retrieval check pending. The user removed the separate I couldn’t recall it shortcut on 2026-10-12. Do not create a failure simply from opening the answer or learning materials.
 - **Repair after a rated failure:** keep the original Not yet. Further recordings are supported practice; subsequent success in that repair episode does not create repeated long-term promotions.
 - **Silent attempt:** if the learner deliberately recalled the answer before reveal, the same three outcomes can provide self-reported memory evidence, labeled silent. This is a proposed resolution of the previously open silent-scheduling question. It never verifies pronunciation or spoken fluency. Mere reading/recognition remains exposure only. Retain the response mode in normal history; do not ask the learner to run comparisons between modes.
 - **Full target shown:** using a displayed word in a sentence does not demonstrate retrieval of that word. A model-visible take is practice, with every recording retained.

@@ -42,24 +42,26 @@ The app has a manifest and service worker. On Safari, use Add to Home Screen and
 
 Use the probe's result selectors for observed results. Untested cases stay untested; export the metadata-only report. Do not put private recordings in evidence or source control. Temporary certificate keys also stay outside the repository.
 
-## Accepted manual feedback, 2026-10-12
+## Current manual-feedback prototype
 
-Choose native-language UI or **Use learning language for the interface** at first launch; change it later under **⚙ Settings**. Explanations retain the native language. Fresh sessions default to recording on; capture starts only when you press the microphone. Existing sessions retain their selected mode on resume. **Show answer** reveals the full phrase without an explanation and records supported exposure. **Other answer / problem** has been removed entirely. See [the decision](../specs/decision-p1-manual-feedback.md).
+Version **0.1.4** follows the [unified practice-card decision](../specs/decision-unified-practice-card.md). Native/learning UI switching is available at first launch and in Settings. One card always offers recording, replay, reference and red/amber/green self-check buttons. There is no recording switch, Practice again, problem submenu or supported-only Continue button.
+
+Show answer fills the gaps. The adjacent blue book-icon Show & explain action expands meaning, usage and phrase breakdown within the same card. Recording is optional; use Show answer and rate without accessing the microphone. Supported ratings retain their support metadata rather than being counted as independent recall.
+
+The round microphone becomes a stop control while recording or playing audio. Stopping playback restores the microphone. After the first explicit recording request, the microphone connection remains ready between takes to avoid repeated headset/audio-route initialization. Only explicit takes are recorded. Pause, leaving practice, backgrounding or finishing releases the microphone; the ready note makes this visible.
 
 ## Walkthroughs
 
-1. Search lesson titles for `rap`, then clear/select All lessons. Search phrases for `greetings`; the matching wording does not contain that concept. Inspect an explanation, return with the query intact, visit its complete lesson list and start a lesson drill. Browsing creates exposure, never a recall result.
-2. Turn recording off and start a familiar-item session directly. Reveal after silent retrieval and choose Not yet, With effort or Recalled. What counts? gives the original-attempt criteria. Silent work is memory evidence only.
-3. On a cue, open Show & explain before responding, then return. The drill hides native-language meaning but retains support. Reveal now offers Continue without a recall grade. A separate I couldn’t recall it action can record one reported failure before help.
-4. Request Practice again on the answer card. First retain the original result; extra practice shows the complete phrase and cannot overwrite that result. Undo corrects the original event while retaining takes/history. Allowed equivalents count as correct under What counts?
-5. Leave recording on (or enable it after the silent walkthrough). Start with the microphone icon, stop manually, listen to the learner take with the cue retained, then see/hear the complete reference. Replay either version. Empty/failed capture creates no memory grade. Missing/blocked audio offers manual recovery.
-6. Open Show & explain with recording on. The full phrase stays visible during capture and both playback stages. Its take is supported practice. Turn recording off to use explanation and manually requested reference audio without microphone access.
-7. Open a prepared dialogue from Home. Partner/supporting lines surround target turns. Practise this turn isolates difficulty; retain its original result, practise, and continue into the next partner turn. There is one target identity across the dialogue and ordinary drill.
-8. Pause, reload and resume. Switch to Serbian and back; the English session/history remain. Open English and Serbian in separate tabs; URL languages remain independent. Explicit session takeover pauses the old view (a prototype lease, not a production concurrency guarantee).
-9. Inspect a word-retrieval target (`en-look`), a shown-construction use target (`en-use`, available under Practice all), and the frame's allowed inflection. The latter use task receives no word-recall credit. Rejected/unknown/ambiguous candidates stay in [the review sheet](drill-flow/cue-review.md), outside the practice queue.
-10. For the retry engineering walkthrough, mark the first target Not yet, use **Prototype diagnostics → Advance probe clock +5 min**, and finish two other distinct targets. The failed target returns using another stored cue when suitable. The original failure remains; at most two extra retrieval attempts are queued. No timer forces waiting. Short sessions defer repairs. A fresh session with Practice all can demonstrate stored-mask variation; a single-cue target reuses its reliable cue.
-
-The diagnostic clock is an engineering control, not a learner experiment or calibration task. Fixture due flags/completion receipts demonstrate selection, not FSRS dates. Failed targets remain due on later sessions; early voluntary practice does not promote a schedule. A production policy/FSRS adapter belongs to P3.
+1. Choose the native language and optional learning-language UI at first launch. Switch later under Settings. Explanations stay native.
+2. Start a session. Without recording, press Show answer and rate your recall using the colored/icon buttons. Direct rating is also available; no microphone permission is required.
+3. Open Show & explain. It expands inside the card beside Show answer, keeps the full phrase visible and retains all practice controls. Rating remains available; support is stored separately. Collapse it using the same link.
+4. Record, stop, and listen to your take followed by the reference. The full phrase is shown after capture. Interrupt playback using the round stop icon; it returns to a microphone. Record again directly. Every take remains stored; the first response's evidence is preserved. Grade to advance, and use Undo to correct the result.
+5. Search lessons for `rap` and phrases for `greetings`. Browsing a phrase opens its materials without starting a review. Visit its lesson list and start a drill. Recent visible answers are tracked as support, while self-check controls remain available.
+6. Pause, reload, resume and switch learning languages. Sessions and recordings are scoped to the language URL. Pause/leave/background releases the ready microphone. English and Serbian bookmarks remain independent.
+7. Try a prepared dialogue, then isolate a turn and rate to advance within the exchange. One target identity is shared across ordinary drills and dialogue appearances.
+8. Mark Not yet, advance the diagnostic clock five minutes and complete two other targets to exercise a separated retry. This is a policy probe, not production FSRS.
+9. Download the prepared English session and reload offline. Reference playback, self-check and retained takes remain usable. Serbian reference audio is still pending.
+10. On Safari with the actual headset, try several takes of a continuous sentence. Listen for the reported mid-take interruption, including the first take, later takes and resuming after Pause. Synthetic checks do not establish that this device-specific issue is resolved.
 
 ## Checks
 
@@ -74,11 +76,14 @@ Install the prototype's pinned development browser dependency separately from th
 ```sh
 cd prototypes
 npm install
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:browser
 npm run test:review
+npm run test:audio
 ```
 
 The browser runner uses port 8871 by default; override `PHRASE_GYM_TEST_ORIGIN` if needed. It writes metadata/screenshots to `/tmp/phrase-gym-p1-browser` (or `PHRASE_GYM_TEST_ARTIFACTS`). It uses a synthetic microphone input, actual MediaRecorder/IndexedDB/decoding, 320px layout, 200% text and injected quota faults. It is **not** actual iPhone, microphone, headset or actor-audio evidence.
 
 Fresh-session review corrections and verification are tracked in [the review-loop report](../specs/plan/evidence/p1-review-loop-2026-10-12.md). The focused browser suite covers browsing exposure, cross-tab history, Undo/retries, original recording replay, unsaved-take recovery, cancellation during delayed audio loading and actor-audio priority.
+
+The audio-continuity check uses a generated tone and disposable persistent browser profiles in Chromium and WebKit. It verifies three stored takes, one microphone-stream acquisition, release on cancel and no middle-of-take dropouts in the encoded signal. It does not access the real headset or prove its clipping is fixed.

@@ -1,5 +1,7 @@
 # Phrase Gym — agent guidance
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 Read [START-HERE](START-HERE.md), the drilling, recording and [navigation/search decisions](decision-session-navigation-and-search.md), [interaction design](design/interaction-design.md) and [next-session brief](plan/next-session.md). Current user instructions take precedence over this record. This project uses the user's Python scaffold; all development context is under `specs/`.
 
 **Implementation update, 2026-10-12:** the current user request authorized P1. New disposable prototypes are runnable; see [evidence](plan/evidence/p1-2026-10-12.md) and [review handoff](plan/p1-review.md). P1 acceptance remains pending and P2 has not begun. Prior discussion-only restrictions below describe the preceding session, not a prohibition on the current P1 task.

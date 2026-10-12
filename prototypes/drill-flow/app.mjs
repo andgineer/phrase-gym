@@ -55,8 +55,7 @@ let error = "",
   message = "",
   lastUndo = JSON.parse(sessionStorage.getItem("pg-undo") || "null"),
   lastTake = null,
-  clockOffset = 0,
-  lookupRecording = true;
+  clockOffset = 0;
 const tabId = sessionStorage.getItem("pg-tab") || crypto.randomUUID();
 sessionStorage.setItem("pg-tab", tabId);
 const now = () => Date.now() + clockOffset;
@@ -92,13 +91,16 @@ const updatePreferences = async (changes) => {
     ...changes,
   }));
 };
-const audio = new AudioFlow((phase, problem) => {
-  if (isDrill() && ["permission", "recording"].includes(phase))
-    session().phase = phase;
-  if (phase === "storage-error") error = t("storageFailed");
-  if (problem) error = problem.message;
-  render();
-});
+const audio = new AudioFlow(
+  (phase, problem) => {
+    if (isDrill() && ["permission", "recording"].includes(phase))
+      session().phase = phase;
+    if (phase === "storage-error") error = t("storageFailed");
+    if (problem) error = problem.message;
+    render();
+  },
+  { keepReady: true },
+);
 
 function parseRoute() {
   const parts = location.pathname.split("/").filter(Boolean);
@@ -177,6 +179,10 @@ function homePath() {
 }
 async function prepare() {
   const s = session();
+  if (isDrill() && s?.attempt?.finalized && !s.finished) {
+    next(s, now());
+    await persist();
+  }
   const current = targetHere();
   const takes = current
     ? (await db.all("takes")).filter(
@@ -185,14 +191,7 @@ async function prepare() {
           (route.kind === "phrase" || take.sessionId === s?.id),
       )
     : [];
-  const replayTakes =
-    route.kind === "session" && s?.attempt && !s.attempt.finalized
-      ? takes.filter(
-          (take) =>
-            take.attemptId === s.attempt.id || take.id === s.attempt.takeId,
-        )
-      : takes;
-  lastTake = replayTakes.sort((a, b) => b.created - a.created)[0] || null;
+  lastTake = takes.sort((a, b) => b.created - a.created)[0] || null;
   if (route.kind === "session" && s && !s.finished) {
     const target = activeTarget();
     if (!s.cueId) {
@@ -263,9 +262,6 @@ function settings() {
       "",
     )}</select></label><label class="check"><input type="checkbox" id="ui-mode" ${prefs.learningUI ? "checked" : ""}>${t("learningUI")}</label><a href="/audio-probe/">${t("report")}</a></section>`;
 }
-function modeSwitch(checked) {
-  return `<label class="check"><input type="checkbox" id="recording-mode" ${checked ? "checked" : ""} ${busy() ? "disabled" : ""}>${t("recording")}: ${checked ? t("on") : t("off")}</label>`;
-}
 function home() {
   const lessons = pack.lessons.filter(
     (l) =>
@@ -274,7 +270,7 @@ function home() {
   );
   const matches = search(pack, language, query);
   const s = session();
-  return `<p class="eyebrow">${t("preview")}</p><h1>Phrase Gym</h1><div class="block"><label for="lesson-filter">${t("lesson")}</label><input id="lesson-filter" placeholder="${t("filterLessons")}" value="${esc(lessonFilter)}" type="search" aria-controls="lessons"><select id="lessons" aria-label="${t("lesson")}" style="margin-top:8px"><option value="">${t("allLessons")}</option>${lessons.map((l) => `<option value="${l.id}" ${selectedLesson === l.id ? "selected" : ""}>${esc(l.title)}</option>`).join("")}</select>${lessonFilter && !lessons.length ? `<p>${t("noMatches")}</p>` : ""}${selectedLesson ? policyOptions() : ""}</div>${modeSwitch(s && !s.finished ? s.recording : lookupRecording)}<div class="row">${s && !s.finished ? button("resume", t("resume"), "primary") : button("start", t("start"), "primary")}${s && !s.finished ? button("finish", t("finish")) : ""}</div><div class="block rule"><label for="phrase-search">${t("findPhrase")}</label><input id="phrase-search" type="search" value="${esc(query)}" placeholder="${t("searchHint")}"><div class="results" id="search-results">${searchResults(matches)}</div></div><details><summary>${t("dialogue")}</summary><div class="stack">${pack.dialogues
+  return `<p class="eyebrow">${t("preview")}</p><h1>Phrase Gym</h1><div class="block"><label for="lesson-filter">${t("lesson")}</label><input id="lesson-filter" placeholder="${t("filterLessons")}" value="${esc(lessonFilter)}" type="search" aria-controls="lessons"><select id="lessons" aria-label="${t("lesson")}" style="margin-top:8px"><option value="">${t("allLessons")}</option>${lessons.map((l) => `<option value="${l.id}" ${selectedLesson === l.id ? "selected" : ""}>${esc(l.title)}</option>`).join("")}</select>${lessonFilter && !lessons.length ? `<p>${t("noMatches")}</p>` : ""}${selectedLesson ? policyOptions() : ""}</div><div class="row">${s && !s.finished ? button("resume", t("resume"), "primary") : button("start", t("start"), "primary")}${s && !s.finished ? button("finish", t("finish")) : ""}</div><div class="block rule"><label for="phrase-search">${t("findPhrase")}</label><input id="phrase-search" type="search" value="${esc(query)}" placeholder="${t("searchHint")}"><div class="results" id="search-results">${searchResults(matches)}</div></div><details><summary>${t("dialogue")}</summary><div class="stack">${pack.dialogues
     .filter((d) => d.language === language)
     .map((d) => button("dialogue", esc(d.title), "", `data-id="${d.id}"`))
     .join("")}</div></details>${engineering()}`;
@@ -307,31 +303,42 @@ function lessonView() {
     )
     .join(
       "",
-    )}</div>${policyOptions()}${modeSwitch(lookupRecording)}${button("lesson-start", t("lessonDrill"), "primary")}`;
+    )}</div>${policyOptions()}${button("lesson-start", t("lessonDrill"), "primary")}`;
 }
-function captureControls(recording, supported = false) {
-  if (audio.requesting)
-    return `<p role="status">${t("permission")}</p>${button("cancel-capture", t("cancel"))}`;
-  if (audio.recorder)
-    return `<p role="status">${t("capturing")}</p>${button("stop-recording", stop + t("stopRecording"), "primary")}`;
-  if (autoComparePending)
-    return `<p role="status">${t(session()?.phase === "reference" ? "referencePlayback" : "ownPlayback")}</p>${button("stop-audio", t("stopAudio"))}`;
-  if (recording)
-    return `<div class="center">${button("record", mic, "mic", `aria-label="${t("startRecording")}"`)}</div>`;
-  return supported ? "" : button("reveal", t("reveal"), "primary");
+function captureControls() {
+  let action = "record",
+    icon = mic,
+    label = t("startRecording"),
+    cls = "mic";
+  if (audio.requesting) {
+    action = "cancel-capture";
+    icon = stop;
+    label = t("cancel");
+  } else if (audio.recorder) {
+    action = "stop-recording";
+    icon = stop;
+    label = t("stopRecording");
+    cls += " capturing";
+  } else if (audio.player || autoComparePending) {
+    action = "stop-audio";
+    icon = stop;
+    label = t("stopAudio");
+    cls += " playing";
+  }
+  return button(action, icon, cls, `aria-label="${label}" title="${label}"`);
 }
 function replayControls() {
-  const disabled =
-    audio.recorder || audio.requesting || autoComparePending ? "disabled" : "";
-  return `<div class="row">${lastTake ? button("play-own", "▶ " + t("myRecording"), "", disabled) : ""}${button("play-reference", "▶ " + t("reference"), "", 'aria-label="' + t("reference") + '" ' + disabled)}${button("stop-audio", t("stopAudio"), "subtle")}</div>`;
+  const disabled = busy() ? "disabled" : "";
+  return `<div class="audio-controls">${captureControls()}<div class="replay-controls">${button("play-own", "▶ " + t("myRecording"), "", !lastTake || busy() ? "disabled" : "")}${button("play-reference", "▶ " + t("reference"), "", disabled)}</div></div>`;
+}
+function phraseDetails(target) {
+  return `<section class="phrase-details" id="phrase-details"><h2>${t("meaning")}</h2><p lang="${prefs.native}">${esc(target.meaning[prefs.native])}</p><h3>${t("breakdown")}</h3><p lang="${language}">${target.chunks.map(esc).join(" / ")}</p><h3>${t("allowed")}</h3><p lang="${language}">${target.allowed.map(esc).join("<br>")}</p></section>`;
 }
 function explanation() {
   const target = targetHere();
   if (!target || target.language !== language)
     return `<h1>${t("noMatches")}</h1>`;
-  const fromDrill = returnRoute?.kind === "session";
-  const recording = fromDrill ? session().recording : lookupRecording;
-  return `${button("back", fromDrill ? t("returnDrill") : t("back"), "subtle")}<p class="eyebrow">${t("explain")}</p><div class="card"><p class="cue" lang="${language}">${esc(target.text)}</p>${modeSwitch(recording)}${captureControls(recording, true)}${replayControls()}<div class="rule"><h2>${t("meaning")}</h2><p lang="${prefs.native}">${esc(target.meaning[prefs.native])}</p><details><summary>${t("breakdown")}</summary><p lang="${language}">${target.chunks.map(esc).join(" / ")}</p><h3>${t("allowed")}</h3><p lang="${language}">${target.allowed.map(esc).join("<br>")}</p></details></div><p class="notice muted">${t("lookupExposure")}</p></div>${button("lesson", esc(pack.lessons.find((l) => l.id === target.lesson).title), "", `data-id="${target.lesson}"`)}`;
+  return `${button("back", t("back"), "subtle")}<div class="card"><p class="cue" lang="${language}">${esc(target.text)}</p>${replayControls()}${phraseDetails(target)}</div>${button("lesson", esc(pack.lessons.find((l) => l.id === target.lesson).title), "", `data-id="${target.lesson}"`)}`;
 }
 function dialogueContext(s, item) {
   if (!item.dialogueId) return "";
@@ -351,9 +358,9 @@ function drill() {
     target = activeTarget(),
     cue = target.cues.find((c) => c.id === s.cueId) || target.cues[0];
   const shown =
-    ["check", "practice", "reference"].includes(s.phase) ||
-    s.captureSupported ||
-    s.hint;
+    s.answerShown ||
+    s.hint ||
+    ["check", "practice", "reference"].includes(s.phase);
   const content = shown
     ? esc(target.text)
     : target.chunks
@@ -363,19 +370,13 @@ function drill() {
             : esc(chunk),
         )
         .join(" ");
-  let actions;
-  if (s.phase === "check") {
-    const supported = !s.attempt?.eligible;
-    actions = `${replayControls()}<p class="notice muted">${supported ? t("support") : s.attempt.modality === "silent-recall" ? t("silent") : t("original")}</p>${s.practiceRequested ? `<p role="status">${t("chooseResult")}</p>` : ""}${supported ? button("supported-continue", t("supportedContinue"), "primary") : ratings()}<div class="row block">${button("practice", t("practice"))}${button("explain", t("explain"))}</div>${gradingCriteria()}`;
-  } else if (s.phase === "practice") {
-    actions = `<p class="status">${t("savedGrade")} · ${t("practiceGrade")}</p>${captureControls(s.recording, true)}${replayControls()}<div class="row block">${button("continue-practice", s.isolated ? t("returnExchange") : t("continue"), "primary")}${button("explain", t("explain"))}</div>`;
-  } else {
-    actions = `${captureControls(s.recording)}<div class="row block">${button("explain", t("explain"), "subtle", busy() ? "disabled" : "")}${button("hint", t("showAnswer"), "subtle", busy() ? "disabled" : "")}${button("missed", t("missedBeforeHelp"), "subtle", busy() ? "disabled" : "")}</div>${s.help.length ? `<p class="notice muted">${t("support")}</p>` : ""}`;
-  }
-  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${modeSwitch(s.recording)}${dialogueContext(s, item)}<div class="card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${actions}</div>${engineering()}`;
+  const locked = audio.recorder || audio.requesting;
+  const book =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg>';
+  return `<div class="row spread">${button("pause", "‹ " + t("pause"), "subtle")}<small>${Math.min(s.cursor + 1, s.queue.length)} / ${s.queue.length}</small></div><progress value="${s.cursor}" max="${s.queue.length}"></progress>${dialogueContext(s, item)}<div class="card practice-card"><p class="context" lang="${language}">${esc(cue.context)}</p><p class="cue" lang="${language}">${content}</p>${replayControls()}${audio.stream && !audio.recorder ? `<p class="notice muted">${t("micReady")}</p>` : ""}<div class="answer-actions">${button("hint", t("showAnswer"), "", shown || locked ? "disabled" : "")}${button("explain", book + t("explain"), "materials-link", `aria-expanded="${!!s.explanationOpen}" aria-controls="phrase-details" ${locked ? "disabled" : ""}`)}</div>${s.explanationOpen ? phraseDetails(target) : ""}${ratings(locked)}${gradingCriteria()}</div>${engineering()}`;
 }
-function ratings() {
-  return `<div class="ratings">${[1, 2, 3].map((rating, index) => button("grade", t(["notYet", "effort", "recalled"][index]), rating === 3 ? "primary" : "", `data-rating="${rating}"`)).join("")}</div>`;
+function ratings(disabled = false) {
+  return `<div class="ratings">${[1, 2, 3].map((rating, index) => button("grade", `<span class="rating-icon" aria-hidden="true">${["↻", "◷", "✓"][index]}</span><span>${t(["notYet", "effort", "recalled"][index])}</span>`, `rating rating-${rating}`, `data-rating="${rating}" ${disabled ? "disabled" : ""}`)).join("")}</div>`;
 }
 function gradingCriteria() {
   return `<details><summary>${t("counts")}</summary><p>${criteria[prefs.learningUI ? language : prefs.native]}</p></details>`;
@@ -396,7 +397,7 @@ function results() {
     )}</div>${pending.length ? `<p class="status">${t("pendingRetries")}</p>` : ""}<div class="row">${button("home", t("home"), "primary")}${button("finish", t("newSession"))}</div>`;
 }
 function engineering() {
-  return `<details><summary>Prototype diagnostics</summary><p>Fixture due flags and review receipts only; FSRS is implemented in P3. Visual design and review-policy parameters are proposals. Recording starts on; microphone capture starts only when requested. The local keyword index demonstrates concept lookup; it is not an evaluated semantic-search system.</p><div class="row">${button("clock", "Advance probe clock +5 min")}${button("download", t("download"))}${button("export", "Export metadata (no audio)")}${button("reset", t("reset"), "danger")}</div><pre>${esc(JSON.stringify({ fixture: pack.revision, clockOffset, coverage: state.coverage[activeTarget()?.id], repairs: session()?.repairs }, null, 2))}</pre></details>`;
+  return `<details><summary>Prototype diagnostics</summary><p>Fixture due flags and review receipts only; FSRS is implemented in P3. Visual design and review-policy parameters are proposals. Microphone capture starts only when requested; recording is optional on every attempt. The local keyword index demonstrates concept lookup; it is not an evaluated semantic-search system.</p><div class="row">${button("clock", "Advance probe clock +5 min")}${button("download", t("download"))}${button("export", "Export metadata (no audio)")}${button("reset", t("reset"), "danger")}</div><pre>${esc(JSON.stringify({ fixture: pack.revision, clockOffset, coverage: state.coverage[activeTarget()?.id], repairs: session()?.repairs }, null, 2))}</pre></details>`;
 }
 function render(focus = false) {
   const ui = prefs.learningUI ? language : prefs.native || "en";
@@ -452,7 +453,6 @@ async function startSession(dialogueId = null, lessonOverride = null) {
   if (!(await claim())) return;
   const fresh = await db.get("settings", "history");
   if (fresh) state = fresh;
-  const recording = document.querySelector("#recording-mode")?.checked ?? true;
   sessions[language] = makeSession(
     pack,
     language,
@@ -462,15 +462,14 @@ async function startSession(dialogueId = null, lessonOverride = null) {
     now(),
     dialogueId,
   );
-  session().recording = recording;
   lastTake = null;
   lastUndo = null;
   await navigate(`/learn/${language}/session`);
 }
-async function beginAttempt() {
+async function beginAttempt(modality = "silent-recall") {
   const s = session();
   state = (await db.get("settings", "history")) || state;
-  if (!s.attempt)
+  if (!s.attempt) {
     s.attempt = snapshotAttempt(
       s,
       activeItem(),
@@ -478,6 +477,8 @@ async function beginAttempt() {
       now(),
       recentExposure(activeTarget()),
     );
+    s.attempt.modality = modality;
+  }
   await persist();
 }
 async function grade(result, reason = null) {
@@ -487,18 +488,16 @@ async function grade(result, reason = null) {
   const saved = finalize(s, s.attempt, result, now());
   saved.reason = reason;
   let undoState = null;
-  if (s.practiceRequested || s.isolated) {
-    s.phase = "practice";
-  } else {
-    next(s, now());
-    undoState = { eventId: saved.id, before, language };
-  }
+  s.isolated = false;
+  next(s, now());
+  undoState = { eventId: saved.id, before, language };
   state = await db.commitSessionEvent(
     s,
     { type: "result", at: now(), ...saved },
     state,
   );
   sessions[language] = s;
+  if (s.finished) audio.releaseMicrophone();
   lastUndo = undoState;
   await persist();
   await prepare();
@@ -509,8 +508,13 @@ async function record() {
   const target = targetHere();
   const s = session();
   const supported =
-    route.kind === "phrase" || s?.phase === "practice" || s?.hint;
-  if (isDrill() && !supported) await beginAttempt();
+    route.kind === "phrase" ||
+    s?.answerShown ||
+    s?.hint ||
+    s?.explanationOpen ||
+    ["check", "practice", "reference"].includes(s?.phase);
+  if (isDrill())
+    await beginAttempt(supported ? "supported-practice" : "recorded-recall");
   const metadata = {
     targetId: target.id,
     targetRevision: target.revision,
@@ -533,8 +537,8 @@ async function record() {
     await audio.start(metadata);
   } catch (problem) {
     if (isDrill()) {
-      s.phase = s.attempt?.finalized ? "practice" : "cue";
-      if (!s.attempt?.finalized) s.attempt = null;
+      s.phase = s.answerShown ? "check" : "cue";
+      if (!s.attempt?.takeId) s.attempt = null;
       await persist();
     }
     throw problem;
@@ -561,17 +565,20 @@ async function compare() {
   if (!take.bytes || take.status !== "complete") {
     autoComparePending = false;
     error =
-      "Capture was empty or interrupted. Retry or switch recording off; no recall result was saved.";
+      "Capture was empty or interrupted. Retry or rate without recording; no result was saved automatically.";
     if (isDrill()) {
-      session().phase = "cue";
-      session().attempt = null;
+      session().phase = session().answerShown ? "check" : "cue";
+      if (!session().attempt?.takeId) session().attempt = null;
     }
     await persist();
     render();
     return;
   }
-  const supported = take.modality === "supported-practice";
-  if (isDrill()) s.phase = "own";
+  if (isDrill()) {
+    s.answerShown = true;
+    s.phase = "own";
+  }
+  await expose(target, "answer-reveal");
   render();
   try {
     await audio.play(take.blob, "own");
@@ -589,8 +596,7 @@ async function compare() {
   } finally {
     if (current()) {
       autoComparePending = false;
-      if (isDrill())
-        s.phase = supported && s.attempt?.finalized ? "practice" : "check";
+      if (isDrill()) s.phase = "check";
       await expose(target, "answer-reveal");
       await persist();
       render();
@@ -647,7 +653,17 @@ async function dispatch(action, el) {
     await startSession(null, route.id);
     return;
   }
-  if (action === "phrase" || action === "explain") {
+  if (action === "explain") {
+    session().explanationOpen = !session().explanationOpen;
+    if (session().explanationOpen) {
+      session().answerShown = true;
+      await expose(activeTarget(), "explanation");
+    }
+    await persist();
+    render();
+    return;
+  }
+  if (action === "phrase") {
     returnRoute = { ...route, path: location.pathname + location.search };
     await navigate(
       `/learn/${language}/phrase/${el.dataset.id || activeTarget().id}`,
@@ -665,25 +681,9 @@ async function dispatch(action, el) {
     await persist();
     return;
   }
-  if (action === "hint") {
-    session().hint = true;
-    await expose(activeTarget(), "full-phrase");
-    message = t("support");
-    await persist();
-    render();
-    return;
-  }
-  if (action === "missed") {
+  if (action === "hint" || action === "reveal") {
     await beginAttempt();
-    session().attempt.modality = "self-reported-missed";
-    session().practiceRequested = true;
-    await grade(1);
-    returnRoute = { kind: "session", path: `/learn/${language}/session` };
-    await navigate(`/learn/${language}/phrase/${activeTarget().id}`);
-    return;
-  }
-  if (action === "reveal") {
-    await beginAttempt();
+    session().answerShown = true;
     session().phase = "check";
     await expose(activeTarget(), "answer-reveal");
     await persist();
@@ -701,8 +701,8 @@ async function dispatch(action, el) {
   if (action === "cancel-capture") {
     await audio.cancel();
     if (isDrill()) {
-      session().phase = "cue";
-      session().attempt = null;
+      session().phase = session().answerShown ? "check" : "cue";
+      if (!session().attempt?.takeId) session().attempt = null;
     }
     await persist();
     render();
@@ -728,45 +728,34 @@ async function dispatch(action, el) {
   }
   if (action === "play-reference") {
     if (busy()) return;
-    const generation = comparisonGeneration,
+    const generation = ++comparisonGeneration,
       target = targetHere();
-    await expose(target, "reference-audio");
-    const reference = await audio.reference(target);
-    if (
-      generation !== comparisonGeneration ||
-      targetHere()?.id !== target.id ||
-      busy()
-    )
-      return;
-    await audio.play(reference, "reference");
+    autoComparePending = true;
+    if (isDrill()) {
+      session().answerShown = true;
+      session().phase = "check";
+    }
     render();
+    try {
+      await expose(target, "reference-audio");
+      const reference = await audio.reference(target);
+      if (generation !== comparisonGeneration || targetHere()?.id !== target.id)
+        return;
+      await audio.play(reference, "reference");
+    } finally {
+      if (generation === comparisonGeneration) {
+        autoComparePending = false;
+        render();
+      }
+    }
     return;
   }
   if (action === "grade") {
+    if (audio.recorder || audio.requesting) return;
+    ++comparisonGeneration;
+    autoComparePending = false;
+    audio.stopPlayback();
     await grade(Number(el.dataset.rating));
-    return;
-  }
-  if (action === "supported-continue") {
-    await grade(null);
-    return;
-  }
-  if (action === "practice") {
-    if (session().attempt?.result) session().phase = "practice";
-    else if (!session().attempt?.eligible) {
-      session().practiceRequested = true;
-      await grade(null);
-      return;
-    } else session().practiceRequested = true;
-    await persist();
-    render();
-    return;
-  }
-  if (action === "continue-practice") {
-    session().isolated = false;
-    next(session(), now());
-    await persist();
-    await prepare();
-    render(true);
     return;
   }
   if (action === "isolate") {
@@ -867,7 +856,7 @@ async function download() {
   if (!navigator.serviceWorker)
     throw new Error("Offline download requires a secure origin.");
   const registration = await navigator.serviceWorker.ready;
-  const cache = await caches.open("phrase-gym-p1-v3");
+  const cache = await caches.open("phrase-gym-p1-v5");
   for (const target of pack.targets.filter(
     (t) => t.language === language && t.audio.url,
   )) {
@@ -889,7 +878,7 @@ app.addEventListener("click", (e) => {
   document.documentElement.dataset.working = "true";
   dispatch(el.dataset.action, el)
     .catch((problem) => {
-      error = problem.message;
+      if (problem.name !== "AbortError") error = problem.message;
       render();
     })
     .finally(() => {
@@ -962,23 +951,6 @@ app.addEventListener("change", async (e) => {
     if (e.target.name === "policy") {
       policy = e.target.value;
     }
-    if (e.target.id === "recording-mode") {
-      if (
-        session() &&
-        (isDrill() ||
-          returnRoute?.kind === "session" ||
-          (route.kind === "home" && !session().finished))
-      )
-        session().recording = e.target.checked;
-      else lookupRecording = e.target.checked;
-      await db.event("recording-mode", {
-        language,
-        enabled: e.target.checked,
-        sessionId: session()?.id,
-      });
-      await persist();
-      render();
-    }
   } catch (problem) {
     error = problem.message;
     render();
@@ -1014,15 +986,19 @@ setInterval(() => {
     );
 }, 10000);
 document.addEventListener("visibilitychange", async () => {
-  if (document.hidden && (audio.recorder || audio.requesting)) {
+  if (document.hidden) {
+    ++comparisonGeneration;
+    autoComparePending = false;
+    const interrupted = audio.recorder || audio.requesting;
     const take = await audio.cancel();
-    if (isDrill()) {
-      session().phase = "cue";
-      session().attempt = null;
+    if (isDrill() && interrupted) {
+      session().phase = session().answerShown ? "check" : "cue";
+      if (!session().attempt?.takeId) session().attempt = null;
     }
     await db.event("interruption", { takeId: take?.id, kind: "background" });
     await persist();
-    error = "Capture interrupted. Recovered audio is retained as incomplete.";
+    if (interrupted)
+      error = "Capture interrupted. Recovered audio is retained as incomplete.";
     render();
   }
 });

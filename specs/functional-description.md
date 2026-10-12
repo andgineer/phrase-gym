@@ -1,5 +1,7 @@
 # Phrase Gym — functional description
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 **Accepted P1 feedback, 2026-10-12:** UI-language switching is required in version one; recording defaults on with explicit microphone start; full-answer help is labelled Show answer; Other answer / problem is removed entirely. See [the decision](decision-p1-manual-feedback.md).
 
 Updated 2026-10-11. **Draft supporting scope. The agreed baseline is [targeted drilling](decision-targeted-drilling.md); there is no approved prototype or active app implementation. [Optional recording and comparison](decision-recording-and-comparison.md) is an additional agreed interaction requirement.** Other features below remain recommendations for design discussion and [prototyping](plan/01-prototyping.md), not additional approved requirements. See the [architecture](architecture.md) and [implementation roadmap](plan/implementation-plan.md) for the proposed work.

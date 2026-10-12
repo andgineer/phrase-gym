@@ -1,11 +1,12 @@
 {
   "name": "phrase-gym-p1-prototypes",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "scripts": {
     "test": "node --test tests/core.test.mjs",
     "test:browser": "node tests/browser.cjs",
-    "test:review": "node tests/review.cjs"
+    "test:review": "node tests/review.cjs",
+    "test:audio": "node tests/audio-continuity.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

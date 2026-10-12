@@ -1,5 +1,7 @@
 # Decision: optional recording and automated comparison
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 2026-10-11. This supplements the [targeted-drilling decision](decision-targeted-drilling.md). The user explicitly requested recording/replay controls, a session-level option for times when they cannot speak, and automatic playback of their own version when recording is enabled. They endorsed the flow below and subsequently selected manual stopping and automatic database retention of all recordings.
 
 **Later terminology correction:** the user rejected **Model** as the audio-button label because it suggests computer-generated speech. The current working replacement is **Reference**; **My recording** remains the learner take. Reference audio may be imported professional-actor/course speech or generated speech. Preserve the source and the comparison sequence. Older “model” terminology below describes an example answer, not its provenance; see the [language/audio decision](decision-languages-and-audio-labels.md).

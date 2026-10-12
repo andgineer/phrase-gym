@@ -1,5 +1,7 @@
 # P1 review and proposed production starting point
 
+**Latest accepted interaction, 2026-10-12:** follow the [unified practice-card decision](../decision-unified-practice-card.md). One card retains recording, replay, reference and colored/icon self-check controls; answer reveal replaces gaps, explanation expands inline beside Show answer. Remove the recording-mode switch, Practice again and supported-only Continue. The microphone/stop icon reflects the active audio action. This supersedes conflicting earlier flow details below.
+
 2026-10-12. The user requested implementation of P1. A new disposable prototype now exists under `prototypes/`; the archived attempt was not used. [Evidence](evidence/p1-2026-10-12.md) separates observed software behaviour from missing device/content/user evidence. P2 has not begun.
 
 ## Concrete proposals available for review
