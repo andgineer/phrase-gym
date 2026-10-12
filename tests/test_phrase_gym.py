@@ -9,6 +9,6 @@ def test_version():
 
 def test_version_option():
     runner = CliRunner()
-    result = runner.invoke(phrase_gym, ['--version'])
+    result = runner.invoke(phrase_gym, ["--version"])
     assert result.exit_code == 0
     assert __version__ in result.output

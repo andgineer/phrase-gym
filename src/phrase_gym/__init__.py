@@ -1,4 +1,4 @@
-"""A language trainer for automatic use of words and phrases through guided recall, spaced repetition, and targeted dialogue drills.
+"""A language trainer for guided phrase recall and prepared dialogue drills.
 
 The file is mandatory for build system to find the package.
 """

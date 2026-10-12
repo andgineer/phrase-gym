@@ -1,8 +1,8 @@
 # Phrase Gym — start here
 
-Updated **2026-10-12**. **P1 is closed as a prototype/design phase at the user's request. P2 has not started.** The final prototype is version **0.1.6** under `prototypes/`; `src/phrase_gym` remains the user's Python scaffold. Device/content limitations remain open evidence, not passed checks.
+Updated **2026-10-12**. **P1 is closed. P2 is underway; P3 has not started.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
 
-Read [the next-session handoff](plan/next-session.md) and [agent guidance](agent-guide.md). They contain the final interaction, production direction, workflow preferences and unresolved work. No chat-history hunt is necessary.
+Read [the next-session handoff](plan/next-session.md) and [agent guidance](agent-guide.md). They contain the final interaction, production foundation, workflow preferences and unresolved work. Read [the P2 runbook](plan/p2-runbook.md) for actual run/import/check commands and [the foundation decision](decision-production-foundation.md) for module boundaries. No chat-history hunt is necessary.
 
 ## Current authoritative decisions
 

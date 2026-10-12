@@ -1,6 +1,6 @@
 # Data model and integration contracts
 
-Proposed contracts, 2026-10-11. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
+Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; session/recording/scheduling contracts below remain future work. The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
 
 ## Durable model
 

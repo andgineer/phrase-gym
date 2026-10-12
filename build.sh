@@ -1,21 +1,13 @@
-#! /usr/bin/env bash
-# Builds dev version of the container(s)
-# Pass all args to docker compose
-#
-# Examples:
-# build.sh --no-cache
-
-cleanup() {
-  # Function to clean up the .setup-scripts folder
-  rm -rf .setup-scripts
-}
-
-# Trap signals and execute the cleanup function
-trap cleanup EXIT INT TERM ERR
-cp -r ../../docker-scripts .setup-scripts
-./compose.sh \
-  build \
-  "$@"
-
-# Cleanup the .setup-scripts folder (redundant, but ensures cleanup)
-cleanup
+#!/usr/bin/env bash
+# Build the same-origin client into the Python wheel and source distribution.
+set -euo pipefail
+cd "$(dirname "$0")"
+uv sync --frozen
+(
+  cd frontend
+  npm ci
+  npm run typecheck
+  npm run build
+)
+uv run python -c 'from pathlib import Path; import shutil; shutil.rmtree("src/phrase_gym/static", ignore_errors=True); shutil.copytree("frontend/dist", "src/phrase_gym/static")'
+uv build

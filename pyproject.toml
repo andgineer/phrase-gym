@@ -6,13 +6,20 @@ build-backend = "hatchling.build"
 name = "phrase-gym"
 dynamic = [ "version",]
 description = "A language trainer for automatic use of words and phrases through guided recall, spaced repetition, and targeted dialogue drills."
-keywords = [ "one", "two", ]
+keywords = [ "language-learning", "spaced-repetition", "phrase-recall", ]
 classifiers = [ "Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent",]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14,<2",
     "click>=8.2.0",
+    "fastapi>=0.115,<1",
+    "mutagen>=1.47,<2",
+    "platformdirs>=4,<5",
+    "pydantic>=2.10,<3",
     "rich-click>=1.8.8",
+    "sqlalchemy>=2.0,<3",
+    "uvicorn>=0.30,<1",
 ]
 [[project.authors]]
 name = "Andrey Sorokin"
@@ -48,13 +55,18 @@ dev = [
     "mkdocs-awesome-pages-plugin>=2.10.1",
     "zensical>=0.0.41",
     "mkdocstrings[python]>=0.29.1",
-    
     "pre-commit>=4.2.0",
     "pymdown-extensions>=10.15",
     "pyrefly>=0.50.0",
     "pytest-cov>=6.1.1",
     "pytest>=8.3.5",
+    "httpx>=0.28,<1",
+    "ruff==0.9.3",
 ]
 
 [project.scripts]
 phrase-gym = "phrase_gym.main:phrase_gym"
+
+# build.sh prepares the client here; editable backend-only installs remain valid.
+[tool.hatch.build]
+artifacts = ["src/phrase_gym/static/**"]

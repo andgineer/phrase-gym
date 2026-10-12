@@ -114,6 +114,42 @@ def pre(c):
 
 
 
+@task
+def test(c: Context):
+    """Run Python and client checks plus real-browser walkthroughs; never skip missing tooling."""
+    c.run("uv run pytest tests/")
+    with c.cd("frontend"):
+        c.run("npm run typecheck")
+        c.run("npm test")
+        c.run("npm run build")
+        c.run("npm run test:browser")
+
+
+@task
+def app_build(c: Context):
+    """Build the client and Python distributions with the bundled client."""
+    c.run("./build.sh")
+
+
+@task
+def app_check(c: Context):
+    """Check the foundation contracts, domain and client separately."""
+    c.run("uv run pytest tests/")
+    c.run("uv run pyrefly check --project-excludes=tests --python-interpreter-path=.venv/bin/python")
+    with c.cd("frontend"):
+        c.run("npm run typecheck")
+        c.run("npm test")
+        c.run("npm run build")
+
+
+@task
+def api_types(c: Context):
+    """Regenerate the OpenAPI snapshot and TypeScript contracts."""
+    c.run("uv run phrase-gym export-schema frontend/openapi.json")
+    with c.cd("frontend"):
+        c.run("npm run generate:types")
+
+
 namespace = Collection.from_module(sys.modules[__name__])
 for name in ALLOWED_VERSION_TYPES:
     namespace.add_task(ver_task_factory(name), name=f"ver-{name}")  # type: ignore[bad-argument-type]

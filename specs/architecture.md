@@ -1,6 +1,6 @@
-# Phrase Gym — proposed architecture
+# Phrase Gym — architecture
 
-2026-10-11. Architecture recommendation and implementation design, not a claim that the app or its prototypes exist. The agreed product baseline is [targeted drilling](decision-targeted-drilling.md) and [optional recording/comparison](decision-recording-and-comparison.md). The name is Phrase Gym. Earlier interface sketches and legacy tooling are not accepted implementations. Start with the [prototyping plan](plan/01-prototyping.md); implementation follows the [roadmap](plan/implementation-plan.md).
+Updated 2026-10-12. The P2 foundation implements the client/API, settings, content imports/library and reference-media storage. Sessions/recordings, offline delivery, preparation workers and deployment below describe planned later work. See the [current module boundaries](decision-production-foundation.md). The agreed product baseline is [targeted drilling](decision-targeted-drilling.md) and [optional recording/comparison](decision-recording-and-comparison.md). The name is Phrase Gym. Earlier interface sketches and legacy tooling are not accepted implementations. Start with the [prototyping plan](plan/01-prototyping.md); implementation follows the [roadmap](plan/implementation-plan.md).
 
 ## Recommendation
 
@@ -64,7 +64,7 @@ See [learning behaviour](architecture/learning-engine.md) and [data/API contract
 specs/                         agreed decisions and current plans
 prototypes/drill-flow/         disposable interaction prototype, to be created
 prototypes/audio-probe/        real-device capability probe, to be created
-webapp/src/
+frontend/src/
   features/{practice,library,dialogues,content}/
   session/                    pure state machine and local journal
   platform/                   media, IndexedDB, network adapters
@@ -75,12 +75,12 @@ src/phrase_gym/
   media/                      storage and audio preparation
   jobs/                       worker, provider interfaces and retries
   adapters/                   vault and echo-words intake
-migrations/
+src/phrase_gym/migrations/
 fixtures/                     reviewed learning content and edge cases
 tests/{unit,integration,browser}/
 ```
 
-The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and a client remain future work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
+The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer behavior remains future work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
 
 ## Content and AI
 

@@ -1,11 +1,5 @@
-# phrase-gym
+# Phrase Gym
 
-A language trainer for automatic use of words and phrases through guided recall, spaced repetition, and targeted dialogue drills.
+The current source build provides the multilingual library, explanations, language bookmarks and imported reference audio. Guided sessions and spaced repetition follow in P3.
 
-
-### Дополнительно
-
-Чтобы увидеть все параметры, используйте:
-```bash
-phrase-gym --help
-```
+Current implementation instructions are maintained in English: see [the source-build installation guide](installation.md). The application itself supports Russian interface text and Russian explanations when prepared content supplies them.

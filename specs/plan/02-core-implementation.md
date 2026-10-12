@@ -1,8 +1,8 @@
 # P2–P3 — production foundation and core trainer
 
-**P1 closeout update, 2026-10-12:** use the [next-session handoff](next-session.md) and [unified practice card](../decision-unified-practice-card.md). These supersede older separate recording/practice modes and rating-correction UI below. No saved-rating banner or Undo in the first implementation; correction is deferred. P2 has not begun.
+**P1 closeout update, 2026-10-12:** use the [next-session handoff](next-session.md) and [unified practice card](../decision-unified-practice-card.md). These supersede older separate recording/practice modes and rating-correction UI below. No saved-rating banner or Undo in the first implementation; correction is deferred. P2 foundation is implemented; real reference-media/content acceptance remains open. P3 has not begun.
 
-Status: **not started**, 2026-10-11. Dependencies: P1 findings and selected production scope. References: [architecture](../architecture.md), [data contracts](../architecture/data-contracts.md), [learning engine](../architecture/learning-engine.md).
+Status: **P2 underway; P3 not started**, 2026-10-12. The current implementation and remaining scope are in the [P2 runbook](p2-runbook.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md). Dependencies: P1 findings and selected production scope. References: [architecture](../architecture.md), [data contracts](../architecture/data-contracts.md), [learning engine](../architecture/learning-engine.md).
 
 Implement the coverage in the [consolidated plan](implementation-plan.md); these work packages supply detail, not a smaller product scope. Accepted requirements and recommended defaults retain their distinct status. P3 is the first useful internal build with prepared fixtures/manual packages; the agreed add-time LLM preparation arrives in P5 before claiming the full feature set.
 

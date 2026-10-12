@@ -2,7 +2,9 @@ exclude: |
     (?x)(
       .venv/|
       tasks.py|
-      resources/
+      resources/|
+      prototypes/|
+      specs/archive/
     )
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -72,6 +74,17 @@ repos:
           "--project-excludes=tests",
           "--python-interpreter-path=.venv/bin/python"
         ]
-
-
-
+  - repo: local
+    hooks:
+      - id: architecture
+        name: architecture boundaries and module size
+        entry: .venv/bin/python scripts/check_architecture.py
+        language: system
+        pass_filenames: false
+        files: ^(src/phrase_gym/|frontend/src/|scripts/check_architecture.py)
+      - id: client-format
+        name: client formatting
+        entry: npm --prefix frontend run format:check
+        language: system
+        pass_filenames: false
+        files: ^frontend/

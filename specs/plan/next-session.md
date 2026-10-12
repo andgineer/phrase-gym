@@ -1,6 +1,6 @@
-# Next-session handoff — P1 closed
+# Next-session handoff — P2 foundation
 
-Updated **2026-10-12**. The user asked to finish P1 and continue in a fresh session. The disposable prototype is version **0.1.6**. P1 design/prototype work is closed at the user's direction; P2 production implementation has not started. Remaining device/content checks below are carried forward, not claimed passed.
+Updated **2026-10-12**. P1 is closed and the production foundation is implemented in `src/phrase_gym` and `frontend/`. P2 is underway; P3 sessions, learner takes and scheduling have not started. The disposable interaction prototype remains version **0.1.6**. Remaining device/content checks below are carried forward, not claimed passed.
 
 ## Read first
 
@@ -9,7 +9,7 @@ Updated **2026-10-12**. The user asked to finish P1 and continue in a fresh sess
 3. [Consolidated plan](implementation-plan.md), then [P2–P3 implementation](02-core-implementation.md), [architecture](../architecture.md) and the relevant data contracts.
 4. [Echo-words integration reference](../reference/echo-words-audio.md) and [prototype walkthroughs](../../prototypes/README.md).
 
-No chat-history search is needed. Do not restart the three-iteration fresh-session review loop or rebuild P1. The user prefers manual prototype feedback and proportionate checks. Follow the next session's actual instruction before beginning P2.
+No chat-history search is needed. Do not restart the three-iteration fresh-session review loop or rebuild P1. The user prefers manual prototype feedback and proportionate checks. Continue from the production foundation and the next session's actual request. See the [P2 runbook](p2-runbook.md), [foundation decision](../decision-production-foundation.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md).
 
 ## Final interaction to implement
 
@@ -26,8 +26,8 @@ No chat-history search is needed. Do not restart the three-iteration fresh-sessi
 ## Workspace and production direction
 
 - Commit directly to **main**, as explicitly requested. Current work is committed locally; do not infer a request to push or deploy.
-- `prototypes/` is a disposable browser implementation/fixture/probe, not the production code location. `src/phrase_gym` still contains the user's Python scaffold. Build the real application in the project source layout during P2; agree a clear frontend location if the recommended Vue/TypeScript client is retained. Do not create another hidden/temporary implementation.
-- Preserve the scaffold's uv/hatchling, CLI/package conventions, tests and CI where applicable. Vue/TypeScript PWA + Python/FastAPI/SQLite remains the recommended production stack, not installed functionality or a fully accepted platform decision.
+- `prototypes/` is a disposable browser implementation/fixture/probe, not the production code location. The production Python application extends `src/phrase_gym`; the user confirmed `frontend/` for the Vue/TypeScript client. Do not create another hidden/temporary implementation.
+- Preserve the scaffold's uv/hatchling, CLI/package conventions, tests and CI where applicable. Vue/TypeScript + Python/FastAPI/SQLAlchemy/Alembic/SQLite is the installed production foundation. The service worker/offline PWA, phone acceptance and private hosting remain future work.
 - The user rejects macOS-only audio solutions and wants the same engines and llmbroker approach as nearby **echo-words**. Reinspect its current implementation when integrating: Piper/Edge, full-phrase caching, Serbian speech-only Cyrillic conversion, language-correct fallback, actor/course audio priority. Existing Samantha WAVs are disposable test assets, not a production dependency.
 - The user reports copying provider keys into `.env`. Keep it ignored and server-side; do not print, commit or bundle secrets. No provider calls or external audio uploads were made in P1.
 - P2–P3 implement the trainer and durable recordings; P5 handles intake/LLM preparation and source integration. Prepare checked cue variants at intake rather than making generation a dependency of each drill step.
@@ -46,4 +46,14 @@ The last substantive change passed **12 core checks, 9 browser walkthroughs, 16 
 
 Run instructions are in [prototypes/README.md](../../prototypes/README.md). The current session used `http://127.0.0.1:8873/learn/en`; do not assume its process survives a session/app restart. Browser data stays with its origin. If needed, restart the documented server on the same port. No private recordings or secrets belong in the handoff.
 
-Suggested next request: **Read specs/START-HERE.md and specs/plan/next-session.md, then begin P2 from this handoff. Commit directly to main.**
+## Production foundation and next work
+
+- Persistent native language and native/learning UI preference; `/learn/{language}` bookmarks; four initial UI locales; per-tab explicit routes win.
+- Stable source-to-target identities, immutable content revisions, pinned dialogue bindings, staged/manual publication with stale-content rejection and atomic rollback.
+- Language-scoped lesson filtering, concept/text lookup, complete lesson phrase lists and materials/exposure logging without recall grades.
+- Hash-addressed original reference audio, provenance, exact text/language/role checks, byte ranges and missing/orphan reconciliation. Fixture audio used by tests is explicitly synthetic.
+- Shared contracts are below HTTP. Focused services own validation, publication, catalog reads, settings and exposure. API routers and Vue views/composables are split by responsibility. `AGENTS.md` contains the adapted echo-words coding rules; `CLAUDE.md` is a symlink. Hooks enforce architecture direction, 300-line source limits and client formatting.
+
+Next: finish real reference-media/content acceptance where material is available, then P3. Before implementing the selected-lesson session branch, resolve due-only versus all-phrase policy. Implement one unified practice card, durable SQLite recording BLOBs with an IndexedDB pending-take journal, honest original-response evidence, pinned sessions and the review policy. The existing pure reducer is an evidence foundation, not an implemented session engine. Start session/drill buttons are disabled until these services exist.
+
+Use `uv run inv pre` then `uv run inv test` as the final gate. Do not rerun P1 or claim actual Safari/headset/iPhone acceptance from synthetic WebKit checks.

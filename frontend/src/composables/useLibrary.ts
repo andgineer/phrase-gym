@@ -1,0 +1,239 @@
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { api, language } from '../api'
+import type { ExposureInput, Lesson, LessonPage, Phrase, PhrasePage } from '../api'
+import { flushExposures, retainExposure, sendExposure } from '../exposures'
+import { languageNames } from '../i18n'
+import { usePreferences } from './usePreferences'
+import { useReferenceAudio } from './useReferenceAudio'
+
+export function useLibrary() {
+  const route = useRoute()
+  const router = useRouter()
+  const error = ref('')
+  const loading = ref(true)
+  const phrase = ref<Phrase | null>(null)
+  const lessons = ref<Lesson[]>([])
+  const lessonTotal = ref(0)
+  const results = ref<Phrase[]>([])
+  const total = ref(0)
+  const hasCollection = ref(false)
+  const selectedLesson = ref('')
+  const pendingExposure = ref<ExposureInput | null>(null)
+  let requestVersion = 0
+  const routeParts = computed(() => route.path.split('/').filter(Boolean))
+  const currentLanguage = computed(() =>
+    routeParts.value[0] === 'learn' ? language(routeParts.value[1]) : null,
+  )
+  const preferences = usePreferences(currentLanguage)
+  const { settings, native, useLearning, configuring, firstLaunch, locale, t } = preferences
+  const { playing, audioError, stopAudio, playReference } = useReferenceAudio(
+    () => phrase.value,
+    () => t.value.audioFailed,
+  )
+  const lessonQuery = computed(() =>
+    typeof route.query.lessonQ === 'string' ? route.query.lessonQ : '',
+  )
+  const phraseQuery = computed(() => (typeof route.query.q === 'string' ? route.query.q : ''))
+  const kind = computed(() => routeParts.value[2] ?? 'home')
+  const selectedLanguage = computed(() => currentLanguage.value ?? '')
+  const explanation = computed(() => {
+    const nativeLanguage = settings.value?.native_language
+    return nativeLanguage ? phrase.value?.content.explanations?.[nativeLanguage] : null
+  })
+  const lessonTitle = ref('')
+
+  async function saveExposure() {
+    const payload = pendingExposure.value
+    if (!payload) return
+    try {
+      if ((await sendExposure(payload)) && pendingExposure.value?.id === payload.id)
+        pendingExposure.value = null
+    } catch {
+      /* Keep the same ID for explicit retry; no review is fabricated. */
+    }
+  }
+  async function saveSettings() {
+    error.value = ''
+    try {
+      await preferences.save()
+      await loadRoute()
+    } catch (cause) {
+      error.value = String(cause)
+    }
+  }
+  function changeLanguage(event: Event) {
+    const next = language((event.target as HTMLSelectElement).value)
+    if (next) router.push(`/learn/${next}`)
+  }
+  function goBack() {
+    if (window.history.state.back) router.back()
+    else router.push({ path: `/learn/${currentLanguage.value}`, query: route.query })
+  }
+  function link(type: 'phrases' | 'lessons', id: string) {
+    return { path: `/learn/${currentLanguage.value}/${type}/${id}`, query: route.query }
+  }
+  function updateQuery(name: 'q' | 'lessonQ', event: Event) {
+    const value = (event.target as HTMLInputElement).value
+    router.replace({ query: { ...route.query, [name]: value || undefined } })
+  }
+  async function loadMore() {
+    const version = requestVersion
+    const lang = currentLanguage.value
+    if (!lang) return
+    error.value = ''
+    try {
+      const path =
+        kind.value === 'lessons'
+          ? `/lessons/${routeParts.value[3]}/phrases?language=${lang}&offset=${results.value.length}`
+          : `/phrases/search?language=${lang}&q=${encodeURIComponent(phraseQuery.value)}&offset=${results.value.length}`
+      const page = await api<PhrasePage>(path)
+      if (version === requestVersion) {
+        results.value.push(...page.items)
+        total.value = page.total
+      }
+    } catch (cause) {
+      if (version === requestVersion) error.value = String(cause)
+    }
+  }
+  async function loadMoreLessons() {
+    const version = requestVersion
+    const lang = currentLanguage.value
+    if (!lang) return
+    try {
+      const page = await api<LessonPage>(
+        `/lessons?language=${lang}&q=${encodeURIComponent(lessonQuery.value)}&offset=${lessons.value.length}`,
+      )
+      if (version === requestVersion) {
+        lessons.value.push(...page.items)
+        lessonTotal.value = page.total
+      }
+    } catch (cause) {
+      if (version === requestVersion) error.value = String(cause)
+    }
+  }
+  async function loadRoute() {
+    const version = ++requestVersion
+    stopAudio()
+    error.value = ''
+    phrase.value = null
+    results.value = []
+    lessons.value = []
+    pendingExposure.value = null
+    audioError.value = ''
+    loading.value = true
+    try {
+      await preferences.load()
+      if (version !== requestVersion) return
+      const lang = currentLanguage.value
+      if (!lang) {
+        if (
+          (route.path === '/' || route.path === '/learn' || route.path === '/learn/') &&
+          settings.value?.last_learning_language
+        ) {
+          await router.replace(`/learn/${settings.value?.last_learning_language}`)
+        }
+        return
+      }
+      const base = `language=${lang}`
+      if (kind.value === 'phrases' && routeParts.value[3]) {
+        const item = await api<Phrase>(`/phrases/${routeParts.value[3]}?${base}`)
+        if (version !== requestVersion) return
+        // Reference lookup exposes the answer before any response, independently of review.
+        pendingExposure.value = {
+          id: crypto.randomUUID(),
+          target_id: item.id,
+          revision: item.revision,
+          language: lang,
+          kind: 'explanation',
+        }
+        retainExposure(pendingExposure.value)
+        phrase.value = item
+        await saveExposure()
+      } else if (kind.value === 'lessons' && routeParts.value[3]) {
+        const page = await api<PhrasePage>(`/lessons/${routeParts.value[3]}/phrases?${base}`)
+        if (version !== requestVersion) return
+        results.value = page.items
+        total.value = page.total
+        lessonTitle.value =
+          page.items[0]?.lessons.find((l) => l.id === routeParts.value[3])?.title ?? ''
+      } else if (kind.value === 'home') {
+        const [lessonPage, phrasePage, collection] = await Promise.all([
+          api<LessonPage>(`/lessons?${base}&q=${encodeURIComponent(lessonQuery.value)}`),
+          api<PhrasePage>(`/phrases/search?${base}&q=${encodeURIComponent(phraseQuery.value)}`),
+          api<PhrasePage>(`/phrases/search?${base}&limit=1`),
+        ])
+        if (version !== requestVersion) return
+        lessons.value = lessonPage.items
+        lessonTotal.value = lessonPage.total
+        results.value = phrasePage.items
+        total.value = phrasePage.total
+        hasCollection.value = collection.total > 0
+        // This is a fallback preference only; a tab's explicit route always wins.
+        if (settings.value?.native_language) {
+          preferences.rememberLanguage(lang)
+        }
+      } else {
+        error.value = t.value.unavailable
+      }
+    } catch (cause) {
+      if (version === requestVersion) error.value = String(cause)
+    } finally {
+      if (version === requestVersion) loading.value = false
+    }
+  }
+  watch(currentLanguage, () => {
+    selectedLesson.value = ''
+  })
+  watch(() => route.fullPath, loadRoute)
+  watch([locale, currentLanguage], () => {
+    document.documentElement.lang = locale.value
+    document.title = currentLanguage.value
+      ? `Phrase Gym: ${languageNames[currentLanguage.value]}`
+      : 'Phrase Gym'
+  })
+  onMounted(() => {
+    loadRoute()
+    flushExposures().catch(() => {})
+  })
+
+  return {
+    route,
+    settings,
+    native,
+    useLearning,
+    configuring,
+    error,
+    loading,
+    phrase,
+    lessons,
+    lessonTotal,
+    results,
+    total,
+    hasCollection,
+    selectedLesson,
+    playing,
+    audioError,
+    pendingExposure,
+    currentLanguage,
+    locale,
+    t,
+    firstLaunch,
+    lessonQuery,
+    phraseQuery,
+    kind,
+    selectedLanguage,
+    explanation,
+    lessonTitle,
+    playReference,
+    saveExposure,
+    saveSettings,
+    changeLanguage,
+    goBack,
+    link,
+    updateQuery,
+    loadMore,
+    loadMoreLessons,
+    loadRoute,
+  }
+}

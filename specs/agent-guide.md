@@ -1,6 +1,6 @@
 # Phrase Gym — agent guidance
 
-Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 has not begun. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
+Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 production foundation is present; P3 has not begun. Coding and architecture rules are maintained in [AGENTS.md](../AGENTS.md), with `CLAUDE.md` linking to that same file. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
 
 ## Workflow
 
@@ -8,7 +8,7 @@ Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.m
 - Commit authorized work directly to **main**, as requested. Do not push, deploy, create extra review chats or restart the fresh-session review loop by default.
 - The user prefers manual prototype review and proportionate engineering checks. Do not impose learning-effectiveness experiments, calibration tasks or scientific-parameter choices on the learner.
 - Latest accepted decisions override older screen sketches and plans. Record new decisions clearly, without turning recommendations into approvals.
-- P1 is a disposable interaction reference. Build production work in the project's source layout when P2 is requested. Preserve the user's Python scaffold conventions and avoid unrelated dependency changes.
+- P1 is a disposable interaction reference. Production work belongs in `src/phrase_gym` and the user-selected `frontend/`; see the [foundation decision](decision-production-foundation.md). Preserve the user's Python scaffold conventions and avoid unrelated dependency changes.
 
 ## Product constraints
 

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "namespace": "manual.examples.sr",
+  "language": "sr",
+  "source_revision": "1",
+  "targets": [
+    {
+      "source_id": "drago",
+      "kind": "fixed_phrase",
+      "meaning_key": "pleased-to-meet",
+      "recall_expression": "Drago mi je.",
+      "text": "Drago mi je.",
+      "purpose": "Upoznaješ novu osobu. Reci da ti je drago.",
+      "chunks": [
+        {
+          "id": "opening",
+          "text": "Drago "
+        },
+        {
+          "id": "ending",
+          "text": "mi je."
+        }
+      ],
+      "required_chunks": [
+        "opening",
+        "ending"
+      ],
+      "cues": [
+        {
+          "id": "reviewed-cue",
+          "prompt": "Upoznaješ novu osobu. Reci da ti je drago.",
+          "visible_chunks": [
+            "ending"
+          ],
+          "reviewed": true
+        }
+      ],
+      "concepts": [
+        "greetings",
+        "upoznavanje",
+        "pozdrav"
+      ],
+      "explanations": {
+        "ru": {
+          "meaning": "Приятно познакомиться.",
+          "usage": "Используйте в указанной ситуации."
+        },
+        "en": {
+          "meaning": "Upoznaješ novu osobu. Reci da ti je drago.",
+          "usage": "Use in the stated situation."
+        }
+      }
+    }
+  ],
+  "lessons": [
+    {
+      "source_id": "greetings",
+      "title": "Upoznavanje",
+      "target_source_ids": [
+        "drago"
+      ]
+    }
+  ],
+  "dialogues": []
+}

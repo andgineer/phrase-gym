@@ -18,3 +18,13 @@ allure-results/
 # Disposable prototype dependencies and private local configuration
 **/node_modules/
 prototypes/.local/
+
+# Production client build and local application data
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+.data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+src/phrase_gym/static/
