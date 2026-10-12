@@ -13,6 +13,7 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
   let writes: Promise<unknown> = Promise.resolve()
   let pendingLanguage: Language | null = null
   let writingLanguage = false
+  let languageVersion = 0
   const locale = computed(() =>
     settings.value?.ui_language_mode === 'learning' && currentLanguage.value
       ? currentLanguage.value
@@ -42,13 +43,19 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
   }
   async function save() {
     if (!native.value) return
+    const submittedLanguageVersion = languageVersion
     const body = JSON.stringify({
       native_language: native.value,
       ui_language_mode: useLearning.value ? 'learning' : 'native',
       last_learning_language:
         currentLanguage.value ?? settings.value?.last_learning_language ?? null,
     })
-    settings.value = await write(() => api<Settings>('/settings', { method: 'PUT', body }))
+    const saved = await write(() => api<Settings>('/settings', { method: 'PUT', body }))
+    // Full-save responses may lag a newer route's cached fallback.
+    if (submittedLanguageVersion !== languageVersion && settings.value) {
+      saved.last_learning_language = settings.value.last_learning_language
+    }
+    settings.value = saved
     configuring.value = false
   }
   async function drainLanguage() {
@@ -70,6 +77,7 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
     }
   }
   function rememberLanguage(lang: Language) {
+    languageVersion += 1
     if (settings.value) settings.value.last_learning_language = lang
     pendingLanguage = lang
     void drainLanguage()

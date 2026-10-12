@@ -50,7 +50,7 @@ for (const status of [200, 503]) {
       await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
     }
     await expect(page.getByRole('heading', { name: 'Make it yours' })).toBeVisible()
-    await page.getByLabel('Native language', { exact: true }).selectOption('en')
+    await page.getByLabel('Your native language', { exact: true }).selectOption('en')
     await page.getByRole('button', { name: 'Save', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()
     expect((await (await request.get('/api/v1/settings')).json()).native_language).toBe('en')

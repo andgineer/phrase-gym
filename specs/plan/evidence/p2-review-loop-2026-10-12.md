@@ -76,4 +76,22 @@ The first full gate after these fixes passed Python/client checks and 83 browser
 
 Final verification: `uv run inv pre` passed every hook with zero pyrefly errors, followed by `uv run inv test`: **37 Python, 4 client and 84 real-browser checks passed**. The fourth-pass fixes are committed locally to main with their regression coverage and clarified acceptance rules.
 
-The final tree has no clean independent review yet. Stop before iteration 5 and ask for confirmation of one further fresh Sol 6.1 review of the corrected P2 implementation, including shared settings lifecycle. No fifth review has been started.
+The user subsequently approved one further fresh Sol 6.1 review. The fifth-pass results follow; the fourth-review stop is historical.
+
+## Iteration 5
+
+Reviewed `f2cfb6d` using a fifth fresh `gpt-6.1-sol` agent with high reasoning, after explicit user confirmation. The reviewer covered the complete P2 foundation, passed all 37 Python and four client tests and reproduced one finding in both Chromium and WebKit:
+
+A held full Settings PUT response could replace the tab's cached last language after another successful route had remembered Serbian. Ordered language PATCHes saved Serbian correctly on the server, but the cache retained English. Holding the automatic post-save catalog refresh, returning through history to an invalid-language selector and following the brand to `/` restored English and then wrote it back to the server.
+
+The preference adapter now records language-intention changes. A full save acknowledges its native/UI preferences while preserving a newer remembered language established after submission. The two-language browser regression holds both save response and subsequent catalog refresh, checks the actual server preference, then exercises history/bare-route restoration. Both Serbian and German cases failed on the prior build and pass after the change.
+
+During integration, the parent also confirmed that SetupForm's hard-coded English accessible name overrode its localized visible native-language label. The control now uses the existing UI translation; all affected browser selectors were updated and four native-UI locale cases added. Those four cases failed before the fix. These are accessibility/localization checks, not learner effectiveness or real-device audio acceptance.
+
+The new scenarios and existing preference initialization/write cases passed **26 targeted browser checks** across Chromium/WebKit. The preferences adapter remains focused at 97 lines. No provider, private-data, external delivery, push or deployment calls occurred.
+
+The remaining convergence gap was an interaction between completed workflows: individual route guards and ordered server writes did not define how an old full-response snapshot should merge with newer cached state. The acceptance checklist now makes field authority/reconciliation explicit and requires the combined save/navigation/history sequence, checking client and server state together. This extends the existing P2 preference behavior without changing the learning product or introducing another service architecture.
+
+Final verification: `uv run inv pre` passed every hook with zero pyrefly errors, followed by `uv run inv test`: **37 Python, 4 client and 96 real-browser checks passed**. Fifth-pass corrections are committed locally to main with their regression coverage and functional clarification.
+
+The final tree has not had a clean independent review. Stop before iteration 6 and wait for confirmation of one further fresh review, including cross-workflow state reconciliation; no sixth review is authorized yet.

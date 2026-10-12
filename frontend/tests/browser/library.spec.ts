@@ -29,7 +29,7 @@ test('first launch and persisted native-language settings', async ({ page, reque
   await expect(page.locator('.phrase-card')).toHaveCount(0)
   expect(exposures).toBe(0)
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled()
-  await page.getByLabel('Native language', { exact: true }).selectOption('ru')
+  await page.getByLabel('Your native language', { exact: true }).selectOption('ru')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(page.locator('.explanation')).toBeVisible()
@@ -39,7 +39,7 @@ test('first launch and persisted native-language settings', async ({ page, reque
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
-  await expect(page.getByLabel('Native language', { exact: true })).toHaveValue('ru')
+  await expect(page.getByLabel('Your native language', { exact: true })).toHaveValue('ru')
 })
 
 test('concept lookup, explanation and complete lesson navigation preserve search', async ({

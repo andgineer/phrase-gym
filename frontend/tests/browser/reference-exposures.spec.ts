@@ -57,7 +57,7 @@ test('settings hide bookmarked materials without creating an exposure', async ({
   await page.getByRole('link', { name: 'Phrase Gym' }).click()
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.goBack()
-  await expect(page.getByLabel('Native language', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('Your native language', { exact: true })).toBeVisible()
   await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.locator('.phrase-card')).toHaveCount(0)
   expect(exposures).toBe(1)

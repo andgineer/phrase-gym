@@ -18,7 +18,7 @@ const emit = defineEmits<{
       <label
         >{{ t.native
         }}<select
-          aria-label="Native language"
+          :aria-label="t.native"
           :value="native"
           @change="emit('update:native', ($event.target as HTMLSelectElement).value as Language)"
         >
