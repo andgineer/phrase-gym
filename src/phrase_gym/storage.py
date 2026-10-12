@@ -6,7 +6,7 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
-from sqlalchemy import ForeignKey, Text, UniqueConstraint, create_engine, event
+from sqlalchemy import CheckConstraint, ForeignKey, Text, UniqueConstraint, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -101,6 +101,33 @@ class ExposureRow(Base):
     revision: Mapped[int]
     payload: Mapped[str] = mapped_column(Text)
     received_at: Mapped[str]
+
+
+class ScheduleRow(Base):
+    __tablename__ = "target_schedule"
+    target_id: Mapped[str] = mapped_column(ForeignKey("target.id"), primary_key=True)
+    version: Mapped[int]
+    due_at: Mapped[str]
+
+
+class SessionRow(Base):
+    __tablename__ = "practice_session"
+    __table_args__ = (
+        UniqueConstraint("open_slot", name="one_open_practice_session"),
+        CheckConstraint(
+            "(status IN ('active', 'paused') AND open_slot IS 1) OR "
+            "(status = 'superseded' AND open_slot IS NULL)",
+            name="session_slot_matches_status",
+        ),
+    )
+    id: Mapped[str] = mapped_column(primary_key=True)
+    start_payload: Mapped[str] = mapped_column(Text)
+    manifest: Mapped[str] = mapped_column(Text)
+    status: Mapped[str]
+    open_slot: Mapped[int | None]
+    version: Mapped[int]
+    created_at: Mapped[str]
+    updated_at: Mapped[str]
 
 
 class Database:

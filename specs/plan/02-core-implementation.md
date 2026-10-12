@@ -1,12 +1,12 @@
 # P2–P3 — production foundation and core trainer
 
-**P1 closeout update, 2026-10-12:** use the [next-session handoff](next-session.md) and [unified practice card](../decision-unified-practice-card.md). These supersede older separate recording/practice modes and rating-correction UI below. No saved-rating banner or Undo in the first implementation; correction is deferred. P2 engineering work is closed by the user with [closeout evidence](evidence/p2-closeout-2026-10-12.md); [device/content problems](../open-problems.md) are explicitly carried forward. P3 has not begun.
+**P1 closeout update, 2026-10-12:** use the [next-session handoff](next-session.md) and [unified practice card](../decision-unified-practice-card.md). These supersede older separate recording/practice modes and rating-correction UI below. No saved-rating banner or Undo in the first implementation; correction is deferred. P2 engineering work is closed by the user with [closeout evidence](evidence/p2-closeout-2026-10-12.md); [device/content problems](../open-problems.md) are explicitly carried forward. P3 has begun with the [session foundation](../decision-p3-session-planning.md).
 
-Status: **P2 engineering closed; P3 not started**, 2026-10-12. The current implementation and remaining scope are in the [P2 runbook](p2-runbook.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md). Dependencies: P1 findings and selected production scope. References: [architecture](../architecture.md), [data contracts](../architecture/data-contracts.md), [learning engine](../architecture/learning-engine.md).
+Status: **P2 engineering closed; P3 in progress**, 2026-10-12. The current implementation and remaining scope are in the [P2 runbook](p2-runbook.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md). Dependencies: P1 findings and selected production scope. References: [architecture](../architecture.md), [data contracts](../architecture/data-contracts.md), [learning engine](../architecture/learning-engine.md).
 
 Implement the coverage in the [consolidated plan](implementation-plan.md); these work packages supply detail, not a smaller product scope. Accepted requirements and recommended defaults retain their distinct status. P3 is the first useful internal build with prepared fixtures/manual packages; the agreed add-time LLM preparation arrives in P5 before claiming the full feature set.
 
-The P2 work packages below describe the completed foundation and its acceptance reference. The user has deferred actual-device/reference-content acceptance; they are not active P2 tasks. P3 work remains to be implemented when authorized.
+The P2 work packages below describe the completed foundation and its acceptance reference. The user has deferred actual-device/reference-content acceptance; they are not active P2 tasks. P3 is authorized; session planning/lifecycle is implemented and the remaining work is tracked below.
 
 ## P2.1 — Application skeleton and contracts
 
@@ -48,7 +48,7 @@ Navigation acceptance: lesson title `rap` filtering and concept-only `greetings`
 ## P3.1 — End-to-end session
 
 - Implement the session planner and pinned manifest for due/new targets with approved cues, review groups and schedule versions.
-- Scope Start session to All lessons under spaced repetition by default, or the selected lesson. Use the same scoped entry from Start lesson drill. Resolve due-only versus all-phrase eligibility for a selected lesson before implementing that branch; do not create per-lesson schedules.
+- Scope Start session to All lessons under spaced repetition by default, or the selected lesson. Use the same scoped entry from Start lesson drill. Use due/new eligibility for both All lessons and a selected lesson, per the [delegated policy decision](../decision-p3-session-planning.md); do not create per-lesson schedules.
 - Pin each session's learning language. Preserve an existing session and all recordings when navigating to another language; a viewed language route alone neither starts nor takes over a session. Implement the reviewed pause/resume behaviour without bypassing the single-active-session rule.
 - Build one Start session entry, prompt, response, meaningful help, an on-request full-phrase/explanation card in the learner's language, alternative/unclear-cue handling, repair and results from the reviewed P1 flow. No separate home learning/rehearsal modes or compulsory introduction based only on a new database item. Include the session recording switch: recording-on own-take replay → model reveal/playback → self-check, and recording-off silent Reveal & compare with manual model audio.
 - Implement pause/resume with a local checkpoint and server session state. Save support/exposure before transitioning.

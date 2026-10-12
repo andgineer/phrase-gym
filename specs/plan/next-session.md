@@ -1,6 +1,6 @@
-# Next-session handoff — P3 next
+# Next-session handoff — P3 in progress
 
-Updated **2026-10-12**. P1 is closed and the production foundation is implemented in `src/phrase_gym` and `frontend/`. P2 engineering work and its review loop are closed at the user's request; P3 sessions, learner takes and scheduling are next and have not started. The disposable interaction prototype remains version **0.1.6**. Remaining device/content checks below are carried forward, not claimed passed.
+Updated **2026-10-12**. P1 is closed and the production foundation is implemented in `src/phrase_gym` and `frontend/`. P2 engineering work and its review loop are closed at the user's request; P3 has begun: pinned session planning/lifecycle APIs are implemented; the practice card, ordered events, learner takes and review policy remain next. The disposable interaction prototype remains version **0.1.6**. Remaining device/content checks below are carried forward, not claimed passed.
 
 ## Read first
 
@@ -31,7 +31,7 @@ No chat-history search is needed. Do not restart P1's closed three-iteration rev
 - The user rejects macOS-only audio solutions and wants the same engines and llmbroker approach as nearby **echo-words**. Reinspect its current implementation when integrating: Piper/Edge, full-phrase caching, Serbian speech-only Cyrillic conversion, language-correct fallback, actor/course audio priority. Existing Samantha WAVs are disposable test assets, not a production dependency.
 - The user reports copying provider keys into `.env`. Keep it ignored and server-side; do not print, commit or bundle secrets. No provider calls or external audio uploads were made in P1.
 - P2–P3 implement the trainer and durable recordings; P5 handles intake/LLM preparation and source integration. Prepare checked cue variants at intake rather than making generation a dependency of each drill step.
-- FSRS parameters, selected-lesson due-only/all policy, session budgets, initial source rollout and deployment details remain recommendations/choices. Do not present them as approved merely because a prototype exists.
+- The user delegated learning-policy defaults to the implementer using the existing research. Selected lessons now use due/new eligibility, sharing the All lessons schedules; see the [session-planning decision](../decision-p3-session-planning.md). Session budgets, the FSRS adapter, initial source rollout and deployment remain future work.
 
 ## Open evidence and risks to carry forward
 
@@ -41,6 +41,8 @@ No chat-history search is needed. Do not restart P1's closed three-iteration rev
 4. P1 uses IndexedDB and fixture review receipts, not durable server-side recording storage or production FSRS. Browser-origin data is not a backup. Concept search uses a hand-authored index; real retrieval quality is not established.
 
 ## Verification and running
+
+The first P3 session-foundation batch passed **76 Python tests, six client unit tests and 100 existing browser checks**, with all hooks, client typecheck and build executed. See [P3 foundation evidence](evidence/p3-session-foundation-2026-10-12.md). Trainer UI/events/recordings/review policy remain open; these browser checks cover the existing client.
 
 P2 implementation verification passed **65 Python tests, six client unit tests and 100 browser checks** (50 scenarios in Chromium/WebKit), with all hooks, client typecheck and build executed. The [P2 closeout](evidence/p2-closeout-2026-10-12.md) records the closure gate. Earlier P1 checks remain in the [P1 closeout](evidence/p1-closeout-2026-10-12.md). These are software checks, not real-headset or iPhone acceptance.
 
@@ -56,6 +58,6 @@ After five P2 review iterations, the user approved simplifying the optional lang
 - Hash-addressed original reference audio, provenance, exact text/language/role checks, byte ranges and missing/orphan reconciliation. Fixture audio used by tests is explicitly synthetic.
 - Shared contracts are below HTTP. Focused services own validation, publication, catalog reads, settings and exposure. API routers and Vue views/composables are split by responsibility. `AGENTS.md` contains the adapted echo-words coding rules; `CLAUDE.md` is a symlink. Hooks enforce architecture direction, 300-line source limits and client formatting.
 
-Next phase: P3 when requested. Real reference-media/content and device acceptance are carried forward in the [open-problems record](../open-problems.md); they do not reopen P2. Before implementing the selected-lesson session branch, resolve due-only versus all-phrase policy. Implement one unified practice card, durable SQLite recording BLOBs with an IndexedDB pending-take journal, honest original-response evidence, pinned sessions and the review policy. The existing pure reducer is an evidence foundation, not an implemented session engine. Start session/drill buttons are disabled until these services exist.
+Continue P3 from the [session foundation](../decision-p3-session-planning.md). Real reference-media/content and device acceptance are carried forward in the [open-problems record](../open-problems.md); they do not reopen P2. All lessons and selected-lesson planning now use due/new targets. The API persists immutable manifests, review groups and schedule versions with idempotent creation, versioned pause/resume and atomic explicit takeover. Next implement ordered original-response/support events and atomic review receipts with the review policy, then one unified practice card and durable SQLite recording BLOBs with an IndexedDB pending-take journal. The existing pure reducer is an evidence foundation, not an implemented session engine. Start session/drill buttons are disabled until these services exist.
 
 Use `uv run inv pre` then `uv run inv test` as the final gate. Do not rerun P1 or claim actual Safari/headset/iPhone acceptance from synthetic WebKit checks.

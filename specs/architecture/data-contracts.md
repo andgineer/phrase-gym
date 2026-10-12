@@ -1,6 +1,6 @@
 # Data model and integration contracts
 
-Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; session/recording/scheduling contracts below remain future work. The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
+Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; pinned session planning/lifecycle contracts are implemented in the first P3 batch. Attempt events, recording transfer and review receipts below remain future work. See the [session-planning decision](../decision-p3-session-planning.md). The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
 
 ## Durable model
 
@@ -42,7 +42,7 @@ The [language decision](../decision-languages-and-audio-labels.md) requires a le
 
 ### Lesson selection and reference lookup
 
-The accepted [navigation/search requirements](../decision-session-navigation-and-search.md) add lesson-title substring filtering, conceptual phrase lookup and full lesson phrase lists. Proposed API reads are `GET /api/v1/lessons?language=en&q=...`, `/lessons/{id}/phrases?language=en` and `/phrases/search?language=en&q=...`; use stable identities and paginate without restricting a lesson list to due items. Session creation carries learning language and explicit lesson scope, All lessons by default or one lesson ID. All lessons uses the spaced-repetition planner within that language. Selected-lesson due-only versus all-phrase eligibility is still open.
+The accepted [navigation/search requirements](../decision-session-navigation-and-search.md) add lesson-title substring filtering, conceptual phrase lookup and full lesson phrase lists. Proposed API reads are `GET /api/v1/lessons?language=en&q=...`, `/lessons/{id}/phrases?language=en` and `/phrases/search?language=en&q=...`; use stable identities and paginate without restricting a lesson list to due items. Session creation carries learning language and explicit lesson scope, All lessons by default or one lesson ID. All lessons uses the spaced-repetition planner within that language. Selected lessons also use due/new eligibility under the user's 2026-10-12 delegation; schedules remain target-owned.
 
 Lookup does not require a scheduled session or attempt. Proposed extension: a practice/exposure context records full phrase/model/explanation exposure from lookup and lesson browsing, with an optional scheduled-session/attempt link. Optional explanation recordings outside a drill attach to this context and target; do not fabricate a review group to satisfy a foreign key. Keep audio retention identical. Actual content exposure may inform later support history, but merely searching, opening a phrase or listing a lesson must not generate a success receipt or advance due dates. Browsing must not take over or discard an active scheduled session. The precise context schema and active-session navigation are design work, not implemented contracts.
 
@@ -79,9 +79,11 @@ IDs above are readable fixture identifiers, not the production UUID format. Thes
 | `GET /api/v1/targets`, `/targets/{id}`, `/dialogues/{id}` | Read published content, source summaries and target progress. Paginate collection queries. |
 | `POST /api/v1/imports` | Stage a versioned source package; return import ID and validation report. No direct scheduling effects. |
 | `POST /api/v1/imports/{id}/publish` | Publish an explicitly reviewed staged revision. Reject missing media or invalid cue references. |
-| `POST /api/v1/sessions` | Start/resume a session; return its pinned manifest, review groups, schedule versions and required media list. Creation has an idempotency key. |
+| `POST /api/v1/sessions` | Implemented: idempotent creation with a caller-issued session ID; pinned manifest/groups/versions/media and optional explicit takeover of the current session. |
+| `GET /api/v1/sessions/current` | Implemented: retrieve the active/paused session, independent of viewed language. |
+| `PATCH /api/v1/sessions/{id}` | Implemented: versioned pause/resume; retains the immutable manifest and single open slot. |
 | `POST /api/v1/sessions/{id}/events` | Ordered event batch; return per-event receipts, last accepted sequence and authoritative schedule changes. |
-| `GET /api/v1/sessions/{id}` | Retrieve the checkpoint/receipts needed to reconcile a resumed client. |
+| `GET /api/v1/sessions/{id}` | Implemented: retrieve persisted lifecycle state and manifest; event checkpoints/receipts remain future work. |
 | `POST /api/v1/cue-reports` | Record ambiguity or inappropriate context without grading a memory failure. |
 | `POST /api/v1/recordings`, `GET /recordings/{id}/audio` | Automatically persist every take's audio and metadata in the database, with idempotent upload/attachment and private playback. Acknowledge storage only after commit. Failed transfer retains pending audio and does not discard the practice event. Historical browsing/comparison and deletion UI are not first-version requirements. |
 | `GET /api/v1/media/{id}` | Private media delivery with byte-range support, MIME type and immutable content identity. |

@@ -844,6 +844,158 @@
           }
         }
       }
+    },
+    "/api/v1/sessions": {
+      "post": {
+        "summary": "Start",
+        "operationId": "start_api_v1_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/current": {
+      "get": {
+        "summary": "Current",
+        "operationId": "current_api_v1_sessions_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PracticeSession"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Current Api V1 Sessions Current Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "summary": "Session",
+        "operationId": "session_api_v1_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Transition",
+        "operationId": "transition_api_v1_sessions__session_id__patch",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionTransition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1774,6 +1926,106 @@
         ],
         "title": "PhrasePage"
       },
+      "PlannedTarget": {
+        "properties": {
+          "phrase": {
+            "$ref": "#/components/schemas/Phrase"
+          },
+          "cue_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Cue Id"
+          },
+          "hidden_chunks": {
+            "items": {
+              "type": "string",
+              "maxLength": 160,
+              "minLength": 1,
+              "pattern": "^[\\w.:-]+$"
+            },
+            "type": "array",
+            "title": "Hidden Chunks"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Review Group Id"
+          },
+          "schedule_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Schedule Version"
+          },
+          "eligibility": {
+            "type": "string",
+            "enum": [
+              "new",
+              "due"
+            ],
+            "title": "Eligibility"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "phrase",
+          "cue_id",
+          "hidden_chunks",
+          "review_group_id",
+          "schedule_version",
+          "eligibility"
+        ],
+        "title": "PlannedTarget"
+      },
+      "PracticeSession": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused",
+              "superseded"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/SessionManifest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "version",
+          "created_at",
+          "updated_at",
+          "manifest"
+        ],
+        "title": "PracticeSession"
+      },
       "PublishRequest": {
         "properties": {
           "reviewed": {
@@ -1819,6 +2071,141 @@
           "removed_staging_files"
         ],
         "title": "Reconciliation"
+      },
+      "SessionManifest": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "planner_version": {
+            "type": "string",
+            "const": "due-new-v1",
+            "title": "Planner Version",
+            "default": "due-new-v1"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru",
+              "sr",
+              "de"
+            ],
+            "title": "Language"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedTarget"
+            },
+            "type": "array",
+            "title": "Targets"
+          },
+          "required_media_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Required Media Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "language",
+          "targets",
+          "required_media_ids"
+        ],
+        "title": "SessionManifest"
+      },
+      "SessionStart": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru",
+              "sr",
+              "de"
+            ],
+            "title": "Language"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
+          "takeover_session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Takeover Session Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "language"
+        ],
+        "title": "SessionStart"
+      },
+      "SessionTransition": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "status"
+        ],
+        "title": "SessionTransition"
       },
       "Settings": {
         "properties": {

@@ -1,8 +1,11 @@
+import pytest
+
 from scripts.check_architecture import check_tree
 
 
-def test_guard_reports_reverse_dependencies_local_imports_and_large_modules(tmp_path):
-    domain = tmp_path / "src/phrase_gym/content"
+@pytest.mark.parametrize("family", ["content", "sessions"])
+def test_guard_reports_reverse_dependencies_local_imports_and_large_modules(tmp_path, family):
+    domain = tmp_path / "src/phrase_gym" / family
     domain.mkdir(parents=True)
     (domain / "bad.py").write_text(
         "from phrase_gym.api.app import create_app\ndef inner():\n    import json\n",

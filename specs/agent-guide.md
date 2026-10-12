@@ -1,6 +1,6 @@
 # Phrase Gym — agent guidance
 
-Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 engineering work and its review loop are closed by the user; P3 has not begun. See the [P2 closeout](plan/evidence/p2-closeout-2026-10-12.md) and [open problems](open-problems.md). Coding and architecture rules are maintained in [AGENTS.md](../AGENTS.md), with `CLAUDE.md` linking to that same file. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
+Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 engineering work and its review loop are closed by the user; P3 has begun with [pinned session planning and lifecycle APIs](decision-p3-session-planning.md); trainer UI, events, recordings and scheduling remain open. See the [P2 closeout](plan/evidence/p2-closeout-2026-10-12.md) and [open problems](open-problems.md). Coding and architecture rules are maintained in [AGENTS.md](../AGENTS.md), with `CLAUDE.md` linking to that same file. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
 
 ## Workflow
 

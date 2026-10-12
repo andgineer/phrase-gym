@@ -24,7 +24,7 @@ Show & explain retains the full phrase, native-language meaning/use, model audio
 
 Opening a search result, reading an explanation or browsing the lesson's phrases is not a completed review or a failed recall attempt. It must not generate a success grade or advance a due date simply because the learner looked at the phrase. Preserve actual model/explanation exposure separately, including when browsing precedes a drill. A later masked response does not erase that exposure. Keep one target and schedule when the same phrase is linked from multiple lessons or routes; a lesson filter is not a separate schedule.
 
-The user explicitly selected spaced repetition for the default **All lessons** session. Whether an explicitly selected lesson drills only due phrases or all its phrases immediately is still open; an optional clarification was asked. Do not silently settle that policy through fixture ordering. Session length, queue mixing and handling a lesson with no due phrases also remain open.
+The user explicitly selected spaced repetition for the default **All lessons** session. On 2026-10-12 the user delegated lesson eligibility to the implementer using the existing research. Both All lessons and a selected lesson now select due/new phrases; see the [session-planning decision](decision-p3-session-planning.md). Session budgets and new-item throttling remain future P3 work; an empty eligible queue creates no session.
 
 ## Search preparation proposal
 

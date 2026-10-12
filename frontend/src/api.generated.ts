@@ -277,6 +277,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start */
+        post: operations["start_api_v1_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current */
+        get: operations["current_api_v1_sessions_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session */
+        get: operations["session_api_v1_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Transition */
+        patch: operations["transition_api_v1_sessions__session_id__patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -603,6 +655,52 @@ export interface components {
             /** Limit */
             limit: number;
         };
+        /** PlannedTarget */
+        PlannedTarget: {
+            phrase: components["schemas"]["Phrase"];
+            /** Cue Id */
+            cue_id: string;
+            /** Hidden Chunks */
+            hidden_chunks: string[];
+            /**
+             * Review Group Id
+             * Format: uuid
+             */
+            review_group_id: string;
+            /** Schedule Version */
+            schedule_version: number;
+            /**
+             * Eligibility
+             * @enum {string}
+             */
+            eligibility: "new" | "due";
+        };
+        /** PracticeSession */
+        PracticeSession: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "paused" | "superseded";
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            manifest: components["schemas"]["SessionManifest"];
+        };
         /** PublishRequest */
         PublishRequest: {
             /**
@@ -619,6 +717,59 @@ export interface components {
             orphan_hashes: string[];
             /** Removed Staging Files */
             removed_staging_files: number;
+        };
+        /** SessionManifest */
+        SessionManifest: {
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /**
+             * Planner Version
+             * @default due-new-v1
+             * @constant
+             */
+            planner_version: "due-new-v1";
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "en" | "ru" | "sr" | "de";
+            /** Lesson Id */
+            lesson_id?: string | null;
+            /** Targets */
+            targets: components["schemas"]["PlannedTarget"][];
+            /** Required Media Ids */
+            required_media_ids: string[];
+        };
+        /** SessionStart */
+        SessionStart: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "en" | "ru" | "sr" | "de";
+            /** Lesson Id */
+            lesson_id?: string | null;
+            /** Takeover Session Id */
+            takeover_session_id?: string | null;
+        };
+        /** SessionTransition */
+        SessionTransition: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "paused";
         };
         /** Settings */
         Settings: {
@@ -1238,6 +1389,125 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Reconciliation"];
+                };
+            };
+        };
+    };
+    start_api_v1_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionStart"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    current_api_v1_sessions_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"] | null;
+                };
+            };
+        };
+    };
+    session_api_v1_sessions__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_api_v1_sessions__session_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionTransition"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

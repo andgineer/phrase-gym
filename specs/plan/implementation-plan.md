@@ -4,7 +4,7 @@
 
 Updated **2026-10-12** with P1 implementation evidence. Originally consolidated on 2026-10-11 at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
 
-**Status, 2026-10-12:** P1 prototype/design work is closed at the user's request; prototype 0.1.6 captures the final interaction. P2 engineering work and its review loop are closed at the user's request: the production foundation, library/import contracts and reference-media path are implemented; P3 is next and has not started. See the [P2 closeout](evidence/p2-closeout-2026-10-12.md) and [open problems](../open-problems.md), including continuing mid-recording clipping. See [the runbook](p2-runbook.md) and [foundation evidence](evidence/p2-foundation-2026-10-12.md). Read [the next-session handoff](next-session.md) and [closeout evidence](evidence/p1-closeout-2026-10-12.md). Device/audio/content gaps are carried forward explicitly, not claimed passed. The unified-card decision supersedes older interaction requirements below, including separate practice/recording modes and Undo.
+**Status, 2026-10-12:** P1 prototype/design work is closed at the user's request; prototype 0.1.6 captures the final interaction. P2 engineering work and its review loop are closed at the user's request: the production foundation, library/import contracts and reference-media path are implemented; P3 is in progress with pinned session planning/lifecycle APIs; the card, event processing, recordings and review policy remain open. See the [P2 closeout](evidence/p2-closeout-2026-10-12.md) and [open problems](../open-problems.md), including continuing mid-recording clipping. See [the runbook](p2-runbook.md) and [foundation evidence](evidence/p2-foundation-2026-10-12.md). Read [the next-session handoff](next-session.md) and [closeout evidence](evidence/p1-closeout-2026-10-12.md). Device/audio/content gaps are carried forward explicitly, not claimed passed. The unified-card decision supersedes older interaction requirements below, including separate practice/recording modes and Undo.
 
 **Status convention:** **Agreed** identifies explicit user requirements. **Recommended** identifies the concrete design/engineering choice to carry into the next prototype, without claiming the user already selected its exact controls or values. **Open** identifies remaining product choices. No learning-effectiveness experiment, calibration task, special assessment session or algorithm tuning is required from the learner.
 
@@ -40,7 +40,7 @@ Show & explain links to the phrase's lesson. That lesson view lists **every phra
 
 Lookup, opening an explanation and browsing displayed phrases record exposure where appropriate; they never fabricate a recall result or move a due date. Search results must reference existing stored phrases. Recommend prepared intent/topic/synonym metadata plus text search; embeddings are an implementation option, not a requirement. Search in the native language is still an optional unselected extension.
 
-**Open:** whether an explicitly selected lesson drills due phrases only or all its phrases. Recommend due-only with a separate optional Practice all action; do not treat this recommendation as an answered user question. See the [navigation decision](../decision-session-navigation-and-search.md).
+**Selected under user delegation, 2026-10-12:** both All lessons and a selected lesson use due/new phrases. No Practice all control is added. See the [session-planning decision](../decision-p3-session-planning.md). See the [navigation decision](../decision-session-navigation-and-search.md).
 
 The [manual-feedback decision](../decision-p1-manual-feedback.md) supersedes earlier hint/problem-control proposals: label full-phrase help **Show answer**, and remove **Other answer / problem** entirely.
 
@@ -182,7 +182,7 @@ Record completed phase evidence in `specs/plan/evidence/`: build/version, device
 
 | Choice | Current recommendation or next decision |
 |---|---|
-| Selected-lesson due-only versus all | Due-only with optional Practice all; user answer remains open. |
+| Selected-lesson eligibility | Due/new, selected under user delegation on 2026-10-12; implemented in the session planner. |
 | Exact answer labels, FSRS/repair/coverage details | Carry the concrete recommendation above into the prototype. Do not ask the learner to choose scientific parameters or validate effectiveness. |
 | Recording on/off initial preference | Accepted on 2026-10-12: on, with explicit microphone start; preserve the mode on resume. |
 | UI preference and language routes | Header selector, `/learn/{language}`, native/learning UI toggle initially off; exact layout/default remains proposed. Multi-language URLs themselves are required. |

@@ -15,6 +15,7 @@ The current stack is Vue/TypeScript/Vite, FastAPI/Pydantic, SQLAlchemy/Alembic a
 | `content/publication.py` | Target revisions, lesson membership and pinned dialogue revisions inside the caller's transaction. |
 | `content/catalog.py` | Language-scoped read/navigation/search operations. |
 | `settings.py`, `content/exposures.py` | Durable preferences and idempotent reference exposures, separate from recall scheduling. |
+| `sessions/` | Due/new session planning and transaction-owned idempotent creation, pause/resume and explicit takeover. |
 | `media/` | Original reference bytes, provenance, integrity, playback delivery and crash reconciliation. |
 | `storage.py`, packaged `migrations/` | Database tables, migration execution and short serialized writes. |
 | `frontend/src/components/` | Focused library, lesson, phrase-material and settings views. |

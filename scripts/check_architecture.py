@@ -5,7 +5,7 @@ from pathlib import Path
 
 MAX_SOURCE_LINES = 300
 SOURCE_EXTENSIONS = {".py", ".ts", ".vue"}
-DOMAIN_DIRECTORIES = {"content", "media", "contracts"}
+DOMAIN_DIRECTORIES = {"content", "media", "contracts", "sessions"}
 
 
 def check_imports(path: Path, package: Path) -> list[str]:
