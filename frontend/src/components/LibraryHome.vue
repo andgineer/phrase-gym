@@ -21,6 +21,7 @@ defineProps<{
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const emit = defineEmits<{
+  start: []
   query: ['q' | 'lessonQ', Event]
   more: []
   moreLessons: []
@@ -61,8 +62,13 @@ const emit = defineEmits<{
       <RouterLink v-if="selectedLesson" :to="link('lessons', selectedLesson)"
         >{{ t.selectLesson }} →</RouterLink
       >
-      <button class="primary" disabled aria-describedby="session-note">{{ t.start }}</button>
-      <p class="muted" id="session-note">{{ t.upcoming }}</p>
+      <button
+        class="primary"
+        :disabled="loading || failed || !hasCollection"
+        @click="emit('start')"
+      >
+        {{ t.start }}
+      </button>
     </div>
     <section class="lookup">
       <label

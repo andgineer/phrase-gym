@@ -9,7 +9,7 @@ from phrase_gym.contracts.base import Language
 from phrase_gym.contracts.content import ManualPackage
 from phrase_gym.contracts.imports import ImportChange, ImportReport
 from phrase_gym.contracts.media import MediaMetadata
-from phrase_gym.storage import DialogueRow, LessonRow, MediaRow, SourceItem, Target, TargetRevision
+from phrase_gym.tables import DialogueRow, LessonRow, MediaRow, SourceItem, Target, TargetRevision
 
 
 class PackageValidator:

@@ -3,6 +3,7 @@ import type { ExposureInput, Language, Phrase } from '../api'
 import { flushExposures, retainExposure, sendExposure } from '../exposures'
 
 export function useReferenceExposure() {
+  const currentExposure = ref<ExposureInput | null>(null)
   const pendingExposure = ref<ExposureInput | null>(null)
   const sendingId = ref<string | null>(null)
   const exposureSaving = computed(() =>
@@ -17,6 +18,7 @@ export function useReferenceExposure() {
       kind: 'explanation',
     }
     retainExposure(payload)
+    currentExposure.value = payload
     pendingExposure.value = payload
   }
   async function saveExposure() {
@@ -33,5 +35,5 @@ export function useReferenceExposure() {
   onMounted(() => {
     flushExposures().catch(() => {})
   })
-  return { pendingExposure, exposureSaving, prepareExposure, saveExposure }
+  return { currentExposure, pendingExposure, exposureSaving, prepareExposure, saveExposure }
 }

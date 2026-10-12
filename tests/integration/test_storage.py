@@ -5,7 +5,8 @@ from pathlib import Path
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from sqlalchemy import text
-from phrase_gym.storage import Base, Database, AppSettings
+from phrase_gym.storage import Database
+from phrase_gym.tables import Base, AppSettings
 from phrase_gym.settings import SettingsService
 
 

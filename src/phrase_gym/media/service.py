@@ -20,7 +20,8 @@ from sqlalchemy import select
 from phrase_gym.contracts.media import MediaAsset, MediaMetadata, MediaUpload, Reconciliation
 from phrase_gym.errors import DomainError
 from phrase_gym.serialization import canonical_json
-from phrase_gym.storage import Database, MediaRow
+from phrase_gym.storage import Database
+from phrase_gym.tables import MediaRow
 
 MEDIA_NAMESPACE = UUID("1a6d9d67-c9b9-4d73-9e38-6dd05a3c1d66")
 MAX_AUDIO_BYTES = 12 * 1024 * 1024

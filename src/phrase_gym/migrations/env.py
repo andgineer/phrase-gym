@@ -2,11 +2,11 @@
 
 from alembic import context
 
-from phrase_gym.storage import Base
+from phrase_gym.practice.tables import PracticeEvent
 
 context.configure(
     connection=context.config.attributes["connection"],
-    target_metadata=Base.metadata,
+    target_metadata=PracticeEvent.metadata,
 )
 with context.begin_transaction():
     context.run_migrations()

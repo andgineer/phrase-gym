@@ -1,6 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import func, select
-from phrase_gym.storage import Database, ExposureRow, Target
+from phrase_gym.storage import Database
+from phrase_gym.tables import ExposureRow, Target
 from tests.integration.helpers import NOW, publish, phrases
 
 

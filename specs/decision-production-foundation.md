@@ -15,9 +15,10 @@ The current stack is Vue/TypeScript/Vite, FastAPI/Pydantic, SQLAlchemy/Alembic a
 | `content/publication.py` | Target revisions, lesson membership and pinned dialogue revisions inside the caller's transaction. |
 | `content/catalog.py` | Language-scoped read/navigation/search operations. |
 | `settings.py`, `content/exposures.py` | Durable preferences and idempotent reference exposures, separate from recall scheduling. |
-| `sessions/` | Due/new session planning and transaction-owned idempotent creation, pause/resume and explicit takeover. |
+| `sessions/` | Due/new planning, readiness, pinned dialogue queues and transaction-owned idempotent lifecycle/takeover. |
+| `practice/` | Ordered evidence processing, original/support snapshots, FSRS review policy/receipts, repairs, cue history and retained-take transfer/decoding. |
 | `media/` | Original reference bytes, provenance, integrity, playback delivery and crash reconciliation. |
-| `storage.py`, packaged `migrations/` | Database tables, migration execution and short serialized writes. |
+| `storage.py`, `tables.py`, `practice/tables.py`, packaged `migrations/` | Database connection/transactions, focused model families and reproducible migrations. |
 | `frontend/src/components/` | Focused library, lesson, phrase-material and settings views. |
 | `frontend/src/composables/` | Route orchestration, preference persistence and reference-audio effects. |
 | Pure client reducer | Original-response/support snapshots; no authoritative schedule computation. |
@@ -30,4 +31,4 @@ Content revisions hold their initial realization/chunks/cues as immutable JSON. 
 
 Media keeps original bytes, with metadata identity incorporating content hash and provenance/preparation settings. Manual publication checks exact language/text/role. Missing media is an explicit preparation gap. The initial search is Unicode substring matching over text, purpose and prepared concepts; it is intentionally independent of lesson filtering.
 
-These boundaries support P3 sessions, recording retention and scheduling without turning the importing service into a catch-all. P3 must keep session planning, evidence processing, review policy and recording transfer separate, using the accepted unified-card interaction. P4/P5/P6 retain their device/offline, provider-intake and deployment responsibilities.
+These boundaries implement P3 sessions, recording retention and scheduling without turning the importing service into a catch-all; see the [core decision](decision-core-trainer.md). P3 must keep session planning, evidence processing, review policy and recording transfer separate, using the accepted unified-card interaction. P4/P5/P6 retain their device/offline, provider-intake and deployment responsibilities.

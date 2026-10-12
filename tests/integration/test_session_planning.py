@@ -3,7 +3,8 @@ from uuid import uuid4
 
 from sqlalchemy import func, select
 
-from phrase_gym.storage import Database, ScheduleRow, SessionRow
+from phrase_gym.storage import Database
+from phrase_gym.tables import ScheduleRow, SessionRow
 from tests.integration.helpers import NOW, publish
 from tests.integration.session_helpers import ready_package, start
 

@@ -4,7 +4,7 @@
 
 A language trainer for ready use of words, phrases and prepared dialogues.
 
-P2 production foundation is now implemented in `src/phrase_gym` and `frontend/`: persistent language settings, a searchable library, reviewed manual-package publication and reference audio. Sessions, optional learner recording and scheduling arrive in P3. The disposable P1 prototype remains in `prototypes/` as an interaction reference.
+The production app in `src/phrase_gym` and `frontend/` includes persistent language settings, a searchable library, reviewed manual-package publication, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling. The disposable P1 prototype remains in `prototypes/` as an interaction reference.
 
 ## Run locally
 
@@ -31,7 +31,7 @@ uv run phrase-gym --data-dir .data import-package fixtures/manual-en.json --stag
 uv run phrase-gym --data-dir .data publish IMPORT_ID --reviewed
 ```
 
-Repeat for `fixtures/manual-sr.json`. These are structural examples, not a release content pack; they deliberately contain no production audio. Reference playback requires a verified clip imported separately. See the [P2 runbook](specs/plan/p2-runbook.md) for media, API, development and package commands.
+Repeat for `fixtures/manual-sr.json`. These are structural examples, not a release content pack; they deliberately contain no production audio. Reference playback requires a verified clip imported separately. See the [P2 runbook](specs/plan/p2-runbook.md) for media/import commands and the [P3 runbook](specs/plan/p3-runbook.md) for sessions, recordings and recovery.
 
 ## Checks and build
 

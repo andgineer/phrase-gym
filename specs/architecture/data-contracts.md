@@ -1,6 +1,6 @@
 # Data model and integration contracts
 
-Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; pinned session planning/lifecycle contracts are implemented in the first P3 batch. Attempt events, recording transfer and review receipts below remain future work. See the [session-planning decision](../decision-p3-session-planning.md). The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
+Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; pinned sessions, ordered attempt events, recording transfer and review receipts are implemented in P3. See the [core trainer decision](../decision-core-trainer.md). The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
 
 ## Durable model
 
@@ -16,7 +16,7 @@ Use opaque UUIDs for internal identities; source identifiers are references, not
 | `lesson` + membership links | Stable lesson ID, learning-language association, title, source references and ordered phrase/realization links. A target may belong to several lessons without duplicating its schedule. Language-scoped queries cannot leak another language's phrases. |
 | `phrase_search_document` | Proposed versioned text/intent/topic/synonym index tied to stored phrase and lesson IDs. Exact search mechanism and metadata preparation are open; conceptual results must resolve to existing phrases. |
 | `dialogue_revision` | Ordered turns, speaker roles, supporting text, target/realization/cue links and audio. References pin revisions, not mutable text. |
-| `session` | Learner/device, pinned learning language, immutable manifest, requested recording mode and its change events, policy/schema versions, status and last accepted event sequence. Navigation to another language never relabels an existing session. |
+| `session` | Learner/device, pinned learning language, immutable manifest, optional per-attempt capture with actual modality/support, policy/schema versions, status and last accepted event sequence. Navigation to another language never relabels an existing session. |
 | `attempt` | Unique event/attempt IDs, target and cue revisions, review group, original-attempt/repair link, actual response modality (recorded speech / silent / explicitly reported unrecorded speech / unknown), exposed chunks and help timing relative to response, media failures, original recall result (`not_yet`, `with_effort`, `recalled`, or no grade), assessment source, eligibility reason, timestamps and optional recording ID. Practice requests and result corrections are distinct events. |
 | `review_state` | Unique `(learner_id, target_id)`, due time, last applied review time, versioned library memory state (FSRS difficulty/stability and required state fields under the current recommendation), parameter/policy version, desired retention and concurrency version. Persistent chunk coverage is linked evidence, not interval levels or sibling schedules. |
 | `review_receipt` | Unique review group per learner/target; accepted attempt, schedule effect and before/after version. |
@@ -44,7 +44,7 @@ The [language decision](../decision-languages-and-audio-labels.md) requires a le
 
 The accepted [navigation/search requirements](../decision-session-navigation-and-search.md) add lesson-title substring filtering, conceptual phrase lookup and full lesson phrase lists. Proposed API reads are `GET /api/v1/lessons?language=en&q=...`, `/lessons/{id}/phrases?language=en` and `/phrases/search?language=en&q=...`; use stable identities and paginate without restricting a lesson list to due items. Session creation carries learning language and explicit lesson scope, All lessons by default or one lesson ID. All lessons uses the spaced-repetition planner within that language. Selected lessons also use due/new eligibility under the user's 2026-10-12 delegation; schedules remain target-owned.
 
-Lookup does not require a scheduled session or attempt. Proposed extension: a practice/exposure context records full phrase/model/explanation exposure from lookup and lesson browsing, with an optional scheduled-session/attempt link. Optional explanation recordings outside a drill attach to this context and target; do not fabricate a review group to satisfy a foreign key. Keep audio retention identical. Actual content exposure may inform later support history, but merely searching, opening a phrase or listing a lesson must not generate a success receipt or advance due dates. Browsing must not take over or discard an active scheduled session. The precise context schema and active-session navigation are design work, not implemented contracts.
+Lookup does not require a scheduled session or attempt. Proposed extension: a practice/exposure context records full phrase/model/explanation exposure from lookup and lesson browsing, with an optional scheduled-session/attempt link. Optional explanation recordings outside a drill attach to this context and target; do not fabricate a review group to satisfy a foreign key. Keep audio retention identical. Actual content exposure may inform later support history, but merely searching, opening a phrase or listing a lesson must not generate a success receipt or advance due dates. Browsing must not take over or discard an active scheduled session. Lookup takes now attach to actual exposure receipts; session takes attach to attempts and optional capture-event receipts. Resume/takeover and pinned-language navigation are implemented.
 
 ## Example realization and cues
 
@@ -82,8 +82,12 @@ IDs above are readable fixture identifiers, not the production UUID format. Thes
 | `POST /api/v1/sessions` | Implemented: idempotent creation with a caller-issued session ID; pinned manifest/groups/versions/media and optional explicit takeover of the current session. |
 | `GET /api/v1/sessions/current` | Implemented: retrieve the active/paused session, independent of viewed language. |
 | `PATCH /api/v1/sessions/{id}` | Implemented: versioned pause/resume; retains the immutable manifest and single open slot. |
-| `POST /api/v1/sessions/{id}/events` | Ordered event batch; return per-event receipts, last accepted sequence and authoritative schedule changes. |
-| `GET /api/v1/sessions/{id}` | Implemented: retrieve persisted lifecycle state and manifest; event checkpoints/receipts remain future work. |
+| `POST /api/v1/sessions/{id}/events` | Implemented: ordered event batch, atomic receipts/evidence/schedule effects and authoritative session state. |
+| `GET /api/v1/sessions/{id}/events` | Implemented: ordered receipts for journal reconciliation. |
+| `GET /api/v1/sessions/readiness` | Implemented: scoped due/new/preparing counts and next UTC due time, with no writes. |
+| `POST /api/v1/recordings` | Implemented: stable-ID take transfer into SQLite BLOBs; validates revision/context and complete audio decoding. |
+| `GET /api/v1/recordings/{id}` | Implemented: original retained take bytes with byte ranges and private caching. |
+| `GET /api/v1/sessions/{id}` | Implemented: retrieve persisted lifecycle state and manifest; cursor, queue, sequence and original/support evidence are included; ordered receipts are available from the events read. |
 | `POST /api/v1/cue-reports` | Record ambiguity or inappropriate context without grading a memory failure. |
 | `POST /api/v1/recordings`, `GET /recordings/{id}/audio` | Automatically persist every take's audio and metadata in the database, with idempotent upload/attachment and private playback. Acknowledge storage only after commit. Failed transfer retains pending audio and does not discard the practice event. Historical browsing/comparison and deletion UI are not first-version requirements. |
 | `GET /api/v1/media/{id}` | Private media delivery with byte-range support, MIME type and immutable content identity. |
@@ -93,7 +97,7 @@ Validate schema versions, ownership, byte limits, state transitions and revision
 
 ### Event processing
 
-An event envelope includes `event_id`, `session_id`, monotonic `sequence`, `attempt_id`, target/cue revisions, `review_group_id`, `base_schedule_version`, event kind, occurred time and structured observations. The client submits observations, never an authoritative due date or algorithm grade.
+An event envelope includes a stable ID, monotonic sequence, manifest step, event kind, occurred time and structured observations. The server derives attempt/target/cue/group/base-schedule bindings from the pinned step; the client cannot choose authoritative due dates or grades. The client submits observations, never an authoritative due date or algorithm grade.
 
 Within one transaction, validate sequence and the manifest, insert the event, derive the outcome, consume a review group if eligible, compare the schedule version, update the schedule and persist its receipt. If an event ID already exists with the same payload hash, return its original receipt. If it has different content, return conflict. A missing sequence returns the expected sequence; do not silently drop preceding help events.
 
@@ -143,6 +147,6 @@ A worker claims a job with a lease in a short transaction, then performs externa
 
 ## Comparison sequence contract
 
-Recording mode must not be inferred merely from the presence or absence of a recording row. Record the requested mode, actual capture outcome, model exposure timing and learner self-report separately. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. All audio takes are automatically retained in the app database, including rerecordings, with no manual Save action or automatic expiry. Historical progress-comparison UI is deferred. This storage requirement does not authorize automatic external AI processing.
+Recording mode must not be inferred merely from the presence or absence of a recording row. Recording is optional per attempt; record actual capture outcome, model exposure timing and learner self-report separately. There is no recording-mode switch. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. All audio takes are automatically retained in the app database, including rerecordings, with no manual Save action or automatic expiry. Historical progress-comparison UI is deferred. This storage requirement does not authorize automatic external AI processing.
 
 The [device-language and Settings decision](../decision-device-language-and-settings.md) removes the server language preference and navigation writes. Migration 0002 removes the legacy JSON field.

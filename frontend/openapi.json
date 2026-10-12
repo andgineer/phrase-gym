@@ -909,6 +909,68 @@
         }
       }
     },
+    "/api/v1/sessions/readiness": {
+      "get": {
+        "summary": "Readiness",
+        "operationId": "readiness_api_v1_sessions_readiness_get",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "ru",
+                "sr",
+                "de"
+              ],
+              "type": "string",
+              "title": "Language"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DueSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sessions/{session_id}": {
       "get": {
         "summary": "Session",
@@ -996,10 +1058,347 @@
           }
         }
       }
+    },
+    "/api/v1/sessions/{session_id}/events": {
+      "post": {
+        "summary": "Events",
+        "operationId": "events_api_v1_sessions__session_id__events_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventBatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeBatchReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Receipts",
+        "operationId": "receipts_api_v1_sessions__session_id__events_get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventReceipt"
+                  },
+                  "title": "Response Receipts Api V1 Sessions  Session Id  Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recordings": {
+      "post": {
+        "summary": "Recording",
+        "operationId": "recording_api_v1_recordings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/{target_id}/recordings": {
+      "get": {
+        "summary": "Recordings",
+        "operationId": "recordings_api_v1_phrases__target_id__recordings_get",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Target Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecordingReceipt"
+                  },
+                  "title": "Response Recordings Api V1 Phrases  Target Id  Recordings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recordings/{recording_id}": {
+      "get": {
+        "summary": "Play Recording",
+        "operationId": "play_recording_api_v1_recordings__recording_id__get",
+        "parameters": [
+          {
+            "name": "recording_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recording Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AttemptEvidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "step": {
+            "type": "integer",
+            "title": "Step"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "cue_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Cue Id"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Review Group Id"
+          },
+          "repair": {
+            "type": "boolean",
+            "title": "Repair"
+          },
+          "supported": {
+            "type": "boolean",
+            "title": "Supported",
+            "default": false
+          },
+          "original": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginalResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revealed": {
+            "type": "boolean",
+            "title": "Revealed",
+            "default": false
+          },
+          "expanded": {
+            "type": "boolean",
+            "title": "Expanded",
+            "default": false
+          },
+          "technical_failure": {
+            "type": "boolean",
+            "title": "Technical Failure",
+            "default": false
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "not_yet",
+                  "with_effort",
+                  "recalled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "presented_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Presented At"
+          },
+          "finalized_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finalized At"
+          },
+          "eligibility_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eligibility Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "step",
+          "target_id",
+          "revision",
+          "cue_id",
+          "review_group_id",
+          "repair",
+          "presented_at"
+        ],
+        "title": "AttemptEvidence"
+      },
       "Chunk": {
         "properties": {
           "id": {
@@ -1242,6 +1641,155 @@
           "text"
         ],
         "title": "DialogueTurn"
+      },
+      "DueSummary": {
+        "properties": {
+          "due_count": {
+            "type": "integer",
+            "title": "Due Count"
+          },
+          "new_count": {
+            "type": "integer",
+            "title": "New Count"
+          },
+          "preparing_count": {
+            "type": "integer",
+            "title": "Preparing Count"
+          },
+          "next_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "due_count",
+          "new_count",
+          "preparing_count",
+          "next_due_at"
+        ],
+        "title": "DueSummary"
+      },
+      "EventBatch": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeInput"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Events"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "title": "EventBatch"
+      },
+      "EventReceipt": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sequence": {
+            "type": "integer",
+            "title": "Sequence"
+          },
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attempt Id"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "clock_adjusted": {
+            "type": "boolean",
+            "title": "Clock Adjusted"
+          },
+          "capture_supported": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Supported"
+          },
+          "schedule_changed": {
+            "type": "boolean",
+            "title": "Schedule Changed",
+            "default": false
+          },
+          "schedule_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schedule Version"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "eligibility_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eligibility Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "attempt_id",
+          "received_at",
+          "occurred_at",
+          "clock_adjusted"
+        ],
+        "title": "EventReceipt"
       },
       "Explanation": {
         "properties": {
@@ -1837,6 +2385,36 @@
         ],
         "title": "MediaUpload"
       },
+      "OriginalResponse": {
+        "properties": {
+          "modality": {
+            "type": "string",
+            "enum": [
+              "self_report",
+              "recorded",
+              "unrecorded"
+            ],
+            "title": "Modality"
+          },
+          "supported": {
+            "type": "boolean",
+            "title": "Supported"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "modality",
+          "supported",
+          "occurred_at"
+        ],
+        "title": "OriginalResponse"
+      },
       "Phrase": {
         "properties": {
           "id": {
@@ -1979,6 +2557,116 @@
         ],
         "title": "PlannedTarget"
       },
+      "PracticeBatchReceipt": {
+        "properties": {
+          "receipts": {
+            "items": {
+              "$ref": "#/components/schemas/EventReceipt"
+            },
+            "type": "array",
+            "title": "Receipts"
+          },
+          "session": {
+            "$ref": "#/components/schemas/PracticeSession"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "receipts",
+          "session"
+        ],
+        "title": "PracticeBatchReceipt"
+      },
+      "PracticeInput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Sequence"
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Step"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "present",
+              "respond",
+              "answer",
+              "explain",
+              "reference",
+              "rate",
+              "failure",
+              "report",
+              "detour",
+              "dialogue_exposure",
+              "dialogue_begin"
+            ],
+            "title": "Kind"
+          },
+          "modality": {
+            "type": "string",
+            "enum": [
+              "self_report",
+              "recorded",
+              "unrecorded"
+            ],
+            "title": "Modality",
+            "default": "self_report"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "not_yet",
+                  "with_effort",
+                  "recalled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "step",
+          "occurred_at",
+          "kind"
+        ],
+        "title": "PracticeInput"
+      },
       "PracticeSession": {
         "properties": {
           "id": {
@@ -1991,7 +2679,8 @@
             "enum": [
               "active",
               "paused",
-              "superseded"
+              "superseded",
+              "completed"
             ],
             "title": "Status"
           },
@@ -2012,6 +2701,28 @@
           },
           "manifest": {
             "$ref": "#/components/schemas/SessionManifest"
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor"
+          },
+          "last_sequence": {
+            "type": "integer",
+            "title": "Last Sequence"
+          },
+          "queue": {
+            "items": {
+              "$ref": "#/components/schemas/SessionStep"
+            },
+            "type": "array",
+            "title": "Queue"
+          },
+          "attempts": {
+            "items": {
+              "$ref": "#/components/schemas/AttemptEvidence"
+            },
+            "type": "array",
+            "title": "Attempts"
           }
         },
         "additionalProperties": false,
@@ -2022,7 +2733,11 @@
           "version",
           "created_at",
           "updated_at",
-          "manifest"
+          "manifest",
+          "cursor",
+          "last_sequence",
+          "queue",
+          "attempts"
         ],
         "title": "PracticeSession"
       },
@@ -2072,6 +2787,168 @@
         ],
         "title": "Reconciliation"
       },
+      "RecordingInput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Revision"
+          },
+          "attempt_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt Id"
+          },
+          "exposure_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exposure Id"
+          },
+          "capture_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Event Id"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Captured At"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Mime Type"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "capture_settings": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Capture Settings"
+          },
+          "audio_base64": {
+            "type": "string",
+            "maxLength": 17000000,
+            "minLength": 1,
+            "title": "Audio Base64"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "target_id",
+          "revision",
+          "captured_at",
+          "mime_type",
+          "complete",
+          "audio_base64"
+        ],
+        "title": "RecordingInput"
+      },
+      "RecordingReceipt": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "byte_length": {
+            "type": "integer",
+            "title": "Byte Length"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Captured At"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "sha256",
+          "byte_length",
+          "captured_at",
+          "received_at",
+          "complete"
+        ],
+        "title": "RecordingReceipt"
+      },
       "SessionManifest": {
         "properties": {
           "schema_version": {
@@ -2082,9 +2959,17 @@
           },
           "planner_version": {
             "type": "string",
-            "const": "due-new-v1",
+            "enum": [
+              "due-new-v1",
+              "due-new-v2"
+            ],
             "title": "Planner Version",
-            "default": "due-new-v1"
+            "default": "due-new-v2"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version",
+            "default": "fsrs-6.3.2-retention90-v1"
           },
           "language": {
             "type": "string",
@@ -2122,6 +3007,16 @@
             },
             "type": "array",
             "title": "Required Media Ids"
+          },
+          "dialogue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Dialogue"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -2162,6 +3057,18 @@
             ],
             "title": "Lesson Id"
           },
+          "dialogue_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dialogue Id"
+          },
           "takeover_session_id": {
             "anyOf": [
               {
@@ -2182,6 +3089,41 @@
           "language"
         ],
         "title": "SessionStart"
+      },
+      "SessionStep": {
+        "properties": {
+          "target_index": {
+            "type": "integer",
+            "title": "Target Index"
+          },
+          "repair": {
+            "type": "boolean",
+            "title": "Repair",
+            "default": false
+          },
+          "dialogue_turn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dialogue Turn"
+          },
+          "introduced": {
+            "type": "boolean",
+            "title": "Introduced",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "target_index"
+        ],
+        "title": "SessionStep"
       },
       "SessionTransition": {
         "properties": {

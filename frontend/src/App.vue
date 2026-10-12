@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePracticeSession } from './composables/usePracticeSession'
+import { practiceMessages } from './practiceMessages'
+import type { Language } from './api'
+import PracticePanel from './components/PracticePanel.vue'
+import SessionLauncher from './components/SessionLauncher.vue'
+import DueOverview from './components/DueOverview.vue'
+import DialogueLibrary from './components/DialogueLibrary.vue'
 import { useLibrary } from './composables/useLibrary'
 import { languages, languageNames } from './i18n'
 import SetupForm from './components/SetupForm.vue'
@@ -22,10 +31,10 @@ const {
   total,
   hasCollection,
   selectedLesson,
-  playing,
-  audioError,
+  currentExposure,
   pendingExposure,
   exposureSaving,
+  locale,
   currentLanguage,
   t,
   firstLaunch,
@@ -35,7 +44,6 @@ const {
   selectedLanguage,
   explanation,
   lessonTitle,
-  playReference,
   saveExposure,
   saveSettings,
   changeLanguage,
@@ -48,6 +56,17 @@ const {
   loadingMoreLessons,
   loadRoute,
 } = useLibrary()
+const practice = usePracticeSession()
+const router = useRouter()
+const pt = computed(() => practiceMessages(locale.value))
+const launcher = ref<InstanceType<typeof SessionLauncher> | null>(null)
+function startSession(lessonId?: string, dialogueId?: string) {
+  if (currentLanguage.value)
+    void launcher.value?.launch(currentLanguage.value, lessonId, dialogueId)
+}
+function leavePractice() {
+  void router.push(`/learn/${practice.session.value?.manifest.language ?? currentLanguage.value}`)
+}
 </script>
 <template>
   <div class="shell">
@@ -99,6 +118,16 @@ const {
           </nav>
         </section>
         <template v-else>
+          <SessionLauncher ref="launcher" :engine="practice" :pt="pt" />
+          <PracticePanel
+            v-if="
+              kind === 'practice' && practice.session.value?.manifest.language === currentLanguage
+            "
+            :engine="practice"
+            :pt="pt"
+            :native-language="settings.native_language as Language"
+            @leave="leavePractice"
+          />
           <button
             v-if="phrase || kind === 'lessons'"
             class="back quiet"
@@ -109,17 +138,17 @@ const {
           </button>
           <PhraseMaterials
             v-if="phrase"
+            :pt="pt"
+            :current-exposure="currentExposure"
+            :save-exposure="saveExposure"
             :t="t"
             :phrase="phrase"
             :language="currentLanguage"
             :native-language="settings.native_language"
             :explanation="explanation"
-            :playing="playing"
-            :audio-error="audioError"
             :pending-exposure="pendingExposure"
             :exposure-saving="exposureSaving"
             :link="link"
-            @reference="playReference"
             @retry-exposure="saveExposure"
           />
           <LessonView
@@ -132,6 +161,7 @@ const {
             :link="link"
             :loading-more="loadingMore"
             @more="loadMore"
+            @start="startSession(route.path.split('/')[4])"
           />
           <LibraryHome
             v-else-if="kind === 'home'"
@@ -152,7 +182,20 @@ const {
             :link="link"
             @query="updateQuery"
             @more="loadMore"
+            @start="startSession(selectedLesson)"
             @more-lessons="loadMoreLessons"
+          />
+          <DueOverview
+            v-if="kind === 'home'"
+            :language="currentLanguage"
+            :lesson-id="selectedLesson"
+            :pt="pt"
+          />
+          <DialogueLibrary
+            v-if="kind === 'home'"
+            :language="currentLanguage"
+            :pt="pt"
+            @start="(id) => startSession(undefined, id)"
           />
         </template>
       </template>

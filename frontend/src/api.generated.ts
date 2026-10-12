@@ -311,6 +311,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Readiness */
+        get: operations["readiness_api_v1_sessions_readiness_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sessions/{session_id}": {
         parameters: {
             query?: never;
@@ -329,10 +346,137 @@ export interface paths {
         patch: operations["transition_api_v1_sessions__session_id__patch"];
         trace?: never;
     };
+    "/api/v1/sessions/{session_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Receipts */
+        get: operations["receipts_api_v1_sessions__session_id__events_get"];
+        put?: never;
+        /** Events */
+        post: operations["events_api_v1_sessions__session_id__events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recording */
+        post: operations["recording_api_v1_recordings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/phrases/{target_id}/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recordings */
+        get: operations["recordings_api_v1_phrases__target_id__recordings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recordings/{recording_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Play Recording */
+        get: operations["play_recording_api_v1_recordings__recording_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AttemptEvidence */
+        AttemptEvidence: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Step */
+            step: number;
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /** Revision */
+            revision: number;
+            /** Cue Id */
+            cue_id: string;
+            /**
+             * Review Group Id
+             * Format: uuid
+             */
+            review_group_id: string;
+            /** Repair */
+            repair: boolean;
+            /**
+             * Supported
+             * @default false
+             */
+            supported: boolean;
+            original?: components["schemas"]["OriginalResponse"] | null;
+            /**
+             * Revealed
+             * @default false
+             */
+            revealed: boolean;
+            /**
+             * Expanded
+             * @default false
+             */
+            expanded: boolean;
+            /**
+             * Technical Failure
+             * @default false
+             */
+            technical_failure: boolean;
+            /** Rating */
+            rating?: ("not_yet" | "with_effort" | "recalled") | null;
+            /**
+             * Presented At
+             * Format: date-time
+             */
+            presented_at: string;
+            /** Finalized At */
+            finalized_at?: string | null;
+            /** Eligibility Reason */
+            eligibility_reason?: string | null;
+        };
         /** Chunk */
         Chunk: {
             /** Id */
@@ -410,6 +554,62 @@ export interface components {
             target_source_id?: string | null;
             /** Audio Id */
             audio_id?: string | null;
+        };
+        /** DueSummary */
+        DueSummary: {
+            /** Due Count */
+            due_count: number;
+            /** New Count */
+            new_count: number;
+            /** Preparing Count */
+            preparing_count: number;
+            /** Next Due At */
+            next_due_at: string | null;
+        };
+        /** EventBatch */
+        EventBatch: {
+            /** Events */
+            events: components["schemas"]["PracticeInput"][];
+        };
+        /** EventReceipt */
+        EventReceipt: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Sequence */
+            sequence: number;
+            /**
+             * Attempt Id
+             * Format: uuid
+             */
+            attempt_id: string;
+            /**
+             * Received At
+             * Format: date-time
+             */
+            received_at: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Clock Adjusted */
+            clock_adjusted: boolean;
+            /** Capture Supported */
+            capture_supported?: boolean | null;
+            /**
+             * Schedule Changed
+             * @default false
+             */
+            schedule_changed: boolean;
+            /** Schedule Version */
+            schedule_version?: number | null;
+            /** Due At */
+            due_at?: string | null;
+            /** Eligibility Reason */
+            eligibility_reason?: string | null;
         };
         /** Explanation */
         Explanation: {
@@ -619,6 +819,21 @@ export interface components {
             /** Audio Base64 */
             audio_base64: string;
         };
+        /** OriginalResponse */
+        OriginalResponse: {
+            /**
+             * Modality
+             * @enum {string}
+             */
+            modality: "self_report" | "recorded" | "unrecorded";
+            /** Supported */
+            supported: boolean;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+        };
         /** Phrase */
         Phrase: {
             /**
@@ -675,6 +890,44 @@ export interface components {
              */
             eligibility: "new" | "due";
         };
+        /** PracticeBatchReceipt */
+        PracticeBatchReceipt: {
+            /** Receipts */
+            receipts: components["schemas"]["EventReceipt"][];
+            session: components["schemas"]["PracticeSession"];
+        };
+        /** PracticeInput */
+        PracticeInput: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Sequence */
+            sequence: number;
+            /** Step */
+            step: number;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "present" | "respond" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
+            /**
+             * Modality
+             * @default self_report
+             * @enum {string}
+             */
+            modality: "self_report" | "recorded" | "unrecorded";
+            /** Rating */
+            rating?: ("not_yet" | "with_effort" | "recalled") | null;
+            /** Reason */
+            reason?: string | null;
+        };
         /** PracticeSession */
         PracticeSession: {
             /**
@@ -686,7 +939,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "paused" | "superseded";
+            status: "active" | "paused" | "superseded" | "completed";
             /** Version */
             version: number;
             /**
@@ -700,6 +953,14 @@ export interface components {
              */
             updated_at: string;
             manifest: components["schemas"]["SessionManifest"];
+            /** Cursor */
+            cursor: number;
+            /** Last Sequence */
+            last_sequence: number;
+            /** Queue */
+            queue: components["schemas"]["SessionStep"][];
+            /** Attempts */
+            attempts: components["schemas"]["AttemptEvidence"][];
         };
         /** PublishRequest */
         PublishRequest: {
@@ -718,6 +979,68 @@ export interface components {
             /** Removed Staging Files */
             removed_staging_files: number;
         };
+        /** RecordingInput */
+        RecordingInput: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /** Revision */
+            revision: number;
+            /** Attempt Id */
+            attempt_id?: string | null;
+            /** Exposure Id */
+            exposure_id?: string | null;
+            /** Capture Event Id */
+            capture_event_id?: string | null;
+            /**
+             * Captured At
+             * Format: date-time
+             */
+            captured_at: string;
+            /** Mime Type */
+            mime_type: string;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** Complete */
+            complete: boolean;
+            /** Capture Settings */
+            capture_settings?: {
+                [key: string]: string | number | boolean;
+            };
+            /** Audio Base64 */
+            audio_base64: string;
+        };
+        /** RecordingReceipt */
+        RecordingReceipt: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Sha256 */
+            sha256: string;
+            /** Byte Length */
+            byte_length: number;
+            /**
+             * Captured At
+             * Format: date-time
+             */
+            captured_at: string;
+            /**
+             * Received At
+             * Format: date-time
+             */
+            received_at: string;
+            /** Complete */
+            complete: boolean;
+        };
         /** SessionManifest */
         SessionManifest: {
             /**
@@ -728,10 +1051,15 @@ export interface components {
             schema_version: 1;
             /**
              * Planner Version
-             * @default due-new-v1
-             * @constant
+             * @default due-new-v2
+             * @enum {string}
              */
-            planner_version: "due-new-v1";
+            planner_version: "due-new-v1" | "due-new-v2";
+            /**
+             * Policy Version
+             * @default fsrs-6.3.2-retention90-v1
+             */
+            policy_version: string;
             /**
              * Language
              * @enum {string}
@@ -743,6 +1071,7 @@ export interface components {
             targets: components["schemas"]["PlannedTarget"][];
             /** Required Media Ids */
             required_media_ids: string[];
+            dialogue?: components["schemas"]["Dialogue"] | null;
         };
         /** SessionStart */
         SessionStart: {
@@ -758,8 +1087,27 @@ export interface components {
             language: "en" | "ru" | "sr" | "de";
             /** Lesson Id */
             lesson_id?: string | null;
+            /** Dialogue Id */
+            dialogue_id?: string | null;
             /** Takeover Session Id */
             takeover_session_id?: string | null;
+        };
+        /** SessionStep */
+        SessionStep: {
+            /** Target Index */
+            target_index: number;
+            /**
+             * Repair
+             * @default false
+             */
+            repair: boolean;
+            /** Dialogue Turn */
+            dialogue_turn?: number | null;
+            /**
+             * Introduced
+             * @default false
+             */
+            introduced: boolean;
         };
         /** SessionTransition */
         SessionTransition: {
@@ -1446,6 +1794,38 @@ export interface operations {
             };
         };
     };
+    readiness_api_v1_sessions_readiness_get: {
+        parameters: {
+            query: {
+                language: "en" | "ru" | "sr" | "de";
+                lesson_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DueSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     session_api_v1_sessions__session_id__get: {
         parameters: {
             query?: never;
@@ -1499,6 +1879,167 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receipts_api_v1_sessions__session_id__events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventReceipt"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    events_api_v1_sessions__session_id__events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventBatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeBatchReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recording_api_v1_recordings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recordings_api_v1_phrases__target_id__recordings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingReceipt"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    play_recording_api_v1_recordings__recording_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

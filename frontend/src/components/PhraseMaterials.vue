@@ -1,37 +1,38 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
+import LookupRecording from './LookupRecording.vue'
+import type { PracticeMessages } from '../practiceMessages'
+import type { ExposureInput } from '../api'
 import type { components } from '../api.generated'
 import type { Language, Phrase } from '../api'
 import type { Messages } from '../i18n'
 defineProps<{
+  pt: PracticeMessages
+  currentExposure: ExposureInput | null
+  saveExposure: () => Promise<void>
   t: Messages
   phrase: Phrase
   language: Language
   nativeLanguage: Language | null | undefined
   explanation: components['schemas']['Explanation'] | null | undefined
-  playing: boolean
-  audioError: string
   pendingExposure: unknown
   exposureSaving: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
-const emit = defineEmits<{ reference: []; retryExposure: [] }>()
+const emit = defineEmits<{ retryExposure: [] }>()
 </script>
 <template>
   <article class="card phrase-card">
     <p class="eyebrow">{{ t.materials }}</p>
     <h1 :lang="language">{{ phrase.content.text }}</h1>
     <p :lang="language" class="purpose">{{ phrase.content.purpose }}</p>
-    <button
-      v-if="phrase.audio_status === 'ready'"
-      class="reference"
-      @click="emit('reference')"
-      :aria-label="playing ? t.stop : t.reference"
-    >
-      {{ playing ? '■' : '▶' }} {{ playing ? t.stop : t.reference }}
-    </button>
-    <p v-else class="muted">{{ t.missing }}</p>
-    <p v-if="audioError" role="alert" class="error">{{ audioError }}</p>
+    <LookupRecording
+      :phrase="phrase"
+      :exposure="currentExposure"
+      :save-exposure="saveExposure"
+      :pt="pt"
+    />
+    <p v-if="phrase.audio_status !== 'ready'" class="muted">{{ t.missing }}</p>
     <div class="explanation" v-if="explanation" :lang="nativeLanguage ?? undefined">
       <h2>{{ t.meaning }}</h2>
       <p>{{ explanation.meaning }}</p>

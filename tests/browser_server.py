@@ -19,7 +19,8 @@ from phrase_gym.config import Config
 from phrase_gym.content.imports import ImportService
 from phrase_gym.content.validation import PackageValidator
 from phrase_gym.media.service import MediaService
-from phrase_gym.storage import Base, Database
+from phrase_gym.storage import Database
+from phrase_gym.tables import Base
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -45,24 +46,24 @@ def seed_library(database: Database, media: MediaService) -> None:
         package = ManualPackage.model_validate_json(
             (ROOT / "fixtures" / name).read_text(encoding="utf-8")
         )
-        target = package.targets[0]
-        metadata = MediaMetadata(
-            language=package.language,
-            text=target.text,
-            role="reference",
-            origin="test",
-            source="P2 synthetic browser fixture",
-            locale=f"{package.language}-{'RS' if package.language == 'sr' else 'US'}",
-            preparation_version="1",
-        )
-        asset = media.upload(
-            MediaUpload(
-                metadata=metadata,
-                mime_type="audio/wav",
-                audio_base64=base64.b64encode(tone()).decode(),
+        for target in package.targets:
+            metadata = MediaMetadata(
+                language=package.language,
+                text=target.text,
+                role="reference",
+                origin="test",
+                source="P2 synthetic browser fixture",
+                locale=f"{package.language}-{'RS' if package.language == 'sr' else 'US'}",
+                preparation_version="1",
             )
-        )
-        target.reference_audio_id = asset.id
+            asset = media.upload(
+                MediaUpload(
+                    metadata=metadata,
+                    mime_type="audio/wav",
+                    audio_base64=base64.b64encode(tone()).decode(),
+                )
+            )
+            target.reference_audio_id = asset.id
         report = content.stage(package)
         assert report.id is not None
         content.publish(report.id)

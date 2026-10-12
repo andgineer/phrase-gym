@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from phrase_gym.serialization import canonical_json
-from phrase_gym.storage import DialogueRow, LessonRow, Membership, SourceItem, Target
+from phrase_gym.tables import DialogueRow, LessonRow, Membership, SourceItem, Target
 
 
 def fingerprint(text: str) -> str:

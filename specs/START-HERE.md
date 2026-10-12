@@ -1,8 +1,8 @@
 # Phrase Gym — start here
 
-Updated **2026-10-12**. **P1 and P2 engineering work are closed. P3 is in progress: pinned session planning and lifecycle APIs are implemented; the practice card, events, recordings and review policy remain next.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
+Updated **2026-10-12**. **P1 and P2 engineering work are closed. P3 core engineering implementation and verification are complete: sessions, events, recordings, FSRS, repairs and prepared dialogues are integrated. P4 device/offline work is next.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
 
-Read [the next-session handoff](plan/next-session.md) and [agent guidance](agent-guide.md). They contain the final interaction, production foundation, workflow preferences and unresolved work. Read [the P2 runbook](plan/p2-runbook.md) for actual run/import/check commands and [the foundation decision](decision-production-foundation.md) for module boundaries. No chat-history hunt is necessary.
+Read [the next-session handoff](plan/next-session.md), [agent guidance](agent-guide.md) and [P3 verification evidence](plan/evidence/p3-core-2026-10-12.md). They contain the final interaction, production foundation, workflow preferences and unresolved work. Read [the P2 runbook](plan/p2-runbook.md) for actual run/import/check commands and [the foundation decision](decision-production-foundation.md) for module boundaries. No chat-history hunt is necessary.
 
 P2 was closed at the user's request with [closeout evidence](plan/evidence/p2-closeout-2026-10-12.md). [Open problems](open-problems.md) include user-confirmed continuing mid-recording clipping, untested iPhone/PWA behavior and incomplete real reference/content acceptance. Carry these forward; do not restart the P2 review loop or audio investigation by default.
 
@@ -33,7 +33,7 @@ The product trains selected words in phrases, fixed expressions and prepared dia
 
 1. [Next-session handoff](plan/next-session.md) — concrete restart instructions and open dependencies.
 2. [P1 closeout](plan/evidence/p1-closeout-2026-10-12.md) and [prototype run/walkthrough instructions](../prototypes/README.md).
-3. [P3 session planning](decision-p3-session-planning.md), [consolidated implementation plan](plan/implementation-plan.md), [P2–P3 work](plan/02-core-implementation.md), [architecture](architecture.md), [learning engine](architecture/learning-engine.md) and [data contracts](architecture/data-contracts.md). Older interaction descriptions yield to the unified-card decision above.
+3. [P3 core policy](decision-core-trainer.md), [P3 runbook](plan/p3-runbook.md), [P3 session planning](decision-p3-session-planning.md), [consolidated implementation plan](plan/implementation-plan.md), [P2–P3 work](plan/02-core-implementation.md), [architecture](architecture.md), [learning engine](architecture/learning-engine.md) and [data contracts](architecture/data-contracts.md). Older interaction descriptions yield to the unified-card decision above.
 4. [Targeted drilling](decision-targeted-drilling.md), [navigation/search](decision-session-navigation-and-search.md), [language roles](decision-languages-and-audio-labels.md), [recording history](decision-recording-and-comparison.md) and [manual-feedback history](decision-p1-manual-feedback.md).
 5. [Learning research](research-answer-card-and-scheduling.md), [review-loop evidence](plan/evidence/p1-review-loop-2026-10-12.md) and [original P1 evidence](plan/evidence/p1-2026-10-12.md).
 

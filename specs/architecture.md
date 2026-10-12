@@ -1,6 +1,6 @@
 # Phrase Gym — architecture
 
-Updated 2026-10-12. The P2 foundation implements the client/API, settings, content imports/library and reference-media storage. P3 now implements [pinned session planning and lifecycle](decision-p3-session-planning.md). Attempt processing, recordings, review policy, offline delivery, preparation workers and deployment below describe remaining work. See the [current module boundaries](decision-production-foundation.md). The agreed product baseline is [targeted drilling](decision-targeted-drilling.md) and [optional recording/comparison](decision-recording-and-comparison.md). The name is Phrase Gym. Earlier interface sketches and legacy tooling are not accepted implementations. Start with the [prototyping plan](plan/01-prototyping.md); implementation follows the [roadmap](plan/implementation-plan.md).
+Updated 2026-10-12. The P2 foundation implements the client/API, settings, content imports/library and reference-media storage. P3 now implements the [core trainer](decision-core-trainer.md), including pinned sessions, ordered evidence, retained recording BLOBs and FSRS. Offline delivery, preparation workers and deployment remain later work. See the [current module boundaries](decision-production-foundation.md). The agreed product baseline is [targeted drilling](decision-targeted-drilling.md) and [optional recording/comparison](decision-recording-and-comparison.md). The name is Phrase Gym. Earlier interface sketches and legacy tooling are not accepted implementations. Start with the [prototyping plan](plan/01-prototyping.md); implementation follows the [roadmap](plan/implementation-plan.md).
 
 ## Recommendation
 
@@ -80,7 +80,7 @@ fixtures/                     reviewed learning content and edge cases
 tests/{unit,integration,browser}/
 ```
 
-The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 session planning/lifecycle is implemented; trainer UI, attempts, recordings and review policy remain future work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
+The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer UI, attempts, recordings and review policy are implemented; actual-device/offline acceptance, preparation sources and deployment remain later work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
 
 ## Content and AI
 

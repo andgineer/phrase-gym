@@ -1,6 +1,7 @@
 import hashlib
 
-from phrase_gym.storage import Database, TargetRevision
+from phrase_gym.storage import Database
+from phrase_gym.tables import TargetRevision
 from tests.integration.helpers import phrases, publish
 
 

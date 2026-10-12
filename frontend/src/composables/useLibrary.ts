@@ -6,7 +6,6 @@ import { languageNames } from '../i18n'
 import { rememberLanguage, restoredLanguage } from '../learningLanguage'
 import { usePreferences } from './usePreferences'
 import { usePagination } from './usePagination'
-import { useReferenceAudio } from './useReferenceAudio'
 import { useReferenceExposure } from './useReferenceExposure'
 
 export function useLibrary() {
@@ -21,7 +20,8 @@ export function useLibrary() {
   const total = ref(0)
   const hasCollection = ref(false)
   const selectedLesson = ref('')
-  const { pendingExposure, exposureSaving, prepareExposure, saveExposure } = useReferenceExposure()
+  const { currentExposure, pendingExposure, exposureSaving, prepareExposure, saveExposure } =
+    useReferenceExposure()
   let requestVersion = 0
   const routeParts = computed(() => route.path.split('/').filter(Boolean))
   const currentLanguage = computed(() =>
@@ -30,10 +30,6 @@ export function useLibrary() {
   const preferences = usePreferences(currentLanguage)
   const { settings, native, useLearning, configuring, savingSettings, firstLaunch, locale, t } =
     preferences
-  const { playing, audioError, stopAudio, playReference } = useReferenceAudio(
-    () => phrase.value,
-    () => t.value.audioFailed,
-  )
   const lessonQuery = computed(() =>
     typeof route.query.lessonQ === 'string' ? route.query.lessonQ : '',
   )
@@ -100,13 +96,12 @@ export function useLibrary() {
     lessonPages.reset()
     total.value = 0
     lessonTotal.value = 0
-    stopAudio()
     error.value = ''
     phrase.value = null
     results.value = []
     lessons.value = []
     pendingExposure.value = null
-    audioError.value = ''
+    currentExposure.value = null
     loading.value = true
     try {
       if (currentLanguage.value) rememberLanguage(currentLanguage.value)
@@ -150,6 +145,8 @@ export function useLibrary() {
         results.value = phrasePage.items
         total.value = phrasePage.total
         hasCollection.value = collection.total > 0
+      } else if (kind.value === 'practice') {
+        return
       } else {
         error.value = t.value.unavailable
       }
@@ -163,8 +160,7 @@ export function useLibrary() {
     selectedLesson.value = ''
   })
   watch(configuring, (value) => {
-    if (value) stopAudio()
-    else loadRoute()
+    if (!value) loadRoute()
   })
   watch(() => route.fullPath, loadRoute)
   watch([locale, currentLanguage], () => {
@@ -193,8 +189,7 @@ export function useLibrary() {
     total,
     hasCollection,
     selectedLesson,
-    playing,
-    audioError,
+    currentExposure,
     pendingExposure,
     exposureSaving,
     currentLanguage,
@@ -207,7 +202,6 @@ export function useLibrary() {
     selectedLanguage,
     explanation,
     lessonTitle,
-    playReference,
     saveExposure,
     saveSettings,
     changeLanguage,

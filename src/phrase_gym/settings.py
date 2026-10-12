@@ -1,5 +1,6 @@
 from phrase_gym.contracts.settings import Settings, SettingsUpdate
-from phrase_gym.storage import AppSettings, Database
+from phrase_gym.storage import Database
+from phrase_gym.tables import AppSettings
 
 
 class SettingsService:

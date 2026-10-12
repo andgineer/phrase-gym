@@ -53,7 +53,7 @@ test('concept lookup, explanation and complete lesson navigation preserve search
   await expect(page.locator('.explanation')).toContainText('Как проходит твой день?')
   await page.getByRole('link', { name: /Building rapport/ }).click()
   await expect(page.locator('.phrase-list li')).toHaveCount(2)
-  await expect(page.getByRole('button', { name: 'Start lesson drill' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Start lesson drill' })).toBeEnabled()
   await page.getByRole('button', { name: 'Back', exact: true }).click()
   await expect(page.locator('.explanation')).toBeVisible()
   await page.getByRole('button', { name: 'Back', exact: true }).click()

@@ -8,7 +8,8 @@ from phrase_gym.content.validation import PackageValidator
 from phrase_gym.contracts.content import ManualPackage
 from phrase_gym.contracts.imports import ImportReport
 from phrase_gym.errors import DomainError
-from phrase_gym.storage import Database, ImportRow
+from phrase_gym.storage import Database
+from phrase_gym.tables import ImportRow
 
 
 class ImportService:

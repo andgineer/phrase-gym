@@ -3,7 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 import copy
 import pytest
 from sqlalchemy import func, select
-from phrase_gym.storage import Database, TargetRevision
+from phrase_gym.storage import Database
+from phrase_gym.tables import TargetRevision
 from tests.integration.helpers import publish, phrases
 
 

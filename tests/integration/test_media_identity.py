@@ -3,7 +3,8 @@ from uuid import uuid5
 
 from phrase_gym.contracts.media import MediaMetadata
 from phrase_gym.media.service import MEDIA_NAMESPACE
-from phrase_gym.storage import Database, MediaRow
+from phrase_gym.storage import Database
+from phrase_gym.tables import MediaRow
 from tests.integration.helpers import upload
 
 

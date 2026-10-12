@@ -6,6 +6,8 @@
 
 **Accepted user constraint:** choose the best-supported practical approach and let the learner use it normally. The user explicitly rejected being asked to validate learning effectiveness. Do not add experiments, validation screens, special assessment sessions, policy A/B tests, calibration tasks or a requirement to prove that the method works for them. Ordinary answer ratings drive automatic scheduling. Software correctness checks are an engineering responsibility.
 
+**P3 update, 2026-10-12:** the user delegated routine policy choices to the implementer using this research. The [core trainer](../decision-core-trainer.md) implements FSRS 6.3.2/0.90, bounded due/new planning, honest original/support evidence and separated repairs. The unified-card decision supersedes historical switches, Practice again, supported-only Continue and Undo below.
+
 ## Objective
 
 Maximize delayed, correct retrieval of useful language per minute of sustainable practice and support ready spoken use. Specify what is being predicted: recalling the target under the declared cue/task conditions, not a probability of success in any conversation.

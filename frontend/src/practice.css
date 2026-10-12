@@ -1,0 +1,71 @@
+.audio-controls,
+.answer-controls,
+.ratings,
+.session-toolbar,
+.session-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.microphone {
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  background: #294f43;
+  color: white;
+}
+.microphone.capturing {
+  background: #a23c35;
+}
+.explain-link {
+  color: #276693;
+  border-color: transparent;
+  background: transparent;
+}
+.ratings {
+  margin-top: 18px;
+}
+.ratings button {
+  flex: 1;
+  min-width: 110px;
+}
+.not-yet {
+  color: #952c27;
+  background: #ffebe8;
+  border-color: #bd6960;
+}
+.effort {
+  color: #775500;
+  background: #fff3cf;
+  border-color: #bfa24d;
+}
+.recalled {
+  color: #235b40;
+  background: #e2f2e7;
+  border-color: #78a58b;
+}
+.answer-controls {
+  margin-top: 22px;
+}
+.session-toolbar,
+.session-banner {
+  margin-bottom: 20px;
+}
+.session-banner {
+  padding: 14px;
+  background: #e8eee4;
+  border-radius: 10px;
+}
+.practice-panel textarea {
+  width: 100%;
+  min-height: 80px;
+  font: inherit;
+}
+.gap {
+  color: #527a69;
+}
+.lookup-recording {
+  margin-top: 16px;
+}

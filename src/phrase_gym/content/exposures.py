@@ -4,7 +4,8 @@ from datetime import datetime
 from phrase_gym.clock import utc_now
 from phrase_gym.contracts.exposures import ExposureInput, ExposureReceipt
 from phrase_gym.errors import DomainError
-from phrase_gym.storage import Database, ExposureRow, Target, TargetRevision
+from phrase_gym.storage import Database
+from phrase_gym.tables import ExposureRow, Target, TargetRevision
 
 
 class ExposureService:

@@ -9,14 +9,7 @@ from sqlalchemy.orm import Session
 from phrase_gym.content.identity import current_revision, fingerprint
 from phrase_gym.contracts.content import ManualPackage
 from phrase_gym.contracts.imports import ImportChange
-from phrase_gym.storage import (
-    DialogueRow,
-    LessonRow,
-    Membership,
-    SourceItem,
-    Target,
-    TargetRevision,
-)
+from phrase_gym.tables import DialogueRow, LessonRow, Membership, SourceItem, Target, TargetRevision
 
 
 def publish_targets(

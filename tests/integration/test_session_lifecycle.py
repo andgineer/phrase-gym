@@ -9,7 +9,8 @@ from sqlalchemy.exc import IntegrityError
 from phrase_gym.api.app import create_app
 from phrase_gym.contracts.sessions import SessionStart
 from phrase_gym.errors import DomainError
-from phrase_gym.storage import Database, SessionRow
+from phrase_gym.storage import Database
+from phrase_gym.tables import SessionRow
 from tests.integration.helpers import NOW
 from tests.integration.session_helpers import ready_package, start
 

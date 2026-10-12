@@ -17,15 +17,8 @@ from phrase_gym.contracts.library import (
     PhrasePage,
 )
 from phrase_gym.errors import DomainError
-from phrase_gym.storage import (
-    Database,
-    DialogueRow,
-    LessonRow,
-    MediaRow,
-    Membership,
-    Target,
-    TargetRevision,
-)
+from phrase_gym.storage import Database
+from phrase_gym.tables import DialogueRow, LessonRow, MediaRow, Membership, Target, TargetRevision
 
 
 class LibraryService:

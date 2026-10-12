@@ -11,14 +11,13 @@ defineProps<{
   loadingMore: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
-const emit = defineEmits<{ more: [] }>()
+const emit = defineEmits<{ more: []; start: [] }>()
 </script>
 <template>
   <section class="card">
     <p class="eyebrow">{{ t.allPhrases }}</p>
     <h1 :lang="language">{{ lessonTitle }}</h1>
-    <button class="primary" disabled aria-describedby="session-note">{{ t.lessonDrill }}</button>
-    <p class="muted" id="session-note">{{ t.upcoming }}</p>
+    <button class="primary" @click="emit('start')">{{ t.lessonDrill }}</button>
     <ul class="phrase-list">
       <li v-for="item in results" :key="item.id">
         <RouterLink :to="link('phrases', item.id)" :lang="language"
