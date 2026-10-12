@@ -1,6 +1,6 @@
-# Next-session handoff — P2 foundation
+# Next-session handoff — P3 next
 
-Updated **2026-10-12**. P1 is closed and the production foundation is implemented in `src/phrase_gym` and `frontend/`. P2 is underway; P3 sessions, learner takes and scheduling have not started. The disposable interaction prototype remains version **0.1.6**. Remaining device/content checks below are carried forward, not claimed passed.
+Updated **2026-10-12**. P1 is closed and the production foundation is implemented in `src/phrase_gym` and `frontend/`. P2 engineering work and its review loop are closed at the user's request; P3 sessions, learner takes and scheduling are next and have not started. The disposable interaction prototype remains version **0.1.6**. Remaining device/content checks below are carried forward, not claimed passed.
 
 ## Read first
 
@@ -9,7 +9,7 @@ Updated **2026-10-12**. P1 is closed and the production foundation is implemente
 3. [Consolidated plan](implementation-plan.md), then [P2–P3 implementation](02-core-implementation.md), [architecture](../architecture.md) and the relevant data contracts.
 4. [Echo-words integration reference](../reference/echo-words-audio.md) and [prototype walkthroughs](../../prototypes/README.md).
 
-No chat-history search is needed. Do not restart P1's closed three-iteration review loop or rebuild P1. The user requested a separate P2 fresh-session review loop; its findings and current status are in the [P2 review record](evidence/p2-review-loop-2026-10-12.md). The user prefers manual prototype feedback and proportionate checks. Continue from the production foundation and the next session's actual request. See the [P2 runbook](p2-runbook.md), [foundation decision](../decision-production-foundation.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md).
+No chat-history search is needed. Do not restart P1's closed three-iteration review loop or rebuild P1. The separate P2 fresh-session review loop is closed; its findings are in the [P2 review record](evidence/p2-review-loop-2026-10-12.md), with phase closure in the [P2 closeout](evidence/p2-closeout-2026-10-12.md). The user prefers manual prototype feedback and proportionate checks. Continue from the production foundation and the next session's actual request. See the [P2 runbook](p2-runbook.md), [foundation decision](../decision-production-foundation.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md).
 
 ## Final interaction to implement
 
@@ -35,14 +35,14 @@ No chat-history search is needed. Do not restart P1's closed three-iteration rev
 
 ## Open evidence and risks to carry forward
 
-1. **Safari/headset clipping:** user reports recurring mid-take clipping on Safari, MacBook Pro M1, external headset. The prototype now reuses a microphone stream between takes, requests voice processing off, uses optional play-and-record Audio Session support, and releases on pause/navigation/background/completion. Synthetic Chromium/WebKit checks passed; the user has not confirmed the actual-headset fix. Verify this early in production audio work, and do not claim it resolved.
+1. **Continuing mid-recording clipping — AUDIO-01:** the user confirmed the issue still occurs after the proposed mitigation. Earlier context was Safari/MacBook Pro M1/external headset; exact latest-test details and the input/encoding/playback cause remain unknown. The user requested recording it as open and stopping the investigation to close P2. Carry it into P3 capture and P4 actual-device acceptance; do not claim it resolved or restart testing now. See the [open-problems record](../open-problems.md).
 2. Actual iPhone Safari/installed-PWA microphone, headset, interruptions and persistence have not been verified. A phone-reachable trusted HTTPS origin is still needed for those checks. Treat these as release dependencies, not reasons to restart general prototype review.
 3. Real actor/course clips and prepared Serbian reference audio remain incomplete; Serbian text/translation and listening quality need appropriate content checks. Twelve manual fixtures/two dialogues are examples, not a production content pack.
 4. P1 uses IndexedDB and fixture review receipts, not durable server-side recording storage or production FSRS. Browser-origin data is not a backup. Concept search uses a hand-authored index; real retrieval quality is not established.
 
 ## Verification and running
 
-The last substantive change passed **12 core checks, 9 browser walkthroughs, 16 regressions and 2 audio-continuity runs**. The final banner/Undo removal reruns the affected browser/regression suites; see the [closeout record](evidence/p1-closeout-2026-10-12.md). These are software checks, not real-headset or iPhone acceptance.
+P2 implementation verification passed **65 Python tests, six client unit tests and 100 browser checks** (50 scenarios in Chromium/WebKit), with all hooks, client typecheck and build executed. The [P2 closeout](evidence/p2-closeout-2026-10-12.md) records the closure gate. Earlier P1 checks remain in the [P1 closeout](evidence/p1-closeout-2026-10-12.md). These are software checks, not real-headset or iPhone acceptance.
 
 Run instructions are in [prototypes/README.md](../../prototypes/README.md). The current session used `http://127.0.0.1:8873/learn/en`; do not assume its process survives a session/app restart. Browser data stays with its origin. If needed, restart the documented server on the same port. No private recordings or secrets belong in the handoff.
 
@@ -56,6 +56,6 @@ After five P2 review iterations, the user approved simplifying the optional lang
 - Hash-addressed original reference audio, provenance, exact text/language/role checks, byte ranges and missing/orphan reconciliation. Fixture audio used by tests is explicitly synthetic.
 - Shared contracts are below HTTP. Focused services own validation, publication, catalog reads, settings and exposure. API routers and Vue views/composables are split by responsibility. `AGENTS.md` contains the adapted echo-words coding rules; `CLAUDE.md` is a symlink. Hooks enforce architecture direction, 300-line source limits and client formatting.
 
-Next: finish real reference-media/content acceptance where material is available, then P3. Before implementing the selected-lesson session branch, resolve due-only versus all-phrase policy. Implement one unified practice card, durable SQLite recording BLOBs with an IndexedDB pending-take journal, honest original-response evidence, pinned sessions and the review policy. The existing pure reducer is an evidence foundation, not an implemented session engine. Start session/drill buttons are disabled until these services exist.
+Next phase: P3 when requested. Real reference-media/content and device acceptance are carried forward in the [open-problems record](../open-problems.md); they do not reopen P2. Before implementing the selected-lesson session branch, resolve due-only versus all-phrase policy. Implement one unified practice card, durable SQLite recording BLOBs with an IndexedDB pending-take journal, honest original-response evidence, pinned sessions and the review policy. The existing pure reducer is an evidence foundation, not an implemented session engine. Start session/drill buttons are disabled until these services exist.
 
 Use `uv run inv pre` then `uv run inv test` as the final gate. Do not rerun P1 or claim actual Safari/headset/iPhone acceptance from synthetic WebKit checks.

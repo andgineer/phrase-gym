@@ -2,6 +2,8 @@
 
 The user requested beginning P2 and committing directly to main, confirmed `frontend/` for the Vue/TypeScript client, then requested the echo-words coding rules and active supervision of architecture/file structure. This record concerns the production foundation; P3 has not started and real-device/content acceptance remains open.
 
+This initial implementation evidence is historical. The latest [P2 closeout](p2-closeout-2026-10-12.md) records user-approved engineering closure and carried-forward [open problems](../../open-problems.md), including continuing mid-recording clipping.
+
 ## Implemented scope
 
 - FastAPI/Pydantic API and same-origin Vue client, explicit data/client directories, loopback runtime and packaged Alembic migrations.
@@ -36,8 +38,8 @@ Python checks ran locally on Python 3.13.13; client checks used the available No
 
 ## Remaining work and limits
 
-- P2 is underway, not a release acceptance claim. Real actor/course audio and reviewed Serbian content/whole-phrase listening checks remain incomplete. Browser audio fixtures are labelled synthetic tones. MP3/Ogg/M4A validation inspects container/duration rather than fully decoding speech.
-- Actual Safari/M1/external-headset clipping, iPhone Safari/installed-PWA capture, interruptions and persistence remain unverified. These tests exercise reference playback and navigation; P2 does not implement microphone capture or prove the reported problem resolved.
+- P2 engineering is now closed at the user's request, not a release acceptance claim. Real actor/course audio and reviewed Serbian content/whole-phrase listening checks remain incomplete. Browser audio fixtures are labelled synthetic tones. MP3/Ogg/M4A validation inspects container/duration rather than fully decoding speech.
+- The user confirms mid-recording clipping continues (AUDIO-01); iPhone Safari/installed-PWA capture, interruptions and persistence remain unverified. These tests exercise reference playback and navigation; P2 does not implement microphone capture or prove the reported problem resolved.
 - Sessions, due scheduling/FSRS, learner capture, every-take SQLite BLOB retention and the IndexedDB pending-audio journal are P3. Start session and lesson-drill controls remain disabled until those services exist. The selected-lesson due-only/all policy still needs resolution before that session branch.
 - The initial content revision has one realization and reviewed cue variants. Cross-source reconciliation and richer intake come later; no text-similarity merge or provider-generated publication is present.
 - Search uses prepared concepts and Unicode substring matching. Real retrieval quality and the final content inventory are not established by four structural example targets.

@@ -4,6 +4,8 @@
 
 The latest three reviews concentrated on coordinating an optional convenience across navigation and Settings. Remove that coordination requirement instead of adding more queue/cache rules. Retain essential publication, content identity, reference evidence, request cancellation and library behavior.
 
+The user closed P2 and this review loop; see the [closeout](evidence/p2-closeout-2026-10-12.md). The checklist below remains a behavioral reference for future changes, not authorization for another review.
+
 ## Acceptance invariants
 
 | Responsibility | Explicit invariant | Required coverage audit |
@@ -30,4 +32,4 @@ The latest three reviews concentrated on coordinating an optional convenience ac
 
 Coverage uses controlled request gates rather than arbitrary delays. Every browser case starts from a freshly reset disposable library/settings state; it then configures its own language and content. The reset endpoint exists only in the test server, never the production application. Real-device and linguistic acceptance remain separately labelled.
 
-After the ordered `uv run inv pre` / `uv run inv test` gate, run one bounded fresh Sol 6.1 review of the simplified accepted P2 implementation. Fix concrete essential defects within this scope. Record the outcome and stop the generic loop; do not manufacture findings or repeatedly extend review.
+The approved bounded fresh Sol 6.1 review and its playback correction are complete and recorded in the evidence. P2 is closed; do not repeat the review loop by default. Future changes still use the ordered `uv run inv pre` / `uv run inv test` gate.

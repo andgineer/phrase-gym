@@ -1,6 +1,6 @@
 # Phrase Gym — agent guidance
 
-Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 production foundation is present; P3 has not begun. Coding and architecture rules are maintained in [AGENTS.md](../AGENTS.md), with `CLAUDE.md` linking to that same file. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
+Read [START-HERE](START-HERE.md), [the next-session handoff](plan/next-session.md) and [the unified-card decision](decision-unified-practice-card.md). P1 was closed by the user on 2026-10-12; P2 engineering work and its review loop are closed by the user; P3 has not begun. See the [P2 closeout](plan/evidence/p2-closeout-2026-10-12.md) and [open problems](open-problems.md). Coding and architecture rules are maintained in [AGENTS.md](../AGENTS.md), with `CLAUDE.md` linking to that same file. Follow the new session's actual request. Historical no-implementation/no-Git statements from the earlier planning session are obsolete.
 
 ## Workflow
 
@@ -26,6 +26,6 @@ Read the accepted [device-language and Settings decision](decision-device-langua
 
 - The user rejects macOS-only solutions and wants echo-words' audio engines and llmbroker approach. Reinspect the nearby project during actual integration; follow [the reference](reference/echo-words-audio.md). Preserve actor audio and language-correct full-phrase generation.
 - `.env` reportedly contains provider keys. Keep them ignored, private, server-side and out of outputs/bundles.
-- Safari/M1/headset clipping remains unconfirmed on the actual device after a mitigation. Synthetic WebKit results are not Safari/headset acceptance. Carry iPhone/PWA/content gaps as explicit dependencies.
+- The user confirms mid-recording clipping continues after the mitigation (AUDIO-01). The current investigation is stopped at the user's request; carry it into P3/P4. Synthetic WebKit results are not Safari/headset acceptance. Carry iPhone/PWA/content gaps as explicit dependencies.
 - All active decisions, architecture and evidence belong under `specs/`. `docs/` is the scaffold's user documentation. Archives are historical, not a baseline or instructions to execute.
 - Do not alter vault notes, echo-words, legacy phrase-shadowing, Anki or course/source delivery without a request. Follow the external project's own instructions if its modification becomes authorized.

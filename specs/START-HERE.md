@@ -1,8 +1,10 @@
 # Phrase Gym — start here
 
-Updated **2026-10-12**. **P1 is closed. P2 is underway; P3 has not started.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
+Updated **2026-10-12**. **P1 and P2 engineering work are closed. P3 is next and has not started.** The production foundation is in `src/phrase_gym` and the user-selected `frontend/`. The final interaction prototype remains version **0.1.6** under `prototypes/`. Device/content limitations remain open evidence, not passed checks.
 
 Read [the next-session handoff](plan/next-session.md) and [agent guidance](agent-guide.md). They contain the final interaction, production foundation, workflow preferences and unresolved work. Read [the P2 runbook](plan/p2-runbook.md) for actual run/import/check commands and [the foundation decision](decision-production-foundation.md) for module boundaries. No chat-history hunt is necessary.
+
+P2 was closed at the user's request with [closeout evidence](plan/evidence/p2-closeout-2026-10-12.md). [Open problems](open-problems.md) include user-confirmed continuing mid-recording clipping, untested iPhone/PWA behavior and incomplete real reference/content acceptance. Carry these forward; do not restart the P2 review loop or audio investigation by default.
 
 ## Current authoritative decisions
 
@@ -25,7 +27,7 @@ The product trains selected words in phrases, fixed expressions and prepared dia
 - P1 manual review is finished for this session. Three fresh Sol 6.1 reviews were completed earlier; do not restart the loop. Use proportionate checks and user feedback.
 - Production implementation belongs in the project's source layout during P2. The disposable prototype and archived experiments are not production baselines to transplant unquestioningly.
 - The user rejects macOS-only audio dependencies and requests echo-words' Piper/Edge and llmbroker approach. See [the integration reference](reference/echo-words-audio.md). Existing Samantha clips are test assets only. Keep `.env` keys private and server-side.
-- The user reported Safari/M1/external-headset clipping. A repeated-stream/audio-processing mitigation passed synthetic tests, but actual-device resolution is unconfirmed. iPhone/PWA checks and real actor/Serbian content also remain pending; carry them into later work explicitly.
+- The user reported Safari/M1/external-headset clipping. The user confirms that mid-recording clipping continues despite the mitigation; see AUDIO-01 in the open-problems record. iPhone/PWA checks and real actor/Serbian content also remain pending; carry them into later work explicitly.
 
 ## Supporting documents
 

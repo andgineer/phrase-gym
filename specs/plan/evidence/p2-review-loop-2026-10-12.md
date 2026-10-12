@@ -121,3 +121,7 @@ Opening Settings now invokes the existing player cancellation operation. Closing
 The reviewer confirmed that the simplified preferences and migration match the accepted decision. It relied on the parent's completed full gate, independently reproduced the playback defect, and performed no repository edits or real-device/content/provider/deployment checks. This was the single approved review; the corrected tree is validated by regression tests and the required full gate, not claimed to have a second independent clean review.
 
 Final ordered verification: every hook in `uv run inv pre` passed with zero pyrefly errors, followed by `uv run inv test`: **65 Python, 6 client unit and 100 browser checks passed** (**50 distinct scenarios × Chromium/WebKit**). Client typecheck and build ran. The four new playback regressions passed in both engines, retaining their failing-before-fix assertions. The bounded review is finished; no next iteration is planned. Changes are committed locally to main; actual-device/audio-quality/content acceptance remains open.
+
+## User-requested phase closure
+
+After reporting continuing mid-recording clipping, the user explicitly closed P2 while retaining that problem. The [P2 closeout](p2-closeout-2026-10-12.md) and [open problems](../../open-problems.md) are the current status. No further P2 review or audio investigation is planned without a new request.

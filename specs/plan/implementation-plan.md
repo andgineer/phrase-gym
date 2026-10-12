@@ -4,7 +4,7 @@
 
 Updated **2026-10-12** with P1 implementation evidence. Originally consolidated on 2026-10-11 at the user's request to put everything discussed into the implementation plan. This is the main execution handoff; the linked phase files contain detailed work and checks. Start with [START-HERE](../START-HERE.md).
 
-**Status, 2026-10-12:** P1 prototype/design work is closed at the user's request; prototype 0.1.6 captures the final interaction. P2 is underway: the production foundation, library/import contracts and reference-media path are implemented; P3 has not started. See [the runbook](p2-runbook.md) and [foundation evidence](evidence/p2-foundation-2026-10-12.md). Read [the next-session handoff](next-session.md) and [closeout evidence](evidence/p1-closeout-2026-10-12.md). Device/audio/content gaps are carried forward explicitly, not claimed passed. The unified-card decision supersedes older interaction requirements below, including separate practice/recording modes and Undo.
+**Status, 2026-10-12:** P1 prototype/design work is closed at the user's request; prototype 0.1.6 captures the final interaction. P2 engineering work and its review loop are closed at the user's request: the production foundation, library/import contracts and reference-media path are implemented; P3 is next and has not started. See the [P2 closeout](evidence/p2-closeout-2026-10-12.md) and [open problems](../open-problems.md), including continuing mid-recording clipping. See [the runbook](p2-runbook.md) and [foundation evidence](evidence/p2-foundation-2026-10-12.md). Read [the next-session handoff](next-session.md) and [closeout evidence](evidence/p1-closeout-2026-10-12.md). Device/audio/content gaps are carried forward explicitly, not claimed passed. The unified-card decision supersedes older interaction requirements below, including separate practice/recording modes and Undo.
 
 **Status convention:** **Agreed** identifies explicit user requirements. **Recommended** identifies the concrete design/engineering choice to carry into the next prototype, without claiming the user already selected its exact controls or values. **Open** identifies remaining product choices. No learning-effectiveness experiment, calibration task, special assessment session or algorithm tuning is required from the learner.
 
@@ -176,7 +176,7 @@ These are software, content and interaction checks for the implementer, not rese
 - [ ] Re-import and echo-words delivery retries preserve identities/progress. Existing prepared sessions remain usable while providers are unavailable; no live generation is needed for advancing.
 - [ ] Accessibility, actual-device interruptions, downloaded-session recovery, private access and backup/rollback have recorded results before the corresponding release claim.
 
-Record completed phase evidence in `specs/plan/evidence/`: build/version, device/browser when relevant, scenarios, results, unresolved limitations and links to artifacts. Do not put private learner recordings in reports or source control. There are no passed phase reports yet.
+Record completed phase evidence in `specs/plan/evidence/`: build/version, device/browser when relevant, scenarios, results, unresolved limitations and links to artifacts. Do not put private learner recordings in reports or source control. P1 and P2 engineering closeout reports exist; their explicitly recorded device/content gaps remain open.
 
 ## Remaining choices and proposed defaults
 
@@ -203,7 +203,7 @@ Do not reopen settled manual stop, automatic storage of every take, recording on
 
 ## Execution handoff and scaffold
 
-P1 deliverables now exist; review the linked evidence and starting-point handoff before beginning P2. The original execution order was **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
+P1 and P2 are closed; review their evidence and the current handoff before beginning P3. The original execution order was **P1.1**: a small reviewed fixture pack, then the complete interaction prototype and real audio probe. Use the recommendations above to make unresolved behaviour concrete and reviewable; do not ask the user to restate already recorded requirements. Record walkthrough corrections as decisions before claiming visual approval or a passed gate.
 
 Preserve `src/phrase_gym`, the rich-click entry point, hatchling/uv, pytest, Invoke, quality checks, documentation and CI conventions. Replace scaffold template behaviour only during authorized implementation. Keep all development context in `specs/`, plural. Do not install or extract the stopped temporary implementation as the starting app.
 

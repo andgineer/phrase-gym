@@ -1,6 +1,6 @@
 # P2 foundation — run and extend
 
-Implemented 2026-10-12. This is the production foundation, not the P3 trainer or a deployed release. The user selected `frontend/` for the Vue/TypeScript client. FastAPI/Pydantic, SQLAlchemy/Alembic and SQLite extend the existing Python scaffold.
+Implemented and engineering-closed at the user's request on 2026-10-12; see the [closeout](evidence/p2-closeout-2026-10-12.md) and [open problems](../open-problems.md). This is the production foundation, not the P3 trainer or a deployed release. The user selected `frontend/` for the Vue/TypeScript client. FastAPI/Pydantic, SQLAlchemy/Alembic and SQLite extend the existing Python scaffold.
 
 ## Local runtime
 

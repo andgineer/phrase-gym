@@ -61,7 +61,7 @@ The round microphone becomes a stop control while recording or playing audio. St
 7. Try a prepared dialogue, then isolate a turn and rate to advance within the exchange. One target identity is shared across ordinary drills and dialogue appearances.
 8. Mark Not yet, advance the diagnostic clock five minutes and complete two other targets to exercise a separated retry. This is a policy probe, not production FSRS.
 9. Download the prepared English session and reload offline. Reference playback, self-check and retained takes remain usable. Serbian reference audio is still pending.
-10. On Safari with the actual headset, try several takes of a continuous sentence. Listen for the reported mid-take interruption, including the first take, later takes and resuming after Pause. Synthetic checks do not establish that this device-specific issue is resolved.
+10. On Safari with the actual headset, try several takes of a continuous sentence. Listen for the reported mid-take interruption, including the first take, later takes and resuming after Pause. The user confirms it still clips mid-recording after the mitigation; see [AUDIO-01](../specs/open-problems.md#audio-01--mid-recording-clipping). The user stopped this investigation and closed P2 with the problem carried forward.
 
 ## Checks
 
