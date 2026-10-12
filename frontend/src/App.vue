@@ -42,6 +42,8 @@ const {
   updateQuery,
   loadMore,
   loadMoreLessons,
+  loadingMore,
+  loadingMoreLessons,
   loadRoute,
 } = useLibrary()
 </script>
@@ -77,7 +79,11 @@ const {
         @save="saveSettings"
       />
       <p role="status" v-if="loading">{{ t.loading }}</p>
-      <template v-else-if="settings?.native_language && !firstLaunch && !configuring">
+      <template
+        v-if="
+          settings?.native_language && !firstLaunch && !configuring && (!loading || kind === 'home')
+        "
+      >
         <section class="card" v-if="!currentLanguage">
           <h1>{{ t.choose }}</h1>
           <p v-if="route.path !== '/' && route.path !== '/learn'">{{ t.unavailable }}</p>
@@ -118,6 +124,7 @@ const {
             :results="results"
             :total="total"
             :link="link"
+            :loading-more="loadingMore"
             @more="loadMore"
           />
           <LibraryHome
@@ -132,6 +139,9 @@ const {
             :total="total"
             v-model:selected-lesson="selectedLesson"
             :has-collection="hasCollection"
+            :loading="loading"
+            :loading-more="loadingMore"
+            :loading-more-lessons="loadingMoreLessons"
             :link="link"
             @query="updateQuery"
             @more="loadMore"

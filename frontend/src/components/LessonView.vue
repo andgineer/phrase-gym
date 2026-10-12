@@ -8,6 +8,7 @@ defineProps<{
   lessonTitle: string
   results: Phrase[]
   total: number
+  loadingMore: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const emit = defineEmits<{ more: [] }>()
@@ -25,6 +26,8 @@ const emit = defineEmits<{ more: [] }>()
         >
       </li>
     </ul>
-    <button v-if="results.length < total" @click="emit('more')">{{ t.more }}</button>
+    <button v-if="results.length < total" :disabled="loadingMore" @click="emit('more')">
+      {{ t.more }}
+    </button>
   </section>
 </template>

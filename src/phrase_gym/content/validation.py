@@ -42,7 +42,7 @@ class PackageValidator:
                 action = (
                     "unchanged"
                     if revision
-                    and revision.fingerprint
+                    and fingerprint(revision.payload)
                     == fingerprint(
                         content.model_dump_json(),
                     )

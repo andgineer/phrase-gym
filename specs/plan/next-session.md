@@ -9,7 +9,7 @@ Updated **2026-10-12**. P1 is closed and the production foundation is implemente
 3. [Consolidated plan](implementation-plan.md), then [P2–P3 implementation](02-core-implementation.md), [architecture](../architecture.md) and the relevant data contracts.
 4. [Echo-words integration reference](../reference/echo-words-audio.md) and [prototype walkthroughs](../../prototypes/README.md).
 
-No chat-history search is needed. Do not restart the three-iteration fresh-session review loop or rebuild P1. The user prefers manual prototype feedback and proportionate checks. Continue from the production foundation and the next session's actual request. See the [P2 runbook](p2-runbook.md), [foundation decision](../decision-production-foundation.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md).
+No chat-history search is needed. Do not restart P1's closed three-iteration review loop or rebuild P1. The user requested a separate P2 fresh-session review loop; its findings and current status are in the [P2 review record](evidence/p2-review-loop-2026-10-12.md). The user prefers manual prototype feedback and proportionate checks. Continue from the production foundation and the next session's actual request. See the [P2 runbook](p2-runbook.md), [foundation decision](../decision-production-foundation.md) and [verification evidence](evidence/p2-foundation-2026-10-12.md).
 
 ## Final interaction to implement
 

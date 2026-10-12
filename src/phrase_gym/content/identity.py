@@ -4,11 +4,12 @@ import json
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from phrase_gym.serialization import canonical_json
 from phrase_gym.storage import DialogueRow, LessonRow, Membership, SourceItem, Target
 
 
 def fingerprint(text: str) -> str:
-    return hashlib.sha256(text.encode()).hexdigest()
+    return hashlib.sha256(canonical_json(text).encode()).hexdigest()
 
 
 def current_revision(session: Session, target_id: str) -> int:

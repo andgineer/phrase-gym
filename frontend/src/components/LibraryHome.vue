@@ -14,6 +14,9 @@ defineProps<{
   total: number
   selectedLesson: string
   hasCollection: boolean
+  loading: boolean
+  loadingMore: boolean
+  loadingMoreLessons: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const emit = defineEmits<{
@@ -38,7 +41,7 @@ const emit = defineEmits<{
           @input="emit('query', 'lessonQ', $event)"
       /></label>
       <select
-        aria-label="Lesson to drill"
+        :aria-label="t.lessonScope"
         :value="selectedLesson"
         @change="emit('update:selectedLesson', ($event.target as HTMLSelectElement).value)"
       >
@@ -47,7 +50,13 @@ const emit = defineEmits<{
           {{ lesson.title }}
         </option>
       </select>
-      <button v-if="lessons.length < lessonTotal" @click="emit('moreLessons')">{{ t.more }}</button>
+      <button
+        v-if="!loading && lessons.length < lessonTotal"
+        :disabled="loadingMoreLessons"
+        @click="emit('moreLessons')"
+      >
+        {{ t.more }}
+      </button>
       <RouterLink v-if="selectedLesson" :to="link('lessons', selectedLesson)"
         >{{ t.selectLesson }} →</RouterLink
       >
@@ -64,8 +73,8 @@ const emit = defineEmits<{
           :value="phraseQuery"
           @input="emit('query', 'q', $event)"
       /></label>
-      <p v-if="!hasCollection" class="muted">{{ t.empty }}</p>
-      <p v-else-if="!results.length">{{ t.noMatches }}</p>
+      <p v-if="!loading && !hasCollection" class="muted">{{ t.empty }}</p>
+      <p v-else-if="!loading && !results.length">{{ t.noMatches }}</p>
       <ul class="phrase-list">
         <li v-for="item in results" :key="item.id">
           <RouterLink :to="link('phrases', item.id)" :lang="language"
@@ -73,7 +82,13 @@ const emit = defineEmits<{
           >
         </li>
       </ul>
-      <button v-if="results.length < total" @click="emit('more')">{{ t.more }}</button>
+      <button
+        v-if="!loading && results.length < total"
+        :disabled="loadingMore"
+        @click="emit('more')"
+      >
+        {{ t.more }}
+      </button>
     </section>
   </section>
 </template>

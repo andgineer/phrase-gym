@@ -19,6 +19,7 @@ from sqlalchemy import select
 
 from phrase_gym.contracts.media import MediaAsset, MediaMetadata, MediaUpload, Reconciliation
 from phrase_gym.errors import DomainError
+from phrase_gym.serialization import canonical_json
 from phrase_gym.storage import Database, MediaRow
 
 MEDIA_NAMESPACE = UUID("1a6d9d67-c9b9-4d73-9e38-6dd05a3c1d66")
@@ -81,7 +82,7 @@ class MediaService:
             raise DomainError("Audio must be valid base64", 422) from error
         validate_audio(audio, upload.mime_type)
         sha256 = hashlib.sha256(audio).hexdigest()
-        metadata_json = upload.metadata.model_dump_json()
+        metadata_json = canonical_json(upload.metadata.model_dump_json())
         identity = "|".join((sha256, upload.mime_type, metadata_json))
         media_id = str(uuid5(MEDIA_NAMESPACE, identity))
         with tempfile.NamedTemporaryFile(dir=self.staging, suffix=".part", delete=False) as stream:
@@ -92,7 +93,20 @@ class MediaService:
         try:
             with self.db.write() as session:
                 os.replace(temporary, self.root / sha256)
-                row = session.get(MediaRow, media_id)
+                # Preserve IDs already bound by packages written before canonical serialization.
+                row = next(
+                    (
+                        candidate
+                        for candidate in session.scalars(
+                            select(MediaRow).where(
+                                MediaRow.sha256 == sha256,
+                                MediaRow.mime_type == upload.mime_type,
+                            ),
+                        )
+                        if canonical_json(candidate.metadata_json) == metadata_json
+                    ),
+                    None,
+                )
                 if row is None:
                     row = MediaRow(
                         id=media_id,

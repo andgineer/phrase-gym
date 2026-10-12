@@ -5,6 +5,7 @@ import type { ExposureInput, Lesson, LessonPage, Phrase, PhrasePage } from '../a
 import { flushExposures, retainExposure, sendExposure } from '../exposures'
 import { languageNames } from '../i18n'
 import { usePreferences } from './usePreferences'
+import { usePagination } from './usePagination'
 import { useReferenceAudio } from './useReferenceAudio'
 
 export function useLibrary() {
@@ -77,43 +78,36 @@ export function useLibrary() {
     const value = (event.target as HTMLInputElement).value
     router.replace({ query: { ...route.query, [name]: value || undefined } })
   }
-  async function loadMore() {
-    const version = requestVersion
-    const lang = currentLanguage.value
-    if (!lang) return
-    error.value = ''
-    try {
+  const phrasePages = usePagination({
+    items: results,
+    total,
+    version: () => requestVersion,
+    error,
+    fetchPage: () => {
+      const lang = currentLanguage.value
       const path =
         kind.value === 'lessons'
           ? `/lessons/${routeParts.value[3]}/phrases?language=${lang}&offset=${results.value.length}`
           : `/phrases/search?language=${lang}&q=${encodeURIComponent(phraseQuery.value)}&offset=${results.value.length}`
-      const page = await api<PhrasePage>(path)
-      if (version === requestVersion) {
-        results.value.push(...page.items)
-        total.value = page.total
-      }
-    } catch (cause) {
-      if (version === requestVersion) error.value = String(cause)
-    }
-  }
-  async function loadMoreLessons() {
-    const version = requestVersion
-    const lang = currentLanguage.value
-    if (!lang) return
-    try {
-      const page = await api<LessonPage>(
-        `/lessons?language=${lang}&q=${encodeURIComponent(lessonQuery.value)}&offset=${lessons.value.length}`,
-      )
-      if (version === requestVersion) {
-        lessons.value.push(...page.items)
-        lessonTotal.value = page.total
-      }
-    } catch (cause) {
-      if (version === requestVersion) error.value = String(cause)
-    }
-  }
+      return api<PhrasePage>(path)
+    },
+  })
+  const lessonPages = usePagination({
+    items: lessons,
+    total: lessonTotal,
+    version: () => requestVersion,
+    error,
+    fetchPage: () =>
+      api<LessonPage>(
+        `/lessons?language=${currentLanguage.value}&q=${encodeURIComponent(lessonQuery.value)}&offset=${lessons.value.length}`,
+      ),
+  })
   async function loadRoute() {
     const version = ++requestVersion
+    phrasePages.reset()
+    lessonPages.reset()
+    total.value = 0
+    lessonTotal.value = 0
     stopAudio()
     error.value = ''
     phrase.value = null
@@ -232,8 +226,10 @@ export function useLibrary() {
     goBack,
     link,
     updateQuery,
-    loadMore,
-    loadMoreLessons,
+    loadMore: phrasePages.loadMore,
+    loadMoreLessons: lessonPages.loadMore,
+    loadingMore: phrasePages.loading,
+    loadingMoreLessons: lessonPages.loading,
     loadRoute,
   }
 }
