@@ -1,6 +1,6 @@
 # P5 — content preparation and integrations
 
-Status: **not started**, 2026-10-11. Depends on P2 contracts and P3 working drills. Some fixture/prompt experiments can start earlier, but generated content must be exercised through the real learning flow before claiming integration complete.
+Status: **not started**, updated 2026-10-13. P2 contracts and P3 working drills are available. The local 44-phrase test pack has one manual partial cue per phrase; LLM preparation and different useful masks are still outstanding. Generated content must be exercised through the real learning flow before claiming integration complete.
 
 This phase completes the preparation/intake coverage in the [consolidated plan](implementation-plan.md). Manual content in P2–P3 is a staged implementation path, not a deferral of the accepted add-time cue preparation beyond the full planned release.
 
@@ -15,6 +15,7 @@ This phase completes the preparation/intake coverage in the [consolidated plan](
 
 ## P5.2 — Durable preparation pipeline
 
+- Implement the [phrase-preparation prompt design and acceptance plan](phrase-preparation.md): versioned generator and review prompts, competing-completion analysis, useful different hidden chunks, representative real-provider measurements and preparation of related meaning/explanation/search material. This is required app implementation work, not satisfied by manually adding one cue per phrase.
 - Add the leased jobs table/worker, explicit provider configuration, bounded retries, deduplication and structured failure states.
 - Define generation outputs for target realizations, chunk boundaries, cue masks, competing-completion analysis, short dialogue turns and on-demand explanations.
 - As part of adding a phrase to the app database, have the LLM prepare variants hiding different words/meaningful chunks where the phrase permits useful alternatives. Store checked versions with that phrase for selection across later sessions; do not generate fresh random masks during practice or require a fixed number of variants. Support a single reliable cue and an explicit no-reliable-cue preparation outcome.
@@ -32,6 +33,8 @@ Demonstrate the accepted variant lifecycle: add a phrase → LLM prepares candid
 Audio acceptance: preserve supplied course/actor clips; create missing complete phrase/turn clips with the selected language/voice/accent; keep Serbian display text unchanged while preparing appropriate speech input. Use real generated phrase samples for content/listening checks during implementation, alongside software checks for exact request text, playable output, provenance, retry and cache invalidation when voice/text/settings change. Do not use the Lower Sorbian voice identified in the echo-words findings or another language's fallback. Provider outages leave recoverable jobs and cannot break existing prepared drills. These are implementer checks, not learner efficacy experiments.
 
 ## P5.3 — Evaluate generated material
+
+Follow the [prompt-quality measurement plan](phrase-preparation.md#quality-review-and-measurements) before spending provider budget: inspect availability, select representative development and held-out fixtures, and have a fresh reviewer inspect concrete model-result measurements. Record semantic review separately from automated conformance.
 
 Build on P1 fixtures with a small held-out set of unseen expressions. Include idiomatic phrases, reusable frames, word senses, long lines, noninitial distinguishing anchors, plausible synonyms, contractions and cross-language cases relevant to the first release.
 
