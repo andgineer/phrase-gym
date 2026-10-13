@@ -1,19 +1,16 @@
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePracticeEvents } from './usePracticeEvents'
-import { api, ApiError } from '../api'
+import { api, ApiError, requireServer, serverUnavailable, connectionRetrying } from '../api'
 import type { Language } from '../api'
 import { journalCheckpoint, journalDelete, journalEntries, journalPut } from '../practiceJournal'
 import type { PendingEvent, PracticeSession, SessionStart } from '../practiceTypes'
-import { verifyPack } from '../sessionPack'
-import { restoreDeviceStatus } from '../deviceSessionState'
 import { useSessionLifecycle } from './useSessionLifecycle'
 
 export function usePracticeSession() {
   const session = ref<PracticeSession | null>(null)
   const busy = ref(false)
   const restoring = ref(false)
-  const offlineUnavailable = ref(false)
   const error = ref('')
   const route = useRoute()
   const openSession = ref<PracticeSession | null>(null)
@@ -30,11 +27,15 @@ export function usePracticeSession() {
     if (routeId.value ? routeId.value === state.id : session.value?.id === state.id)
       session.value = state
   }
-  const { pending, card, action, flush, offline, project } = usePracticeEvents(
+  const { pending, card, action, flush } = usePracticeEvents(
     session,
     error,
     accept,
-    () => !restoring.value && !offlineUnavailable.value,
+    () =>
+      !restoring.value &&
+      !serverUnavailable.value &&
+      !connectionRetrying.value &&
+      !pending.value.length,
   )
   const item = computed(() => {
     const state = session.value
@@ -61,6 +62,7 @@ export function usePracticeSession() {
     takeover = false,
   ) {
     if (busy.value) return
+    requireServer()
     busy.value = true
     error.value = ''
     try {
@@ -95,83 +97,46 @@ export function usePracticeSession() {
       busy.value = false
     }
   }
-  const transition = useSessionLifecycle({ session, busy, error, offline, flush, accept })
-  async function load() {
+  const lifecycle = useSessionLifecycle({ session, busy, error, flush, accept })
+  const transition = lifecycle.transition
+  async function load(): Promise<boolean> {
     const version = ++loadingVersion
     restoring.value = true
-    offlineUnavailable.value = false
     const id = routeId.value
     if (id !== session.value?.id) session.value = null
     try {
-      const starts = await journalEntries<SessionStart>('start')
-      if (version !== loadingVersion) return
-      candidate.value = starts[0]?.value ?? null
+      candidate.value = (await journalEntries<SessionStart>('start'))[0]?.value ?? null
       const events = await journalEntries<PendingEvent>('event:')
-      if (version !== loadingVersion) return
+      if (version !== loadingVersion) return false
       pending.value = events.map((e) => e.value)
+      try {
+        await flush()
+      } catch (cause) {
+        if (pending.value.length) throw cause
+      }
+      await lifecycle.recover()
+      if (candidate.value && !busy.value) {
+        const created = await api<PracticeSession>('/sessions', {
+          method: 'POST',
+          body: JSON.stringify(candidate.value),
+        })
+        await journalCheckpoint(created)
+        await journalDelete('start')
+        candidate.value = null
+      }
       const current = await api<PracticeSession | null>('/sessions/current')
       const selected = id ? await api<PracticeSession>(`/sessions/${id}`) : current
-      if (version !== loadingVersion) return
+      if (version !== loadingVersion) return false
       openSession.value = current
-      const checkpoint = selected ? await journalCheckpoint(selected) : null
-      if (version !== loadingVersion) return
-      const restoredCheckpoint = checkpoint ? await restoreDeviceStatus(checkpoint) : null
-      if (version !== loadingVersion) return
-      const projected = restoredCheckpoint
-        ? await project(restoredCheckpoint, () => version === loadingVersion)
-        : null
-      if (version !== loadingVersion) return
-      session.value = projected
-      await flush()
-      if (version === loadingVersion) offline.value = false
+      session.value = selected ? await journalCheckpoint(selected) : null
+      return true
     } catch (cause) {
-      if (version !== loadingVersion) return
-      error.value = String(cause)
-      const cached = await journalEntries<PracticeSession>('session:').catch(() => [])
-      if (version !== loadingVersion) return
-      const candidates = cached
-        .map((e) => e.value)
-        .filter((s) => (id ? s.id === id : s.status === 'active' || s.status === 'paused'))
-      const restored =
-        [...candidates, ...(session.value ? [session.value] : [])].sort(
-          (a, b) =>
-            (a.id === b.id ? b.last_sequence - a.last_sequence || b.version - a.version : 0) ||
-            b.updated_at.localeCompare(a.updated_at),
-        )[0] ?? null
-      if (restored && (!id || restored.id === id)) {
-        try {
-          const pack = await verifyPack(restored.id)
-          if (version !== loadingVersion) return
-          if (pack) {
-            offline.value = true
-            await project(restored, () => version === loadingVersion)
-            if (version === loadingVersion) error.value = ''
-          } else accept(restored)
-        } catch (packError) {
-          if (version !== loadingVersion) return
-          offlineUnavailable.value = true
-          accept(restored)
-          error.value = String(packError)
-        }
-      } else if (id) {
-        error.value =
-          'Session data is unavailable on this device. Reconnect to restore server-acknowledged progress; unacknowledged events and audio cannot be restored after browser storage eviction.'
-      }
+      if (version === loadingVersion) error.value = String(cause)
+      return false
     } finally {
       if (version === loadingVersion) restoring.value = false
     }
   }
-  function reconnect() {
-    if (!document.hidden) void load()
-  }
-  onMounted(() => {
-    window.addEventListener('online', reconnect)
-    document.addEventListener('visibilitychange', reconnect)
-  })
-  onUnmounted(() => {
-    window.removeEventListener('online', reconnect)
-    document.removeEventListener('visibilitychange', reconnect)
-  })
   watch(routeId, load, { immediate: true })
   return {
     session,
@@ -181,10 +146,8 @@ export function usePracticeSession() {
     card,
     busy,
     restoring,
-    offlineUnavailable,
     error,
     pending,
-    offline,
     candidate,
     start,
     action,

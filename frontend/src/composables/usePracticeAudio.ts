@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted, ref } from 'vue'
+import { requireServer } from '../api'
 
 export function usePracticeAudio() {
   const playing = ref(false)
@@ -19,6 +20,12 @@ export function usePracticeAudio() {
   }
   async function play(url: string): Promise<boolean> {
     if (!live) return false
+    try {
+      requireServer()
+    } catch {
+      error.value = 'Server connection required before playback'
+      return false
+    }
     stop()
     lastUrl = url
     error.value = ''

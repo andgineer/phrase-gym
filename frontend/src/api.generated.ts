@@ -932,11 +932,6 @@ export interface components {
             rating?: ("not_yet" | "with_effort" | "recalled") | null;
             /** Reason */
             reason?: string | null;
-            /**
-             * Defer Repairs
-             * @default false
-             */
-            defer_repairs: boolean;
         };
         /** PracticeSession */
         PracticeSession: {
@@ -971,12 +966,6 @@ export interface components {
             queue: components["schemas"]["SessionStep"][];
             /** Attempts */
             attempts: components["schemas"]["AttemptEvidence"][];
-            /** Dialogue Exposures */
-            dialogue_exposures?: string[];
-            /** Support Exposures */
-            support_exposures?: {
-                [key: string]: string[];
-            };
         };
         /** PublishRequest */
         PublishRequest: {
@@ -1067,10 +1056,10 @@ export interface components {
             schema_version: 1;
             /**
              * Planner Version
-             * @default due-new-v2
+             * @default due-new-v3-online
              * @enum {string}
              */
-            planner_version: "due-new-v1" | "due-new-v2";
+            planner_version: "due-new-v1" | "due-new-v2" | "due-new-v3-online";
             /**
              * Policy Version
              * @default fsrs-6.3.2-retention90-v1

@@ -1,5 +1,5 @@
-import { onUnmounted, ref } from 'vue'
-import { api } from '../api'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { api, requireServer, serverUnavailable, connectionRetrying } from '../api'
 import { useCapture } from './useCapture'
 import { usePracticeAudio } from './usePracticeAudio'
 import { takeTransfers } from '../takeTransfers'
@@ -68,7 +68,13 @@ export function useCardAudio(
       generation++
       local(take)
       void takes.flush()
-      if (live && take.complete && !document.hidden) {
+      if (
+        live &&
+        take.complete &&
+        !document.hidden &&
+        !serverUnavailable.value &&
+        !connectionRetrying.value
+      ) {
         void audio.play(localUrl).then((ok) => {
           if (ok && live && currentScope() === scope && reference) void audio.play(reference)
         })
@@ -82,6 +88,7 @@ export function useCardAudio(
     } else if (capture.capturing.value) await capture.stop()
     else if (audio.playing.value) audio.stop()
     else {
+      requireServer()
       audio.stop()
       await capture.start()
     }
@@ -92,7 +99,13 @@ export function useCardAudio(
     await capture.release()
     audio.stop()
   }
+  function stopOwnedMedia() {
+    if (capture.requesting.value || capture.capturing.value) void control()
+    audio.stop()
+  }
+  onMounted(() => window.addEventListener('phrase-gym:stop-media', stopOwnedMedia))
   onUnmounted(() => {
+    window.removeEventListener('phrase-gym:stop-media', stopOwnedMedia)
     live = false
     if (localUrl) URL.revokeObjectURL(localUrl)
   })

@@ -85,7 +85,7 @@ test('a pending take survives a lost acknowledgement and reload without duplicat
   await page.getByRole('button', { name: 'Record', exact: true }).click()
   await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
-  await expect(page.getByRole('alert').first()).toContainText('Take acknowledgement lost')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   await page.reload()
   await expect.poll(() => retried).toBe(id)
   await expect.poll(() => retainedAudio(page)).toBe(0)

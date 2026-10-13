@@ -49,6 +49,13 @@ for (const change of ['query', 'language']) {
       release()
       await (await response).finished()
       await page.evaluate(() => new Promise(requestAnimationFrame))
+      if (status === 503) {
+        await expect(page.getByTestId('connection-required')).toBeVisible()
+        await page
+          .getByTestId('connection-required')
+          .getByRole('button', { name: /Retry|Pokušaj ponovo/ })
+          .click()
+      }
       await expect(page.locator('.phrase-list li')).toHaveCount(1)
       await expect(page.locator('.phrase-list')).toContainText(expected)
       await expect(page.getByRole('alert')).toHaveCount(0)
@@ -72,11 +79,14 @@ test('a failed search offers retry without claiming no matches', async ({ page }
     } else await route.continue()
   })
   await page.getByLabel('Find a phrase', { exact: true }).fill('greetings')
-  await expect(page.getByRole('alert')).toContainText('Temporary search failure')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   await expect(page.locator('.lookup')).not.toContainText('No matches')
   await expect(page.locator('.phrase-list li')).toHaveCount(0)
   await expect(page.getByLabel('Find a phrase', { exact: true })).toHaveValue('greetings')
-  await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+  await page
+    .getByTestId('connection-required')
+    .getByRole('button', { name: /Retry|Pokušaj ponovo/ })
+    .click()
   await expect(page.locator('.phrase-list li')).toHaveCount(1)
   await expect(page.getByRole('alert')).toHaveCount(0)
 })

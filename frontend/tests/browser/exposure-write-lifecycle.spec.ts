@@ -23,8 +23,8 @@ test('explicit exposure retry sends the same retained payload and acknowledges i
   })
   await page.goto('/learn/en?q=greetings')
   await page.getByRole('link', { name: /How has your day/ }).click()
-  await expect(page.locator('.phrase-card')).toBeVisible()
-  await expect(page.getByRole('alert')).toContainText('Could not save this reference exposure')
+  await expect(page.locator('.phrase-card')).toBeHidden()
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   const key = `phrase-gym.reference-exposure.v1.${payloads[0].id}`
   expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), key)).toEqual(
     payloads[0],
@@ -32,7 +32,7 @@ test('explicit exposure retry sends the same retained payload and acknowledges i
   const acknowledgement = page.waitForResponse(
     (response) => response.url().endsWith('/api/v1/exposures') && response.status() === 200,
   )
-  await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+  await page.getByTestId('connection-required').getByRole('button', { name: 'Retry' }).click()
   expect((await (await acknowledgement).json()).id).toBe(payloads[0].id)
   await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.getByRole('alert')).toHaveCount(0)
@@ -69,7 +69,7 @@ test('a previous visit acknowledgement cannot clear a later failed visit', async
   await page.getByRole('button', { name: 'Back', exact: true }).click()
   await page.getByLabel('Find a phrase', { exact: true }).fill('coffee')
   await page.getByRole('link', { name: /catch up over coffee/ }).click()
-  await expect(page.getByRole('alert')).toContainText('Could not save this reference exposure')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   expect(payloads[1].target_id).not.toBe(payloads[0].target_id)
   const firstKey = `phrase-gym.reference-exposure.v1.${payloads[0].id}`
   const secondKey = `phrase-gym.reference-exposure.v1.${payloads[1].id}`
@@ -78,12 +78,12 @@ test('a previous visit acknowledgement cannot clear a later failed visit', async
   expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), secondKey)).toEqual(
     payloads[1],
   )
-  await expect(page.getByRole('alert')).toContainText('Could not save this reference exposure')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   retry = true
   const acknowledgement = page.waitForResponse(
     (response) => response.url().endsWith('/api/v1/exposures') && response.status() === 200,
   )
-  await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+  await page.getByTestId('connection-required').getByRole('button', { name: 'Retry' }).click()
   expect((await (await acknowledgement).json()).id).toBe(payloads[1].id)
   await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.getByRole('alert')).toHaveCount(0)

@@ -1,6 +1,6 @@
 # P4 and P6 — phone reliability, validation and release
 
-Status: **P4 state audit and four reviews complete; stop before round 5**, updated 2026-10-13. See the [offline decision](../decision-offline-sessions.md), [P4 runbook](p4-runbook.md), [implementation evidence](evidence/p4-core-2026-10-13.md) and [authorized fresh-review loop](evidence/p4-review-loop-2026-10-13.md). Actual-device acceptance remains open. Follow the [current handoff](next-session.md) and accepted unified-card decisions. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
+Status: **P4 online-only correction and authorized fresh round 5**, updated 2026-10-13. Follow the [online-only decision](../decision-online-only.md), [runbook](p4-runbook.md) and [current handoff](next-session.md). Earlier offline review/evidence remains historical. Actual-device acceptance, P5 integrations and P6 deployment remain separate.
 
 Use the [consolidated plan's acceptance checklist](implementation-plan.md#end-to-end-acceptance-checklist) as release coverage, including language URLs/UI separation, search/navigation, revised recall outcomes, reference audio and every recording's retention. Checks in this file concern implementation reliability, not learner-run learning-effectiveness validation.
 
@@ -12,25 +12,17 @@ Harden the automatic storage already included in P3: retain every take's audio a
 
 **Acceptance:** denied/ignored permission does not trap the learner; real recordings play on the supported devices; upload retry creates one recording while a new take creates a separate record; comparison uses the intended reference revision; all takes survive session completion/restart and database restore; quota failure does not claim a recording was saved. No voice is automatically submitted to an external model.
 
-## P4.2 — Downloaded sessions and reconnection
+## P4.2 — Temporary server failure
 
-- Add the app manifest/service worker and verified prepared-session pack. Cache only selected material; expose download progress and missing assets.
-- Journal transitions and attempt results in IndexedDB. A connected session remains usable through a temporary loss of connectivity.
-- Reconcile pending events on foreground/resume/retry. Treat server receipts as authoritative and retain unacknowledged events. Do not rely on background sync firing.
-- Keep active-session content compatible through an app update. Offer an update after checkpoint/end rather than reloading over a spoken attempt.
-- Detect unavailable/evicted local state and explain what can be restored from the server. Browser cache is not the backup strategy.
+Require the live server for learning/settings. Hide usable practice when a transport/server failure occurs; offer Retry and usable stop/cancel for already active media. Retain every initiated event/take with its original ID/context/bytes. Retry server receipts and reload authoritative state before enabling learning. Do not predict attempts/support/grades or advance locally.
 
-**Acceptance scenarios:** download completely then disable network; finish and reconnect; retry after server commit but lost response; close/reopen while offline; exhaust storage; change content while a pack is offline; take over on another device; deliver an old outbox later. Each produces one acknowledged attempt history and no duplicate schedule advancement. Preserve recoverable events even if a version cannot be applied.
-
-Language/session acceptance: downloaded packs retain their pinned learning language and content revisions. Switching language or opening another bookmarked tab cannot relabel a pack, discard pending recordings or silently take over the active session. Resume follows the original language/history and preserves exposure; UI locale changes do not change speech/text assets.
-
-Only prepared-session completion is promised at this milestone. Do not label arbitrary library access, new imports, generation, or new due-session creation as offline-capable.
+Retire earlier owned worker caches/registrations and obsolete packs without clearing pending journals or reloading active media. No offline packs, cached navigation, installation/update flow or outage platform is in scope. Check representative real-server connection failure, lost response and active media cleanup; preserve established idempotency, capture ownership and conditional audio acknowledgement tests.
 
 ## P4.3 — Accessibility and device checks
 
-Repeat critical flows on the actual iPhone in Safari and installed mode, with speaker and headphones. Check text scaling, focus order, touch targets, readable cue gaps, VoiceOver labels, light/dark contrast, interruptions and visible support state. Test non-Latin and longer-text fixtures where relevant.
+Repeat critical flows on the actual iPhone in Safari, with speaker and headphones. Check text scaling, focus order, touch targets, readable cue gaps, VoiceOver labels, light/dark contrast, interruptions and visible support state. Test non-Latin and longer-text fixtures where relevant.
 
-Automate reducer, persistence and browser state tests, including Chromium and WebKit where supported. Record actual-device audio results separately; an automated desktop WebKit pass cannot stand in for an iPhone recording test. Fix silent failures and misleading saved/graded states before release.
+Automate authoritative state mapping, persistence and browser state tests, including Chromium and WebKit where supported. Record actual-device audio results separately; an automated desktop WebKit pass cannot stand in for an iPhone recording test. Fix silent failures and misleading saved/graded states before release.
 
 ## P6.1 — Choose and prepare the host
 
@@ -46,7 +38,7 @@ Recommend the smallest private deployment that passes the measurements: one API 
 - Restore to an isolated directory/instance and verify content, due dates, attempts, personal notes and playable audio.
 - Include every learning language, native-language/UI-mode settings, source mappings, reference-audio provenance and preparation job state in recovery checks. Verify unfinished jobs can recover without duplicating content or replacing an imported actor clip.
 - Rehearse a schema upgrade and app rollback. If a migration is not backward compatible, rollback means restoring the matching snapshot, not running old code on new tables.
-- Keep worker crash recovery, missing-media reconciliation and download-pack compatibility in the runbook.
+- Keep worker crash recovery, missing-media reconciliation and retained-write compatibility in the runbook.
 
 **Acceptance:** demonstrated recovery from the backup with matching representative counts and playable media; acknowledged progress survives process restart; a failed update can be reversed without guessing which database/media files belong together.
 
@@ -65,7 +57,7 @@ Release only when:
 - both fixed phrases and words/frames work through the same target model;
 - one schedule per target, support accounting and idempotent event handling pass the critical tests;
 - generated material and live source intake pass their separate quality/contract checks for the selected scope;
-- real-device audio/recording, prepared-session recovery and accessibility checks have recorded results;
+- real-device audio/recording, connected journal retry and accessibility checks have recorded results;
 - private access, backup/restore and rollback are demonstrated on the chosen host;
 - remaining limitations are stated concretely and accepted by the user before calling the corresponding feature complete.
 

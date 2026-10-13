@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { expect } from '@playwright/test'
-import { test } from './offline-fixtures'
-import { downloadSession, retainedKeys } from './offline-actions'
+import { test } from './connection-fixtures'
+import { startSession, retainedKeys } from './session-actions'
 import { syntheticCapture } from './synthetic-capture'
 
 test.beforeEach(async ({ request }) => {
@@ -15,7 +15,7 @@ for (const navigation of ['library', 'settings', 'language']) {
     request,
   }) => {
     await syntheticCapture(page)
-    const id = await downloadSession(page)
+    const id = await startSession(page)
     const state = await (await request.get(`/api/v1/sessions/${id}`)).json()
     const target = state.manifest.targets[0].phrase.id
     await page.evaluate(() => {

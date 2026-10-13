@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue'
+import { serverUnavailable, connectionRetrying } from '../api'
 import type { usePracticeSession } from './usePracticeSession'
 import { useCardAudio } from './useCardAudio'
 import type { RecallRating } from '../practiceTypes'
@@ -51,7 +52,7 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
     session.value?.attempts.some((a) => a.step === session.value?.cursor),
   )
   async function prepare() {
-    if (engine.restoring.value) return
+    if (engine.restoring.value || serverUnavailable.value || connectionRetrying.value) return
     if (
       captureContext &&
       (session.value?.id !== captureContext.sessionId ||
@@ -84,6 +85,8 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
       () => session.value?.status,
       intro,
       engine.restoring,
+      serverUnavailable,
+      connectionRetrying,
     ],
     prepare,
     {

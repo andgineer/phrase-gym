@@ -44,26 +44,3 @@ def test_separated_repair_preserves_original_and_updates_schedule_once(client, p
             assert transaction.get(ScheduleRow, target_id).version == 1
     finally:
         database.close()
-
-
-def test_downloaded_queue_defers_repairs_even_after_sufficient_spacing(client, package):
-    session = session_fixture(client, package)
-    for index, rating in enumerate(["not_yet", "recalled", "recalled"]):
-        now = NOW + timedelta(minutes=index * 3)
-        client.app.state.practice.clock = lambda: now
-        _, result = apply(client, session, "present", occurred_at=now.isoformat())
-        body, result = apply(
-            client,
-            result["session"],
-            "rate",
-            rating=rating,
-            occurred_at=now.isoformat(),
-            defer_repairs=True,
-        )
-        replay = client.post(f"/api/v1/sessions/{session['id']}/events", json={"events": [body]})
-        assert replay.status_code == 200
-        assert replay.json()["receipts"] == result["receipts"]
-        session = result["session"]
-    assert session["status"] == "completed"
-    assert len(session["queue"]) == 3
-    assert all(attempt["eligibility_reason"] == "eligible" for attempt in session["attempts"])

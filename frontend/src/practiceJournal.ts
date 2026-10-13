@@ -1,6 +1,5 @@
 import { toRaw } from 'vue'
 import type { PracticeSession } from './practiceTypes'
-import { mergeSupportFacts } from './supportState'
 
 const databaseName = 'phrase-gym.practice.v1'
 let opening: Promise<IDBDatabase> | null = null
@@ -56,7 +55,6 @@ export async function journalCheckpoint(state: PracticeSession): Promise<Practic
       ) {
         retained = current
       }
-      retained = { ...retained, support_exposures: mergeSupportFacts(current, state) }
       journal.put(toRaw(retained), key)
     }
     transaction.oncomplete = () => resolve(retained)

@@ -50,7 +50,7 @@ cd ..
 
 `build.sh` bundles the client in the Python wheel/source distribution. A backend-only `uv build` before preparing the client requires `--client-dir` at runtime. Invoke tasks include `app-check`, `app-build`, `api-types`, and the scaffold's existing documentation/version tasks. Run `uv run invoke --list` or `uv run phrase-gym --help`.
 
-The local server binds loopback and rejects cross-site mutations. This is a local development application; private HTTPS access, authentication, phone/PWA validation and verified backups remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
+The local server binds loopback and rejects cross-site mutations. This is a local development application; private HTTPS access, authentication, phone validation and verified backups remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
 
 ## Project context
 

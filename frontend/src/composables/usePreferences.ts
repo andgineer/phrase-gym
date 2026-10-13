@@ -1,9 +1,8 @@
 import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
-import { api } from '../api'
+import { api, requireServer } from '../api'
 import type { Language, Settings } from '../api'
 import { messages } from '../i18n'
-import { journalEntries, journalPut } from '../practiceJournal'
 
 export function usePreferences(currentLanguage: Ref<Language | null>) {
   const settings = ref<Settings | null>(null)
@@ -19,23 +18,16 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
   )
   const t = computed(() => messages(locale.value))
   const firstLaunch = computed(() => settings.value !== null && !settings.value.native_language)
-  async function load() {
-    if (settings.value) return
+  async function load(refresh = false) {
+    if (settings.value && !refresh) return
     if (!initialization) {
       initialization = api<Settings>('/settings')
-        .then(async (value) => {
-          await journalPut('preferences', value).catch(() => {})
-          return value
-        })
-        .catch(async (cause) => {
-          const cached = (await journalEntries<Settings>('preferences'))[0]?.value
-          if (!cached) throw cause
-          return cached
-        })
         .then((value) => {
           settings.value = value
-          native.value = value.native_language ?? ''
-          useLearning.value = value.ui_language_mode === 'learning'
+          if (!configuring.value) {
+            native.value = value.native_language ?? ''
+            useLearning.value = value.ui_language_mode === 'learning'
+          }
         })
         .finally(() => {
           initialization = null
@@ -44,6 +36,7 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
     await initialization
   }
   async function save() {
+    requireServer()
     if (!native.value || savingSettings.value) return false
     savingSettings.value = true
     try {
@@ -55,7 +48,6 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
         }),
       })
       configuring.value = false
-      await journalPut('preferences', settings.value).catch(() => {})
       return true
     } finally {
       savingSettings.value = false

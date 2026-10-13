@@ -1,4 +1,7 @@
-# P4 shared state model
+# Superseded offline P4 state model
+
+**Historical offline-era model, superseded by [online-only behavior](decision-online-only.md). Connected retention/cleanup protections survive, but offline projection/packs/lifecycle/readiness do not.**
+
 
 Accepted 2026-10-13 under the confirmed pre-round-4 audit. This specifies the facts, owners and admission rules shared by ordinary practice, lookup and prepared dialogue flows. It extends the [offline decision](decision-offline-sessions.md); the [coverage matrix](plan/evidence/p4-state-matrix-2026-10-13.md) maps these rules to actual implementations and combined behavioral checks.
 

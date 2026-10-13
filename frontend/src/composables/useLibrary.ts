@@ -1,6 +1,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { api, language } from '../api'
+import { api, language, requireServer } from '../api'
 import type { Lesson, LessonPage, Phrase, PhrasePage } from '../api'
 import { languageNames } from '../i18n'
 import { preparedExplanation } from '../explanation'
@@ -44,6 +44,7 @@ export function useLibrary() {
   const lessonTitle = ref('')
 
   async function saveSettings() {
+    requireServer()
     if (savingSettings.value) return
     error.value = ''
     try {
@@ -53,6 +54,7 @@ export function useLibrary() {
     }
   }
   function changeLanguage(event: Event) {
+    requireServer()
     const next = language((event.target as HTMLSelectElement).value)
     if (next) router.push(`/learn/${next}`)
   }
@@ -64,6 +66,7 @@ export function useLibrary() {
     return { path: `/learn/${currentLanguage.value}/${type}/${id}`, query: route.query }
   }
   function updateQuery(name: 'q' | 'lessonQ', event: Event) {
+    requireServer()
     const value = (event.target as HTMLInputElement).value
     router.replace({ query: { ...route.query, [name]: value || undefined } })
   }
@@ -91,7 +94,8 @@ export function useLibrary() {
         `/lessons?language=${currentLanguage.value}&q=${encodeURIComponent(lessonQuery.value)}&offset=${lessons.value.length}`,
       ),
   })
-  async function loadRoute() {
+  async function loadRoute(refresh = false) {
+    const previousExposure = refresh ? currentExposure.value : null
     const version = ++requestVersion
     phrasePages.reset()
     lessonPages.reset()
@@ -106,8 +110,8 @@ export function useLibrary() {
     loading.value = true
     try {
       if (currentLanguage.value) rememberLanguage(currentLanguage.value)
-      await preferences.load()
-      if (version !== requestVersion || firstLaunch.value || configuring.value) return
+      await preferences.load(refresh)
+      if (version !== requestVersion || firstLaunch.value || configuring.value) return true
       const lang = currentLanguage.value
       if (!lang) {
         const restored = restoredLanguage()
@@ -117,17 +121,19 @@ export function useLibrary() {
         ) {
           await router.replace(`/learn/${restored}`)
         }
-        return
+        return true
       }
       const base = `language=${lang}`
       if (kind.value === 'phrases' && routeParts.value[3]) {
         const item = await api<Phrase>(`/phrases/${routeParts.value[3]}?${base}`)
-        if (version !== requestVersion || firstLaunch.value || configuring.value) return
+        if (version !== requestVersion || firstLaunch.value || configuring.value) return true
         const nativeLanguage = settings.value?.native_language
         const help = nativeLanguage
           ? preparedExplanation(item.content.explanations?.[nativeLanguage])
           : null
-        prepareExposure(item, lang, help ? 'explanation' : 'answer')
+        if (previousExposure?.target_id === item.id && previousExposure.revision === item.revision)
+          currentExposure.value = previousExposure
+        else prepareExposure(item, lang, help ? 'explanation' : 'answer')
         phrase.value = item
         loading.value = false
         void saveExposure()
@@ -151,12 +157,14 @@ export function useLibrary() {
         total.value = phrasePage.total
         hasCollection.value = collection.total > 0
       } else if (kind.value === 'practice') {
-        return
+        return true
       } else {
         error.value = t.value.unavailable
       }
+      return true
     } catch (cause) {
       if (version === requestVersion) error.value = String(cause)
+      return false
     } finally {
       if (version === requestVersion) loading.value = false
     }
@@ -167,7 +175,10 @@ export function useLibrary() {
   watch(configuring, (value) => {
     if (!value) loadRoute()
   })
-  watch(() => route.fullPath, loadRoute)
+  watch(
+    () => route.fullPath,
+    () => loadRoute(),
+  )
   watch([locale, currentLanguage], () => {
     document.documentElement.lang = locale.value
     document.title = currentLanguage.value

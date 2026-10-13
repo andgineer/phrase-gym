@@ -16,7 +16,7 @@ Implemented: original hash-addressed bytes/provenance, exact text/language/role 
 
 ## P3.1 — End-to-end session
 
-Implemented: bounded due/new planning for All lessons or one lesson, immutable manifests, explicit resume/takeover, language pinning, authored chunk masks, one practice card, optional recording, latest-take/reference playback, inline native-language explanations and quiet ratings/results. Lookup recordings use exposure contexts rather than invented sessions. IndexedDB preserves pending events/takes and acknowledged checkpoints; SQLite retains every take, including recoverable incomplete captures. Device capture/replay effects are isolated from rendering and the evidence reducer.
+Implemented: bounded due/new planning for All lessons or one lesson, immutable manifests, explicit resume/takeover, language pinning, authored chunk masks, one practice card, optional recording, latest-take/reference playback, inline native-language explanations and quiet ratings/results. Lookup recordings use exposure contexts rather than invented sessions. IndexedDB preserves pending events/takes and acknowledged checkpoints; SQLite retains every take, including recoverable incomplete captures. Device capture/replay effects are isolated from rendering and authoritative state mapping.
 
 ## P3.2 — Review and transaction correctness
 
@@ -34,7 +34,7 @@ The [core trainer decision](../decision-core-trainer.md) owns lasting policy and
 
 ## Remaining work outside P3
 
-- **P4:** actual Safari/headset/iPhone/PWA and interruption acceptance, downloaded-session offline completion, quota/eviction/transfer hardening and trusted phone access. AUDIO-01 remains open; its investigation is not restarted here.
+- **P4:** connected recording/session reliability, minimal server-error/retry handling, Safari/headset/iPhone interruption acceptance and trusted phone access. AUDIO-01 remains open; its investigation is not restarted here.
 - **P5:** reviewed real content, source adapters, add-time LLM cue preparation, explanations/search metadata and multilingual reference speech. Preserve source read-only boundaries and budget/semantic-review requirements.
 - **P6:** private hosting/access, measured resources, consistent backups and restore/upgrade/rollback evidence.
 

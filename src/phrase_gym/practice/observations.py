@@ -109,7 +109,7 @@ class ObservationProcessor:
                 session,
                 evidence,
                 queue,
-                Advancement(receipt.occurred_at, event.defer_repairs),
+                Advancement(receipt.occurred_at, bool(event.legacy_deferral)),
             )
 
     @staticmethod

@@ -3,11 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import './style.css'
 import './practice.css'
-import { registerApp } from './pwa'
+import { retireLegacyClient } from './legacyClient'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [{ path: '/:pathMatch(.*)*', component: { template: '<span />' } }],
 })
-createApp(App).use(router).mount('#app')
-void registerApp()
+void retireLegacyClient().finally(() => createApp(App).use(router).mount('#app'))

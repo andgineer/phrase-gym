@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { expect } from '@playwright/test'
-import { test } from './offline-fixtures'
-import { downloadSession } from './offline-actions'
+import { test } from './connection-fixtures'
+import { startSession } from './session-actions'
 import { readTake, takeFixture, writeTake } from './take-race-helpers'
 
 test.beforeEach(async ({ request }) => {
@@ -14,7 +14,7 @@ for (const size of [0, 2048]) {
     page,
     request,
   }) => {
-    const id = await downloadSession(page)
+    const id = await startSession(page)
     const { take, bytes } = await takeFixture(request, id)
     await writeTake(page, take, bytes.slice(0, size))
     await page.evaluate(
@@ -75,7 +75,7 @@ test('an unresponsive live writer lease prevents partial recovery and upload in 
   context,
   request,
 }) => {
-  const id = await downloadSession(page)
+  const id = await startSession(page)
   const writer = await context.newPage()
   await writer.goto('/learn/en')
   const { take, bytes } = await takeFixture(request, id)
@@ -146,7 +146,7 @@ test('a lost ownership protocol cannot let acknowledgement deletion erase newer 
   page,
   request,
 }) => {
-  const id = await downloadSession(page)
+  const id = await startSession(page)
   const { take, bytes } = await takeFixture(request, id)
   await request.post('/_test/hold-recording-ack')
   await writeTake(page, { ...take, complete: true, status: 'pending' }, bytes)
@@ -195,7 +195,7 @@ test('legacy captures without exclusive ownership stay retained with compatible 
   page,
   request,
 }) => {
-  const id = await downloadSession(page)
+  const id = await startSession(page)
   const { take, bytes } = await takeFixture(request, id)
   const { capture_lease: _lease, ...legacy } = take
   await writeTake(page, legacy, bytes.slice(0, 2048))
@@ -215,7 +215,7 @@ test('new captures use a separate journal namespace that an older unleased recov
   page,
   request,
 }) => {
-  const id = await downloadSession(page)
+  const id = await startSession(page)
   const { take, bytes } = await takeFixture(request, id)
   await writeTake(page, take, bytes.slice(0, 2048))
   const legacyKeys = await page.evaluate(

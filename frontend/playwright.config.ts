@@ -6,7 +6,8 @@ export default defineConfig({
   workers: 1,
   use: { baseURL: 'http://127.0.0.1:8941', trace: 'retain-on-failure' },
   webServer: [8941, 8942].map((port) => ({
-    command: `../.venv/bin/python ../tests/browser_server.py --port ${port}`,
+    command: `.venv/bin/python -m tests.browser_server --port ${port}`,
+    cwd: '..',
     url: `http://127.0.0.1:${port}/api/v1/settings`,
     reuseExistingServer: false,
   })),

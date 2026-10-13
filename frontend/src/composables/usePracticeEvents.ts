@@ -1,11 +1,8 @@
 import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
-import { api, ApiError } from '../api'
+import { api, ApiError, requireServer, serverUnavailable } from '../api'
 import { journalCheckpoint, journalDelete, journalEntries, journalPut } from '../practiceJournal'
 import { sessionCard } from '../practiceState'
-import { localAttemptId, projectEvent } from '../offlineProjection'
-import { verifyPack } from '../sessionPack'
-import { restoreDeviceStatus } from '../deviceSessionState'
 import type {
   PendingEvent,
   PracticeBatchReceipt,
@@ -20,32 +17,9 @@ export function usePracticeEvents(
   available: () => boolean,
 ) {
   const pending = ref<PendingEvent[]>([])
-  const offline = ref(false)
   let flushing: Promise<void> | null = null
   let actions = Promise.resolve()
-  const card = computed(() =>
-    session.value
-      ? sessionCard(
-          session.value,
-          pending.value.filter((e) => e.sessionId === session.value?.id).map((e) => e.event),
-        )
-      : null,
-  )
-  async function project(state: PracticeSession, isCurrent = () => true) {
-    if (state.status === 'superseded' || state.status === 'completed') {
-      if (isCurrent()) accept(state)
-      return state
-    }
-    let projected = state
-    const events = pending.value
-      .filter((e) => e.sessionId === state.id)
-      .sort((a, b) => a.event.sequence - b.event.sequence)
-    for (const { event } of events)
-      projected = projectEvent(projected, event, await localAttemptId(state.id, event.step))
-    projected = await restoreDeviceStatus(projected)
-    if (isCurrent()) accept(projected)
-    return projected
-  }
+  const card = computed(() => (session.value ? sessionCard(session.value) : null))
   async function flush() {
     if (flushing) return flushing
     flushing = (async () => {
@@ -86,8 +60,7 @@ export function usePracticeEvents(
           const checkpoint = await journalCheckpoint(receipt.session)
           await journalDelete(entry.key)
           pending.value = pending.value.filter((e) => e.event.id !== entry.value.event.id)
-          await project(checkpoint)
-          offline.value = false
+          accept(checkpoint)
         }
       }
       window.dispatchEvent(new Event('phrase-gym:receipts'))
@@ -107,6 +80,7 @@ export function usePracticeEvents(
   ): Promise<PracticeInput> {
     const origin = session.value
     const step = origin?.cursor
+    const eventId = crypto.randomUUID()
     const operation = actions.then(async () => {
       if (!available() && !['failure', 'capture_complete'].includes(kind))
         throw new Error('Wait for session restoration before choosing a new action')
@@ -114,44 +88,33 @@ export function usePracticeEvents(
       if (state?.id !== origin?.id || state?.cursor !== step)
         throw new Error('The card changed; repeat your choice on the current card')
       if (!state || state.status !== 'active') throw new Error('Resume the session first')
-      const downloaded = Boolean(await verifyPack(state.id))
+      if (!['failure', 'capture_complete'].includes(kind)) requireServer()
       const sequence =
         Math.max(
           state.last_sequence,
           ...pending.value.filter((e) => e.sessionId === state.id).map((e) => e.event.sequence),
         ) + 1
       const event: PracticeInput = {
-        id: crypto.randomUUID(),
+        id: eventId,
         sequence,
         step: state.cursor,
         occurred_at: new Date().toISOString(),
         kind,
         modality: 'self_report',
         ...options,
-        defer_repairs: downloaded && kind === 'rate',
       }
       await journalPut(`event:${event.id}`, { sessionId: state.id, event })
       pending.value.push({ sessionId: state.id, event })
-      try {
-        await flush()
-      } catch (cause) {
-        if (
-          !downloaded ||
-          !(cause instanceof TypeError || (cause instanceof ApiError && cause.status >= 500)) ||
-          !pending.value.some((e) => e.event.id === event.id)
-        )
-          throw cause
-        offline.value = true
-        accept(projectEvent(state, event, await localAttemptId(state.id, event.step)))
-        error.value = ''
-      }
+      if (serverUnavailable.value) return event
+      await flush()
       return event
     })
     actions = operation.then(() => {}).catch(() => {})
     return operation.catch((cause) => {
+      if (pending.value.some((entry) => entry.event.id === eventId)) serverUnavailable.value = true
       error.value = String(cause)
       throw cause
     })
   }
-  return { pending, card, flush, action, offline, project }
+  return { pending, card, flush, action }
 }

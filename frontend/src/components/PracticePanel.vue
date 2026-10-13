@@ -4,7 +4,7 @@ import { usePracticeActions } from '../composables/usePracticeActions'
 import type { Language } from '../api'
 import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
-import SessionDownload from './SessionDownload.vue'
+import { serverUnavailable, connectionRetrying } from '../api'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
   pt: PracticeMessages
@@ -54,22 +54,9 @@ const {
       </button>
       <button @click="emit('leave')">{{ pt.back }}</button>
     </div>
-    <SessionDownload
-      :engine="engine"
-      :pt="pt"
-      :capture-busy="capturing || requesting || processing"
-      :pending-takes="pendingTakes"
-      @retry="retry"
-    />
     <div v-if="session.status === 'completed' || session.status === 'superseded'" class="card">
       <h1 tabindex="-1">
-        {{
-          session.status === 'completed'
-            ? engine.pending.value.length
-              ? pt.completePending
-              : pt.complete
-            : pt.results
-        }}
+        {{ session.status === 'completed' ? pt.complete : pt.results }}
       </h1>
       <div v-if="session.manifest.dialogue" :lang="session.manifest.language">
         <p v-for="(turn, index) in session.manifest.dialogue.content.turns" :key="index">
@@ -113,7 +100,12 @@ const {
         <strong>{{ turn.speaker }}:</strong> {{ turn.text }}
       </p>
       <button
-        :disabled="engine.restoring.value || engine.offlineUnavailable.value"
+        :disabled="
+          engine.restoring.value ||
+          serverUnavailable ||
+          connectionRetrying ||
+          engine.pending.value.length > 0
+        "
         @click="beginDialogue"
       >
         {{ pt.rehearse }}
@@ -137,7 +129,8 @@ const {
                 ratingBusy ||
                 !ready ||
                 engine.restoring.value ||
-                engine.offlineUnavailable.value
+                serverUnavailable ||
+                connectionRetrying
               "
               @click="media.audio.play(`/api/v1/media/${turn.audio_id}`)"
             >
@@ -153,7 +146,8 @@ const {
             ratingBusy ||
             !ready ||
             engine.restoring.value ||
-            engine.offlineUnavailable.value
+            serverUnavailable ||
+            connectionRetrying
           "
           @click="isolate"
         >
@@ -171,7 +165,12 @@ const {
         :processing="processing"
         :playing="playing"
         :rating-busy="
-          ratingBusy || !ready || engine.restoring.value || engine.offlineUnavailable.value
+          ratingBusy ||
+          !ready ||
+          engine.restoring.value ||
+          serverUnavailable ||
+          connectionRetrying ||
+          engine.pending.value.length > 0
         "
         :has-take="Boolean(latestUrl)"
         @control="media.control"

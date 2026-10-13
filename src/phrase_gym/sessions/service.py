@@ -1,13 +1,13 @@
 import json
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import cast
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from phrase_gym.contracts.practice import AttemptEvidence, EventReceipt, PracticeInput
+from phrase_gym.contracts.practice import AttemptEvidence
 from phrase_gym.contracts.sessions import (
     PracticeSession,
     SessionManifest,
@@ -16,8 +16,7 @@ from phrase_gym.contracts.sessions import (
     SessionTransition,
 )
 from phrase_gym.errors import DomainError
-from phrase_gym.practice.support import support_times
-from phrase_gym.practice.tables import AttemptRow, PracticeEvent
+from phrase_gym.practice.tables import AttemptRow
 from phrase_gym.serialization import canonical_json
 from phrase_gym.sessions.planning import SessionPlanner
 from phrase_gym.sessions.queue import initial_queue
@@ -32,7 +31,6 @@ class SessionService:
     @staticmethod
     def model(row: SessionRow, transaction: Session) -> PracticeSession:
         manifest = SessionManifest.model_validate_json(row.manifest)
-        earliest = datetime.fromisoformat(row.created_at) - timedelta(minutes=5)
         return PracticeSession(
             id=UUID(row.id),
             status=cast(SessionStatus, row.status),
@@ -53,23 +51,6 @@ class SessionService:
                     .order_by(AttemptRow.step),
                 )
             ],
-            dialogue_exposures=[
-                EventReceipt.model_validate_json(event.receipt).occurred_at
-                for event in transaction.scalars(
-                    select(PracticeEvent)
-                    .where(PracticeEvent.session_id == row.id)
-                    .order_by(PracticeEvent.sequence),
-                )
-                if PracticeInput.model_validate_json(event.payload).kind == "dialogue_exposure"
-            ],
-            support_exposures={
-                target.phrase.id: [
-                    time
-                    for time in support_times(transaction, str(target.phrase.id))
-                    if time >= earliest
-                ]
-                for target in manifest.targets
-            },
         )
 
     @staticmethod

@@ -134,7 +134,6 @@ test('an authoritative card change releases old capture without replay on the ne
           kind: 'rate',
           rating: 'recalled',
           modality: 'self_report',
-          defer_repairs: true,
         },
       ],
     },

@@ -1,5 +1,7 @@
 # Fresh Sol 6.1 P4 review loop — 2026-10-13
 
+**Historical offline-era rounds 1–4. The [online-only decision](../../decision-online-only.md) supersedes offline requirements and earlier review-stop limits. One new round 5 is authorized after the correction; its evidence will be separate.**
+
 The user authorized P4 implementation in a separate Sol 6.1 chat and fresh Sol 6.1 review/fix rounds. Each reviewer starts a new local Phrase Gym chat, independently reads repository instructions/specs, and performs a read-only review. No forks or reused reviewer histories establish a fresh round. Reviews target complete P4 behavior; actual-device dependencies are separated from fixable findings. At most three rounds are authorized before renewed confirmation if actionable findings remain.
 
 Implementation commit: **`5d62534`** on main, from baseline `4db59bf`. The ordered implementation gate passed using Python 3.13.13 and Node 24.19.0 LTS: all hooks/zero pyrefly errors, 111 Python tests, 11 client tests and 196 browser checks (98 scenarios in both Chromium and WebKit, no skips). App-build passed and the wheel contains the offline worker, manifest and installation icons. See [core evidence](p4-core-2026-10-13.md).

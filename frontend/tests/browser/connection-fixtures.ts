@@ -27,7 +27,7 @@ export const test = base.extend<{ connection: Connection; journalDiagnostics: vo
                   resolve(rows)
                   return
                 }
-                if (/^(event:|session:|paused:)/.test(String(cursor.key)))
+                if (/^(event:|session:|transition:)/.test(String(cursor.key)))
                   rows.push({ key: cursor.key, value: cursor.value })
                 cursor.continue()
               }
@@ -83,7 +83,7 @@ export const test = base.extend<{ connection: Connection; journalDiagnostics: vo
     }
   },
   context: async ({ playwright, browserName, connection }, use) => {
-    const profile = await mkdtemp(join(tmpdir(), 'phrase-gym-offline-'))
+    const profile = await mkdtemp(join(tmpdir(), 'phrase-gym-connection-'))
     const context = await playwright[browserName].launchPersistentContext(profile, {
       headless: true,
       baseURL: connection.url,

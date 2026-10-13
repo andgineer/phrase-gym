@@ -46,8 +46,8 @@ for (const status of [200, 503]) {
     await expect(page.getByRole('heading', { name: 'Make it yours' })).toHaveCount(0)
     release()
     if (status === 503) {
-      await expect(page.getByRole('alert')).toContainText('Settings unavailable')
-      await page.getByRole('alert').getByRole('button', { name: 'Retry' }).click()
+      await expect(page.getByTestId('connection-required')).toBeVisible()
+      await page.getByTestId('connection-required').getByRole('button', { name: 'Retry' }).click()
     }
     await expect(page.getByRole('heading', { name: 'Make it yours' })).toBeVisible()
     await page.getByLabel('Your native language', { exact: true }).selectOption('en')

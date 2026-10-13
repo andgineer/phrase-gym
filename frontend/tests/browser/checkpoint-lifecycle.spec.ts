@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from './fixtures'
 
-test('a delayed session read cannot overwrite an acknowledged evidence checkpoint', async ({
+test('session restoration waits for pending acknowledgement before reading the server', async ({
   page,
   request,
 }) => {
@@ -53,9 +53,10 @@ test('a delayed session read cannot overwrite an acknowledged evidence checkpoin
   await page.getByRole('button', { name: 'Show answer', exact: true }).click()
   await expect.poll(() => writing).toBe(true)
   await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await expect.poll(() => reading).toBe(true)
+  expect(reading).toBe(false)
   try {
     releaseWrite()
+    await expect.poll(() => reading).toBe(true)
     await expect.poll(async () => (await checkpoint()).last_sequence).toBe(2)
     releaseRead()
     await expect(page.getByRole('button', { name: 'Resume session', exact: true })).toBeEnabled()
@@ -108,9 +109,7 @@ test('a foreground read blocks dialogue introduction and detour until restoratio
         exact: true,
       })
       await expect(action).toBeDisabled()
-      await expect(
-        page.getByRole('button', { name: 'Download session', exact: true }),
-      ).toBeDisabled()
+      await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeDisabled()
       await action.evaluate((button: HTMLButtonElement) => button.click())
       expect((await (await request.get(`/api/v1/sessions/${state.id}`)).json()).last_sequence).toBe(
         before.last_sequence,

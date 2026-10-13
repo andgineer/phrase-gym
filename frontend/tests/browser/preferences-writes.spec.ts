@@ -48,7 +48,8 @@ for (const status of [200, 503]) {
     expect(writes).toBe(1)
     release()
     if (status === 503) {
-      await expect(page.getByRole('alert')).toContainText('Save unavailable')
+      await expect(page.getByTestId('connection-required')).toBeVisible()
+      await page.getByTestId('connection-required').getByRole('button', { name: 'Retry' }).click()
       await expect(save).toBeEnabled()
       await expect(page.getByLabel('Your native language', { exact: true })).toHaveValue('en')
       await save.click()

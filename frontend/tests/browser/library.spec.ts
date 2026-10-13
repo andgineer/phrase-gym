@@ -133,7 +133,7 @@ test('reference exposure retries retain an immutable event through reload', asyn
   )
   await page.goto('/learn/en?q=greetings')
   await page.getByRole('link', { name: /How has your day/ }).click()
-  await expect(page.getByRole('alert')).toContainText('Could not save this reference exposure')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   const before = await page.evaluate(() =>
     Object.keys(localStorage).filter((k) => k.startsWith('phrase-gym.reference-exposure.v1.')),
   )

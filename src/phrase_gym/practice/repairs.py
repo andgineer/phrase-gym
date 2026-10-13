@@ -17,7 +17,7 @@ INTERVENING_TARGETS = 2
 @dataclass
 class Advancement:
     occurred_at: datetime
-    defer_repairs: bool = False
+    historical_queue: bool = False
 
 
 def advance(
@@ -27,7 +27,7 @@ def advance(
     queue: list[SessionStep],
     timing: Advancement,
 ) -> None:
-    now, defer_repairs = timing.occurred_at, timing.defer_repairs
+    now, historical_queue = timing.occurred_at, timing.historical_queue
     if session.status in ("completed", "superseded"):
         return
     pending = json.loads(session.repairs)
@@ -38,7 +38,7 @@ def advance(
         in ("eligible", "repair", "supported", "supported_learning_check")
         and (evidence.rating == "not_yet" or (evidence.original and evidence.original.supported))
         and extra_count < MAX_REPAIRS
-        and not defer_repairs
+        and not historical_queue
     ):
         pending.append(
             {
@@ -55,7 +55,7 @@ def advance(
     attempts = [AttemptEvidence.model_validate_json(r.payload) for r in evidence_rows]
     retained = []
     for repair in pending:
-        if defer_repairs:
+        if historical_queue:
             retained.append(repair)
             continue
         others = {

@@ -11,7 +11,7 @@ from tests.integration.session_helpers import start
 @pytest.mark.parametrize("source", ["lookup", "reference"])
 @pytest.mark.parametrize("before_response", [False, True])
 @pytest.mark.parametrize("scheduled", [False, True])
-def test_late_outbox_support_ends_at_original_response(
+def test_delayed_receipt_support_ends_at_original_response(
     client, package, source, before_response, scheduled
 ):
     helper = session_fixture(client, package)
@@ -62,7 +62,6 @@ def test_late_outbox_support_ends_at_original_response(
         "rate",
         rating="recalled",
         occurred_at=(base + timedelta(seconds=6)).isoformat(),
-        defer_repairs=True,
     )
     receipt = result["receipts"][0]
     assert result["session"]["attempts"][0]["original"] == original
@@ -87,9 +86,6 @@ def test_delayed_dialogue_uses_script_occurrence_before_response_not_receive_tim
     _, result = apply(
         client, session, "dialogue_exposure", occurred_at=(NOW + timedelta(seconds=1)).isoformat()
     )
-    expected = [(NOW + timedelta(seconds=1)).isoformat().replace("+00:00", "Z")]
-    assert result["session"]["dialogue_exposures"] == expected
-    assert client.get(f"/api/v1/sessions/{session['id']}").json()["dialogue_exposures"] == expected
     _, result = apply(
         client,
         result["session"],
@@ -110,15 +106,12 @@ def test_delayed_dialogue_uses_script_occurrence_before_response_not_receive_tim
         "rate",
         rating="recalled",
         occurred_at=(NOW + timedelta(seconds=5)).isoformat(),
-        defer_repairs=True,
     )
     assert result["receipts"][0]["eligibility_reason"] == "supported_learning_check"
 
 
 @pytest.mark.parametrize("elapsed", [timedelta(minutes=4), timedelta(minutes=6)])
-def test_dialogue_checkpoint_retains_exposure_and_expires_for_later_target(
-    client, package, elapsed
-):
+def test_script_exposure_expires_for_later_target(client, package, elapsed):
     target = package["targets"][2]
     package["dialogues"][0]["turns"].append(
         {"speaker": "Learner", "text": target["text"], "target_source_id": target["source_id"]}
@@ -134,18 +127,13 @@ def test_dialogue_checkpoint_retains_exposure_and_expires_for_later_target(
     assert first["supported"]
     clocks(client, NOW + elapsed)
     time = (NOW + elapsed).isoformat()
-    _, result = apply(
-        client, result["session"], "rate", rating="recalled", defer_repairs=True, occurred_at=time
-    )
+    _, result = apply(client, result["session"], "rate", rating="recalled", occurred_at=time)
     _, result = apply(client, result["session"], "present", occurred_at=time)
     expected_support = elapsed <= timedelta(minutes=5)
     assert result["session"]["attempts"][1]["supported"] is expected_support
-    body, result = apply(
-        client, result["session"], "rate", rating="recalled", defer_repairs=True, occurred_at=time
-    )
+    body, result = apply(client, result["session"], "rate", rating="recalled", occurred_at=time)
     assert result["session"]["attempts"][1]["original"]["supported"] is expected_support
     saved = client.get(f"/api/v1/sessions/{session['id']}").json()
-    assert saved["dialogue_exposures"] == [NOW.isoformat().replace("+00:00", "Z")]
     assert saved["attempts"][0]["original"]["supported"]
     replay = client.post(f"/api/v1/sessions/{session['id']}/events", json={"events": [body]})
     assert replay.json()["receipts"] == result["receipts"]

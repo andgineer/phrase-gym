@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import type { CardState } from '../reducer'
+import type { CardState } from '../practiceState'
 import type { PlannedTarget, RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
 import type { Language } from '../api'

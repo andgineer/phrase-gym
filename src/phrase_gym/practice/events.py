@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from phrase_gym.contracts.practice import EventBatch, EventReceipt, PracticeInput
-from phrase_gym.contracts.sessions import PracticeBatchReceipt
+from phrase_gym.contracts.sessions import PracticeBatchReceipt, SessionManifest
 from phrase_gym.errors import DomainError
 from phrase_gym.practice.evidence import attempt_id
 from phrase_gym.practice.observations import ObservationProcessor
@@ -57,12 +57,18 @@ class PracticeService:
         session: SessionRow,
         event: PracticeInput,
     ) -> EventReceipt:
-        payload = canonical_json(event.model_dump_json())
+        payload = canonical_json(event.retained_payload())
         existing = transaction.get(PracticeEvent, str(event.id))
         if existing:
             if existing.payload != payload or existing.session_id != session.id:
                 raise DomainError("Event ID already has a different payload or session", 409)
             return EventReceipt.model_validate_json(existing.receipt)
+        if (
+            event.legacy_deferral
+            and SessionManifest.model_validate_json(session.manifest).planner_version
+            == "due-new-v3-online"
+        ):
+            raise DomainError("Retired rating options cannot apply to an online-only session", 422)
         if event.sequence != session.last_sequence + 1:
             raise DomainError(f"Expected event sequence {session.last_sequence + 1}", 409)
         if event.step != session.cursor or event.step >= len(json.loads(session.queue)):

@@ -1,15 +1,14 @@
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import datetime
-from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.staticfiles import StaticFiles
 
 from phrase_gym.api import exposures, imports, library, media, practice, sessions, settings
 from phrase_gym.api.boundary import LocalBoundary
+from phrase_gym.api.client import mount_client
 from phrase_gym.clock import utc_now
 from phrase_gym.config import Config
 from phrase_gym.content.catalog import LibraryService
@@ -70,6 +69,7 @@ def create_app(config: Config | None = None, clock: Callable[[], datetime] = utc
     app = FastAPI(title="Phrase Gym", version="1.0.0", lifespan=lifespan)
     app.add_middleware(LocalBoundary, allowed_origins=runtime.allowed_origins)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(runtime.allowed_hosts))
+
     for routes in (settings, imports, library, exposures, media, sessions, practice):
         app.include_router(routes.router)
 
@@ -77,39 +77,6 @@ def create_app(config: Config | None = None, clock: Callable[[], datetime] = utc
     async def domain_error(_request: Request, error: DomainError):
         return JSONResponse({"detail": str(error)}, status_code=error.status)
 
-    if runtime.client_dir and (runtime.client_dir / "index.html").is_file():
-        assets = runtime.client_dir / "assets"
-        if assets.is_dir():
-            app.mount("/assets", StaticFiles(directory=assets), name="assets")
-
-        @app.get("/sw.js", include_in_schema=False)
-        @app.get("/manifest.webmanifest", include_in_schema=False)
-        @app.get("/icon.svg", include_in_schema=False)
-        @app.get("/icon-192.png", include_in_schema=False)
-        @app.get("/icon-512.png", include_in_schema=False)
-        @app.get("/apple-touch-icon.png", include_in_schema=False)
-        def offline_asset(request: Request):
-            return FileResponse(
-                Path(runtime.client_dir or ".") / request.url.path.lstrip("/"),
-                headers={"Cache-Control": "no-cache"},
-            )
-
-        @app.get("/", include_in_schema=False)
-        @app.get("/index.html", include_in_schema=False)
-        @app.get("/learn", include_in_schema=False)
-        @app.get("/learn/{client_path:path}", include_in_schema=False)
-        def client():
-            return FileResponse(
-                Path(runtime.client_dir or ".") / "index.html",
-                headers={"Cache-Control": "no-cache"},
-            )
-    else:
-
-        @app.get("/", include_in_schema=False)
-        def no_client():
-            return JSONResponse(
-                {"detail": "Build the client and pass --client-dir frontend/dist"},
-                503,
-            )
+    mount_client(app, runtime.client_dir)
 
     return app

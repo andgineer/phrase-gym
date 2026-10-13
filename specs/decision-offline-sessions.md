@@ -1,4 +1,7 @@
-# Downloaded prepared sessions
+# Superseded: downloaded prepared sessions
+
+**Historical design, superseded on 2026-10-13 by the explicit [online-only decision](decision-online-only.md). None of the offline capabilities below remain accepted requirements. Preserve this decision record as history; do not implement or restore it.**
+
 
 2026-10-13. P4 extends the immutable P3 session/event protocol. This is prepared-session completion, including prepared dialogues, rather than offline library browsing, generation, imports or session planning.
 

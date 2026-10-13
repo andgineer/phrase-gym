@@ -86,7 +86,7 @@ test('lost rating acknowledgement is retried with the same event after reload', 
     await route.continue()
   })
   await page.getByRole('button', { name: 'Recalled' }).click()
-  await expect(page.getByRole('alert').first()).toContainText('Acknowledgement lost')
+  await expect(page.getByTestId('connection-required')).toBeVisible()
   await page.reload()
   await expect.poll(() => retryId).toBe(lostId)
   await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()

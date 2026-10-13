@@ -2666,11 +2666,6 @@
               }
             ],
             "title": "Reason"
-          },
-          "defer_repairs": {
-            "type": "boolean",
-            "title": "Defer Repairs",
-            "default": false
           }
         },
         "additionalProperties": false,
@@ -2740,28 +2735,6 @@
             },
             "type": "array",
             "title": "Attempts"
-          },
-          "dialogue_exposures": {
-            "items": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "type": "array",
-            "title": "Dialogue Exposures"
-          },
-          "support_exposures": {
-            "additionalProperties": {
-              "items": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "type": "array"
-            },
-            "propertyNames": {
-              "format": "uuid"
-            },
-            "type": "object",
-            "title": "Support Exposures"
           }
         },
         "additionalProperties": false,
@@ -3000,10 +2973,11 @@
             "type": "string",
             "enum": [
               "due-new-v1",
-              "due-new-v2"
+              "due-new-v2",
+              "due-new-v3-online"
             ],
             "title": "Planner Version",
-            "default": "due-new-v2"
+            "default": "due-new-v3-online"
           },
           "policy_version": {
             "type": "string",

@@ -1,4 +1,12 @@
 import type { components } from './api.generated'
+import { ref } from 'vue'
+
+export const serverUnavailable = ref(false)
+export const connectionRetrying = ref(false)
+export function requireServer() {
+  if (serverUnavailable.value || connectionRetrying.value)
+    throw new Error('Server connection required. Retry before continuing.')
+}
 
 export type Settings = components['schemas']['Settings']
 export type Language = NonNullable<Settings['native_language']>
@@ -18,11 +26,19 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  })
+  let response: Response
+  try {
+    response = await fetch(`/api/v1${path}`, {
+      ...options,
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+    })
+  } catch (cause) {
+    serverUnavailable.value = true
+    throw cause
+  }
   if (!response.ok) {
+    if (response.status >= 500) serverUnavailable.value = true
     const error = await response.json().catch(() => null)
     throw new ApiError(
       typeof error?.detail === 'string' ? error.detail : `Request failed (${response.status})`,

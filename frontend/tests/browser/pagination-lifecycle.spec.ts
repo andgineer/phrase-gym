@@ -58,9 +58,11 @@ for (const view of ['lookup', 'lesson', 'lessons']) {
       await more.click()
       await expect.poll(() => requests).toBe(1)
       if (outcome === 'retry') {
-        await expect(page.getByRole('alert')).toContainText('Page unavailable')
+        await expect(page.getByTestId('connection-required')).toBeVisible()
         await expect(rows).toHaveCount(50)
-        await expect(more).toBeEnabled()
+        await expect(more).toBeHidden()
+        await page.getByTestId('connection-required').getByRole('button', { name: 'Retry' }).click()
+        await expect(rows).toHaveCount(50)
         await more.click()
         await expect(rows).toHaveCount(100)
         if (view !== 'lessons') {

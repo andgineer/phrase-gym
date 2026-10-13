@@ -8,7 +8,7 @@ from tests.integration.practice_helpers import apply, clocks, session_fixture
 
 
 @pytest.mark.parametrize("kind", ["lookup", "answer", "explain", "reference", "capture_complete"])
-def test_checkpoint_support_uses_exposure_time_not_finalization(client, package, kind):
+def test_first_original_support_is_not_inferred_from_finalization(client, package, kind):
     session = session_fixture(client, package)
     _, result = apply(client, session, "present")
     state = result["session"]
@@ -33,16 +33,15 @@ def test_checkpoint_support_uses_exposure_time_not_finalization(client, package,
             state = result["session"]
         _, result = apply(client, state, kind, occurred_at=exposed.isoformat())
         state = result["session"]
-    clocks(client, NOW + timedelta(minutes=6))
+    clocks(client, NOW + timedelta(minutes=7))
     _, result = apply(
         client,
         state,
         "rate",
         rating="recalled",
-        defer_repairs=True,
-        occurred_at=(NOW + timedelta(minutes=6)).isoformat(),
+        occurred_at=(NOW + timedelta(minutes=7)).isoformat(),
     )
     snapshot = client.get(f"/api/v1/sessions/{session['id']}").json()
-    assert snapshot["support_exposures"][target] == [exposed.isoformat().replace("+00:00", "Z")]
-    assert snapshot["support_exposures"] == result["session"]["support_exposures"]
-    assert all(not times for id, times in snapshot["support_exposures"].items() if id != target)
+    original = snapshot["attempts"][0]["original"]
+    assert original["supported"] is (kind in ("explain", "reference"))
+    assert snapshot["attempts"][0]["original"] == result["session"]["attempts"][0]["original"]

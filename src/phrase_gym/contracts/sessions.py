@@ -30,7 +30,7 @@ class PlannedTarget(Contract):
 
 class SessionManifest(Contract):
     schema_version: Literal[1] = 1
-    planner_version: Literal["due-new-v1", "due-new-v2"] = "due-new-v2"
+    planner_version: Literal["due-new-v1", "due-new-v2", "due-new-v3-online"] = "due-new-v3-online"
     policy_version: str = "fsrs-6.3.2-retention90-v1"
     language: Language
     lesson_id: UUID | None = None
@@ -57,8 +57,6 @@ class PracticeSession(Contract):
     last_sequence: int
     queue: list[SessionStep]
     attempts: list[AttemptEvidence]
-    dialogue_exposures: list[datetime] = Field(default_factory=list)
-    support_exposures: dict[UUID, list[datetime]] = Field(default_factory=dict)
 
 
 class SessionTransition(Contract):

@@ -1,14 +1,14 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { ref } from 'vue'
 import { usePreferences } from '../src/composables/usePreferences'
+import { serverUnavailable, connectionRetrying } from '../src/api'
 import { rememberLanguage, restoredLanguage } from '../src/learningLanguage'
 
-vi.mock('../src/practiceJournal', () => ({
-  journalPut: vi.fn(async () => {}),
-  journalEntries: vi.fn(async () => []),
-}))
-
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  serverUnavailable.value = false
+  connectionRetrying.value = false
+})
 
 test('device language validates storage and tolerates failed reads and writes', () => {
   const storage = { getItem: vi.fn(() => 'sr'), setItem: vi.fn() }
@@ -26,7 +26,7 @@ test('device language validates storage and tolerates failed reads and writes', 
   expect(() => rememberLanguage('en')).not.toThrow()
 })
 
-test('simultaneous Settings submissions send one immutable payload and failure allows retry', async () => {
+test('simultaneous Settings submissions send one immutable payload and a server error blocks new saves until retry', async () => {
   let release!: (response: Response) => void
   const fetch = vi.fn(
     (_input: RequestInfo | URL, _init?: RequestInit) =>
@@ -50,6 +50,13 @@ test('simultaneous Settings submissions send one immutable payload and failure a
   await expect(pending).rejects.toThrow('Unavailable')
   expect(preferences.savingSettings.value).toBe(false)
   expect(preferences.configuring.value).toBe(true)
+  await expect(preferences.save()).rejects.toThrow('Server connection required')
+  expect(fetch).toHaveBeenCalledTimes(1)
+  serverUnavailable.value = false
+  const refresh = preferences.load(true)
+  release(new Response('{"native_language":"ru","ui_language_mode":"native"}'))
+  await refresh
+  expect(preferences.native.value).toBe('de')
   const retry = preferences.save()
   release(new Response('{"native_language":"de","ui_language_mode":"native"}'))
   expect(await retry).toBe(true)

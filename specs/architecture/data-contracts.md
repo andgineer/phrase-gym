@@ -127,13 +127,11 @@ Persist that envelope before reporting it sent; retry delivery after restarts us
 
 The adapter should be a new output destination, not a Phrase Gym implementation of an Anki-shaped `CardStore` that creates sibling cards. Provide a manual package export/import path first. The later switch from Anki output to Phrase Gym is a user-visible rollout action; do not silently dual-send or remove existing notes. Existing Anki collection migration is separate, unplanned work.
 
-## Prepared-session cache
+## Connected session journal
 
-A download manifest lists the schema version, app compatibility, immutable content/cue revisions and asset hashes/sizes. Mark a pack ready only after required assets are verified. A failed download leaves no misleading offline-ready state.
+The live server owns session progress, support, repairs and results. IndexedDB retains acknowledged checkpoints and initiated event/take/start/transition payloads; small lookup exposures use separate localStorage keys. Both retain original IDs/payloads for retry, without offline restoration or local advancement. A receipt is authoritative; audio is removed only after matching ID/hash/size/completeness acknowledgement. Quota failures retain available volatile audio with visible guidance to keep the tab open.
 
-IndexedDB holds the session checkpoint, immutable attempts pending acknowledgement and every captured recording awaiting database acknowledgement. Cache Storage holds the app shell and downloaded model audio. Quota failure must be visible; never discard an unacknowledged attempt or pending recording just to make cache space. Local copies may be evicted after durable database storage is verified; that does not delete the retained recording from the database. Evict replaceable model assets first. Sync on foreground/resume/retry; do not require background sync support.
-
-Content is immutable within a session. Service-worker updates wait until the session is checkpointed or ended; keep compatible assets for the active pack. A server schema change that cannot read an old event must return a recoverable incompatibility response, not clear the outbox.
+No downloads, app shell/media caches or routine service-worker registration remain. The previous worker URL serves a bounded retirement worker; cleanup deletes only owned caches and obsolete pack/display fallback keys, preserving pending evidence and acknowledged history. It never automatically reloads a live recording. A narrow decoder retains historical event payload identity; new session contracts omit repair deferral. See the [online-only decision](../decision-online-only.md).
 
 ## Media and jobs
 
