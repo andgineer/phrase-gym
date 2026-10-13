@@ -15,7 +15,10 @@ const { downloaded, busy: downloading, progress, error } = pack
 </script>
 <template>
   <div class="download-controls">
-    <button :disabled="downloading || captureBusy || engine.busy.value" @click="pack.download">
+    <button
+      :disabled="downloading || captureBusy || engine.busy.value || engine.restoring.value"
+      @click="pack.download"
+    >
       {{ pt.download }}
     </button>
     <span v-if="downloading" role="status">{{ pt.downloading }} {{ progress }}</span>
@@ -30,7 +33,11 @@ const { downloaded, busy: downloading, progress, error } = pack
         engine.session.value &&
         ['paused', 'completed', 'superseded'].includes(engine.session.value.status)
       "
-      :disabled="Boolean(engine.pending.value.length || pendingTakes || captureBusy)"
+      :disabled="
+        Boolean(
+          engine.pending.value.length || pendingTakes || captureBusy || engine.restoring.value,
+        )
+      "
       @click="applyUpdate"
     >
       {{ pt.update }}

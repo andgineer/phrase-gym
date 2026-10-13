@@ -17,6 +17,7 @@ export function usePracticeEvents(
   session: Ref<PracticeSession | null>,
   error: Ref<string>,
   accept: (state: PracticeSession) => void,
+  available: () => boolean,
 ) {
   const pending = ref<PendingEvent[]>([])
   const offline = ref(false)
@@ -107,6 +108,8 @@ export function usePracticeEvents(
     const origin = session.value
     const step = origin?.cursor
     const operation = actions.then(async () => {
+      if (!available() && !['failure', 'capture_complete'].includes(kind))
+        throw new Error('Wait for session restoration before choosing a new action')
       const state = session.value
       if (state?.id !== origin?.id || state?.cursor !== step)
         throw new Error('The card changed; repeat your choice on the current card')

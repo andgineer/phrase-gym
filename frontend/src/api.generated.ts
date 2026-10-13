@@ -973,6 +973,10 @@ export interface components {
             attempts: components["schemas"]["AttemptEvidence"][];
             /** Dialogue Exposures */
             dialogue_exposures?: string[];
+            /** Support Exposures */
+            support_exposures?: {
+                [key: string]: string[];
+            };
         };
         /** PublishRequest */
         PublishRequest: {

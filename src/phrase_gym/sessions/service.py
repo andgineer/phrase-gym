@@ -1,6 +1,6 @@
 import json
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import cast
 from uuid import UUID
 
@@ -16,6 +16,7 @@ from phrase_gym.contracts.sessions import (
     SessionTransition,
 )
 from phrase_gym.errors import DomainError
+from phrase_gym.practice.support import support_times
 from phrase_gym.practice.tables import AttemptRow, PracticeEvent
 from phrase_gym.serialization import canonical_json
 from phrase_gym.sessions.planning import SessionPlanner
@@ -30,13 +31,15 @@ class SessionService:
 
     @staticmethod
     def model(row: SessionRow, transaction: Session) -> PracticeSession:
+        manifest = SessionManifest.model_validate_json(row.manifest)
+        earliest = datetime.fromisoformat(row.created_at) - timedelta(minutes=5)
         return PracticeSession(
             id=UUID(row.id),
             status=cast(SessionStatus, row.status),
             version=row.version,
             created_at=datetime.fromisoformat(row.created_at),
             updated_at=datetime.fromisoformat(row.updated_at),
-            manifest=SessionManifest.model_validate_json(row.manifest),
+            manifest=manifest,
             cursor=row.cursor or 0,
             last_sequence=row.last_sequence or 0,
             queue=json.loads(row.queue or "[]"),
@@ -59,6 +62,14 @@ class SessionService:
                 )
                 if PracticeInput.model_validate_json(event.payload).kind == "dialogue_exposure"
             ],
+            support_exposures={
+                target.phrase.id: [
+                    time
+                    for time in support_times(transaction, str(target.phrase.id))
+                    if time >= earliest
+                ]
+                for target in manifest.targets
+            },
         )
 
     @staticmethod

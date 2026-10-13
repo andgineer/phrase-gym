@@ -4,14 +4,8 @@ from uuid import uuid4
 import pytest
 
 from tests.integration.helpers import NOW
-from tests.integration.practice_helpers import apply, session_fixture
+from tests.integration.practice_helpers import apply, clocks, session_fixture
 from tests.integration.session_helpers import start
-
-
-def clocks(client, now):
-    client.app.state.sessions.clock = lambda: now
-    client.app.state.practice.clock = lambda: now
-    client.app.state.exposures.clock = lambda: now
 
 
 @pytest.mark.parametrize("source", ["lookup", "reference"])

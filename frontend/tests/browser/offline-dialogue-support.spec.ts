@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from './offline-fixtures'
+import { installEventClock, setEventClock } from './event-clock'
 
 for (const offlineStart of [false, true])
   for (const seconds of [240, 360])
@@ -13,20 +14,7 @@ for (const offlineStart of [false, true])
         data: { native_language: 'ru', ui_language_mode: 'learning' },
       })
       await request.post('/_test/two-target-dialogue')
-      await context.addInitScript(() => {
-        const NativeDate = Date
-        window.Date = new Proxy(NativeDate, {
-          construct(target, args) {
-            const offset = Number(localStorage.getItem('synthetic-clock-offset') ?? 0)
-            return Reflect.construct(target, args.length ? args : [target.now() + offset])
-          },
-          get(target, key) {
-            return key === 'now'
-              ? () => target.now() + Number(localStorage.getItem('synthetic-clock-offset') ?? 0)
-              : Reflect.get(target, key)
-          },
-        })
-      })
+      await installEventClock(context)
       const dialogue = (await (await request.get('/api/v1/dialogues?language=en')).json()).items[0]
       const response = await request.post('/api/v1/sessions', {
         data: { id: crypto.randomUUID(), language: 'en', dialogue_id: dialogue.id },
@@ -55,10 +43,7 @@ for (const offlineStart of [false, true])
       await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
       await expect(page.getByRole('status').filter({ hasText: 'With help' })).toBeVisible()
       await request.post(`/_test/advance-clock/${seconds}`)
-      await page.evaluate(
-        (offset) => localStorage.setItem('synthetic-clock-offset', String(offset)),
-        seconds * 1000,
-      )
+      await setEventClock(page, seconds)
       await page.reload()
       await page.getByRole('button', { name: 'Recalled' }).click()
       await expect(page.locator('.session-toolbar')).toContainText('2 / 2')

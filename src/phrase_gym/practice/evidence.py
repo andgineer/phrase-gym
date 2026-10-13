@@ -1,8 +1,6 @@
-import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from uuid import UUID, uuid5
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from phrase_gym.contracts.practice import (
@@ -12,62 +10,13 @@ from phrase_gym.contracts.practice import (
     PracticeInput,
 )
 from phrase_gym.contracts.sessions import PlannedTarget, SessionStep
-from phrase_gym.practice.tables import AttemptRow, ChunkHistoryRow, PracticeEvent
-from phrase_gym.tables import ExposureRow, SessionRow
+from phrase_gym.practice.support import recent_support
+from phrase_gym.practice.tables import AttemptRow, ChunkHistoryRow
+from phrase_gym.tables import SessionRow
 
 
 def attempt_id(session_id: UUID, step: int) -> UUID:
     return uuid5(session_id, f"step:{step}")
-
-
-def recent_support(transaction: Session, target_id: str, now: datetime) -> bool:
-    recent = transaction.scalars(
-        select(ExposureRow).where(
-            ExposureRow.target_id == target_id,
-        ),
-    ).all()
-    earlier = transaction.scalars(
-        select(AttemptRow).where(
-            AttemptRow.target_id == target_id,
-        ),
-    ).all()
-    dialogues = {
-        row.id: json.loads(row.payload)["session_id"]
-        for row in recent
-        if json.loads(row.payload).get("kind") == "dialogue"
-    }
-    supported = any(
-        row.id not in dialogues
-        and now - timedelta(minutes=5) <= datetime.fromisoformat(row.received_at) <= now
-        for row in recent
-    )
-    attempt_ids = {UUID(row.id) for row in earlier}
-    events = transaction.scalars(
-        select(PracticeEvent).where(
-            PracticeEvent.session_id.in_(
-                {row.session_id for row in earlier} | set(dialogues.values()),
-            ),
-        ),
-    )
-    for row in events:
-        event = PracticeInput.model_validate_json(row.payload)
-        dialogue = (
-            event.kind == "dialogue_exposure" and str(uuid5(event.id, target_id)) in dialogues
-        )
-        if not dialogue and event.kind not in (
-            "answer",
-            "explain",
-            "reference",
-            "capture_complete",
-        ):
-            continue
-        receipt = EventReceipt.model_validate_json(row.receipt)
-        if (dialogue or receipt.attempt_id in attempt_ids) and now - timedelta(
-            minutes=5,
-        ) <= receipt.occurred_at <= now:
-            supported = True
-            break
-    return supported
 
 
 def create_attempt(

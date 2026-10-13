@@ -49,7 +49,7 @@ def seed_library(
     database: Database,
     media: MediaService,
     revision: str = "1",
-    two_target_dialogue: bool = False,
+    dialogue_target_index: int | None = None,
 ) -> None:
     content = ImportService(database, PackageValidator(media.available))
     for name in ("manual-en.json", "manual-sr.json"):
@@ -57,8 +57,8 @@ def seed_library(
             (ROOT / "fixtures" / name).read_text(encoding="utf-8")
         )
         package.source_revision = revision
-        if two_target_dialogue and package.language == "en":
-            target = package.targets[2]
+        if dialogue_target_index is not None and package.language == "en":
+            target = package.targets[dialogue_target_index]
             package.dialogues[0].turns.append(
                 DialogueTurn(
                     speaker="Learner",
@@ -109,7 +109,12 @@ def run() -> None:
 
         @app.post("/_test/two-target-dialogue", include_in_schema=False)
         def two_target_dialogue():
-            seed_library(app.state.settings.db, app.state.media, "2", True)
+            seed_library(app.state.settings.db, app.state.media, "2", 2)
+            return {"ready": True}
+
+        @app.post("/_test/repeated-target-dialogue", include_in_schema=False)
+        def repeated_target_dialogue():
+            seed_library(app.state.settings.db, app.state.media, "2", 1)
             return {"ready": True}
 
         @app.middleware("http")

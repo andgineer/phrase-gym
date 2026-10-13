@@ -58,6 +58,7 @@ class PracticeSession(Contract):
     queue: list[SessionStep]
     attempts: list[AttemptEvidence]
     dialogue_exposures: list[datetime] = Field(default_factory=list)
+    support_exposures: dict[UUID, list[datetime]] = Field(default_factory=dict)
 
 
 class SessionTransition(Contract):

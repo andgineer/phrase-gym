@@ -52,8 +52,8 @@ it.each([
   [300001, false],
   [-1, false],
 ])('uses checkpoint script exposure at elapsed %i milliseconds', (elapsed, supported) => {
-  const state = { ...session, dialogue_exposures: ['2026-10-13T00:00:00Z'] }
-  const time = new Date(Date.parse(state.dialogue_exposures[0]!) + elapsed).toISOString()
+  const state = { ...session, support_exposures: { target: ['2026-10-13T00:00:00Z'] } }
+  const time = new Date(Date.parse(state.support_exposures.target[0]!) + elapsed).toISOString()
   let next = projectEvent(state, { ...event('present', 1), occurred_at: time }, 'attempt')
   next = projectEvent(next, { ...event('rate', 2), occurred_at: time }, 'attempt')
   expect(next.attempts[0]?.original?.supported).toBe(supported)

@@ -34,6 +34,7 @@ export function usePracticeSession() {
     session,
     error,
     accept,
+    () => !restoring.value && !offlineUnavailable.value,
   )
   const item = computed(() => {
     const state = session.value

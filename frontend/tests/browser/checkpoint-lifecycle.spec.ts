@@ -67,3 +67,63 @@ test('a delayed session read cannot overwrite an acknowledged evidence checkpoin
     releaseRead()
   }
 })
+
+test('a foreground read blocks dialogue introduction and detour until restoration finishes', async ({
+  page,
+  request,
+}) => {
+  await request.put('/api/v1/settings', {
+    data: { native_language: 'ru', ui_language_mode: 'learning' },
+  })
+  const dialogue = (await (await request.get('/api/v1/dialogues?language=en')).json()).items[0]
+  const state = await (
+    await request.post('/api/v1/sessions', {
+      data: { id: crypto.randomUUID(), language: 'en', dialogue_id: dialogue.id },
+    })
+  ).json()
+  await page.goto(`/learn/en/practice/${state.id}`)
+  await expect(page.getByRole('button', { name: 'Rehearse dialogue', exact: true })).toBeEnabled()
+  for (const begun of [false, true]) {
+    if (begun) {
+      await page.getByRole('button', { name: 'Rehearse dialogue', exact: true }).click()
+      await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
+    }
+    const before = await (await request.get(`/api/v1/sessions/${state.id}`)).json()
+    let reading = false
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    await page.route('**/api/v1/sessions/current', async (route) => {
+      const response = await route.fetch()
+      reading = true
+      await gate
+      await route.fulfill({ response })
+    })
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await expect.poll(() => reading).toBe(true)
+    try {
+      const action = page.getByRole('button', {
+        name: begun ? 'Isolate this turn' : 'Rehearse dialogue',
+        exact: true,
+      })
+      await expect(action).toBeDisabled()
+      await expect(
+        page.getByRole('button', { name: 'Download session', exact: true }),
+      ).toBeDisabled()
+      await action.evaluate((button: HTMLButtonElement) => button.click())
+      expect((await (await request.get(`/api/v1/sessions/${state.id}`)).json()).last_sequence).toBe(
+        before.last_sequence,
+      )
+    } finally {
+      release()
+    }
+    await expect(
+      page.getByRole('button', {
+        name: begun ? 'Isolate this turn' : 'Rehearse dialogue',
+        exact: true,
+      }),
+    ).toBeEnabled()
+    await page.unroute('**/api/v1/sessions/current')
+  }
+})

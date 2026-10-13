@@ -27,3 +27,9 @@ def apply(client, session, kind, **parameters):
     body, response = event(client, session, kind, **parameters)
     assert response.status_code == 200, response.text
     return body, response.json()
+
+
+def clocks(client, now):
+    client.app.state.sessions.clock = lambda: now
+    client.app.state.practice.clock = lambda: now
+    client.app.state.exposures.clock = lambda: now

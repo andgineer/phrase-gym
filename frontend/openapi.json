@@ -2748,6 +2748,20 @@
             },
             "type": "array",
             "title": "Dialogue Exposures"
+          },
+          "support_exposures": {
+            "additionalProperties": {
+              "items": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Support Exposures"
           }
         },
         "additionalProperties": false,
