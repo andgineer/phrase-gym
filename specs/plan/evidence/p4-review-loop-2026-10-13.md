@@ -1,6 +1,6 @@
 # Fresh Sol 6.1 P4 review loop — 2026-10-13
 
-**Historical offline-era rounds 1–4. The [online-only decision](../../decision-online-only.md) supersedes offline requirements and earlier review-stop limits. One new round 5 is authorized after the correction; its evidence will be separate.**
+**Historical offline-era rounds 1–4. The [online-only decision](../../decision-online-only.md) supersedes offline requirements and earlier review-stop limits. Round 5 and its targeted closure are recorded separately in the [online-only closeout](p4-online-only-2026-10-13.md).**
 
 The user authorized P4 implementation in a separate Sol 6.1 chat and fresh Sol 6.1 review/fix rounds. Each reviewer starts a new local Phrase Gym chat, independently reads repository instructions/specs, and performs a read-only review. No forks or reused reviewer histories establish a fresh round. Reviews target complete P4 behavior; actual-device dependencies are separated from fixable findings. At most three rounds are authorized before renewed confirmation if actionable findings remain.
 
@@ -56,3 +56,10 @@ The reviewer independently passed 127 Python, 16 client and 32 browser checks, t
 The final ordered correction gate passed on Node 24.19.0 LTS: **all hooks, zero pyrefly errors, 127 Python tests, 18 client tests and 256 browser checks**, with typecheck/build and all 128 scenarios in Chromium and WebKit, without skips. The extended focused tests reproduced old-card capture remaining live before correction, then verified resource release and lookup cancellation. App-build passed; every built client file matches the wheel, including worker, manifest and installation icons. Final correction commit: **`182b6df`** on main, following audit **`3ea4f80`**. No check remains blocked by approval/execution infrastructure; no push/publication/deployment was performed.
 
 The sequence is **3 → 2 → 1 → 3**, not convergence. All accepted findings and related cleanup corrections are verified; no post-correction fresh zero-finding review exists. Stop before round 5 for a new scope decision. The updated [model](../../p4-state-model.md), [matrix](p4-state-matrix-2026-10-13.md) and [continuation plan](../p4-review-continuation.md) specify independent fact ordering, cleanup/affinity exceptions and readiness revalidation. P5 can start independently; no P5 implementation, fifth review, push or deployment is implied. Actual-device acceptance remains open.
+
+
+## Round 5 — accepted online-only scope and independently closed finding
+
+The human removed all offline functionality and authorized one genuinely new Sol 6.1 round 5. The correction at `09da348` and its original ordered gate/packaging are recorded in the [closeout](p4-online-only-2026-10-13.md). Fresh reviewer chat `01a136ac-6a83-7ff0-ab35-fcb7b45a54a9` reported **one P2 response-body failure admission defect**, accepted without deferral. At the human's direction, that SAME reviewer independently reproduced and closed the specific correction at `102154b` in Chromium/WebKit, preserving the original finding and appending [targeted closure evidence](p4-review-5-2026-10-13.md).
+
+The parent's final post-closure ordered gate passed all hooks/zero errors, 130 Python tests, 5 client tests and 208 browser checks with typecheck/build and both engines executed. Packaging matches the independently reviewed client byte-for-byte. P4 connected engineering is closed; actual-device/content/release evidence remains separate. This is one original finding with independently verified closure, not a new zero-finding scan, an unbounded loop or a generic convergence claim. P5 is next separately; no P5 implementation, further review round, push or deployment follows.

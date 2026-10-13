@@ -105,6 +105,7 @@ test('a competing review is reconciled without a permanently blocked journal', a
   })
   expect(response.ok()).toBe(true)
   await page.getByRole('button', { name: 'Show answer', exact: true }).click()
+  await expect(page.locator('.session-toolbar')).toContainText('2 / 3')
   await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
   await page.getByRole('button', { name: 'Recalled' }).click()
   await expect

@@ -1,6 +1,6 @@
 # P4 and P6 — phone reliability, validation and release
 
-Status: **P4 online-only correction and authorized fresh round 5**, updated 2026-10-13. Follow the [online-only decision](../decision-online-only.md), [runbook](p4-runbook.md) and [current handoff](next-session.md). Earlier offline review/evidence remains historical. Actual-device acceptance, P5 integrations and P6 deployment remain separate.
+Status: **P4 connected engineering closed; device and P6 acceptance open**, updated 2026-10-13. Follow the [online-only decision](../decision-online-only.md), [runbook](p4-runbook.md) and [current handoff](next-session.md). Earlier offline review/evidence remains historical. Actual-device acceptance, P5 integrations and P6 deployment remain separate.
 
 Use the [consolidated plan's acceptance checklist](implementation-plan.md#end-to-end-acceptance-checklist) as release coverage, including language URLs/UI separation, search/navigation, revised recall outcomes, reference audio and every recording's retention. Checks in this file concern implementation reliability, not learner-run learning-effectiveness validation.
 
