@@ -2740,6 +2740,14 @@
             },
             "type": "array",
             "title": "Attempts"
+          },
+          "dialogue_exposures": {
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": "array",
+            "title": "Dialogue Exposures"
           }
         },
         "additionalProperties": false,

@@ -55,6 +55,7 @@ const { pendingTakes, error: takeError } = media.takes
 const { latestUrl } = media
 const ready = computed(() => session.value?.attempts.some((a) => a.step === session.value?.cursor))
 async function prepare() {
+  if (props.engine.restoring.value) return
   if (session.value?.status !== 'active') {
     await media.release()
     return
@@ -73,7 +74,13 @@ async function prepare() {
   } catch {}
 }
 watch(
-  [() => session.value?.id, () => session.value?.cursor, () => session.value?.status, intro],
+  [
+    () => session.value?.id,
+    () => session.value?.cursor,
+    () => session.value?.status,
+    intro,
+    props.engine.restoring,
+  ],
   prepare,
   {
     immediate: true,

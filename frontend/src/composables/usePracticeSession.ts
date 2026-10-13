@@ -116,8 +116,11 @@ export function usePracticeSession() {
       if (version !== loadingVersion) return
       const restoredCheckpoint = checkpoint ? await restoreDeviceStatus(checkpoint) : null
       if (version !== loadingVersion) return
-      session.value = restoredCheckpoint
-      if (restoredCheckpoint) accept(restoredCheckpoint)
+      const projected = restoredCheckpoint
+        ? await project(restoredCheckpoint, () => version === loadingVersion)
+        : null
+      if (version !== loadingVersion) return
+      session.value = projected
       await flush()
       if (version === loadingVersion) offline.value = false
     } catch (cause) {

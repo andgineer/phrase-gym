@@ -8,6 +8,7 @@ import math
 import struct
 import tempfile
 import wave
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -17,7 +18,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import delete
 
 from phrase_gym.api.app import create_app
-from phrase_gym.contracts.content import ManualPackage
+from phrase_gym.contracts.content import DialogueTurn, ManualPackage
 from phrase_gym.contracts.media import MediaMetadata, MediaUpload
 from phrase_gym.config import Config
 from phrase_gym.content.imports import ImportService
@@ -44,13 +45,27 @@ def tone() -> bytes:
     return buffer.getvalue()
 
 
-def seed_library(database: Database, media: MediaService, revision: str = "1") -> None:
+def seed_library(
+    database: Database,
+    media: MediaService,
+    revision: str = "1",
+    two_target_dialogue: bool = False,
+) -> None:
     content = ImportService(database, PackageValidator(media.available))
     for name in ("manual-en.json", "manual-sr.json"):
         package = ManualPackage.model_validate_json(
             (ROOT / "fixtures" / name).read_text(encoding="utf-8")
         )
         package.source_revision = revision
+        if two_target_dialogue and package.language == "en":
+            target = package.targets[2]
+            package.dialogues[0].turns.append(
+                DialogueTurn(
+                    speaker="Learner",
+                    text=target.text,
+                    target_source_id=target.source_id,
+                ),
+            )
         for target in package.targets:
             if revision != "1":
                 target.purpose += " Updated publication."
@@ -82,9 +97,20 @@ def run() -> None:
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="phrase-gym-browser-") as directory:
         config = Config(Path(directory), client_dir=ROOT / "frontend/dist")
-        app = create_app(config)
+        clock_offset = [timedelta()]
+        app = create_app(config, clock=lambda: datetime.now(UTC) + clock_offset[0])
         app.state.lose_rating_ack = False
         app.state.recording_ack_gate = None
+
+        @app.post("/_test/advance-clock/{seconds}", include_in_schema=False)
+        def advance_clock(seconds: int):
+            clock_offset[0] = timedelta(seconds=seconds)
+            return {"now": (datetime.now(UTC) + clock_offset[0]).isoformat()}
+
+        @app.post("/_test/two-target-dialogue", include_in_schema=False)
+        def two_target_dialogue():
+            seed_library(app.state.settings.db, app.state.media, "2", True)
+            return {"ready": True}
 
         @app.middleware("http")
         async def lost_ack(request: Request, call_next):
@@ -135,6 +161,7 @@ def run() -> None:
 
         @app.post("/_test/reset", include_in_schema=False)
         async def reset_fixture():
+            clock_offset[0] = timedelta()
             app.state.lose_rating_ack = False
             if app.state.recording_ack_gate:
                 app.state.recording_ack_gate.set()

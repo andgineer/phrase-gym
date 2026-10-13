@@ -57,6 +57,7 @@ class PracticeSession(Contract):
     last_sequence: int
     queue: list[SessionStep]
     attempts: list[AttemptEvidence]
+    dialogue_exposures: list[datetime] = Field(default_factory=list)
 
 
 class SessionTransition(Contract):

@@ -971,6 +971,8 @@ export interface components {
             queue: components["schemas"]["SessionStep"][];
             /** Attempts */
             attempts: components["schemas"]["AttemptEvidence"][];
+            /** Dialogue Exposures */
+            dialogue_exposures?: string[];
         };
         /** PublishRequest */
         PublishRequest: {

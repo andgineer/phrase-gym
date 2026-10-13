@@ -33,7 +33,7 @@ export function usePracticeEvents(
   async function project(state: PracticeSession, isCurrent = () => true) {
     if (state.status === 'superseded' || state.status === 'completed') {
       if (isCurrent()) accept(state)
-      return
+      return state
     }
     let projected = state
     const events = pending.value
@@ -43,6 +43,7 @@ export function usePracticeEvents(
       projected = projectEvent(projected, event, await localAttemptId(state.id, event.step))
     projected = await restoreDeviceStatus(projected)
     if (isCurrent()) accept(projected)
+    return projected
   }
   async function flush() {
     if (flushing) return flushing

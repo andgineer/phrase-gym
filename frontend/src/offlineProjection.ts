@@ -24,10 +24,16 @@ export function projectEvent(
   if (event.sequence <= next.last_sequence) return next
   if (event.step !== next.cursor) throw new Error('Pending action no longer addresses this card')
   next.last_sequence = event.sequence
+  if (event.kind === 'dialogue_exposure')
+    next.dialogue_exposures = [...(next.dialogue_exposures ?? []), event.occurred_at]
   if (event.kind === 'dialogue_begin') next.queue[0]!.introduced = true
   if (event.kind.startsWith('dialogue_')) return next
   const step = next.queue[event.step]!
   const item = next.manifest.targets[step.target_index]!
+  const scriptSupport = (next.dialogue_exposures ?? []).some((time) => {
+    const elapsed = Date.parse(event.occurred_at) - Date.parse(time)
+    return elapsed >= 0 && elapsed <= 300000
+  })
   let evidence = next.attempts.find((a) => a.step === event.step)
   if (!evidence) {
     if (event.kind !== 'present') throw new Error('Present the cue before responding')
@@ -40,7 +46,7 @@ export function projectEvent(
       review_group_id: item.review_group_id,
       repair: step.repair,
       supported:
-        Boolean(next.manifest.dialogue) ||
+        scriptSupport ||
         next.attempts.some(
           (a) =>
             a.target_id === item.phrase.id &&
@@ -57,6 +63,7 @@ export function projectEvent(
     } satisfies AttemptEvidence
     next.attempts.push(evidence)
   }
+  if (!evidence.original) evidence.supported ||= scriptSupport
   if (['respond', 'answer', 'rate'].includes(event.kind) && !evidence.original)
     evidence.original = {
       modality: event.modality,

@@ -6,7 +6,7 @@ import { verifyOfflineShell } from './pwa'
 
 export const mediaCacheName = 'phrase-gym.selected-media.v1'
 export type SessionPack = {
-  version: 1
+  version: 2
   session: PracticeSession
   media: components['schemas']['MediaAsset'][]
 }
@@ -21,14 +21,14 @@ export async function verifyPack(id: string): Promise<SessionPack | null> {
   )?.value
   if (!pack) return null
   if (
-    pack.version !== 1 ||
+    pack.version !== 2 ||
     pack.session.id !== id ||
     pack.session.manifest.schema_version !== 1 ||
     pack.session.manifest.policy_version !== 'fsrs-6.3.2-retention90-v1' ||
     !['due-new-v1', 'due-new-v2'].includes(pack.session.manifest.planner_version)
   )
     throw new Error(
-      'This download needs a compatible app. Pending actions and audio remain retained.',
+      'This download needs a compatible app and a fresh download while connected. Pending actions and audio remain retained.',
     )
   const cache = await caches.open(mediaCacheName)
   for (const asset of pack.media) {
@@ -72,7 +72,7 @@ export async function downloadPack(
     progress(media.length, session.manifest.required_media_ids.length)
   }
   await journalPut(`pack:${session.id}`, {
-    version: 1,
+    version: 2,
     session: JSON.parse(JSON.stringify(session)),
     media,
   } satisfies SessionPack)
