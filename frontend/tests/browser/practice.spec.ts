@@ -154,7 +154,7 @@ test('lookup between the cue and response remains support when returning to the 
   expect(session.attempts[0].original.supported).toBe(true)
 })
 
-test('starting another language requires explicit takeover and preserves the old history', async ({
+test('starting another language replaces the session in one click and preserves history', async ({
   page,
   request,
 }) => {
@@ -165,10 +165,6 @@ test('starting another language requires explicit takeover and preserves the old
   await page.getByRole('button', { name: 'Show answer', exact: true }).click()
   await page.getByLabel('Learning language', { exact: true }).selectOption('sr')
   await page.getByRole('button', { name: 'Započni vežbu', exact: true }).click()
-  expect((await (await request.get(`/api/v1/sessions/${previousId}`)).json()).status).toBe('active')
-  await page
-    .getByRole('button', { name: 'Započni izabranu vežbu umesto trenutne', exact: true })
-    .click()
   await expect(page).toHaveURL(/\/learn\/sr\/practice\//)
   await expect(page.locator('.practice-card')).toBeVisible()
   const previous = await (await request.get(`/api/v1/sessions/${previousId}`)).json()

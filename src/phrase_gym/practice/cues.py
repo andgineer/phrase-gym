@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from phrase_gym.content.cues import has_visible_hint
 from phrase_gym.contracts.content import Cue, TargetInput
 from phrase_gym.practice.tables import ChunkHistoryRow, CueReportRow
 
@@ -14,6 +15,7 @@ def select_cue(
         cue
         for cue in content.cues
         if cue.reviewed
+        and has_visible_hint(content, cue)
         and transaction.get(CueReportRow, (target_id, revision, cue.id)) is None
         and (
             content.kind == "fixed_phrase"

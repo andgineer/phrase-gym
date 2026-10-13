@@ -59,7 +59,6 @@ test('history selects the bookmarked session and keeps the open session resumabl
   await expect(page.locator('.practice-card .explanation')).toBeVisible()
   await page.getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
-  await page.getByRole('button', { name: 'Start selected session instead', exact: false }).click()
   await expect(page).not.toHaveURL(previousUrl)
   await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
   const currentUrl = page.url()

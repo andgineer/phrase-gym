@@ -4,9 +4,10 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from phrase_gym.content.cues import has_visible_hint
 from phrase_gym.content.identity import content_version, fingerprint
 from phrase_gym.contracts.base import Language
-from phrase_gym.contracts.content import ManualPackage
+from phrase_gym.contracts.content import ManualPackage, TargetInput
 from phrase_gym.contracts.imports import ImportChange, ImportReport
 from phrase_gym.contracts.media import MediaMetadata
 from phrase_gym.tables import DialogueRow, LessonRow, MediaRow, SourceItem, Target, TargetRevision
@@ -65,19 +66,7 @@ class PackageValidator:
                 errors,
                 content.source_id,
             )
-            for cue in content.cues:
-                spoken = "".join(
-                    chunk.text for chunk in content.chunks if chunk.id in cue.visible_chunks
-                )
-                self.check_audio(
-                    session,
-                    cue.audio_id,
-                    package.language,
-                    spoken,
-                    "cue",
-                    errors,
-                    f"{content.source_id}/{cue.id}",
-                )
+            self.check_cues(session, content, package.language, errors)
         for lesson in package.lessons:
             existing = session.scalar(
                 select(LessonRow).where(
@@ -116,6 +105,25 @@ class PackageValidator:
             errors=errors,
             base_content_version=content_version(session, package.namespace),
         )
+
+    def check_cues(
+        self,
+        session: Session,
+        content: TargetInput,
+        language: Language,
+        errors: list[str],
+    ) -> None:
+        for cue in content.cues:
+            context = f"{content.source_id}/{cue.id}"
+            if not has_visible_hint(content, cue):
+                errors.append(
+                    f"{context}: retrieval cues need visible phrase-specific text; "
+                    "leave cues empty until a useful hint is prepared",
+                )
+            spoken = "".join(
+                chunk.text for chunk in content.chunks if chunk.id in cue.visible_chunks
+            )
+            self.check_audio(session, cue.audio_id, language, spoken, "cue", errors, context)
 
     def check_audio(  # noqa: PLR0913 - validates an asset against its content binding
         self,

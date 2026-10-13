@@ -54,6 +54,7 @@ export function usePracticeSession() {
     busy.value = true
     error.value = ''
     try {
+      await flush()
       const payload = candidate.value ?? {
         id: crypto.randomUUID(),
         language,

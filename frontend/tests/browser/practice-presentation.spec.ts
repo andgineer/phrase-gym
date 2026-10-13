@@ -3,8 +3,8 @@ import { expect } from '@playwright/test'
 import { test } from './fixtures'
 import type { components } from '../../src/api.generated'
 
-for (const fullyHidden of [true, false]) {
-  test(`${fullyHidden ? 'situation-only' : 'partial'} cue shows one instruction and meaningful phrase content`, async ({
+for (const duplicatePurpose of [true, false]) {
+  test(`${duplicatePurpose ? 'matching' : 'different'} purpose shows one instruction and a partial phrase hint`, async ({
     page,
     request,
   }) => {
@@ -20,8 +20,7 @@ for (const fullyHidden of [true, false]) {
       .filter((chunk) => cue.visible_chunks.includes(chunk.id))
       .map((chunk) => chunk.text)
       .join('')
-    target.purpose = fullyHidden ? cue.prompt : 'Different library purpose'
-    if (fullyHidden) cue.visible_chunks = []
+    target.purpose = duplicatePurpose ? cue.prompt : 'Different library purpose'
     const staged = await request.post('/api/v1/imports', {
       data: {
         namespace: 'browser.practice.presentation',
@@ -53,18 +52,14 @@ for (const fullyHidden of [true, false]) {
     const card = page.locator('.practice-card')
     await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()
     await expect(card.getByText(cue.prompt, { exact: true })).toHaveCount(1)
-    if (fullyHidden) {
-      await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-      await expect(card.locator('.gap')).toHaveCount(0)
-      await page.reload()
-      await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()
-      await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-      await expect(card.getByText(cue.prompt, { exact: true })).toHaveCount(1)
-    } else {
-      await expect(page.getByTestId('practice-phrase')).toContainText(visibleText)
-      await expect(card.locator('.gap')).toHaveCount(1)
+    await expect(page.getByTestId('practice-phrase')).toContainText(visibleText)
+    await expect(card.locator('.gap')).toHaveCount(1)
+    if (!duplicatePurpose)
       await expect(card.getByText(target.purpose, { exact: true })).toHaveCount(0)
-    }
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()
+    await expect(page.getByTestId('practice-phrase')).toContainText(visibleText)
+    await expect(card.getByText(cue.prompt, { exact: true })).toHaveCount(1)
     await page.getByRole('button', { name: 'Show answer', exact: true }).click()
     await expect(page.getByTestId('practice-phrase')).toHaveText(target.text)
     await expect(card.locator('.gap')).toHaveCount(0)

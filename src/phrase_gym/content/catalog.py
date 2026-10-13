@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from phrase_gym.content.cues import has_visible_hint
 from phrase_gym.contracts.base import Language
 from phrase_gym.contracts.content import DialogueInput, TargetInput
 from phrase_gym.contracts.library import (
@@ -88,7 +89,9 @@ class LibraryService:
             content=content,
             lessons=[self.lesson_model(session, lesson) for lesson in lessons],
             audio_status="ready" if ready else "missing",
-            retrieval_ready=bool(content.cues) and ready and cue_audio_ready,
+            retrieval_ready=any(has_visible_hint(content, cue) for cue in content.cues)
+            and ready
+            and cue_audio_ready,
         )
 
     def phrase(self, target_id: UUID, language: Language, revision: int | None = None) -> Phrase:

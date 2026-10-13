@@ -10,6 +10,8 @@ This adopts the existing recommendation in the [answer-card/review policy](desig
 
 ## Current implementation
 
+The 2026-10-13 manual correction makes Start session and selected lesson/dialogue starts complete in one click. The start action itself authorizes replacement of the known open session, whose history remains retained; there is no second Start selected session instead step. Resume session retains the existing session and position. Viewing another language or returning to the library still makes no replacement request. The server keeps explicit current-session ID checks and idempotent creation; unknown concurrent changes remain conflicts.
+
 The initial batch implemented pinned manifests, idempotent creation, versioned pause/resume, explicit takeover and one open SQLite session slot. The [core trainer decision](decision-core-trainer.md) now supersedes its provisional first-cue/unbounded-queue behavior: persistent cue history, a bounded due/new budget, FSRS, ordered original-response/support events, durable takes, the unified card and prepared dialogue rehearsal are implemented.
 
 The [P3 runbook](plan/p3-runbook.md) and [core verification record](plan/evidence/p3-core-2026-10-12.md) own current use/evidence. Initial foundation verification remains preserved in its [evidence record](plan/evidence/p3-session-foundation-2026-10-12.md). P4 device/offline, P5 preparation/source and P6 deployment/backup work remain separate. AUDIO-01 and actual headset/iPhone/content acceptance remain open; no provider calls or deployment are part of this batch.
