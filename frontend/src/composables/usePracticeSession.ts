@@ -131,8 +131,7 @@ export function usePracticeSession() {
       const restored =
         [...candidates, ...(session.value ? [session.value] : [])].sort(
           (a, b) =>
-            b.last_sequence - a.last_sequence ||
-            b.version - a.version ||
+            (a.id === b.id ? b.last_sequence - a.last_sequence || b.version - a.version : 0) ||
             b.updated_at.localeCompare(a.updated_at),
         )[0] ?? null
       if (restored && (!id || restored.id === id)) {

@@ -1,7 +1,8 @@
 import { ref } from 'vue'
-import { liveCaptureOwners } from './captureOwners'
+import { releaseCapture, withAvailableTake } from './captureOwners'
+import { recoverTake, acknowledgeTake, takeEntries, takePrefix } from './takeJournalRecovery'
 import { api, ApiError } from './api'
-import { journalDelete, journalEntries, journalPut } from './practiceJournal'
+import { journalEntries, journalPut } from './practiceJournal'
 import type { RecordingReceipt, StoredTake } from './practiceTypes'
 
 function base64(bytes: ArrayBuffer) {
@@ -20,10 +21,12 @@ let waitingForReceipts = false
 async function retain(take: StoredTake) {
   volatile.set(take.id, take)
   try {
-    await journalPut(`take:${take.id}`, take)
+    await journalPut(`${takePrefix}${take.id}`, take)
     if (volatile.get(take.id) === take) volatile.delete(take.id)
+    if (take.status === 'pending') releaseCapture(take.id)
     pendingTakes.value = (await localTakes()).length
   } catch (cause) {
+    if (!take.audio.byteLength) volatile.delete(take.id)
     pendingTakes.value = (await localTakes()).length
     error.value = `Storage unavailable: ${String(cause)}. Audio is only in this open tab. Keep it open, free space and retry.`
     throw new Error(error.value)
@@ -45,33 +48,39 @@ async function flush() {
         failures.push(String(cause))
       }
     }
-    const entries = await journalEntries<StoredTake>('take:')
+    const entries = await takeEntries()
     pendingTakes.value = (await localTakes()).length
     waitingForReceipts = false
-    for (const { key, value: take } of entries) {
-      if (take.status === 'capturing' || volatile.has(take.id)) continue
+    for (const { key, value: snapshot } of entries) {
+      if (snapshot.status === 'capturing' || volatile.has(snapshot.id)) continue
       try {
-        const { audio, status: _status, owner: _owner, ...metadata } = take
-        const receipt = await api<RecordingReceipt>('/recordings', {
-          method: 'POST',
-          body: JSON.stringify({ ...metadata, audio_base64: base64(audio) }),
+        await withAvailableTake(snapshot.id, async () => {
+          const take = (await journalEntries<StoredTake>(key)).find(
+            (entry) => entry.key === key,
+          )?.value
+          if (!take || take.status !== 'pending' || volatile.has(take.id)) return
+          const { audio, status: _status, owner: _owner, capture_lease: _lease, ...metadata } = take
+          const receipt = await api<RecordingReceipt>('/recordings', {
+            method: 'POST',
+            body: JSON.stringify({ ...metadata, audio_base64: base64(audio) }),
+          })
+          const digest = await crypto.subtle.digest('SHA-256', audio)
+          const checksum = Array.from(new Uint8Array(digest), (b) =>
+            b.toString(16).padStart(2, '0'),
+          ).join('')
+          if (
+            receipt.id !== take.id ||
+            receipt.byte_length !== audio.byteLength ||
+            receipt.sha256 !== checksum ||
+            receipt.complete !== take.complete
+          )
+            throw new Error('Recording acknowledgement did not match the retained take')
+          await acknowledgeTake(key, take)
+          pendingTakes.value = (await localTakes()).length
         })
-        const digest = await crypto.subtle.digest('SHA-256', audio)
-        const checksum = Array.from(new Uint8Array(digest), (b) =>
-          b.toString(16).padStart(2, '0'),
-        ).join('')
-        if (
-          receipt.id !== take.id ||
-          receipt.byte_length !== audio.byteLength ||
-          receipt.sha256 !== checksum ||
-          receipt.complete !== take.complete
-        )
-          throw new Error('Recording acknowledgement did not match the retained take')
-        await journalDelete(key)
-        pendingTakes.value--
       } catch (cause) {
         if (cause instanceof ApiError && cause.status === 409) waitingForReceipts = true
-        failures.push(`Recording ${take.id}: ${String(cause)}. Audio remains on this device.`)
+        failures.push(`Recording ${snapshot.id}: ${String(cause)}. Audio remains on this device.`)
       }
     }
     error.value = failures.join('\n')
@@ -90,29 +99,24 @@ async function flush() {
 }
 async function recover() {
   try {
-    const entries = await journalEntries<StoredTake>('take:')
-    const live = entries.some((e) => e.value.status === 'capturing')
-      ? await liveCaptureOwners()
-      : new Set<string>()
+    const entries = await takeEntries()
+    const failures: string[] = []
     for (const { key, value: take } of entries) {
-      if (take.status === 'capturing' && take.owner && live.has(take.owner)) continue
-      if (!take.audio.byteLength) {
-        if (volatile.has(take.id)) continue
-        await journalDelete(key)
-        continue
+      if (take.status !== 'capturing' || volatile.has(take.id)) continue
+      try {
+        await withAvailableTake(take.id, () => recoverTake(key))
+      } catch (cause) {
+        failures.push(String(cause))
       }
-      if (take.status === 'capturing')
-        await journalPut(key, { ...take, status: 'pending', complete: false })
     }
     await flush()
+    if (failures.length) error.value = [error.value, ...failures].filter(Boolean).join('\n')
   } catch (cause) {
     error.value = String(cause)
   }
 }
 async function localTakes(): Promise<StoredTake[]> {
-  const stored = (await journalEntries<StoredTake>('take:').catch(() => [])).map(
-    (entry) => entry.value,
-  )
+  const stored = (await takeEntries().catch(() => [])).map((entry) => entry.value)
   const merged = new Map(stored.map((take) => [take.id, take]))
   for (const take of volatile.values()) merged.set(take.id, take)
   return [...merged.values()]

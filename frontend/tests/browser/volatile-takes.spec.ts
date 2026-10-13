@@ -21,7 +21,7 @@ for (const navigation of ['library', 'settings', 'language']) {
     await page.evaluate(() => {
       const put = IDBObjectStore.prototype.put
       IDBObjectStore.prototype.put = function (value, key) {
-        if (String(key).startsWith('take:') && value.audio?.byteLength)
+        if (String(key).startsWith('take-v2:') && value.audio?.byteLength)
           throw new DOMException('Full', 'QuotaExceededError')
         return put.call(this, value, key)
       }
@@ -35,7 +35,7 @@ for (const navigation of ['library', 'settings', 'language']) {
     await expect(page.getByRole('alert').filter({ hasText: 'Keep it open' })).toBeVisible()
     await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
-    const originalId = (await retainedKeys(page, 'take:'))[0]!.slice(5)
+    const originalId = (await retainedKeys(page, 'take-v2:'))[0]!.split(':').pop()!
     if (navigation === 'library') {
       await page.getByRole('button', { name: 'Library', exact: true }).click()
       await expect(page.getByRole('alert').filter({ hasText: 'Keep it open' })).toBeVisible()
@@ -75,6 +75,6 @@ for (const navigation of ['library', 'settings', 'language']) {
     const recordings = await (await request.get(`/api/v1/phrases/${target}/recordings`)).json()
     expect(sent).toEqual({ id: originalId, hash: recordings[0].sha256 })
     expect(recordings[0].id).toBe(originalId)
-    await expect.poll(() => retainedKeys(page, 'take:')).toHaveLength(0)
+    await expect.poll(() => retainedKeys(page, 'take-v2:')).toHaveLength(0)
   })
 }

@@ -23,5 +23,6 @@ export type StoredTake = {
   capture_settings: Record<string, string | number | boolean>
   audio: ArrayBuffer
   owner?: string
+  capture_lease?: 1
   status: 'capturing' | 'pending'
 }

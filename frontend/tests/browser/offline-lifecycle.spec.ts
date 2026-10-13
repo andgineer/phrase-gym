@@ -70,3 +70,26 @@ test('a real lifecycle version conflict is not disguised as an offline transitio
   await expect(page.getByRole('alert').first()).toContainText('version')
   await expect(page.getByRole('heading', { name: 'Session paused' })).toHaveCount(0)
 })
+
+test('offline home resumes the newer session instead of an older session with more event sequences', async ({
+  page,
+  connection,
+}) => {
+  const oldId = await downloadSession(page)
+  await page.getByRole('button', { name: 'Show & explain' }).click()
+  await expect(page.locator('.explanation')).toBeVisible()
+  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByRole('button', { name: 'Start session', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
+  const newest = page.url()
+  expect(newest).not.toContain(oldId)
+  await page.getByRole('button', { name: 'Download session', exact: true }).click()
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Verified for offline practice' }),
+  ).toBeVisible()
+  connection.disconnect()
+  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Resume session', exact: true })).toBeEnabled()
+  await page.getByRole('button', { name: 'Resume session', exact: true }).click()
+  await expect(page).toHaveURL(newest)
+})

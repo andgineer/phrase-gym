@@ -73,6 +73,37 @@ export async function journalDelete(key: string): Promise<void> {
       reject(transaction.error ?? new Error('Journal delete failed'))
   })
 }
+export async function journalModify<T>(
+  key: string,
+  update: (current: T | undefined) => T | null | undefined,
+): Promise<T | undefined> {
+  const db = await database()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('journal', 'readwrite')
+    const journal = transaction.objectStore('journal')
+    const read = journal.get(key)
+    let retained: T | undefined
+    read.onsuccess = () => {
+      retained = read.result as T | undefined
+      try {
+        const result = update(retained)
+        if (result === null) {
+          journal.delete(key)
+          retained = undefined
+        } else if (result !== undefined) {
+          journal.put(toRaw(result), key)
+          retained = result
+        }
+      } catch (cause) {
+        transaction.abort()
+        reject(cause)
+      }
+    }
+    transaction.oncomplete = () => resolve(retained)
+    transaction.onabort = transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Conditional journal write failed'))
+  })
+}
 export async function journalEntries<T>(prefix: string): Promise<Array<{ key: string; value: T }>> {
   const db = await database()
   return new Promise((resolve, reject) => {

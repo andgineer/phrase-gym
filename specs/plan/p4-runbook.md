@@ -6,7 +6,7 @@ Use the built client with the normal Python server; `uv run inv app-build` inclu
 2. Disconnect the origin, reopen the same bookmarked practice URL, use help/reference/optional recordings, pause/resume, and finish. Locally finished results await server confirmation. New session planning and arbitrary library access require connectivity.
 3. Reconnect and foreground the app, or use Retry beside pending progress/transfer errors. Inspect the authoritative results after confirmation. Conflicting actions remain retained locally; revisiting another language never relabels them or performs takeover.
 4. At a pause/end checkpoint, Update app appears when a newer worker is waiting. Resolve pending events/takes before activation. Keep tabs with volatile recording storage errors open until retry succeeds.
-5. If downloaded media was evicted, reconnect and download again. A lost browser journal cannot be reconstructed beyond server-acknowledged history. Browser data are neither a database backup nor permanent storage.
+5. If downloaded media was evicted, reconnect and download again. A lost browser journal cannot be reconstructed beyond server-acknowledged history. Browser data are neither a database backup nor permanent storage. Current capture/recovery requires Web Locks for exclusive take ownership. An older unleased capture remains retained with guidance to finish in its original capture tab/compatible app; the new app does not claim an unresponsive legacy writer or discard its bytes.
 
 ## Engineering checks
 

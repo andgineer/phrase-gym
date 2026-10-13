@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, ref } from 'vue'
-import { captureOwner } from '../captureOwners'
+import { captureOwner, holdCapture, releaseCapture } from '../captureOwners'
 import type { StoredTake } from '../practiceTypes'
 
 type TakeContext = Pick<
@@ -42,9 +42,12 @@ export function useCapture(options: CaptureOptions) {
     const token = ++generation
     requesting.value = true
     error.value = ''
+    let leaseId: string | null = null
     try {
       if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder)
         throw new Error('Recording is unavailable in this browser')
+      if (!navigator.locks)
+        throw new Error('Recording is unavailable in this browser. You can still use self-check.')
       const context = await options.context()
       if (token !== generation) return
       if (!stream || stream.getAudioTracks().every((track) => track.readyState === 'ended')) {
@@ -86,10 +89,17 @@ export function useCapture(options: CaptureOptions) {
         capture_settings,
         audio: new ArrayBuffer(0),
         owner: captureOwner,
+        capture_lease: 1,
         status: 'capturing',
       }
       await options.retain(take)
       if (token !== generation) return
+      await holdCapture(take.id)
+      leaseId = take.id
+      if (token !== generation) {
+        releaseCapture(take.id)
+        return
+      }
       const chunks: Blob[] = []
       let byteLength = 0
       let writes = Promise.resolve()
@@ -155,6 +165,7 @@ export function useCapture(options: CaptureOptions) {
       capture.start(1000)
       capturing.value = true
     } catch (cause) {
+      if (leaseId && !capturing.value) releaseCapture(leaseId)
       error.value = String(cause)
       await options.failure().catch(() => {})
     } finally {

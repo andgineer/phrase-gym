@@ -1,6 +1,7 @@
 """Disposable P2 browser fixture server; no user data or external providers."""
 
 import argparse
+import asyncio
 import base64
 import io
 import math
@@ -83,9 +84,15 @@ def run() -> None:
         config = Config(Path(directory), client_dir=ROOT / "frontend/dist")
         app = create_app(config)
         app.state.lose_rating_ack = False
+        app.state.recording_ack_gate = None
 
         @app.middleware("http")
         async def lost_ack(request: Request, call_next):
+            recording_gate = (
+                app.state.recording_ack_gate
+                if request.method == "POST" and request.url.path == "/api/v1/recordings"
+                else None
+            )
             losing = False
             if request.method == "POST" and request.url.path.endswith("/events"):
                 payload = await request.json()
@@ -93,9 +100,23 @@ def run() -> None:
                     event["kind"] == "rate" for event in payload["events"]
                 )
             response = await call_next(request)
+            if recording_gate and response.status_code == 200:
+                await recording_gate.wait()
             if losing and response.status_code == 200:
                 return JSONResponse({"detail": "Rating acknowledgement lost"}, 503)
             return response
+
+        @app.post("/_test/hold-recording-ack", include_in_schema=False)
+        async def hold_recording_ack():
+            app.state.recording_ack_gate = asyncio.Event()
+            return {"held": True}
+
+        @app.post("/_test/release-recording-ack", include_in_schema=False)
+        async def release_recording_ack():
+            if app.state.recording_ack_gate:
+                app.state.recording_ack_gate.set()
+            app.state.recording_ack_gate = None
+            return {"held": False}
 
         @app.post("/_test/lose-rating", include_in_schema=False)
         def lose_rating():
@@ -113,8 +134,11 @@ def run() -> None:
             return {"revised": True}
 
         @app.post("/_test/reset", include_in_schema=False)
-        def reset_fixture():
+        async def reset_fixture():
             app.state.lose_rating_ack = False
+            if app.state.recording_ack_gate:
+                app.state.recording_ack_gate.set()
+            app.state.recording_ack_gate = None
             database = app.state.settings.db
             with database.write() as session:
                 for table in reversed(Base.metadata.sorted_tables):

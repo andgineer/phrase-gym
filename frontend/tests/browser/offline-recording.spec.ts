@@ -27,7 +27,7 @@ test('offline capture retains every take, reopens, and transfers after its event
     if (await page.getByRole('button', { name: 'Stop playback', exact: true }).count())
       await page.getByRole('button', { name: 'Stop playback', exact: true }).click()
   }
-  const takeIds = await retainedKeys(page, 'take:')
+  const takeIds = await retainedKeys(page, 'take-v2:')
   await page.reload()
   await expect(page.getByRole('button', { name: 'My recording', exact: false })).toBeEnabled()
   connection.reconnect()
@@ -39,7 +39,7 @@ test('offline capture retains every take, reopens, and transfers after its event
     .toBe(2)
   await expect.poll(() => retainedAudio(page)).toBe(0)
   const takes = await (await request.get(`/api/v1/phrases/${target}/recordings`)).json()
-  expect(takes.map((t: { id: string }) => `take:${t.id}`).sort()).toEqual(takeIds.sort())
+  expect(takes.map((t: { id: string }) => `take-v2:${t.id}`).sort()).toEqual(takeIds.sort())
   expect(takes.every((t: { complete: boolean }) => t.complete)).toBe(true)
 })
 
@@ -80,7 +80,7 @@ test('recording quota failure keeps volatile audio visible and retry acknowledge
   await page.evaluate(() => {
     const put = IDBObjectStore.prototype.put
     IDBObjectStore.prototype.put = function (value, key) {
-      if (String(key).startsWith('take:') && value.audio?.byteLength)
+      if (String(key).startsWith('take-v2:') && value.audio?.byteLength)
         throw new DOMException('Full', 'QuotaExceededError')
       return put.call(this, value, key)
     }
