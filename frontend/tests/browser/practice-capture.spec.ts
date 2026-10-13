@@ -26,6 +26,7 @@ test('actual encoded takes are retained separately and the original response sta
     await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
     await expect(page.getByText('Press again to stop recording', { exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
+    await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toHaveCount(0)
     const session = await (await request.get(`/api/v1/sessions/${sessionId}`)).json()
     targetId = session.attempts[0].target_id
     expect(session.attempts[0].original).toMatchObject({ modality: 'recorded', supported: false })

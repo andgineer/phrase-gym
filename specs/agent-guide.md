@@ -27,6 +27,6 @@ Read the accepted [device-language and Settings decision](decision-device-langua
 
 - The user rejects macOS-only solutions and wants echo-words' audio engines and llmbroker approach. Reinspect the nearby project during actual integration; follow [the reference](reference/echo-words-audio.md). Preserve actor audio and language-correct full-phrase generation.
 - `.env` reportedly contains provider keys. Keep them ignored, private, server-side and out of outputs/bundles.
-- The user confirms mid-recording clipping continues after the mitigation (AUDIO-01). The current investigation is stopped at the user's request; carry it into P3/P4. Synthetic WebKit results are not Safari/headset acceptance. Carry iPhone/PWA/content gaps as explicit dependencies.
+- The user reported successful production recording without clipping in Safari on a MacBook Pro M1 on 2026-10-13 (AUDIO-01), superseding the earlier prototype's continuing-clipping report for the current tested setup. Broader headset/device acceptance remains open. The earlier investigation was stopped at the user's request; do not restart it by default. Carry iPhone/PWA/content gaps as explicit dependencies.
 - All active decisions, architecture and evidence belong under `specs/`. `docs/` is the scaffold's user documentation. Archives are historical, not a baseline or instructions to execute.
 - Do not alter vault notes, echo-words, legacy phrase-shadowing, Anki or course/source delivery without a request. Follow the external project's own instructions if its modification becomes authorized.

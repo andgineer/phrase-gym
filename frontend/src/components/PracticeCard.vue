@@ -17,6 +17,12 @@ const props = defineProps<{
   hasTake: boolean
 }>()
 const cue = computed(() => props.item.phrase.content.cues?.find((c) => c.id === props.item.cue_id))
+const prompt = computed(() => cue.value?.prompt || props.item.phrase.content.purpose)
+const showPhrase = computed(
+  () =>
+    props.card.revealed ||
+    props.item.phrase.content.chunks.some((chunk) => cue.value?.visible_chunks.includes(chunk.id)),
+)
 const explanation = computed(() => props.item.phrase.content.explanations?.[props.nativeLanguage])
 const emit = defineEmits<{
   control: []
@@ -29,11 +35,10 @@ const emit = defineEmits<{
 </script>
 <template>
   <article class="card practice-card">
-    <p class="eyebrow">{{ item.phrase.content.purpose }}</p>
-    <p :lang="item.phrase.language">
-      {{ cue?.prompt }}
+    <p class="practice-prompt" :lang="item.phrase.language">
+      {{ prompt }}
     </p>
-    <h1 :lang="item.phrase.language" data-testid="practice-phrase">
+    <h1 v-if="showPhrase" :lang="item.phrase.language" data-testid="practice-phrase">
       <template v-for="chunk in item.phrase.content.chunks" :key="chunk.id">
         <span v-if="card.revealed || cue?.visible_chunks.includes(chunk.id)">{{ chunk.text }}</span>
         <span v-else class="gap" aria-label="…">_____ </span>
@@ -65,6 +70,7 @@ const emit = defineEmits<{
     <p v-if="capturing" role="status">{{ pt.stopHint }}</p>
     <div class="answer-controls">
       <button
+        v-if="!card.revealed"
         :disabled="capturing || requesting || processing || ratingBusy"
         @click="emit('answer')"
       >

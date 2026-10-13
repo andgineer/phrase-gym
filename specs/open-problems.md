@@ -1,14 +1,16 @@
 # Open problems and acceptance gaps
 
-Updated **2026-10-12**. The user closed P2 engineering work while explicitly retaining the problems below. These are carried into later work; P2 closure does not establish device, speech-quality or release acceptance.
+Updated **2026-10-13**. The user closed P2 engineering work while explicitly retaining the problems below. These are carried into later work; P2 closure does not establish device, speech-quality or release acceptance.
 
 ## AUDIO-01 — Mid-recording clipping
 
-**Open; user-confirmed continuing failure.** After the local manual-test instructions, the user reported: “it continue clipping in the middle of recording”. The earlier reported setup was Safari on a MacBook Pro M1 with an external headset. The latest test page, Safari version, headset model/connection and whether the fault is in captured input, encoding or playback were not confirmed. Do not infer a root cause from this report.
+**Latest production Safari/M1 check passes; broader device acceptance remains open.** On 2026-10-13, testing the production app locally with imported vault phrases, the user reported: “recording works fine, without clipping - in Safari macbook pro M1”. This is actual-device feedback, separate from synthetic tests. The report does not specify a headset, Safari version, take duration or pause/resume coverage.
 
-The prototype requests echo cancellation, noise suppression and automatic gain control off, and uses optional play-and-record Audio Session support. The practice flow retains a microphone stream between takes; the audio probe releases it between takes. These measures have not resolved the reported issue. The synthetic continuity check uses three 2.1-second generated-tone takes per browser engine; it does not exercise the real headset or establish continuity of longer spoken recordings.
+The earlier prototype report was: “it continue clipping in the middle of recording”, with Safari on a MacBook Pro M1 and an external headset. The fault's capture, encoding or playback origin was not established. The latest successful production check supersedes the claim that clipping continues in the current tested setup; it does not establish a root cause or acceptance for the earlier external headset.
 
-P2 has reference playback but no production microphone capture. Carry this defect into P3 capture implementation and P4 device acceptance. First distinguish microphone/input, encoder/container and playback failure with focused evidence on the user's actual setup. Keep recordings private and do not require a general review loop or repeated undirected manual tests. Close this problem only after the implemented capture path passes actual-device listening checks, including a longer continuous take, successive takes and pause/resume. Automated tests alone cannot close it.
+The prototype requests echo cancellation, noise suppression and automatic gain control off, and uses optional play-and-record Audio Session support. The practice flow retains a microphone stream between takes; the audio probe releases it between takes. Those prototype measures did not resolve the earlier reported issue. The synthetic continuity check uses three 2.1-second generated-tone takes per browser engine; it does not exercise the real headset or establish continuity of longer spoken recordings.
+
+P3 implements production capture/storage and now has the successful local listening report above. P4 retains broader device acceptance, including longer continuous takes, successive takes and pause/resume. If clipping recurs, distinguish microphone/input, encoder/container and playback failure with focused evidence on the affected setup. Keep recordings private and do not require a general review loop or repeated undirected manual tests. Automated tests alone cannot establish actual-device acceptance.
 
 The user requested stopping the current investigation and closing P2. No additional audio change or manual test is required for that closure.
 
