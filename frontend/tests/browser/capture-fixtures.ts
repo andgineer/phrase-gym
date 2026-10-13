@@ -9,6 +9,7 @@ export const test = base.extend({
     const context = await playwright[browserName].launchPersistentContext(profile, {
       headless: true,
       baseURL,
+      serviceWorkers: 'block',
     })
     try {
       await use(context)

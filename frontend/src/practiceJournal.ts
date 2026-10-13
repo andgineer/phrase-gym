@@ -1,4 +1,5 @@
 import { toRaw } from 'vue'
+import type { PracticeSession } from './practiceTypes'
 
 const databaseName = 'phrase-gym.practice.v1'
 let opening: Promise<IDBDatabase> | null = null
@@ -7,7 +8,17 @@ function database(): Promise<IDBDatabase> {
     opening = new Promise((resolve, reject) => {
       const request = indexedDB.open(databaseName, 1)
       request.onupgradeneeded = () => request.result.createObjectStore('journal')
-      request.onsuccess = () => resolve(request.result)
+      request.onsuccess = () => {
+        const db = request.result
+        db.onclose = () => {
+          opening = null
+        }
+        db.onversionchange = () => {
+          db.close()
+          opening = null
+        }
+        resolve(db)
+      }
       request.onerror = () => {
         opening = null
         reject(request.error)
@@ -25,6 +36,31 @@ export async function journalPut(key: string, value: unknown): Promise<void> {
     transaction.oncomplete = () => resolve()
     transaction.onabort = transaction.onerror = () =>
       reject(transaction.error ?? new Error('Journal write failed'))
+  })
+}
+export async function journalCheckpoint(state: PracticeSession): Promise<PracticeSession> {
+  const db = await database()
+  return new Promise<PracticeSession>((resolve, reject) => {
+    const transaction = db.transaction('journal', 'readwrite')
+    const journal = transaction.objectStore('journal')
+    const key = `session:${state.id}`
+    const read = journal.get(key)
+    let retained = toRaw(state)
+    read.onsuccess = () => {
+      const current = read.result as PracticeSession | undefined
+      // A delayed read must not replace a newer acknowledged checkpoint.
+      if (
+        current &&
+        (current.last_sequence > state.last_sequence || current.version > state.version)
+      ) {
+        retained = current
+        return
+      }
+      journal.put(toRaw(state), key)
+    }
+    transaction.oncomplete = () => resolve(retained)
+    transaction.onabort = transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Checkpoint write failed'))
   })
 }
 export async function journalDelete(key: string): Promise<void> {

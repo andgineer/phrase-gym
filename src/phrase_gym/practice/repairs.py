@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from sqlalchemy import select
@@ -13,13 +14,20 @@ MAX_REPAIRS = 2
 INTERVENING_TARGETS = 2
 
 
+@dataclass
+class Advancement:
+    occurred_at: datetime
+    defer_repairs: bool = False
+
+
 def advance(
     transaction: Session,
     session: SessionRow,
     evidence: AttemptEvidence,
     queue: list[SessionStep],
-    now: datetime,
+    timing: Advancement,
 ) -> None:
+    now, defer_repairs = timing.occurred_at, timing.defer_repairs
     if session.status in ("completed", "superseded"):
         return
     pending = json.loads(session.repairs)
@@ -30,6 +38,7 @@ def advance(
         in ("eligible", "repair", "supported", "supported_learning_check")
         and (evidence.rating == "not_yet" or (evidence.original and evidence.original.supported))
         and extra_count < MAX_REPAIRS
+        and not defer_repairs
     ):
         pending.append(
             {
@@ -46,6 +55,9 @@ def advance(
     attempts = [AttemptEvidence.model_validate_json(r.payload) for r in evidence_rows]
     retained = []
     for repair in pending:
+        if defer_repairs:
+            retained.append(repair)
+            continue
         others = {
             a.target_id
             for a in attempts

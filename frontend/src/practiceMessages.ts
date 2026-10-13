@@ -1,5 +1,13 @@
 import type { Language } from './api'
 const en = {
+  downloadedSessions: 'Downloaded sessions',
+  cancelPermission: 'Cancel microphone request',
+  download: 'Download session',
+  downloading: 'Downloading…',
+  downloaded: 'Verified for offline practice',
+  localPending: 'Progress is on this device; awaiting server confirmation.',
+  update: 'Update app',
+  completePending: 'Finished on this device — awaiting confirmation',
   due: 'Due',
   newTargets: 'New',
   preparing: 'Preparing',
@@ -41,6 +49,14 @@ const en = {
 }
 export type PracticeMessages = typeof en
 const ru: PracticeMessages = {
+  downloadedSessions: 'Скачанные занятия',
+  cancelPermission: 'Отменить запрос микрофона',
+  download: 'Скачать занятие',
+  downloading: 'Скачивание…',
+  downloaded: 'Проверено для занятий без сети',
+  localPending: 'Прогресс на этом устройстве; ожидает подтверждения сервера.',
+  update: 'Обновить приложение',
+  completePending: 'Завершено на устройстве — ожидает подтверждения',
   due: 'К повторению',
   newTargets: 'Новые',
   preparing: 'Готовятся',
@@ -81,6 +97,14 @@ const ru: PracticeMessages = {
   recording: 'Запись…',
 }
 const sr: PracticeMessages = {
+  downloadedSessions: 'Preuzete vežbe',
+  cancelPermission: 'Otkaži zahtev za mikrofon',
+  download: 'Preuzmi vežbu',
+  downloading: 'Preuzimanje…',
+  downloaded: 'Provereno za vežbanje bez mreže',
+  localPending: 'Napredak je na ovom uređaju; čeka potvrdu servera.',
+  update: 'Ažuriraj aplikaciju',
+  completePending: 'Završeno na uređaju — čeka potvrdu',
   due: 'Za ponavljanje',
   newTargets: 'Novo',
   preparing: 'U pripremi',
@@ -121,6 +145,14 @@ const sr: PracticeMessages = {
   recording: 'Snimanje…',
 }
 const de: PracticeMessages = {
+  downloadedSessions: 'Heruntergeladene Übungen',
+  cancelPermission: 'Mikrofonanfrage abbrechen',
+  download: 'Übung herunterladen',
+  downloading: 'Wird heruntergeladen…',
+  downloaded: 'Für Offline-Übung geprüft',
+  localPending: 'Fortschritt auf diesem Gerät; Serverbestätigung steht aus.',
+  update: 'App aktualisieren',
+  completePending: 'Auf diesem Gerät beendet — Bestätigung steht aus',
   due: 'Fällig',
   newTargets: 'Neu',
   preparing: 'In Vorbereitung',

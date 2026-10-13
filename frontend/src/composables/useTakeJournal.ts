@@ -1,6 +1,6 @@
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { liveCaptureOwners } from '../captureOwners'
-import { api } from '../api'
+import { api, ApiError } from '../api'
 import { journalDelete, journalEntries, journalPut } from '../practiceJournal'
 import type { RecordingReceipt, StoredTake } from '../practiceTypes'
 
@@ -17,6 +17,7 @@ export function useTakeJournal() {
   const volatile = new Map<string, StoredTake>()
   let sending: Promise<void> | null = null
   let rerun = false
+  let waitingForReceipts = false
   async function retain(take: StoredTake) {
     volatile.set(take.id, take)
     try {
@@ -24,8 +25,9 @@ export function useTakeJournal() {
       volatile.delete(take.id)
       pendingTakes.value = (await journalEntries('take:')).length
     } catch (cause) {
-      error.value = String(cause)
-      throw cause
+      pendingTakes.value = Math.max(pendingTakes.value, volatile.size)
+      error.value = `Storage unavailable: ${String(cause)}. Audio is only in this open tab. Keep it open, free space and retry.`
+      throw new Error(error.value)
     }
   }
   async function flush() {
@@ -39,6 +41,7 @@ export function useTakeJournal() {
       const entries = await journalEntries<StoredTake>('take:')
       pendingTakes.value = entries.length
       const failures: string[] = []
+      waitingForReceipts = false
       for (const { key, value: take } of entries) {
         if (take.status === 'capturing') continue
         try {
@@ -61,6 +64,7 @@ export function useTakeJournal() {
           await journalDelete(key)
           pendingTakes.value--
         } catch (cause) {
+          if (cause instanceof ApiError && cause.status === 409) waitingForReceipts = true
           failures.push(`Recording ${take.id}: ${String(cause)}. Audio remains on this device.`)
         }
       }
@@ -99,5 +103,21 @@ export function useTakeJournal() {
     }
   }
   onMounted(recover)
+  function reconnect() {
+    if (!document.hidden) void recover()
+  }
+  function receipts() {
+    if (waitingForReceipts && !document.hidden) void flush()
+  }
+  onMounted(() => {
+    window.addEventListener('online', reconnect)
+    window.addEventListener('phrase-gym:receipts', receipts)
+    document.addEventListener('visibilitychange', reconnect)
+  })
+  onUnmounted(() => {
+    window.removeEventListener('online', reconnect)
+    window.removeEventListener('phrase-gym:receipts', receipts)
+    document.removeEventListener('visibilitychange', reconnect)
+  })
   return { pendingTakes, error, retain, flush }
 }

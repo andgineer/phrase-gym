@@ -1,6 +1,6 @@
 # P4 and P6 — phone reliability, validation and release
 
-Status: **not started**, updated 2026-10-13. P3 core and its [local follow-ups](evidence/p3-local-followups-2026-10-13.md) are verified; P4 can start from that baseline. Follow the [current handoff](next-session.md) and accepted unified-card decisions. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
+Status: **P4 engineering gate passed; fresh review in progress**, updated 2026-10-13. See the [offline decision](../decision-offline-sessions.md), [P4 runbook](p4-runbook.md), [implementation evidence](evidence/p4-core-2026-10-13.md) and [authorized fresh-review loop](evidence/p4-review-loop-2026-10-13.md). Actual-device acceptance remains open. Follow the [current handoff](next-session.md) and accepted unified-card decisions. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
 
 Use the [consolidated plan's acceptance checklist](implementation-plan.md#end-to-end-acceptance-checklist) as release coverage, including language URLs/UI separation, search/navigation, revised recall outcomes, reference audio and every recording's retention. Checks in this file concern implementation reliability, not learner-run learning-effectiveness validation.
 

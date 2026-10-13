@@ -7,6 +7,7 @@ import type { Language } from './api'
 import PracticePanel from './components/PracticePanel.vue'
 import SessionLauncher from './components/SessionLauncher.vue'
 import DueOverview from './components/DueOverview.vue'
+import DownloadedSessions from './components/DownloadedSessions.vue'
 import DialogueLibrary from './components/DialogueLibrary.vue'
 import { useLibrary } from './composables/useLibrary'
 import { languages, languageNames } from './i18n'
@@ -118,6 +119,7 @@ function leavePractice() {
           </nav>
         </section>
         <template v-else>
+          <DownloadedSessions v-if="kind === 'home'" :language="currentLanguage" :pt="pt" />
           <SessionLauncher ref="launcher" :engine="practice" :pt="pt" />
           <PracticePanel
             :key="practice.session.value?.id"

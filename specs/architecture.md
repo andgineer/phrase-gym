@@ -54,7 +54,7 @@ See [learning behaviour](architecture/learning-engine.md) and [data/API contract
 
 ## Application stack and layout
 
-- **Client:** Vue 3, TypeScript, Vite and Vue Router. A pure TypeScript session reducer handles transitions; views render its state. Keep fetch, recording and persistence behind small adapters. Use IndexedDB for session checkpoints and pending events; Cache Storage for downloaded immutable media. Add a service worker when the prepared-session offline milestone is built.
+- **Client:** Vue 3, TypeScript, Vite and Vue Router. A pure TypeScript session reducer handles transitions; views render its state. Keep fetch, recording and persistence behind small adapters. Use IndexedDB for session checkpoints and pending events; Cache Storage for downloaded immutable media. The [P4 offline decision](decision-offline-sessions.md) adds a verified versioned shell and selected-session media cache.
 - **Server:** FastAPI, Pydantic request/response models, SQLAlchemy and Alembic migrations. Generate TypeScript API types from the OpenAPI contract. Use short database transactions; keep network calls and media processing outside them.
 - **Runtime:** one API process serving the built client and API from the same origin, plus one bounded worker from the same Python package. A SQLite jobs table provides durable work, leases and retry state. No Redis or distributed job system is needed for the proposed personal workload.
 - **Storage:** one local SQLite database with foreign keys, WAL mode and a busy timeout; immutable model media files addressed by hash; all learner-recording audio stored as database BLOBs with links to attempts and capture metadata. Keep every take automatically, including retries; no manual Save flag or automatic expiry. Use a local filesystem for SQLite, not a network-mounted database file.
@@ -80,7 +80,7 @@ fixtures/                     reviewed learning content and edge cases
 tests/{unit,integration,browser}/
 ```
 
-The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer UI, attempts, recordings and review policy are implemented; actual-device/offline acceptance, preparation sources and deployment remain later work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
+The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer UI, attempts, recordings and review policy are implemented; downloaded-session offline engineering is implemented; actual-device acceptance, preparation sources and deployment remain separate work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
 
 ## Content and AI
 
@@ -96,7 +96,7 @@ Use a provider interface, with llmbroker and existing speech tools as candidates
 
 The server owns published content, committed attempts and schedules. The browser owns an unacknowledged local journal until the server confirms receipt. Save a turn's support/exposure history before showing its next state; reopening the page must not turn a model-assisted attempt into a fresh recall success.
 
-Build an online session first. Add **offline completion of an explicitly downloaded session** later: cache its manifest, approved alternate cues and required model audio, then verify the pack before calling it available offline. Starting arbitrary new offline sessions, merging arbitrary edits and peer-to-peer synchronization are not required for the first release.
+**Offline completion of an explicitly downloaded prepared session** is implemented in P4: cache the immutable manifest, prepared cues and required Reference/partner audio, verify bytes/hashes and the shell before marking it available, then journal and reconcile provisional completion. See the [offline decision](decision-offline-sessions.md) for repair deferral, compatibility and quota/eviction behavior. Starting arbitrary new offline sessions, merging arbitrary edits and peer-to-peer synchronization are not required for the first release.
 
 Use immutable event IDs and sequence numbers. The server records an attempt and any allowed schedule update in one transaction. Replaying a request returns the original receipt. A stale session may contribute history but must not overwrite a newer schedule. Display pending versus saved progress truthfully. Browser storage is a cache, not a guaranteed backup; show a recovery message after eviction. See [WebKit's storage policy](https://webkit.org/blog/14403/updates-to-storage-policy/).
 

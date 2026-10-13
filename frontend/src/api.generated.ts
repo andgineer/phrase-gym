@@ -932,6 +932,11 @@ export interface components {
             rating?: ("not_yet" | "with_effort" | "recalled") | null;
             /** Reason */
             reason?: string | null;
+            /**
+             * Defer Repairs
+             * @default false
+             */
+            defer_repairs: boolean;
         };
         /** PracticeSession */
         PracticeSession: {

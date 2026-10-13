@@ -9,7 +9,7 @@ from phrase_gym.contracts.sessions import SessionManifest, SessionStep
 from phrase_gym.errors import DomainError
 from phrase_gym.practice.evidence import create_attempt, observe, refresh_support
 from phrase_gym.practice.policy import ReviewPolicy
-from phrase_gym.practice.repairs import advance
+from phrase_gym.practice.repairs import Advancement, advance
 from phrase_gym.practice.reviews import ReviewContext, finalize_review
 from phrase_gym.practice.tables import AttemptRow, CueReportRow
 from phrase_gym.tables import ExposureRow, SessionRow
@@ -104,7 +104,13 @@ class ObservationProcessor:
         row.payload = evidence.model_dump_json()
         transaction.flush()
         if event.kind in ("rate", "report"):
-            advance(transaction, session, evidence, queue, receipt.occurred_at)
+            advance(
+                transaction,
+                session,
+                evidence,
+                queue,
+                Advancement(receipt.occurred_at, event.defer_repairs),
+            )
 
     @staticmethod
     def report(transaction: Session, item, evidence: AttemptEvidence, event: PracticeInput) -> None:

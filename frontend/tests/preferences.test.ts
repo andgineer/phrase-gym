@@ -3,6 +3,11 @@ import { ref } from 'vue'
 import { usePreferences } from '../src/composables/usePreferences'
 import { rememberLanguage, restoredLanguage } from '../src/learningLanguage'
 
+vi.mock('../src/practiceJournal', () => ({
+  journalPut: vi.fn(async () => {}),
+  journalEntries: vi.fn(async () => []),
+}))
+
 afterEach(() => vi.unstubAllGlobals())
 
 test('device language validates storage and tolerates failed reads and writes', () => {

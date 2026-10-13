@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { CardState } from '../reducer'
 import type { PlannedTarget, RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
@@ -17,6 +17,8 @@ const props = defineProps<{
   ratingBusy: boolean
   hasTake: boolean
 }>()
+const heading = ref<HTMLElement | null>(null)
+onMounted(() => heading.value?.focus())
 const cue = computed(() => props.item.phrase.content.cues?.find((c) => c.id === props.item.cue_id))
 const prompt = computed(() => cue.value?.prompt || props.item.phrase.content.purpose)
 const showPhrase = computed(
@@ -41,7 +43,13 @@ const emit = defineEmits<{
     <p class="practice-prompt" :lang="item.phrase.language">
       {{ prompt }}
     </p>
-    <h1 v-if="showPhrase" :lang="item.phrase.language" data-testid="practice-phrase">
+    <h1
+      v-if="showPhrase"
+      ref="heading"
+      tabindex="-1"
+      :lang="item.phrase.language"
+      data-testid="practice-phrase"
+    >
       <template v-for="chunk in item.phrase.content.chunks" :key="chunk.id">
         <span v-if="card.revealed || cue?.visible_chunks.includes(chunk.id)">{{ chunk.text }}</span>
         <span v-else class="gap" aria-label="…">_____ </span>
@@ -51,11 +59,19 @@ const emit = defineEmits<{
       <button
         class="microphone"
         :class="{ capturing }"
-        :disabled="requesting || processing || ratingBusy"
-        :aria-label="capturing ? pt.stopRecording : playing ? pt.stop : pt.record"
+        :disabled="processing || ratingBusy"
+        :aria-label="
+          requesting
+            ? pt.cancelPermission
+            : capturing
+              ? pt.stopRecording
+              : playing
+                ? pt.stop
+                : pt.record
+        "
         @click="emit('control')"
       >
-        <span aria-hidden="true">{{ capturing || playing ? '■' : '🎙' }}</span>
+        <span aria-hidden="true">{{ capturing || playing || requesting ? '■' : '🎙' }}</span>
       </button>
       <button
         :disabled="!hasTake || capturing || requesting || processing || ratingBusy"
@@ -107,6 +123,14 @@ const emit = defineEmits<{
       </ul>
     </details>
     <p>{{ pt.rating }}</p>
+    <p
+      v-if="
+        card.originalResponse?.supported || (!card.originalResponse && card.exposedBeforeResponse)
+      "
+      role="status"
+    >
+      {{ pt.supported }}
+    </p>
     <div class="ratings">
       <button
         class="not-yet"

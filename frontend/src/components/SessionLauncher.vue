@@ -47,9 +47,9 @@ defineExpose({ launch })
         >{{ languageNames[session.manifest.language] }} · {{ session.cursor }} /
         {{ session.queue.length }}</span
       >
-      <button :disabled="busy" @click="resume">{{ pt.resume }}</button>
+      <button :disabled="busy || engine.restoring.value" @click="resume">{{ pt.resume }}</button>
     </template>
-    <button v-if="requested && error" :disabled="busy" @click="create">
+    <button v-if="requested && error" :disabled="busy || engine.restoring.value" @click="create">
       {{ pt.retry }}
     </button>
     <p v-if="requested && busy" role="status">{{ pt.syncing }}</p>

@@ -1,6 +1,8 @@
 import { test as base } from '@playwright/test'
 
 export const test = base.extend<{ isolatedLibrary: void; silentPlayback: void }>({
+  // Page-level fault routes cannot intercept requests owned by a service worker.
+  serviceWorkers: 'block',
   silentPlayback: [
     async ({ context }, use) => {
       await context.addInitScript(() => {

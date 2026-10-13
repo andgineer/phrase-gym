@@ -32,6 +32,7 @@ class PracticeInput(Contract):
     modality: Modality = "self_report"
     rating: RecallRating | None = None
     reason: str | None = Field(default=None, max_length=1000)
+    defer_repairs: bool = False
 
     @model_validator(mode="after")
     def validate_kind(self) -> "PracticeInput":
@@ -39,6 +40,8 @@ class PracticeInput(Contract):
             raise ValueError("Only a rate event supplies a rating")
         if self.kind == "report" and not self.reason:
             raise ValueError("Cue reports require a reason")
+        if self.defer_repairs and self.kind != "rate":
+            raise ValueError("Only offline ratings can defer repair additions")
         return self
 
 

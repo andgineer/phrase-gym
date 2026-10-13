@@ -18,6 +18,7 @@ export function sessionCard(session: PracticeSession, pending: PracticeInput[]):
       }
     : initialCard()
   for (const event of pending) {
+    if (event.sequence <= session.last_sequence) continue
     if (event.step !== session.cursor) continue
     if (event.kind === 'answer' || event.kind === 'explain' || event.kind === 'respond') {
       state = reduceCard(state, {

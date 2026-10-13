@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import { api } from '../api'
 import type { Language, Settings } from '../api'
 import { messages } from '../i18n'
+import { journalEntries, journalPut } from '../practiceJournal'
 
 export function usePreferences(currentLanguage: Ref<Language | null>) {
   const settings = ref<Settings | null>(null)
@@ -22,6 +23,15 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
     if (settings.value) return
     if (!initialization) {
       initialization = api<Settings>('/settings')
+        .then(async (value) => {
+          await journalPut('preferences', value).catch(() => {})
+          return value
+        })
+        .catch(async (cause) => {
+          const cached = (await journalEntries<Settings>('preferences'))[0]?.value
+          if (!cached) throw cause
+          return cached
+        })
         .then((value) => {
           settings.value = value
           native.value = value.native_language ?? ''
@@ -45,6 +55,7 @@ export function usePreferences(currentLanguage: Ref<Language | null>) {
         }),
       })
       configuring.value = false
+      await journalPut('preferences', settings.value).catch(() => {})
       return true
     } finally {
       savingSettings.value = false

@@ -4,7 +4,7 @@ Proposed implementation behaviour, 2026-10-11. Derived from the [agreed drills](
 
 **Current recommendation:** Not yet / With effort / Recalled and an FSRS-based policy with 0.90 default retention, automatic target-state updates and a separate repair queue. The active flow below incorporates it; the former fixed ladder is historical. User acceptance of exact labels/parameters is still pending. The user has explicitly rejected learner-run validation, in-app experiments and special assessment sessions; testing here means software/content/device checks by the implementer.
 
-**P3 update, 2026-10-12:** the [core trainer decision](../decision-core-trainer.md) describes the implemented version under the user's delegation. It overrides historical separate recording modes, problem/alternative submenus, Practice again and Undo below. Capture is optional per attempt; original response/support, FSRS, repairs, cue history and prepared dialogue rehearsal are implemented. Actual-device/offline and content/source acceptance remain later work.
+**P3 update, 2026-10-12:** the [core trainer decision](../decision-core-trainer.md) describes the implemented version under the user's delegation. It overrides historical separate recording modes, problem/alternative submenus, Practice again and Undo below. Capture is optional per attempt; original response/support, FSRS, repairs, cue history and prepared dialogue rehearsal are implemented. P4 adds [verified downloaded-session completion](../decision-offline-sessions.md); actual-device and content/source acceptance remain separate work.
 
 ## Separate the learning target from its presentation
 

@@ -6,6 +6,7 @@ import type { Language } from '../api'
 import type { RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
+import SessionDownload from './SessionDownload.vue'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
   pt: PracticeMessages
@@ -110,6 +111,7 @@ async function pause() {
 }
 async function retry() {
   try {
+    await props.engine.load()
     await flush()
     await prepare()
     await media.takes.flush()
@@ -130,18 +132,37 @@ async function isolate() {
 }
 </script>
 <template>
-  <section v-if="session" class="practice-panel">
+  <section v-if="session" class="practice-panel" :aria-busy="engine.restoring.value">
     <div class="session-toolbar">
       <span
         >{{ Math.min(session.cursor + 1, session.queue.length) }} / {{ session.queue.length }}</span
       >
-      <button v-if="session.status === 'active'" :disabled="engine.busy.value" @click="pause">
+      <button
+        v-if="session.status === 'active'"
+        :disabled="engine.busy.value || engine.restoring.value"
+        @click="pause"
+      >
         {{ pt.pause }}
       </button>
       <button @click="emit('leave')">{{ pt.back }}</button>
     </div>
+    <SessionDownload
+      :engine="engine"
+      :pt="pt"
+      :capture-busy="capturing || requesting || processing"
+      :pending-takes="pendingTakes"
+      @retry="retry"
+    />
     <div v-if="session.status === 'completed' || session.status === 'superseded'" class="card">
-      <h1>{{ session.status === 'completed' ? pt.complete : pt.results }}</h1>
+      <h1 tabindex="-1">
+        {{
+          session.status === 'completed'
+            ? engine.pending.value.length
+              ? pt.completePending
+              : pt.complete
+            : pt.results
+        }}
+      </h1>
       <div v-if="session.manifest.dialogue" :lang="session.manifest.language">
         <p v-for="(turn, index) in session.manifest.dialogue.content.turns" :key="index">
           <strong>{{ turn.speaker }}:</strong> {{ turn.text }}
@@ -209,6 +230,7 @@ async function isolate() {
         </button>
       </section>
       <PracticeCard
+        :key="session.cursor"
         :item="item"
         :card="card"
         :pt="pt"
@@ -217,7 +239,9 @@ async function isolate() {
         :requesting="requesting"
         :processing="processing"
         :playing="playing"
-        :rating-busy="ratingBusy || !ready"
+        :rating-busy="
+          ratingBusy || !ready || engine.restoring.value || engine.offlineUnavailable.value
+        "
         :has-take="Boolean(latestUrl)"
         @control="media.control"
         @mine="media.audio.play(latestUrl)"

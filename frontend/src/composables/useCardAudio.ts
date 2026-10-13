@@ -69,7 +69,10 @@ export function useCardAudio(
     },
   })
   async function control() {
-    if (capture.capturing.value) await capture.stop()
+    if (capture.requesting.value) {
+      await capture.release()
+      await failure().catch(() => {})
+    } else if (capture.capturing.value) await capture.stop()
     else if (audio.playing.value) audio.stop()
     else {
       audio.stop()

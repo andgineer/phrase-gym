@@ -246,3 +246,54 @@ form {
 .header-controls label {
   min-width: 0;
 }
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #e9eee9;
+    background: #18221f;
+  }
+  .card,
+  button,
+  select,
+  input[type='search'] {
+    color: #e9eee9;
+    background: #25352e;
+    border-color: #64776b;
+  }
+  .brand,
+  .phrase-list a {
+    color: #e9eee9;
+  }
+  a,
+  .explain-link {
+    color: #9dcff0;
+  }
+  .muted,
+  .purpose,
+  .lesson-links span,
+  .eyebrow,
+  .explanation h2 {
+    color: #b9c9bf;
+  }
+  .session-banner {
+    background: #304339;
+  }
+  .gap {
+    color: #a5d1b8;
+  }
+  .not-yet {
+    color: #ffd1cb;
+    background: #522c29;
+  }
+  .effort {
+    color: #ffe6a0;
+    background: #493c1b;
+  }
+  .recalled {
+    color: #c4efd1;
+    background: #244932;
+  }
+  .error {
+    color: #ffcec1;
+    background: #512e27;
+  }
+}

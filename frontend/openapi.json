@@ -2666,6 +2666,11 @@
               }
             ],
             "title": "Reason"
+          },
+          "defer_repairs": {
+            "type": "boolean",
+            "title": "Defer Repairs",
+            "default": false
           }
         },
         "additionalProperties": false,

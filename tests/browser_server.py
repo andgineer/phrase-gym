@@ -8,8 +8,11 @@ import struct
 import tempfile
 import wave
 from pathlib import Path
+from uuid import UUID
 
 import uvicorn
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import delete
 
 from phrase_gym.api.app import create_app
@@ -40,13 +43,16 @@ def tone() -> bytes:
     return buffer.getvalue()
 
 
-def seed_library(database: Database, media: MediaService) -> None:
+def seed_library(database: Database, media: MediaService, revision: str = "1") -> None:
     content = ImportService(database, PackageValidator(media.available))
     for name in ("manual-en.json", "manual-sr.json"):
         package = ManualPackage.model_validate_json(
             (ROOT / "fixtures" / name).read_text(encoding="utf-8")
         )
+        package.source_revision = revision
         for target in package.targets:
+            if revision != "1":
+                target.purpose += " Updated publication."
             metadata = MediaMetadata(
                 language=package.language,
                 text=target.text,
@@ -76,15 +82,51 @@ def run() -> None:
     with tempfile.TemporaryDirectory(prefix="phrase-gym-browser-") as directory:
         config = Config(Path(directory), client_dir=ROOT / "frontend/dist")
         app = create_app(config)
+        app.state.lose_rating_ack = False
+
+        @app.middleware("http")
+        async def lost_ack(request: Request, call_next):
+            losing = False
+            if request.method == "POST" and request.url.path.endswith("/events"):
+                payload = await request.json()
+                losing = app.state.lose_rating_ack and any(
+                    event["kind"] == "rate" for event in payload["events"]
+                )
+            response = await call_next(request)
+            if losing and response.status_code == 200:
+                return JSONResponse({"detail": "Rating acknowledgement lost"}, 503)
+            return response
+
+        @app.post("/_test/lose-rating", include_in_schema=False)
+        def lose_rating():
+            app.state.lose_rating_ack = True
+            return {"armed": True}
+
+        @app.post("/_test/acknowledge-rating", include_in_schema=False)
+        def acknowledge_rating():
+            app.state.lose_rating_ack = False
+            return {"armed": False}
+
+        @app.post("/_test/revise-content", include_in_schema=False)
+        def revise_content():
+            seed_library(app.state.settings.db, app.state.media, "2")
+            return {"revised": True}
 
         @app.post("/_test/reset", include_in_schema=False)
         def reset_fixture():
+            app.state.lose_rating_ack = False
             database = app.state.settings.db
             with database.write() as session:
                 for table in reversed(Base.metadata.sorted_tables):
                     session.execute(delete(table))
             seed_library(database, app.state.media)
             return {"reset": True}
+
+        @app.post("/_test/missing-media/{media_id}", include_in_schema=False)
+        def missing_media(media_id: UUID):
+            path, _asset = app.state.media.delivery(media_id)
+            path.unlink()
+            return {"missing": True}
 
         uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
 

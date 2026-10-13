@@ -82,7 +82,20 @@ def create_app(config: Config | None = None, clock: Callable[[], datetime] = utc
         if assets.is_dir():
             app.mount("/assets", StaticFiles(directory=assets), name="assets")
 
+        @app.get("/sw.js", include_in_schema=False)
+        @app.get("/manifest.webmanifest", include_in_schema=False)
+        @app.get("/icon.svg", include_in_schema=False)
+        @app.get("/icon-192.png", include_in_schema=False)
+        @app.get("/icon-512.png", include_in_schema=False)
+        @app.get("/apple-touch-icon.png", include_in_schema=False)
+        def offline_asset(request: Request):
+            return FileResponse(
+                Path(runtime.client_dir or ".") / request.url.path.lstrip("/"),
+                headers={"Cache-Control": "no-cache"},
+            )
+
         @app.get("/", include_in_schema=False)
+        @app.get("/index.html", include_in_schema=False)
         @app.get("/learn", include_in_schema=False)
         @app.get("/learn/{client_path:path}", include_in_schema=False)
         def client():
