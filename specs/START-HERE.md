@@ -15,7 +15,7 @@ The [device-language and Settings decision](decision-device-language-and-setting
 The [unified practice-card decision](decision-unified-practice-card.md) is the latest interaction specification. It supersedes older separate cue/check/practice screens and intermediate manual-feedback designs.
 
 - One practice card with optional recording, reference/replay and colored/icon self-check buttons. Recording or Show answer fills the gaps; explanation expands inline.
-- Show answer and the visually distinct book-icon Show & explain action stay together on the card.
+- Show answer and the visually distinct book-icon Show & explain action stay together on the card when useful native translation/explanation exists. Missing help hides its action and panel; no not-prepared placeholder is shown. The preparation prompt must supply a translation, adding explanation only when useful.
 - The round microphone becomes a stop icon while recording/playing. Show **Press again to stop recording** only during capture.
 - Ratings save and advance quietly. No recording switch, Practice again, problem submenu, I couldn’t recall it, supported-only Continue, microphone-ready filler, saved-rating banner or Undo UI.
 - Native language supplies explanations; UI can follow native or learning language from version one. Learning-language URLs preserve separate sessions and bookmarks.

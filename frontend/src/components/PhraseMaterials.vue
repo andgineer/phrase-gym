@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import LookupRecording from './LookupRecording.vue'
 import type { PracticeMessages } from '../practiceMessages'
@@ -6,7 +7,8 @@ import type { ExposureInput } from '../api'
 import type { components } from '../api.generated'
 import type { Language, Phrase } from '../api'
 import type { Messages } from '../i18n'
-defineProps<{
+import { preparedExplanation } from '../explanation'
+const props = defineProps<{
   pt: PracticeMessages
   currentExposure: ExposureInput | null
   saveExposure: () => Promise<void>
@@ -19,11 +21,12 @@ defineProps<{
   exposureSaving: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
+const prepared = computed(() => preparedExplanation(props.explanation))
 const emit = defineEmits<{ retryExposure: [] }>()
 </script>
 <template>
   <article class="card phrase-card">
-    <p class="eyebrow">{{ t.materials }}</p>
+    <p class="eyebrow">{{ prepared ? t.materials : t.reference }}</p>
     <h1 :lang="language">{{ phrase.content.text }}</h1>
     <p :lang="language" class="purpose">{{ phrase.content.purpose }}</p>
     <LookupRecording
@@ -33,16 +36,19 @@ const emit = defineEmits<{ retryExposure: [] }>()
       :pt="pt"
     />
     <p v-if="phrase.audio_status !== 'ready'" class="muted">{{ t.missing }}</p>
-    <div class="explanation" v-if="explanation" :lang="nativeLanguage ?? undefined">
-      <h2>{{ t.meaning }}</h2>
-      <p>{{ explanation.meaning }}</p>
-      <h2>{{ t.usage }}</h2>
-      <p>{{ explanation.usage }}</p>
-      <ul v-if="explanation.breakdown?.length">
-        <li v-for="chunk in explanation.breakdown" :key="chunk">{{ chunk }}</li>
+    <div class="explanation" v-if="prepared" :lang="nativeLanguage ?? undefined">
+      <template v-if="prepared.meaning.trim()">
+        <h2>{{ t.meaning }}</h2>
+        <p>{{ prepared.meaning }}</p>
+      </template>
+      <template v-if="prepared.usage?.trim()">
+        <h2>{{ t.usage }}</h2>
+        <p>{{ prepared.usage }}</p>
+      </template>
+      <ul v-if="prepared.breakdown?.length">
+        <li v-for="chunk in prepared.breakdown" :key="chunk">{{ chunk }}</li>
       </ul>
     </div>
-    <p v-else>{{ t.noExplanation }}</p>
     <p v-if="exposureSaving" role="status">{{ t.exposureSaving }}</p>
     <div v-else-if="pendingExposure" class="error" role="alert">
       {{ t.exposureFailed }} <button @click="emit('retryExposure')">{{ t.retry }}</button>

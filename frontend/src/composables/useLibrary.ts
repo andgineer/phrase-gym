@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, language } from '../api'
 import type { Lesson, LessonPage, Phrase, PhrasePage } from '../api'
 import { languageNames } from '../i18n'
+import { preparedExplanation } from '../explanation'
 import { rememberLanguage, restoredLanguage } from '../learningLanguage'
 import { usePreferences } from './usePreferences'
 import { usePagination } from './usePagination'
@@ -122,7 +123,11 @@ export function useLibrary() {
       if (kind.value === 'phrases' && routeParts.value[3]) {
         const item = await api<Phrase>(`/phrases/${routeParts.value[3]}?${base}`)
         if (version !== requestVersion || firstLaunch.value || configuring.value) return
-        prepareExposure(item, lang)
+        const nativeLanguage = settings.value?.native_language
+        const help = nativeLanguage
+          ? preparedExplanation(item.content.explanations?.[nativeLanguage])
+          : null
+        prepareExposure(item, lang, help ? 'explanation' : 'answer')
         phrase.value = item
         loading.value = false
         void saveExposure()

@@ -8,7 +8,6 @@ const en = {
   counts: 'What counts?',
   criteria:
     'With effort means correct recall. Compare the whole phrase, including the required words and any allowed equivalents.',
-  missingExplanation: 'An explanation in your native language is not prepared yet.',
   answer: 'Show answer',
   explain: 'Show & explain',
   record: 'Record',
@@ -50,7 +49,6 @@ const ru: PracticeMessages = {
   counts: 'Что считать правильным?',
   criteria:
     'С усилием означает правильное воспроизведение. Сравните всю фразу, включая нужные слова и разрешённые варианты.',
-  missingExplanation: 'Объяснение на вашем родном языке ещё не подготовлено.',
   answer: 'Показать ответ',
   explain: 'Показать и объяснить',
   record: 'Записать',
@@ -91,7 +89,6 @@ const sr: PracticeMessages = {
   counts: 'Šta se računa?',
   criteria:
     'Uz napor znači tačno prisećanje. Uporedi celu frazu, uključujući tražene reči i dozvoljene varijante.',
-  missingExplanation: 'Objašnjenje na tvom maternjem jeziku još nije pripremljeno.',
   answer: 'Prikaži odgovor',
   explain: 'Prikaži i objasni',
   record: 'Snimi',
@@ -132,7 +129,6 @@ const de: PracticeMessages = {
   counts: 'Was zählt?',
   criteria:
     'Mit Mühe bedeutet korrekt erinnert. Vergleiche die ganze Phrase einschließlich der erforderlichen Wörter und erlaubten Varianten.',
-  missingExplanation: 'Eine Erklärung in deiner Muttersprache ist noch nicht vorbereitet.',
   answer: 'Antwort zeigen',
   explain: 'Zeigen und erklären',
   record: 'Aufnehmen',

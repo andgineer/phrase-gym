@@ -621,7 +621,7 @@ export interface components {
             /** Meaning */
             meaning: string;
             /** Usage */
-            usage: string;
+            usage?: string | null;
             /** Breakdown */
             breakdown?: string[];
         };

@@ -13,6 +13,7 @@ The user requested all of P3, not an isolated first batch, and delegated routine
 
 ## Implemented core
 
+- The 2026-10-13 native-help correction hides Show & explain and its panel when the selected native language has no useful content; there is no not-prepared placeholder. Translation-only help is supported without mandatory usage text. The [phrase-preparation prompt plan](phrase-preparation.md) now requires a native translation/meaning, with useful explanation only when necessary.
 - Local testing on 2026-10-13 corrected the vault test import to reviewed partial phrase cues for all 44 phrases. Situation-only cues are rejected on intake and excluded from new retrieval sessions; earlier pinned sessions stay readable. Start session now starts the selected scope in one click, retaining any replaced session's history, and Resume keeps the existing position. Do not restore the second replacement-button flow or treat a broad situation as a sufficient phrase hint.
 - Persistent native language and native/learning UI preference; separate `/learn/{language}` bookmarks; scoped library/concept search, complete lesson lists, exact reference provenance and immutable publication/content/dialogue bindings.
 - Due/new planning for All lessons or a selected lesson, one schedule per target, up to 20 items with at most five new items filling remaining capacity. Ready/preparing counts and the next UTC due time are separate reads. Imported examples without verified reference media remain Preparing.

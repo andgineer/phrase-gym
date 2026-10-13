@@ -4,6 +4,7 @@ import type { CardState } from '../reducer'
 import type { PlannedTarget, RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
 import type { Language } from '../api'
+import { preparedExplanation } from '../explanation'
 const props = defineProps<{
   item: PlannedTarget
   card: CardState
@@ -23,7 +24,9 @@ const showPhrase = computed(
     props.card.revealed ||
     props.item.phrase.content.chunks.some((chunk) => cue.value?.visible_chunks.includes(chunk.id)),
 )
-const explanation = computed(() => props.item.phrase.content.explanations?.[props.nativeLanguage])
+const explanation = computed(() =>
+  preparedExplanation(props.item.phrase.content.explanations?.[props.nativeLanguage]),
+)
 const emit = defineEmits<{
   control: []
   mine: []
@@ -77,6 +80,7 @@ const emit = defineEmits<{
         {{ pt.answer }}
       </button>
       <button
+        v-if="explanation"
         class="explain-link"
         :disabled="capturing || requesting || processing || ratingBusy"
         @click="emit('explain')"
@@ -84,17 +88,14 @@ const emit = defineEmits<{
         📖 {{ pt.explain }}
       </button>
     </div>
-    <div v-if="card.expanded" class="explanation" :lang="nativeLanguage">
-      <template v-if="explanation">
-        <p>{{ explanation.meaning }}</p>
-        <p>{{ explanation.usage }}</p>
-        <ul>
-          <li v-for="chunk in explanation.breakdown" :key="chunk">
-            {{ chunk }}
-          </li>
-        </ul>
-      </template>
-      <p v-else>{{ pt.missingExplanation }}</p>
+    <div v-if="card.expanded && explanation" class="explanation" :lang="nativeLanguage">
+      <p v-if="explanation.meaning.trim()">{{ explanation.meaning }}</p>
+      <p v-if="explanation.usage?.trim()">{{ explanation.usage }}</p>
+      <ul v-if="explanation.breakdown?.length">
+        <li v-for="chunk in explanation.breakdown" :key="chunk">
+          {{ chunk }}
+        </li>
+      </ul>
     </div>
     <details>
       <summary>{{ pt.counts }}</summary>

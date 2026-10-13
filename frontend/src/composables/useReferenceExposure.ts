@@ -9,13 +9,13 @@ export function useReferenceExposure() {
   const exposureSaving = computed(() =>
     Boolean(pendingExposure.value && pendingExposure.value.id === sendingId.value),
   )
-  function prepareExposure(item: Phrase, language: Language) {
+  function prepareExposure(item: Phrase, language: Language, kind: ExposureInput['kind']) {
     const payload: ExposureInput = {
       id: crypto.randomUUID(),
       target_id: item.id,
       revision: item.revision,
       language,
-      kind: 'explanation',
+      kind,
     }
     retainExposure(payload)
     currentExposure.value = payload

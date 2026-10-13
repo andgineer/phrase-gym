@@ -1805,9 +1805,16 @@
             "title": "Meaning"
           },
           "usage": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Usage"
           },
           "breakdown": {
@@ -1822,8 +1829,7 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "meaning",
-          "usage"
+          "meaning"
         ],
         "title": "Explanation"
       },

@@ -64,7 +64,7 @@ With recording off, use **Reveal & compare**, permit silent recall and play refe
 
 ### 5. Show & explain and support history
 
-**Agreed:** make help available before any attempt. Show the complete target-language phrase, native-language meaning/use and reference audio. Recommend concise explanation with an optional chunk/construction breakdown; detailed copy/layout remains proposed.
+**Agreed:** make prepared help available before any attempt. The phrase-preparation prompt must supply a natural native-language translation/meaning, adding concise usage/nuance or chunk/construction explanation only when useful. A straightforward phrase may need translation alone, with no filler usage section. Show & explain appears only when useful content exists in the selected native language; missing content hides the control rather than returning a not-prepared message. Show answer and reference playback remain separate available actions.
 
 Allow recording directly on this card. The full phrase stays visible throughout capture, learner playback and reference playback. Respect the same recording switch, manual controls and storage policy. These are supported practice takes, including when the card came from lookup outside a session.
 

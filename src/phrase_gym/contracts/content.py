@@ -21,7 +21,7 @@ class Cue(Contract):
 
 class Explanation(Contract):
     meaning: Text
-    usage: Text
+    usage: Text | None = None
     breakdown: list[str] = Field(default_factory=list, max_length=50)
 
 

@@ -44,3 +44,7 @@ Rename **Original result retained** to **Previous rating saved**. This banner co
 The user accepted removing the saved-rating banner and its Undo button. A rating saves and advances quietly. Accidental-rating correction is deferred until it proves useful; do not restore it from older screen plans. Underlying historical correction records/core helpers need not be deleted.
 
 The user asked to finish P1 and continue in a new session. P1 prototype work is closed with the current interaction decisions captured; unresolved real-device/audio/content evidence is carried forward explicitly in [the next-session handoff](plan/next-session.md). Closing the prototype phase is not a claim that those checks passed.
+
+## Native-language help availability — 2026-10-13
+
+Show & explain is conditional on useful content in the selected native language. When absent or empty, hide the button and panel; do not offer a control that only reports that nothing has been prepared, and do not substitute another language. Translation alone is sufficient for straightforward phrases, with optional useful explanation for nuance or constructions. The phrase-preparation prompt must prepare and review that material. Full-answer reveal and reference playback remain independently available.
