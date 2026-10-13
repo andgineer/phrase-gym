@@ -1,6 +1,6 @@
 # P2–P3 — production foundation and core trainer
 
-Updated **2026-10-12**. P2 engineering is closed at the user's request. P3 core engineering implementation is complete and its final gate passed: [104 Python tests, eight client tests and 138 browser checks](evidence/p3-review-loop-2026-10-12.md), with all hooks and client typecheck/build executed. The production application extends `src/phrase_gym` and `frontend/`. Latest [unified-card decisions](../decision-unified-practice-card.md) override historical switches, split screens, problem submenus and Undo.
+Updated **2026-10-13**. P2 engineering is closed at the user's request. P3 core engineering implementation is complete and its final gate passed: [110 Python tests, eight client tests and 164 browser checks](evidence/p3-local-followups-2026-10-13.md), with all hooks and client typecheck/build executed. The production application extends `src/phrase_gym` and `frontend/`. Latest [unified-card decisions](../decision-unified-practice-card.md) override historical switches, split screens, problem submenus and Undo.
 
 ## P2.1 — Application skeleton and contracts
 

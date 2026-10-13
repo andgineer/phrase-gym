@@ -1,16 +1,16 @@
 # P4 and P6 — phone reliability, validation and release
 
-Status: **not started**, 2026-10-11. P4 follows the core trainer and P1 audio probe. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
+Status: **not started**, updated 2026-10-13. P3 core and its [local follow-ups](evidence/p3-local-followups-2026-10-13.md) are verified; P4 can start from that baseline. Follow the [current handoff](next-session.md) and accepted unified-card decisions. P6 follows the selected release scope, including the agreed source handoff. Hosting remains undecided.
 
 Use the [consolidated plan's acceptance checklist](implementation-plan.md#end-to-end-acceptance-checklist) as release coverage, including language URLs/UI separation, search/navigation, revised recall outcomes, reference audio and every recording's retention. Checks in this file concern implementation reliability, not learner-run learning-effectiveness validation.
 
 ## P4.1 — Record, compare and retain every take reliably
 
-Harden the basic recording/comparison adapter already included in P3. Preserve the agreed session switch, visible state, start/stop/cancel, automatic learner-take → model comparison and manual replay/rerecord controls. Validate recording-off silent practice independently. Ask for the microphone only when the learner chooses recording. Stop tracks on exit; label interrupted/empty clips rather than presenting them as completed speech.
+Harden the basic recording/comparison adapter already included in P3. Preserve the unified card, optional explicit capture, single microphone/stop control, automatic learner-take → Reference comparison and manual replay/rerecord controls. There is no recording switch. Validate silent self-check without a microphone independently. Ask for the microphone only when the learner chooses recording. Stop tracks on exit; label interrupted/empty clips rather than presenting them as completed speech.
 
-Harden the automatic storage already included in P3: retain every take's audio and metadata in the app database, including retries, with no manual Save step or automatic expiry. Persist pending audio locally, transfer it independently of the attempt event and distinguish pending transfer from acknowledged database storage. Recoverable interrupted takes retain their audio with an incomplete status. Historical progress-comparison UI is deferred; keep the existing immediate self/model replay controls.
+Harden the automatic storage already included in P3: retain every take's audio and metadata in the app database, including retries, with no manual Save step or automatic expiry. Persist pending audio locally, transfer it independently of the attempt event and distinguish pending transfer from acknowledged database storage. Recoverable interrupted takes retain their audio with an incomplete status. Historical progress-comparison UI is deferred; keep the existing immediate learner/reference replay controls.
 
-**Acceptance:** denied/ignored permission does not trap the learner; real recordings play on the supported devices; upload retry creates one recording while a new take creates a separate record; comparison uses the intended model revision; all takes survive session completion/restart and database restore; quota failure does not claim a recording was saved. No voice is automatically submitted to an external model.
+**Acceptance:** denied/ignored permission does not trap the learner; real recordings play on the supported devices; upload retry creates one recording while a new take creates a separate record; comparison uses the intended reference revision; all takes survive session completion/restart and database restore; quota failure does not claim a recording was saved. No voice is automatically submitted to an external model.
 
 ## P4.2 — Downloaded sessions and reconnection
 

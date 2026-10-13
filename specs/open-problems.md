@@ -16,7 +16,7 @@ The user requested stopping the current investigation and closing P2. No additio
 
 ## DEVICE-01 — iPhone and installed-app acceptance
 
-**Untested.** A phone-accessible trusted HTTPS test origin and production capture/storage are still needed. P3/P4 must verify permission, recording/replay, interruption recovery, saved-take persistence and installed-app behavior before making the corresponding device claim.
+**Untested.** Production capture/storage is implemented in P3. A phone-accessible trusted HTTPS test origin and actual P4 device checks are still needed to verify permission, recording/replay, interruption recovery, saved-take persistence and installed-app behavior before making the corresponding device claim.
 
 ## CONTENT-01 — Real reference speech and language quality
 

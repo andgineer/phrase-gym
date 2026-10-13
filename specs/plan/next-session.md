@@ -1,6 +1,6 @@
 # Next-session handoff — P3 core, P4 next
 
-Updated **2026-10-12**. P1 and P2 engineering/review work are closed. P3 core engineering implementation and its final gate are complete: **104 Python tests, eight client tests and 138 browser checks**, with all hooks, client typecheck and build executed. See the [original P3 evidence](evidence/p3-core-2026-10-12.md) and [completed three-round fresh Sol 6.1 review](evidence/p3-review-loop-2026-10-12.md), which converged with 5 → 1 → 0 findings. The production app remains in `src/phrase_gym` and `frontend/`; prototype **0.1.6** remains an interaction reference.
+Updated **2026-10-13**. P1 and P2 engineering/review work are closed. P3 core engineering implementation and its final gate are complete: **110 Python tests, eight client tests and 164 browser checks**, with all hooks, client typecheck and build executed. The [local follow-up evidence](evidence/p3-local-followups-2026-10-13.md) records the latest corrections and gate. P4 implementation can start in a fresh session. See the [original P3 evidence](evidence/p3-core-2026-10-12.md) and [completed three-round fresh Sol 6.1 review](evidence/p3-review-loop-2026-10-12.md), which converged with 5 → 1 → 0 findings. The production app remains in `src/phrase_gym` and `frontend/`; prototype **0.1.6** remains an interaction reference.
 
 ## Read first
 
@@ -39,6 +39,8 @@ The [foundation boundaries](../decision-production-foundation.md) and core decis
 Preserve the user's Python scaffold conventions, Vue client, locked dependencies and same-origin API. Commit authorized work directly to **main**. Do not push/deploy without a separate explicit request. Keep `.env`, keys, learner data and recordings ignored/private/server-side; never read them into fixtures/logs. Vault, echo-words, legacy trainers and Anki sources stay read-only unless separately authorized. Reinspect echo-words only when its actual integration begins; no macOS-only speech dependency is approved.
 
 ## Run and verify
+
+The current manual test app uses the ignored `.data/vault-test` directory, with 44 English phrases and original vault reference clips. Preserve its existing progress and recordings; automated tests use disposable data instead. Check for an existing process before starting another server. To restart this manual instance, use `uv run phrase-gym --data-dir .data/vault-test serve --client-dir frontend/dist` on loopback port 8000.
 
 Use [P3 run/use instructions](p3-runbook.md) and [P2 import/media commands](p2-runbook.md). The local production CLI serves `http://127.0.0.1:8000/learn/en` by default; no surviving process is assumed. `http://127.0.0.1:8873/learn/en` belongs to the earlier disposable prototype and is not the production trainer.
 
