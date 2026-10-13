@@ -123,3 +123,38 @@ for (const mode of ['capture', 'permission', 'playback'])
       expect(state.attempts[0].original.modality).toBe('recorded')
     }
   })
+
+test('a session body lost after successful headers blocks practice until actual recovery', async ({
+  page,
+  request,
+  connection,
+}) => {
+  const id = await startSession(page)
+  const before = await (await request.get(`/api/v1/sessions/${id}`)).json()
+  const receipts = await (await request.get(`/api/v1/sessions/${id}/events`)).json()
+  const cut = connection.cutNextSessionBody()
+  const headers = page.waitForResponse(
+    (response) => response.url().endsWith('/api/v1/sessions/current') && response.status() === 200,
+  )
+  await page.evaluate(() => window.dispatchEvent(new Event('online')))
+  await headers
+  await expect(page.getByRole('button', { name: 'Recalled' })).toBeDisabled()
+  cut()
+  await expect(page.getByTestId('connection-required')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Recalled' })).toBeHidden()
+  expect((await readCheckpoint(page, id)).cursor).toBe(before.cursor)
+  const blocked = await (await request.get(`/api/v1/sessions/${id}`)).json()
+  expect(blocked.cursor).toBe(before.cursor)
+  expect(blocked.last_sequence).toBe(before.last_sequence)
+  await page
+    .getByTestId('connection-required')
+    .getByRole('button', { name: 'Retry', exact: true })
+    .click()
+  await expect(page.getByTestId('connection-required')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Recalled' })).toBeEnabled()
+  const restored = await (await request.get(`/api/v1/sessions/${id}`)).json()
+  expect(restored.cursor).toBe(before.cursor)
+  expect(restored.last_sequence).toBe(before.last_sequence)
+  expect(restored.attempts[0].id).toBe(before.attempts[0].id)
+  expect(await (await request.get(`/api/v1/sessions/${id}/events`)).json()).toEqual(receipts)
+})

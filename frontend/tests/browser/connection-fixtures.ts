@@ -1,11 +1,17 @@
-import { createServer, connect } from 'node:net'
+import { createServer, request } from 'node:http'
+import type { ServerResponse } from 'node:http'
 import type { Socket } from 'node:net'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test as base } from './fixtures'
 
-type Connection = { url: string; disconnect: () => void; reconnect: () => void }
+type Connection = {
+  url: string
+  disconnect: () => void
+  reconnect: () => void
+  cutNextSessionBody: () => () => void
+}
 export const test = base.extend<{ connection: Connection; journalDiagnostics: void }>({
   journalDiagnostics: [
     async ({ page }, use, testInfo) => {
@@ -47,22 +53,49 @@ export const test = base.extend<{ connection: Connection; journalDiagnostics: vo
     const origin = new URL(baseURL!)
     let online = true
     const sockets = new Set<Socket>()
-    const server = createServer((client) => {
+    function track(socket: Socket) {
+      if (sockets.has(socket)) return
+      sockets.add(socket)
+      socket.once('close', () => sockets.delete(socket))
+    }
+    let cutting = false
+    let cutResponse: ServerResponse | null = null
+    const server = createServer((client, response) => {
       if (!online) {
-        client.destroy()
+        client.socket.destroy()
         return
       }
-      const upstream = connect(Number(origin.port), origin.hostname)
-      for (const socket of [client, upstream]) {
-        sockets.add(socket)
-        socket.on('error', () => {
-          client.destroy()
-          upstream.destroy()
-        })
-        socket.on('close', () => sockets.delete(socket))
-      }
-      client.pipe(upstream).pipe(client)
+      const upstream = request(
+        {
+          hostname: origin.hostname,
+          port: origin.port,
+          path: client.url,
+          method: client.method,
+          headers: client.headers,
+        },
+        (incoming) => {
+          incoming.on('error', () => response.destroy())
+          if (cutting && client.url === '/api/v1/sessions/current') {
+            cutting = false
+            cutResponse = response
+            response.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Transfer-Encoding': 'chunked',
+              'Cache-Control': 'no-store',
+            })
+            response.write('{')
+            incoming.resume()
+          } else {
+            response.writeHead(incoming.statusCode ?? 502, incoming.headers)
+            incoming.pipe(response)
+          }
+        },
+      )
+      upstream.on('socket', track)
+      upstream.on('error', () => response.destroy())
+      client.pipe(upstream)
     })
+    server.on('connection', track)
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
     const address = server.address()
     if (!address || typeof address === 'string') throw new Error('Proxy did not start')
@@ -75,6 +108,13 @@ export const test = base.extend<{ connection: Connection; journalDiagnostics: vo
         },
         reconnect: () => {
           online = true
+        },
+        cutNextSessionBody: () => {
+          cutting = true
+          return () => {
+            cutResponse?.destroy()
+            cutResponse = null
+          }
         },
       })
     } finally {

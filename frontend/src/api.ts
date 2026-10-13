@@ -45,7 +45,12 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
       response.status,
     )
   }
-  return response.json() as Promise<T>
+  try {
+    return (await response.json()) as T
+  } catch (cause) {
+    serverUnavailable.value = true
+    throw cause
+  }
 }
 
 export function language(value: unknown): Language | null {
