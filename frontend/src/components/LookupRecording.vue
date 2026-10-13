@@ -11,11 +11,17 @@ const props = defineProps<{
 }>()
 const media = useCardAudio(
   async () => {
+    const target = props.phrase
     await props.saveExposure()
-    if (!props.exposure) throw new Error('The reference exposure must be retained before recording')
+    if (
+      !props.exposure ||
+      props.exposure.target_id !== target.id ||
+      props.exposure.revision !== target.revision
+    )
+      throw new Error('The reference exposure must be retained before recording')
     return {
-      target_id: props.phrase.id,
-      revision: props.phrase.revision,
+      target_id: target.id,
+      revision: target.revision,
       exposure_id: props.exposure.id,
     }
   },
@@ -24,18 +30,24 @@ const media = useCardAudio(
       ? `/api/v1/media/${props.phrase.content.reference_audio_id}`
       : '',
   async () => {},
+  () => `${props.phrase.id}:${props.phrase.revision}`,
 )
 const { capturing, requesting, processing, error } = media.capture
 const { playing, error: audioError } = media.audio
 const { error: takeError, pendingTakes } = media.takes
 const { latestUrl } = media
-const disabled = computed(() => !props.exposure || requesting.value || processing.value)
+const disabled = computed(
+  () =>
+    !(capturing.value || requesting.value || playing.value) &&
+    (!props.exposure || processing.value),
+)
 watch(
-  () => props.phrase.id,
-  async (id) => {
+  () => `${props.phrase.id}:${props.phrase.revision}`,
+  async () => {
+    await media.release()
     latestUrl.value = ''
     try {
-      await media.refresh(id)
+      await media.refresh(props.phrase.id)
     } catch {}
   },
   { immediate: true },
@@ -47,10 +59,18 @@ watch(
       <button
         class="microphone"
         :disabled="disabled"
-        :aria-label="capturing ? pt.stopRecording : playing ? pt.stop : pt.record"
+        :aria-label="
+          requesting
+            ? pt.cancelPermission
+            : capturing
+              ? pt.stopRecording
+              : playing
+                ? pt.stop
+                : pt.record
+        "
         @click="media.control"
       >
-        {{ capturing || playing ? '■' : '🎙' }}
+        {{ capturing || playing || requesting ? '■' : '🎙' }}
       </button>
       <button
         v-if="phrase.audio_status === 'ready'"

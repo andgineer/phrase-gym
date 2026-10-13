@@ -3,8 +3,11 @@ import { api } from './api'
 import { journalEntries, journalPut } from './practiceJournal'
 import type { PracticeSession } from './practiceTypes'
 import { verifyOfflineShell } from './pwa'
+import { ref } from 'vue'
 
 export const mediaCacheName = 'phrase-gym.selected-media.v1'
+export const packReady = ref<Record<string, boolean>>({})
+const verifications = new Map<string, number>()
 export type SessionPack = {
   version: 3
   session: PracticeSession
@@ -15,7 +18,7 @@ export async function checksum(bytes: ArrayBuffer) {
     b.toString(16).padStart(2, '0'),
   ).join('')
 }
-export async function verifyPack(id: string): Promise<SessionPack | null> {
+async function inspectPack(id: string): Promise<SessionPack | null> {
   const pack = (await journalEntries<SessionPack>(`pack:${id}`)).find(
     (e) => e.key === `pack:${id}`,
   )?.value
@@ -45,12 +48,27 @@ export async function verifyPack(id: string): Promise<SessionPack | null> {
   }
   if (pack.session.manifest.required_media_ids.some((id) => !pack.media.some((m) => m.id === id)))
     throw new Error('Download is missing required audio')
+  await verifyOfflineShell()
   return pack
+}
+export async function verifyPack(id: string): Promise<SessionPack | null> {
+  const token = (verifications.get(id) ?? 0) + 1
+  verifications.set(id, token)
+  try {
+    const pack = await inspectPack(id)
+    if (verifications.get(id) === token) packReady.value[id] = Boolean(pack)
+    return pack
+  } catch (cause) {
+    if (verifications.get(id) === token) packReady.value[id] = false
+    throw cause
+  }
 }
 export async function downloadPack(
   session: PracticeSession,
   progress: (done: number, total: number) => void,
 ) {
+  verifications.set(session.id, (verifications.get(session.id) ?? 0) + 1)
+  packReady.value[session.id] = false
   await verifyOfflineShell(true)
   await journalPut('preferences', await api<components['schemas']['Settings']>('/settings'))
   const cache = await caches.open(mediaCacheName)

@@ -20,7 +20,7 @@ export async function verifyOfflineShell(repair = false): Promise<void> {
       else
         reject(
           new Error(
-            'Offline app shell is unavailable or evicted. Reconnect and reinstall the app cache.',
+            'Offline app shell is unavailable or evicted. Reconnect and download this session again to repair the app cache.',
           ),
         )
     }

@@ -13,14 +13,15 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
   let captureContext: { sessionId: string; step: number } | null = null
   const media = useCardAudio(
     async () => {
-      if (session.value)
-        captureContext = { sessionId: session.value.id, step: session.value.cursor }
+      const origin = session.value
+      const target = item.value
+      const attempt = origin?.attempts.find((a) => a.step === origin.cursor)
+      if (!origin || !attempt || !target) throw new Error('Attempt is not ready')
+      captureContext = { sessionId: origin.id, step: origin.cursor }
       const captureEvent = await action('respond', { modality: 'recorded' })
-      const attempt = session.value?.attempts.find((a) => a.step === session.value?.cursor)
-      if (!attempt || !item.value) throw new Error('Attempt is not ready')
       return {
-        target_id: item.value.phrase.id,
-        revision: item.value.phrase.revision,
+        target_id: target.phrase.id,
+        revision: target.phrase.revision,
         attempt_id: attempt.id,
         capture_event_id: captureEvent.id,
       }
@@ -33,6 +34,7 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
       )
         await action('failure', { reason: 'Capture unavailable or interrupted' })
     },
+    () => `${session.value?.id}:${session.value?.cursor}`,
     async () => {
       if (
         session.value?.id === captureContext?.sessionId &&
@@ -50,6 +52,14 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
   )
   async function prepare() {
     if (engine.restoring.value) return
+    if (
+      captureContext &&
+      (session.value?.id !== captureContext.sessionId ||
+        session.value?.cursor !== captureContext.step)
+    ) {
+      captureContext = null
+      await media.release()
+    }
     if (session.value?.status !== 'active') {
       await media.release()
       return

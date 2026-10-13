@@ -59,7 +59,7 @@ const emit = defineEmits<{
       <button
         class="microphone"
         :class="{ capturing }"
-        :disabled="processing || ratingBusy"
+        :disabled="!(capturing || playing || requesting) && (processing || ratingBusy)"
         :aria-label="
           requesting
             ? pt.cancelPermission

@@ -1,5 +1,13 @@
 import type { PracticeSession } from './practiceTypes'
 
+export function mergeSupportFacts(current: PracticeSession | undefined, incoming: PracticeSession) {
+  const facts: Record<string, string[]> = {}
+  for (const state of [current, incoming])
+    for (const [target, times] of Object.entries(state?.support_exposures ?? {}))
+      facts[target] = [...new Set([...(facts[target] ?? []), ...times])].sort()
+  return facts
+}
+
 export function rememberSupport(state: PracticeSession, targetId: string, time: string) {
   const exposures = (state.support_exposures ??= {})
   const times = (exposures[targetId] ??= [])

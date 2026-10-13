@@ -13,6 +13,7 @@ export function useCardAudio(
   context: () => Promise<Context>,
   referenceUrl: () => string,
   failure: () => Promise<void>,
+  currentScope: () => string,
   completed: () => Promise<void> = async () => {},
 ) {
   const takes = takeTransfers
@@ -21,6 +22,8 @@ export function useCardAudio(
   let localUrl = ''
   let live = true
   let generation = 0
+  let captureScope = ''
+  let captureReference = ''
   function local(take: StoredTake) {
     if (localUrl) URL.revokeObjectURL(localUrl)
     localUrl = URL.createObjectURL(new Blob([take.audio], { type: take.mime_type }))
@@ -43,16 +46,22 @@ export function useCardAudio(
       latestUrl.value = `/api/v1/recordings/${latest.id}`
   }
   const capture = useCapture({
-    context,
+    context: async () => {
+      captureScope = currentScope()
+      captureReference = referenceUrl()
+      return context()
+    },
     retain: takes.retain,
     failure,
     finished: async (take) => {
-      if (take.complete) {
+      const scope = captureScope
+      const reference = captureReference
+      if (take.complete && currentScope() === scope) {
         try {
           await completed()
         } catch {}
       }
-      if (!live) {
+      if (!live || currentScope() !== scope) {
         void takes.flush()
         return
       }
@@ -61,7 +70,7 @@ export function useCardAudio(
       void takes.flush()
       if (live && take.complete && !document.hidden) {
         void audio.play(localUrl).then((ok) => {
-          if (ok && live && referenceUrl()) void audio.play(referenceUrl())
+          if (ok && live && currentScope() === scope && reference) void audio.play(reference)
         })
       }
     },

@@ -1,10 +1,10 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Ref } from 'vue'
-import { downloadPack, verifyPack } from '../sessionPack'
+import { downloadPack, verifyPack, packReady } from '../sessionPack'
 import type { PracticeSession } from '../practiceTypes'
 
 export function useSessionPack(session: Ref<PracticeSession | null>) {
-  const downloaded = ref(false)
+  const downloaded = computed(() => Boolean(session.value && packReady.value[session.value.id]))
   const busy = ref(false)
   const progress = ref('')
   const error = ref('')
@@ -13,11 +13,9 @@ export function useSessionPack(session: Ref<PracticeSession | null>) {
     () => session.value?.id,
     async (id) => {
       const token = ++generation
-      downloaded.value = false
       error.value = ''
       try {
-        const pack = id ? await verifyPack(id) : null
-        if (token === generation) downloaded.value = Boolean(pack)
+        if (id) await verifyPack(id)
       } catch (cause) {
         if (token === generation) error.value = String(cause)
       }
@@ -27,15 +25,12 @@ export function useSessionPack(session: Ref<PracticeSession | null>) {
   async function download() {
     const state = session.value
     if (!state || busy.value) return
-    const token = generation
     busy.value = true
-    downloaded.value = false
     error.value = ''
     try {
       await downloadPack(state, (done, total) => {
         progress.value = `${done} / ${total}`
       })
-      if (token === generation) downloaded.value = true
     } catch (cause) {
       error.value = `Download incomplete: ${String(cause)}. Device storage may be full. Pending actions and audio are retained; free space outside this app and retry.`
     } finally {

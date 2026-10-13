@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import type { PracticeSession } from '../../src/practiceTypes'
 export async function downloadSession(page: Page) {
   await page.goto('/learn/en')
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
@@ -30,5 +31,23 @@ export async function retainedKeys(page: Page, prefix: string): Promise<string[]
         }
       }),
     prefix,
+  )
+}
+export async function readCheckpoint(page: Page, id: string) {
+  return page.evaluate(
+    (id) =>
+      new Promise<PracticeSession>((resolve, reject) => {
+        const opening = indexedDB.open('phrase-gym.practice.v1', 1)
+        opening.onsuccess = () => {
+          const reading = opening.result
+            .transaction('journal')
+            .objectStore('journal')
+            .get(`session:${id}`)
+          reading.onsuccess = () => resolve(reading.result)
+          reading.onerror = () => reject(reading.error)
+        }
+        opening.onerror = () => reject(opening.error)
+      }),
+    id,
   )
 }

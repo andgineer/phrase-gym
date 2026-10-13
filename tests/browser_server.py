@@ -101,6 +101,27 @@ def run() -> None:
         app = create_app(config, clock=lambda: datetime.now(UTC) + clock_offset[0])
         app.state.lose_rating_ack = False
         app.state.recording_ack_gate = None
+        app.state.session_read_gate = None
+        app.state.session_read_id = None
+        app.state.session_read_held = False
+
+        @app.post("/_test/hold-session-read/{session_id}", include_in_schema=False)
+        async def hold_session_read(session_id: UUID):
+            app.state.session_read_gate = asyncio.Event()
+            app.state.session_read_id = str(session_id)
+            app.state.session_read_held = False
+            return {"armed": True}
+
+        @app.get("/_test/session-read-state", include_in_schema=False)
+        async def session_read_state():
+            return {"held": app.state.session_read_held}
+
+        @app.post("/_test/release-session-read", include_in_schema=False)
+        async def release_session_read():
+            if app.state.session_read_gate:
+                app.state.session_read_gate.set()
+            app.state.session_read_id = None
+            return {"released": True}
 
         @app.post("/_test/advance-clock/{seconds}", include_in_schema=False)
         def advance_clock(seconds: int):
@@ -119,6 +140,13 @@ def run() -> None:
 
         @app.middleware("http")
         async def lost_ack(request: Request, call_next):
+            read_gate = None
+            if (
+                request.method == "GET"
+                and request.url.path == f"/api/v1/sessions/{app.state.session_read_id}"
+            ):
+                read_gate = app.state.session_read_gate
+                app.state.session_read_id = None
             recording_gate = (
                 app.state.recording_ack_gate
                 if request.method == "POST" and request.url.path == "/api/v1/recordings"
@@ -131,6 +159,10 @@ def run() -> None:
                     event["kind"] == "rate" for event in payload["events"]
                 )
             response = await call_next(request)
+            if read_gate and response.status_code == 200:
+                app.state.session_read_held = True
+                await read_gate.wait()
+                app.state.session_read_held = False
             if recording_gate and response.status_code == 200:
                 await recording_gate.wait()
             if losing and response.status_code == 200:
@@ -167,6 +199,11 @@ def run() -> None:
         @app.post("/_test/reset", include_in_schema=False)
         async def reset_fixture():
             clock_offset[0] = timedelta()
+            if app.state.session_read_gate:
+                app.state.session_read_gate.set()
+            app.state.session_read_gate = None
+            app.state.session_read_id = None
+            app.state.session_read_held = False
             app.state.lose_rating_ack = False
             if app.state.recording_ack_gate:
                 app.state.recording_ack_gate.set()
