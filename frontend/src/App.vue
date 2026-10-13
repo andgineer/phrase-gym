@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useTakeJournal } from './composables/useTakeJournal'
 import { usePracticeSession } from './composables/usePracticeSession'
 import { practiceMessages } from './practiceMessages'
 import type { Language } from './api'
@@ -58,6 +59,13 @@ const {
   loadRoute,
 } = useLibrary()
 const practice = usePracticeSession()
+const transfers = useTakeJournal()
+async function retryTransfers() {
+  try {
+    await practice.flush()
+  } catch {}
+  await transfers.flush()
+}
 const router = useRouter()
 const pt = computed(() => practiceMessages(locale.value))
 const launcher = ref<InstanceType<typeof SessionLauncher> | null>(null)
@@ -91,6 +99,11 @@ function leavePractice() {
       </div>
     </header>
     <main>
+      <div v-if="transfers.pendingTakes.value && (kind !== 'practice' || configuring)">
+        <p role="status">{{ pt.pending }} ({{ transfers.pendingTakes.value }})</p>
+        <p v-if="transfers.error.value" role="alert" class="error">{{ transfers.error.value }}</p>
+        <button @click="retryTransfers">{{ pt.retry }}</button>
+      </div>
       <p class="error" v-if="error" role="alert">
         {{ error }} <button @click="loadRoute">{{ t.retry }}</button>
       </p>

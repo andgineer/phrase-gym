@@ -10,7 +10,7 @@ A pack uses schema version 1 and preserves the server checkpoint independently f
 
 Downloaded queues remain stable: ratings in a downloaded session carry `defer_repairs`. Extra repair cards are deferred to the next scheduled practice rather than appended to this queue. Existing pinned repair steps still run. Ordinary connected, undownloaded sessions retain the five-minute/two-other-target repair policy. This routine reliability choice avoids predicting authoritative eligibility/schedules or introducing timed offline waiting; every original outcome still receives the normal server validation and scheduling policy.
 
-Offline pause/resume is device-local and journaled independently of the server's active status. It prevents capture/practice on this device and survives reopening. Online transitions retain version checks. Switching language or opening a pack does not take over the server's open session or change any pinned binding.
+Offline pause/resume is device-local: both desired active and paused states are journaled independently of the acknowledged server status and applied on every load/receipt, including empty-outbox online reloads. A verified pack retains the intent when the first attempted connected transition encounters connection loss. It prevents capture/practice on this device and survives reopening; authoritative completion/supersession always wins. Online transitions retain version checks. Switching language or opening a pack does not take over the server's open session or change any pinned binding.
 
 ## Reconciliation and updates
 
@@ -18,7 +18,7 @@ Foreground, an online signal, reopening and explicit Retry reconcile the origina
 
 The service worker serves its complete shell, selected media and range responses. An updated worker waits for explicit activation at a paused/end checkpoint; pending events/takes disable the update action. App activation never automatically reloads a spoken attempt. Old shell assets remain cached for existing tabs. No schema migration deletes unacknowledged evidence; incompatible pack versions produce recovery guidance.
 
-Quota, unavailable IndexedDB and evicted media produce visible failures. A journal write failure prevents a provisional rating/advancement; audio whose journal write fails remains volatile in the open tab, with an explicit keep-open/free-space/retry message. Missing cached audio blocks the offline promise until a new verified download. If browser storage itself is lost, the server can restore acknowledged history and recordings, but cannot reconstruct unacknowledged device bytes. No automatic expiration of pending evidence or browser-origin backup claim is introduced.
+Quota, unavailable IndexedDB and evicted media produce visible failures. A journal write failure prevents a provisional rating/advancement; audio whose journal write fails remains with an application-lifetime transfer owner in the open tab, across Library/Settings/language navigation, with an explicit keep-open/free-space/retry message and global recovery controls. That owner also supplies latest-take replay and update guards; empty markers never replace its bytes. Missing cached audio blocks the offline promise until a new verified download. If browser storage itself is lost, the server can restore acknowledged history and recordings, but cannot reconstruct unacknowledged device bytes. No automatic expiration of pending evidence or browser-origin backup claim is introduced.
 
 ## Evidence boundaries
 

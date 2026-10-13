@@ -191,7 +191,9 @@ async function isolate() {
     </div>
     <div v-else-if="session.status === 'paused'" class="card">
       <h1>{{ pt.paused }}</h1>
-      <button @click="transition('active')">{{ pt.resume }}</button>
+      <button :disabled="engine.busy.value || engine.restoring.value" @click="transition('active')">
+        {{ pt.resume }}
+      </button>
     </div>
     <div v-else-if="intro && session.manifest.dialogue" class="card">
       <h1>{{ session.manifest.dialogue.content.title }}</h1>

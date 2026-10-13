@@ -5,6 +5,7 @@ import { journalCheckpoint, journalDelete, journalEntries, journalPut } from '..
 import { sessionCard } from '../practiceState'
 import { localAttemptId, projectEvent } from '../offlineProjection'
 import { verifyPack } from '../sessionPack'
+import { restoreDeviceStatus } from '../deviceSessionState'
 import type {
   PendingEvent,
   PracticeBatchReceipt,
@@ -40,8 +41,7 @@ export function usePracticeEvents(
       .sort((a, b) => a.event.sequence - b.event.sequence)
     for (const { event } of events)
       projected = projectEvent(projected, event, await localAttemptId(state.id, event.step))
-    const paused = (await journalEntries<boolean>(`paused:${state.id}`)).length > 0
-    if (paused && projected.status === 'active') projected = { ...projected, status: 'paused' }
+    projected = await restoreDeviceStatus(projected)
     if (isCurrent()) accept(projected)
   }
   async function flush() {

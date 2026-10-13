@@ -1,9 +1,8 @@
 import { onUnmounted, ref } from 'vue'
 import { api } from '../api'
-import { journalEntries } from '../practiceJournal'
 import { useCapture } from './useCapture'
 import { usePracticeAudio } from './usePracticeAudio'
-import { useTakeJournal } from './useTakeJournal'
+import { takeTransfers } from '../takeTransfers'
 import type { RecordingReceipt, StoredTake } from '../practiceTypes'
 
 type Context = Pick<
@@ -16,7 +15,7 @@ export function useCardAudio(
   failure: () => Promise<void>,
   completed: () => Promise<void> = async () => {},
 ) {
-  const takes = useTakeJournal()
+  const takes = takeTransfers
   const audio = usePracticeAudio()
   const latestUrl = ref('')
   let localUrl = ''
@@ -29,8 +28,7 @@ export function useCardAudio(
   }
   async function refresh(targetId: string) {
     const token = ++generation
-    const pending = (await journalEntries<StoredTake>('take:'))
-      .map((e) => e.value)
+    const pending = (await takes.localTakes())
       .filter((t) => t.target_id === targetId && t.audio.byteLength)
       .sort((a, b) => b.captured_at.localeCompare(a.captured_at))[0]
     if (pending && live && token === generation) local(pending)

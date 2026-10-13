@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { journalEntries } from './practiceJournal'
+import { takeTransfers } from './takeTransfers'
 export const updateWaiting = ref(false)
 let registration: ServiceWorkerRegistration | null = null
 export async function verifyOfflineShell(repair = false): Promise<void> {
@@ -42,7 +43,12 @@ export async function registerApp() {
 }
 export async function applyUpdate() {
   if (!registration?.waiting) return
-  if ((await journalEntries('event:')).length || (await journalEntries('take:')).length) return
+  if (
+    takeTransfers.hasVolatileTakes() ||
+    (await journalEntries('event:')).length ||
+    (await journalEntries('take:')).length
+  )
+    return
   navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), {
     once: true,
   })

@@ -6,6 +6,8 @@ import type { Language } from '../api'
 import { journalCheckpoint, journalDelete, journalEntries, journalPut } from '../practiceJournal'
 import type { PendingEvent, PracticeSession, SessionStart } from '../practiceTypes'
 import { verifyPack } from '../sessionPack'
+import { restoreDeviceStatus } from '../deviceSessionState'
+import { useSessionLifecycle } from './useSessionLifecycle'
 
 export function usePracticeSession() {
   const session = ref<PracticeSession | null>(null)
@@ -92,30 +94,7 @@ export function usePracticeSession() {
       busy.value = false
     }
   }
-  async function transition(status: 'active' | 'paused', state = session.value) {
-    if (!state || busy.value) return
-    busy.value = true
-    try {
-      if (offline.value) {
-        if (status === 'paused') await journalPut(`paused:${state.id}`, true)
-        else await journalDelete(`paused:${state.id}`)
-        accept({ ...state, status })
-        return
-      }
-      await flush()
-      const updated = await api<PracticeSession>(`/sessions/${state.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ expected_version: state.version, status }),
-      })
-      accept(updated)
-      await journalCheckpoint(updated)
-      await journalDelete(`paused:${updated.id}`)
-    } catch (cause) {
-      error.value = String(cause)
-    } finally {
-      busy.value = false
-    }
-  }
+  const transition = useSessionLifecycle({ session, busy, error, offline, flush, accept })
   async function load() {
     const version = ++loadingVersion
     restoring.value = true
@@ -135,9 +114,12 @@ export function usePracticeSession() {
       openSession.value = current
       const checkpoint = selected ? await journalCheckpoint(selected) : null
       if (version !== loadingVersion) return
-      session.value = checkpoint
-      if (checkpoint) accept(checkpoint)
+      const restoredCheckpoint = checkpoint ? await restoreDeviceStatus(checkpoint) : null
+      if (version !== loadingVersion) return
+      session.value = restoredCheckpoint
+      if (restoredCheckpoint) accept(restoredCheckpoint)
       await flush()
+      if (version === loadingVersion) offline.value = false
     } catch (cause) {
       if (version !== loadingVersion) return
       error.value = String(cause)
