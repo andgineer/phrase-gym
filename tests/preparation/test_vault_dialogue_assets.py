@@ -25,7 +25,7 @@ id: public-course
 - A: How are you? ![[partner.wav]]
 - B: Not too bad, thanks. And yours? ![[reference.mp3]]
 """
-    (tmp_path / "lesson.md").write_text(note)
+    (tmp_path / "lesson.md").write_text(note, encoding="utf-8")
     return VaultManifest.model_validate(
         {
             "namespace": source.namespace,
@@ -100,7 +100,7 @@ def test_valid_unuploaded_partner_asset_is_reported_and_cannot_be_exported(tmp_p
     assert not report["errors"] and package.dialogues[0].turns[0].audio_id is None
     assert report["assets_not_uploaded"] == ["dialogue_asset:partner.wav"]
     mapping = tmp_path / "manifest.json"
-    mapping.write_text(manifest.model_dump_json())
+    mapping.write_text(manifest.model_dump_json(), encoding="utf-8")
     output = tmp_path / "export.json"
     response = CliRunner().invoke(
         phrase_gym,

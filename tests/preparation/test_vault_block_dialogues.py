@@ -33,9 +33,10 @@ def test_mixed_selectors_parse_note_once_and_refuse_ambiguous_meaning_bindings(t
     manifest.selections.append(extra)
     note = tmp_path / "lesson.md"
     note.write_text(
-        note.read_text().replace(
+        note.read_text(encoding="utf-8").replace(
             "## диалоги", "2. Goodbye. ^second\n   ![[goodbye.mp3]]\n## диалоги"
-        )
+        ),
+        encoding="utf-8",
     )
     package, report = export_vault(tmp_path, manifest)
     assert not report["errors"] and len(package.dialogues) == 1
@@ -69,7 +70,7 @@ def test_ordinary_block_notes_do_not_require_legacy_dialogue_format(tmp_path, in
         ],
     }
     # A plain block note needs no legacy front matter or course headings.
-    (tmp_path / "plain.md").write_text("- Right. ^plain\n")
+    (tmp_path / "plain.md").write_text("- Right. ^plain\n", encoding="utf-8")
     manifest = VaultManifest.model_validate(from_mapping)
     package, report = export_vault(tmp_path, manifest)
     assert not report["errors"] and package.dialogues == []
@@ -82,7 +83,10 @@ def test_disabled_automatic_dialogues_preserve_explicit_bindings_without_parsing
     manifest.selections[0].block_id = "greeting"
     manifest.selections[0].source_audio_name = None
     note = tmp_path / "lesson.md"
-    note.write_text(note.read_text().replace("id: public-course", "no-legacy-id: intentional"))
+    note.write_text(
+        note.read_text(encoding="utf-8").replace("id: public-course", "no-legacy-id: intentional"),
+        encoding="utf-8",
+    )
     manifest.dialogues = [
         DialogueInput(
             source_id="explicit",

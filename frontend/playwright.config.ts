@@ -16,7 +16,15 @@ export default defineConfig({
     reuseExistingServer: false,
   })),
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], baseURL: chromiumURL } },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: chromiumURL,
+        // Preserve native playback clocks without requiring a runner audio device.
+        launchOptions: { args: ['--disable-audio-output'] },
+      },
+    },
     { name: 'webkit', use: { ...devices['Desktop Safari'], baseURL: webkitURL } },
   ],
 })

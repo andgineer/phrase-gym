@@ -54,7 +54,7 @@ def mapping():
 
 def test_ambiguous_automatic_binding_is_rejected_independently_of_manifest_order(tmp_path):
     note = tmp_path / "lesson.md"
-    note.write_text(NOTE)
+    note.write_text(NOTE, encoding="utf-8")
     manifest = mapping()
     results = []
     for selections in [manifest.selections, list(reversed(manifest.selections))]:
@@ -68,17 +68,17 @@ def test_ambiguous_automatic_binding_is_rejected_independently_of_manifest_order
             in report["errors"][0]["error"]
         )
         results.append(report["errors"])
-    assert results[0] == results[1] and note.read_text() == NOTE
+    assert results[0] == results[1] and note.read_text(encoding="utf-8") == NOTE
 
 
 @pytest.mark.parametrize("match", [False, True])
 def test_zero_matches_remain_partner_context_and_unique_matches_link_correctly(tmp_path, match):
-    (tmp_path / "lesson.md").write_text(NOTE)
+    (tmp_path / "lesson.md").write_text(NOTE, encoding="utf-8")
     manifest = mapping()
     manifest.selections = manifest.selections[:1]
     if not match:
         manifest.selections[0].block_id = "block"
-        (tmp_path / "lesson.md").write_text(NOTE + "\nRight. ^block\n")
+        (tmp_path / "lesson.md").write_text(NOTE + "\nRight. ^block\n", encoding="utf-8")
         # Parse the note through a second, differently attached selection.
         extra = manifest.selections[0].model_copy(deep=True)
         extra.source_id = "extra"
@@ -90,6 +90,7 @@ def test_zero_matches_remain_partner_context_and_unique_matches_link_correctly(t
         (tmp_path / "lesson.md").write_text(
             NOTE.replace("## диалоги", "2. Elsewhere.\n   ![[elsewhere.mp3]]\n## диалоги")
             + "\nRight. ^block\n",
+            encoding="utf-8",
         )
     package, report = export_vault(tmp_path, manifest)
     assert not report["errors"]
@@ -103,7 +104,7 @@ def test_explicit_complete_dialogue_preserves_distinct_meaning_targets_and_sched
 ):
     jobs, media, imports, _ = prepared_runtime
     reference = asyncio.run(FakeSpeech(media).prepare("Right.", "en", "vault:synthetic"))
-    (tmp_path / "lesson.md").write_text(NOTE)
+    (tmp_path / "lesson.md").write_text(NOTE, encoding="utf-8")
     manifest = mapping()
     manifest.include_dialogues = False
     manifest.dialogues = [

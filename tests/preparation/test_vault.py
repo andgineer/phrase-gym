@@ -40,13 +40,13 @@ def test_read_only_stable_blocks_reorder_rename_and_distinct_meanings(tmp_path):
     vault = tmp_path / "vault"
     vault.mkdir()
     note = vault / "lesson.md"
-    note.write_text("- Right. ^a\n- Right. ^b\n")
+    note.write_text("- Right. ^a\n- Right. ^b\n", encoding="utf-8")
     before = note.read_bytes()
     exported, report = export_vault(vault, manifest())
     assert note.read_bytes() == before
     assert report["duplicate_surface_forms"] == ["Right."]
     note.rename(vault / "renamed.md")
-    (vault / "renamed.md").write_text("- Right. ^b\n- Right. ^a\n")
+    (vault / "renamed.md").write_text("- Right. ^b\n- Right. ^a\n", encoding="utf-8")
     again, _ = export_vault(vault, manifest("renamed.md"))
     assert [(p.source_id, p.meaning_key) for p in exported.phrases] == [
         (p.source_id, p.meaning_key) for p in again.phrases
@@ -83,7 +83,7 @@ id: sample
 """
     parsed = parse_note(note)
     assert len(parsed.phrases) == 2 and parsed.phrases[0].context == "Greet a friend."
-    (tmp_path / "lesson.md").write_text(note)
+    (tmp_path / "lesson.md").write_text(note, encoding="utf-8")
     mapping = VaultManifest.model_validate(
         {
             "namespace": "vault",

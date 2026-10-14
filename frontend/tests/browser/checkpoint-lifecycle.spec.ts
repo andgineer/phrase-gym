@@ -84,6 +84,12 @@ test('a foreground read blocks dialogue introduction and detour until restoratio
   ).json()
   await page.goto(`/learn/en/practice/${state.id}`)
   await expect(page.getByRole('button', { name: 'Rehearse dialogue', exact: true })).toBeEnabled()
+  // Script exposure saves asynchronously; establish the baseline after its receipt.
+  await expect
+    .poll(
+      async () => (await (await request.get(`/api/v1/sessions/${state.id}`)).json()).last_sequence,
+    )
+    .toBe(1)
   for (const begun of [false, true]) {
     if (begun) {
       await page.getByRole('button', { name: 'Rehearse dialogue', exact: true }).click()
