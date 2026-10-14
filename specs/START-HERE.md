@@ -1,6 +1,8 @@
 # Phrase Gym — start here
 
-**Current authorization, 2026-10-14: implement P5 and the requested fresh engineering review/fix loop. Phrase Gym remains ONLINE-ONLY. P4 engineering is closed; P5 now has the durable source/preparation/speech/receiver implementation and real provider measurements. Initial human content/listening acceptance and external echo-words sender rollout remain open. No push or deployment is authorized.**
+**P5 status, 2026-10-14: implementation and all known review findings are committed. Three fresh Sol 6.1 reviews returned 4 → 2 → 3 findings; independent convergence is unverified. The loop is stopped pending user confirmation of the proposed acceptance checklist and one additional review. Phrase Gym remains ONLINE-ONLY. Human content/listening approval and external echo-words sender rollout remain open. No push or deployment is authorized.**
+
+See [the review evidence and convergence analysis](plan/evidence/p5-review-loop-2026-10-14.md) and [P5 runbook](plan/p5-runbook.md). The latest ordered correction gate passes all hooks/zero pyrefly errors, **212 Python tests, five client tests and 210 browser checks**, with actual typecheck/build and both engines. The last correction commit is `230b16d`; passing checks do not replace the requested independent review.
 
 The [three-round fresh Sol 6.1 P3 review](plan/evidence/p3-review-loop-2026-10-12.md) converged with 5 → 1 → 0 findings. That review passed 104 Python tests, eight client tests and 138 browser checks. The subsequent [local P3 follow-ups](plan/evidence/p3-local-followups-2026-10-13.md) include phrase hints, one-click session starts and conditional native help; the P3 baseline gate passes **110 Python tests, eight client tests and 164 browser checks**. This is the P3 baseline for the P4 reliability implementation.
 

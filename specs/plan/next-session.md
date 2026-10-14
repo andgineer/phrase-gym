@@ -1,6 +1,8 @@
-# Next-session handoff — P5 implementation and acceptance boundaries
+# Next-session handoff — P5 review limit reached
 
-**Current authorization, 2026-10-14: implement P5 and the requested fresh engineering review/fix loop. Phrase Gym remains ONLINE-ONLY. P4 engineering is closed; P5 now has the durable source/preparation/speech/receiver implementation and real provider measurements. Initial human content/listening acceptance and external echo-words sender rollout remain open. No push or deployment is authorized.**
+**P5 status, 2026-10-14: implementation and all known review findings are committed. Three fresh Sol 6.1 reviews returned 4 → 2 → 3 findings; independent convergence is unverified. The loop is stopped pending user confirmation of the proposed acceptance checklist and one additional review. Phrase Gym remains ONLINE-ONLY. Human content/listening approval and external echo-words sender rollout remain open. No push or deployment is authorized.**
+
+Read [the review evidence and proposed acceptance clarification](evidence/p5-review-loop-2026-10-14.md) before continuing. All nine confirmed findings are corrected through `230b16d`; the third correction batch has not received independent review. The latest ordered gate passes all hooks/zero pyrefly errors, **212 Python tests, five client tests and 210 browser checks**, with actual typecheck/build and both engines. Do not start review 4 without the user's confirmation.
 
 ## Read first
 

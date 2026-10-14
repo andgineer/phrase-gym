@@ -2,6 +2,8 @@
 
 Status: **workflow implementation and real measurements delivered; human content/listening and external sender acceptance remain open**, updated 2026-10-14. See [implementation evidence](evidence/p5-implementation-2026-10-14.md), [fresh semantic review](evidence/p5-semantic-review.md) and [runbook](p5-runbook.md). P2 contracts and P3 working drills are available. The local 44-phrase test pack has one manual partial cue per phrase; LLM preparation and different useful masks are still outstanding. Generated content must be exercised through the real learning flow before claiming integration complete.
 
+The [three-round engineering review](evidence/p5-review-loop-2026-10-14.md) returned **4 → 2 → 3** findings. All nine known findings are corrected, with the final ordered **212 Python / five client / 210 browser** gate passing. Independent convergence remains unverified; the loop is stopped before review 4. The shared source/media/provider acceptance checklist in that report is a proposal awaiting the user's confirmation, not a new accepted product decision.
+
 This phase completes the preparation/intake coverage in the [consolidated plan](implementation-plan.md). Manual content in P2–P3 is a staged implementation path, not a deferral of the accepted add-time cue preparation beyond the full planned release.
 
 ## P5.1 — Vault adapter

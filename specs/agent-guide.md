@@ -1,6 +1,8 @@
 # Phrase Gym — agent guidance
 
-**Current authorization, 2026-10-14: implement P5 and the requested fresh engineering review/fix loop. Phrase Gym remains ONLINE-ONLY. P4 engineering is closed; P5 now has the durable source/preparation/speech/receiver implementation and real provider measurements. Initial human content/listening acceptance and external echo-words sender rollout remain open. No push or deployment is authorized.**
+**P5 status, 2026-10-14: implementation and all known review findings are committed. Three fresh Sol 6.1 reviews returned 4 → 2 → 3 findings; independent convergence is unverified. The loop is stopped pending user confirmation of the proposed acceptance checklist and one additional review. Phrase Gym remains ONLINE-ONLY. Human content/listening approval and external echo-words sender rollout remain open. No push or deployment is authorized.**
+
+Follow [the review stop and proposed clarification](plan/evidence/p5-review-loop-2026-10-14.md). All nine confirmed findings are corrected through `230b16d`, with the ordered **212 Python / five client / 210 browser** gate passing and zero pyrefly errors. No fourth review or independent convergence claim is authorized until the user confirms continuation.
 
 ## Workflow
 
