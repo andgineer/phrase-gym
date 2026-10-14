@@ -208,3 +208,25 @@ partner-only context; multiple selected meanings with the same text/attachment r
 with a stable ambiguity report, independently of manifest order. Resolve this by setting
 `include_dialogues: false` and supplying complete `dialogues` with explicit target source IDs,
 turns and any audio bindings. Distinct selected meanings keep distinct targets and schedules.
+
+## Supplied dialogue audio and transport failures after review round 3
+
+Dry-run validates every configured asset referenced by parsed dialogue turns: confinement
+(including symlinks), existence, container/MIME and exact turn/language/role provenance. Supplied
+dialogue bytes participate in the source revision. `assets_not_uploaded` includes referenced
+dialogue entries as `dialogue_asset:<attachment>` alongside selected phrase assets. Importable
+`--output` requires `--upload-assets` whenever that report is nonempty; otherwise supplied actor
+or course originals would lose their binding. Uploaded partner clips retain their exact bytes
+and performer provenance, and the worker uses that binding instead of synthesizing replacement.
+
+When `include_dialogues: true`, each selected note containing the legacy dialogue heading is
+parsed once independently of block/audio selection. Stable block suffixes are not phrase text;
+the parser retains their attachment mapping for unique target linking. Mixed selectors preserve
+one complete ordered exchange per parsed note. Unmatched turns stay partner context, ambiguity
+remains an explicit rejection, and `include_dialogues: false` preserves explicit dialogue input
+without forcing legacy dialogue parsing. Ordinary block notes need no course front matter.
+
+Edge network/HTTP/WebSocket errors at the speech boundary try the next configured voice with
+the same locale/accent. Exhaustion becomes the normal retryable audio failure with raw provider
+answers and completed clips retained. Explicit retry resumes those checkpoints. Cancellation
+still propagates and releases the worker lease; it does not silently select another voice.

@@ -11,6 +11,7 @@ from typing import Literal
 from uuid import UUID
 
 import edge_tts
+from aiohttp import ClientError
 from pydantic import Field, model_validator
 from sqlalchemy import select
 
@@ -184,6 +185,7 @@ class SpeechAdapter:
                 RuntimeError,
                 TimeoutError,
                 edge_tts.exceptions.EdgeTTSException,
+                ClientError,
                 DomainError,
             ):
                 continue

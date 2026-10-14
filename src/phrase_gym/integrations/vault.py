@@ -43,7 +43,12 @@ def export_vault(
     digest = hashlib.sha256()
     for selection in manifest.selections:
         try:
-            raw, text, context = read_selection(root, selection, parsed_notes)
+            raw, text, context = read_selection(
+                root,
+                selection,
+                parsed_notes,
+                manifest.include_dialogues,
+            )
             digest.update(selection.source_id.encode() + raw)
             audio_id = None
             if selection.attachment is not None:
@@ -100,7 +105,16 @@ def export_vault(
     dialogues = manifest.dialogues
     if manifest.include_dialogues:
         try:
-            dialogues = dialogues + export_dialogues(root, manifest, parsed_notes, phrases, media)
+            parsed_dialogues, unuploaded, asset_digest = export_dialogues(
+                root,
+                manifest,
+                parsed_notes,
+                phrases,
+                media,
+            )
+            dialogues = dialogues + parsed_dialogues
+            report["assets_not_uploaded"].extend(unuploaded)
+            digest.update(asset_digest or b"")
         except (OSError, UnicodeError, DomainError, ValueError) as error:
             errors.append({"source_id": "dialogues", "error": str(error)})
             return None, report
@@ -118,8 +132,11 @@ def export_vault(
 
 def export_dialogues(root, manifest, parsed_notes, phrases, media):
     dialogues = []
+    unuploaded = []
+    assets = {}
     phrase_by_id = {p.source_id: p for p in phrases}
-    for parsed in parsed_notes.values():
+    for path, parsed in parsed_notes.items():
+        attachments = note_attachments(root, manifest.selections, path, parsed)
         for position, dialogue in enumerate(parsed.dialogues):
             turns = []
             for speaker, text, attachment in dialogue.turns:
@@ -127,7 +144,7 @@ def export_dialogues(root, manifest, parsed_notes, phrases, media):
                     selection.source_id
                     for selection in manifest.selections
                     if attachment is not None
-                    and selection.source_audio_name == attachment
+                    and attachments.get(selection.source_id) == attachment
                     and phrase_by_id[selection.source_id].text == text
                 ]
                 if len(matches) > 1:
@@ -141,23 +158,27 @@ def export_dialogues(root, manifest, parsed_notes, phrases, media):
                 audio_id = phrase_by_id[linked].reference_audio_id if linked else None
                 if attachment in manifest.assets:
                     asset = manifest.assets[attachment]
-                    if asset.metadata.text != text or asset.metadata.language != manifest.language:
+                    if (asset.metadata.text, asset.metadata.language, asset.metadata.role) != (
+                        text,
+                        manifest.language,
+                        "reference" if linked else "partner",
+                    ):
                         raise DomainError(
                             "Dialogue audio requires exact turn/language provenance",
                             422,
                         )
+                    audio = confined(root, asset.path).read_bytes()
+                    upload = MediaUpload(
+                        metadata=asset.metadata,
+                        mime_type=asset.mime_type,
+                        audio_base64=base64.b64encode(audio).decode(),
+                    )
+                    validate_audio(audio, upload.mime_type)
+                    assets[attachment] = audio
                     if media:
-                        audio_id = media.upload(
-                            MediaUpload.model_validate(
-                                {
-                                    "metadata": asset.metadata,
-                                    "mime_type": asset.mime_type,
-                                    "audio_base64": base64.b64encode(
-                                        confined(root, asset.path).read_bytes(),
-                                    ).decode(),
-                                },
-                            ),
-                        ).id
+                        audio_id = media.upload(upload).id
+                    elif "dialogue_asset:" + attachment not in unuploaded:
+                        unuploaded.append("dialogue_asset:" + attachment)
                 turns.append(
                     DialogueTurn(
                         speaker=speaker,
@@ -173,19 +194,46 @@ def export_dialogues(root, manifest, parsed_notes, phrases, media):
                     turns=turns,
                 ),
             )
-    return dialogues
+    digest = hashlib.sha256()
+    for attachment, audio in sorted(assets.items()):
+        digest.update(attachment.encode() + audio)
+    return dialogues, unuploaded, digest.digest() if assets else None
 
 
-def read_selection(root, selection, parsed_notes):
+def note_attachments(root, selections, path, parsed):
+    attachments = {}
+    for selection in selections:
+        if str(confined(root, selection.note)) != path:
+            continue
+        names = [
+            p.attachment
+            for p in parsed.phrases
+            if selection.block_id and p.block_id == selection.block_id
+        ]
+        attachments[selection.source_id] = selection.source_audio_name or (
+            names[0] if len(names) == 1 else None
+        )
+    return attachments
+
+
+def read_selection(root, selection, parsed_notes, include_dialogues):
     path = confined(root, selection.note)
     raw = path.read_bytes()
     note_text = raw.decode("utf-8")
+    key = str(path)
+    if (
+        include_dialogues
+        and key not in parsed_notes
+        and re.search(r"^## диалоги\s*$", note_text, re.MULTILINE)
+    ):
+        parsed_notes[key] = parse_note(note_text)
     context = selection.context
     if selection.block_id:
         text = extract_block(note_text, selection.block_id)
     elif selection.source_audio_name:
-        parsed_note = parse_note(note_text)
-        parsed_notes[str(selection.note)] = parsed_note
+        if key not in parsed_notes:
+            parsed_notes[key] = parse_note(note_text)
+        parsed_note = parsed_notes[key]
         parsed = selected_phrase(parsed_note, selection.source_audio_name)
         text = parsed.text
         context = context or parsed.context

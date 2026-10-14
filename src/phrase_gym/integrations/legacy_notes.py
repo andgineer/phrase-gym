@@ -10,6 +10,7 @@ FRONTMATTER_PARTS = 3
 EMBED = re.compile(r"!\[\[([^\]]+)\]\]")
 NUMBERED = re.compile(r"^\s*\d+\.\s+(.+)")
 TURN = re.compile(r"^- ([^:]+):\s*(.+)")
+BLOCK_ID = re.compile(r"\s+\^([\w-]+)\s*$")
 
 
 @dataclass
@@ -17,6 +18,7 @@ class NotePhrase:
     text: str
     attachment: str | None = None
     context: str | None = None
+    block_id: str | None = None
 
 
 @dataclass
@@ -56,7 +58,11 @@ def parse_note(note: str) -> ParsedNote:
 def parse_phrase_line(parsed: ParsedNote, raw: str, line: str) -> None:
     numbered = NUMBERED.match(raw)
     if numbered:
-        parsed.phrases.append(NotePhrase(numbered.group(1)))
+        text = numbered.group(1)
+        block = BLOCK_ID.search(text)
+        parsed.phrases.append(
+            NotePhrase(BLOCK_ID.sub("", text), block_id=block.group(1) if block else None),
+        )
     elif parsed.phrases and (embed := EMBED.search(line)):
         parsed.phrases[-1].attachment = embed.group(1)
     elif parsed.phrases and line.startswith("*") and line.endswith("*"):
@@ -69,7 +75,7 @@ def parse_dialogue_line(parsed: ParsedNote, line: str) -> None:
     elif parsed.dialogues and (turn := TURN.match(line)):
         text = re.sub(r"<!--.*?-->", "", turn.group(2))
         embed = EMBED.search(text)
-        text = EMBED.sub("", text).replace("**", "").strip()
+        text = BLOCK_ID.sub("", EMBED.sub("", text).replace("**", "").strip())
         parsed.dialogues[-1].turns.append((turn.group(1), text, embed.group(1) if embed else None))
 
 

@@ -45,7 +45,7 @@ def vault_export(
         if package is None or report.get("identity_errors"):
             raise click.ClickException("Vault export rejected")
         if output:
-            if any(s.attachment for s in manifest.selections) and not upload_assets:
+            if report["assets_not_uploaded"]:
                 raise click.ClickException(
                     "Use --upload-assets before writing an importable audio-bound export",
                 )
