@@ -22,6 +22,8 @@ async function retain(take: StoredTake) {
   volatile.set(take.id, take)
   try {
     await journalPut(`${takePrefix}${take.id}`, take)
+    if (take.status === 'pending' && !take.audio.byteLength)
+      await acknowledgeTake(`${takePrefix}${take.id}`, take)
     if (volatile.get(take.id) === take) volatile.delete(take.id)
     if (take.status === 'pending') releaseCapture(take.id)
     pendingTakes.value = (await localTakes()).length

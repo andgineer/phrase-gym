@@ -16,6 +16,6 @@ Abrupt termination can recover journaled snapshots, not the unflushed tail. Veri
 
 ## Browser constraints
 
-Use the emitted MIME, including browsers that supply none before capture starts. Reuse one media element for learner/reference playback and retries; cancellation invalidates earlier asynchronous playback. Feature-detect the optional [Audio Session API](https://www.w3.org/TR/audio-session/): recording for capture, playback for comparison/replay, auto on release. Browsers without a writable API use native behavior.
+Use the emitted MIME, including browsers that supply none before capture starts. Reuse one media element for learner/reference playback and retries; cancellation invalidates earlier asynchronous playback. Feature-detect the optional [Audio Session API](https://www.w3.org/TR/audio-session/): keep play-and-record while a microphone stream is retained, including comparison/replay, because playback-only sessions can end microphone tracks on iOS. Use playback when no microphone is held and auto on release. Browsers without a writable API use native behavior. Replace muted or ended streams before another take; empty captures report failure and discard the unusable stream so retry can acquire a fresh one.
 
 Journal event/checkpoint reads use their key prefixes so advancing a card does not clone unrelated audio buffers. Local checkpoint failure retains pending evidence and reports a storage error. Rejected requests show their validation reason; pending evidence alone does not imply a lost connection.

@@ -5,7 +5,7 @@ export async function syntheticCapture(page: Page, holdPermission = false) {
     const context = new AudioContext()
     const oscillator = context.createOscillator()
     oscillator.frequency.value = 440
-    const destination = context.createMediaStreamDestination()
+    let destination = context.createMediaStreamDestination()
     oscillator.connect(destination)
     oscillator.start()
     document.addEventListener(
@@ -23,6 +23,10 @@ export async function syntheticCapture(page: Page, holdPermission = false) {
           requests++
           if (holdPermission)
             await new Promise<void>((resolve) => Object.assign(window, { __allowCapture: resolve }))
+          if (destination.stream.getAudioTracks()[0]?.readyState === 'ended') {
+            destination = context.createMediaStreamDestination()
+            oscillator.connect(destination)
+          }
           return destination.stream
         },
       },

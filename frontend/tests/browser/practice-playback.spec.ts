@@ -82,9 +82,8 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
   expect(probe.playerCount).toBe(1)
   expect(probe.sources[0]).toMatch(/^blob:/)
   expect(probe.sources[1]).toContain('/api/v1/media/')
-  expect(probe.sessionTypes.indexOf('play-and-record')).toBeLessThan(
-    probe.sessionTypes.indexOf('playback'),
-  )
+  expect(probe.sessionTypes).toContain('play-and-record')
+  expect(probe.sessionTypes).not.toContain('playback')
   const session = await (
     await request.get(`/api/v1/sessions/${page.url().split('/').pop()}`)
   ).json()

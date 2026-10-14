@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { captureOwner, holdCapture, releaseCapture } from '../captureOwners'
-import { setAudioSession } from '../audioSession'
+import { retainMicrophone, setAudioSession } from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 
 type TakeContext = Pick<
@@ -19,12 +19,19 @@ export function useCapture(options: CaptureOptions) {
   const processing = ref(false)
   const error = ref('')
   let stream: MediaStream | null = null
+  let relinquishMicrophone: (() => void) | null = null
   let recorder: MediaRecorder | null = null
   let generation = 0
   let interrupted = false
   let stopping: Promise<void> | null = null
   let resolveStop: (() => void) | null = null
 
+  function discardStream() {
+    stream?.getTracks().forEach((track) => track.stop())
+    relinquishMicrophone?.()
+    relinquishMicrophone = null
+    stream = null
+  }
   async function stop(incomplete = false) {
     interrupted ||= incomplete
     if (recorder?.state === 'recording') recorder.stop()
@@ -35,8 +42,7 @@ export function useCapture(options: CaptureOptions) {
     requesting.value = false
     if (capturing.value) void options.failure().catch(() => {})
     await stop(true)
-    stream?.getTracks().forEach((track) => track.stop())
-    stream = null
+    discardStream()
     setAudioSession('auto')
   }
   async function start() {
@@ -53,7 +59,8 @@ export function useCapture(options: CaptureOptions) {
       const context = await options.context()
       if (token !== generation) return
       setAudioSession('play-and-record')
-      if (!stream || stream.getAudioTracks().every((track) => track.readyState === 'ended')) {
+      if (!stream?.getAudioTracks().some((track) => track.readyState === 'live' && !track.muted)) {
+        discardStream()
         const acquired = await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: false,
@@ -66,6 +73,7 @@ export function useCapture(options: CaptureOptions) {
           return
         }
         stream = acquired
+        relinquishMicrophone = retainMicrophone(acquired)
       }
       const formats = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus']
       const format = formats.find((type) => MediaRecorder.isTypeSupported(type))
@@ -144,7 +152,7 @@ export function useCapture(options: CaptureOptions) {
           await writes
           take.audio = await new Blob(chunks, { type: take.mime_type }).arrayBuffer()
           take.duration_ms = Math.round(performance.now() - started)
-          take.complete = !interrupted
+          take.complete = !interrupted && take.audio.byteLength > 0
           take.status = 'pending'
           await options.retain(take)
         } catch (cause) {
@@ -154,6 +162,12 @@ export function useCapture(options: CaptureOptions) {
             await options.finished(take).catch((cause) => {
               error.value = String(cause)
             })
+          else {
+            error.value = 'No audio was captured. Please record again.'
+            discardStream()
+            setAudioSession('auto')
+            await options.failure().catch(() => {})
+          }
           processing.value = false
           recorder = null
           resolveStop?.()
@@ -169,7 +183,14 @@ export function useCapture(options: CaptureOptions) {
       capture.start(1000)
       capturing.value = true
     } catch (cause) {
-      if (leaseId && !capturing.value) releaseCapture(leaseId)
+      if (!capturing.value) {
+        if (leaseId) releaseCapture(leaseId)
+        recorder = null
+        resolveStop?.()
+        stopping = null
+        discardStream()
+        setAudioSession('auto')
+      }
       error.value = String(cause)
       await options.failure().catch(() => {})
     } finally {
