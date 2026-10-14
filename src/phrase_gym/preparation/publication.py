@@ -7,7 +7,9 @@ from phrase_gym.content.imports import ImportService
 from phrase_gym.contracts.content import ManualPackage
 from phrase_gym.contracts.preparation import HumanReview, PreparationDraft, SourcePackage
 from phrase_gym.errors import DomainError
-from phrase_gym.preparation.jobs import PreparationJobs, digest, source_bindings
+from phrase_gym.preparation.bindings import source_bindings
+from phrase_gym.preparation.chunks import reconcile_draft
+from phrase_gym.preparation.jobs import PreparationJobs, digest
 from phrase_gym.tables import ImportRow, SourceItem, Target, TargetRevision
 
 
@@ -33,6 +35,9 @@ def publish_reviewed(
             raise DomainError("Source content changed during preparation; enqueue a new revision")
         package = ManualPackage.model_validate(result["package"])
         draft = PreparationDraft.model_validate(result["draft"])
+        normalized, _mapping = reconcile_draft(transaction, source, draft)
+        if normalized != draft:
+            raise DomainError("Chunk identities require correction and a new review hash", 422)
         if set(review.accepted_cues) != {p.source_id for p in source.phrases}:
             raise DomainError("Review must explicitly decide every source phrase", 422)
         apply_review(transaction, package, draft, review)

@@ -13,11 +13,11 @@ from phrase_gym.clock import utc_now
 from phrase_gym.content.source_identity import check_source_objectives
 from phrase_gym.contracts.preparation import PreparationJob, SourcePackage
 from phrase_gym.errors import DomainError
+from phrase_gym.preparation.bindings import source_bindings
 from phrase_gym.preparation.prompts import PROMPT_VERSION, REVIEW_VERSION
 from phrase_gym.preparation.tables import PreparationRow
 from phrase_gym.serialization import canonical_json
 from phrase_gym.storage import Database
-from phrase_gym.tables import SourceItem, Target, TargetRevision
 
 MAX_ATTEMPTS = 3
 LEASE_SECONDS = 600
@@ -25,18 +25,6 @@ LEASE_SECONDS = 600
 
 def digest(value: str) -> str:
     return hashlib.sha256(canonical_json(value).encode()).hexdigest()
-
-
-def source_bindings(session: Session, source: SourcePackage) -> str:
-    bindings = {}
-    for phrase in source.phrases:
-        item = session.get(SourceItem, (source.namespace, phrase.source_id))
-        target = session.get(Target, item.target_id) if item else None
-        revision = (
-            session.get(TargetRevision, (target.id, target.current_revision)) if target else None
-        )
-        bindings[phrase.source_id] = revision.fingerprint if revision else None
-    return json.dumps(bindings, sort_keys=True)
 
 
 class PreparationJobs:

@@ -165,3 +165,27 @@ URL fetching is absent. Use queued/received/preparing/ready/failed states in a f
 The real echo-words selection-time outbox, destination UI/action and unavailable-receiver retry
 are **external sender rollout work** requiring separate source-write authorization. This session
 kept echo-words/Anki/vault sources read-only; it did not dual-send, migrate or switch existing output.
+
+## Publication fences and chunk evidence after review round 1
+
+The intake snapshot covers every target, lesson and dialogue the package can publish, including
+absent identities. Lesson snapshots include title/language, ordered membership and member target
+revisions. Dialogue snapshots include the latest complete payload, revision and target bindings.
+A concurrent reviewed lesson/dialogue edit or create blocks the pending package instead of
+restoring old content. Jobs with the earlier target-only snapshot are withheld; enqueue an
+explicit new source revision rather than silently rebasing their original approval.
+
+Generated/operator-corrected chunk IDs are reconciled before the review hash is produced.
+Exact text, required-material status, frame-slot values and occurrence distinguish material;
+all retained target revisions and history IDs participate. Verified unchanged material keeps
+its durable ID even when the provider renames or swaps labels. Changed material gets a distinct
+ID; historically ambiguous IDs remain retained but are not reused for current coverage.
+Inspect `chunk_id_mapping` alongside the normalized draft/package. Raw provider answers remain
+unchanged. Publication refuses any identity normalization that would silently alter approved
+content. Earlier session manifests and late events keep their original material IDs and evidence.
+
+A truncated JSON fence is a normal retained `draft_conformance_failure`; use explicit regeneration
+to request new candidates. The vault adapter rejects a runtime data directory inside the selected
+vault before opening SQLite or creating media/staging directories, including resolved symlink,
+case and default-directory aliases. Both runtime/export paths also compare existing ancestor
+inode identity. Keep both runtime storage and export output outside the read-only source.

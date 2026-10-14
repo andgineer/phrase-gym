@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from phrase_gym.contracts.preparation import ModelReview, PreparationDraft, SourcePackage
 from phrase_gym.errors import DomainError
+from phrase_gym.preparation.chunks import reconcile_draft
 from phrase_gym.preparation.config import PreparationSettings
 from phrase_gym.preparation.jobs import PreparationJobs
 from phrase_gym.preparation.prompts import (
@@ -29,7 +30,10 @@ class TextProvider(Protocol):
 def parse_answer(text: str) -> dict:
     stripped = text.strip()
     if stripped.startswith("```"):
-        stripped = stripped.split("\n", 1)[1].rsplit("```", 1)[0]
+        _opening, separator, body = stripped.partition("\n")
+        if not separator or not body.rstrip().endswith("```"):
+            raise ValueError("Model answer contains an incomplete JSON fence")
+        stripped = body.rstrip()[:-3]
     return json.loads(stripped)
 
 
@@ -87,7 +91,11 @@ class PreparationWorker:
             )
             self.jobs.checkpoint(job_id, token, result)
         draft = PreparationDraft.model_validate(parse_answer(result["generation"]["text"]))
+        assemble(source, draft)
+        with self.jobs.db.read() as transaction:
+            draft, mapping = reconcile_draft(transaction, source, draft)
         package = assemble(source, draft)
+        result["chunk_id_mapping"] = mapping
         result["draft"] = draft.model_dump(mode="json")
         if "model_review" not in result:
             result["model_review"] = await self.provider.ask(

@@ -30,7 +30,10 @@ def vault_export(
     upload_assets: bool,
 ):
     """Dry-run selected stable blocks by default; write export only outside the vault."""
-    if output and output.resolve().is_relative_to(vault_root.resolve()):
+    resolved_vault = vault_root.resolve()
+    if within_vault(config.data_dir, resolved_vault):
+        raise click.ClickException("Runtime data directory must stay outside the read-only vault")
+    if output and within_vault(output, resolved_vault):
         raise click.ClickException("Export output must stay outside the read-only vault")
     with runtime(config) as (jobs, media):
         manifest = VaultManifest.model_validate_json(manifest_path.read_text())
@@ -126,3 +129,13 @@ def latest_dialogues(transaction, namespace):
         if row.source_id not in selected:
             selected[row.source_id] = DialogueInput.model_validate_json(row.payload)
     return list(selected.values())
+
+
+def within_vault(path: Path, root: Path) -> bool:
+    resolved = path.resolve()
+    if resolved.is_relative_to(root):
+        return True
+    # Case aliases can share an inode without Path.resolve normalizing their spelling.
+    return any(
+        parent.exists() and parent.samefile(root) for parent in (resolved, *resolved.parents)
+    )
