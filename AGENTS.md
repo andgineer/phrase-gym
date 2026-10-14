@@ -1,8 +1,8 @@
 # Phrase Gym — agent instructions
 
-Read [specs/START-HERE.md](specs/START-HERE.md), the current [handoff](specs/plan/next-session.md), then [agent guidance](specs/agent-guide.md). Accepted product decisions override older sketches. Production work extends the user's Python scaffold and the Vue client in `frontend/`; disposable prototypes and archived experiments are interaction/history references.
+Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Production work extends the user's Python scaffold and the Vue client in `frontend/`.
 
-The coding rules below are copied and adapted from `../echo-words/AGENTS.md`. Echo-words' product, deployment, Anki and experiment paths are not Phrase Gym instructions. `CLAUDE.md` links to this file; keep one instruction source.
+`CLAUDE.md` links to this file; keep one instruction source.
 
 ## Architecture and file structure
 
@@ -61,13 +61,13 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 ## Specs and plans
 
-- `specs/` owns architectural decisions, accepted behavior and current engineering evidence. Code owns signatures, argument lists and class structure; plans may contain implementation detail.
-- Current-state specs must stay accurate. Preserve explicitly required research, decision history and evidence records; use Git for routine implementation chronology.
-- Keep active plans focused on remaining work. Move lasting decisions out of completed implementation plans when appropriate. Latest accepted decisions win, and contradictory plan text is corrected in the same commit.
+- `specs/` contains current decisions, their rationale and substantial design constraints that are difficult to infer from code. Code, tests and generated contracts document implemented behavior; usage and operational commands belong in README or `docs/`.
+- Keep one authoritative home per decision. Do not retain historical references, superseded sketches, review logs, implementation inventories or completed plans in specs. Git preserves earlier versions.
+- The implementation plan contains only remaining work. Delete completed entries and plans; retain any lasting decision in its focused spec. Correct contradictory text in the same commit and keep acceptance gaps concise.
 
 ## Model integration
 
-When P5 changes prompts, provider payloads or interpretation of real model answers, mocks alone cannot establish model behavior. Plan representative fixtures and real-provider measurements before spending budget; inspect availability and every concrete result. Record semantic review separately from automated conformance. A fresh reviewer is required for those model-result measurements, not for ordinary P2/P3 refactors. Do not create learner effectiveness experiments or restart the closed P1 review loop.
+When changing prompts, provider payloads or interpretation of real model answers, mocks alone cannot establish model behavior. Plan representative fixtures and real-provider measurements before spending budget; inspect availability and every concrete result. Record semantic review separately from automated conformance. A fresh reviewer is required for those model-result measurements, not for ordinary refactors. Do not create learner effectiveness experiments or unrequested general review loops.
 
 ## Git, secrets and deployment
 

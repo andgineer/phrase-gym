@@ -3,8 +3,7 @@ exclude: |
       .venv/|
       tasks.py|
       resources/|
-      prototypes/|
-      specs/archive/
+      prototypes/
     )
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

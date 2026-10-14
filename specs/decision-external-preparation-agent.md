@@ -1,75 +1,21 @@
-# External agent preparation and generic intake
+# External preparation and reference speech
 
-Accepted by the user on **2026-10-14**. This supersedes P5 source adapters,
-in-application LLM generation/review, preparation orchestration and a dedicated
-echo-words sender/receiver workflow. It also supersedes the proposed response to
-the earlier three-round review stop. The existing implementation still contains
-those superseded components; removing them is remaining implementation work.
+## Ownership boundary
 
-## Ownership
+Phrase Gym defines one versioned prepared-package format and supplies an external-agent guide covering preparation and actual submission. The user's agent understands its source, extracts phrases/optional audio, chooses/calls its text LLM, reviews language quality, handles failures/retries and submits material. Phrase Gym does not parse source formats, mount vaults, run text-generation/review jobs or add a human-approval workflow. Every source uses the same generic intake, including echo-words; Phrase Gym owns no special sender.
 
-Phrase Gym defines one prepared-phrase input format and provides a prompt for
-the user's external LLM agent. That agent understands the user's unique source,
-extracts phrases and optional audio, prepares the learning material, checks its
-quality and submits it. Source parsing, LLM choice/calls/costs, linguistic review,
-preparation failures/retries and delivery belong to the external agent.
+The guide covers complete phrases and selected meanings, exact meaningful chunk reconstruction, identifying cues checked against competing completions, allowed equivalents/frame slots, native translations with useful explanation only, searchable concepts and complete dialogues. One reliable cue or supported study without a reliable cue is allowed. Do not invent missing meanings or require a variant quota. Semantic review happens externally; app validation checks structure and bindings.
 
-Phrase Gym accepts prepared phrases, translations/necessary explanations, checked
-gap cues, optional complete dialogues, search metadata and optional reference
-audio. It validates their structure and bindings, stores them durably and trains
-the learner. There is no application-owned LLM preparation/review workflow or
-human-approval stage. Structural validation and atomic storage remain internal
-responsibilities; they do not certify linguistic quality.
+## Intake and preservation
 
-The prompt must explain both preparation and submission, using the actual
-versioned schema and API. It must be usable with any external source. Phrase Gym
-does not mount/read vaults, understand note formats or require a source-specific
-adapter. External source references are provenance and stable identifiers.
+Stable source/submission identifiers make retries idempotent. Compatible edits preserve targets, schedules, recordings and unchanged chunk evidence; changed meanings require distinct targets. Pinned sessions keep their content. Source ordering and similar wording are not identities.
 
-## Learning material and preservation
+Optional supplied reference audio needs verified uploaded bytes and exact text/language/role/provenance. Preserve course/actor originals. Reject invalid or supplied-but-untransferred audio rather than treating it as a request for synthesis. Do not fetch arbitrary media URLs. Structural validation and content publication remain atomic internal responsibilities.
 
-The prompt covers selected meaning, whole-phrase responses, exact chunk
-reconstruction, useful identifying gap cues, competing completions, allowed
-equivalents/slots, proportionate native-language help and searchable concepts.
-It permits one reliable cue or no reliable retrieval cue, without a variant quota.
-Dialogue turns preserve complete exchanges and explicit target meanings.
+## Missing reference speech
 
-Stable submission/source identifiers make retries idempotent. Compatible edits
-preserve targets, schedules and learner recordings; changed meanings require
-distinct targets. Chunk evidence is retained only for unchanged material. Active
-sessions retain their pinned content. These are generic intake guarantees,
-independent of the source format or the agent used to prepare the package.
+Generate genuinely missing whole-phrase/turn audio inside Phrase Gym before practice, cache it and preserve exact speech input, engine/voice, locale/accent, settings and preparation version in its identity. Use one configured primary provider/voice per learning language and a fallback preserving that language and intended locale/accent. Provider failure has bounded fallback/retry and cannot break already prepared practice. Focused durable audio work does not justify a generic text-LLM pipeline or speech grading.
 
-Optional supplied audio is transferred with exact text/language/role/provenance
-and verified bytes. Preserve course/actor originals. Do not fetch arbitrary
-source-media URLs. Missing audio can be generated by Phrase Gym; supplied but
-untransferred or invalid audio must not silently become a missing-audio request.
+Piper Lessac for US English, Piper Thorsten for German and Edge Sophie for Serbian are starting candidates, not a quality ranking. No macOS-only speech dependency. Serbian speech input may need Cyrillic conversion while displayed text stays unchanged; names, digraph boundaries and foreign words need checking. The Piper serbski_institut voice is Lower Sorbian and must not be selected as Serbian merely from its label. Supplied actor clips always take priority.
 
-## Speech remains inside Phrase Gym
-
-Use one configured primary speech provider/voice per learning language, chosen
-for that language using actual speech-quality evidence. The existing Piper/Edge
-reference is a starting point, not proof that a voice is the best available.
-
-Keep a fallback that preserves the learning language and intended locale/accent.
-Generate complete phrases/turns, cache them and retain exact speech input, voice,
-settings and version. Serbian speech conversion never changes displayed text.
-Speech failures follow bounded fallback/retry and cannot break existing prepared
-practice. This small audio responsibility does not justify retaining the generic
-LLM preparation pipeline. No learner speech grading is added.
-
-## echo-words and implementation scope
-
-An agent on the echo-words side uses the same Phrase Gym prompt/schema to prepare
-and submit phrases. Phrase Gym has no special knowledge of echo-words and does
-not own its sender. Existing Anki output is not switched or migrated by this
-decision. External repositories remain read-only unless separately authorized.
-
-Simplification removes application-owned source parsers, text-provider adapters,
-LLM job/review APIs and special handoff interfaces. Keep the generic importer,
-content validation/storage, prompt/schema delivery, optional-media intake and
-focused speech generation/fallback. Preserve existing data and historical
-evidence; do not rewrite old migrations or delete learner history.
-
-No additional fresh review is authorized by this product clarification alone.
-The earlier review evidence remains a record of the superseded implementation.
+Actual speech listening and external-agent semantic review are distinct from schema/container tests. Choose voices using language-specific quality evidence. Private learner recordings are never provider inputs.
