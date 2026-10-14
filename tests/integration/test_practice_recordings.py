@@ -6,21 +6,7 @@ from fastapi.testclient import TestClient
 from phrase_gym.api.app import create_app
 from tests.integration.helpers import NOW, wav_bytes
 from tests.integration.practice_helpers import apply, session_fixture
-
-
-def take(attempt, **changes):
-    return {
-        "id": str(uuid4()),
-        "target_id": attempt["target_id"],
-        "revision": attempt["revision"],
-        "attempt_id": attempt["id"],
-        "captured_at": NOW.isoformat(),
-        "mime_type": "audio/wav",
-        "duration_ms": 100,
-        "complete": True,
-        "audio_base64": base64.b64encode(wav_bytes()).decode(),
-        **changes,
-    }
+from tests.integration.recording_helpers import take
 
 
 def test_all_takes_retained_idempotently_after_completion_and_restart(client, package, config):
@@ -86,18 +72,12 @@ def test_lookup_take_requires_actual_exposure_without_a_session(client, package)
     )
 
 
-def test_corrupt_complete_audio_bad_context_and_unknown_take_are_rejected(client, package):
+def test_invalid_transfer_bad_context_and_unknown_take_are_rejected(client, package):
     session = session_fixture(client, package)
     _, result = apply(client, session, "present")
     attempt = result["session"]["attempts"][0]
     assert (
         client.post("/api/v1/recordings", json=take(attempt, audio_base64="not base64")).status_code
-        == 422
-    )
-    assert (
-        client.post(
-            "/api/v1/recordings", json=take(attempt, audio_base64="aW52YWxpZA==")
-        ).status_code
         == 422
     )
     assert (

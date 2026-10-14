@@ -1,6 +1,6 @@
 # Open problems and acceptance gaps
 
-Updated **2026-10-13**. The user closed P2 engineering work while explicitly retaining the problems below. These are carried into later work; P2 closure does not establish device, speech-quality or release acceptance.
+Updated **2026-10-14**. The user closed P2 engineering work while explicitly retaining the problems below. These are carried into later work; P2 closure does not establish device, speech-quality or release acceptance.
 
 ## AUDIO-01 — Mid-recording clipping
 
@@ -16,7 +16,7 @@ The user requested stopping the current investigation and closing P2. No additio
 
 ## DEVICE-01 — iPhone acceptance
 
-**Untested.** Production capture/storage is implemented in P3. A phone-accessible trusted HTTPS test origin and actual P4 device checks are still needed to verify permission, recording/replay, interruption recovery, saved-take persistence before making the corresponding device claim. Offline installation is withdrawn by the [online-only decision](decision-online-only.md).
+**Upload rejection reported; corrected retention awaits an actual-device retest.** On 2026-10-14 the user reached the private Tailscale HTTPS origin on iPhone, acknowledged session events and played recordings locally, but four complete takes failed server decoding validation with HTTP 422. The [learner recording storage decision](decision-learner-recording-retention.md) removes server decoding and container inspection; pending takes can retry unchanged after server restart. The user reports the latest iOS, without a numeric version. Saved-take replay/reopening, interruptions, headset behavior and VoiceOver remain acceptance gaps. Offline installation is withdrawn by the [online-only decision](decision-online-only.md).
 
 ## CONTENT-01 — Real reference speech and language quality
 

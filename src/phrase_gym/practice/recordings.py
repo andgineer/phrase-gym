@@ -17,14 +17,13 @@ from phrase_gym.contracts.practice import (
     RecordingReceipt,
 )
 from phrase_gym.errors import DomainError
-from phrase_gym.practice.audio import validate_take
 from phrase_gym.practice.tables import AttemptRow, PracticeEvent, RecordingRow
 from phrase_gym.serialization import canonical_json
 from phrase_gym.storage import Database
 from phrase_gym.tables import ExposureRow, TargetRevision
 
 MAX_TAKE_BYTES = 12 * 1024 * 1024
-ALLOWED_CONTAINERS = {"audio/webm", "audio/ogg", "audio/mp4", "audio/wav", "audio/mpeg"}
+ALLOWED_MIME_TYPES = {"audio/webm", "audio/ogg", "audio/mp4", "audio/wav", "audio/mpeg"}
 
 
 class RecordingService:
@@ -33,13 +32,14 @@ class RecordingService:
 
     @staticmethod
     def receipt(row: RecordingRow) -> RecordingReceipt:
+        metadata = json.loads(row.metadata_json)
         return RecordingReceipt(
             id=UUID(row.id),
             sha256=row.sha256,
             byte_length=len(row.audio),
-            captured_at=datetime.fromisoformat(json.loads(row.metadata_json)["captured_at"]),
+            captured_at=datetime.fromisoformat(metadata["captured_at"]),
             received_at=datetime.fromisoformat(row.received_at),
-            complete=json.loads(row.metadata_json)["complete"],
+            complete=metadata["complete"],
         )
 
     def save(self, payload: RecordingInput) -> RecordingReceipt:
@@ -49,11 +49,8 @@ class RecordingService:
             raise DomainError("Take audio must be valid base64", 422) from error
         if not audio or len(audio) > MAX_TAKE_BYTES:
             raise DomainError("A take must contain audio and be at most 12 MiB", 422)
-        if payload.mime_type.split(";")[0].lower() not in ALLOWED_CONTAINERS:
-            raise DomainError("Unsupported recording container", 422)
-        if payload.complete:
-            validate_take(audio, payload.mime_type)
-        # Interrupted browser containers may lack final decoding metadata; retain original bytes.
+        if payload.mime_type.split(";")[0].strip().lower() not in ALLOWED_MIME_TYPES:
+            raise DomainError("Unsupported recording MIME type", 422)
         metadata = canonical_json(payload.model_dump_json(exclude={"audio_base64"}))
         sha256 = hashlib.sha256(audio).hexdigest()
         with self.db.write() as transaction:
