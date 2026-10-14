@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from invoke import task, Context, Collection
+from platformdirs import user_data_path
 import time
 from scripts.run_local import run_local
 
@@ -126,9 +127,22 @@ def test(c: Context):
         c.run("npm run test:browser")
 
 
-@task
+@task(help={
+    "client_dir": "Built client directory (default: frontend/dist).",
+    "data_dir": (
+        "Private database/media directory (default: PHRASE_GYM_DATA_DIR when set; "
+        f"otherwise {user_data_path('phrase-gym')})."
+    ),
+})
 def run(c: Context, data_dir: str = "", client_dir: str = "frontend/dist"):
-    """Run on a free loopback port and expose HTTPS port 443 through Tailscale Serve."""
+    """Run the built client with Tailscale HTTPS on port 443.
+
+    With no options, serve frontend/dist, use the application's normal data
+    directory, and choose a free loopback port other than 8000.
+
+    Print both URLs and run the server and Tailscale Serve in the foreground.
+    Ctrl+C stops both. Requires a built client and connected Tailscale with MagicDNS.
+    """
     run_local(c, data_dir, client_dir)
 
 
