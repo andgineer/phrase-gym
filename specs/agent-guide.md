@@ -1,8 +1,8 @@
 # Phrase Gym — agent guidance
 
-**P5 status, 2026-10-14: implementation and all known review findings are committed. Three fresh Sol 6.1 reviews returned 4 → 2 → 3 findings; independent convergence is unverified. The loop is stopped pending user confirmation of the proposed acceptance checklist and one additional review. Phrase Gym remains ONLINE-ONLY. Human content/listening approval and external echo-words sender rollout remain open. No push or deployment is authorized.**
+**Latest decision, 2026-10-14: an external agent prepares phrases using Phrase Gym's prompt and input rules. Phrase Gym accepts prepared material, stores/trains it and generates missing reference audio with per-language primary/fallback speech. Source formats, text-LLM calls/review/retries and a special echo-words sender are outside the app. The earlier P5 runtime must be simplified; no extra fresh review, push or deployment is authorized.**
 
-Follow [the review stop and proposed clarification](plan/evidence/p5-review-loop-2026-10-14.md). All nine confirmed findings are corrected through `230b16d`, with the ordered **212 Python / five client / 210 browser** gate passing and zero pyrefly errors. No fourth review or independent convergence claim is authorized until the user confirms continuation.
+Follow the [accepted external-agent decision](decision-external-preparation-agent.md). The [old three-round review](plan/evidence/p5-review-loop-2026-10-14.md) concerns superseded source/LLM responsibilities. Implementing the simplified boundary is remaining work; do not restart that review automatically.
 
 ## Workflow
 
@@ -27,7 +27,7 @@ Read the accepted [device-language and Settings decision](decision-device-langua
 
 ## Audio, evidence and external data
 
-- The user rejects macOS-only solutions and wants echo-words' audio engines and llmbroker approach. Reinspect the nearby project during actual integration; follow [the reference](reference/echo-words-audio.md). Preserve actor audio and language-correct full-phrase generation.
+- The user rejects macOS-only solutions and wants language-appropriate speech generation with fallback. Text-provider choice and orchestration belong to the external agent. Reinspect the nearby project during actual integration; follow [the reference](reference/echo-words-audio.md). Preserve actor audio and language-correct full-phrase generation.
 - `.env` reportedly contains provider keys. Keep them ignored, private, server-side and out of outputs/bundles.
 - The user reported successful production recording without clipping in Safari on a MacBook Pro M1 on 2026-10-13 (AUDIO-01), superseding the earlier prototype's continuing-clipping report for the current tested setup. Broader headset/device acceptance remains open. The earlier investigation was stopped at the user's request; do not restart it by default. Carry iPhone/content gaps as explicit dependencies.
 - All active decisions, architecture and evidence belong under `specs/`. `docs/` is the scaffold's user documentation. Archives are historical, not a baseline or instructions to execute.

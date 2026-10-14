@@ -2,6 +2,8 @@
 
 Accepted direction, 2026-10-10; cue preparation, unified session entry, on-request explanation and native-language setup clarified on 2026-10-11. This records the user's decisions; it does not approve the entire first-version feature set. See the [functional description](functional-description.md) for the app around these drills and the [remaining questions](plan/functionality-discussion.md).
 
+**Ownership clarification, 2026-10-14:** the [external-agent decision](decision-external-preparation-agent.md) preserves these learning requirements while moving source parsing, LLM preparation/review and retries outside Phrase Gym. The app supplies the prompt/input rules and accepts prepared material.
+
 ## Product scope
 
 Train selected words in useful phrases, fixed expressions and specific dialogues until the learner can use them readily in the intended situations. Open-ended AI conversation, free role-play and a general AI speaking partner are outside the product's scope, including as a later direction.
@@ -45,7 +47,7 @@ This is controlled variation, not random gaps or first-letter puzzles. Reusing a
 
 ### Prepare variants when adding the phrase
 
-Accepted clarification, 2026-10-11: when a phrase is added to the app database, an **LLM prepares alternate cue versions with different words or meaningful chunks hidden**, where the phrase supports useful alternatives. Store those variants with the same phrase so a subsequent practice session can show a different prepared version. This is part of adding/preparing the phrase, not a fresh generation request during each drill.
+Accepted preparation behavior, clarified on 2026-10-14: the external LLM agent prepares checked alternate cues with different words or meaningful chunks hidden before submitting the phrase, where useful alternatives exist. Store those variants with the same phrase so a subsequent practice session can show a different prepared version. This is part of adding/preparing the phrase, not a fresh generation request during each drill.
 
 Each version must preserve enough phrase-specific material to identify the learned expression in context. Check candidate variants before making them available for practice. Do not force a fixed number of variants or manufacture ambiguous gaps just to change the display. If only one reliable cue is possible, reuse it; if none is reliable, retain model practice and flag the cue for preparation rather than inventing a test.
 
@@ -82,7 +84,7 @@ One learning target has one review schedule across its cue versions, contexts an
 
 ## AI's role and the evidence boundary
 
-As part of phrase intake, the LLM prepares candidate cue chunks and alternate masks where useful variants are possible, as agreed above. AI may also prepare useful word-in-phrase examples and short dialogues. It can check plausible competing completions and help refine an ambiguous prompt. Generated material needs checking for naturalness, meaning and suitability for the target; an AI check is not proof of uniqueness.
+Before submission, the external agent uses Phrase Gym's prompt to prepare/check cue chunks and alternate masks where useful variants are possible, as agreed above. AI may also prepare useful word-in-phrase examples and short dialogues. It can check plausible competing completions and help refine an ambiguous prompt. Generated material needs checking for naturalness, meaning and suitability for the target; an AI check is not proof of uniqueness.
 
 Optional assistance during practice may identify an omitted target, offer a better cue or select a repair exercise. Uncertain speech recognition must not be treated as a definite learner mistake. Self-comparison with the model remains available; automatic assessment is not a prerequisite for the core drill.
 

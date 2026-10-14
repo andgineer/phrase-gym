@@ -1,8 +1,8 @@
 # Phrase Gym — start here
 
-**P5 status, 2026-10-14: implementation and all known review findings are committed. Three fresh Sol 6.1 reviews returned 4 → 2 → 3 findings; independent convergence is unverified. The loop is stopped pending user confirmation of the proposed acceptance checklist and one additional review. Phrase Gym remains ONLINE-ONLY. Human content/listening approval and external echo-words sender rollout remain open. No push or deployment is authorized.**
+**Latest decision, 2026-10-14: an external agent prepares phrases using Phrase Gym's prompt and input rules. Phrase Gym accepts prepared material, stores/trains it and generates missing reference audio with per-language primary/fallback speech. Source formats, text-LLM calls/review/retries and a special echo-words sender are outside the app. The earlier P5 runtime must be simplified; no extra fresh review, push or deployment is authorized.**
 
-See [the review evidence and convergence analysis](plan/evidence/p5-review-loop-2026-10-14.md) and [P5 runbook](plan/p5-runbook.md). The latest ordered correction gate passes all hooks/zero pyrefly errors, **212 Python tests, five client tests and 210 browser checks**, with actual typecheck/build and both engines. The last correction commit is `230b16d`; passing checks do not replace the requested independent review.
+Read the [accepted external-agent boundary](decision-external-preparation-agent.md) and [revised P5 plan](plan/03-content-and-integrations.md). The [earlier review](plan/evidence/p5-review-loop-2026-10-14.md) and its passing software checks are historical evidence for the superseded implementation, not a reason to keep its source adapters or LLM orchestration.
 
 The [three-round fresh Sol 6.1 P3 review](plan/evidence/p3-review-loop-2026-10-12.md) converged with 5 → 1 → 0 findings. That review passed 104 Python tests, eight client tests and 138 browser checks. The subsequent [local P3 follow-ups](plan/evidence/p3-local-followups-2026-10-13.md) include phrase hints, one-click session starts and conditional native help; the P3 baseline gate passes **110 Python tests, eight client tests and 164 browser checks**. This is the P3 baseline for the P4 reliability implementation.
 
@@ -30,7 +30,7 @@ The product trains selected words in phrases, fixed expressions and prepared dia
 - Commit directly to **main**. Do not create branches by default, push or deploy without a request.
 - P1 manual review is finished for this session. Three fresh Sol 6.1 reviews were completed earlier; do not restart the loop. Use proportionate checks and user feedback.
 - Production implementation belongs in the project's source layout during P2. The disposable prototype and archived experiments are not production baselines to transplant unquestioningly.
-- The user rejects macOS-only audio dependencies and requests echo-words' Piper/Edge and llmbroker approach. See [the integration reference](reference/echo-words-audio.md). Existing Samantha clips are test assets only. Keep `.env` keys private and server-side.
+- The user rejects macOS-only audio dependencies. Piper/Edge are the inspected speech starting point; text LLMs and their provider libraries belong to the external agent. See [the integration reference](reference/echo-words-audio.md). Existing Samantha clips are test assets only. Keep `.env` keys private and server-side.
 - Earlier prototype testing reported Safari/M1/external-headset clipping; the 2026-10-13 production Safari/M1 test now reports recording without clipping. Headset details and broader acceptance remain unspecified; see AUDIO-01 in the open-problems record. iPhone checks and real actor/Serbian content also remain pending.
 
 ## Supporting documents

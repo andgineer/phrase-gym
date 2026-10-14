@@ -1,64 +1,28 @@
-# Phrase preparation — prompt design and acceptance
+# Phrase preparation — instructions for the external agent
 
-Implemented preparation workflow with measured withheld drafts, updated **2026-10-14**. See [evidence](evidence/p5-implementation-2026-10-14.md) and [fresh semantic review](evidence/p5-semantic-review.md). Initial operator content/listening review remains required. The original scope was clarified by the user on **2026-10-13**. This is part of P5 and the full app implementation, not an optional polish task. It expands [P5.2–P5.3](03-content-and-integrations.md) and follows the [targeted-drilling decision](../decision-targeted-drilling.md).
+Updated **2026-10-14** under the accepted [external-agent decision](../decision-external-preparation-agent.md). Phrase Gym supplies the prompt, versioned input schema and submission instructions. The user's agent runs preparation outside Phrase Gym and understands the user's source format.
 
-## Current gap
+The current runtime still contains the earlier application-owned LLM workflow. The following is the accepted replacement, not a claim that the runtime or a downloadable agent guide has already been simplified.
 
-The 44 phrases in the local vault test import each have one manually prepared partial cue. The core can select stored variants using hidden-chunk history, but this pack does not demonstrate different parts being recalled across sessions. Structural checks now reject cues with no visible phrase text; they do not establish that a nonempty hint is good or sufficiently identifying. LLM prompts, durable draft/review/publication and the intake-to-rotation lifecycle are implemented and measured. The free-provider outputs demonstrate recoverable failures and withheld drafts; initial human content/listening acceptance remains open.
+## Prompt contents
 
-## Required prompt-design deliverables
+1. Read the selected complete phrase, expression/sense/frame, language, native explanation language and available context. Keep missing context explicit; do not invent a meaning. Use stable identifiers rather than a source's current ordering.
+2. Preserve the complete phrase and meaningful chunk boundaries. Every cue requests the whole phrase; chunks reconstruct it exactly.
+3. Prepare useful different hidden parts while keeping identifying visible wording. Avoid random gaps, first-letter puzzles, punctuation-only support and situation-only prompts. One reliable cue is enough; zero reliable retrieval cues is an honest result.
+4. Challenge each visible cue with realistic competing completions. Check identifying anchors, hidden required material, target leaks and reviewed equivalent/slot boundaries. Do this externally before submission, without exposing quality rationales as learner instructions.
+5. Supply a natural native-language translation/meaning. Add concise usage, nuance or construction explanation only when useful; do not require filler or another language's explanation.
+6. Prepare intent/topic/situation/synonym terms that retrieve the actual stored target. Preserve complete dialogues and explicit turn meanings when included.
+7. Preserve optional complete phrase/turn recordings and their source/performer or generation metadata. Upload them through the documented intake path; never substitute a headword clip or silently drop a supplied actor clip.
+8. Submit the prepared package using the actual schema/API. Explain stable IDs, idempotent delivery, media binding, validation errors and compatible updates without resetting schedules or earlier sessions.
 
-1. Design and version a preparation prompt that takes the complete source phrase, selected expression/sense or frame, source situation/dialogue context, learning language and native explanation language. Supply relevant neighbouring expressions as competing wording where available. Missing source context must remain explicit.
-2. Ask for meaningful chunk boundaries and candidate cues that hide different useful parts of the same phrase while preserving enough identifying wording. The learner always recalls the complete phrase. Do not default to the first words, generate random masks, use first-letter puzzles or treat a broad situation alone as a sufficient cue.
-3. Require a competing-completion analysis for each candidate: what other plausible response fits, which visible anchors distinguish the learned expression, what is actually being recalled, and whether the cue supplies a word/frame target that should be hidden. A generic rationale such as “this is a good hint” is insufficient.
-4. Request useful, genuinely different variants rather than a fixed count. Reject cosmetic rewordings that hide the same material. Permit one reliable variant for a short or constrained phrase and an explicit no-reliable-cue result when necessary. Record uncovered useful chunks and the reason instead of manufacturing a weak variant to satisfy coverage.
-5. Design a separate review prompt/checklist that challenges the candidate using the actual visible cue and plausible alternatives. The generator's confidence or self-approval must not publish a cue. Keep initial human semantic review and a fresh reviewer for real model-result measurements.
-6. Define structured draft output, deterministic validation and review outcomes before wiring provider calls into publication. Keep cue-selection rationales and quality-review notes out of the learner's normal card. Save source/input hashes, provider/model, prompt and preparation versions, concrete responses and review outcomes.
-7. Require native-language help as part of phrase preparation: a natural translation/meaning is sufficient for a straightforward phrase; add concise usage, nuance or chunk/construction explanation only when it helps. Do not manufacture an extended explanation or generic usage filler for every phrase. Review translation accuracy and when extra explanation is necessary alongside cue quality. Store this material for later use; pressing a help control must not be a request to discover that nothing exists.
+The guide must be usable by the user's chosen LLM agent with any unique source. No Phrase Gym vault parser, echo-words adapter, text-provider credentials, generation worker or human-approval API is required.
 
-Illustrative candidates for **“Not too bad, thanks. And yours?”** are **“_____ thanks. And yours?”** and **“Not too bad, thanks. _____”**. They exercise different parts under the same target and schedule. These are examples for the review set, not a universal template or evidence that every generated variant is adequate.
+## Quality and demonstration
 
-## Other phrase preparation in the same workflow
+Use public development examples and separate held-out examples to assess the prompt through an external agent. Cover short/long phrases, idioms, word senses, frames, noninitial anchors, realistic alternatives, contractions, missing context and relevant language/native-help combinations. Inspect actual prepared material separately from schema checks.
 
-The following existing app requirements should share the intake workflow while retaining distinct validation and review responsibilities:
+Demonstrate multiple useful cues, a single reliable cue and supported study without a retrieval cue. Submit prepared material through generic intake, practise it, then confirm later selection and pinned reload. Preserve one target schedule and honest support evidence.
 
-| Preparation | Intended result | Constraint |
-|---|---|---|
-| Target and meaning analysis | Identify the selected fixed expression, word sense or reusable frame; distinguish required material from allowed substitutions. | Preserve source intent and target identity. A different meaning needs a new objective, not an automatic rewrite of an existing target. |
-| Native-language translation or explanation | Prepare a natural translation/meaning for a straightforward phrase, adding useful usage, nuance or chunk/construction explanation when necessary. | Both are the prompt's responsibility. Allow translation without mandatory usage text; do not invent grammar rules, force long explanations or display help before the learner requests it. |
-| Allowed equivalents and frame slots | Explicitly reviewed contractions, wording alternatives and permissible slot values. | Good English is not automatically equivalent to the selected target. Do not broaden exact-phrase acceptance merely to compensate for an ambiguous cue. |
-| Intent and search metadata | Communicative purpose, topic, situation, register and useful related search terms, such as greetings absent from the literal phrase. | Search retrieves existing phrases and lessons. Native-language search and embeddings remain separate choices. |
-| Context and partner-turn candidates | Suitable alternate situations or prepared dialogue turns where they improve identification and practice. | Preserve the expression/sense, keep adequate phrase-specific anchors, and introduce no free conversation or compulsory dialogue quota. |
-| Source and reference readiness | Flag missing context, uncertain provenance, absent audio and known text/audio mismatches for review. | Preserve source text and original actor/course assets. A text-only LLM result cannot certify what an audio clip says; audio preparation and listening acceptance remain separate work. |
+External preparation failures, provider choice, retries and semantic review belong to the agent/user. Phrase Gym returns structural/storage feedback and never calls a text LLM to repair the submission. Existing measured results remain [historical evidence](evidence/p5-semantic-review.md) of the previous prompt/workflow.
 
-These outputs can be generated in separate bounded stages or a cohesive structured request after representative measurements establish which is more reliable. No new learner-audio analysis or speech-grading feature is implied.
-
-## Quality review and measurements
-
-Before spending provider budget, define representative development fixtures and a separate held-out set, expected failure cases, the measurement plan and available configured providers. Include:
-
-- the current failure case: a broad day-response situation that permits many phrasings;
-- short expressions where only one useful variant may exist;
-- longer phrases with beginning, middle and ending chunks worth recalling;
-- cues needing a noninitial distinguishing anchor and near-duplicate phrases in one lesson;
-- fixed phrases, selected word senses and frames, including a visible-target leak;
-- contractions, reasonable competing completions, missing context and no-reliable-cue outcomes;
-- supported learning languages and native translations/explanations relevant to the release, including simple phrases needing only translation and idioms or constructions needing further explanation.
-
-Inspect every concrete real-provider result. Record semantic acceptance/rejection separately from automated conformance, with representative rejected examples and reasons, latency, retries and observed cost. A fresh reviewer must inspect the real model-result measurements; mocks and a second model's approval alone cannot establish cue quality. No learner effectiveness experiment, calibration session or reopening of P1 follows from this work.
-
-Review each cue for naturalness, fidelity to the selected meaning, sufficient distinguishing material, hidden useful recall content and honest supplied support. Strengthen or withhold an ambiguous cue rather than grade an arbitrary wording choice as forgetting. Keep phrases without reliable cues available for supported study and mark retrieval preparation incomplete.
-
-## Integration acceptance
-
-- [ ] Prompts, structured output, validation and review criteria are versioned and supported by concrete reviewed provider results.
-- [ ] Adding a representative phrase produces multiple accepted stored masks that hide different meaningful parts; one-variant and no-reliable-variant cases also work.
-- [ ] The stored variant sets fit the selector's comparable-support rules. Demonstrate that useful variants are actually reachable; do not store alternatives that the current hidden-chunk-count filter can never choose.
-- [ ] Later ordinary sessions select different suitable hidden parts of the same target using presentation/recall history. Reload keeps the active session's pinned cue and content revision.
-- [ ] All variants, contexts and dialogue appearances retain one target schedule. Prepared support is recorded accurately; partial-cue recall is not relabelled independent speech.
-- [ ] Generated native help is accurate and proportionate: translation-only phrases need no filler usage section; idioms/constructions get useful explanation. Search metadata is checked with representative concept queries against the real app.
-- [ ] Show & explain appears only when useful translation/explanation content exists in the selected native language. Missing or empty content hides the action and panel instead of displaying a nonfunctional control or a not-prepared message. Native-language changes update availability without falling back to another language.
-- [ ] Already imported phrases, including the current 44-phrase local pack, can be prepared or regenerated without duplicate targets, reset schedules, lost recordings or mutation of earlier session manifests.
-- [ ] Timeout, malformed output, failed semantic review and provider outage leave recoverable drafts. Published practice uses stored material and never waits for an LLM between cards.
-
-P5 is not complete merely because JSON validates, a cue has some visible text, or the core has a rotation algorithm. It must demonstrate preparation, review, publication and useful later cue selection together.
+Actual reference-speech quality remains a separate audio check. No learner effectiveness experiment or reopening of P1 follows from this work.

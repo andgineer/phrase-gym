@@ -1,5 +1,7 @@
 # P5 fresh-session engineering review loop — 2026-10-14
 
+**Historical scope:** the user subsequently accepted the [external-agent decision](../../decision-external-preparation-agent.md). Its source-independent intake replaces the in-app source/LLM workflow reviewed here. The proposed cross-source adapter matrix below is superseded; no fourth review is authorized by that clarification alone.
+
 The user authorized P5 implementation in a fresh Sol 6.1 session followed by
 fresh independent reviews, analysis and necessary fixes. The coordinator will
 stop before a fourth review if actionable findings remain after three iterations,

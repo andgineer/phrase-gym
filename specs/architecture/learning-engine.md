@@ -14,7 +14,7 @@ For fixed phrases, preserve the requested wording and permitted equivalents. For
 
 ## Cue eligibility and selection
 
-The accepted preparation timing is phrase intake: when adding a phrase to the database, have the LLM prepare useful alternate masks, check them and persist them for later sessions. Session selection consumes this prepared set. Different hidden parts must not require a live LLM request during a drill.
+Under the [external-agent decision](../decision-external-preparation-agent.md), the external agent prepares/checks useful masks before submission. Phrase Gym validates and persists the submitted set for later sessions. Session selection consumes this prepared set. Different hidden parts must not require a live LLM request during a drill.
 
 1. Only published, reviewed cue variants are eligible. All chunk IDs must resolve within the pinned realization revision and reconstruct the original text exactly, including punctuation and spacing.
 2. A cue must state the task, supply its use context and retain enough distinguishing language. Store plausible competing answers and why the chosen anchors distinguish the intended learned expression. This is a review aid, not a proof of universal uniqueness.

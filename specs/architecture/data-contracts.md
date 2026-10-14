@@ -1,6 +1,6 @@
 # Data model and integration contracts
 
-Updated 2026-10-12. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; pinned sessions, ordered attempt events, recording transfer and review receipts are implemented in P3. See the [core trainer decision](../decision-core-trainer.md). The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
+Updated 2026-10-14. The [external-agent decision](../decision-external-preparation-agent.md) supersedes source-specific and in-app LLM preparation contracts. The current runtime still exposes its earlier workflow pending simplification. Settings, manual packages, immutable content revisions, library reads, reference exposures and media contracts are implemented in P2; pinned sessions, ordered attempt events, recording transfer and review receipts are implemented in P3. See the [core trainer decision](../decision-core-trainer.md). The committed OpenAPI snapshot and generated client types describe the actual API. Companion to the [architecture](../architecture.md) and [learning engine](learning-engine.md). Implement these incrementally; the prototype needs only fixtures matching the core shapes.
 
 ## Durable model
 
@@ -22,13 +22,13 @@ Use opaque UUIDs for internal identities; source identifiers are references, not
 | `review_receipt` | Unique review group per learner/target; accepted attempt, schedule effect and before/after version. |
 | `media_asset` | Reference/cue audio: hash, MIME type, byte size, duration, storage key, language, provenance (imported course/human recording or generated speech, with source/performer or provider details when available) and readiness. Original and normalized versions are linked. Do not infer AI origin from an old field/UI term. Learner recordings use database audio storage below. |
 | `recording` | Stable take ID, learner, target/session/attempt and cue/content revision links, captured timestamp, audio bytes (BLOB in SQLite), hash, MIME type, byte size, duration when known, capture/completeness status and persistence acknowledgement. Support/exposure is retained through attempt history. Every take is automatically kept; no saved/pinned opt-in flag. A new take gets a new ID and does not replace earlier audio. No recording is required for a recording-off attempt. |
-| `content_job` | Kind, canonical input hash, state, lease owner/expiry, retry count, result/error and provider/prompt provenance. |
+| `content_job` | Focused reference-audio work and recovery only in the accepted boundary. The earlier LLM job implementation/migration remains historical until simplification. |
 | `cue_report`, `learner_note` | Cue-specific quality feedback and target-specific personal notes; neither is a schedule. |
 | `app_settings` | Native language collected on first launch and `ui_language_mode` (`native` or `learning`). Bare-URL language restoration is best-effort browser storage, outside this server row. Explanation language derives from native language; effective UI language derives from the mode and current URL's learning language. No independent arbitrary UI locale selector. These two fields are the implemented Settings contract. |
 
 Compatible editorial/context revisions keep the target and schedule; retain recall coverage only for unchanged required chunks, with an explicit mapping for renamed chunk IDs. A source edit must not silently replace the required expression or meaning.
 
-For the accepted add-time cue-preparation flow, link the LLM preparation job and its checked `cue_variant` results to the phrase's realization revision. Persist cue presentation in session/attempt history, including a displayed cue on a subsequently abandoned attempt, so selection can vary the hidden parts across sessions. Store zero, one or several candidates as appropriate; only reviewed usable cues enter retrieval practice. These variants do not create additional targets or schedules. The exact history schema and selection policy remain implementation proposals.
+For the accepted external-agent flow, store submitted checked cue variants with the phrase revision, retaining external prompt/model provenance when supplied. Phrase Gym does not own the LLM job. Persist cue presentation in session/attempt history, including a displayed cue on a subsequently abandoned attempt, so selection can vary the hidden parts across sessions. Store zero, one or several candidates as appropriate; only reviewed usable cues enter retrieval practice. These variants do not create additional targets or schedules. The exact history schema and selection policy remain implementation proposals.
 
 The [current review recommendation](../design/answer-card-and-review-policy.md) maps eligible original results to FSRS Again/1, Hard/2 and Good/3. Preserve the state before/after each applied observation for correction and reproducibility. Log separated retries, supported takes and search/explanation exposures even when they do not update the schedule. The first eligible result per review group remains authoritative; later success never overwrites it. Cue selection uses persistent hidden-chunk practice/recall evidence, including support and last presentation, rather than a mandatory coverage gate at every interval. These fields support normal learning; they do not require an experiment or calibration feature.
 
@@ -91,7 +91,7 @@ IDs above are readable fixture identifiers, not the production UUID format. Thes
 | `POST /api/v1/cue-reports` | Record ambiguity or inappropriate context without grading a memory failure. |
 | `POST /api/v1/recordings`, `GET /recordings/{id}/audio` | Automatically persist every take's audio and metadata in the database, with idempotent upload/attachment and private playback. Acknowledge storage only after commit. Failed transfer retains pending audio and does not discard the practice event. Historical browsing/comparison and deletion UI are not first-version requirements. |
 | `GET /api/v1/media/{id}` | Private media delivery with byte-range support, MIME type and immutable content identity. |
-| `POST /api/v1/preparation`, `GET /api/v1/preparation/{id}` | Durable asynchronous preparation and status. Polling suffices initially; no streaming chat API. |
+| `POST /api/v1/preparation`, `GET /api/v1/preparation/{id}` | Existing legacy LLM workflow, superseded and awaiting removal. Actual current signatures remain in OpenAPI; this is not the accepted intake boundary. |
 
 Validate schema versions, ownership, byte limits, state transitions and revision references at the boundary. Render imported/generated content as text or sanitized supported markup; do not execute source HTML or instructions. Import packages contain asset references or uploaded files, not arbitrary server-fetch URLs.
 
@@ -103,29 +103,17 @@ Within one transaction, validate sequence and the manifest, insert the event, de
 
 The first release permits one active session per learner. A takeover closes the previous session for scheduling; late events may be retained as historical practice with an explicit no-schedule-change reason. Changed/withdrawn cues and stale target revisions similarly cannot overwrite the current learning contract.
 
-## Source intake
+## Generic prepared-material intake
 
-### Vault
+Phrase Gym provides one input schema and preparation/submission prompt. The user's external agent knows the source format, prepares the selected meaning, chunks/cues, native help, concepts and complete dialogues, and submits optional verified reference audio. Vaults, echo-words and other sources use the same input rules; there is no source-specific sender or parser inside Phrase Gym.
 
-Use a local export command operating on explicitly selected notes and assets. Read the vault; write packages and identity mappings in the project/application data directory. Do not require a server to mount the entire vault, watch unrelated notes, or write learning progress into note files.
+Use stable submission/source identifiers for idempotent retries and target preservation. Keep meanings explicit: two identical surface forms may have distinct targets, and changing a meaning cannot reuse another target's schedule. Compatible edits preserve recordings, unchanged chunk evidence and pinned sessions. An external agent's current note position or selected-sense array index is not a learning identity.
 
-The existing note format and `phrases.py` can inform a parser, but the old runtime, hint rules and generated page are not the new app. Current numbered phrases can be reordered: do not assume `lesson-id + position` is a permanent identity. Maintain an import manifest with stable IDs and source fingerprints; surface ambiguous reorders/edits for mapping instead of merging by text or resetting progress. Renames and repeated identical text must be covered by fixtures.
+Structural and media-binding validation, atomic content storage and clear receipts/errors remain inside the app. LLM calls/reviews/costs and preparation/delivery retries are external. There is no application-owned human approval workflow. Prepared content quality is the external producer's responsibility, guided by the prompt.
 
-### echo-words
+Optional supplied audio must carry exact text/language/role/provenance and uploaded bytes. Preserve supplied originals; reject invalid or supplied-but-untransferred media rather than silently generating replacements. Do not fetch arbitrary URLs. Phrase Gym generates genuinely missing full-phrase/turn audio using its language-specific primary and fallback.
 
-The inspected code has structured `Note`, `Meaning`, `Example` objects, but recent `Entry` history is restart-ephemeral. An `entry_id`, selected sense index or rendered HTML response is not a sufficient permanent import key.
-
-The P5 portable envelope and durable Phrase Gym receiver are implemented. The external sender must create a durable outbound envelope at selection time with:
-
-- contract version and a stable export UUID/idempotency key;
-- source language, selected expression and selected meaning description;
-- complete useful examples and the surface form in each;
-- source/provenance metadata, optional model audio files and source revision;
-- a stable target mapping after the first successful import.
-
-Persist that envelope before reporting it sent; retry delivery after restarts using the same ID. An acknowledged import may remain **preparing** rather than **ready to practise**. A sense re-analysis requires semantic reconciliation; its new array position cannot silently change an existing target's meaning.
-
-The adapter should be a new output destination, not a Phrase Gym implementation of an Anki-shaped `CardStore` that creates sibling cards. Provide a manual package export/import path first. The later switch from Anki output to Phrase Gym is a user-visible rollout action; do not silently dual-send or remove existing notes. Existing Anki collection migration is separate, unplanned work.
+Current generic manual-package/API contracts are implemented; the old special preparation/handoff endpoints still await removal. The accepted prompt/schema delivery and simplified intake path must be implemented against the generated API, without inventing unsupported endpoint names in this document.
 
 ## Connected session journal
 
@@ -141,7 +129,7 @@ For generated reference audio, retain the exact speech input separately from dis
 
 For learner takes, persist original audio bytes and metadata together. Validate request, size, declared MIME and context under the [retention decision](../decision-learner-recording-retention.md). Store opaque bytes without decoding or container inspection; only the frontend plays audio. Preserve browser capture completeness, including interrupted fragments, without inferring playback compatibility from contents. Use the same take ID on retry so a lost acknowledgement does not duplicate a recording. Distinct takes remain distinct even if their audio hashes match. Recording storage does not itself advance a review schedule. No automatic expiry or cleanup of retained database recordings is part of the policy.
 
-A worker claims a job with a lease in a short transaction, then performs external work outside the lock. Renew the lease for long work. After a crash, expiry permits retry; the canonical input hash deduplicates publication, even if an external provider was called twice. Store bounded error details, expose a retry action and cap provider work. Jobs do not carry database locks across network calls.
+Focused audio work claims its durable task in a short transaction, then synthesizes outside the lock. Renew the lease for long work. After a crash, expiry permits retry; the canonical input hash deduplicates publication, even if a speech request was repeated. Store bounded error details, expose a retry action and cap provider work. Jobs do not carry database locks across network calls.
 
 ## Comparison sequence contract
 
@@ -150,7 +138,9 @@ Recording mode must not be inferred merely from the presence or absence of a rec
 The [device-language and Settings decision](../decision-device-language-and-settings.md) removes the server language preference and navigation writes. Migration 0002 removes the legacy JSON field.
 
 
-## Implemented preparation boundary (2026-10-14)
+## Superseded implemented LLM boundary (2026-10-14)
+
+The following legacy runtime remains until simplification; it is not the accepted architecture.
 
 `preparation_job` persists canonical source/settings/prompt identity, base source bindings,
 leases/tokens, attempts/retry state, retained raw generation/advisory responses, checkpointed

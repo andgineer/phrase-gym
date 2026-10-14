@@ -4,6 +4,8 @@
 
 The current stack is Vue/TypeScript/Vite, FastAPI/Pydantic, SQLAlchemy/Alembic and SQLite. Source dependencies are locked. One local API process serves the built client and API from one origin. The CLI binds loopback; public/private HTTPS access and release authentication remain later work. No provider call or learner-audio upload is part of the foundation.
 
+The accepted [external-agent decision](decision-external-preparation-agent.md) keeps source parsing and all text-LLM preparation outside the app. The generic importer remains; prompt/schema delivery and focused speech generation are the P5 responsibilities. Earlier `preparation/` and `integrations/` source/LLM modules still await removal.
+
 ## Boundaries
 
 | Area | Responsibility |
@@ -31,4 +33,4 @@ Content revisions hold their initial realization/chunks/cues as immutable JSON. 
 
 Media keeps original bytes, with metadata identity incorporating content hash and provenance/preparation settings. Manual publication checks exact language/text/role. Missing media is an explicit preparation gap. The initial search is Unicode substring matching over text, purpose and prepared concepts; it is intentionally independent of lesson filtering.
 
-These boundaries implement P3 sessions, recording retention and scheduling without turning the importing service into a catch-all; see the [core decision](decision-core-trainer.md). P3 must keep session planning, evidence processing, review policy and recording transfer separate, using the accepted unified-card interaction. P4/P5/P6 retain their connected reliability/device, provider-intake and deployment responsibilities.
+These boundaries implement P3 sessions, recording retention and scheduling without turning the importing service into a catch-all; see the [core decision](decision-core-trainer.md). P3 must keep session planning, evidence processing, review policy and recording transfer separate, using the accepted unified-card interaction. P4/P5/P6 retain connected reliability/device, generic prepared intake/reference speech and deployment responsibilities.
