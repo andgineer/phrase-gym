@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { requireServer } from '../api'
+import { setAudioSession } from '../audioSession'
 
 export function usePracticeAudio() {
   const playing = ref(false)
@@ -12,8 +13,11 @@ export function usePracticeAudio() {
   function stop() {
     sequence++
     audio?.pause()
-    if (audio) audio.src = ''
-    audio = null
+    if (audio) {
+      audio.onended = null
+      audio.onerror = null
+      audio.src = ''
+    }
     playing.value = false
     resolvePlayback?.()
     resolvePlayback = null
@@ -30,18 +34,19 @@ export function usePracticeAudio() {
     lastUrl = url
     error.value = ''
     const token = sequence
-    const playback = new Audio(url)
-    audio = playback
+    const playback = (audio ??= new Audio())
+    playback.src = url
+    setAudioSession('playback')
     playing.value = true
     let successful = true
     const ended = new Promise<void>((resolve) => {
       resolvePlayback = resolve
     })
     playback.onended = () => {
-      if (audio === playback) resolvePlayback?.()
+      if (token === sequence) resolvePlayback?.()
     }
     playback.onerror = () => {
-      if (audio === playback) {
+      if (token === sequence) {
         successful = false
         error.value = 'Audio could not play. Try again.'
         resolvePlayback?.()
@@ -52,19 +57,24 @@ export function usePracticeAudio() {
       await ended
     } catch {
       successful = false
-      if (audio === playback) error.value = 'Audio could not play. Try again.'
+      if (token === sequence) error.value = 'Audio could not play. Try again.'
     }
     if (token !== sequence) return false
     stop()
     return successful
   }
   function background() {
-    if (document.hidden) stop()
+    if (document.hidden) {
+      stop()
+      setAudioSession('auto')
+    }
   }
   onMounted(() => document.addEventListener('visibilitychange', background))
   onUnmounted(() => {
     live = false
     stop()
+    setAudioSession('auto')
+    audio = null
     document.removeEventListener('visibilitychange', background)
   })
   return {

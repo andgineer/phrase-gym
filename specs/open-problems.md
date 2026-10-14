@@ -16,7 +16,9 @@ The user requested stopping the current investigation and closing P2. No additio
 
 ## DEVICE-01 — iPhone acceptance
 
-**Upload rejection reported; corrected retention awaits an actual-device retest.** On 2026-10-14 the user reached the private Tailscale HTTPS origin on iPhone, acknowledged session events and played recordings locally, but four complete takes failed server decoding validation with HTTP 422. The [learner recording storage decision](decision-learner-recording-retention.md) removes server decoding and container inspection; pending takes can retry unchanged after server restart. The user reports the latest iOS, without a numeric version. Saved-take replay/reopening, interruptions, headset behavior and VoiceOver remain acceptance gaps. Offline installation is withdrawn by the [online-only decision](decision-online-only.md).
+**Basic iPhone flow passes; broader acceptance remains open.** On 2026-10-14 the user tested the private Tailscale HTTPS origin with the latest iOS and the built-in speaker. Initial complete takes failed unnecessary server decoding validation with HTTP 422 despite local playback. The [learner recording storage decision](decision-learner-recording-retention.md) removes that gate and preserves original bytes.
+
+The next check reported silent learner playback before the reference, slow advancement/answer reveal and a connection warning; MacBook Safari worked correctly. After the [browser audio/journal correction](decision-browser-audio-session.md) and loading the corrected frontend, the user reports: "now it works on on iphone". Live practice events and recording uploads returned HTTP 200. This is actual-device evidence for the reported basic flow, without a numeric iOS version or timing measurement. Saved-take replay/reopening, interruptions, headset behavior and VoiceOver still require their own acceptance checks. Offline installation is withdrawn by the [online-only decision](decision-online-only.md).
 
 ## CONTENT-01 — Real reference speech and language quality
 

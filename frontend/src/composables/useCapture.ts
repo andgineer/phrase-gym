@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { captureOwner, holdCapture, releaseCapture } from '../captureOwners'
+import { setAudioSession } from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 
 type TakeContext = Pick<
@@ -36,6 +37,7 @@ export function useCapture(options: CaptureOptions) {
     await stop(true)
     stream?.getTracks().forEach((track) => track.stop())
     stream = null
+    setAudioSession('auto')
   }
   async function start() {
     if (capturing.value || requesting.value || processing.value) return
@@ -50,6 +52,7 @@ export function useCapture(options: CaptureOptions) {
         throw new Error('Recording is unavailable in this browser. You can still use self-check.')
       const context = await options.context()
       if (token !== generation) return
+      setAudioSession('play-and-record')
       if (!stream || stream.getAudioTracks().every((track) => track.readyState === 'ended')) {
         const acquired = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -83,7 +86,7 @@ export function useCapture(options: CaptureOptions) {
         ...context,
         id: crypto.randomUUID(),
         captured_at: new Date().toISOString(),
-        mime_type: capture.mimeType,
+        mime_type: capture.mimeType || format || '',
         duration_ms: null,
         complete: false,
         capture_settings,
@@ -110,6 +113,7 @@ export function useCapture(options: CaptureOptions) {
       })
       capture.ondataavailable = (event) => {
         if (event.data.size) {
+          take.mime_type = event.data.type || capture.mimeType || take.mime_type
           chunks.push(event.data)
           byteLength += event.data.size
           // Leave headroom for the final encoder chunk below the server's 12 MiB limit.

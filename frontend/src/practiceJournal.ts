@@ -108,7 +108,10 @@ export async function journalEntries<T>(prefix: string): Promise<Array<{ key: st
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('journal')
     const entries: Array<{ key: string; value: T }> = []
-    const cursor = transaction.objectStore('journal').openCursor()
+    // Reading event/checkpoint keys must not clone unrelated retained audio buffers.
+    const cursor = transaction
+      .objectStore('journal')
+      .openCursor(IDBKeyRange.bound(prefix, `${prefix}\uffff`))
     cursor.onsuccess = () => {
       const next = cursor.result
       if (next) {

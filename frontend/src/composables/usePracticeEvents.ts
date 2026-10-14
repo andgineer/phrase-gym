@@ -111,7 +111,6 @@ export function usePracticeEvents(
     })
     actions = operation.then(() => {}).catch(() => {})
     return operation.catch((cause) => {
-      if (pending.value.some((entry) => entry.event.id === eventId)) serverUnavailable.value = true
       error.value = String(cause)
       throw cause
     })

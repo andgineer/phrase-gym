@@ -40,8 +40,13 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
   if (!response.ok) {
     if (response.status >= 500) serverUnavailable.value = true
     const error = await response.json().catch(() => null)
+    const detail = error?.detail
     throw new ApiError(
-      typeof error?.detail === 'string' ? error.detail : `Request failed (${response.status})`,
+      typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((issue) => `${issue.loc?.join('.')}: ${issue.msg}`).join('; ')
+          : `Request failed (${response.status})`,
       response.status,
     )
   }

@@ -88,7 +88,7 @@ test('failed reference delivery offers a working explicit playback retry', async
       page.evaluate(() => {
         const players = (window as unknown as { referencePlayers: HTMLAudioElement[] })
           .referencePlayers
-        return players.length === 2 && !players[1].paused
+        return players.length === 1 && !players[0].paused
       }),
     )
     .toBe(true)

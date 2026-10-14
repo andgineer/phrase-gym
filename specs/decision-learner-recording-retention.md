@@ -16,4 +16,4 @@ The four pending iPhone takes can retry with their existing IDs and payloads aft
 
 ## Evidence boundary
 
-The user reports local iPhone playback and the latest iOS, without a numeric version. Regression tests verify opaque and encoded byte retention, exact receipts, idempotent retries, capture facts and remaining integrity guards. Existing tests cover retention across session completion and server restart. Actual iPhone upload/replay must be retested before closing DEVICE-01; headset, interruption and VoiceOver acceptance remain separate device checks.
+The user reports local iPhone playback and the latest iOS, without a numeric version. Regression tests verify opaque and encoded byte retention, exact receipts, idempotent retries, capture facts and remaining integrity guards. Existing tests cover retention across session completion and server restart. After the subsequent [frontend correction](decision-browser-audio-session.md), the user reports that the basic iPhone flow works, with live recording uploads returning HTTP 200. Headset, interruption, saved-take reopening and VoiceOver acceptance remain separate device checks.
