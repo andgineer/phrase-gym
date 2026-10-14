@@ -4,7 +4,7 @@
 
 A language trainer for ready use of words, phrases and prepared dialogues.
 
-The production app in `src/phrase_gym` and `frontend/` includes persistent language settings, a searchable library, reviewed manual-package publication, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling. Disposable browser probes live in `prototypes/`.
+The production app in `src/phrase_gym` and `frontend/` includes persistent language settings, a searchable library, reviewed manual-package publication, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling.
 
 ## Run locally
 

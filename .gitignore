@@ -15,9 +15,8 @@ pytest-coverage.txt
 **/.setup-scripts/
 allure-results/
 
-# Disposable prototype dependencies and private local configuration
+# Client dependencies
 **/node_modules/
-prototypes/.local/
 
 # Production client build and local application data
 frontend/dist/

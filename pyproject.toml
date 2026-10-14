@@ -37,15 +37,6 @@ file = "LICENSE"
 Homepage = "https://andgineer.github.io/phrase-gym/"
 Documentation = "https://andgineer.github.io/phrase-gym/"
 
-[tool.setuptools]
-packages = "find:"
-
-[tool.setuptools.package-dir]
-"" = "src"
-
-[tool.setuptools.manifest]
-include = [ "README.md", "LICENSE",]
-
 [tool.ruff]
 line-length = 99
 

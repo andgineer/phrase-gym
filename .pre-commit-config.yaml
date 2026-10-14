@@ -1,9 +1,7 @@
 exclude: |
     (?x)(
       .venv/|
-      tasks.py|
-      resources/|
-      prototypes/
+      tasks.py
     )
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

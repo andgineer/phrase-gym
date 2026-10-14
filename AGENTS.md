@@ -48,7 +48,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 - Iterate with subsets if useful, then verify the full suite.
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.
-- Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone/PWA and content gaps explicit.
+- Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone and content gaps explicit.
 
 ## Code conventions
 
