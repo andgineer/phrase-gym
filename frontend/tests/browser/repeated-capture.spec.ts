@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from './capture-fixtures'
+import { expectComparison } from './native-playback'
 import { retainedAudio, syntheticCapture } from './synthetic-capture'
 
 test.beforeEach(async ({ request }) => {
@@ -57,8 +58,7 @@ test('each take releases the microphone before comparison switches to an exclusi
       .poll(async () => (await (await request.get(recordings)).json()).length)
       .toBe(index + 1)
     await expect.poll(() => retainedAudio(page)).toBe(0)
-    // Await both native learner/reference playbacks, including their ended events.
-    await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
+    await expectComparison(page, index + 1)
     expect(
       await page.evaluate(
         () => (window as unknown as { __captureTrackState: string }).__captureTrackState,
@@ -112,7 +112,7 @@ test('an empty second take reports failure and a third take still saves', async 
   await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
   await expect.poll(async () => (await (await request.get(recordings)).json()).length).toBe(1)
-  await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
+  await expectComparison(page, 1)
   await page.getByRole('button', { name: 'Record', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Stop recording', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
@@ -126,6 +126,7 @@ test('an empty second take reports failure and a third take still saves', async 
   await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
   await expect.poll(async () => (await (await request.get(recordings)).json()).length).toBe(2)
+  await expectComparison(page, 2)
   const rows = await (await request.get(recordings)).json()
   expect(
     rows.every(
@@ -177,7 +178,9 @@ test('an interrupted microphone retains partial audio and the next take acquires
     await expect
       .poll(async () => (await (await request.get(recordings)).json()).length)
       .toBe(index + 1)
-    await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
+    if (index === 0)
+      await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
+    else await expectComparison(page, 1)
   }
   const rows = await (await request.get(recordings)).json()
   expect(rows.map((take: { complete: boolean }) => take.complete)).toEqual([false, true])

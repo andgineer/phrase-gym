@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test as base } from './fixtures'
+import { observeNativePlayback } from './native-playback'
 
 export const test = base.extend({
   context: async ({ playwright, browserName, baseURL, launchOptions }, use) => {
@@ -13,6 +14,7 @@ export const test = base.extend({
       serviceWorkers: 'block',
     })
     try {
+      await observeNativePlayback(context)
       await use(context)
     } finally {
       await context.close()

@@ -164,5 +164,12 @@ jobs:
       working-directory: frontend
     - run: npm run test:browser
       working-directory: frontend
+    - name: Retain failed browser traces
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: browser-test-results
+        path: frontend/test-results/
+        if-no-files-found: ignore
     - name: Build package with client
       run: ./build.sh

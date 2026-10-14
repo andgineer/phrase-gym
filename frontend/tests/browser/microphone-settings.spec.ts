@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from './capture-fixtures'
+import { expectComparison } from './native-playback'
 import { retainedAudio, recordingPeak, syntheticCapture } from './synthetic-capture'
 
 test('recording uses native microphone defaults and successive takes contain an audio signal', async ({
@@ -42,7 +43,7 @@ test('recording uses native microphone defaults and successive takes contain an 
       .toBe(index + 1)
     const rows = await (await request.get(recordings)).json()
     expect(await recordingPeak(page, rows[index].id)).toBeGreaterThan(0.1)
-    await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
+    await expectComparison(page, index + 1)
   }
   expect(
     await page.evaluate(

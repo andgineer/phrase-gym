@@ -7,6 +7,8 @@ import type { RecallRating } from '../practiceTypes'
 export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>) {
   const { session, item, card, error, present, action, flush, transition } = engine
   const ratingBusy = ref(false)
+  const preparing = ref(false)
+  let preparation = 0
   const intro = computed(() =>
     Boolean(session.value?.manifest.dialogue && !session.value.queue[0]?.introduced),
   )
@@ -53,30 +55,36 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
   )
   async function prepare() {
     if (engine.restoring.value || serverUnavailable.value || connectionRetrying.value) return
-    if (
-      captureContext &&
-      (session.value?.id !== captureContext.sessionId ||
-        session.value?.cursor !== captureContext.step)
-    ) {
-      captureContext = null
-      await media.release()
-    }
-    if (session.value?.status !== 'active') {
-      await media.release()
-      return
-    }
-    if (!item.value) return
-    if (intro.value) {
-      try {
-        await action('dialogue_exposure')
-      } catch {}
-      return
-    }
-    latestUrl.value = ''
+    const token = ++preparation
+    preparing.value = true
     try {
-      await present()
-      await media.refresh(item.value.phrase.id)
-    } catch {}
+      if (
+        captureContext &&
+        (session.value?.id !== captureContext.sessionId ||
+          session.value?.cursor !== captureContext.step)
+      ) {
+        captureContext = null
+        await media.release()
+      }
+      if (session.value?.status !== 'active') {
+        await media.release()
+        return
+      }
+      if (!item.value) return
+      if (intro.value) {
+        try {
+          await action('dialogue_exposure')
+        } catch {}
+        return
+      }
+      latestUrl.value = ''
+      try {
+        await present()
+        await media.refresh(item.value.phrase.id)
+      } catch {}
+    } finally {
+      if (token === preparation) preparing.value = false
+    }
   }
   watch(
     [
@@ -134,10 +142,15 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
     } catch {}
   }
   async function beginDialogue() {
+    if (preparing.value || ratingBusy.value) return
+    ratingBusy.value = true
     try {
       await action('dialogue_exposure')
       await action('dialogue_begin')
-    } catch {}
+    } catch {
+    } finally {
+      ratingBusy.value = false
+    }
   }
   async function isolate() {
     try {
@@ -163,6 +176,7 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
     takeError,
     latestUrl,
     ready,
+    preparing,
     ratingBusy,
     help,
     rate,

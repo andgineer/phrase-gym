@@ -30,6 +30,7 @@ const {
   takeError,
   latestUrl,
   ready,
+  preparing,
   ratingBusy,
   help,
   rate,
@@ -102,6 +103,8 @@ const {
       <button
         :disabled="
           engine.restoring.value ||
+          preparing ||
+          ratingBusy ||
           serverUnavailable ||
           connectionRetrying ||
           engine.pending.value.length > 0
@@ -166,6 +169,7 @@ const {
         :playing="playing"
         :rating-busy="
           ratingBusy ||
+          preparing ||
           !ready ||
           engine.restoring.value ||
           serverUnavailable ||
