@@ -1,0 +1,399 @@
+[
+  {
+    "tier": "dev",
+    "id": "day",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "day",
+          "kind": "fixed_phrase",
+          "meaning_key": "day",
+          "recall_expression": "How has your day been so far?",
+          "text": "How has your day been so far?",
+          "purpose": "Ask about the day up to now",
+          "context": "Two friends meet in the afternoon.",
+          "competing_expressions": [
+            "How was your day?",
+            "How is your day going?"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "day-lesson",
+          "title": "P5 day",
+          "target_source_ids": [
+            "day"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "greeting",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "greeting",
+          "kind": "fixed_phrase",
+          "meaning_key": "greeting",
+          "recall_expression": "Not too bad, thanks. And yours?",
+          "text": "Not too bad, thanks. And yours?",
+          "purpose": "Reciprocate a greeting",
+          "context": "Response to: How has your day been so far?",
+          "competing_expressions": [
+            "Fine, thanks. How about you?"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "greeting-lesson",
+          "title": "P5 greeting",
+          "target_source_ids": [
+            "greeting"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "spill",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "spill",
+          "kind": "word_sense",
+          "meaning_key": "spill",
+          "recall_expression": "spill the beans",
+          "text": "Please don’t spill the beans about the surprise.",
+          "purpose": "Ask someone to keep a secret",
+          "context": "A surprise party is being planned.",
+          "competing_expressions": [
+            "give away the secret"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "spill-lesson",
+          "title": "P5 spill",
+          "target_source_ids": [
+            "spill"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "bank",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "bank",
+          "kind": "word_sense",
+          "meaning_key": "bank",
+          "recall_expression": "bank",
+          "text": "We sat on the bank of the river.",
+          "purpose": "Describe resting beside a river",
+          "context": "The target is the land beside a river, not a financial institution.",
+          "competing_expressions": [
+            "shore",
+            "riverbank"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "bank-lesson",
+          "title": "P5 bank",
+          "target_source_ids": [
+            "bank"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "short",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "de",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "short",
+          "kind": "fixed_phrase",
+          "meaning_key": "short",
+          "recall_expression": "Vielen Dank!",
+          "text": "Vielen Dank!",
+          "purpose": "Express thanks",
+          "context": "Thank someone for helping.",
+          "competing_expressions": [
+            "Danke schön!"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "short-lesson",
+          "title": "P5 short",
+          "target_source_ids": [
+            "short"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "serbian-latin",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "sr",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "serbian-latin",
+          "kind": "fixed_phrase",
+          "meaning_key": "serbian-latin",
+          "recall_expression": "Vidimo se sledeće nedelje.",
+          "text": "Vidimo se sledeće nedelje.",
+          "purpose": "Arrange to meet next week",
+          "context": "Saying goodbye after agreeing on a meeting.",
+          "competing_expressions": [
+            "Vidimo se iduće nedelje."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "serbian-latin-lesson",
+          "title": "P5 serbian-latin",
+          "target_source_ids": [
+            "serbian-latin"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "long",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "long",
+          "kind": "frame",
+          "meaning_key": "long",
+          "recall_expression": "If I had known",
+          "text": "If I had known about the delay, I would have taken an earlier train.",
+          "purpose": "Express an unreal past condition",
+          "context": "The speaker missed a connection because of an unexpected delay.",
+          "competing_expressions": [
+            "Had I known about the delay, I would have left earlier."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "long-lesson",
+          "title": "P5 long",
+          "target_source_ids": [
+            "long"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "anchor",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "anchor",
+          "kind": "fixed_phrase",
+          "meaning_key": "anchor",
+          "recall_expression": "looking forward to",
+          "text": "I’m looking forward to hearing from you.",
+          "purpose": "Close a message expecting a response",
+          "context": "A polite closing sentence in an email.",
+          "competing_expressions": [
+            "I’m looking forward to seeing you.",
+            "I look forward to hearing from you."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "anchor-lesson",
+          "title": "P5 anchor",
+          "target_source_ids": [
+            "anchor"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "contraction",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "contraction",
+          "kind": "frame",
+          "meaning_key": "contraction",
+          "recall_expression": "would rather",
+          "text": "I’d rather stay home tonight.",
+          "purpose": "Express a preference",
+          "context": "Decline an invitation in favour of staying at home.",
+          "competing_expressions": [
+            "I prefer to stay home tonight."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "contraction-lesson",
+          "title": "P5 contraction",
+          "target_source_ids": [
+            "contraction"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "german-idiom",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "de",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "german-idiom",
+          "kind": "fixed_phrase",
+          "meaning_key": "german-idiom",
+          "recall_expression": "Das kommt mir spanisch vor.",
+          "text": "Das kommt mir spanisch vor.",
+          "purpose": "Express suspicion or puzzlement",
+          "context": "A story sounds strange and suspicious.",
+          "competing_expressions": [
+            "Das klingt merkwürdig."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "german-idiom-lesson",
+          "title": "P5 german-idiom",
+          "target_source_ids": [
+            "german-idiom"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "serbian-cyrillic",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "sr",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "serbian-cyrillic",
+          "kind": "fixed_phrase",
+          "meaning_key": "serbian-cyrillic",
+          "recall_expression": "Надам се да ћеш доћи на време.",
+          "text": "Надам се да ћеш доћи на време.",
+          "purpose": "Hope that someone arrives punctually",
+          "context": "A friend is expected at an appointment.",
+          "competing_expressions": [
+            "Надам се да нећеш каснити."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "serbian-cyrillic-lesson",
+          "title": "P5 serbian-cyrillic",
+          "target_source_ids": [
+            "serbian-cyrillic"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout",
+    "id": "missing",
+    "source": {
+      "namespace": "p5-public-heldout",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-1",
+      "phrases": [
+        {
+          "source_id": "missing",
+          "kind": "fixed_phrase",
+          "meaning_key": "missing",
+          "recall_expression": "Right.",
+          "text": "Right.",
+          "purpose": "Unspecified sense",
+          "context": null,
+          "competing_expressions": []
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "missing-lesson",
+          "title": "P5 missing",
+          "target_source_ids": [
+            "missing"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -91,7 +91,7 @@ IDs above are readable fixture identifiers, not the production UUID format. Thes
 | `POST /api/v1/cue-reports` | Record ambiguity or inappropriate context without grading a memory failure. |
 | `POST /api/v1/recordings`, `GET /recordings/{id}/audio` | Automatically persist every take's audio and metadata in the database, with idempotent upload/attachment and private playback. Acknowledge storage only after commit. Failed transfer retains pending audio and does not discard the practice event. Historical browsing/comparison and deletion UI are not first-version requirements. |
 | `GET /api/v1/media/{id}` | Private media delivery with byte-range support, MIME type and immutable content identity. |
-| `POST /api/v1/preparation-jobs`, `GET /preparation-jobs/{id}` | Durable asynchronous preparation and status. Polling suffices initially; no streaming chat API. |
+| `POST /api/v1/preparation`, `GET /api/v1/preparation/{id}` | Durable asynchronous preparation and status. Polling suffices initially; no streaming chat API. |
 
 Validate schema versions, ownership, byte limits, state transitions and revision references at the boundary. Render imported/generated content as text or sanitized supported markup; do not execute source HTML or instructions. Import packages contain asset references or uploaded files, not arbitrary server-fetch URLs.
 
@@ -115,7 +115,7 @@ The existing note format and `phrases.py` can inform a parser, but the old runti
 
 The inspected code has structured `Note`, `Meaning`, `Example` objects, but recent `Entry` history is restart-ephemeral. An `entry_id`, selected sense index or rendered HTML response is not a sufficient permanent import key.
 
-Add an explicit adapter when P5 is implemented. It creates a durable outbound envelope at selection time with:
+The P5 portable envelope and durable Phrase Gym receiver are implemented. The external sender must create a durable outbound envelope at selection time with:
 
 - contract version and a stable export UUID/idempotency key;
 - source language, selected expression and selected meaning description;
@@ -148,3 +148,19 @@ A worker claims a job with a lease in a short transaction, then performs externa
 Recording mode must not be inferred merely from the presence or absence of a recording row. Recording is optional per attempt; record actual capture outcome, model exposure timing and learner self-report separately. There is no recording-mode switch. The UI checkpoint includes the current comparison phase (own playback, model reveal/playback, self-check) so reload or an interrupted take cannot invent a finished response or erase assistance. All audio takes are automatically retained in the app database, including rerecordings, with no manual Save action or automatic expiry. Historical progress-comparison UI is deferred. This storage requirement does not authorize automatic external AI processing.
 
 The [device-language and Settings decision](../decision-device-language-and-settings.md) removes the server language preference and navigation writes. Migration 0002 removes the legacy JSON field.
+
+
+## Implemented preparation boundary (2026-10-14)
+
+`preparation_job` persists canonical source/settings/prompt identity, base source bindings,
+leases/tokens, attempts/retry state, retained raw generation/advisory responses, checkpointed
+media IDs, operator corrections and exact review/publication receipts. `source_handoff` binds
+an export UUID to the immutable selected-content hash and durable job ID. Receipt/enqueue
+and reviewed content/job publication each own a single transaction.
+
+Initial operator human content/listening review is hash-bound to the exact result. The model's
+review is advisory; malformed output and uncertain content remain withheld. Zero accepted
+cues preserves supported lookup and incomplete retrieval readiness. One reliable cue and
+multiple comparable masks are supported. Native-language help is merged without replacing
+other reviewed languages. Old target revisions and session manifests remain immutable.
+See [P5 runbook](../plan/p5-runbook.md) and [measurement evidence](../plan/evidence/p5-implementation-2026-10-14.md).

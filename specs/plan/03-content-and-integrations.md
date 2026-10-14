@@ -1,6 +1,6 @@
 # P5 — content preparation and integrations
 
-Status: **not started**, updated 2026-10-13. P2 contracts and P3 working drills are available. The local 44-phrase test pack has one manual partial cue per phrase; LLM preparation and different useful masks are still outstanding. Generated content must be exercised through the real learning flow before claiming integration complete.
+Status: **workflow implementation and real measurements delivered; human content/listening and external sender acceptance remain open**, updated 2026-10-14. See [implementation evidence](evidence/p5-implementation-2026-10-14.md), [fresh semantic review](evidence/p5-semantic-review.md) and [runbook](p5-runbook.md). P2 contracts and P3 working drills are available. The local 44-phrase test pack has one manual partial cue per phrase; LLM preparation and different useful masks are still outstanding. Generated content must be exercised through the real learning flow before claiming integration complete.
 
 This phase completes the preparation/intake coverage in the [consolidated plan](implementation-plan.md). Manual content in P2–P3 is a staged implementation path, not a deferral of the accepted add-time cue preparation beyond the full planned release.
 

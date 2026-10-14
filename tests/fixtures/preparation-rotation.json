@@ -1,0 +1,104 @@
+{
+  "source": {
+    "namespace": "public-fixture",
+    "language": "en",
+    "native_language": "ru",
+    "source_revision": "1",
+    "phrases": [
+      {
+        "source_id": "greeting",
+        "kind": "fixed_phrase",
+        "meaning_key": "greeting",
+        "recall_expression": "Not too bad, thanks. And yours?",
+        "text": "Not too bad, thanks. And yours?",
+        "purpose": "Reciprocate a greeting",
+        "context": null,
+        "competing_expressions": [],
+        "reference_audio_id": null
+      }
+    ],
+    "lessons": [
+      {
+        "source_id": "lesson",
+        "title": "Greetings",
+        "target_source_ids": [
+          "greeting"
+        ]
+      }
+    ],
+    "dialogues": []
+  },
+  "draft": {
+    "phrases": [
+      {
+        "source_id": "greeting",
+        "chunks": [
+          {
+            "id": "a",
+            "text": "Not too bad, "
+          },
+          {
+            "id": "b",
+            "text": "thanks. "
+          },
+          {
+            "id": "c",
+            "text": "And yours?"
+          }
+        ],
+        "required_chunks": [
+          "a",
+          "b",
+          "c"
+        ],
+        "candidates": [
+          {
+            "id": "hide-a",
+            "prompt": "_____ thanks. And yours?",
+            "visible_chunks": [
+              "b",
+              "c"
+            ],
+            "competing_completions": [
+              "Fine, thanks. And yours?"
+            ],
+            "distinguishing_anchors": "thanks. And yours?",
+            "recalled_material": "Not too bad",
+            "supplied_support": "Closing response",
+            "target_leak": false
+          },
+          {
+            "id": "hide-c",
+            "prompt": "Not too bad, thanks. _____",
+            "visible_chunks": [
+              "a",
+              "b"
+            ],
+            "competing_completions": [
+              "How about you?"
+            ],
+            "distinguishing_anchors": "Not too bad, thanks.",
+            "recalled_material": "And yours?",
+            "supplied_support": "Opening response",
+            "target_leak": false
+          }
+        ],
+        "uncovered_chunks": {
+          "b": "Too little identifying material"
+        },
+        "no_reliable_cue_reason": null,
+        "explanation": {
+          "meaning": "Неплохо, спасибо. А у тебя?",
+          "usage": null,
+          "breakdown": []
+        },
+        "concepts": [
+          "greetings",
+          "reciprocity"
+        ],
+        "acceptable_equivalents": [],
+        "slots": {}
+      }
+    ]
+  }
+}

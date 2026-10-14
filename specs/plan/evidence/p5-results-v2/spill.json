@@ -1,0 +1,270 @@
+{
+  "id": "d376056c-e941-4801-b855-1f65d32fcd39",
+  "status": "awaiting_review",
+  "input_hash": "ec1d68951a1169b1a92de5f8cbdf0d5f75b6c7f00b674e638e97a7ad92077aaa",
+  "attempts": 1,
+  "error": null,
+  "result": {
+    "generation": {
+      "text": "{\n  \"phrases\": [\n    {\n      \"source_id\": \"spill\",\n      \"chunks\": [\n        {\n          \"id\": \"c1\",\n          \"text\": \"Please don’t \"\n        },\n        {\n          \"id\": \"c2\",\n          \"text\": \"spill the beans \"\n        },\n        {\n          \"id\": \"c3\",\n          \"text\": \"about the surprise.\"\n        }\n      ],\n      \"required_chunks\": [\n        \"c2\"\n      ],\n      \"candidates\": [\n        {\n          \"id\": \"cand-spill-1\",\n          \"prompt\": \"A surprise party is being planned. Ask someone to keep a secret: Please don’t _____ about the surprise.\",\n          \"visible_chunks\": [\n            \"c1\",\n            \"c3\"\n          ],\n          \"competing_completions\": [\n            \"ruin the surprise\",\n            \"spoil the surprise\",\n            \"forget about the surprise\"\n          ],\n          \"distinguishing_anchors\": \"The visible context 'Please don't _____ about the surprise.' specifically targets the idiom meaning to reveal confidential information, distinguishing it from general verbs like 'ruin' or 'spoil'.\",\n          \"recalled_material\": \"spill the beans\",\n          \"supplied_support\": \"Situation: A surprise party is being planned. Ask someone to keep a secret. Prompt context: Please don’t _____ about the surprise.\",\n          \"target_leak\": false\n        }\n      ],\n      \"uncovered_chunks\": {},\n      \"no_reliable_cue_reason\": null,\n      \"explanation\": {\n        \"meaning\": \"раскрывать секрет, проговариваться\",\n        \"usage\": \"Используется в разговорной речи, когда просят кого-то не разглашать тайну.\",\n        \"breakdown\": [\n          \"spill the beans - проболтаться, выдать секрет\"\n        ]\n      },\n      \"concepts\": [\n        \"secret\",\n        \"reveal\",\n        \"surprise party\",\n        \"confidentiality\",\n        \"idiom\"\n      ],\n      \"acceptable_equivalents\": [\n        \"tell the secret\",\n        \"give it away\"\n      ],\n      \"slots\": {}\n    }\n  ]\n}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.925,
+      "usage": {
+        "prompt_tokens": 1993,
+        "completion_tokens": 531,
+        "total_tokens": 2524,
+        "extra": null
+      }
+    },
+    "draft": {
+      "phrases": [
+        {
+          "source_id": "spill",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Please don’t "
+            },
+            {
+              "id": "c2",
+              "text": "spill the beans "
+            },
+            {
+              "id": "c3",
+              "text": "about the surprise."
+            }
+          ],
+          "required_chunks": [
+            "c2"
+          ],
+          "candidates": [
+            {
+              "id": "cand-spill-1",
+              "prompt": "A surprise party is being planned. Ask someone to keep a secret: Please don’t _____ about the surprise.",
+              "visible_chunks": [
+                "c1",
+                "c3"
+              ],
+              "competing_completions": [
+                "ruin the surprise",
+                "spoil the surprise",
+                "forget about the surprise"
+              ],
+              "distinguishing_anchors": "The visible context 'Please don't _____ about the surprise.' specifically targets the idiom meaning to reveal confidential information, distinguishing it from general verbs like 'ruin' or 'spoil'.",
+              "recalled_material": "spill the beans",
+              "supplied_support": "Situation: A surprise party is being planned. Ask someone to keep a secret. Prompt context: Please don’t _____ about the surprise.",
+              "target_leak": false
+            }
+          ],
+          "uncovered_chunks": {},
+          "no_reliable_cue_reason": null,
+          "explanation": {
+            "meaning": "раскрывать секрет, проговариваться",
+            "usage": "Используется в разговорной речи, когда просят кого-то не разглашать тайну.",
+            "breakdown": [
+              "spill the beans - проболтаться, выдать секрет"
+            ]
+          },
+          "concepts": [
+            "secret",
+            "reveal",
+            "surprise party",
+            "confidentiality",
+            "idiom"
+          ],
+          "acceptable_equivalents": [
+            "tell the secret",
+            "give it away"
+          ],
+          "slots": {}
+        }
+      ]
+    },
+    "model_review": {
+      "text": "```json\n{\n  \"candidates\": [\n    {\n      \"source_id\": \"spill\",\n      \"candidate_id\": \"cand-spill-1\",\n      \"acceptable\": false,\n      \"reason\": \"Reasoning: A reasonable competing completion (e.g., 'ruin the surprise', 'spoil the surprise') defeats the identifying anchors. The visible sentence frame 'Please don’t [blank] about the surprise.' allows multiple natural collocations that fit the grammar and context identically, meaning the anchors fail to uniquely isolate 'spill the beans'.\"\n    }\n  ],\n  \"help_errors\": {},\n  \"meaning_errors\": {}\n}\n```",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 0.986,
+      "usage": {
+        "prompt_tokens": 1016,
+        "completion_tokens": 149,
+        "total_tokens": 1165,
+        "extra": null
+      }
+    },
+    "advisory_review": {
+      "candidates": [
+        {
+          "source_id": "spill",
+          "candidate_id": "cand-spill-1",
+          "acceptable": false,
+          "reason": "Reasoning: A reasonable competing completion (e.g., 'ruin the surprise', 'spoil the surprise') defeats the identifying anchors. The visible sentence frame 'Please don’t [blank] about the surprise.' allows multiple natural collocations that fit the grammar and context identically, meaning the anchors fail to uniquely isolate 'spill the beans'."
+        }
+      ],
+      "help_errors": {},
+      "meaning_errors": {}
+    },
+    "audio": {
+      "target:spill": "5142ecce-c70a-5016-b4eb-8e8dfce4b128"
+    },
+    "package": {
+      "schema_version": 1,
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "source_revision": "fixture-v2",
+      "targets": [
+        {
+          "source_id": "spill",
+          "kind": "word_sense",
+          "meaning_key": "spill",
+          "recall_expression": "spill the beans",
+          "text": "Please don’t spill the beans about the surprise.",
+          "purpose": "Ask someone to keep a secret",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Please don’t "
+            },
+            {
+              "id": "c2",
+              "text": "spill the beans "
+            },
+            {
+              "id": "c3",
+              "text": "about the surprise."
+            }
+          ],
+          "required_chunks": [
+            "c2"
+          ],
+          "cues": [
+            {
+              "id": "cand-spill-1",
+              "prompt": "A surprise party is being planned. Ask someone to keep a secret: Please don’t _____ about the surprise.",
+              "visible_chunks": [
+                "c1",
+                "c3"
+              ],
+              "reviewed": true,
+              "audio_id": null
+            }
+          ],
+          "explanations": {
+            "ru": {
+              "meaning": "раскрывать секрет, проговариваться",
+              "usage": "Используется в разговорной речи, когда просят кого-то не разглашать тайну.",
+              "breakdown": [
+                "spill the beans - проболтаться, выдать секрет"
+              ]
+            }
+          },
+          "concepts": [
+            "secret",
+            "reveal",
+            "surprise party",
+            "confidentiality",
+            "idiom"
+          ],
+          "acceptable_equivalents": [
+            "tell the secret",
+            "give it away"
+          ],
+          "slots": {},
+          "reference_audio_id": "5142ecce-c70a-5016-b4eb-8e8dfce4b128"
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "spill-lesson",
+          "title": "P5 spill",
+          "target_source_ids": [
+            "spill"
+          ]
+        }
+      ],
+      "dialogues": []
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-2",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "en",
+      "lessons": [
+        {
+          "source_id": "spill-lesson",
+          "target_source_ids": [
+            "spill"
+          ],
+          "title": "P5 spill"
+        }
+      ],
+      "namespace": "p5-public-dev",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "give away the secret"
+          ],
+          "context": "A surprise party is being planned.",
+          "kind": "word_sense",
+          "meaning_key": "spill",
+          "purpose": "Ask someone to keep a secret",
+          "recall_expression": "spill the beans",
+          "reference_audio_id": null,
+          "source_id": "spill",
+          "text": "Please don’t spill the beans about the surprise."
+        }
+      ],
+      "source_revision": "fixture-v2"
+    }
+  },
+  "human_review": null,
+  "tier": "dev"
+}

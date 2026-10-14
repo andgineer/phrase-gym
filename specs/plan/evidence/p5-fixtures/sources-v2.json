@@ -1,0 +1,345 @@
+[
+  {
+    "tier": "dev",
+    "id": "day",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "day",
+          "kind": "fixed_phrase",
+          "meaning_key": "day",
+          "recall_expression": "How has your day been so far?",
+          "text": "How has your day been so far?",
+          "purpose": "Ask about the day up to now",
+          "context": "Two friends meet in the afternoon.",
+          "competing_expressions": [
+            "How was your day?",
+            "How is your day going?"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "day-lesson",
+          "title": "P5 day",
+          "target_source_ids": [
+            "day"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "greeting",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "greeting",
+          "kind": "fixed_phrase",
+          "meaning_key": "greeting",
+          "recall_expression": "Not too bad, thanks. And yours?",
+          "text": "Not too bad, thanks. And yours?",
+          "purpose": "Reciprocate a greeting",
+          "context": "Response to: How has your day been so far?",
+          "competing_expressions": [
+            "Fine, thanks. How about you?"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "greeting-lesson",
+          "title": "P5 greeting",
+          "target_source_ids": [
+            "greeting"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "spill",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "spill",
+          "kind": "word_sense",
+          "meaning_key": "spill",
+          "recall_expression": "spill the beans",
+          "text": "Please don’t spill the beans about the surprise.",
+          "purpose": "Ask someone to keep a secret",
+          "context": "A surprise party is being planned.",
+          "competing_expressions": [
+            "give away the secret"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "spill-lesson",
+          "title": "P5 spill",
+          "target_source_ids": [
+            "spill"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "bank",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "bank",
+          "kind": "word_sense",
+          "meaning_key": "bank",
+          "recall_expression": "bank",
+          "text": "We sat on the bank of the river.",
+          "purpose": "Describe resting beside a river",
+          "context": "The target is the land beside a river, not a financial institution.",
+          "competing_expressions": [
+            "shore",
+            "riverbank"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "bank-lesson",
+          "title": "P5 bank",
+          "target_source_ids": [
+            "bank"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "short",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "de",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "short",
+          "kind": "fixed_phrase",
+          "meaning_key": "short",
+          "recall_expression": "Vielen Dank!",
+          "text": "Vielen Dank!",
+          "purpose": "Express thanks",
+          "context": "Thank someone for helping.",
+          "competing_expressions": [
+            "Danke schön!"
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "short-lesson",
+          "title": "P5 short",
+          "target_source_ids": [
+            "short"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "dev",
+    "id": "serbian-latin",
+    "source": {
+      "namespace": "p5-public-dev",
+      "language": "sr",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "serbian-latin",
+          "kind": "fixed_phrase",
+          "meaning_key": "serbian-latin",
+          "recall_expression": "Vidimo se sledeće nedelje.",
+          "text": "Vidimo se sledeće nedelje.",
+          "purpose": "Arrange to meet next week",
+          "context": "Saying goodbye after agreeing on a meeting.",
+          "competing_expressions": [
+            "Vidimo se iduće nedelje."
+          ]
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "serbian-latin-lesson",
+          "title": "P5 serbian-latin",
+          "target_source_ids": [
+            "serbian-latin"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-idiom",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-idiom",
+          "kind": "word_sense",
+          "meaning_key": "new-idiom",
+          "recall_expression": "call it a day",
+          "text": "Let’s call it a day and pick this up tomorrow.",
+          "purpose": "Suggest stopping work until tomorrow",
+          "context": "A team has worked late.",
+          "competing_expressions": [
+            "wrap up",
+            "finish for today"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-long",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-long",
+          "kind": "fixed_phrase",
+          "meaning_key": "new-long",
+          "recall_expression": "Could you let me know whether",
+          "text": "Could you let me know whether the meeting has been moved to Friday?",
+          "purpose": "Ask for confirmation of a changed meeting time",
+          "context": "An email to the organiser.",
+          "competing_expressions": [
+            "Could you tell me if the meeting is on Friday?"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-contraction",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-contraction",
+          "kind": "frame",
+          "meaning_key": "new-contraction",
+          "recall_expression": "should not have",
+          "text": "You shouldn’t have gone to all that trouble.",
+          "purpose": "Express appreciation that someone made unnecessary effort",
+          "context": "Someone prepared a large meal as a favour.",
+          "competing_expressions": [
+            "You needn’t have done so much."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-german",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "de",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-german",
+          "kind": "frame",
+          "meaning_key": "new-german",
+          "recall_expression": "sich freuen auf",
+          "text": "Ich freue mich darauf, dich wiederzusehen.",
+          "purpose": "Anticipate meeting someone again",
+          "context": "A message to a friend before a reunion.",
+          "competing_expressions": [
+            "Ich kann es kaum erwarten, dich wiederzusehen."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-serbian",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "sr",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-serbian",
+          "kind": "frame",
+          "meaning_key": "new-serbian",
+          "recall_expression": "Možeš li da mi kažeš",
+          "text": "Možeš li da mi kažeš gde je najbliža stanica?",
+          "purpose": "Ask where the nearest station is",
+          "context": "A visitor asks a passer-by.",
+          "competing_expressions": [
+            "Gde se nalazi najbliža stanica?"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "tier": "heldout-v2",
+    "id": "new-missing",
+    "source": {
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "native_language": "ru",
+      "source_revision": "fixture-v2",
+      "phrases": [
+        {
+          "source_id": "new-missing",
+          "kind": "fixed_phrase",
+          "meaning_key": "new-missing",
+          "recall_expression": "Fine.",
+          "text": "Fine.",
+          "purpose": "Unspecified sense",
+          "context": null,
+          "competing_expressions": []
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,253 @@
+{
+  "id": "88151cf4-0f8c-41d7-b35b-60d4e95c59f4",
+  "status": "awaiting_review",
+  "input_hash": "c8b4ba4431b45adb440bf03bfe43038343745f3d8f9a0a83cbb0248ec65355b7",
+  "attempts": 1,
+  "error": null,
+  "result": {
+    "generation": {
+      "text": "{\n  \"phrases\": [\n    {\n      \"source_id\": \"new-idiom\",\n      \"chunks\": [\n        {\n          \"id\": \"c1\",\n          \"text\": \"Let’s \"\n        },\n        {\n          \"id\": \"c2\",\n          \"text\": \"call it a day\"\n        },\n        {\n          \"id\": \"c3\",\n          \"text\": \" and pick this up tomorrow.\"\n        }\n      ],\n      \"required_chunks\": [\n        \"c2\"\n      ],\n      \"candidates\": [\n        {\n          \"id\": \"cand-1\",\n          \"prompt\": \"A team has worked late. Situation: Suggest stopping work until tomorrow. Complete the sentence: Let’s _____ and pick this up tomorrow.\",\n          \"visible_chunks\": [\n            \"c1\",\n            \"c3\"\n          ],\n          \"competing_completions\": [\n            \"wrap up\",\n            \"finish for today\",\n            \"stop here\"\n          ],\n          \"distinguishing_anchors\": \"The visible surrounding text 'Let’s ... and pick this up tomorrow.' strictly confines the idiom slot to a standard English idiom meaning to stop working, for which 'call it a day' is the exact required expression.\",\n          \"recalled_material\": \"call it a day\",\n          \"supplied_support\": \"Context about working late and the surrounding sentence chunks 'Let’s ' and ' and pick this up tomorrow.'\",\n          \"target_leak\": false\n        }\n      ],\n      \"uncovered_chunks\": {},\n      \"no_reliable_cue_reason\": null,\n      \"explanation\": {\n        \"meaning\": \"закругляться, закончить работу на сегодня\",\n        \"usage\": \"Used when deciding to stop working on a task, usually because you have done enough or it is getting late.\",\n        \"breakdown\": [\n          \"call\",\n          \"it\",\n          \"a\",\n          \"day\"\n        ]\n      },\n      \"concepts\": [\n        \"stopping work\",\n        \"finishing for the day\",\n        \"leaving off\",\n        \"quitting time\"\n      ],\n      \"acceptable_equivalents\": [],\n      \"slots\": {}\n    }\n  ]\n}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.715,
+      "usage": {
+        "prompt_tokens": 1979,
+        "completion_tokens": 516,
+        "total_tokens": 2495,
+        "extra": null
+      }
+    },
+    "draft": {
+      "phrases": [
+        {
+          "source_id": "new-idiom",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Let’s "
+            },
+            {
+              "id": "c2",
+              "text": "call it a day"
+            },
+            {
+              "id": "c3",
+              "text": " and pick this up tomorrow."
+            }
+          ],
+          "required_chunks": [
+            "c2"
+          ],
+          "candidates": [
+            {
+              "id": "cand-1",
+              "prompt": "A team has worked late. Situation: Suggest stopping work until tomorrow. Complete the sentence: Let’s _____ and pick this up tomorrow.",
+              "visible_chunks": [
+                "c1",
+                "c3"
+              ],
+              "competing_completions": [
+                "wrap up",
+                "finish for today",
+                "stop here"
+              ],
+              "distinguishing_anchors": "The visible surrounding text 'Let’s ... and pick this up tomorrow.' strictly confines the idiom slot to a standard English idiom meaning to stop working, for which 'call it a day' is the exact required expression.",
+              "recalled_material": "call it a day",
+              "supplied_support": "Context about working late and the surrounding sentence chunks 'Let’s ' and ' and pick this up tomorrow.'",
+              "target_leak": false
+            }
+          ],
+          "uncovered_chunks": {},
+          "no_reliable_cue_reason": null,
+          "explanation": {
+            "meaning": "закругляться, закончить работу на сегодня",
+            "usage": "Used when deciding to stop working on a task, usually because you have done enough or it is getting late.",
+            "breakdown": [
+              "call",
+              "it",
+              "a",
+              "day"
+            ]
+          },
+          "concepts": [
+            "stopping work",
+            "finishing for the day",
+            "leaving off",
+            "quitting time"
+          ],
+          "acceptable_equivalents": [],
+          "slots": {}
+        }
+      ]
+    },
+    "model_review": {
+      "text": "```json\n{\n  \"candidates\": [\n    {\n      \"source_id\": \"new-idiom\",\n      \"candidate_id\": \"cand-1\",\n      \"acceptable\": false,\n      \"reason\": \"Reasoning: A reasonable competing completion (such as 'stop here', 'wrap up', or 'finish for today') can fit grammatically and semantically into the blank given the surrounding text ('Let’s _____ and pick this up tomorrow.'), meaning the visible anchors do not uniquely force the specific target idiom 'call it a day'.\"\n    }\n  ],\n  \"help_errors\": {},\n  \"meaning_errors\": {}\n}\n```",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.142,
+      "usage": {
+        "prompt_tokens": 990,
+        "completion_tokens": 144,
+        "total_tokens": 1134,
+        "extra": null
+      }
+    },
+    "advisory_review": {
+      "candidates": [
+        {
+          "source_id": "new-idiom",
+          "candidate_id": "cand-1",
+          "acceptable": false,
+          "reason": "Reasoning: A reasonable competing completion (such as 'stop here', 'wrap up', or 'finish for today') can fit grammatically and semantically into the blank given the surrounding text ('Let’s _____ and pick this up tomorrow.'), meaning the visible anchors do not uniquely force the specific target idiom 'call it a day'."
+        }
+      ],
+      "help_errors": {},
+      "meaning_errors": {}
+    },
+    "audio": {
+      "target:new-idiom": "110ac442-4e48-5af3-ac31-b1acdd4706a8"
+    },
+    "package": {
+      "schema_version": 1,
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "source_revision": "fixture-v2",
+      "targets": [
+        {
+          "source_id": "new-idiom",
+          "kind": "word_sense",
+          "meaning_key": "new-idiom",
+          "recall_expression": "call it a day",
+          "text": "Let’s call it a day and pick this up tomorrow.",
+          "purpose": "Suggest stopping work until tomorrow",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Let’s "
+            },
+            {
+              "id": "c2",
+              "text": "call it a day"
+            },
+            {
+              "id": "c3",
+              "text": " and pick this up tomorrow."
+            }
+          ],
+          "required_chunks": [
+            "c2"
+          ],
+          "cues": [
+            {
+              "id": "cand-1",
+              "prompt": "A team has worked late. Situation: Suggest stopping work until tomorrow. Complete the sentence: Let’s _____ and pick this up tomorrow.",
+              "visible_chunks": [
+                "c1",
+                "c3"
+              ],
+              "reviewed": true,
+              "audio_id": null
+            }
+          ],
+          "explanations": {
+            "ru": {
+              "meaning": "закругляться, закончить работу на сегодня",
+              "usage": "Used when deciding to stop working on a task, usually because you have done enough or it is getting late.",
+              "breakdown": [
+                "call",
+                "it",
+                "a",
+                "day"
+              ]
+            }
+          },
+          "concepts": [
+            "stopping work",
+            "finishing for the day",
+            "leaving off",
+            "quitting time"
+          ],
+          "acceptable_equivalents": [],
+          "slots": {},
+          "reference_audio_id": "110ac442-4e48-5af3-ac31-b1acdd4706a8"
+        }
+      ],
+      "lessons": [],
+      "dialogues": []
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-2",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "en",
+      "lessons": [],
+      "namespace": "p5-public-heldout-v2",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "wrap up",
+            "finish for today"
+          ],
+          "context": "A team has worked late.",
+          "kind": "word_sense",
+          "meaning_key": "new-idiom",
+          "purpose": "Suggest stopping work until tomorrow",
+          "recall_expression": "call it a day",
+          "reference_audio_id": null,
+          "source_id": "new-idiom",
+          "text": "Let’s call it a day and pick this up tomorrow."
+        }
+      ],
+      "source_revision": "fixture-v2"
+    }
+  },
+  "human_review": null,
+  "tier": "heldout-v2"
+}

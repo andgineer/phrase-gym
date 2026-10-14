@@ -1,0 +1,279 @@
+{
+  "id": "860fc5f5-2033-4f83-b874-b7214dfe19f2",
+  "status": "awaiting_review",
+  "input_hash": "f70ab25773047e712ce8c60b550c31bd005d42a2cedc1f04289c402463e97fbf",
+  "attempts": 1,
+  "error": null,
+  "result": {
+    "generation": {
+      "text": "{\n  \"phrases\": [\n    {\n      \"source_id\": \"short\",\n      \"chunks\": [\n        {\n          \"id\": \"c1\",\n          \"text\": \"Vielen \"\n        },\n        {\n          \"id\": \"c2\",\n          \"text\": \"Dank!\"\n        }\n      ],\n      \"required_chunks\": [\n        \"c1\",\n        \"c2\"\n      ],\n      \"candidates\": [\n        {\n          \"id\": \"cand-1\",\n          \"prompt\": \"Thank someone for helping: _____ Dank!\",\n          \"visible_chunks\": [\n            \"c2\"\n          ],\n          \"competing_completions\": [\n            \"Herzlichen Dank!\",\n            \"Besten Dank!\"\n          ],\n          \"distinguishing_anchors\": \"The visible anchor 'Dank!' combined with the exact modifier length and formal gratitude context differentiates it from competing expressions like 'Danke schön!'.\",\n          \"recalled_material\": \"Vielen \",\n          \"supplied_support\": \"Situation: Thank someone for helping; Visible text: _____ Dank!\",\n          \"target_leak\": false\n        },\n        {\n          \"id\": \"cand-2\",\n          \"prompt\": \"Express gratitude after receiving help: Vielen _____@\",\n          \"visible_chunks\": [\n            \"c1\"\n          ],\n          \"competing_completions\": [\n            \"Vielen Müll!\",\n            \"Vielen Gruß!\"\n          ],\n          \"distinguishing_anchors\": \"The visible anchor 'Vielen ' uniquely establishes the precise adverbial/adjectival quantifier structure typical of polite German gratitude phrases.\",\n          \"recalled_material\": \"Dank!\",\n          \"supplied_support\": \"Situation: Express gratitude after receiving help; Visible text: Vielen _____@\",\n          \"target_leak\": false\n        }\n      ],\n      \"uncovered_chunks\": {},\n      \"no_reliable_cue_reason\": null,\n      \"explanation\": {\n        \"meaning\": \"Большое спасибо!\",\n        \"usage\": null,\n        \"breakdown\": []\n      },\n      \"concepts\": [\n        \"gratitude\",\n        \"thanking\",\n        \"politeness\",\n        \"acknowledgment\"\n      ],\n      \"acceptable_equivalents\": [],\n      \"slots\": {}\n    }\n  ]\n}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.626,
+      "usage": {
+        "prompt_tokens": 1975,
+        "completion_tokens": 532,
+        "total_tokens": 2507,
+        "extra": null
+      }
+    },
+    "draft": {
+      "phrases": [
+        {
+          "source_id": "short",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Vielen "
+            },
+            {
+              "id": "c2",
+              "text": "Dank!"
+            }
+          ],
+          "required_chunks": [
+            "c1",
+            "c2"
+          ],
+          "candidates": [
+            {
+              "id": "cand-1",
+              "prompt": "Thank someone for helping: _____ Dank!",
+              "visible_chunks": [
+                "c2"
+              ],
+              "competing_completions": [
+                "Herzlichen Dank!",
+                "Besten Dank!"
+              ],
+              "distinguishing_anchors": "The visible anchor 'Dank!' combined with the exact modifier length and formal gratitude context differentiates it from competing expressions like 'Danke schön!'.",
+              "recalled_material": "Vielen ",
+              "supplied_support": "Situation: Thank someone for helping; Visible text: _____ Dank!",
+              "target_leak": false
+            },
+            {
+              "id": "cand-2",
+              "prompt": "Express gratitude after receiving help: Vielen _____@",
+              "visible_chunks": [
+                "c1"
+              ],
+              "competing_completions": [
+                "Vielen Müll!",
+                "Vielen Gruß!"
+              ],
+              "distinguishing_anchors": "The visible anchor 'Vielen ' uniquely establishes the precise adverbial/adjectival quantifier structure typical of polite German gratitude phrases.",
+              "recalled_material": "Dank!",
+              "supplied_support": "Situation: Express gratitude after receiving help; Visible text: Vielen _____@",
+              "target_leak": false
+            }
+          ],
+          "uncovered_chunks": {},
+          "no_reliable_cue_reason": null,
+          "explanation": {
+            "meaning": "Большое спасибо!",
+            "usage": null,
+            "breakdown": []
+          },
+          "concepts": [
+            "gratitude",
+            "thanking",
+            "politeness",
+            "acknowledgment"
+          ],
+          "acceptable_equivalents": [],
+          "slots": {}
+        }
+      ]
+    },
+    "model_review": {
+      "text": "```json\n{\n  \"candidates\": [\n    {\n      \"source_id\": \"short\",\n      \"candidate_id\": \"cand-1\",\n      \"acceptable\": false,\n      \"reason\": \"Reasonable competing completions like 'Herzlichen Dank!' or 'Besten Dank!' completely defeat the identifying anchors because '_____ Dank!' is shared across multiple common German expressions of gratitude, making the prompt ambiguous rather than uniquely pointing to 'Vielen Dank!'.\"\n    },\n    {\n      \"source_id\": \"short\",\n      \"candidate_id\": \"cand-2\",\n      \"acceptable\": false,\n      \"reason\": \"Competing completions such as 'Vielen Gruß!' defeat the identifying anchors because 'Vielen _____' does not uniquely select 'Dank!'. Furthermore, the visible text uses an unnatural placeholder symbol '@'.\"\n    }\n  ],\n  \"help_errors\": {},\n  \"meaning_errors\": {}\n}\n```",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.209,
+      "usage": {
+        "prompt_tokens": 993,
+        "completion_tokens": 207,
+        "total_tokens": 1200,
+        "extra": null
+      }
+    },
+    "advisory_review": {
+      "candidates": [
+        {
+          "source_id": "short",
+          "candidate_id": "cand-1",
+          "acceptable": false,
+          "reason": "Reasonable competing completions like 'Herzlichen Dank!' or 'Besten Dank!' completely defeat the identifying anchors because '_____ Dank!' is shared across multiple common German expressions of gratitude, making the prompt ambiguous rather than uniquely pointing to 'Vielen Dank!'."
+        },
+        {
+          "source_id": "short",
+          "candidate_id": "cand-2",
+          "acceptable": false,
+          "reason": "Competing completions such as 'Vielen Gruß!' defeat the identifying anchors because 'Vielen _____' does not uniquely select 'Dank!'. Furthermore, the visible text uses an unnatural placeholder symbol '@'."
+        }
+      ],
+      "help_errors": {},
+      "meaning_errors": {}
+    },
+    "audio": {
+      "target:short": "09f9a5da-f148-5bf9-bba2-fbf5ae90766d"
+    },
+    "package": {
+      "schema_version": 1,
+      "namespace": "p5-public-dev",
+      "language": "de",
+      "source_revision": "fixture-v2",
+      "targets": [
+        {
+          "source_id": "short",
+          "kind": "fixed_phrase",
+          "meaning_key": "short",
+          "recall_expression": "Vielen Dank!",
+          "text": "Vielen Dank!",
+          "purpose": "Express thanks",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "Vielen "
+            },
+            {
+              "id": "c2",
+              "text": "Dank!"
+            }
+          ],
+          "required_chunks": [
+            "c1",
+            "c2"
+          ],
+          "cues": [
+            {
+              "id": "cand-1",
+              "prompt": "Thank someone for helping: _____ Dank!",
+              "visible_chunks": [
+                "c2"
+              ],
+              "reviewed": true,
+              "audio_id": null
+            },
+            {
+              "id": "cand-2",
+              "prompt": "Express gratitude after receiving help: Vielen _____@",
+              "visible_chunks": [
+                "c1"
+              ],
+              "reviewed": true,
+              "audio_id": null
+            }
+          ],
+          "explanations": {
+            "ru": {
+              "meaning": "Большое спасибо!",
+              "usage": null,
+              "breakdown": []
+            }
+          },
+          "concepts": [
+            "gratitude",
+            "thanking",
+            "politeness",
+            "acknowledgment"
+          ],
+          "acceptable_equivalents": [],
+          "slots": {},
+          "reference_audio_id": "09f9a5da-f148-5bf9-bba2-fbf5ae90766d"
+        }
+      ],
+      "lessons": [
+        {
+          "source_id": "short-lesson",
+          "title": "P5 short",
+          "target_source_ids": [
+            "short"
+          ]
+        }
+      ],
+      "dialogues": []
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-2",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "de",
+      "lessons": [
+        {
+          "source_id": "short-lesson",
+          "target_source_ids": [
+            "short"
+          ],
+          "title": "P5 short"
+        }
+      ],
+      "namespace": "p5-public-dev",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "Danke schön!"
+          ],
+          "context": "Thank someone for helping.",
+          "kind": "fixed_phrase",
+          "meaning_key": "short",
+          "purpose": "Express thanks",
+          "recall_expression": "Vielen Dank!",
+          "reference_audio_id": null,
+          "source_id": "short",
+          "text": "Vielen Dank!"
+        }
+      ],
+      "source_revision": "fixture-v2"
+    }
+  },
+  "human_review": null,
+  "tier": "dev"
+}

@@ -1270,6 +1270,202 @@
           }
         }
       }
+    },
+    "/api/v1/preparation": {
+      "post": {
+        "summary": "Enqueue",
+        "operationId": "enqueue_api_v1_preparation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourcePackage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparationJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/{job_id}": {
+      "get": {
+        "summary": "Job Status",
+        "operationId": "job_status_api_v1_preparation__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparationJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/{job_id}/retry": {
+      "post": {
+        "summary": "Retry",
+        "operationId": "retry_api_v1_preparation__job_id__retry_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparationJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/handoffs": {
+      "post": {
+        "summary": "Receive",
+        "operationId": "receive_api_v1_handoffs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoffEnvelope"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/handoffs/{export_id}": {
+      "get": {
+        "summary": "Handoff Status",
+        "operationId": "handoff_status_api_v1_handoffs__export_id__get",
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Export Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1913,6 +2109,92 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HandoffEnvelope": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "export_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Export Id"
+          },
+          "sender": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Sender"
+          },
+          "selected_sense_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Selected Sense Id"
+          },
+          "selected_sense": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Selected Sense"
+          },
+          "package": {
+            "$ref": "#/components/schemas/SourcePackage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "export_id",
+          "sender",
+          "selected_sense_id",
+          "selected_sense",
+          "package"
+        ],
+        "title": "HandoffEnvelope"
+      },
+      "HandoffReceipt": {
+        "properties": {
+          "export_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Export Id"
+          },
+          "preparation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Preparation Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "preparing",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "durable": {
+            "type": "boolean",
+            "const": true,
+            "title": "Durable",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "export_id",
+          "preparation_id",
+          "status"
+        ],
+        "title": "HandoffReceipt"
       },
       "ImportChange": {
         "properties": {
@@ -2753,6 +3035,81 @@
         ],
         "title": "PracticeSession"
       },
+      "PreparationJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "leased",
+              "failed",
+              "awaiting_review",
+              "ready"
+            ],
+            "title": "Status"
+          },
+          "input_hash": {
+            "type": "string",
+            "title": "Input Hash"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "published_import_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published Import Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "input_hash",
+          "attempts",
+          "error",
+          "result",
+          "published_import_id"
+        ],
+        "title": "PreparationJob"
+      },
       "PublishRequest": {
         "properties": {
           "reviewed": {
@@ -3223,6 +3580,182 @@
           "native_language"
         ],
         "title": "SettingsUpdate"
+      },
+      "SourcePackage": {
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Namespace"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru",
+              "sr",
+              "de"
+            ],
+            "title": "Language"
+          },
+          "native_language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru",
+              "sr",
+              "de"
+            ],
+            "title": "Native Language"
+          },
+          "source_revision": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Source Revision"
+          },
+          "phrases": {
+            "items": {
+              "$ref": "#/components/schemas/SourcePhrase"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Phrases"
+          },
+          "lessons": {
+            "items": {
+              "$ref": "#/components/schemas/LessonInput"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Lessons"
+          },
+          "dialogues": {
+            "items": {
+              "$ref": "#/components/schemas/DialogueInput"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Dialogues"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "namespace",
+          "language",
+          "native_language",
+          "source_revision",
+          "phrases"
+        ],
+        "title": "SourcePackage"
+      },
+      "SourcePhrase": {
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Source Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "fixed_phrase",
+              "word_sense",
+              "frame"
+            ],
+            "title": "Kind",
+            "default": "fixed_phrase"
+          },
+          "meaning_key": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Meaning Key"
+          },
+          "selected_meaning": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Meaning"
+          },
+          "recall_expression": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Recall Expression"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Purpose"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          },
+          "competing_expressions": {
+            "items": {
+              "type": "string",
+              "maxLength": 10000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Competing Expressions"
+          },
+          "reference_audio_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Audio Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_id",
+          "meaning_key",
+          "recall_expression",
+          "text",
+          "purpose"
+        ],
+        "title": "SourcePhrase"
       },
       "TargetInput": {
         "properties": {

@@ -11,6 +11,7 @@ from platformdirs import user_data_path
 class Config:
     data_dir: Path
     client_dir: Path | None = None
+    preparation_config: Path | None = None
     allowed_hosts: tuple[str, ...] = ("127.0.0.1", "localhost", "testserver")
     allowed_origins: tuple[str, ...] = ()
 
@@ -22,6 +23,9 @@ class Config:
         return cls(
             data_dir=Path(os.environ.get("PHRASE_GYM_DATA_DIR", user_data_path("phrase-gym"))),
             client_dir=client_dir,
+            preparation_config=Path(os.environ["PHRASE_GYM_PREPARATION_CONFIG"])
+            if os.environ.get("PHRASE_GYM_PREPARATION_CONFIG")
+            else None,
             allowed_hosts=tuple(
                 os.environ.get("PHRASE_GYM_HOSTS", "127.0.0.1,localhost").split(","),
             ),

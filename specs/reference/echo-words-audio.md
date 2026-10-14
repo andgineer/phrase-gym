@@ -40,3 +40,24 @@ The UI label remains **Reference**, regardless of actor or synthesis provenance.
 - Engineering acceptance should cover complete English/German/Serbian phrases, script handling, correct text/voice, playable nonempty output, consistent playback volume, same-language fallback and retry without replacing good existing assets. Listening/content checks are implementation work, not learner-run efficacy experiments. No new quality or device pass is claimed by this source inspection.
 
 Useful source locations: `audio.py:75` (cache/source chain), `audio.py:335` (Piper), `audio.py:404` (Edge and Serbian input), `audio.py:480` (cache identity), `config.py:21` (English accent defaults), `tests/test_audio.py:696` (voice failure and language/script tests), and `spec/functional-description.md:472` (audio contract). The paths above are navigation aids; the findings are written here so the handoff remains understandable without the sibling checkout.
+
+## P5 implementation measurements — 2026-10-14
+
+Phrase Gym now has its own bounded Piper subprocess and Edge adapter; echo-words remains
+read-only. The English/German native models and configurations were downloaded to disposable
+storage using the inspected pinned catalogue and verified byte-for-byte:
+
+| Voice | Model SHA-256 | Configuration SHA-256 |
+|---|---|---|
+| `en_US-lessac-medium` | `5efe09e69902187827af646e1a6e9d269dee769f9877d17b16b1b46eeaaf019f` | `efe19c417bed055f2d69908248c6ba650fa135bc868b0e6abb3da181dab690a0` |
+| `de_DE-thorsten-medium` | `7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819` | `974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85` |
+
+Pinned base URL: `https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/`.
+Append `en/en_US/lessac/medium/en_US-lessac-medium.onnx` or
+`de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx`, and `.json` for its configuration.
+
+Real native full-phrase outputs and real English/German/Serbian Edge outputs are retained in
+[the P5 audio evidence](../plan/evidence/p5-audio/) through the main P5 evidence/runbook links.
+Native cache repeats preserved the exact asset ID. Container/duration checks are positive;
+no agent or automated check attests human listening, pronunciation/accent quality, or
+actual-device acceptance. Original actor/course clips remain preferred and unmodified.

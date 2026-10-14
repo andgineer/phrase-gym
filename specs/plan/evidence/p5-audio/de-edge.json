@@ -1,0 +1,25 @@
+{
+  "id": "09f9a5da-f148-5bf9-bba2-fbf5ae90766d",
+  "sha256": "11dcaefd5d7bcfb769f05ffddad78f82ff2f8b02f3c7674be986067a0d762ab4",
+  "byte_length": 11232,
+  "mime_type": "audio/mpeg",
+  "metadata": {
+    "language": "de",
+    "text": "Vielen Dank!",
+    "role": "reference",
+    "origin": "generated",
+    "source": "p5-public-dev:short",
+    "performer": null,
+    "engine": "edge",
+    "voice": "de-DE-KatjaNeural",
+    "locale": "de-DE",
+    "accent": "DE",
+    "speech_text": "Vielen Dank!",
+    "preparation_version": "whole-phrase-1-serbian-cyrillic-1",
+    "settings": {
+      "model_sha256": "",
+      "timeout_seconds": 45.0
+    }
+  },
+  "available": true
+}

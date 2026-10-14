@@ -18,7 +18,9 @@ from phrase_gym.content.validation import PackageValidator
 from phrase_gym.contracts.content import ManualPackage
 from phrase_gym.contracts.media import MediaMetadata, MediaUpload
 from phrase_gym.errors import DomainError
+from phrase_gym.integrations.cli import existing_export, vault_export
 from phrase_gym.media.service import MediaService
+from phrase_gym.preparation.cli import preparation_cli
 from phrase_gym.storage import Database
 
 click.rich_click.USE_MARKDOWN = True
@@ -150,6 +152,11 @@ def export_schema(output_path: Path) -> None:
     schema = create_app().openapi()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
+
+
+phrase_gym.add_command(preparation_cli)
+phrase_gym.add_command(vault_export)
+phrase_gym.add_command(existing_export)
 
 
 if __name__ == "__main__":  # pragma: no cover

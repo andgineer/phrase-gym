@@ -26,6 +26,7 @@ from phrase_gym.media.service import MediaService
 from phrase_gym.storage import Database
 from phrase_gym.tables import Base
 from tests.browser_legacy import legacy_worker_fixture
+from tests.browser_preparation import register_preparation_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -91,6 +92,7 @@ def run() -> None:
         app.state.hold_pending_delivery = False
         app.state.lose_rating_ack = False
         legacy_worker_fixture(app)
+        register_preparation_fixture(app, ROOT)
         app.state.recording_ack_gate = None
         app.state.session_read_gate = None
         app.state.session_read_id = None

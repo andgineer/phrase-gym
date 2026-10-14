@@ -73,14 +73,15 @@ src/phrase_gym/
   content/                    targets, cues, revisions and imports
   practice/                   sessions, attempts and review policy
   media/                      storage and audio preparation
-  jobs/                       worker, provider interfaces and retries
+  preparation/                leased worker, providers, speech and review publication
+  integrations/               read-only sources and durable receiver
   adapters/                   vault and echo-words intake
 src/phrase_gym/migrations/
 fixtures/                     reviewed learning content and edge cases
 tests/{unit,integration,browser}/
 ```
 
-The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer UI, attempts, recordings and review policy are implemented; connected reliability is the P4 scope; actual-device acceptance, preparation sources and deployment remain separate work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
+The user-created scaffold in `~/projects/phrase-gym` is the actual starting point: preserve `src/phrase_gym`, hatchling/uv, the rich-click entry point, pytest, Invoke, documentation and CI conventions. Production modules and the client now extend that scaffold; P3 trainer UI, attempts, recordings and review policy are implemented; connected reliability is the P4 scope; P5 preparation/source/speech/receiver engineering is implemented; initial human content/listening acceptance, external sender rollout and deployment remain separate work. All development docs belong under `specs/` (plural). The old trainer is outside the new app boundary; a [source-format reference](reference/legacy-tooling.md) and archive preserve the relevant context here. No earlier code or stopped prototype establishes a completed milestone.
 
 ## Content and AI
 

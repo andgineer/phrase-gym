@@ -1,0 +1,102 @@
+{
+  "id": "d8f470fc-c225-4753-b111-3bc8a0144fae",
+  "status": "failed",
+  "input_hash": "04288e0e16efb4ae70b2df65b1f62d6f7c2f5f18559e84ab0a60d616fc182e37",
+  "attempts": 1,
+  "error": "draft_conformance_failure",
+  "result": {
+    "generation": {
+      "text": "{\"phrases\": [{\"source_id\": \"serbian-cyrillic\", \"chunks\": [{\"id\": \"c1\", \"text\": \"Надам се да\"}, {\"id\": \"c2\", \"text\": \" ћеш доћи\"}, {\"id\": \"c3\", \"text\": \" на време.\"}], \"required_chunks\": [\"c1\", \"c2\", \"c3\"], \"candidates\": [{\"id\": \"cand-1\", \"prompt\": \"A friend is expected at an appointment. You express your hope regarding their punctuality: _____ _____ _____\", \"visible_chunks\": [], \"competing_completions\": [\"Надам се да нећеш каснити.\"], \"distinguishing_anchors\": \"The situation specifies expressing hope for punctuality with an affirmative structure; the competing completion uses negation ('нећеш каснити').\", \"recalled_material\": \"Надам се да ћеш доћи на време.\", \"supplied_support\": \"Context: A friend is expected at an appointment.\", \"target_leak\": false}], \"uncovered_chunks\": {}, \"no_reliable_cue_reason\": null, \"explanation\": {\"meaning\": \"Надеюсь, ты придешь вовремя.\", \"usage\": null, \"breakdown\": [\"Надам се — надеюсь\", \"да — что\", \"ћеш доћи — придешь\", \"на време — вовремя\"]}, \"concepts\": [\"hope\", \"punctuality\", \"appointment\", \"arrival\", \"timeliness\"], \"acceptable_equivalents\": [\"Надам се да ћеш стићи на време.\"], \"slots\": {}}]}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.508,
+      "usage": {
+        "prompt_tokens": 1836,
+        "completion_tokens": 343,
+        "total_tokens": 2179,
+        "extra": null
+      }
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-1",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "sr",
+      "lessons": [
+        {
+          "source_id": "serbian-cyrillic-lesson",
+          "target_source_ids": [
+            "serbian-cyrillic"
+          ],
+          "title": "P5 serbian-cyrillic"
+        }
+      ],
+      "namespace": "p5-public-heldout",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "Надам се да нећеш каснити."
+          ],
+          "context": "A friend is expected at an appointment.",
+          "kind": "fixed_phrase",
+          "meaning_key": "serbian-cyrillic",
+          "purpose": "Hope that someone arrives punctually",
+          "recall_expression": "Надам се да ћеш доћи на време.",
+          "reference_audio_id": null,
+          "source_id": "serbian-cyrillic",
+          "text": "Надам се да ћеш доћи на време."
+        }
+      ],
+      "source_revision": "fixture-1"
+    }
+  },
+  "human_review": null,
+  "tier": "heldout"
+}

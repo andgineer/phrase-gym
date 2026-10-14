@@ -6,7 +6,16 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from phrase_gym.api import exposures, imports, library, media, practice, sessions, settings
+from phrase_gym.api import (
+    exposures,
+    imports,
+    library,
+    media,
+    practice,
+    preparation,
+    sessions,
+    settings,
+)
 from phrase_gym.api.boundary import LocalBoundary
 from phrase_gym.api.client import mount_client
 from phrase_gym.clock import utc_now
@@ -16,10 +25,13 @@ from phrase_gym.content.exposures import ExposureService
 from phrase_gym.content.imports import ImportService
 from phrase_gym.content.validation import PackageValidator
 from phrase_gym.errors import DomainError
+from phrase_gym.integrations.handoff import HandoffReceiver
 from phrase_gym.media.service import MediaService
 from phrase_gym.practice.events import PracticeService
 from phrase_gym.practice.policy import ReviewPolicy
 from phrase_gym.practice.recordings import RecordingService
+from phrase_gym.preparation.config import PreparationSettings
+from phrase_gym.preparation.jobs import PreparationJobs
 from phrase_gym.sessions.planning import SessionPlanner
 from phrase_gym.sessions.readiness import ReadinessService
 from phrase_gym.sessions.service import SessionService
@@ -35,6 +47,18 @@ def create_app(config: Config | None = None, clock: Callable[[], datetime] = utc
         database = Database(runtime.data_dir)
         database.migrate()
         reference_media = MediaService(database, runtime.data_dir)
+        application.state.preparation = PreparationJobs(database, clock)
+        application.state.preparation_identity = (
+            PreparationSettings.model_validate_json(
+                runtime.preparation_config.read_text(),
+            ).identity()
+            if runtime.preparation_config
+            else {}
+        )
+        application.state.handoff = HandoffReceiver(
+            application.state.preparation,
+            application.state.preparation_identity,
+        )
         application.state.settings = SettingsService(database)
         application.state.imports = ImportService(
             database,
@@ -70,7 +94,7 @@ def create_app(config: Config | None = None, clock: Callable[[], datetime] = utc
     app.add_middleware(LocalBoundary, allowed_origins=runtime.allowed_origins)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(runtime.allowed_hosts))
 
-    for routes in (settings, imports, library, exposures, media, sessions, practice):
+    for routes in (settings, imports, library, exposures, media, sessions, practice, preparation):
         app.include_router(routes.router)
 
     @app.exception_handler(DomainError)

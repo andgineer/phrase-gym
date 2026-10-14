@@ -1,0 +1,165 @@
+{
+  "fixtures": [
+    {
+      "stage": "original",
+      "fixture": "anchor",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "original",
+      "fixture": "bank",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "original",
+      "fixture": "contraction",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "original",
+      "fixture": "day",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "german-idiom",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "greeting",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "long",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "missing",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "serbian-cyrillic",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "serbian-latin",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "short",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "original",
+      "fixture": "spill",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "bank",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "day",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "revision2",
+      "fixture": "greeting",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-contraction",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-german",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-idiom",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-long",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-missing",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "revision2",
+      "fixture": "new-serbian",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "serbian-latin",
+      "status": "failed",
+      "error": "draft_conformance_failure"
+    },
+    {
+      "stage": "revision2",
+      "fixture": "short",
+      "status": "awaiting_review",
+      "error": null
+    },
+    {
+      "stage": "revision2",
+      "fixture": "spill",
+      "status": "awaiting_review",
+      "error": null
+    }
+  ],
+  "concrete_text_answers": 37,
+  "models": {
+    "google-gemini-3.5-flash-lite": 37
+  },
+  "latency_seconds": {
+    "min": 0.771,
+    "median": 1.626,
+    "max": 2.681
+  },
+  "reported_tokens": 73771,
+  "provider_timeout_attempts_without_answer": 1,
+  "configured_paid_escalation": false,
+  "published_real_generated_targets": 0,
+  "human_content_or_listening_approved": false,
+  "configured_free_pool": true,
+  "provider_reported_cost_usd": null,
+  "account_invoice_inspected": false
+}

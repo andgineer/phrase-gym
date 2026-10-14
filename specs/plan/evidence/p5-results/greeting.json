@@ -1,0 +1,102 @@
+{
+  "id": "1b93a0aa-47fa-4227-a7df-1f22b247e1e9",
+  "status": "failed",
+  "input_hash": "0e369f2480238ca68ddb23e8aa649ffa7bedd39024dab5a1ffe39692be21d7bf",
+  "attempts": 1,
+  "error": "draft_conformance_failure",
+  "result": {
+    "generation": {
+      "text": "{\n  \"phrases\": [\n    {\n      \"source_id\": \"greeting\",\n      \"chunks\": [\n        {\n          \"id\": \"c1\",\n          \"text\": \"Not too bad\"\n        },\n        {\n          \"id\": \"c2\",\n          \"text\": \", \"\n        },\n        {\n          \"id\": \"c3\",\n          \"text\": \"thanks\"\n        },\n        {\n          \"id\": \"c4\",\n          \"text\": \". \"\n        },\n        {\n          \"id\": \"c5\",\n          \"text\": \"And \"\n        },\n        {\n          \"id\": \"c6\",\n          \"text\": \"yours\"\n        },\n        {\n          \"id\": \"c7\",\n          \"text\": \"?\"\n        }\n      ],\n      \"required_chunks\": [\n        \"c1\",\n        \"c2\",\n        \"c3\",\n        \"c4\",\n        \"c5\",\n        \"c6\",\n        \"c7\"\n      ],\n      \"candidates\": [\n        {\n          \"id\": \"cand-1\",\n          \"prompt\": \"When someone asks how your day has been so far, you respond: _____.\",\n          \"visible_chunks\": [],\n          \"competing_completions\": [\n            \"Fine, thanks. How about you?\",\n            \"Not bad at all. And yourself?\"\n          ],\n          \"distinguishing_anchors\": \"No visible anchors available in this completely hidden mask.\",\n          \"recalled_material\": \"Not too bad, thanks. And yours?\",\n          \"supplied_support\": \"Context: Response to: How has your day been so far?\",\n          \"target_leak\": false\n        }\n      ],\n      \"uncovered_chunks\": {},\n      \"no_reliable_cue_reason\": null,\n      \"explanation\": {\n        \"meaning\": \"Неплохо, спасибо. А у тебя?\",\n        \"usage\": null,\n        \"breakdown\": []\n      },\n      \"concepts\": [\n        \"greeting response\",\n        \"casual reply\",\n        \"reciprocate inquiry\",\n        \"daily check-in\"\n      ],\n      \"acceptable_equivalents\": [\n        \"Not too bad, thank you. And yours?\"\n      ],\n      \"slots\": {}\n    }\n  ]\n}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.772,
+      "usage": {
+        "prompt_tokens": 1804,
+        "completion_tokens": 539,
+        "total_tokens": 2343,
+        "extra": null
+      }
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-1",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "en",
+      "lessons": [
+        {
+          "source_id": "greeting-lesson",
+          "target_source_ids": [
+            "greeting"
+          ],
+          "title": "P5 greeting"
+        }
+      ],
+      "namespace": "p5-public-dev",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "Fine, thanks. How about you?"
+          ],
+          "context": "Response to: How has your day been so far?",
+          "kind": "fixed_phrase",
+          "meaning_key": "greeting",
+          "purpose": "Reciprocate a greeting",
+          "recall_expression": "Not too bad, thanks. And yours?",
+          "reference_audio_id": null,
+          "source_id": "greeting",
+          "text": "Not too bad, thanks. And yours?"
+        }
+      ],
+      "source_revision": "fixture-1"
+    }
+  },
+  "human_review": null,
+  "tier": "dev"
+}

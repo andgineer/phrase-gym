@@ -1,0 +1,262 @@
+{
+  "id": "40876d3f-9424-40a0-a2a0-cc49e1c5ef03",
+  "status": "awaiting_review",
+  "input_hash": "f30f6121f1a1919099f631dbedd19531dd05113ae3d761d9be5cce9b0a51a38c",
+  "attempts": 1,
+  "error": null,
+  "result": {
+    "generation": {
+      "text": "{\n  \"phrases\": [\n    {\n      \"source_id\": \"new-contraction\",\n      \"chunks\": [\n        {\n          \"id\": \"c1\",\n          \"text\": \"You \"\n        },\n        {\n          \"id\": \"c2\",\n          \"text\": \"shouldn’t \"\n        },\n        {\n          \"id\": \"c3\",\n          \"text\": \"have \"\n        },\n        {\n          \"id\": \"c4\",\n          \"text\": \"gone to all that trouble.\"\n        }\n      ],\n      \"required_chunks\": [\n        \"c2\",\n        \"c3\"\n      ],\n      \"candidates\": [\n        {\n          \"id\": \"cand-1\",\n          \"prompt\": \"Express appreciation to someone who prepared a large meal as a favour: You _____ gone to all that trouble.\",\n          \"visible_chunks\": [\n            \"c1\",\n            \"c4\"\n          ],\n          \"competing_completions\": [\n            \"You shouldn’t have gone to all that trouble.\",\n            \"You could have gone to all that trouble.\",\n            \"You would have gone to all that trouble.\"\n          ],\n          \"distinguishing_anchors\": \"Situation involving someone making unnecessary effort with a large meal, combined with visible chunks 'You ' and 'gone to all that trouble.'\",\n          \"recalled_material\": \"shouldn’t have\",\n          \"supplied_support\": \"Context of appreciating unnecessary effort, plus surrounding words 'You ' and 'gone to all that trouble.'\",\n          \"target_leak\": false\n        }\n      ],\n      \"uncovered_chunks\": {},\n      \"no_reliable_cue_reason\": null,\n      \"explanation\": {\n        \"meaning\": \"не стоило (этого делать), не надо было\",\n        \"usage\": \"Используется для выражения благодарности за проявленную заботу или излишние усилия.\",\n        \"breakdown\": [\n          \"shouldn’t = should not\",\n          \"have gone to trouble = утруждать себя\"\n        ]\n      },\n      \"concepts\": [\n        \"appreciation\",\n        \"gratitude\",\n        \"unnecessary effort\",\n        \"polite response\"\n      ],\n      \"acceptable_equivalents\": [\n        \"You needn’t have done so much.\"\n      ],\n      \"slots\": {}\n    }\n  ]\n}",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.86,
+      "usage": {
+        "prompt_tokens": 1980,
+        "completion_tokens": 552,
+        "total_tokens": 2532,
+        "extra": null
+      }
+    },
+    "draft": {
+      "phrases": [
+        {
+          "source_id": "new-contraction",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "You "
+            },
+            {
+              "id": "c2",
+              "text": "shouldn’t "
+            },
+            {
+              "id": "c3",
+              "text": "have "
+            },
+            {
+              "id": "c4",
+              "text": "gone to all that trouble."
+            }
+          ],
+          "required_chunks": [
+            "c2",
+            "c3"
+          ],
+          "candidates": [
+            {
+              "id": "cand-1",
+              "prompt": "Express appreciation to someone who prepared a large meal as a favour: You _____ gone to all that trouble.",
+              "visible_chunks": [
+                "c1",
+                "c4"
+              ],
+              "competing_completions": [
+                "You shouldn’t have gone to all that trouble.",
+                "You could have gone to all that trouble.",
+                "You would have gone to all that trouble."
+              ],
+              "distinguishing_anchors": "Situation involving someone making unnecessary effort with a large meal, combined with visible chunks 'You ' and 'gone to all that trouble.'",
+              "recalled_material": "shouldn’t have",
+              "supplied_support": "Context of appreciating unnecessary effort, plus surrounding words 'You ' and 'gone to all that trouble.'",
+              "target_leak": false
+            }
+          ],
+          "uncovered_chunks": {},
+          "no_reliable_cue_reason": null,
+          "explanation": {
+            "meaning": "не стоило (этого делать), не надо было",
+            "usage": "Используется для выражения благодарности за проявленную заботу или излишние усилия.",
+            "breakdown": [
+              "shouldn’t = should not",
+              "have gone to trouble = утруждать себя"
+            ]
+          },
+          "concepts": [
+            "appreciation",
+            "gratitude",
+            "unnecessary effort",
+            "polite response"
+          ],
+          "acceptable_equivalents": [
+            "You needn’t have done so much."
+          ],
+          "slots": {}
+        }
+      ]
+    },
+    "model_review": {
+      "text": "```json\n{\n  \"candidates\": [\n    {\n      \"source_id\": \"new-contraction\",\n      \"candidate_id\": \"cand-1\",\n      \"acceptable\": false,\n      \"reason\": \"The competing completions ('You should have gone to all that trouble', 'You could have gone to all that trouble', 'You would have gone to all that trouble') are not reasonable semantic competitors for the given situation (expressing appreciation for unnecessary effort). Furthermore, the competing completions leave the modal auxiliary ('shouldn't', 'could', 'would') as the only distinguishing feature while keeping the exact same form 'gone to all that trouble', which makes the prompt unnatural since 'You could have gone to all that trouble' or 'You would have gone to all that trouble' completely flip the pragmatic meaning from appreciation to criticism or sarcasm, failing to properly test the targeted recalled material 'shouldn’t have' under standard instructional design.\"\n    }\n  ],\n  \"help_errors\": {},\n  \"meaning_errors\": {}\n}\n```",
+      "provider": "llmbroker",
+      "model": "google-gemini-3.5-flash-lite",
+      "latency_seconds": 1.2,
+      "usage": {
+        "prompt_tokens": 1014,
+        "completion_tokens": 223,
+        "total_tokens": 1237,
+        "extra": null
+      }
+    },
+    "advisory_review": {
+      "candidates": [
+        {
+          "source_id": "new-contraction",
+          "candidate_id": "cand-1",
+          "acceptable": false,
+          "reason": "The competing completions ('You should have gone to all that trouble', 'You could have gone to all that trouble', 'You would have gone to all that trouble') are not reasonable semantic competitors for the given situation (expressing appreciation for unnecessary effort). Furthermore, the competing completions leave the modal auxiliary ('shouldn't', 'could', 'would') as the only distinguishing feature while keeping the exact same form 'gone to all that trouble', which makes the prompt unnatural since 'You could have gone to all that trouble' or 'You would have gone to all that trouble' completely flip the pragmatic meaning from appreciation to criticism or sarcasm, failing to properly test the targeted recalled material 'shouldn’t have' under standard instructional design."
+        }
+      ],
+      "help_errors": {},
+      "meaning_errors": {}
+    },
+    "audio": {
+      "target:new-contraction": "e23a57bc-d176-54b3-8578-f7eb122d7b12"
+    },
+    "package": {
+      "schema_version": 1,
+      "namespace": "p5-public-heldout-v2",
+      "language": "en",
+      "source_revision": "fixture-v2",
+      "targets": [
+        {
+          "source_id": "new-contraction",
+          "kind": "frame",
+          "meaning_key": "new-contraction",
+          "recall_expression": "should not have",
+          "text": "You shouldn’t have gone to all that trouble.",
+          "purpose": "Express appreciation that someone made unnecessary effort",
+          "chunks": [
+            {
+              "id": "c1",
+              "text": "You "
+            },
+            {
+              "id": "c2",
+              "text": "shouldn’t "
+            },
+            {
+              "id": "c3",
+              "text": "have "
+            },
+            {
+              "id": "c4",
+              "text": "gone to all that trouble."
+            }
+          ],
+          "required_chunks": [
+            "c2",
+            "c3"
+          ],
+          "cues": [
+            {
+              "id": "cand-1",
+              "prompt": "Express appreciation to someone who prepared a large meal as a favour: You _____ gone to all that trouble.",
+              "visible_chunks": [
+                "c1",
+                "c4"
+              ],
+              "reviewed": true,
+              "audio_id": null
+            }
+          ],
+          "explanations": {
+            "ru": {
+              "meaning": "не стоило (этого делать), не надо было",
+              "usage": "Используется для выражения благодарности за проявленную заботу или излишние усилия.",
+              "breakdown": [
+                "shouldn’t = should not",
+                "have gone to trouble = утруждать себя"
+              ]
+            }
+          },
+          "concepts": [
+            "appreciation",
+            "gratitude",
+            "unnecessary effort",
+            "polite response"
+          ],
+          "acceptable_equivalents": [
+            "You needn’t have done so much."
+          ],
+          "slots": {},
+          "reference_audio_id": "e23a57bc-d176-54b3-8578-f7eb122d7b12"
+        }
+      ],
+      "lessons": [],
+      "dialogues": []
+    }
+  },
+  "published_import_id": null,
+  "input": {
+    "prompt_version": "phrase-preparation-2",
+    "review_version": "phrase-review-1",
+    "settings": {
+      "provider": {
+        "allow_paid": false,
+        "direct_model": null,
+        "keys_file": "<operator-private-file>",
+        "wait_seconds": 60.0
+      },
+      "speech": {
+        "timeout_seconds": 45.0,
+        "voices": {
+          "de": [
+            {
+              "accent": "DE",
+              "engine": "edge",
+              "locale": "de-DE",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "de-DE-KatjaNeural"
+            }
+          ],
+          "en": [
+            {
+              "accent": "US",
+              "engine": "edge",
+              "locale": "en-US",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "en-US-AriaNeural"
+            }
+          ],
+          "sr": [
+            {
+              "accent": "RS",
+              "engine": "edge",
+              "locale": "sr-RS",
+              "model_path": null,
+              "model_sha256": null,
+              "voice": "sr-RS-SophieNeural"
+            }
+          ]
+        }
+      }
+    },
+    "source": {
+      "dialogues": [],
+      "language": "en",
+      "lessons": [],
+      "namespace": "p5-public-heldout-v2",
+      "native_language": "ru",
+      "phrases": [
+        {
+          "competing_expressions": [
+            "You needn’t have done so much."
+          ],
+          "context": "Someone prepared a large meal as a favour.",
+          "kind": "frame",
+          "meaning_key": "new-contraction",
+          "purpose": "Express appreciation that someone made unnecessary effort",
+          "recall_expression": "should not have",
+          "reference_audio_id": null,
+          "source_id": "new-contraction",
+          "text": "You shouldn’t have gone to all that trouble."
+        }
+      ],
+      "source_revision": "fixture-v2"
+    }
+  },
+  "human_review": null,
+  "tier": "heldout-v2"
+}

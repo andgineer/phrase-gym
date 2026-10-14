@@ -415,6 +415,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preparation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enqueue */
+        post: operations["enqueue_api_v1_preparation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Job Status */
+        get: operations["job_status_api_v1_preparation__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/{job_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry */
+        post: operations["retry_api_v1_preparation__job_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/handoffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Receive */
+        post: operations["receive_api_v1_handoffs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/handoffs/{export_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Handoff Status */
+        get: operations["handoff_status_api_v1_handoffs__export_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -664,6 +749,51 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HandoffEnvelope */
+        HandoffEnvelope: {
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /**
+             * Export Id
+             * Format: uuid
+             */
+            export_id: string;
+            /** Sender */
+            sender: string;
+            /** Selected Sense Id */
+            selected_sense_id: string;
+            /** Selected Sense */
+            selected_sense: string;
+            package: components["schemas"]["SourcePackage"];
+        };
+        /** HandoffReceipt */
+        HandoffReceipt: {
+            /**
+             * Export Id
+             * Format: uuid
+             */
+            export_id: string;
+            /**
+             * Preparation Id
+             * Format: uuid
+             */
+            preparation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "received" | "preparing" | "ready" | "failed";
+            /**
+             * Durable
+             * @default true
+             * @constant
+             */
+            durable: true;
         };
         /** ImportChange */
         ImportChange: {
@@ -967,6 +1097,31 @@ export interface components {
             /** Attempts */
             attempts: components["schemas"]["AttemptEvidence"][];
         };
+        /** PreparationJob */
+        PreparationJob: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "leased" | "failed" | "awaiting_review" | "ready";
+            /** Input Hash */
+            input_hash: string;
+            /** Attempts */
+            attempts: number;
+            /** Error */
+            error: string | null;
+            /** Result */
+            result: {
+                [key: string]: unknown;
+            } | null;
+            /** Published Import Id */
+            published_import_id: string | null;
+        };
         /** PublishRequest */
         PublishRequest: {
             /**
@@ -1148,6 +1303,56 @@ export interface components {
              * @enum {string}
              */
             ui_language_mode: "native" | "learning";
+        };
+        /** SourcePackage */
+        SourcePackage: {
+            /** Namespace */
+            namespace: string;
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "en" | "ru" | "sr" | "de";
+            /**
+             * Native Language
+             * @enum {string}
+             */
+            native_language: "en" | "ru" | "sr" | "de";
+            /** Source Revision */
+            source_revision: string;
+            /** Phrases */
+            phrases: components["schemas"]["SourcePhrase"][];
+            /** Lessons */
+            lessons?: components["schemas"]["LessonInput"][];
+            /** Dialogues */
+            dialogues?: components["schemas"]["DialogueInput"][];
+        };
+        /** SourcePhrase */
+        SourcePhrase: {
+            /** Source Id */
+            source_id: string;
+            /**
+             * Kind
+             * @default fixed_phrase
+             * @enum {string}
+             */
+            kind: "fixed_phrase" | "word_sense" | "frame";
+            /** Meaning Key */
+            meaning_key: string;
+            /** Selected Meaning */
+            selected_meaning?: string | null;
+            /** Recall Expression */
+            recall_expression: string;
+            /** Text */
+            text: string;
+            /** Purpose */
+            purpose: string;
+            /** Context */
+            context?: string | null;
+            /** Competing Expressions */
+            competing_expressions?: string[];
+            /** Reference Audio Id */
+            reference_audio_id?: string | null;
         };
         /** TargetInput */
         TargetInput: {
@@ -2045,6 +2250,165 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enqueue_api_v1_preparation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourcePackage"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreparationJob"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    job_status_api_v1_preparation__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreparationJob"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_api_v1_preparation__job_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreparationJob"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_api_v1_handoffs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoffEnvelope"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoffReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    handoff_status_api_v1_handoffs__export_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                export_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoffReceipt"];
                 };
             };
             /** @description Validation Error */

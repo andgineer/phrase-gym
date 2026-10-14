@@ -1,10 +1,10 @@
 # Phrase preparation — prompt design and acceptance
 
-Planned implementation work, clarified by the user on **2026-10-13**. This is part of P5 and the full app implementation, not an optional polish task. It expands [P5.2–P5.3](03-content-and-integrations.md) and follows the [targeted-drilling decision](../decision-targeted-drilling.md).
+Implemented preparation workflow with measured withheld drafts, updated **2026-10-14**. See [evidence](evidence/p5-implementation-2026-10-14.md) and [fresh semantic review](evidence/p5-semantic-review.md). Initial operator content/listening review remains required. The original scope was clarified by the user on **2026-10-13**. This is part of P5 and the full app implementation, not an optional polish task. It expands [P5.2–P5.3](03-content-and-integrations.md) and follows the [targeted-drilling decision](../decision-targeted-drilling.md).
 
 ## Current gap
 
-The 44 phrases in the local vault test import each have one manually prepared partial cue. The core can select stored variants using hidden-chunk history, but this pack does not demonstrate different parts being recalled across sessions. Structural checks now reject cues with no visible phrase text; they do not establish that a nonempty hint is good or sufficiently identifying. LLM prompt design, measured cue quality and the intake-to-rotation lifecycle remain unimplemented.
+The 44 phrases in the local vault test import each have one manually prepared partial cue. The core can select stored variants using hidden-chunk history, but this pack does not demonstrate different parts being recalled across sessions. Structural checks now reject cues with no visible phrase text; they do not establish that a nonempty hint is good or sufficiently identifying. LLM prompts, durable draft/review/publication and the intake-to-rotation lifecycle are implemented and measured. The free-provider outputs demonstrate recoverable failures and withheld drafts; initial human content/listening acceptance remains open.
 
 ## Required prompt-design deliverables
 
