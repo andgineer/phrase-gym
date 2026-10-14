@@ -189,3 +189,22 @@ to request new candidates. The vault adapter rejects a runtime data directory in
 vault before opening SQLite or creating media/staging directories, including resolved symlink,
 case and default-directory aliases. Both runtime/export paths also compare existing ancestor
 inode identity. Keep both runtime storage and export output outside the read-only source.
+
+## Speech revisions and unambiguous dialogue bindings after review round 2
+
+Speech preparation version joins source, settings and prompt/review versions in canonical job
+identity. An upgrade creates a new job even for identical source/settings; historical completed
+jobs and published drills retain their original media and approval. A worker refuses a queued
+speech version that is missing or differs from its current version before making provider calls.
+For an older in-progress payload, enqueue the same source/settings under the current version;
+do not edit its stored input or silently resume old partial audio. Generated-audio checkpoints
+also retain their speech version. Missing/mismatched checkpoint versions are withheld; explicit
+`retry --regenerate` archives that result and requests fresh preparation for a current-version
+payload. Speech media remains independently cached by exact speech identity, so unrelated LLM
+prompt/provider changes can reuse the same verified clip.
+
+Automatic parsed dialogue linking requires one exact text/attachment match. Zero matches stay
+partner-only context; multiple selected meanings with the same text/attachment reject export
+with a stable ambiguity report, independently of manifest order. Resolve this by setting
+`include_dialogues: false` and supplying complete `dialogues` with explicit target source IDs,
+turns and any audio bindings. Distinct selected meanings keep distinct targets and schedules.

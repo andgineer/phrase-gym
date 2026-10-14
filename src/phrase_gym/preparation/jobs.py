@@ -13,8 +13,8 @@ from phrase_gym.clock import utc_now
 from phrase_gym.content.source_identity import check_source_objectives
 from phrase_gym.contracts.preparation import PreparationJob, SourcePackage
 from phrase_gym.errors import DomainError
+from phrase_gym.preparation import versions
 from phrase_gym.preparation.bindings import source_bindings
-from phrase_gym.preparation.prompts import PROMPT_VERSION, REVIEW_VERSION
 from phrase_gym.preparation.tables import PreparationRow
 from phrase_gym.serialization import canonical_json
 from phrase_gym.storage import Database
@@ -43,8 +43,9 @@ class PreparationJobs:
             {
                 "source": source.model_dump(mode="json"),
                 "settings": settings_identity,
-                "prompt_version": PROMPT_VERSION,
-                "review_version": REVIEW_VERSION,
+                "prompt_version": versions.PROMPT_VERSION,
+                "review_version": versions.REVIEW_VERSION,
+                "speech_version": versions.SPEECH_VERSION,
             },
             sort_keys=True,
         )

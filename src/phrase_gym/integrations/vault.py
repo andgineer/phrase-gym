@@ -99,7 +99,11 @@ def export_vault(
         return None, report
     dialogues = manifest.dialogues
     if manifest.include_dialogues:
-        dialogues = dialogues + export_dialogues(root, manifest, parsed_notes, phrases, media)
+        try:
+            dialogues = dialogues + export_dialogues(root, manifest, parsed_notes, phrases, media)
+        except (OSError, UnicodeError, DomainError, ValueError) as error:
+            errors.append({"source_id": "dialogues", "error": str(error)})
+            return None, report
     package = SourcePackage(
         namespace=manifest.namespace,
         language=manifest.language,
@@ -119,15 +123,21 @@ def export_dialogues(root, manifest, parsed_notes, phrases, media):
         for position, dialogue in enumerate(parsed.dialogues):
             turns = []
             for speaker, text, attachment in dialogue.turns:
-                linked = next(
-                    (
-                        selection.source_id
-                        for selection in manifest.selections
-                        if selection.source_audio_name == attachment
-                        and phrase_by_id[selection.source_id].text == text
-                    ),
-                    None,
-                )
+                matches = [
+                    selection.source_id
+                    for selection in manifest.selections
+                    if attachment is not None
+                    and selection.source_audio_name == attachment
+                    and phrase_by_id[selection.source_id].text == text
+                ]
+                if len(matches) > 1:
+                    raise DomainError(
+                        "Ambiguous dialogue target mapping: "
+                        + ", ".join(sorted(matches))
+                        + "; disable automatic dialogue export and supply explicit turn bindings",
+                        422,
+                    )
+                linked = matches[0] if matches else None
                 audio_id = phrase_by_id[linked].reference_audio_id if linked else None
                 if attachment in manifest.assets:
                     asset = manifest.assets[attachment]

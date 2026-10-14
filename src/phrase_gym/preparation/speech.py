@@ -18,10 +18,9 @@ from phrase_gym.contracts.base import Contract, Language
 from phrase_gym.contracts.media import MediaMetadata, MediaUpload
 from phrase_gym.errors import DomainError
 from phrase_gym.media.service import MediaService
+from phrase_gym.preparation import versions
 from phrase_gym.serialization import canonical_json
 from phrase_gym.tables import MediaRow
-
-SPEECH_VERSION = "whole-phrase-1-serbian-cyrillic-1"
 
 
 class SpeechVoice(Contract):
@@ -136,7 +135,7 @@ class SpeechAdapter:
                 locale=voice.locale,
                 accent=voice.accent,
                 speech_text=speech_text,
-                preparation_version=SPEECH_VERSION,
+                preparation_version=versions.SPEECH_VERSION,
                 settings={
                     "model_sha256": voice.model_sha256 or "",
                     "config_sha256": voice.config_sha256 or "",

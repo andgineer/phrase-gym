@@ -10,12 +10,11 @@ from pydantic import ValidationError
 
 from phrase_gym.contracts.preparation import ModelReview, PreparationDraft, SourcePackage
 from phrase_gym.errors import DomainError
+from phrase_gym.preparation import versions
 from phrase_gym.preparation.chunks import reconcile_draft
 from phrase_gym.preparation.config import PreparationSettings
 from phrase_gym.preparation.jobs import PreparationJobs
 from phrase_gym.preparation.prompts import (
-    PROMPT_VERSION,
-    REVIEW_VERSION,
     generation_prompt,
     review_prompt,
 )
@@ -56,9 +55,21 @@ class PreparationWorker:
             return False
         job_id, token, payload, result = claimed
         try:
+            if payload.get("speech_version") != versions.SPEECH_VERSION:
+                self.jobs.fail(job_id, token, "speech_version_mismatch: enqueue a new job")
+                return True
+            if result.get("audio") and (
+                result.get("audio_preparation_version") != versions.SPEECH_VERSION
+            ):
+                self.jobs.fail(
+                    job_id,
+                    token,
+                    "speech_checkpoint_version_mismatch: explicit regeneration required",
+                )
+                return True
             if (
-                payload["prompt_version"] != PROMPT_VERSION
-                or payload["review_version"] != REVIEW_VERSION
+                payload["prompt_version"] != versions.PROMPT_VERSION
+                or payload["review_version"] != versions.REVIEW_VERSION
             ):
                 raise DomainError("Queued prompt version differs; enqueue a new revision", 422)
             if self.settings_identity is not None and (
@@ -113,6 +124,7 @@ class PreparationWorker:
 
     async def prepare_audio(self, source, package, result, job_id, token):
         audio = result.setdefault("audio", {})
+        result["audio_preparation_version"] = versions.SPEECH_VERSION
         for target in package.targets:
             if target.reference_audio_id is None:
                 key = "target:" + target.source_id
