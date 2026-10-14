@@ -22,6 +22,14 @@ uv run phrase-gym --data-dir .data serve --client-dir frontend/dist
 
 Open [the local app](http://127.0.0.1:8000/learn/en). Choose your native language on first launch. English, Serbian, German and Russian UI locales are available; explanations stay in the native language. The database starts without content. `/learn/en` and `/learn/sr` can be bookmarked independently.
 
+With Tailscale installed, signed in and MagicDNS enabled, run the built client on a free loopback port other than 8000 and share it within your tailnet on standard HTTPS port 443:
+
+```bash
+uv run inv run --data-dir .data
+```
+
+The command prints both URLs, allows the device's exact Tailscale DNS hostname and HTTPS origin, and keeps the server and `tailscale serve --https=443` in the foreground. Ctrl+C stops both. Omit `--data-dir` to use the normal application data directory or `PHRASE_GYM_DATA_DIR`; use `--client-dir` for another client build. Tailscale Serve provisions the certificate; if tailnet HTTPS is disabled, follow its authorization prompt. The trusted HTTPS URL supports remote-device microphone capture.
+
 For sample content, validate and stage a package:
 
 ```bash

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from invoke import task, Context, Collection
 import time
+from scripts.run_local import run_local
 
 
 DOCS_PATH = Path("docs")
@@ -126,6 +127,12 @@ def test(c: Context):
 
 
 @task
+def run(c: Context, data_dir: str = "", client_dir: str = "frontend/dist"):
+    """Run on a free loopback port and expose HTTPS port 443 through Tailscale Serve."""
+    run_local(c, data_dir, client_dir)
+
+
+@task
 def app_build(c: Context):
     """Build the client and Python distributions with the bundled client."""
     c.run("./build.sh")
@@ -155,4 +162,3 @@ for name in ALLOWED_VERSION_TYPES:
     namespace.add_task(ver_task_factory(name), name=f"ver-{name}")  # type: ignore[bad-argument-type]
 for name in ALLOWED_DOC_LANGUAGES:
     namespace.add_task(docs_task_factory(name), name=f"docs-{name}")  # type: ignore[bad-argument-type]
-

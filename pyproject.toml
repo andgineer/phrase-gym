@@ -40,6 +40,9 @@ Documentation = "https://andgineer.github.io/phrase-gym/"
 [tool.ruff]
 line-length = 99
 
+[tool.pyrefly]
+search-path = ["."]
+
 [tool.hatch.version]
 path = "src/phrase_gym/__about__.py"
 
