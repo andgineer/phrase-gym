@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from './capture-fixtures'
-import { retainedAudio, syntheticCapture } from './synthetic-capture'
+import { recordingPeak, retainedAudio, syntheticCapture } from './synthetic-capture'
 
 test.beforeEach(async ({ request }) => {
   await request.put('/api/v1/settings', {
@@ -82,8 +82,8 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
   expect(probe.playerCount).toBe(1)
   expect(probe.sources[0]).toMatch(/^blob:/)
   expect(probe.sources[1]).toContain('/api/v1/media/')
-  expect(probe.sessionTypes).toContain('play-and-record')
-  expect(probe.sessionTypes).not.toContain('playback')
+  expect(probe.sessionTypes).toContain('auto')
+  expect(probe.sessionTypes).toContain('playback')
   const session = await (
     await request.get(`/api/v1/sessions/${page.url().split('/').pop()}`)
   ).json()
@@ -91,17 +91,7 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
     await request.get(`/api/v1/phrases/${session.attempts[0].target_id}/recordings`)
   ).json()
   expect(rows).toHaveLength(1)
-  const peak = await page.evaluate(async (id) => {
-    const context = new AudioContext()
-    try {
-      const response = await fetch(`/api/v1/recordings/${id}`)
-      const decoded = await context.decodeAudioData(await response.arrayBuffer())
-      return decoded.getChannelData(0).reduce((max, sample) => Math.max(max, Math.abs(sample)), 0)
-    } finally {
-      await context.close()
-    }
-  }, rows[0].id)
-  expect(peak).toBeGreaterThan(0.1)
+  expect(await recordingPeak(page, rows[0].id)).toBeGreaterThan(0.1)
   await page.getByRole('button', { name: 'Pause', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Session paused' })).toBeVisible()
   expect(

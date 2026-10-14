@@ -5,9 +5,12 @@ export async function syntheticCapture(page: Page, holdPermission = false) {
     const context = new AudioContext()
     const oscillator = context.createOscillator()
     oscillator.frequency.value = 440
+    const gain = context.createGain()
     let destination = context.createMediaStreamDestination()
-    oscillator.connect(destination)
+    oscillator.connect(gain)
+    gain.connect(destination)
     oscillator.start()
+    Object.assign(window, { __captureGain: gain })
     document.addEventListener(
       'click',
       () => {
@@ -25,7 +28,7 @@ export async function syntheticCapture(page: Page, holdPermission = false) {
             await new Promise<void>((resolve) => Object.assign(window, { __allowCapture: resolve }))
           if (destination.stream.getAudioTracks()[0]?.readyState === 'ended') {
             destination = context.createMediaStreamDestination()
-            oscillator.connect(destination)
+            gain.connect(destination)
           }
           return destination.stream
         },
@@ -48,4 +51,16 @@ export async function retainedAudio(page: Page): Promise<number> {
       }
     })
   })
+}
+
+export async function recordingPeak(page: Page, id: string): Promise<number> {
+  return page.evaluate(async (id) => {
+    const context = new OfflineAudioContext(1, 1, 48000)
+    const response = await fetch(`/api/v1/recordings/${id}`)
+    const decoded = await context.decodeAudioData(await response.arrayBuffer())
+    let peak = 0
+    for (let channel = 0; channel < decoded.numberOfChannels; channel++)
+      for (const sample of decoded.getChannelData(channel)) peak = Math.max(peak, Math.abs(sample))
+    return peak
+  }, id)
 }

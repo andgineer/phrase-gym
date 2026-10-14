@@ -58,23 +58,16 @@ export function useCapture(options: CaptureOptions) {
         throw new Error('Recording is unavailable in this browser. You can still use self-check.')
       const context = await options.context()
       if (token !== generation) return
-      setAudioSession('play-and-record')
-      if (!stream?.getAudioTracks().some((track) => track.readyState === 'live' && !track.muted)) {
-        discardStream()
-        const acquired = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-        })
-        if (token !== generation) {
-          acquired.getTracks().forEach((track) => track.stop())
-          return
-        }
-        stream = acquired
-        relinquishMicrophone = retainMicrophone(acquired)
+      discardStream()
+      setAudioSession('auto')
+      // Native defaults avoid iOS capture failures when audio processing is forced off.
+      const acquired = await navigator.mediaDevices.getUserMedia({ audio: true })
+      if (token !== generation) {
+        acquired.getTracks().forEach((track) => track.stop())
+        return
       }
+      stream = acquired
+      relinquishMicrophone = retainMicrophone(acquired)
       const formats = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus']
       const format = formats.find((type) => MediaRecorder.isTypeSupported(type))
       const capture = new MediaRecorder(stream, format ? { mimeType: format } : undefined)
@@ -148,6 +141,9 @@ export function useCapture(options: CaptureOptions) {
       capture.onstop = async () => {
         capturing.value = false
         processing.value = true
+        // The final data event precedes stop; release the input before routing playback.
+        discardStream()
+        setAudioSession('auto')
         try {
           await writes
           take.audio = await new Blob(chunks, { type: take.mime_type }).arrayBuffer()

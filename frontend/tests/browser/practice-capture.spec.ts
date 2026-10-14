@@ -43,7 +43,7 @@ test('actual encoded takes are retained separately and the original response sta
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,
     ),
-  ).toBe(1)
+  ).toBe(2)
   const retained = await (await request.get(`/api/v1/phrases/${targetId}/recordings`)).json()
   expect(
     retained.every(

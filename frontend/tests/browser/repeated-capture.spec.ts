@@ -8,7 +8,7 @@ test.beforeEach(async ({ request }) => {
   })
 })
 
-test('comparison preserves the microphone for successive takes with an exclusive audio session', async ({
+test('each take releases the microphone before comparison switches to an exclusive playback session', async ({
   page,
   request,
 }) => {
@@ -21,6 +21,8 @@ test('comparison preserves the microphone for successive takes with an exclusive
       return stream
     }
     let type = 'auto'
+    let unsafeTransitions = 0
+    Object.defineProperty(window, '__unsafePlaybackTransitions', { get: () => unsafeTransitions })
     Object.defineProperty(navigator, 'audioSession', {
       configurable: true,
       value: {
@@ -30,7 +32,11 @@ test('comparison preserves the microphone for successive takes with an exclusive
         set type(value: string) {
           type = value
           // Playback-only sessions cannot keep a microphone track alive.
-          if (value === 'playback') stream?.getTracks().forEach((track) => track.stop())
+          if (value === 'playback') {
+            if (stream?.getAudioTracks().some((track) => track.readyState === 'live'))
+              unsafeTransitions++
+            stream?.getTracks().forEach((track) => track.stop())
+          }
         },
       },
     })
@@ -57,13 +63,19 @@ test('comparison preserves the microphone for successive takes with an exclusive
       await page.evaluate(
         () => (window as unknown as { __captureTrackState: string }).__captureTrackState,
       ),
-    ).toBe('live')
+    ).toBe('ended')
   }
   expect(
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,
     ),
-  ).toBe(1)
+  ).toBe(3)
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { __unsafePlaybackTransitions: number }).__unsafePlaybackTransitions,
+    ),
+  ).toBe(0)
   await page.getByRole('button', { name: 'Pause', exact: true }).click()
   await expect
     .poll(() =>
@@ -125,10 +137,10 @@ test('an empty second take reports failure and a third take still saves', async 
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,
     ),
-  ).toBe(2)
+  ).toBe(3)
 })
 
-test('a retained microphone muted by the device is replaced before rerecording', async ({
+test('an interrupted microphone retains partial audio and the next take acquires a fresh input', async ({
   page,
   request,
 }) => {
@@ -138,8 +150,11 @@ test('a retained microphone muted by the device is replaced before rerecording',
     navigator.mediaDevices.getUserMedia = async (constraints) => {
       const stream = await acquire(constraints)
       Object.assign(window, {
-        __muteCapture: () =>
-          Object.defineProperty(stream.getAudioTracks()[0], 'muted', { value: true }),
+        __interruptCapture: () => {
+          const track = stream.getAudioTracks()[0]!
+          track.stop()
+          track.dispatchEvent(new Event('ended'))
+        },
       })
       return stream
     }
@@ -154,16 +169,18 @@ test('a retained microphone muted by the device is replaced before rerecording',
   for (let index = 0; index < 2; index++) {
     await page.getByRole('button', { name: 'Record', exact: true }).click()
     await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
-    await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
+    if (index === 0)
+      await page.evaluate(() =>
+        (window as unknown as { __interruptCapture: () => void }).__interruptCapture(),
+      )
+    else await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
     await expect
       .poll(async () => (await (await request.get(recordings)).json()).length)
       .toBe(index + 1)
     await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
-    if (index === 0)
-      await page.evaluate(() =>
-        (window as unknown as { __muteCapture: () => void }).__muteCapture(),
-      )
   }
+  const rows = await (await request.get(recordings)).json()
+  expect(rows.map((take: { complete: boolean }) => take.complete)).toEqual([false, true])
   expect(
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,
