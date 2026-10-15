@@ -2,48 +2,60 @@
 
 This plan contains unfinished work only. Remove entries as they are completed; lasting constraints belong in the linked decisions, and code/tests describe delivered behavior.
 
-## External-agent intake and reference speech
+## Preparation inbox and agent
 
-Follow the [external-agent boundary](../decision-external-preparation-agent.md). The runtime still contains source parsing, application text-LLM preparation/review and special handoff workflows that do not belong in the app.
+Follow the [preparation decision](../decision-external-preparation-agent.md).
 
-- Remove vault/legacy-note parsers, text-provider configuration/calls, generic LLM jobs/review APIs and source-specific handoff interfaces. Preserve data, migrations, generic validation/publication, immutable revisions, chunk reconciliation, media storage and reusable speech adapters. Remove tests for discarded responsibilities and refresh generated API contracts.
-- Deliver a source-independent preparation/submission guide and the actual versioned schema. Include stable identities, meaning/chunk/cue/help/dialogue rules, optional-media upload/binding, validation feedback, idempotent retries and compatible updates. Document real commands/endpoints once implemented.
-- Provide one generic prepared-material intake path without application linguistic review or operator approval. Verify unrelated sources, identical-text/different-meaning targets, retries, compatible updates and supplied-audio preservation. Demonstrate prepared prompts through actual rotation and pinned reload without resetting progress.
-- Isolate missing-reference speech into focused bounded audio work with per-language primary/fallback and complete-phrase caching. Verify failure/retry, partial resume and cache invalidation without replacing good supplied assets. Language-specific voice selection/listening remains open.
-- Assess the guide using representative externally prepared material and held-out examples: short replies, openers that share their first words, long phrases, near-duplicates across lessons, idioms, frames, contractions, missing context, German chunks, Serbian and each language's help setting. Demonstrate several accepted prompts per phrase and a phrase whose prompts all fail the whole-set check (study and lookup only). Inspect semantic quality separately from structural conformance; provider measurements need a planned fixture set and a fresh reviewer.
+- **Remove in-app text preparation:** vault/legacy-note parsers, text-provider configuration and calls (the `llmbroker` dependency), generic LLM jobs/review APIs and the echo-words-specific handoff receiver. Preserve data, migrations, generic validation/publication, immutable revisions, chunk reconciliation, media storage and speech adapters. Remove tests for discarded responsibilities and refresh generated API contracts.
+- **Inbox:**
+  - Item API: one phrase or word, optional audio, optional free-text context; stable sender identity and idempotent receipt. Intake credentials stay server-side.
+  - Drop space: a + button in the top bar opens a panel over the current screen, pre-filled from the clipboard on that tap (`navigator.clipboard.readText()`; fall back to an empty box when it rejects), with a note field, Send and recent entry statuses and failure reasons. Browser tests cover pre-fill, rejection fallback, closing back mid-card and that nothing is sent without Send.
+  - Durable entries with statuses: waiting, preparing, items added, failed with reason. Adding a note to a drop requeues it. Recreate card creates an entry with the item and the optional comment.
+- **Agent runner:**
+  - One drop at a time, a bounded run time and crash recovery through a durable claimed task with a lease, like the speech work.
+  - Configurable CLI: Claude Code (`claude -p --chrome`, started with `ANTHROPIC_API_KEY` removed from the child environment so the claude.ai login is used) or Codex (`codex exec` with its browser tool, once verified). The working directory is the source-instructions folder.
+  - Capture the outcome into the drop status; never prompt the learner. Tests fake the CLI boundary; no real agent runs in tests.
+- **Agent access to Phrase Gym:** read the per-language card/help settings, upload media and submit prepared packages. Document the actual commands/endpoints in the guide.
+- **Preparation guide:** rewrite for the [current card rules](../decision-targeted-drilling.md): fixed wording and slots, one preferred phrase per moment, separated speaker turns, prompts in the card language, one hint, familiar-material marking, confusable partners, help per language, accepted German variants, and what to create for a bare item from the API (situation, partner line, short dialogue where useful, help).
+- **Source instructions folder:** configurable location outside the repository, initialized as a git repository, with starting instructions for EPAM course pages (find the audio and cut each sentence's clip without the spoken item number) and plain pasted text.
+- **Checks before relying on unattended runs:**
+  - Whether EPAM course pages and their audio need the learner's login.
+  - Codex non-interactive browser access to signed-in pages.
+  - Approving the course sites for the agent in the browser extension.
+- **Assessment:** run representative drops (an EPAM page with numbered audio, echo-words words in English and German, pasted movie lines, a book page) and held-out examples: short replies, openers sharing first words, long phrases, near-duplicates across lessons, idioms, frames, missing context, German chunks and Serbian. Inspect semantic quality separately from structural conformance. Model-result measurements need a planned fixture set and a fresh reviewer before the results are used for real imports.
 
-External sources remain read-only unless separately authorized. Preparation/provider choice and delivery retries belong to the external agent.
+External sources remain read-only for the agent unless separately authorized.
+
+## echo-words outbox
+
+Work in the echo-words project, which needs its own authorization: export each new word to the Phrase Gym inbox instead of Anki. Keep unsent words in an outbox file on the echo-words server, send on each new word and periodically, and remove only the words the inbox confirmed. Send the word and its audio through the item API, with the chosen sense and source sentence as context.
 
 ## Prompt and practice redesign
 
-Implements the [prompts, words, help and practice decisions](../decision-targeted-drilling.md).
+Implements the [prompts, words, help and practice decisions](../decision-targeted-drilling.md) and the [learning policy](../decision-core-trainer.md).
 
-- **Prompt variants:** replace gapped-phrase cues with prompt variants (situation, optional preceding line with its audio, ordered hint words) across contracts, validation, publication, pinned revisions and generated client types. Re-prepare the local 44-phrase pack rather than converting its gapped cues. Rotation follows the [learning policy](../decision-core-trainer.md).
+- **Prompts:** replace gapped-phrase cues with prompts (situation in the card language, optional preceding line with its audio, one hint) across contracts, validation, publication, pinned revisions and generated client types. Re-prepare the local 44-phrase pack through the agent rather than converting its gapped cues.
 - **Card:**
   - Show the situation, and play and show the preceding line once. Show no phrase text before the response.
-  - Hint reveals the hint words one at a time and marks the response supported.
-  - The comparison ends with the reference and an ungraded "say it with the reference" step.
-  - Browser tests cover hint support, rotation and that no phrase text appears before the response.
-- **First meeting:** before a phrase's first recall, play the reference, show the phrase with its situation and ask for two say-alongs, with no grade. The first recall comes after the existing repair spacing (five minutes and two other finalized targets), or in a later session.
-- **Help per language:**
-  - Replace the single native-language explanation source with a help language and a translation-with-answer choice per learning language. English: English help, off. German: Russian, on, shown on reveal and after comparison. Serbian: not Russian; its help language is still open.
-  - Keep the UI-language preference, and migrate existing settings.
+  - Hint shows the one cue, then the full answer, and marks the response supported. A hint on a target with a memory state records Not yet.
+  - Saying the phrase with the reference ends the comparison only after a wrong or effortful attempt.
+  - Delete and Recreate card replace the unclear-cue report. Delete retires the target from practice and lookup, keeping history and recordings. Recreate card takes an optional comment and creates an inbox entry. Either one before rating leaves the attempt ungraded.
+  - Browser tests cover hint support and grading, rotation, the conditional say-along and that no phrase text appears before the response.
+- **First meeting:** material marked as already studied starts with an unaided attempt. New material plays the reference, shows the phrase with its situation and asks for one say-along, with no grade; its first recall comes after the existing repair spacing (five minutes and two other finalized targets) or in a later session.
+- **Card language and help per language:**
+  - Replace the single native-language explanation source with a card language, a help language and a translation-with-answer choice per learning language. English: English cards and help, translation off. German: Russian cards and help, translation on, shown on reveal and after comparison. Serbian: Serbian cards; its help language is still open.
+  - Keep the UI-language preference and migrate existing settings.
 - **Word items:**
-  - Add a per-language level setting (beginner or independent) that selects the card format: English independent, German beginner.
-  - Independent format: definition, rotating contexts, contrast notes, missing-word prompt with whole-sentence answer.
-  - Beginner format: rotating whole chunks, understanding before saying, translation prompts for saying, gloss with article/plural on tap.
-  - Both formats: one schedule per word, no two new confusables in one session, and mixed contrast drills once both are known.
-  - Define when an item moves from understanding to saying.
-  - Ask the user for Serbian's level and help language before preparing Serbian words.
-- **Game elements:** dialogue runs with shrinking pauses and hint-free levels, the per-lesson count of phrases recalled without help, real-call phrase choice with marking afterwards, and a weekly target.
-- **Preparation instructions:**
-  - Rewrite the generator and reviewer instructions for prompt variants. Check each prompt against the learner's whole phrase set in that language, and produce distinguishing hints and help only where useful.
-  - The external agent produces a review page where the learner accepts or rejects each prompt.
-  - Measure on the representative fixtures above with a fresh reviewer before using the result for imports.
-- **English vault import:**
-  - Scope: 63 phrases in four lessons of `languages/english/фразы`, read-only at a recorded revision.
-  - Build the package from accepted prompts. Take the other person's lines from the vault dialogues, reusing their existing audio. Add English notes only where useful, and no Russian.
-  - Run a dry run against the real database, then import, reconcile media and verify playback after the user approves.
+  - One schedule built around saying; understanding is part of the first meeting.
+  - English and Serbian: missing-word context, whole-sentence answer, definition and contrast note. German: Russian meaning of a chunk, chunk answer with accepted variants, gloss with article/plural on tap.
+  - A new confusable partner waits until its partner has been recalled once on a later day.
+  - Ask the user for Serbian's help language before preparing Serbian words.
+- **Game elements:**
+  - Dialogue runs: no timer; partner lines play, the learner says each own line, the reference plays and the rating continues the run. Lines said without visible text are ordinary reviews; after the full script they are supported.
+  - Lesson progress shows phrases recalled without help at their last check and the overdue count.
+  - Real calls: choose two or three phrases, then mark each used, no chance or forgot, with no schedule effect.
+  - A weekly target.
+- **Vault course phrases:** once the item API exists, an external agent session reads the learner's 63 English phrases in the four lessons of `languages/english/фразы` (read-only) and sends each phrase with its audio and its dialogue line as context. Verify the prepared cards, media and playback in the app.
 
 ## Device acceptance
 
@@ -51,11 +63,11 @@ Complete the [device gaps](../open-problems.md) on actual iPhone Safari over tru
 
 ## Private release and recovery
 
-- Measure the built app and bounded speech work on the proposed Oracle VM or always-on laptop: idle/API/media peaks, disk growth and impact on neighboring services. Do not assume speech models fit a shared 1 GB host.
-- Prepare a concrete host/access/backup proposal and operational documentation covering configuration, start/stop/update, health checks, storage/logging and recovery. Host choice and deployment require an explicit user request.
-- Demonstrate a consistent database/media backup and isolated restore, including every language, settings, schedules/history, every learner take, reference provenance and unfinished audio work. Rehearse upgrade and rollback using matching snapshots where needed.
-- Verify actual private access and health from intended devices before a release claim. Keep secrets and personal media outside Git.
+- Measure the built app, speech work and agent runs on the laptop: idle/API/media peaks, agent run memory and disk growth.
+- Verify private access to the laptop from the iPhone and from the echo-words server, and the behavior while the laptop sleeps. Deployment changes require an explicit user request.
+- Demonstrate a consistent database/media backup and isolated restore, including every language, settings, schedules/history, every learner take, reference provenance, inbox drops and unfinished audio or agent work. Include the source-instructions folder in backups. Rehearse upgrade and rollback using matching snapshots where needed.
+- Prepare operational documentation covering configuration, start/stop/update, the agent CLI login, health checks, storage/logging and recovery. Keep secrets and personal media outside Git.
 
 ## Validation
 
-Use behavioral tests for remaining implementation changes, then run `uv run inv pre` followed by `uv run inv test`, including frontend and both browser engines. Speech/content, actual-device and host recovery acceptance stay separate from that software gate. No learning-effectiveness experiment, extra general review loop, push or deployment follows from this plan.
+Use behavioral tests for remaining implementation changes, then run `uv run inv pre` followed by `uv run inv test`, including frontend and both browser engines. Speech/content, agent output, actual-device and host recovery acceptance stay separate from that software gate. No learning-effectiveness experiment, extra general review loop, push or deployment follows from this plan.

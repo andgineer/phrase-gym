@@ -1,6 +1,6 @@
 # Architecture and durability
 
-Use the existing Vue/TypeScript client and Python API as one personal application, serving the built client and API from the same origin. SQLite stores content, progress and learner audio; local hash-addressed files store reference media. Keep SQLite on local disk. Hosting remains a separate decision.
+Use the existing Vue/TypeScript client and Python API as one personal application, serving the built client and API from the same origin. SQLite stores content, progress and learner audio; local hash-addressed files store reference media. Keep SQLite on local disk. The application runs on the learner's laptop together with the [preparation inbox and agent](decision-external-preparation-agent.md).
 
 Transport/UI adapters depend inward on contracts and focused domain services. Validation, publication, library reads, planning, evidence processing, scheduling and media transfer have separate responsibilities. Each write workflow owns one transaction; helpers receive it. Construct services at the application boundary. Code and generated contracts own module layout, signatures and endpoints.
 
@@ -18,7 +18,7 @@ Browser actions stay bound to their initiating card through asynchronous work. T
 
 Stage, validate and hash reference bytes, then atomically move them before committing a ready reference. Include provenance/preparation settings in identity; do not infer origin from sample rate. Reconcile missing/orphaned files without discarding originals. Publication checks exact text, language and role; prompt audio must not reveal the answer. Keep active-session/backup assets out of cleanup.
 
-Speech work claims a durable task in a short transaction and synthesizes outside locks. Bounded leases/retries and canonical input identity allow crash recovery without duplicate publication or stale-voice cache reuse. External text preparation belongs to the [external agent](decision-external-preparation-agent.md).
+Speech work claims a durable task in a short transaction and synthesizes outside locks. Bounded leases/retries and canonical input identity allow crash recovery without duplicate publication or stale-voice cache reuse. Text preparation belongs to the [preparation agent](decision-external-preparation-agent.md), which Phrase Gym starts as a separate process; inbox storage, agent runs and intake publication are separate responsibilities.
 
 ## Private release and recovery
 
