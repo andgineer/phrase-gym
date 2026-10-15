@@ -7,7 +7,7 @@ from pathlib import Path
 from invoke import task, Context, Collection
 from platformdirs import user_data_path
 import time
-from scripts.run_local import run_local
+from scripts.run_local import DEFAULT_CLIENT_DIR, run_local
 
 
 DOCS_PATH = Path("docs")
@@ -128,22 +128,24 @@ def test(c: Context):
 
 
 @task(help={
-    "client_dir": "Built client directory (default: frontend/dist).",
+    "build": f"Rebuild the client into {DEFAULT_CLIENT_DIR} before serving.",
+    "client_dir": f"Built client directory (default: {DEFAULT_CLIENT_DIR}).",
     "data_dir": (
         "Private database/media directory (default: PHRASE_GYM_DATA_DIR when set; "
         f"otherwise {user_data_path('phrase-gym')})."
     ),
 })
-def run(c: Context, data_dir: str = "", client_dir: str = "frontend/dist"):
+def run(c: Context, data_dir: str = "", client_dir: str = DEFAULT_CLIENT_DIR, build: bool = False):
     """Run the built client with Tailscale HTTPS on port 443.
 
     With no options, serve frontend/dist, use the application's normal data
     directory, and choose a free loopback port other than 8000.
 
     Print both URLs and run the server and Tailscale Serve in the foreground.
-    Ctrl+C stops both. Requires a built client and connected Tailscale with MagicDNS.
+    Ctrl+C stops both. Requires a built client (or --build) and connected
+    Tailscale with MagicDNS.
     """
-    run_local(c, data_dir, client_dir)
+    run_local(c, data_dir, client_dir, build)
 
 
 @task

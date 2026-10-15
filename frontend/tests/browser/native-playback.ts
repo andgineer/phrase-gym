@@ -1,6 +1,9 @@
-import { expect, type BrowserContext, type Page } from '@playwright/test'
+import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 
 type Playback = { source: string; ended: boolean; failed: boolean; time: number }
+
+// Headless Chromium on the macOS CI runner has played media at under half of real time.
+const COMPARISON_BUDGET = 45000
 
 export async function observeNativePlayback(context: BrowserContext) {
   await context.addInitScript(() => {
@@ -35,13 +38,14 @@ export async function observeNativePlayback(context: BrowserContext) {
 
 export async function expectComparison(page: Page, count: number) {
   // Native decoding and two real playback clocks need their own bounded budget.
+  test.info().setTimeout(test.info().timeout + COMPARISON_BUDGET)
   await expect
     .poll(
       () =>
         page.evaluate(
           () => (window as unknown as { __nativePlaybacks: Playback[] }).__nativePlaybacks,
         ),
-      { timeout: 15000 },
+      { timeout: COMPARISON_BUDGET },
     )
     .toMatchObject(
       Array.from({ length: count }, () => [

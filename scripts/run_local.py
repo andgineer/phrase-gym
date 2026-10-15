@@ -16,15 +16,16 @@ from phrase_gym.api.app import create_app
 from phrase_gym.config import Config
 
 EXCLUDED_PORT = 8000
+DEFAULT_CLIENT_DIR = "frontend/dist"
+MAC_TAILSCALE = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
 
 def tailscale_command() -> str:
     installed = shutil.which("tailscale")
     if installed:
         return installed
-    mac_app = Path("/Applications/Tailscale.app/Contents/MacOS/Tailscale")
-    if mac_app.is_file():
-        return str(mac_app)
+    if Path(MAC_TAILSCALE).is_file():
+        return MAC_TAILSCALE
     raise Exit("Install Tailscale and sign in before running inv run.", code=1)
 
 
@@ -37,8 +38,17 @@ def reserve_port() -> socket.socket:
         listener.close()
 
 
-def run_local(c: Context, data_dir: str = "", client_dir: str = "frontend/dist") -> None:
+def run_local(
+    c: Context,
+    data_dir: str = "",
+    client_dir: str = DEFAULT_CLIENT_DIR,
+    build: bool = False,
+) -> None:
     client = Path(client_dir)
+    if build:
+        if client != Path(DEFAULT_CLIENT_DIR):
+            raise Exit(f"--build only rebuilds {DEFAULT_CLIENT_DIR}; omit --client-dir.", code=1)
+        c.run("npm --prefix frontend run build")
     if not (client / "index.html").is_file():
         raise Exit("Build the client first: npm --prefix frontend run build", code=1)
     tailscale = tailscale_command()

@@ -28,7 +28,7 @@ With Tailscale installed, signed in and MagicDNS enabled, run the built client o
 uv run inv run --data-dir .data
 ```
 
-The command prints both URLs, allows the device's exact Tailscale DNS hostname and HTTPS origin, and keeps the server and `tailscale serve --https=443` in the foreground. Ctrl+C stops both. Omit `--data-dir` to use the normal application data directory or `PHRASE_GYM_DATA_DIR`; use `--client-dir` for another client build. Tailscale Serve provisions the certificate; if tailnet HTTPS is disabled, follow its authorization prompt. The trusted HTTPS URL supports remote-device microphone capture.
+The command prints both URLs, allows the device's exact Tailscale DNS hostname and HTTPS origin, and keeps the server and `tailscale serve --https=443` in the foreground. Ctrl+C stops both. Omit `--data-dir` to use the normal application data directory or `PHRASE_GYM_DATA_DIR`; add `--build` to rebuild `frontend/dist` before serving, or use `--client-dir` for another client build. Tailscale Serve provisions the certificate; if tailnet HTTPS is disabled, follow its authorization prompt. The trusted HTTPS URL supports remote-device microphone capture.
 
 For sample content, validate and stage a package:
 

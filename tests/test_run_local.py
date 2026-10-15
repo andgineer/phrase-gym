@@ -92,6 +92,29 @@ def test_run_requires_built_client_before_tailscale(tmp_path):
         run_local.run_local(SimpleNamespace(), client_dir=str(tmp_path))
 
 
+def test_run_build_rebuilds_default_client_before_tailscale(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(run_local, "tailscale_command", lambda: "tailscale")
+    commands = []
+
+    def command(args, **_options):
+        commands.append(args)
+        if args == "npm --prefix frontend run build":
+            client = tmp_path / run_local.DEFAULT_CLIENT_DIR
+            client.mkdir(parents=True)
+            (client / "index.html").write_text("<h1>Phrase Gym</h1>")
+        return SimpleNamespace(stdout="{}")
+
+    with pytest.raises(Exit, match="Connect Tailscale"):
+        run_local.run_local(SimpleNamespace(run=command), build=True)
+    assert commands == ["npm --prefix frontend run build", "tailscale status --json"]
+
+
+def test_run_build_rejects_other_client_dir(runtime):
+    with pytest.raises(Exit, match="--build only rebuilds"):
+        run_local.run_local(SimpleNamespace(), client_dir=str(runtime), build=True)
+
+
 def test_run_requires_connected_tailscale(runtime):
     runner = SimpleNamespace(run=lambda *_args, **_kwargs: SimpleNamespace(stdout="{}"))
     with pytest.raises(Exit, match="Connect Tailscale"):
@@ -117,8 +140,9 @@ def test_run_does_not_share_if_server_startup_fails(runtime, monkeypatch):
     assert len(commands) == 1
 
 
-def test_invoke_registers_run_with_data_and_client_options():
+def test_invoke_registers_run_with_data_client_and_build_options():
     assert namespace["run"].body.__name__ == "run"
+    assert set(namespace["run"].help) == {"build", "client_dir", "data_dir"}
 
 
 def test_tailscale_cli_prefers_path_installation(monkeypatch):
