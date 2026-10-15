@@ -59,7 +59,7 @@ The prompt follows the card language:
 
 The learner grades the target word, sense or construction; an unrelated slip elsewhere in the sentence does not fail the word.
 
-Confusable partners are lookalikes and near-synonyms that preparation marks. The second of a pair is introduced only after the first has been recalled once on a later day. After that both appear in ordinary reviews, with a contrast note that explains overlap as well as difference: *further* and *farther* both express distance, while only *further* fits "further notice". There is no separate mixed drill. Lessons are grouped by situation, not by semantic category.
+Confusable partners are lookalikes and near-synonyms that preparation marks within one inbox entry; the agent does not search existing items, so a pair arriving in separate entries is not linked, and its contrast notes still explain it. The second of a marked pair is introduced only after the first has been recalled once on a later day. After that both appear in ordinary reviews, with a contrast note that explains overlap as well as difference: *further* and *farther* both express distance, while only *further* fits "further notice". There is no separate mixed drill. Lessons are grouped by situation, not by semantic category.
 
 Evidence:
 - Flashcards ranked highest descriptively among intentional activities, but delayed form-recall differences between activities were not significant, and the results are aggregates of heterogeneous studies ([Webb, Yanagisawa & Uchihara 2020](https://doi.org/10.1111/modl.12671)). Retrieving the word–meaning link stays the core; the gap is one prompt format, not proof of independent use. See [flashcards versus context](research/words-in-context.md#flashcards-versus-context).
