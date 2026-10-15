@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { test } from './capture-fixtures'
+import { expectComparison } from './native-playback'
 import { recordingPeak, retainedAudio, syntheticCapture } from './synthetic-capture'
 
 test.beforeEach(async ({ request }) => {
@@ -61,15 +62,7 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
   await page.getByRole('button', { name: 'Record', exact: true }).click()
   await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const probe = (window as unknown as { __playbackProbe: { sources: string[] } })
-          .__playbackProbe
-        return probe.sources.length
-      }),
-    )
-    .toBe(2)
+  await expectComparison(page, 1)
   expect(submittedMime).toMatch(/^audio\//)
   const probe = await page.evaluate(() => {
     const { players, sources, sessionTypes } = (
@@ -80,6 +73,7 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
     return { playerCount: players.length, sources, sessionTypes }
   })
   expect(probe.playerCount).toBe(1)
+  expect(probe.sources).toHaveLength(2)
   expect(probe.sources[0]).toMatch(/^blob:/)
   expect(probe.sources[1]).toContain('/api/v1/media/')
   expect(probe.sessionTypes).toContain('auto')
