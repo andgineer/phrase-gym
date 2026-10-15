@@ -1,6 +1,6 @@
 # Recording, comparison and retention
 
-Recording is optional on every attempt, including lookup/native-help practice with the full phrase visible. Silent self-check never requests a microphone. Capture starts explicitly and stops manually; show the stop instruction only during capture. Acquire a fresh microphone stream for each take and release it after the recorder emits its final data, before comparison playback. Reliable input and playback routing take priority over avoiding repeated permission prompts on iOS. Pause, navigation, Settings, backgrounding and leaving the page release media; cancelled permission requests release late streams.
+Recording is optional on every attempt, including lookup/help practice with the full phrase visible. Silent self-check never requests a microphone. Capture starts explicitly and stops manually; show the stop instruction only during capture. Acquire a fresh microphone stream for each take and release it after the recorder emits its final data, before comparison playback. Reliable input and playback routing take priority over avoiding repeated permission prompts on iOS. Pause, navigation, Settings, backgrounding and leaving the page release media; cancelled permission requests release late streams.
 
 After a take, play the learner recording followed by the complete phrase's reference. Use Reference regardless of actor/course or generated origin, preserving provenance separately. Replaying or rerecording cannot change the original response's support or grade. Only one playback runs at a time.
 

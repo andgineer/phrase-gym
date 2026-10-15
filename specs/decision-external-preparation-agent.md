@@ -4,7 +4,7 @@
 
 Phrase Gym defines one versioned prepared-package format and supplies an external-agent guide covering preparation and actual submission. The user's agent understands its source, extracts phrases/optional audio, chooses/calls its text LLM, reviews language quality, handles failures/retries and submits material. Phrase Gym does not parse source formats, mount vaults, run text-generation/review jobs or add a human-approval workflow. Every source uses the same generic intake, including echo-words; Phrase Gym owns no special sender.
 
-The guide covers complete phrases and selected meanings, exact meaningful chunk reconstruction, identifying cues checked against competing completions, allowed equivalents/frame slots, native translations with useful explanation only, searchable concepts and complete dialogues. One reliable cue or supported study without a reliable cue is allowed. Do not invent missing meanings or require a variant quota. Semantic review happens externally; app validation checks structure and bindings.
+The guide covers complete phrases and selected meanings, exact meaningful chunk reconstruction, several [prompts per phrase](decision-targeted-drilling.md#prompts-for-fixed-phrases) checked against the learner's whole phrase set, distinguishing hints, allowed equivalents/frame slots, help in each language's help language only where useful, searchable concepts and complete dialogues. A phrase without an accepted prompt is submitted for study and lookup. Do not invent missing meanings. Semantic review and the learner's acceptance of prompts happen externally; app validation checks structure and bindings.
 
 ## Intake and preservation
 

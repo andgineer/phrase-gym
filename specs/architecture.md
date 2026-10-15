@@ -6,7 +6,7 @@ Transport/UI adapters depend inward on contracts and focused domain services. Va
 
 ## Identity and transaction constraints
 
-Targets represent meanings, not source positions or surface-text similarity. Compatible edits create immutable revisions; changed meanings create targets. Lesson/dialogue appearances share identity and scheduling. Dialogue revisions and session manifests pin their content/media, cues, review groups and policy/schedule versions so later edits cannot rewrite an earlier attempt.
+Targets represent meanings, not source positions or surface-text similarity. Compatible edits create immutable revisions; changed meanings create targets. Lesson/dialogue appearances share identity and scheduling. Dialogue revisions and session manifests pin their content/media, prompts, review groups and policy/schedule versions so later edits cannot rewrite an earlier attempt.
 
 One scheduled session may be open at a time. Start explicitly replaces the known current session; unknown concurrent changes conflict. Session URLs select the displayed session independently of the launcher's open session. Superseded sessions and late reports remain readable history, with schedule changes guarded against stale content/policy/schedule versions.
 
@@ -16,7 +16,7 @@ Browser actions stay bound to their initiating card through asynchronous work. T
 
 ## Reference media and speech
 
-Stage, validate and hash reference bytes, then atomically move them before committing a ready reference. Include provenance/preparation settings in identity; do not infer origin from sample rate. Reconcile missing/orphaned files without discarding originals. Publication checks exact text, language and role; cue audio must not reveal hidden material. Keep active-session/backup assets out of cleanup.
+Stage, validate and hash reference bytes, then atomically move them before committing a ready reference. Include provenance/preparation settings in identity; do not infer origin from sample rate. Reconcile missing/orphaned files without discarding originals. Publication checks exact text, language and role; prompt audio must not reveal the answer. Keep active-session/backup assets out of cleanup.
 
 Speech work claims a durable task in a short transaction and synthesizes outside locks. Bounded leases/retries and canonical input identity allow crash recovery without duplicate publication or stale-voice cache reuse. External text preparation belongs to the [external agent](decision-external-preparation-agent.md).
 
