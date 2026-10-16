@@ -32,12 +32,16 @@ Use `uv sync --frozen`, `npm --prefix frontend ci`, and install the browser bina
 
 ## Done gate
 
-Before describing a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
+Choose the gate from the complete change, including staged and unstaged files.
+
+**Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run `uv run inv pre`, Python checks, application builds or Python/client/browser suites. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
+
+**Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
 
 1. `uv run inv pre`: every hook passes and pyrefly reports zero errors.
 2. `uv run inv test`: the full Python, client and browser suites pass; frontend checks must run rather than skip.
 
-Run `inv pre` after each discrete batch. If a hook rewrites files, rerun until it converges. A previous run or a narrow test subset does not satisfy the final gate. Never bypass hooks with `--no-verify`.
+Run `inv pre` after each discrete implementation batch; use the documentation-only gate for prose-only batches. If a hook rewrites files, rerun until it converges. A previous run or a narrow test subset does not satisfy the implementation gate. Never bypass commit hooks with `--no-verify`.
 
 Fix findings even when they appear pre-existing. Deferral requires evidence that the same failure exists on the committed baseline and the user's agreement in the current turn. Never silently report a failing tree as passing. If execution or approval infrastructure blocks a check, describe that block explicitly and do not claim the gate passed.
 
@@ -45,7 +49,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 - New modules/functions ship meaningful behavioral coverage in the same commit. Keep tests with the responsibility they verify; do not grow one catch-all test file.
 - Behavior that only exists in the browser needs a real-browser test against the real server and built client. Assert provisional/error states deterministically; do not race an artificial delay.
-- Iterate with subsets if useful, then verify the full suite.
+- For implementation changes, iterate with subsets if useful, then verify the full suite. Documentation-only changes use the done gate above.
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.
 - Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone and content gaps explicit.

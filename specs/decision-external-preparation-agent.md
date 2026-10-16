@@ -2,11 +2,23 @@
 
 ## Ownership boundary
 
-Phrase Gym Coach is the laptop preparation application. It processes the inbox through an API hosted by [Phrase Gym Server](architecture.md), backed by the same database as learning. The server hosts that API and stores all durable inbox entries, personal preferences, jobs and delivery receipts alongside learning data. Coach claims work and persists changes through the API; it has no separate authoritative database and never opens the core SQLite file over a network. The core validates packages and publishes content atomically; it never launches a preparation agent or speech provider. Published practice, inbox submission and preference updates continue when Coach is offline.
+Phrase Gym Coach is a Rust desktop GUI application for Windows and macOS. It processes the inbox through an API hosted by [Phrase Gym Server](architecture.md), backed by the same database as learning. The server hosts that API and stores all durable inbox entries, personal preferences, jobs and delivery receipts alongside learning data. Coach claims work and persists changes through the API; it has no separate authoritative database and never opens the core SQLite file over a network. The core validates packages and publishes content atomically; it never launches a preparation agent or speech provider. Published practice, inbox submission and preference updates continue when Coach is offline.
 
 Website import is outside Coach and the inbox. The learner uses an external agent to visit sources, handle access, extract text and audio, and submit the resulting material through the inbox API. The inbox neither opens URLs nor manages browsers, source logins, page parsers or source-specific extraction instructions. Source URLs may be retained as opaque provenance, never as fetch requests. A URL-only drop is rejected with an explanation to submit extracted material instead. External source workflows remain read-only unless separately authorized.
 
 There is no routine human approval before prepared cards enter practice. Accepted preparation workflows require representative semantic assessment before unattended use; structural validation alone cannot establish language quality. The learner can suspend and recreate bad cards during practice.
+
+## Desktop application
+
+V1 contains only an inbox drop area, settings selecting Codex or Claude CLI, and basic processing status/database counts. Detailed GUI design and queue browsing, job-detail screens, charts and diagnostics dashboards are deferred. Dropping/pasting material populates a draft; explicit Send submits through the existing inbox API. Text/audio validation and durable acknowledgement follow the same contract as other senders. A bounded local sender outbox retains unacknowledged submissions for identical retry; accepted processing remains Server-owned.
+
+Settings choose one CLI for LLM tasks. Each attempt pins the selection; changes affect subsequent attempts. Missing login/tools or quota failure never silently switches CLI or enables paid API execution. The status shows connection, selected-tool readiness, processing and last submission outcome. Database statistics are scoped Server API summaries of target and inbox/readiness counts, with freshness; no direct SQLite access. Practice stays in the Vue browser client. Personal profiles remain under the separately authorized external-agent API.
+
+Use egui/eframe for the Rust GUI, subject to the native-platform acceptance spike in the [Coach implementation plan](plan/coach-desktop.md). Its compact drop/status/settings workflow does not require a second web frontend. Views render snapshots and emit commands; a separate asynchronous runner owns API calls, leases, transfers and subprocesses. GUI dependencies belong only to Coach and never enter the Server build. Validate accessibility and native lifecycle behavior before expanding the UI.
+
+The first release is a windowed application, with processing continuing while minimized. Each launch starts paused; a processing setting enables bounded queue processing. Pausing stops new claims and lets the current job finish. Closing the window or choosing Quit stops claims, performs bounded worker cleanup and exits, leaving unfinished work recoverable through Server. There is no hidden tray worker, login startup, OS service or automatic updater in this scope. Multiple machines coordinate through Server leases; a second local instance must not start another runner for the same local configuration.
+
+Connection loss shows the last confirmed status as stale. Sleep, restart, cancellation and ambiguous delivery must reconcile Server generations, leases and receipts before resuming; the UI never equates a successful subprocess exit with publication. Server owns budget accounting so restarting Coach or clearing its cache cannot reset daily starts. Local storage contains machine settings, credential references, bounded diagnostics, unacknowledged sender submissions and disposable processing staging/cache. Store scoped Server credentials in the OS credential store; keep provider login under the adapter's documented authentication mechanism and out of ordinary job inputs.
 
 ## Inbox
 
@@ -26,7 +38,7 @@ Status distinguishes waiting, preparing, failed with reason, pending core delive
 
 ## Preparation jobs and permissions
 
-Coach starts a non-interactive CLI adapter, one entry or explicit group at a time. Start with one supported adapter and verify its actual launch environment; keep an adapter boundary for alternatives. Subscription authentication, permissions and configuration are explicit. Never silently fall back to paid API credentials. No browser tools are needed or granted for inbox preparation.
+Coach starts the selected Codex or Claude non-interactive CLI adapter, one entry or explicit group at a time. Support and verify both adapters on Windows and macOS; keep provider argument/output handling separate from process supervision. Subscription authentication, permissions and configuration are explicit. Never silently fall back to paid API credentials. No browser tools are needed or granted for inbox preparation.
 
 The deterministic runner owns leases, generation fencing, bounded duration, attempt limits, output/media limits and a daily run budget. Authentication or quota failures stop repeated attempts until retry is appropriate. A late worker cannot publish after cancellation, lease replacement or a newer generation: accepting its result requires the current generation and fencing token. A crash after delivery recovers the publication receipt instead of generating new identities. Terminate worker subprocesses on cancellation where possible.
 

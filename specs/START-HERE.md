@@ -12,5 +12,6 @@ Code, tests and generated OpenAPI describe the implementation. These documents r
 - [Acceptance gaps](open-problems.md)
 - [Research evidence](research/README.md): sources behind learning decisions, for when a decision needs backing
 - [Remaining work](plan/implementation-plan.md)
+- [Coach desktop implementation](plan/coach-desktop.md): Windows/macOS GUI work within the Rust migration
 
 Development rules live in [AGENTS.md](../AGENTS.md); usage and commands live in [README.md](../README.md). Remove completed plan entries rather than archiving them in specs. Keep one home for each decision; do not retain review transcripts, implementation inventories or superseded alternatives.
