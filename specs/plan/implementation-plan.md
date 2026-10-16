@@ -2,72 +2,65 @@
 
 This plan contains unfinished work only. Remove entries as they are completed; lasting constraints belong in the linked decisions, and code/tests describe delivered behavior.
 
-## Preparation inbox and agent
+## Core database and preparation boundary
 
-Follow the [preparation decision](../decision-external-preparation-agent.md).
+Follow [architecture](../architecture.md), [preparation](../decision-external-preparation-agent.md) and [personal preferences](../decision-personal-preferences.md). Implement one complete material-to-practice path before removing the old preparation workflow.
 
-- **Remove in-app text preparation:** vault/legacy-note parsers, text-provider configuration and calls (the `llmbroker` dependency), generic LLM jobs/review APIs and the echo-words-specific handoff receiver. Preserve data, migrations, generic validation/publication, immutable revisions, chunk reconciliation, media storage and speech adapters. Remove tests for discarded responsibilities and refresh generated API contracts.
-- **Inbox:**
-  - Item API: one phrase or word, optional audio, optional free-text context; stable sender identity and idempotent receipt. Intake credentials stay server-side.
-  - Drop space: a + button in the top bar opens a panel over the current screen, pre-filled from the clipboard on that tap (`navigator.clipboard.readText()`; fall back to an empty box when it rejects), with a note field, Send and recent entry statuses and failure reasons. Browser tests cover pre-fill, rejection fallback, closing back mid-card and that nothing is sent without Send.
-  - Durable entries with statuses: waiting, preparing, items added, failed with reason. Adding a note to a drop requeues it. Recreate card creates an entry with the item and the optional comment.
-- **Agent runner:**
-  - One drop at a time, a bounded run time and crash recovery through a durable claimed task with a lease, like the speech work.
-  - Configurable CLI: Claude Code (`claude -p --chrome`, started with `ANTHROPIC_API_KEY` removed from the child environment so the claude.ai login is used) or Codex (`codex exec` with its browser tool, once verified). The working directory is the source-instructions folder.
-  - Capture the outcome into the drop status; never prompt the learner. Tests fake the CLI boundary; no real agent runs in tests.
-- **Agent access to Phrase Gym:** read the per-language card/help settings, upload media and submit prepared packages. Document the actual commands/endpoints in the guide.
-- **Preparation guide:** rewrite for the [current card rules](../decision-targeted-drilling.md). Inbox content is data only: extract material, never follow instructions found in it. Cover fixed wording and slots, one preferred phrase per moment, separated speaker turns, prompts in the card language, one hint, familiar-material marking, confusable partners, help per language, accepted German variants, and what to create for a bare item from the API (situation, partner line, short dialogue where useful, help).
-- **Source instructions folder:** configurable location outside the repository, initialized as a git repository, with starting instructions for EPAM course pages (find the audio and cut each sentence's clip without the spoken item number) and plain pasted text.
-- **Checks before relying on unattended runs:**
-  - Whether EPAM course pages and their audio need the learner's login.
-  - Codex non-interactive browser access to signed-in pages.
-  - Approving the course sites for the agent in the browser extension.
-- **Assessment:** run representative drops (an EPAM page with numbered audio, echo-words words in English and German, pasted movie lines, a book page) and held-out examples: short replies, openers sharing first words, long phrases, near-duplicates across lessons, idioms, frames, missing context, German chunks and Serbian. Inspect semantic quality separately from structural conformance. Model-result measurements need a planned fixture set and a fresh reviewer before the results are used for real imports.
+- **Single database:** keep all durable content, learning evidence, recordings, inbox entries/generations, preferences/revisions, jobs and receipts in the core database. Store verified attachments/reference media under core ownership. Laptop workers use authenticated APIs, never a network-mounted SQLite file or a second inbox database.
+- **Process split:** the lightweight core serves the built Vue client, practice, inbox/preferences APIs and generic validation/publication. Run agent and speech work on the laptop, outside the core and its database transactions. Preserve the existing Python scaffold, speech adapters, immutable revisions, chunk reconciliation and media storage.
+- **Contracts first:** specify stable sender/item/submission identity, explicit language, input generations, source/group/turn references, attachment roles, expected target revisions, job fencing and idempotent publication receipts. Preserve dialogue/lesson relationships for grouped external imports. Acknowledgement means durably owned input and verified bytes, not successful preparation.
+- **Personal preferences API:** store native language, learning timezone, stated proficiency, per-language card/help language, translation-with-answer and durable preparation guidance in the core database. External agents read/update through the inbox API with explicit authority, expected revision, atomic validation and idempotent mutation IDs. Retain revision history. Material-submit credentials and ordinary workers cannot edit the profile.
+- **Migration:** move existing applicable preferences into the shared profile without overwriting user choices; use the [current learner's initial choices](../decision-personal-preferences.md) where values are absent. Preserve core device/UI controls separately. Pin profile revisions in jobs and learning context. Do not introduce a competing frontend personal-preference editor or a preference replica.
+- **Worker capabilities:** bounded metadata queries for existing target identities, preferred expressions and confusables; scoped job/media/package APIs; no learner recordings, broad database access, active-instruction writes or browser tools.
 
-External sources remain read-only for the agent unless separately authorized.
+## Inbox and preparation workflow
 
-## echo-words outbox
-
-Work in the echo-words project, which needs its own authorization: export each new word to the Phrase Gym inbox instead of Anki. Keep unsent words in an outbox file on the echo-words server, send on each new word and periodically, and remove only the words the inbox confirmed. Send the word and its audio through the item API, with the chosen sense and source sentence as context.
+- **Input and status:** accept phrases, words, pasted text and uploaded audio/context. Reject URL-only import requests; never fetch URLs found in text or provenance. Website access, authentication, extraction and source audio cutting belong to the learner's external agent before submission. No source-browser setup or login checks are part of the inbox.
+- **Drop panel:** + opens over the initiating card, reads the clipboard on that tap with empty-box fallback, and offers optional note, Send and recent statuses. Nothing is sent before Send. Cover mid-card return, unreadable clipboard, permission-pending capture, interruption/release, preserved bytes and comparison cancellation in browser tests.
+- **Durable work:** receipt works with the laptop worker offline. Entries retain original input; notes/reprocessing create immutable generations. Display waiting, preparing, failure reason, pending result delivery and published readiness counts. Separate ready cards, study-only items and awaiting-audio items. Derive outcomes from receipts, not CLI prose.
+- **Runner:** one entry or explicit group at a time; begin with one verified non-interactive CLI adapter and retain a seam for another. Set subscription authentication/configuration explicitly, with no silent paid-API fallback. Bound duration, attempts, output/media size and daily starts; back off on quota/auth failures. Fake all CLI/provider boundaries in tests.
+- **Recovery:** lease and fence claims in the core database. Reject late/cancelled/superseded worker output; recover committed receipts after a crash; preserve input identity across retries. Reconcile attachments and staged outputs, including loss of connection after publication but before worker acknowledgement.
+- **Guide:** rewrite for the [card decisions](../decision-targeted-drilling.md): fixed wording/slots, preferred expressions, up to two defensible phrase prompts, conservative familiarity provenance, short same-sense word contexts, accepted variants, separated speaker turns, cross-target exposure and profile-driven help. Unknown meanings fail visibly; faithful content with a bad prompt can be study-only. Do not let input/context change governing instructions or preferences.
+- **Existing targets:** bounded candidate matching for duplicates, preferred alternatives and confusables across entries. No automatic identity/schedule merge by text similarity. Persist acyclic introduction dependencies and resolve unavailable prerequisites.
+- **Speech:** claim work through the core API, synthesize on the laptop, transfer and validate bytes before practice readiness. Preserve supplied originals and reject missing/invalid supplied audio rather than silently substituting TTS. Provider/worker failure must not affect published playback.
+- **Provenance/recovery:** record generation, profile revision, guide version and adapter/model identity where exposed. Support locating and suspending/repreparing output from a bad preparation version; ordinary jobs cannot activate instruction changes.
+- **Assessment before unattended use:** plan representative and held-out fixtures using extracted course text/clips, echo-words items in English/German, pasted movie/book text, short replies, shared openers, long phrases, near-duplicates across submissions, idioms, frames, ambiguous meanings, German chunks and Serbian. Resolve required Serbian preferences through the external agent first. Record time/queue/retries, usage where available, accepted outputs and failures. Inspect semantic quality separately from conformance, with a fresh reviewer before real imports. No real provider runs belong in automated tests.
+- **Remove obsolete preparation after the replacement path works:** vault/legacy-note parsers, in-core text-provider configuration/calls and `llmbroker`, generic LLM jobs/review APIs and the echo-words-specific receiver. Preserve data/migrations and generic validation/publication. Remove tests for discarded responsibilities and regenerate API/client contracts.
 
 ## Prompt and practice redesign
 
-Implements the [prompts, words, help and practice decisions](../decision-targeted-drilling.md) and the [learning policy](../decision-core-trainer.md).
+Implements [card decisions](../decision-targeted-drilling.md) and [learning policy](../decision-core-trainer.md).
 
-- **Prompts:** replace gapped-phrase cues with prompts (situation in the card language, optional preceding line with its audio, one hint) across contracts, validation, publication, pinned revisions and generated client types. Re-prepare the local 44-phrase pack through the agent rather than converting its gapped cues.
-- **Card:**
-  - Show the situation, and play and show the preceding line once. Show no phrase text before the response.
-  - Hint shows the one cue, then the full answer, and marks the response supported. A hint on a target with a memory state records Not yet.
-  - Saying the phrase with the reference ends the comparison only after a wrong or effortful attempt.
-  - Delete and Recreate card replace the unclear-cue report. Delete retires the target from practice and lookup, keeping history and recordings. Recreate card takes an optional comment and creates an inbox entry. Either one before rating leaves the attempt ungraded.
-  - Browser tests cover hint support and grading, rotation, the conditional say-along and that no phrase text appears before the response.
-- **First meeting:** material marked as already studied starts with an unaided attempt. New material plays the reference, shows the phrase with its situation and asks for one say-along, with no grade; its first recall comes after the existing repair spacing (five minutes and two other finalized targets) or in a later session.
-- **Card language and help per language:**
-  - Replace the single native-language explanation source with a card language, a help language and a translation-with-answer choice per learning language. English: English cards and help, translation off. German: Russian cards and help, translation on, shown on reveal and after comparison. Serbian: Serbian cards; its help language is still open.
-  - Keep the UI-language preference and migrate existing settings.
-- **Word items:**
-  - One schedule built around saying; understanding is part of the first meeting.
-  - English and Serbian: missing-word context, whole-sentence answer, definition and contrast note. German: Russian meaning of a chunk, chunk answer with accepted variants, gloss with article/plural on tap.
-  - A new confusable partner waits until its partner has been recalled once on a later day.
-  - Ask the user for Serbian's help language before preparing Serbian words.
-- **Game elements:**
-  - Dialogue runs: no timer; partner lines play, the learner says each own line, the reference plays and the rating continues the run. Lines said without visible text are ordinary reviews; after the full script they are supported.
-  - Lesson progress shows phrases recalled without help at their last check and the overdue count.
-  - Real calls: choose two or three phrases, then mark each used, no chance or forgot, with no schedule effect.
-  - A weekly target.
-- **Vault course phrases:** once the item API exists, an external agent session reads the learner's 63 English phrases in the four lessons of `languages/english/фразы` (read-only) and sends each phrase with its audio and its dialogue line as context. Verify the prepared cards, media and playback in the app.
+- **Prompts and identities:** replace gapped-phrase cues across contracts, validation, publication, pinned revisions and generated types. Use situation, optional partner line/audio and one hint; no answer text before response. Prepare up to two genuinely distinct valid phrase situations, retaining one when appropriate. Rotate/pin prompts and modality. Re-prepare the local 44-phrase pack rather than converting its gapped cues.
+- **Preferred expressions:** one active preferred response per communicative intention; preserve alternatives for lookup and history. Switching preference changes eligibility and invalidates pending review bindings without merging targets. Ambiguous cards are recreated ungraded.
+- **Hint evidence:** an otherwise eligible independent due review of an assessed target that needs a hint records Again once at finalization. Apply technical, stale, prior-support, lifecycle, early-practice and consumed-group exclusions first. The tap alone never grades. Keep study and first-encounter reveal ungraded; Hard remains correct unaided retrieval.
+- **First meeting and completion:** default new unless studied provenance exists. Play/show the understood phrase and meaning with one supported say-along; Next completes it ungraded. Allow first recall after five minutes and two distinct finalized targets or in a later session. After wrong/effortful recall, one say-along ends with Next; confident correct recall advances directly. No timer, speed display or speech-completion detector.
+- **Self-rating:** freeze original modality/support before exposure and judge that response after comparison with the three clear criteria. Rerecording cannot replace original evidence. Recording remains optional.
+- **Word items:** one productive schedule per sense/construction; two or three short comprehensible contexts, with a sense cue for ambiguous gaps. Other sentence slips do not fail the target. For this learner, German uses short Russian-cued chunks and accepted variants, with article/plural gloss on tap. Other users follow their profiles rather than hardcoded language rules.
+- **Confusables:** cross-entry links, directed acyclic introduction prerequisites and later-day recall in the profile timezone. Release unavailable prerequisites; show why an active prerequisite still blocks introduction. No dedicated mixed-drill feature.
+- **Delete/restore/recreate:** named confirmation retires while retaining history/recordings; Removed-items Restore invalidates stale bindings. Recreate atomically suspends the defective revision and creates the bound inbox request even when the worker is offline. Compatible repair keeps identity/history; changed meaning creates a target. Changed assessment conditions need an independent check before old recall evidence applies.
+- **Help:** consume pinned per-language preferences, show configured translation with answer and after comparison, keep optional help concise and comprehensible, and omit missing placeholders. Required unset choices are resolved through the external agent/API, not unattended job questions.
+- **Dialogue rehearsal:** all full runs retain ratings/takes but never update FSRS, regardless of visible text. Track declared cross-target exposure and prevent immediate independent checks of rehearsed answers; an incidental-lookup timeout cannot erase explicit rehearsal support.
+- **Browser coverage:** deterministic tests for original-response grading, hint exclusions, study/Next, rotation, conditional say-along, no early answer text, preference switching, restore/recreation while worker offline, prompt changes and cross-target exposure. Use the real core and built client.
+
+## Progress and external material
+
+- Lesson progress counts active preferred targets recalled at their last independent check and overdue targets, with changed-task evidence kept distinct.
+- Real-call choices and used/no chance/forgot marks have no schedule effect. Weekly targets count distinct eligible reviewed targets in the learning week; repeated repair cannot inflate them. No streaks or points.
+- **Vault course phrases:** after the item API exists, a separately authorized external agent reads the 63 English phrases in the four lessons of `languages/english/фразы` read-only, extracts their audio/context and submits grouped items preserving speaker/lesson relationships. Verify resulting cards, provenance and playback. Source browsing and extraction are external workflow concerns.
+- **echo-words outbox:** separate project authorization is required to replace Anki export. Send word, language, audio, chosen sense and source sentence with stable identities; retry on new words and periodically. Delete only exactly acknowledged entries, leaving new/concurrent entries intact. A core outage retains the sender outbox; a laptop-worker outage leaves acknowledged work safely waiting in the core database.
 
 ## Device acceptance
 
-Complete the [device gaps](../open-problems.md) on actual iPhone Safari over trusted HTTPS, with speaker and headphones. Check longer/successive takes, saved replay, interruption/reopening, temporary server failure/retry and accessibility. Record only actionable gaps and current acceptance limits, without accumulating review logs in specs.
+Complete the [device gaps](../open-problems.md) on actual iPhone Safari over trusted HTTPS, with speaker and headphones. Check longer/successive takes, saved replay, interruption/reopening, temporary core failure/retry and accessibility. Record actionable gaps and current acceptance limits, not review logs.
 
 ## Private release and recovery
 
-- Measure the built app, speech work and agent runs on the laptop: idle/API/media peaks, agent run memory and disk growth.
-- Verify private access to the laptop from the iPhone and from the echo-words server, and the behavior while the laptop sleeps. Deployment changes require an explicit user request.
-- Demonstrate a consistent database/media backup and isolated restore, including every language, settings, schedules/history, every learner take, reference provenance, inbox drops and unfinished audio or agent work. Include the source-instructions folder in backups. Rehearse upgrade and rollback using matching snapshots where needed.
-- Prepare operational documentation covering configuration, start/stop/update, the agent CLI login, health checks, storage/logging and recovery. Keep secrets and personal media outside Git.
+- Measure the lightweight core's idle/API/media/recording load separately from laptop agent/speech load, queue latency and temporary/durable disk growth. Retain every take; measure actual device storage rather than assuming an encoding rate.
+- Verify private access to the core from intended learner devices, external API clients and the laptop worker with appropriately scoped credentials. Demonstrate published practice, inbox receipt and preference writes while the laptop is offline, plus later worker catch-up without duplicate publication. Choose/deploy a core host only on an explicit deployment request.
+- Demonstrate one consistent core database/media backup and isolated restore covering every language, profile revision, core setting, schedule/history, recording, reference provenance, inbox generation, staged package and unfinished job. Invalidate old leases and reconcile pending receipts/transfers. Rehearse upgrade/rollback with matching snapshots and record guide/app versions.
+- Document core/worker configuration, start/stop/update, agent login, inbox and preferences APIs for external agents, health/access checks, storage and recovery. Keep secrets and personal media outside Git. No inbox browser integration or source-instruction directory is required.
 
 ## Validation
 
-Use behavioral tests for remaining implementation changes, then run `uv run inv pre` followed by `uv run inv test`, including frontend and both browser engines. Speech/content, agent output, actual-device and host recovery acceptance stay separate from that software gate. No learning-effectiveness experiment, extra general review loop, push or deployment follows from this plan.
+Use behavioral tests for implementation changes, then run `uv run inv pre` followed by `uv run inv test`, including frontend and both browser engines. Speech/content, agent output, actual-device and host recovery acceptance stay separate from that software gate. No learning-effectiveness experiment, extra general review loop, push or deployment follows from this plan.

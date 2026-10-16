@@ -60,4 +60,4 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 ## Model-prepared prompts
 
 - **Attali et al. (2022)**, [The interactive reading task: transformer-based automatic item generation](https://doi.org/10.3389/frai.2022.903077). Checked: abstract. Language models generated hundreds of passages and thousands of questions for the Duolingo English Test practice test. Human review and test-taker statistics showed the approach was feasible.
-- No study measures model-written prompts or lead-in lines for phrase drills, or their error rate. **For us:** the learner deletes duplicates and recreates bad cards during practice. Reviewing prompts beside their answers before practice would itself be study, so there is no acceptance step.
+- No study measures model-written prompts or lead-in lines for phrase drills, or their error rate. **For us:** use bounded existing-target checks, retain useful alternatives for lookup, and suspend/recreate bad cards during practice. Representative semantic acceptance precedes unattended use, but there is no routine learner approval of every prompt beside its answer: that would itself be study.
