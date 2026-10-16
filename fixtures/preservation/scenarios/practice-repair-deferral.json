@@ -1,0 +1,324 @@
+{
+  "description": "A repair that has not yet waited five minutes is never awaited: once the other cards are done the session completes without it and keeps the original failed rating.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "stage-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "content_import": "/id"
+      }
+    },
+    {
+      "id": "publish-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{content_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "target_day": "/changes/0/target_id",
+        "target_catch_up": "/changes/1/target_id",
+        "target_rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "start",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e551011-0000-4000-8000-000000000102",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "active"
+          },
+          {
+            "at": "/queue",
+            "length": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "card-0",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000102/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000001020001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000001020002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "not_yet"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/session/queue",
+            "length": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "card-1",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000102/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000001020003",
+              "sequence": 3,
+              "step": 1,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000001020004",
+              "sequence": 4,
+              "step": 1,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "recalled"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/session/queue",
+            "length": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "last-card-completes-without-waiting",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000102/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000001020005",
+              "sequence": 5,
+              "step": 2,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000001020006",
+              "sequence": 6,
+              "step": 2,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "recalled"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/session/status",
+            "equals": "completed"
+          },
+          {
+            "at": "/session/queue",
+            "length": 3
+          },
+          {
+            "at": "/session/attempts/0/rating",
+            "equals": "not_yet"
+          }
+        ]
+      }
+    },
+    {
+      "id": "no-open-session",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/current"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "equals": null
+          }
+        ]
+      }
+    }
+  ]
+}

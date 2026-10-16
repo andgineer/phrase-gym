@@ -35,6 +35,7 @@ tracing = { version = "0.1.44", default-features = false, features = ["std"] }
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["std", "fmt", "ansi", "env-filter"] }
 utoipa = { version = "6.0.0", default-features = false, features = ["macros", "uuid"] }
 uuid = { version = "1.28.0", default-features = false, features = ["std", "serde"] }
+yaml-rust2 = { version = "0.13.0", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

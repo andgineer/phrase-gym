@@ -70,7 +70,7 @@ cd ..
 The Rust replacement lives in the Cargo workspace (`crates/`, `xtask/`) and runs alongside the Python application during the migration. With rustup and Node 22.12+ installed:
 
 ```bash
-cargo xtask pre        # rustfmt, Clippy, architecture checks, client formatting, generated-contract drift
+cargo xtask pre        # rustfmt, Clippy, architecture and hygiene checks, client formatting, generated-contract drift
 cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
 cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
 cargo xtask app-build  # build the client and release Rust binaries

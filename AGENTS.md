@@ -25,7 +25,7 @@ Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/
 | Build client and Python distributions | `uv run inv app-build` |
 | Refresh OpenAPI and generated client types | `uv run inv api-types` |
 | Available tasks | `uv run inv --list` |
-| Rust format, Clippy, architecture, client format and Rust contract drift | `cargo xtask pre` |
+| Rust format, Clippy, architecture, hygiene, client format and Rust contract drift | `cargo xtask pre` |
 | Rust tests, client typecheck/unit/build and both browser engines | `cargo xtask test` |
 | Refresh the Rust OpenAPI and its generated TypeScript fixture | `cargo xtask api-types` |
 | Build the client and release Rust binaries | `cargo xtask app-build` |

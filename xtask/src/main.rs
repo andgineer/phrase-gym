@@ -1,5 +1,6 @@
 mod architecture;
 mod contracts;
+mod hygiene;
 mod modules;
 mod tools;
 
@@ -46,6 +47,7 @@ fn pre(workspace: &Workspace) -> Result<(), Failure> {
         "warnings",
     ])?;
     architecture::check(workspace)?;
+    hygiene::check(workspace)?;
     workspace.npm(&["run", "format:check"])?;
     contracts::check_drift(workspace)
 }

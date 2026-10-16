@@ -3,7 +3,9 @@
 import base64
 import copy
 import json
+import os
 import sqlite3
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -131,28 +133,59 @@ def send(client: TestClient, request: dict):
     )
 
 
+def execute_sql(data_dir: Path, statements: list[str]) -> None:
+    connection = sqlite3.connect(data_dir / "phrase-gym.sqlite3")
+    try:
+        connection.executescript("\n".join(statements))
+    finally:
+        connection.close()
+
+
+def prepare(step: str, setup: dict, data_dir: Path) -> None:
+    assert set(setup) <= {"sql", "files"}, step
+    if setup.get("sql"):
+        execute_sql(data_dir, setup["sql"])
+    for spec in setup.get("files", []):
+        path = data_dir / spec["path"]
+        if spec.get("absent"):
+            path.unlink()
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(scenario_bytes(spec["bytes"]))
+        if "age_seconds" in spec:
+            modified = time.time() - spec["age_seconds"]
+            os.utime(path, (modified, modified))
+
+
+def check_files(step: str, specs: list[dict], data_dir: Path) -> None:
+    for spec in specs:
+        path = data_dir / spec["path"]
+        if spec.get("absent"):
+            assert not path.exists(), (step, spec["path"])
+        else:
+            assert path.read_bytes() == scenario_bytes(spec["bytes"]), (step, spec["path"])
+
+
 def run(name: str, data_dir: Path) -> None:
     scenario = load(name)
     assert "python" in scenario["implementations"], name
     clock = ScenarioClock(scenario["clock"])
     with TestClient(create_app(Config(data_dir), clock=clock)) as client:
         if scenario.get("seed_sql"):
-            connection = sqlite3.connect(data_dir / "phrase-gym.sqlite3")
-            try:
-                connection.executescript("\n".join(scenario["seed_sql"]))
-            finally:
-                connection.close()
+            execute_sql(data_dir, scenario["seed_sql"])
         captures: dict = {}
         responses: dict = {}
         for step in scenario["steps"]:
             if "clock" in step:
                 clock.now = datetime.fromisoformat(step["clock"])
+            prepare(step["id"], substitute(step.get("setup", {}), captures), data_dir)
             request = substitute(expand(step["request"]), captures)
             response = send(client, request)
             expect = substitute(expand(step["expect"]), captures)
             assert response.status_code == expect["status"], (step["id"], response.text)
             for header, value in expect.get("headers", {}).items():
                 assert response.headers.get(header) == value, (step["id"], header)
+            check_files(step["id"], expect.get("files", []), data_dir)
             if "bytes" in expect:
                 assert response.content == scenario_bytes(expect["bytes"]), step["id"]
                 continue

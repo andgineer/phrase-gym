@@ -11,4 +11,12 @@ def test_python_server_preserves_scenario(name, tmp_path):
 def test_scenarios_are_declared_for_python_and_cover_each_preserved_area():
     names = scenario_names()
     assert all("python" in load(name)["implementations"] for name in names)
-    assert {"publication", "session-events", "recordings", "reference-media"} <= set(names)
+    assert {
+        "publication",
+        "session-events",
+        "practice-repairs",
+        "historical-ratings",
+        "recordings",
+        "reference-media",
+        "media-reconciliation",
+    } <= set(names)

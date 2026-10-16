@@ -32,11 +32,13 @@ fn raw_number(text: &str, field: &str) -> Option<f64> {
 
 fn close(actual: Option<f64>, expected: Option<f64>, context: &str) {
     match (actual, expected) {
+        (Some(actual), Some(0.0)) => {
+            assert!(actual == 0.0, "{context}: {actual} differs from zero");
+        }
         (Some(actual), Some(expected)) => {
-            let bound = RELATIVE_TOLERANCE * expected.abs().max(1.0);
             assert!(
-                (actual - expected).abs() <= bound,
-                "{context}: {actual} differs from {expected}"
+                (actual - expected).abs() <= RELATIVE_TOLERANCE * expected.abs(),
+                "{context}: {actual} differs from {expected} beyond the relative tolerance"
             );
         }
         _ => assert_eq!(actual, expected, "{context}"),

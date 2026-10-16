@@ -47,6 +47,10 @@ impl Workspace {
         )
     }
 
+    pub fn git_output(&self, arguments: &[&str]) -> Result<String, Failure> {
+        output(Command::new("git").args(arguments).current_dir(&self.root))
+    }
+
     pub fn npm(&self, arguments: &[&str]) -> Result<(), Failure> {
         run(Command::new(npm())
             .args(arguments)

@@ -1,0 +1,288 @@
+{
+  "description": "Reference media reconciliation only reports: missing originals and orphan files are listed and never deleted, interrupted staging files older than an hour are removed while active ones stay, and an identical upload restores a missing original under its identity.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "upload-original",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      },
+      "capture": {
+        "media": "/id",
+        "sha256": "/sha256"
+      }
+    },
+    {
+      "id": "report-orphans-and-remove-only-old-staging",
+      "setup": {
+        "files": [
+          {
+            "path": "media/0000000000000000000000000000000000000000000000000000000000000000",
+            "bytes": {
+              "text": "orphan"
+            }
+          },
+          {
+            "path": "staging/interrupted.part",
+            "bytes": {
+              "text": "partial"
+            },
+            "age_seconds": 7200
+          },
+          {
+            "path": "staging/active.part",
+            "bytes": {
+              "text": "active upload"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media/reconcile"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/missing_ids",
+            "length": 0
+          },
+          {
+            "at": "/orphan_hashes",
+            "equals": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ]
+          },
+          {
+            "at": "/removed_staging_files",
+            "equals": 1
+          }
+        ],
+        "files": [
+          {
+            "path": "media/0000000000000000000000000000000000000000000000000000000000000000",
+            "bytes": {
+              "text": "orphan"
+            }
+          },
+          {
+            "path": "media/{{sha256}}",
+            "bytes": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          },
+          {
+            "path": "staging/active.part",
+            "bytes": {
+              "text": "active upload"
+            }
+          },
+          {
+            "path": "staging/interrupted.part",
+            "absent": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "original-still-served",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}"
+      },
+      "expect": {
+        "status": 200,
+        "bytes": {
+          "file": "fixtures/preservation/media/silence-100ms.wav"
+        }
+      }
+    },
+    {
+      "id": "repeat-reports-without-deleting",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media/reconcile"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/orphan_hashes",
+            "equals": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ]
+          },
+          {
+            "at": "/removed_staging_files",
+            "equals": 0
+          }
+        ],
+        "files": [
+          {
+            "path": "media/0000000000000000000000000000000000000000000000000000000000000000",
+            "bytes": {
+              "text": "orphan"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-original-is-unavailable",
+      "setup": {
+        "files": [
+          {
+            "path": "media/{{sha256}}",
+            "absent": true
+          }
+        ]
+      },
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}/metadata"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/available",
+            "equals": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-original-not-served",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}"
+      },
+      "expect": {
+        "status": 503
+      }
+    },
+    {
+      "id": "report-missing-original",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media/reconcile"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/missing_ids",
+            "equals": [
+              "{{media}}"
+            ]
+          },
+          {
+            "at": "/orphan_hashes",
+            "equals": [
+              "0000000000000000000000000000000000000000000000000000000000000000"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "identical-upload-restores-original",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{media}}"
+          },
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "restored-original-served",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}"
+      },
+      "expect": {
+        "status": 200,
+        "bytes": {
+          "file": "fixtures/preservation/media/silence-100ms.wav"
+        }
+      }
+    },
+    {
+      "id": "nothing-missing-after-restore",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media/reconcile"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/missing_ids",
+            "length": 0
+          }
+        ]
+      }
+    }
+  ]
+}

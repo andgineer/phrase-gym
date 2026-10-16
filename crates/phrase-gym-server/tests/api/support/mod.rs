@@ -1,5 +1,6 @@
 pub mod documents;
 pub mod scenario;
+pub mod setup;
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -18,8 +19,9 @@ pub fn repository_root() -> PathBuf {
 pub struct TestServer {
     pub router: Router,
     pub clock: Arc<ManualClock>,
+    pub data_dir: PathBuf,
     pub database_path: PathBuf,
-    _data_dir: TempDir,
+    _temporary: TempDir,
 }
 
 impl TestServer {
@@ -32,8 +34,9 @@ impl TestServer {
         Self {
             router: router(state),
             clock,
+            data_dir: data_dir.path().to_owned(),
             database_path,
-            _data_dir: data_dir,
+            _temporary: data_dir,
         }
     }
 }

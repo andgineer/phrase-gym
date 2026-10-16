@@ -44,18 +44,18 @@ repos:
           --select=UP,    # Upgrade syntax
           --select=W,     # Warnings
           '--ignore=B019,S101,G004,TRY003,TRY300,TRY301,TRY400'  # Ignore docstring and `assert` detection
-        ]
+          ]
       - id: ruff
         name: ruff-format-tests
         files: ^tests/
         args: [
           --fix-only,
           --line-length=100
-        ]
+          ]
       - id: ruff-format
         args: [
           --line-length=100
-        ]
+          ]
 
 
 
@@ -70,7 +70,7 @@ repos:
 #          "--ignore=missing-source-for-stubs",
           "--project-excludes=tests",
           "--python-interpreter-path=.venv/bin/python"
-        ]
+          ]
   - repo: local
     hooks:
       - id: architecture
@@ -86,7 +86,7 @@ repos:
         pass_filenames: false
         files: ^frontend/
       - id: rust-pre
-        name: rust format, clippy, architecture and generated contracts
+        name: rust format, clippy, architecture, hygiene and generated contracts
         entry: cargo xtask pre
         language: system
         pass_filenames: false

@@ -9,6 +9,7 @@ use serde_json::Value;
 use tower::ServiceExt;
 
 use super::documents::{expand, scenario_bytes, substitute};
+use super::setup::{DataFile, Setup, check_files, execute_sql, prepare};
 use super::{TestServer, repository_root};
 
 #[derive(Deserialize)]
@@ -27,6 +28,7 @@ pub struct Scenario {
 struct Step {
     id: String,
     clock: Option<String>,
+    setup: Option<Value>,
     request: Value,
     expect: Value,
     #[serde(default)]
@@ -53,6 +55,8 @@ struct Expectation {
     #[serde(default)]
     headers: BTreeMap<String, String>,
     bytes: Option<Value>,
+    #[serde(default)]
+    files: Vec<DataFile>,
 }
 
 #[derive(Deserialize)]
@@ -160,17 +164,16 @@ fn http_request(request: ScenarioRequest) -> Request<Body> {
 pub async fn run(name: &str) {
     let scenario = load(name);
     let server = TestServer::start(moment(&scenario.clock));
-    if !scenario.seed_sql.is_empty() {
-        let connection = rusqlite::Connection::open(&server.database_path).unwrap();
-        connection
-            .execute_batch(&scenario.seed_sql.join("\n"))
-            .unwrap();
-    }
+    execute_sql(&server.database_path, &scenario.seed_sql);
     let mut captures = BTreeMap::new();
     let mut responses = BTreeMap::new();
     for step in &scenario.steps {
         if let Some(now) = &step.clock {
             server.clock.set(moment(now));
+        }
+        if let Some(setup) = &step.setup {
+            let setup: Setup = serde_json::from_value(substitute(setup, &captures)).unwrap();
+            prepare(&setup, &server.data_dir, &server.database_path);
         }
         let request: ScenarioRequest =
             serde_json::from_value(substitute(&expand(&step.request), &captures)).unwrap();
@@ -200,6 +203,7 @@ pub async fn run(name: &str) {
                 step.id
             );
         }
+        check_files(&step.id, &expect.files, &server.data_dir);
         if let Some(bytes) = &expect.bytes {
             assert_eq!(
                 content.as_ref(),

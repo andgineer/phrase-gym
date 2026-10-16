@@ -2,7 +2,9 @@
 #
 # A legacy harness may be deleted only when each module it runs is "covered" by a Rust or client
 # successor, or "superseded" by a tested replacement of intentionally changed behavior.
-#   covered:    successors already run against the Rust implementation or language-neutral fixtures.
+#   covered:    every successor already runs without Python: Rust tests, client tests and scenarios
+#               declared for Rust. Citing the Rust scenario runner without naming scenarios relies on
+#               every scenario.
 #   pending:    successors are ported in the named migration stage; listed scenarios already pin the
 #               behavior against Python and must pass against Rust before the module is deleted.
 #   superseded: the cited decision replaces the behavior; the replacement is tested in the named stage.
@@ -18,30 +20,41 @@ successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
 path = "tests/integration/test_exposures.py"
 responsibility = "Lookup exposure receipts are idempotent, keep their first receipt time and conflict on changed payloads."
 status = "covered"
-successors = ["scenario:lookup-exposures", "rust:crates/phrase-gym-server/tests/api/preservation.rs"]
+successors = [
+    "scenario:lookup-exposures",
+    "rust:crates/phrase-gym-server/tests/api/preservation.rs",
+    "rust:crates/phrase-gym-server/tests/api/exposures.rs",
+]
 
 [[module]]
 path = "tests/test_architecture.py"
-responsibility = "Dependency direction and the module-size boundary for handwritten server and client code."
+responsibility = "Dependency direction and the module-size boundary for handwritten server and client code; its Python-only import-placement rules end with the Python code."
 status = "covered"
 successors = ["rust:xtask/src/architecture.rs", "rust:xtask/src/modules.rs"]
 
 [[module]]
 path = "tests/preservation/test_fsrs_fixtures.py"
-responsibility = "Committed scheduler fixtures still match the locked Python scheduler."
-status = "covered"
+responsibility = "Committed scheduler fixtures still match the locked Python scheduler and cover the required situations."
+status = "superseded"
+decision = "specs/plan/implementation-plan.md"
+replacement = "The Python exporter and drift check are removed at cutover; the recorded sequences stay frozen inputs to the Rust scheduler test."
+stage = 7
 successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
 
 [[module]]
 path = "tests/preservation/test_schema_fixtures.py"
 responsibility = "Committed SQL schemas reproduce every legacy Alembic revision."
-status = "covered"
+status = "superseded"
+decision = "specs/plan/implementation-plan.md"
+replacement = "The Python exporter and drift check are removed at cutover; the recorded schemas stay frozen inputs to the Rust migration tests."
+stage = 7
 successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
 
 [[module]]
 path = "tests/preservation/test_scenarios.py"
 responsibility = "Language-neutral HTTP preservation scenarios pass against the Python server."
-status = "covered"
+status = "pending"
+stage = 2
 successors = ["rust:crates/phrase-gym-server/tests/api/preservation.rs"]
 
 [[module]]
@@ -120,7 +133,7 @@ path = "tests/integration/test_media.py"
 responsibility = "Original reference bytes, ranges, retry recovery, audio binding checks, invalid audio and orphan reconciliation."
 status = "pending"
 stage = 2
-successors = ["scenario:reference-media"]
+successors = ["scenario:reference-media", "scenario:media-reconciliation"]
 
 [[module]]
 path = "tests/integration/test_media_containers.py"
@@ -176,14 +189,14 @@ path = "tests/integration/test_legacy_event_retry.py"
 responsibility = "Historical queued ratings keep their payload and receipt; retired options are rejected for new sessions."
 status = "pending"
 stage = 2
-successors = []
+successors = ["scenario:historical-ratings"]
 
 [[module]]
 path = "tests/integration/test_practice_repairs.py"
 responsibility = "Repairs wait for spacing without a timer and update the schedule once per review group."
 status = "pending"
 stage = 2
-successors = []
+successors = ["scenario:practice-repairs", "scenario:practice-repair-deferral"]
 
 [[module]]
 path = "tests/integration/test_practice_recordings.py"
