@@ -1,6 +1,6 @@
 # Phrase Gym — agent instructions
 
-Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Production work extends the user's Python scaffold and the Vue client in `frontend/`.
+Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Server and Coach are migrating to Rust under that plan; retain the Vue client in `frontend/`. The existing Python scaffold and its commands remain in use until the tested Rust replacement permits their removal.
 
 `CLAUDE.md` links to this file; keep one instruction source.
 
@@ -8,7 +8,7 @@ Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/
 
 - Keep architecture under active review in every batch. Each module and service has one coherent responsibility. Split unrelated workflows before adding more methods; do not grow a catch-all service or application component.
 - Aim for no more than 250 lines of handwritten production code per file; review and split before 300. Generated contracts and migrations may be longer. A shorter file does not justify circular dependencies, meaningless wrappers or fragmented invariants.
-- Dependencies point inward: transport and UI adapters use contracts/domain services; domain services never import HTTP routers, application startup or UI modules. Shared contracts live in `src/phrase_gym/contracts/`. Construct services at the application boundary.
+- Dependencies point inward: transport and UI adapters use contracts/domain services; domain services never import HTTP routers, application startup or UI modules. Current Python contracts live in `src/phrase_gym/contracts/`; the Rust workspace must provide shared contracts at the same architectural boundary. Construct services at the application boundary.
 - Keep validation, publication transactions and library reads separate. One workflow owns each transaction; helpers receive that transaction instead of opening hidden writes. Keep all package publication atomic.
 - Vue views render state. Route orchestration, preferences and audio effects belong in focused composables/adapters; the practice reducer stays pure. Generated API types are the client contract.
 - When moving a symbol, update all importers and tests. No re-export compatibility shims. Shared helpers are preferable to duplicated logic.
@@ -52,7 +52,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 ## Code conventions
 
-- Python 3.12+, `src` layout and hatchling packaging. Preserve uv, Click, pytest, Invoke and CI conventions.
+- While Python remains, use Python 3.12+, `src` layout, hatchling packaging and the existing uv, Click, pytest, Invoke and CI conventions. Add Rust tooling during migration and replace Python tooling at the tested cutover described in the plan.
 - English only in comments, docstrings, plans and repository documentation. Follow the project's English communication rule. Learning data, language names and voice IDs retain their original language/script as quoted, searchable literals.
 - All imports at module top level. No in-function lazy imports and none to break cycles; fix the dependency structure. An optional heavy provider dependency needs an explicit documented exception when actually integrated.
 - No `from __future__ import annotations`.
