@@ -1,12 +1,16 @@
 # Architecture and durability
 
-## Learning core and laptop preparation
+## Product names and responsibilities
 
-The lightweight core serves the existing Vue/TypeScript frontend and Python API from the same origin. It owns learning sessions, scheduling, library reads, recordings, validation/publication and the inbox API. The core can run on an independently available private host; laptop preparation availability never gates published practice. The laptop runs the preparation and reference-speech workers, not the learning server's request path. No agent CLI or model/speech provider runs inside the core.
+Phrase Gym is the product and learning frontend. Phrase Gym Server is the lightweight core and database host. Phrase Gym Coach is the laptop application that prepares learning material and reference speech. Use Coach as its short name within the product. Inbox names the durable submission queue and API domain, not a separate application.
 
-One core-owned SQLite database stores all durable state: content, schedules/history, learner recording BLOBs, core settings, personal preferences and revisions, inbox entries/generations, preparation/speech jobs, staged-package metadata and receipts. Reference media and verified inbox attachments use core-owned hash-addressed files with database references. Keep SQLite on the core host's local disk; no shared network SQLite file, second inbox database or replicated preference store. The laptop worker and external agents read and persist through authenticated core APIs, including the inbox domain's material and preferences endpoints. Temporary laptop files are staging/cache only, never the sole acknowledged copy of input or recovery state.
+## Phrase Gym Server and Phrase Gym Coach
 
-The core stores submissions even while the laptop sleeps. The worker claims jobs when connected, prepares outside transactions and submits staged outputs for validation/publication. Loss of the core blocks new claims and acknowledgements; temporary results may be retained for retry, but an expired or superseded claim cannot publish. Provider connectivity is required only for work that uses that provider. [Online-only practice](decision-online-only.md) refers to the live core, not an always-connected laptop.
+Phrase Gym Server serves the existing Vue/TypeScript frontend and Python API from the same origin. It owns learning sessions, scheduling, library reads, recordings, validation/publication and the inbox API. The core can run on an independently available private host; laptop preparation availability never gates published practice. Phrase Gym Coach runs the preparation and reference-speech workers on the laptop, outside the server's learning request path. No agent CLI or model/speech provider runs inside the core.
+
+One core-owned SQLite database stores all durable state: content, schedules/history, learner recording BLOBs, core settings, personal preferences and revisions, inbox entries/generations, preparation/speech jobs, staged-package metadata and receipts. Reference media and verified inbox attachments use core-owned hash-addressed files with database references. Keep SQLite on the core host's local disk; no shared network SQLite file, second inbox database or replicated preference store. Coach and external agents read and persist through authenticated core APIs, including the inbox domain's material and preferences endpoints. Temporary laptop files are staging/cache only, never the sole acknowledged copy of input or recovery state.
+
+The core stores submissions even while the laptop sleeps. Coach claims jobs when connected, prepares outside transactions and submits staged outputs for validation/publication. Loss of the core blocks new claims and acknowledgements; temporary results may be retained for retry, but an expired or superseded claim cannot publish. Provider connectivity is required only for work that uses that provider. [Online-only practice](decision-online-only.md) refers to the live core, not an always-connected laptop.
 
 Transport/UI adapters depend inward on contracts and focused domain services. Inbox storage, preferences, job leasing, validation, publication, library reads, planning, evidence processing, scheduling and media transfer have separate responsibilities. Each write workflow owns one transaction; helpers receive it. Construct services at the relevant application/process boundary. Sharing a database does not justify a catch-all service or direct worker access to learner data. Code and generated contracts own module layout, signatures and endpoints.
 
@@ -26,7 +30,7 @@ Browser actions stay bound to their initiating card through asynchronous work. T
 
 Stage, validate and hash uploaded reference bytes at the core, then atomically move them before committing a ready reference. Include provenance/preparation settings in identity; do not infer origin from sample rate. Reconcile missing/orphaned files without discarding originals. Publication checks exact text, language and role; prompt audio must not reveal the answer. Keep active-session, pending-inbox and backup assets out of cleanup.
 
-Speech workers claim durable tasks through the core API and synthesize on the laptop outside database locks. Bounded leases/retries and canonical input identity allow crash recovery without duplicate publication or stale-voice cache reuse. Reference playback always uses core-owned published bytes and needs no laptop connection. Learner recordings never enter preparation APIs or provider inputs.
+Coach speech workers claim durable tasks through the core API and synthesize on the laptop outside database locks. Bounded leases/retries and canonical input identity allow crash recovery without duplicate publication or stale-voice cache reuse. Reference playback always uses core-owned published bytes and needs no laptop connection. Learner recordings never enter preparation APIs or provider inputs.
 
 ## Private release and recovery
 

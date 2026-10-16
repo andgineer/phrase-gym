@@ -1,6 +1,6 @@
 # Personal preferences
 
-Personal preferences belong to the inbox domain and are stored in the core's single database, alongside inbox work and learning data. The learner describes preferences to an external agent, which reads and updates them through the inbox preferences API hosted by the core. No language-specific choice is hardcoded as a universal product rule, and ordinary material preparation never edits preferences.
+Personal preferences used by Phrase Gym Coach belong to the inbox domain and are stored in Phrase Gym Server's single database, alongside inbox work and learning data. The learner describes preferences to an external agent, which reads and updates them through the inbox preferences API hosted by the core. No language-specific choice is hardcoded as a universal product rule, and ordinary material preparation never edits preferences.
 
 The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language, translation-with-answer choice and durable preparation guidance. Card and help languages are independent. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent resolves them with the learner and writes the answer through the API.
 
@@ -24,4 +24,4 @@ Each preparation generation pins one profile revision. An accepted update affect
 
 The core reads the same database records used by the inbox API; there is no preference replica or synchronization service. Prepared content and running jobs retain their pinned preference revision. New sessions use the current learning timezone and UI-relevant profile values while historical attempts retain their original context.
 
-When the laptop worker is offline, the core continues serving practice, accepting material and updating preferences. These operations require the live core, not the worker. The learning frontend does not offer a competing personal-preference editor: the external agent uses the inbox API. Device/UI controls that do not change the personal preparation profile remain core concerns. Selecting a learning language or navigating never writes the profile.
+When Coach is offline, the core continues serving practice, accepting material and updating preferences. These operations require the live core, not the worker. The learning frontend does not offer a competing personal-preference editor: the external agent uses the inbox API. Device/UI controls that do not change the personal preparation profile remain core concerns. Selecting a learning language or navigating never writes the profile.

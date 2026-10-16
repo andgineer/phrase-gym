@@ -74,7 +74,7 @@ Evidence:
 Every practice card has Delete and Recreate card:
 
 - **Delete** confirms the named item and retires it from practice and ordinary lookup, preserving history and recordings. A Removed-items view can Restore it; this is not a transient Undo button. Retirement and restoration invalidate stale session bindings and resolve dependent introduction rules. Selecting a preferred alternative is separate from deletion.
-- **Recreate card** immediately suspends the defective revision and records an inbox request with an optional comment and the expected target/revision. It remains suspended while preparation waits or fails, including when the laptop worker is offline. Compatible repair retains identity/history; a changed meaning creates a new target. Changed assessment conditions require an independent check. Show the preparation outcome without requiring the learner to classify the problem.
+- **Recreate card** immediately suspends the defective revision and records an inbox request with an optional comment and the expected target/revision. It remains suspended while preparation waits or fails, including when Phrase Gym Coach is offline. Compatible repair retains identity/history; a changed meaning creates a new target. Changed assessment conditions require an independent check. Show the preparation outcome without requiring the learner to classify the problem.
 
 An attempt on a card deleted or recreated before it is rated is not graded. To learn words seen on a card, the learner copies them and pastes them into the [drop space](decision-external-preparation-agent.md#inbox), the same way as text from any other app; cards get no selection button of their own.
 

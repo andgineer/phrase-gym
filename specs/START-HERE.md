@@ -6,7 +6,7 @@ Code, tests and generated OpenAPI describe the implementation. These documents r
 - [Learning policy and evidence](decision-core-trainer.md)
 - [Recording and comparison](decision-recording-and-comparison.md)
 - [Online-only behavior](decision-online-only.md)
-- [Material preparation inbox and reference speech](decision-external-preparation-agent.md)
+- [Phrase Gym Coach, inbox and reference speech](decision-external-preparation-agent.md)
 - [Personal preferences and inbox API](decision-personal-preferences.md)
 - [Architecture and durability](architecture.md)
 - [Acceptance gaps](open-problems.md)
