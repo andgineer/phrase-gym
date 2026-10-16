@@ -1,5 +1,5 @@
 {
-  "description": "Reference media reconciliation only reports: missing originals and orphan files are listed and never deleted, interrupted staging files older than an hour are removed while active ones stay, and an identical upload restores a missing original under its identity.",
+  "description": "Reference media reconciliation only reports: missing originals and orphan files are listed and never deleted, interrupted staging files older than an hour are removed while active ones stay, and an identical upload restores a missing original under its identity. Staging age is the file modification time measured against the wall clock, never the fixed scenario clock: setup backdates files from the wall clock, so an implementation measuring age with its injected clock keeps the interrupted file.",
   "implementations": [
     "python"
   ],

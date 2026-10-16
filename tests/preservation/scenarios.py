@@ -153,6 +153,7 @@ def prepare(step: str, setup: dict, data_dir: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(scenario_bytes(spec["bytes"]))
         if "age_seconds" in spec:
+            # Backdated from the wall clock, not the scenario clock: staging age is real file time.
             modified = time.time() - spec["age_seconds"]
             os.utime(path, (modified, modified))
 

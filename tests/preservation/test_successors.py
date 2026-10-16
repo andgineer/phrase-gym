@@ -1,3 +1,4 @@
+import re
 import tomllib
 
 from tests.integration.helpers import ROOT
@@ -8,6 +9,7 @@ STATUSES = {"covered", "pending", "superseded"}
 SCENARIO_RUNNER = "rust:crates/phrase-gym-server/tests/api/preservation.rs"
 RUST_TEST_MARKERS = ("#[test]", "#[tokio::test")
 EXPORTER = "tests.preservation.export"
+SCRIPT_IMPORT = re.compile(r"^(?:from|import) scripts\b", re.MULTILINE)
 
 
 def modules() -> list[dict]:
@@ -81,6 +83,13 @@ def test_python_fixture_drift_checks_end_at_cutover():
     for entry in modules():
         if EXPORTER in (ROOT / entry["path"]).read_text(encoding="utf-8"):
             assert (entry["status"], entry["stage"]) == ("superseded", 7), entry
+
+
+def test_python_script_checks_end_at_cutover():
+    # Project scripts guard or run live Python code until the cutover; nothing covers them earlier.
+    for entry in modules():
+        if SCRIPT_IMPORT.search((ROOT / entry["path"]).read_text(encoding="utf-8")):
+            assert entry["status"] != "covered" and entry["stage"] == 7, entry
 
 
 def test_coverage_requires_rust_execution_of_every_relied_on_scenario():

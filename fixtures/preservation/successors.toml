@@ -28,8 +28,11 @@ successors = [
 
 [[module]]
 path = "tests/test_architecture.py"
-responsibility = "Dependency direction and the module-size boundary for handwritten server and client code; its Python-only import-placement rules end with the Python code."
-status = "covered"
+responsibility = "The Python architecture guard keeps live Python domain code off HTTP, imports at module top level and handwritten Python and client modules within the size boundary."
+status = "superseded"
+decision = "specs/plan/implementation-plan.md"
+replacement = "The Python guard is removed with the Python code; the xtask dependency-direction and module-size checks replace it for Rust and client code."
+stage = 7
 successors = ["rust:xtask/src/architecture.rs", "rust:xtask/src/modules.rs"]
 
 [[module]]

@@ -61,6 +61,9 @@ test('Resume session keeps the existing session and cue instead of starting agai
   await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()
   const original = await (await request.get('/api/v1/sessions/current')).json()
   await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Resume session', exact: true })).toBeVisible()
+  // The banner moves up when the library's loading notice above it clears.
+  await expect(page.getByText('Loading…')).toHaveCount(0)
   await page.getByRole('button', { name: 'Resume session', exact: true }).click()
   await expect(page).toHaveURL(`/learn/en/practice/${original.id}`)
   await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()

@@ -20,6 +20,7 @@ pub struct Setup {
 pub struct DataFile {
     path: String,
     bytes: Option<Value>,
+    // Backdated from the wall clock, not the scenario clock: staging age is real file time.
     age_seconds: Option<u64>,
     #[serde(default)]
     absent: bool,
