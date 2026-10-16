@@ -29,7 +29,7 @@ def speech_boundary(media, monkeypatch):
         async def save(self, path):
             if outage["partner"] and self.text == "How are you?":
                 raise OSError("Synthetic partner outage")
-            Path(path).write_bytes(Path("tests/fixtures/media/tone.mp3").read_bytes())
+            Path(path).write_bytes(Path("fixtures/preservation/media/tone.mp3").read_bytes())
 
     monkeypatch.setattr("phrase_gym.preparation.speech.edge_tts.Communicate", Edge)
     settings = SpeechSettings.model_validate(

@@ -13,7 +13,7 @@ def test_whole_phrase_cache_identity_voice_text_and_serbian_input(prepared_runti
             calls.append((text, voice))
 
         async def save(self, path):
-            Path(path).write_bytes(Path("tests/fixtures/media/tone.mp3").read_bytes())
+            Path(path).write_bytes(Path("fixtures/preservation/media/tone.mp3").read_bytes())
 
     monkeypatch.setattr("phrase_gym.preparation.speech.edge_tts.Communicate", FakeEdge)
     configured = SpeechSettings.model_validate(

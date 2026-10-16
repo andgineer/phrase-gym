@@ -132,6 +132,39 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
 
+  # Rust replacement checks run alongside the Python gate until the cutover.
+  rust-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install the pinned Rust toolchain
+      run: rustup toolchain install
+    - uses: Swatinem/rust-cache@v2
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+    - run: npm ci
+      working-directory: frontend
+    - name: Format, Clippy, architecture, client formatting and generated contracts
+      run: cargo xtask pre
+    - name: Independent release server build
+      run: cargo build --release --locked --package phrase-gym-server
+
+  rust-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install the pinned Rust toolchain
+      run: rustup toolchain install
+    - uses: Swatinem/rust-cache@v2
+    - run: cargo test --workspace --all-features --locked
+
   client-build:
     # Native WebKit MediaRecorder is unavailable in the Linux Playwright build.
     runs-on: macos-latest

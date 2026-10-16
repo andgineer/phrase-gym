@@ -25,8 +25,16 @@ Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/
 | Build client and Python distributions | `uv run inv app-build` |
 | Refresh OpenAPI and generated client types | `uv run inv api-types` |
 | Available tasks | `uv run inv --list` |
+| Rust format, Clippy, architecture, client format and Rust contract drift | `cargo xtask pre` |
+| Rust tests, client typecheck/unit/build and both browser engines | `cargo xtask test` |
+| Refresh the Rust OpenAPI and its generated TypeScript fixture | `cargo xtask api-types` |
+| Build the client and release Rust binaries | `cargo xtask app-build` |
+| Run the Rust server on loopback with a synthetic data directory | `cargo xtask run` |
+| Re-record scheduler and legacy-schema fixtures from the Python implementation | `uv run python -m tests.preservation.export` |
 
-Use `uv sync --frozen`, `npm --prefix frontend ci`, and install the browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python is 3.12+; use Node 22.12+ on an LTS release. The pyrefly hook uses `.venv/bin/python`. Adding/changing Python dependencies means updating `uv.lock`; client dependencies update the npm lockfile. Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
+Use `uv sync --frozen`, `npm --prefix frontend ci`, and install the browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python is 3.12+; use Node 22.12+ on an LTS release (`.nvmrc`). Rust uses the exact toolchain pinned in `rust-toolchain.toml` through rustup. The pyrefly hook uses `.venv/bin/python`; the Rust hook runs `cargo xtask pre` and needs that toolchain plus Node. Adding/changing Python dependencies means updating `uv.lock`; client dependencies update the npm lockfile; Rust dependencies update the committed `Cargo.lock`, disable default features and list the features they need. Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
+
+During the transition `uv run inv pre` and `uv run inv test` remain the authoritative gate: the first runs `cargo xtask pre` as a hook and the second runs the Rust tests. `cargo xtask` replaces them only at the cutover described in the plan.
 
 **Never call Ruff directly.** `inv pre` runs the project's configured Ruff, formatter, pyrefly and hygiene hooks and matches CI. An editor lint panel does not replace it.
 
@@ -38,8 +46,8 @@ Choose the gate from the complete change, including staged and unstaged files.
 
 **Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
 
-1. `uv run inv pre`: every hook passes and pyrefly reports zero errors.
-2. `uv run inv test`: the full Python, client and browser suites pass; frontend checks must run rather than skip.
+1. `uv run inv pre`: every hook passes, including the Rust hook, and pyrefly reports zero errors.
+2. `uv run inv test`: the full Python, Rust, client and browser suites pass; frontend checks must run rather than skip.
 
 Run `inv pre` after each discrete implementation batch; use the documentation-only gate for prose-only batches. If a hook rewrites files, rerun until it converges. A previous run or a narrow test subset does not satisfy the implementation gate. Never bypass commit hooks with `--no-verify`.
 
@@ -53,10 +61,12 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.
 - Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone and content gaps explicit.
+- `fixtures/preservation/` records legacy behavior for the Rust replacement: synthetic HTTP scenarios, scheduler sequences and legacy schemas. Re-record them only for an intended legacy change. Every legacy test module keeps an entry in `fixtures/preservation/successors.toml`; add, move or delete entries with the module, and delete a legacy harness only when its entries are covered or superseded.
 
 ## Code conventions
 
 - While Python remains, use Python 3.12+, `src` layout, hatchling packaging and the existing uv, Click, pytest, Invoke and CI conventions. Add Rust tooling during migration and replace Python tooling at the tested cutover described in the plan.
+- Rust code passes rustfmt and Clippy pedantic with warnings denied; documentation lints are relaxed because comments default to none. The `xtask` architecture check enforces crate dependency direction, explicit dependency features, a Server dependency graph free of GUI, provider and model crates, and the module-size boundary.
 - English only in comments, docstrings, plans and repository documentation. Follow the project's English communication rule. Learning data, language names and voice IDs retain their original language/script as quoted, searchable literals.
 - All imports at module top level. No in-function lazy imports and none to break cycles; fix the dependency structure. An optional heavy provider dependency needs an explicit documented exception when actually integrated.
 - No `from __future__ import annotations`.

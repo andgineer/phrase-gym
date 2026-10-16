@@ -1,0 +1,211 @@
+{
+  "description": "Lookup exposure receipts: identical retries keep the original receipt, a changed payload under the same ID conflicts, and rejected requests persist nothing.",
+  "implementations": ["python", "rust"],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "seed_sql": [
+    "INSERT INTO target (id, language, kind, meaning_key, recall_expression, current_revision) VALUES ('2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10', 'en', 'fixed_phrase', 'ask-day', 'How has your day been so far?', 1);",
+    "INSERT INTO target_revision (target_id, revision, payload, fingerprint, created_at) VALUES ('2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10', 1, '{\"synthetic\": \"lookup target\"}', 'synthetic', '2026-10-01T09:00:00+00:00');"
+  ],
+  "steps": [
+    {
+      "id": "record",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "explanation"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {"at": "/id", "equals": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01"},
+          {"at": "/received_at", "instant": "2026-10-12T12:00:00+00:00"}
+        ]
+      }
+    },
+    {
+      "id": "identical-retry-later",
+      "clock": "2026-10-12T13:00:00+00:00",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "explanation"
+        }
+      },
+      "expect": {"status": 200, "json": [{"at": "", "same_as": "record:"}]}
+    },
+    {
+      "id": "changed-payload",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "answer"
+        }
+      },
+      "expect": {"status": 409}
+    },
+    {
+      "id": "changed-payload-unknown-target",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "9d1e4b7a-8c2f-4e5d-b6a3-0f1e2d3c4b5a",
+          "revision": 1,
+          "language": "en",
+          "kind": "explanation"
+        }
+      },
+      "expect": {"status": 409}
+    },
+    {
+      "id": "retry-after-conflicts",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "explanation"
+        }
+      },
+      "expect": {"status": 200, "json": [{"at": "", "same_as": "record:"}]}
+    },
+    {
+      "id": "unknown-target",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "9d1e4b7a-8c2f-4e5d-b6a3-0f1e2d3c4b5a",
+          "revision": 1,
+          "language": "en",
+          "kind": "reference"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "wrong-language",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "sr",
+          "kind": "reference"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "unknown-revision",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 2,
+          "language": "en",
+          "kind": "reference"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "revision-below-one",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "6a1f3c1e-0d7b-4e43-9a51-3f3e2f6b8a01",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 0,
+          "language": "en",
+          "kind": "explanation"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "unknown-field",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "reference",
+          "source": "lookup"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "unlisted-kind",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "hint"
+        }
+      },
+      "expect": {"status": 422}
+    },
+    {
+      "id": "malformed-body",
+      "request": {"method": "POST", "path": "/api/v1/exposures", "raw": "{\"id\": "},
+      "expect": {"status": 422}
+    },
+    {
+      "id": "rejected-id-remains-free",
+      "clock": "2026-10-12T14:30:00.250000+00:00",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a",
+          "target_id": "2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10",
+          "revision": 1,
+          "language": "en",
+          "kind": "reference"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {"at": "/id", "equals": "c3b2a1f0-1e2d-4c3b-8a49-5f6e7d8c9b0a"},
+          {"at": "/received_at", "instant": "2026-10-12T14:30:00.250000+00:00"}
+        ]
+      }
+    }
+  ]
+}

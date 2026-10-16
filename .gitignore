@@ -27,3 +27,6 @@ frontend/playwright-report/
 *.sqlite3-wal
 *.sqlite3-shm
 src/phrase_gym/static/
+
+# Rust build output
+/target/

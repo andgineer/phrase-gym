@@ -67,6 +67,18 @@ cd ..
 
 `build.sh` bundles the client in the Python wheel/source distribution. A backend-only `uv build` before preparing the client requires `--client-dir` at runtime. Invoke tasks include `app-check`, `app-build`, `api-types`, and the scaffold's existing documentation/version tasks. Run `uv run invoke --list` or `uv run phrase-gym --help`.
 
+The Rust replacement lives in the Cargo workspace (`crates/`, `xtask/`) and runs alongside the Python application during the migration. With rustup and Node 22.12+ installed:
+
+```bash
+cargo xtask pre        # rustfmt, Clippy, architecture checks, client formatting, generated-contract drift
+cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
+cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
+cargo xtask app-build  # build the client and release Rust binaries
+cargo xtask run        # Rust server on 127.0.0.1:8010 with the synthetic .data/rust-server directory
+```
+
+The Rust server currently implements only a subset of the API and must not be pointed at a real learner database. Preservation fixtures under `fixtures/preservation/` record the Python behavior that the Rust server must keep.
+
 The local server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and verified backups remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
 
 ## Project context

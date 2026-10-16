@@ -85,3 +85,9 @@ repos:
         language: system
         pass_filenames: false
         files: ^frontend/
+      - id: rust-pre
+        name: rust format, clippy, architecture and generated contracts
+        entry: cargo xtask pre
+        language: system
+        pass_filenames: false
+        files: ^(Cargo\.(toml|lock)|rust-toolchain\.toml|\.cargo/|crates/|xtask/|fixtures/preservation/|frontend/)

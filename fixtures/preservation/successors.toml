@@ -1,0 +1,455 @@
+# Successors for every legacy test responsibility.
+#
+# A legacy harness may be deleted only when each module it runs is "covered" by a Rust or client
+# successor, or "superseded" by a tested replacement of intentionally changed behavior.
+#   covered:    successors already run against the Rust implementation or language-neutral fixtures.
+#   pending:    successors are ported in the named migration stage; listed scenarios already pin the
+#               behavior against Python and must pass against Rust before the module is deleted.
+#   superseded: the cited decision replaces the behavior; the replacement is tested in the named stage.
+# Successor references: "scenario:<name>" (fixtures/preservation/scenarios), "rust:<path>", "client:<path>".
+
+[[module]]
+path = "tests/unit/test_review_policy.py"
+responsibility = "Ratings map to Again/Hard/Good with short steps disabled; elapsed time and lapses drive intervals."
+status = "covered"
+successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
+
+[[module]]
+path = "tests/integration/test_exposures.py"
+responsibility = "Lookup exposure receipts are idempotent, keep their first receipt time and conflict on changed payloads."
+status = "covered"
+successors = ["scenario:lookup-exposures", "rust:crates/phrase-gym-server/tests/api/preservation.rs"]
+
+[[module]]
+path = "tests/test_architecture.py"
+responsibility = "Dependency direction and the module-size boundary for handwritten server and client code."
+status = "covered"
+successors = ["rust:xtask/src/architecture.rs", "rust:xtask/src/modules.rs"]
+
+[[module]]
+path = "tests/preservation/test_fsrs_fixtures.py"
+responsibility = "Committed scheduler fixtures still match the locked Python scheduler."
+status = "covered"
+successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
+
+[[module]]
+path = "tests/preservation/test_schema_fixtures.py"
+responsibility = "Committed SQL schemas reproduce every legacy Alembic revision."
+status = "covered"
+successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
+
+[[module]]
+path = "tests/preservation/test_scenarios.py"
+responsibility = "Language-neutral HTTP preservation scenarios pass against the Python server."
+status = "covered"
+successors = ["rust:crates/phrase-gym-server/tests/api/preservation.rs"]
+
+[[module]]
+path = "tests/preservation/test_successors.py"
+responsibility = "This record names a successor for every legacy test module."
+status = "superseded"
+decision = "specs/plan/implementation-plan.md"
+replacement = "Deleted with this record once the last legacy harness is removed."
+stage = 7
+
+[[module]]
+path = "tests/integration/test_storage.py"
+responsibility = "Migrations match the models, SQLite runs with foreign keys/WAL/busy timeout, legacy settings migrate."
+status = "pending"
+stage = 2
+successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
+
+[[module]]
+path = "tests/integration/test_boundary.py"
+responsibility = "Cross-site mutations, unknown hosts and oversized bodies are rejected; the schema snapshot matches the API."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_boundary_streaming.py"
+responsibility = "Streamed bodies are bounded without trusting Content-Length; disconnects never reach handlers."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_client_delivery.py"
+responsibility = "The built client is served same-origin with no-store caching, the worker retirement script and no offline assets."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_cli.py"
+responsibility = "Local CLI dry-run, staging, publication and export share the publication boundary."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_imports.py"
+responsibility = "Dry run, staging and explicit publication with stable identities, editorial revisions, rollback and single source consumption."
+status = "pending"
+stage = 2
+successors = ["scenario:publication"]
+
+[[module]]
+path = "tests/integration/test_content_identity.py"
+responsibility = "Object key order never creates revisions; array order does."
+status = "pending"
+stage = 2
+successors = ["scenario:publication"]
+
+[[module]]
+path = "tests/integration/test_content_rejections.py"
+responsibility = "Broken references, language changes and missing media cannot publish or disturb published content."
+status = "pending"
+stage = 2
+successors = ["scenario:publication"]
+
+[[module]]
+path = "tests/integration/test_library.py"
+responsibility = "Lookup, lesson membership, language scoping and dialogue revisions pinned to target content."
+status = "pending"
+stage = 2
+successors = ["scenario:publication"]
+
+[[module]]
+path = "tests/integration/test_media.py"
+responsibility = "Original reference bytes, ranges, retry recovery, audio binding checks, invalid audio and orphan reconciliation."
+status = "pending"
+stage = 2
+successors = ["scenario:reference-media"]
+
+[[module]]
+path = "tests/integration/test_media_containers.py"
+responsibility = "MP3/Ogg/MP4 containers keep original bytes; mismatched MIME, bad provenance and malformed base64 are rejected."
+status = "pending"
+stage = 2
+successors = ["scenario:reference-media"]
+
+[[module]]
+path = "tests/integration/test_media_identity.py"
+responsibility = "Media identity ignores provenance key order and preserves legacy asset IDs on retry."
+status = "pending"
+stage = 2
+successors = ["scenario:reference-media"]
+
+[[module]]
+path = "tests/integration/test_session_lifecycle.py"
+responsibility = "Start idempotency across restart, pause/resume versions, explicit takeover and the single open-session constraint."
+status = "pending"
+stage = 2
+successors = ["scenario:session-replacement"]
+
+[[module]]
+path = "tests/integration/test_session_planning.py"
+responsibility = "Manifests pin unique targets, cues, groups and media; due-first order, lesson scope and immutability."
+status = "pending"
+stage = 2
+successors = ["scenario:session-events"]
+
+[[module]]
+path = "tests/integration/test_session_readiness.py"
+responsibility = "Readiness is scoped and read-only and never presents unprepared targets as due work."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_events.py"
+responsibility = "Ordered events, identical-retry receipts, conflicts, batch rollback, bounded time and atomic schedule updates."
+status = "pending"
+stage = 2
+successors = ["scenario:session-events", "scenario:session-replacement"]
+
+[[module]]
+path = "tests/integration/test_original_support.py"
+responsibility = "Support on the original response is fixed before finalization and never inferred later."
+status = "pending"
+stage = 2
+successors = ["scenario:session-events"]
+
+[[module]]
+path = "tests/integration/test_legacy_event_retry.py"
+responsibility = "Historical queued ratings keep their payload and receipt; retired options are rejected for new sessions."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_repairs.py"
+responsibility = "Repairs wait for spacing without a timer and update the schedule once per review group."
+status = "pending"
+stage = 2
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_recordings.py"
+responsibility = "Every take is retained idempotently with ranges, valid context, lookup links and no schedule promotion."
+status = "pending"
+stage = 2
+successors = ["scenario:recordings"]
+
+[[module]]
+path = "tests/integration/test_recording_retention.py"
+responsibility = "Takes are opaque original bytes; interrupted captures stay honestly incomplete."
+status = "pending"
+stage = 2
+successors = ["scenario:recordings"]
+
+[[module]]
+path = "tests/integration/test_settings.py"
+responsibility = "Device language and UI mode survive restart; unknown settings fields are rejected."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/integration/test_cue_hints.py"
+responsibility = "Cues need phrase-specific text; legacy situation-only cues stay readable but cannot start new sessions."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/integration/test_explanations.py"
+responsibility = "Native meaning accepts a translation-only or a useful explanation."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/integration/test_delayed_support.py"
+responsibility = "Delayed receipts and dialogue script exposure count as support only before the original response."
+status = "pending"
+stage = 5
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_support_timing.py"
+responsibility = "Recent help is measured from the actual exposure time."
+status = "pending"
+stage = 5
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_dialogues.py"
+responsibility = "Dialogue exposure, detours, shared schedules of repeated targets and revision-scoped cue reports."
+status = "pending"
+stage = 5
+successors = []
+
+[[module]]
+path = "tests/integration/test_practice_cues.py"
+responsibility = "Cue selection prioritizes hidden chunks by persistent chunk history."
+status = "superseded"
+decision = "specs/decision-targeted-drilling.md"
+replacement = "Prompt rotation by fewest presentations, oldest presentation and stable ID."
+stage = 5
+
+[[module]]
+path = "tests/preparation/test_api.py"
+responsibility = "Durable source and handoff APIs accept work without provider calls."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Durable inbox receipt and scoped job APIs."
+stage = 4
+
+[[module]]
+path = "tests/preparation/test_handoff.py"
+responsibility = "Handoff receipts survive retry and restart; a changed sense is a new identity."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Inbox submission identity, receipts and immutable input generations."
+stage = 4
+
+[[module]]
+path = "tests/preparation/test_jobs.py"
+responsibility = "Job deduplication, restart lease fencing, retry limits and manual retry."
+status = "pending"
+stage = 4
+successors = []
+
+[[module]]
+path = "tests/preparation/test_package_bindings.py"
+responsibility = "Pending packages fence every publication identity and lesson revision they bind."
+status = "pending"
+stage = 4
+successors = []
+
+[[module]]
+path = "tests/preparation/test_publication.py"
+responsibility = "Hash-gated atomic publication keeps schedules, rejects stale sources and pins generated masks."
+status = "pending"
+stage = 4
+successors = ["scenario:publication"]
+
+[[module]]
+path = "tests/preparation/test_chunk_identity.py"
+responsibility = "Generated chunk IDs keep matching material only; changed material gets distinct history."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/preparation/test_chunk_conformance.py"
+responsibility = "Invalid chunk references fail before identity remapping and keep the original draft."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/preparation/test_validation.py"
+responsibility = "Package validation rejects answer leaks and unreachable masks."
+status = "pending"
+stage = 3
+successors = []
+
+[[module]]
+path = "tests/preparation/test_source_report.py"
+responsibility = "Source dry runs report create, edit, unchanged and meaning conflicts before provider work."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Inbox validation and bounded candidate checks before Coach preparation."
+stage = 4
+
+[[module]]
+path = "tests/preparation/test_fenced_answers.py"
+responsibility = "Truncated fenced model answers are recoverable failures; complete answers parse."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach adapter output validation of malformed, empty and truncated results."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_providers.py"
+responsibility = "Provider pool timeouts are recoverable without paid escalation."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach CLI adapter failure classification without paid-API fallback."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_worker.py"
+responsibility = "Worker keeps drafts on outages, never repeats paid calls and archives malformed answers."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach runner recovery with fake agent processes."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_speech.py"
+responsibility = "Serbian speech conversion and language/accent checks."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach speech adapters with pinned language, locale and conversion rules."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_speech_cache.py"
+responsibility = "Whole-phrase speech cache identity covers voice, text and Serbian input."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach speech cache identity tests."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_speech_network.py"
+responsibility = "Network speech failures use matching fallback voices, stay retryable and release leases on cancellation."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach speech adapter fallback and cancellation tests with fake processes."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_speech_versions.py"
+responsibility = "Speech versions fence partial retries and reuse identical media across unrelated changes."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Coach speech identity and Server reference-media publication tests."
+stage = 6
+
+[[module]]
+path = "tests/preparation/test_existing_export.py"
+responsibility = "Existing-export import keeps the latest complete dialogue and audio."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "External agents submit material through the inbox; no source-specific exporter."
+stage = 7
+
+[[module]]
+path = "tests/preparation/test_vault.py"
+responsibility = "Vault parsing is read-only, keeps stable blocks and rejects missing, ambiguous or escaping references."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "External agents submit material through the inbox; no vault parser."
+stage = 7
+
+[[module]]
+path = "tests/preparation/test_vault_block_dialogues.py"
+responsibility = "Vault block and audio selectors preserve complete exchanges and refuse ambiguous bindings."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "External agents submit material through the inbox; no vault parser."
+stage = 7
+
+[[module]]
+path = "tests/preparation/test_vault_dialogue_assets.py"
+responsibility = "Vault dialogue assets are validated, reported when unuploaded and kept byte-for-byte."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "Inbox attachment receipt and verified original storage."
+stage = 4
+
+[[module]]
+path = "tests/preparation/test_vault_dialogue_bindings.py"
+responsibility = "Vault dialogue bindings reject ambiguity and keep distinct meanings and schedules."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "External agents submit material through the inbox; no vault parser."
+stage = 7
+
+[[module]]
+path = "tests/preparation/test_vault_runtime.py"
+responsibility = "Vault export refuses runtime or output paths inside the vault before writing."
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "External agents submit material through the inbox; no vault exporter."
+stage = 7
+
+[[module]]
+path = "tests/test_phrase_gym.py"
+responsibility = "The package reports its version."
+status = "pending"
+stage = 7
+successors = []
+
+[[module]]
+path = "tests/test_run_local.py"
+responsibility = "Local run serves the built client over Tailscale HTTPS with explicit directories and child cleanup."
+status = "pending"
+stage = 7
+successors = []
+
+[[module]]
+path = "tests/browser_server.py"
+responsibility = "Real-browser server harness with synthetic seed data and deterministic failure controls."
+status = "pending"
+stage = 6
+successors = []
+
+[[module]]
+path = "tests/browser_preparation.py"
+responsibility = "Browser harness that drives a generated-draft preparation lifecycle with fake provider and speech."
+status = "pending"
+stage = 6
+successors = []
+
+[[module]]
+path = "tests/browser_legacy.py"
+responsibility = "Browser harness that serves a legacy offline worker to verify its retirement."
+status = "pending"
+stage = 6
+successors = []

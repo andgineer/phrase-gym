@@ -1,0 +1,830 @@
+{
+  "description": "Reference media identity is derived from original bytes, MIME and canonical provenance; retries reuse it, originals are served byte-for-byte with ranges, and invalid containers or provenance are rejected.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "upload",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "settings": {
+              "speed": 1,
+              "processing": false
+            }
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "42744847-d32c-510e-86a9-366f9dd53b35"
+          },
+          {
+            "at": "/sha256",
+            "equals": "2976da01e205a110c9fa41d47659e238a5c6d3c3f3137582f2949853faa201dd"
+          },
+          {
+            "at": "/byte_length",
+            "equals": 3244
+          },
+          {
+            "at": "/mime_type",
+            "equals": "audio/wav"
+          },
+          {
+            "at": "/available",
+            "equals": true
+          },
+          {
+            "at": "/metadata/text",
+            "equals": "How has your day been so far?"
+          },
+          {
+            "at": "/metadata/settings",
+            "equals": {
+              "speed": 1,
+              "processing": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "identical-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "settings": {
+              "speed": 1,
+              "processing": false
+            }
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "upload:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "reordered-settings-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "settings": {
+              "processing": false,
+              "speed": 1
+            }
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "upload:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "changed-settings",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "settings": {
+              "speed": 1,
+              "processing": true
+            }
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "ab9c1c99-5059-59c2-996b-5a95d22e801f"
+          },
+          {
+            "at": "/sha256",
+            "equals": "2976da01e205a110c9fa41d47659e238a5c6d3c3f3137582f2949853faa201dd"
+          }
+        ]
+      }
+    },
+    {
+      "id": "changed-performer",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Another performer",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "settings": {
+              "speed": 1,
+              "processing": false
+            }
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "2c8d2b96-0eff-5b94-a965-6be783d7bfac"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metadata",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/42744847-d32c-510e-86a9-366f9dd53b35/metadata"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "upload:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "original-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/42744847-d32c-510e-86a9-366f9dd53b35"
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "content-type": "audio/wav",
+          "etag": "\"2976da01e205a110c9fa41d47659e238a5c6d3c3f3137582f2949853faa201dd\""
+        },
+        "bytes": {
+          "file": "fixtures/preservation/media/silence-100ms.wav"
+        }
+      }
+    },
+    {
+      "id": "byte-range",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/42744847-d32c-510e-86a9-366f9dd53b35",
+        "headers": {
+          "range": "bytes=0-43"
+        }
+      },
+      "expect": {
+        "status": 206,
+        "bytes": {
+          "file": "fixtures/preservation/media/silence-100ms.wav",
+          "slice": [
+            0,
+            44
+          ]
+        }
+      }
+    },
+    {
+      "id": "unsatisfiable-range",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/42744847-d32c-510e-86a9-366f9dd53b35",
+        "headers": {
+          "range": "bytes=999999-"
+        }
+      },
+      "expect": {
+        "status": 416
+      }
+    },
+    {
+      "id": "unknown-metadata",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/0000dead-0000-4000-8000-000000000001/metadata"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "unknown-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/0000dead-0000-4000-8000-000000000001"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "empty-audio",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": ""
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "not-audio",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "text": "not-audio"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "truncated-wav",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/truncated.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "malformed-base64",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": "%%%invalid%%%"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unsupported-mime",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/webm",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "mp3-container",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/mpeg",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.mp3"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "db827161-335f-504e-bc22-0105892748fb"
+          },
+          {
+            "at": "/byte_length",
+            "equals": 764
+          },
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mp3-original-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/db827161-335f-504e-bc22-0105892748fb"
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "content-type": "audio/mpeg"
+        },
+        "bytes": {
+          "file": "fixtures/preservation/media/tone.mp3"
+        }
+      }
+    },
+    {
+      "id": "mp3-mismatched-mime",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/ogg",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.mp3"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "ogg-container",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/ogg",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.ogg"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "7f2ba4aa-e8f5-5a15-9544-acbbaabce417"
+          },
+          {
+            "at": "/byte_length",
+            "equals": 4321
+          },
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "ogg-original-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/7f2ba4aa-e8f5-5a15-9544-acbbaabce417"
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "content-type": "audio/ogg"
+        },
+        "bytes": {
+          "file": "fixtures/preservation/media/tone.ogg"
+        }
+      }
+    },
+    {
+      "id": "ogg-mismatched-mime",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/mp4",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.ogg"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "m4a-container",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/mp4",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.m4a"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "61727986-97fb-5c9e-b1e7-3e6a4066779d"
+          },
+          {
+            "at": "/byte_length",
+            "equals": 1940
+          },
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "m4a-original-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/61727986-97fb-5c9e-b1e7-3e6a4066779d"
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "content-type": "audio/mp4"
+        },
+        "bytes": {
+          "file": "fixtures/preservation/media/tone.m4a"
+        }
+      }
+    },
+    {
+      "id": "m4a-mismatched-mime",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.m4a"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "locale-language-mismatch",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "sr-RS",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "actor-without-performer",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": null,
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "generated-without-engine",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "generated",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1",
+            "engine": null,
+            "voice": "test",
+            "speech_text": "How has your day been so far?"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "generated-with-provenance",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "generated",
+            "source": "preservation-fixture",
+            "performer": null,
+            "locale": "en-US",
+            "preparation_version": "1",
+            "engine": "synthetic-engine",
+            "voice": "synthetic-voice",
+            "speech_text": "How has your day been so far?"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/metadata/origin",
+            "equals": "generated"
+          }
+        ]
+      }
+    }
+  ]
+}

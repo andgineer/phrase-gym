@@ -12,7 +12,7 @@ from tests.integration.helpers import ROOT, upload
 def test_compressed_container_retains_original_bytes_and_rejects_mismatched_mime(
     client, suffix, mime
 ):
-    audio = (ROOT / f"tests/fixtures/media/tone.{suffix}").read_bytes()
+    audio = (ROOT / f"fixtures/preservation/media/tone.{suffix}").read_bytes()
     metadata = upload(client).json()["metadata"]
     payload = {
         "metadata": metadata,

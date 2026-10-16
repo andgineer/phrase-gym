@@ -1,0 +1,1122 @@
+{
+  "description": "Learner takes are opaque retained bytes: identical retries return the same receipt, changed audio or metadata under an ID conflicts, every take is kept and served byte-for-byte with ranges, invalid input is rejected without storage, and context must match a persisted attempt or lookup exposure.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "stage-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "content_import": "/id"
+      }
+    },
+    {
+      "id": "publish-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{content_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "target_day": "/changes/0/target_id",
+        "target_catch_up": "/changes/1/target_id",
+        "target_rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "start",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e553033-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200
+      },
+      "capture": {
+        "target": "/manifest/targets/0/phrase/id",
+        "revision": "/manifest/targets/0/phrase/revision",
+        "other_target": "/manifest/targets/1/phrase/id"
+      }
+    },
+    {
+      "id": "take-before-attempt",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "present",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e553033-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e49-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "id": "respond",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e553033-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e49-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "respond",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "modality": "recorded"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "id": "opaque-take",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "00007a6e-0000-4000-8000-000000000001"
+          },
+          {
+            "at": "/sha256",
+            "equals": "e4fde89f39bc53b90e9935a8015b80dd6e4135485e894094a3517fa250e344ae"
+          },
+          {
+            "at": "/byte_length",
+            "equals": 2048
+          },
+          {
+            "at": "/complete",
+            "equals": true
+          },
+          {
+            "at": "/captured_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          },
+          {
+            "at": "/received_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "identical-retry",
+      "clock": "2026-10-12T12:01:00+00:00",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "opaque-take:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-id-different-audio",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                8,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "same-id-different-metadata",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 101,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "same-bytes-new-take",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000002",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:01:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "00007a6e-0000-4000-8000-000000000002"
+          },
+          {
+            "at": "/sha256",
+            "equals": "e4fde89f39bc53b90e9935a8015b80dd6e4135485e894094a3517fa250e344ae"
+          },
+          {
+            "at": "/received_at",
+            "instant": "2026-10-12T12:01:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "incomplete-take",
+      "clock": "2026-10-12T12:02:30+00:00",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000003",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "captured_at": "2026-10-12T12:02:00+00:00",
+          "mime_type": "audio/wav",
+          "duration_ms": 100,
+          "complete": false,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/complete",
+            "equals": false
+          },
+          {
+            "at": "/byte_length",
+            "equals": 3244
+          },
+          {
+            "at": "/sha256",
+            "equals": "2976da01e205a110c9fa41d47659e238a5c6d3c3f3137582f2949853faa201dd"
+          }
+        ]
+      }
+    },
+    {
+      "id": "incomplete-take-marks-technical-failure",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/5e553033-0000-4000-8000-000000000001"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/attempts/0/technical_failure",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "every-take-listed",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{target}}/recordings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "length": 3
+          },
+          {
+            "at": "/0",
+            "same_as": "opaque-take:"
+          },
+          {
+            "at": "/1",
+            "same_as": "same-bytes-new-take:"
+          },
+          {
+            "at": "/2",
+            "same_as": "incomplete-take:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "original-bytes",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recordings/00007a6e-0000-4000-8000-000000000001"
+      },
+      "expect": {
+        "status": 200,
+        "headers": {
+          "content-type": "audio/webm;codecs=opus",
+          "etag": "\"e4fde89f39bc53b90e9935a8015b80dd6e4135485e894094a3517fa250e344ae\"",
+          "accept-ranges": "bytes"
+        },
+        "bytes": {
+          "fill": [
+            7,
+            2048
+          ]
+        }
+      }
+    },
+    {
+      "id": "byte-range",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recordings/00007a6e-0000-4000-8000-000000000001",
+        "headers": {
+          "range": "bytes=0-99"
+        }
+      },
+      "expect": {
+        "status": 206,
+        "headers": {
+          "content-range": "bytes 0-99/2048"
+        },
+        "bytes": {
+          "fill": [
+            7,
+            2048
+          ],
+          "slice": [
+            0,
+            100
+          ]
+        }
+      }
+    },
+    {
+      "id": "suffix-range",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recordings/00007a6e-0000-4000-8000-000000000003",
+        "headers": {
+          "range": "bytes=-100"
+        }
+      },
+      "expect": {
+        "status": 206,
+        "headers": {
+          "content-range": "bytes 3144-3243/3244"
+        },
+        "bytes": {
+          "file": "fixtures/preservation/media/silence-100ms.wav",
+          "slice": [
+            3144,
+            3244
+          ]
+        }
+      }
+    },
+    {
+      "id": "unsatisfiable-range",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recordings/00007a6e-0000-4000-8000-000000000001",
+        "headers": {
+          "range": "bytes=5000-"
+        }
+      },
+      "expect": {
+        "status": 416,
+        "headers": {
+          "content-range": "bytes */2048"
+        }
+      }
+    },
+    {
+      "id": "unknown-take",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recordings/00007a6e-0000-4000-8000-000000000063"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "malformed-base64",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": "%%%not-base64%%%"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "empty-audio",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": ""
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "over-twelve-mebibytes",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                0,
+                12582913
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unlisted-mime",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "video/mp4",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unknown-revision",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": 9,
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unknown-attempt",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "0000a77e-0000-4000-8000-000000000001",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "target-does-not-match-attempt",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{other_target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "capture-event-is-not-a-response",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000001",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "neither-attempt-nor-exposure",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "lookup-exposure",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/exposures",
+        "json": {
+          "id": "000e4b05-0000-4000-8000-000000000001",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "language": "en",
+          "kind": "reference"
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "id": "attempt-and-exposure",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          },
+          "exposure_id": "000e4b05-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "lookup-take",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000005",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          },
+          "exposure_id": "000e4b05-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "00007a6e-0000-4000-8000-000000000005"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lookup-take-other-target",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000006",
+          "target_id": "{{other_target}}",
+          "revision": "{{revision}}",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          },
+          "exposure_id": "000e4b05-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "rejected-id-remains-free",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/recordings",
+        "json": {
+          "id": "00007a6e-0000-4000-8000-000000000004",
+          "target_id": "{{target}}",
+          "revision": "{{revision}}",
+          "attempt_id": "208cfcbb-775a-5ec1-ac19-7c0e81d21ad5",
+          "capture_event_id": "000e7e49-0000-4000-8000-000000000002",
+          "captured_at": "2026-10-12T12:00:00+00:00",
+          "mime_type": "audio/webm;codecs=opus",
+          "duration_ms": 100,
+          "complete": true,
+          "capture_settings": {
+            "echoCancellation": true,
+            "sampleRate": 48000,
+            "deviceKind": "builtin"
+          },
+          "audio_base64": {
+            "$base64": {
+              "fill": [
+                7,
+                2048
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "00007a6e-0000-4000-8000-000000000004"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Phrase Gym Server",
+    "description": "Rust server API during the migration",
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    },
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/api/v1/exposures": {
+      "post": {
+        "tags": [
+          "exposures"
+        ],
+        "operationId": "record_exposure",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExposureInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Recorded or previously recorded exposure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExposureReceipt"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Exposure ID already used with a different payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid payload or unknown phrase revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ExposureInput": {
+        "type": "object",
+        "required": [
+          "id",
+          "target_id",
+          "revision",
+          "language",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ExposureKind"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExposureKind": {
+        "type": "string",
+        "enum": [
+          "answer",
+          "explanation",
+          "reference"
+        ]
+      },
+      "ExposureReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "received_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "received_at": {
+            "type": "string"
+          }
+        }
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "ru",
+          "sr",
+          "de"
+        ]
+      }
+    }
+  }
+}

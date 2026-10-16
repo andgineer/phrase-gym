@@ -49,7 +49,7 @@ def test_edge_network_failure_uses_matching_fallback(prepared_runtime, monkeypat
         async def save(self, path):
             if self.voice == "en-US-AriaNeural":
                 raise network_failure(failure)
-            Path(path).write_bytes(Path("tests/fixtures/media/tone.mp3").read_bytes())
+            Path(path).write_bytes(Path("fixtures/preservation/media/tone.mp3").read_bytes())
 
     monkeypatch.setattr("phrase_gym.preparation.speech.edge_tts.Communicate", Edge)
     speech = configured_speech(media)
@@ -85,7 +85,7 @@ def test_exhausted_network_errors_are_failed_retryable_and_keep_raw_answers(
         async def save(self, path):
             if outage["active"] and self.text == "How are you?":
                 raise network_failure("response")
-            Path(path).write_bytes(Path("tests/fixtures/media/tone.mp3").read_bytes())
+            Path(path).write_bytes(Path("fixtures/preservation/media/tone.mp3").read_bytes())
 
     monkeypatch.setattr("phrase_gym.preparation.speech.edge_tts.Communicate", Edge)
     job = jobs.enqueue(source, {})

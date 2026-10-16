@@ -1,0 +1,527 @@
+{
+  "description": "Single open session: explicit takeover supersedes the known current session, pause keeps the slot, stale transitions conflict, and late reports to replaced sessions remain history without schedule changes.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "stage-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "content_import": "/id"
+      }
+    },
+    {
+      "id": "publish-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{content_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "target_day": "/changes/0/target_id",
+        "target_catch_up": "/changes/1/target_id",
+        "target_rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "start",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "active"
+          }
+        ]
+      }
+    },
+    {
+      "id": "second-start-without-takeover",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000002",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "takeover-of-unknown-session",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000002",
+          "language": "en",
+          "takeover_session_id": "5e552022-0000-4000-8000-000000000063"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "pause",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001",
+        "json": {
+          "expected_version": 1,
+          "status": "paused"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "paused"
+          },
+          {
+            "at": "/version",
+            "equals": 2
+          },
+          {
+            "at": "/manifest",
+            "same_as": "start:/manifest"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pause-retry",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001",
+        "json": {
+          "expected_version": 1,
+          "status": "paused"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "pause:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "paused-keeps-open-slot",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000003",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "stale-transition",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001",
+        "json": {
+          "expected_version": 1,
+          "status": "active"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "resume",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001",
+        "json": {
+          "expected_version": 2,
+          "status": "active"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "active"
+          },
+          {
+            "at": "/version",
+            "equals": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "present-before-takeover",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e48-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "id": "explicit-takeover",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000002",
+          "language": "en",
+          "takeover_session_id": "5e552022-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5e552022-0000-4000-8000-000000000002"
+          },
+          {
+            "at": "/status",
+            "equals": "active"
+          },
+          {
+            "at": "/version",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "replaced-session-is-history",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "superseded"
+          },
+          {
+            "at": "/version",
+            "equals": 4
+          },
+          {
+            "at": "/manifest",
+            "same_as": "start:/manifest"
+          },
+          {
+            "at": "/last_sequence",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "closed-session-cannot-resume",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001",
+        "json": {
+          "expected_version": 4,
+          "status": "active"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "repeated-takeover-conflicts",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000003",
+          "language": "en",
+          "takeover_session_id": "5e552022-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "late-rating-is-retained-without-grading",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e48-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "recalled"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/eligibility_reason",
+            "equals": "closed_session"
+          },
+          {
+            "at": "/receipts/0/schedule_changed",
+            "equals": false
+          },
+          {
+            "at": "/session/status",
+            "equals": "superseded"
+          }
+        ]
+      }
+    },
+    {
+      "id": "current-is-replacement",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/current"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "explicit-takeover:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "start-retry-returns-original-history",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e552022-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5e552022-0000-4000-8000-000000000001"
+          },
+          {
+            "at": "/status",
+            "equals": "superseded"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-session",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000062"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "unknown-session-transition",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/sessions/5e552022-0000-4000-8000-000000000062",
+        "json": {
+          "expected_version": 1,
+          "status": "paused"
+        }
+      },
+      "expect": {
+        "status": 404
+      }
+    }
+  ]
+}

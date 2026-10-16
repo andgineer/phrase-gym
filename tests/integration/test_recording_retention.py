@@ -16,7 +16,7 @@ from tests.integration.recording_helpers import take
 def test_encoded_take_retains_original_bytes_and_receipt(client, package, suffix, mime):
     session = session_fixture(client, package)
     _, result = apply(client, session, "present")
-    audio = (ROOT / f"tests/fixtures/media/tone.{suffix}").read_bytes()
+    audio = (ROOT / f"fixtures/preservation/media/tone.{suffix}").read_bytes()
     body = take(
         result["session"]["attempts"][0],
         mime_type=mime,

@@ -118,8 +118,9 @@ def pre(c):
 
 @task
 def test(c: Context):
-    """Run Python and client checks plus real-browser walkthroughs; never skip missing tooling."""
+    """Run Python, Rust and client checks plus real-browser walkthroughs; never skip missing tooling."""
     c.run("uv run pytest tests/")
+    c.run("cargo test --workspace --all-features --locked")
     with c.cd("frontend"):
         c.run("npm run typecheck")
         c.run("npm test")

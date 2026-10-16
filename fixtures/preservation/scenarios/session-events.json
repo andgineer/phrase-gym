@@ -1,0 +1,827 @@
+{
+  "description": "Ordered session events: server-derived attempt identities, identical-retry receipts, changed-payload conflicts, whole-batch rollback on a sequence gap, bounded and monotonic client time, and one atomic rating/schedule/receipt commit with the FSRS due time.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "stage-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "content_import": "/id"
+      }
+    },
+    {
+      "id": "publish-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{content_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "target_day": "/changes/0/target_id",
+        "target_catch_up": "/changes/1/target_id",
+        "target_rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "start",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e551011-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5e551011-0000-4000-8000-000000000001"
+          },
+          {
+            "at": "/status",
+            "equals": "active"
+          },
+          {
+            "at": "/version",
+            "equals": 1
+          },
+          {
+            "at": "/cursor",
+            "equals": 0
+          },
+          {
+            "at": "/last_sequence",
+            "equals": 0
+          },
+          {
+            "at": "/attempts",
+            "length": 0
+          },
+          {
+            "at": "/manifest/policy_version",
+            "equals": "fsrs-6.3.2-retention90-v1"
+          },
+          {
+            "at": "/manifest/targets",
+            "length": 3
+          },
+          {
+            "at": "/created_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          }
+        ]
+      },
+      "capture": {
+        "first_target": "/manifest/targets/0/phrase/id"
+      }
+    },
+    {
+      "id": "start-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e551011-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "start:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "start-changed-payload",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e551011-0000-4000-8000-000000000001",
+          "language": "sr"
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "present",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/id",
+            "equals": "000e7e47-0000-4000-8000-000000000001"
+          },
+          {
+            "at": "/receipts/0/sequence",
+            "equals": 1
+          },
+          {
+            "at": "/receipts/0/attempt_id",
+            "equals": "d92b59f1-8ecc-5534-8736-d97a97d7c1b6"
+          },
+          {
+            "at": "/receipts/0/clock_adjusted",
+            "equals": false
+          },
+          {
+            "at": "/receipts/0/occurred_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          },
+          {
+            "at": "/receipts/0/received_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          },
+          {
+            "at": "/receipts/0/schedule_changed",
+            "equals": false
+          },
+          {
+            "at": "/session/last_sequence",
+            "equals": 1
+          },
+          {
+            "at": "/session/attempts/0/id",
+            "equals": "d92b59f1-8ecc-5534-8736-d97a97d7c1b6"
+          },
+          {
+            "at": "/session/attempts/0/target_id",
+            "equals": "{{first_target}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "present-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0",
+            "same_as": "present:/receipts/0"
+          },
+          {
+            "at": "/session/last_sequence",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "present-changed-payload",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "answer",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "sequence-gap-rolls-back-batch",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "answer",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000000000003",
+              "sequence": 4,
+              "step": 0,
+              "kind": "respond",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "modality": "recorded"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "after-gap",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/last_sequence",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-step",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 1,
+              "kind": "answer",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "future-time-is-bounded",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "answer",
+              "occurred_at": "2027-01-20T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/clock_adjusted",
+            "equals": true
+          },
+          {
+            "at": "/receipts/0/occurred_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          },
+          {
+            "at": "/receipts/0/attempt_id",
+            "equals": "d92b59f1-8ecc-5534-8736-d97a97d7c1b6"
+          }
+        ]
+      }
+    },
+    {
+      "id": "past-time-is-monotonic",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000003",
+              "sequence": 3,
+              "step": 0,
+              "kind": "respond",
+              "occurred_at": "2026-07-04T12:00:00+00:00",
+              "modality": "recorded"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/clock_adjusted",
+            "equals": true
+          },
+          {
+            "at": "/receipts/0/occurred_at",
+            "instant": "2026-10-12T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "capture-complete",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000004",
+              "sequence": 4,
+              "step": 0,
+              "kind": "capture_complete",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "id": "rate",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000005",
+              "sequence": 5,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "with_effort"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/schedule_changed",
+            "equals": true
+          },
+          {
+            "at": "/receipts/0/eligibility_reason",
+            "equals": "eligible"
+          },
+          {
+            "at": "/receipts/0/due_at",
+            "instant": "2026-10-13T12:00:00+00:00"
+          },
+          {
+            "at": "/session/attempts/0/rating",
+            "equals": "with_effort"
+          },
+          {
+            "at": "/session/attempts/0/original/supported",
+            "equals": false
+          },
+          {
+            "at": "/session/cursor",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "rate-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000005",
+              "sequence": 5,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "with_effort"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0",
+            "same_as": "rate:/receipts/0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rate-changed-payload",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000005",
+              "sequence": 5,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "recalled"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "rate-retry-after-conflict",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000005",
+              "sequence": 5,
+              "step": 0,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "with_effort"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0",
+            "same_as": "rate:/receipts/0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-step-after-finalization",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000006",
+              "sequence": 6,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "second-target",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000006",
+              "sequence": 6,
+              "step": 1,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000000000007",
+              "sequence": 7,
+              "step": 1,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "recalled"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts",
+            "length": 2
+          },
+          {
+            "at": "/receipts/0/attempt_id",
+            "equals": "89c6dba7-fc67-5a1a-9d6b-545ab5bc4b3e"
+          },
+          {
+            "at": "/receipts/1/schedule_changed",
+            "equals": true
+          },
+          {
+            "at": "/receipts/1/due_at",
+            "instant": "2026-10-14T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "third-target",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-000000000008",
+              "sequence": 8,
+              "step": 2,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            },
+            {
+              "id": "000e7e47-0000-4000-8000-000000000009",
+              "sequence": 9,
+              "step": 2,
+              "kind": "rate",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "rating": "not_yet"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/1/due_at",
+            "instant": "2026-10-13T12:00:00+00:00"
+          },
+          {
+            "at": "/session/status",
+            "equals": "completed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "no-open-session",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/current"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "receipts-in-order",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000001/events"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "length": 9
+          },
+          {
+            "at": "/0",
+            "same_as": "present:/receipts/0"
+          },
+          {
+            "at": "/4",
+            "same_as": "rate:/receipts/0"
+          },
+          {
+            "at": "/8/sequence",
+            "equals": 9
+          }
+        ]
+      }
+    },
+    {
+      "id": "events-for-unknown-session",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e551011-0000-4000-8000-000000000063/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e47-0000-4000-8000-00000000000a",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 404
+      }
+    }
+  ]
+}

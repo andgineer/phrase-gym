@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "namespace": "manual.examples.en",
+  "language": "en",
+  "source_revision": "1",
+  "targets": [
+    {
+      "source_id": "day",
+      "kind": "fixed_phrase",
+      "meaning_key": "ask-day",
+      "recall_expression": "How has your day been so far?",
+      "text": "How has your day been so far?",
+      "purpose": "Ask about their day up to now.",
+      "chunks": [
+        {
+          "id": "opening",
+          "text": "How has "
+        },
+        {
+          "id": "subject",
+          "text": "your day "
+        },
+        {
+          "id": "ending",
+          "text": "been so far?"
+        }
+      ],
+      "required_chunks": [
+        "opening",
+        "subject",
+        "ending"
+      ],
+      "cues": [
+        {
+          "id": "reviewed-cue",
+          "prompt": "Ask about their day up to now.",
+          "visible_chunks": [
+            "subject",
+            "ending"
+          ],
+          "reviewed": true
+        }
+      ],
+      "concepts": [
+        "greetings",
+        "rapport",
+        "catching up"
+      ],
+      "explanations": {
+        "ru": {
+          "meaning": "Как проходит твой день?",
+          "usage": "Используйте в указанной ситуации."
+        },
+        "en": {
+          "meaning": "Ask about their day up to now.",
+          "usage": "Use in the stated situation."
+        }
+      },
+      "acceptable_equivalents": [
+        "How’s your day going?"
+      ]
+    },
+    {
+      "source_id": "catch-up",
+      "kind": "word_sense",
+      "meaning_key": "catch-up-person",
+      "recall_expression": "catch up",
+      "text": "Let’s catch up over coffee.",
+      "purpose": "Suggest meeting to share recent news.",
+      "chunks": [
+        {
+          "id": "opening",
+          "text": "Let’s "
+        },
+        {
+          "id": "verb",
+          "text": "catch up "
+        },
+        {
+          "id": "ending",
+          "text": "over coffee."
+        }
+      ],
+      "required_chunks": [
+        "verb"
+      ],
+      "cues": [
+        {
+          "id": "reviewed-cue",
+          "prompt": "Suggest meeting to share recent news.",
+          "visible_chunks": [
+            "opening",
+            "ending"
+          ],
+          "reviewed": true
+        }
+      ],
+      "concepts": [
+        "meeting",
+        "rapport",
+        "news"
+      ],
+      "explanations": {
+        "ru": {
+          "meaning": "Давай встретимся за кофе и поговорим о том, что нового.",
+          "usage": "Используйте в указанной ситуации."
+        },
+        "en": {
+          "meaning": "Suggest meeting to share recent news.",
+          "usage": "Use in the stated situation."
+        }
+      }
+    },
+    {
+      "source_id": "rather",
+      "kind": "frame",
+      "meaning_key": "rather-preference",
+      "recall_expression": "would rather",
+      "text": "I’d rather meet tomorrow.",
+      "purpose": "Express a preference for meeting tomorrow.",
+      "chunks": [
+        {
+          "id": "opening",
+          "text": "I’d "
+        },
+        {
+          "id": "frame",
+          "text": "rather "
+        },
+        {
+          "id": "slot",
+          "text": "meet tomorrow."
+        }
+      ],
+      "required_chunks": [
+        "frame"
+      ],
+      "cues": [
+        {
+          "id": "reviewed-cue",
+          "prompt": "Express a preference for meeting tomorrow.",
+          "visible_chunks": [
+            "opening",
+            "slot"
+          ],
+          "reviewed": true
+        }
+      ],
+      "concepts": [
+        "preference",
+        "plans"
+      ],
+      "explanations": {
+        "ru": {
+          "meaning": "Я бы предпочёл встретиться завтра.",
+          "usage": "Используйте в указанной ситуации."
+        },
+        "en": {
+          "meaning": "Express a preference for meeting tomorrow.",
+          "usage": "Use in the stated situation."
+        }
+      },
+      "slots": {
+        "slot": [
+          "meet tomorrow.",
+          "stay home."
+        ]
+      }
+    }
+  ],
+  "lessons": [
+    {
+      "source_id": "rapport",
+      "title": "Building rapport",
+      "target_source_ids": [
+        "day",
+        "catch-up"
+      ]
+    },
+    {
+      "source_id": "plans",
+      "title": "Making plans",
+      "target_source_ids": [
+        "rather",
+        "catch-up"
+      ]
+    }
+  ],
+  "dialogues": [
+    {
+      "source_id": "coffee",
+      "title": "Catching up",
+      "turns": [
+        {
+          "speaker": "Partner",
+          "text": "It’s been a while. What shall we do?"
+        },
+        {
+          "speaker": "Learner",
+          "text": "Let’s catch up over coffee.",
+          "target_source_id": "catch-up"
+        }
+      ]
+    }
+  ]
+}

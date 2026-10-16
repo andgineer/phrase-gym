@@ -1,0 +1,896 @@
+{
+  "description": "Package validation, staging and atomic publication: stable target identity across unchanged and compatible edits, immutable revisions with dialogue rebinding, rejection of changed meanings under an existing source, idempotent publication, stale staged packages conflicting without partial writes.",
+  "implementations": [
+    "python"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "validate",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/validate",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "validated"
+          },
+          {
+            "at": "/id",
+            "equals": null
+          },
+          {
+            "at": "/errors",
+            "length": 0
+          },
+          {
+            "at": "/changes",
+            "length": 3
+          },
+          {
+            "at": "/changes/0/action",
+            "equals": "create"
+          },
+          {
+            "at": "/changes/0/target_id",
+            "equals": null
+          },
+          {
+            "at": "/changes/2/source_id",
+            "equals": "rather"
+          }
+        ]
+      },
+      "capture": {
+        "empty_version": "/base_content_version"
+      }
+    },
+    {
+      "id": "stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          },
+          {
+            "at": "/changes",
+            "same_as": "validate:/changes"
+          },
+          {
+            "at": "/base_content_version",
+            "equals": "{{empty_version}}"
+          }
+        ]
+      },
+      "capture": {
+        "first_import": "/id"
+      }
+    },
+    {
+      "id": "read-staged",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/imports/{{first_import}}"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "stage:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{first_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          },
+          {
+            "at": "/id",
+            "equals": "{{first_import}}"
+          }
+        ]
+      },
+      "capture": {
+        "day": "/changes/0/target_id",
+        "catch_up": "/changes/1/target_id",
+        "rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "publish-retry",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{first_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "publish:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "library-after-publish",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q="
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          },
+          {
+            "at": "/items",
+            "length": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-revision-1",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "dialogue-revision-1",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/items/0/revision",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/target_ids/catch-up",
+            "equals": "{{catch_up}}"
+          },
+          {
+            "at": "/items/0/target_revisions/catch-up",
+            "equals": 1
+          }
+        ]
+      },
+      "capture": {
+        "dialogue": "/items/0/id"
+      }
+    },
+    {
+      "id": "restage-unchanged",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          },
+          {
+            "at": "/changes/0/action",
+            "equals": "unchanged"
+          },
+          {
+            "at": "/changes/0/target_id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/changes/0/base_revision",
+            "equals": 1
+          },
+          {
+            "at": "/changes/1/action",
+            "equals": "unchanged"
+          },
+          {
+            "at": "/changes/2/action",
+            "equals": "unchanged"
+          }
+        ]
+      },
+      "capture": {
+        "unchanged_import": "/id"
+      }
+    },
+    {
+      "id": "publish-unchanged",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{unchanged_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-still-revision-1",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "compatible-edit",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/source_revision": "2",
+            "/targets/0/purpose": "Ask how their day has gone."
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          },
+          {
+            "at": "/changes/0/action",
+            "equals": "update"
+          },
+          {
+            "at": "/changes/0/target_id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/changes/0/base_revision",
+            "equals": 1
+          },
+          {
+            "at": "/changes/1/action",
+            "equals": "unchanged"
+          }
+        ]
+      },
+      "capture": {
+        "edit_import": "/id"
+      }
+    },
+    {
+      "id": "publish-compatible-edit",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{edit_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          },
+          {
+            "at": "/changes/0/target_id",
+            "equals": "{{day}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-revision-2",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 2
+          },
+          {
+            "at": "/content/purpose",
+            "equals": "Ask how their day has gone."
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-revision-1-remains-readable",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en&revision=1"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 1
+          },
+          {
+            "at": "/content/purpose",
+            "equals": "Ask about their day up to now."
+          }
+        ]
+      }
+    },
+    {
+      "id": "dialogue-unchanged-by-unlinked-edit",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/items/0/id",
+            "equals": "{{dialogue}}"
+          },
+          {
+            "at": "/items/0/revision",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "linked-edit",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/source_revision": "3",
+            "/targets/0/purpose": "Ask how their day has gone.",
+            "/targets/1/purpose": "Suggest meeting to hear each other's news."
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/changes/1/action",
+            "equals": "update"
+          },
+          {
+            "at": "/changes/0/action",
+            "equals": "unchanged"
+          }
+        ]
+      },
+      "capture": {
+        "linked_import": "/id"
+      }
+    },
+    {
+      "id": "publish-linked-edit",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{linked_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dialogue-rebound-to-new-revision",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/items/0/id",
+            "equals": "{{dialogue}}"
+          },
+          {
+            "at": "/items/0/revision",
+            "equals": 2
+          },
+          {
+            "at": "/items/0/target_ids/catch-up",
+            "equals": "{{catch_up}}"
+          },
+          {
+            "at": "/items/0/target_revisions/catch-up",
+            "equals": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "changed-meaning-rejected",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/targets/0/purpose": "Ask how their day has gone.",
+            "/targets/1/purpose": "Suggest meeting to hear each other's news.",
+            "/source_revision": "4",
+            "/targets/0/meaning_key": "ask-week"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "rejected"
+          },
+          {
+            "at": "/id",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-unchanged-after-rejection",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "stage-stale-candidate",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/targets/0/purpose": "Ask how their day has gone.",
+            "/targets/1/purpose": "Suggest meeting to hear each other's news.",
+            "/source_revision": "5",
+            "/targets/2/purpose": "Postpone until tomorrow."
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "stale_import": "/id"
+      }
+    },
+    {
+      "id": "stage-newer",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/targets/0/purpose": "Ask how their day has gone.",
+            "/targets/1/purpose": "Suggest meeting to hear each other's news.",
+            "/source_revision": "6",
+            "/targets/2/purpose": "Propose meeting tomorrow instead."
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "newer_import": "/id"
+      }
+    },
+    {
+      "id": "publish-newer",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{newer_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-publication-conflicts",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{stale_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "id": "stale-left-content-untouched",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{rather}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{rather}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 2
+          },
+          {
+            "at": "/content/purpose",
+            "equals": "Propose meeting tomorrow instead."
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-import-still-staged",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/imports/{{stale_import}}"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      }
+    },
+    {
+      "id": "invalid-package-publishes-nothing",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/targets/0/purpose": "Would be a third revision.",
+            "/targets/1/purpose": "Suggest meeting to hear each other's news.",
+            "/source_revision": "7",
+            "/lessons/0/target_source_ids/0": "missing-target"
+          }
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "library-unchanged",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q="
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "day-not-advanced",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{day}}?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "{{day}}"
+          },
+          {
+            "at": "/revision",
+            "equals": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-import",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/0000dead-0000-4000-8000-000000000002/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 404
+      }
+    }
+  ]
+}
