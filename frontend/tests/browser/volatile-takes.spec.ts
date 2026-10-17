@@ -51,21 +51,13 @@ for (const navigation of ['library', 'settings', 'language']) {
     }
     await expect(page.getByRole('button', { name: 'My recording', exact: false })).toBeEnabled()
     await expect(page.getByRole('alert').filter({ hasText: 'Keep it open' })).toBeVisible()
-    let sent: { id: string; hash: string } | null = null
-    page.on('request', (request) => {
-      if (!request.url().endsWith('/api/v1/recordings')) return
-      const payload = request.postDataJSON()
-      sent = {
-        id: payload.id,
-        hash: createHash('sha256')
-          .update(Buffer.from(payload.audio_base64, 'base64'))
-          .digest('hex'),
-      }
-    })
+    // WebKit can report the request event after the server has already stored the upload.
+    const upload = page.waitForRequest((request) => request.url().endsWith('/api/v1/recordings'))
     await page.evaluate(() =>
       (window as unknown as { __restoreTakes: () => void }).__restoreTakes(),
     )
     await page.getByRole('button', { name: 'Retry', exact: true }).last().click()
+    const payload = (await upload).postDataJSON()
     await expect
       .poll(
         async () =>
@@ -73,7 +65,10 @@ for (const navigation of ['library', 'settings', 'language']) {
       )
       .toBe(1)
     const recordings = await (await request.get(`/api/v1/phrases/${target}/recordings`)).json()
-    expect(sent).toEqual({ id: originalId, hash: recordings[0].sha256 })
+    expect({
+      id: payload.id,
+      hash: createHash('sha256').update(Buffer.from(payload.audio_base64, 'base64')).digest('hex'),
+    }).toEqual({ id: originalId, hash: recordings[0].sha256 })
     expect(recordings[0].id).toBe(originalId)
     await expect.poll(() => retainedKeys(page, 'take-v2:')).toHaveLength(0)
   })
