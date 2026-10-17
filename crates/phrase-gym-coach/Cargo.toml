@@ -11,6 +11,11 @@ name = "phrase-gym-coach"
 path = "src/main.rs"
 required-features = ["desktop"]
 
+# Its target derivation and redaction are unit-tested; the probe itself only runs by hand.
+[[example]]
+name = "cli_probe"
+test = true
+
 [features]
 desktop = ["dep:egui", "dep:eframe", "dep:wgpu", "dep:rfd"]
 

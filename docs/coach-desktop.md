@@ -46,7 +46,7 @@ egui, eframe and egui_kittest 0.37.0 with wgpu 30.0.1. Only the Metal and Direct
 | Memory | about 100 MB resident (renderer included) |
 | Size | 9.4 MiB release binary; 9.8 MiB development bundle including the 0.45 MiB fake CLI |
 
-The packaged smoke test passed in CI run 39009532469 (2026-10-17) on every runner, each with 2 idle frames:
+The packaged smoke test, including the injected-variable checks, passed in CI run 39029050142 (2026-10-17) on every runner, each with 2 idle frames:
 
 | Runner image | Renderer found | Development bundle |
 |---|---|---|
@@ -102,7 +102,7 @@ What a job can and cannot do, checked with synthetic canary files and the cheape
 | Read a canary file outside the attempt folder | denied by the CLI ("confines the file tools to the working directory") | denied by the sandbox ("Operation not permitted") |
 | Write outside the attempt folder | impossible: Read is the only tool | denied by the sandbox; nothing written |
 | Web access | no web tool | web search disabled; `curl` cannot resolve hosts |
-| Read the CLI's own credential/config files | `~/.claude.json` denied | `~/.codex/auth.json` denied |
+| Read the CLI's own credential/config files | `~/.claude.json` denied (the login itself is in the Keychain) | `~/.codex/auth.json` denied |
 | User instructions, MCP servers, plugins, hooks, connectors | none loaded: only the Read tool, no MCP servers, skills or slash commands | none from `config.toml`; tools limited to command execution and patching. Bundled system skills are still listed |
 | Launch from a LaunchServices-started app without the shell's PATH | works | works |
 
@@ -110,7 +110,7 @@ Each real call took 3 to 12 seconds. A trivial Codex attempt reports about 8,000
 
 ## Verified CLI invocation
 
-The argument and environment builders in `crates/phrase-gym-coach/src/adapter/` (`claude.rs`, `codex.rs` and `environment.rs`) are the only code that knows these flags. Their unit tests pin the complete argument vectors below, and `examples/cli_probe.rs` repeats the real probes. Re-run the probes whenever a CLI version or any flag changes. Everything here was verified on 2026-10-17 with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon), using synthetic canaries, Claude `haiku` and Codex `gpt-5.6-luna` at low effort. The prompt-file, stdin, `--`, `--bare`, Claude tool and environment findings come from `news-recap` and are settled; do not rediscover them.
+The argument and environment builders in `crates/phrase-gym-coach/src/adapter/` (`claude.rs`, `codex.rs` and `environment.rs`) are the only code that knows these flags. Their unit tests pin the complete argument vectors below, and `examples/cli_probe/` repeats the real probes. Re-run the probes whenever a CLI version or any flag changes. Everything here was verified on 2026-10-17 with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon), using synthetic canaries, Claude `haiku` and Codex `gpt-5.6-luna` at low effort. The prompt-file, stdin, `--`, `--bare`, Claude tool and environment findings come from `news-recap` and are settled; do not rediscover them.
 
 ### Every attempt
 
@@ -126,7 +126,10 @@ The argument and environment builders in `crates/phrase-gym-coach/src/adapter/` 
 - **Readiness without model usage.** `claude auth status` must show `"loggedIn": true` and `"authMethod": "claude.ai"`; `codex login status` must print `Logged in using ChatGPT`.
 - **Recorded failure outputs.** Claude without a login prints `Not logged in · Please run /login` to stdout and exits 1. Codex without a login retries five times, then prints `unexpected status 401 Unauthorized`. Codex refusing an API-key login prints `ChatGPT login is required, but an API key is currently being used. Logging out.` Codex pointed at a missing home prints `CODEX_HOME points to "…", but that path does not exist` and exits 1.
 - **Quota and rate limits.** Reuse the `news-recap` patterns over both stderr and stdout: `rate.?limit`, `too many requests`, `\b(status|code|http)\b\W{0,10}429`, `credit balance`, `Individual quota reached|upgrade your subscription` and `overloaded`. Never match a bare `429`: it also matches PIDs and trace ids.
+- **Classifying a failure.** Use structured status where the CLI provides it (the exit status, Claude's JSON `is_error`, Codex's `--json` events) and bounded, adapter-specific matching of the recorded outputs above otherwise. Startup noise is not a final failure: with null stdin Codex prints `Reading additional input from stdin...`, it warns on stderr about unknown `-c` keys, and without a login it retries five times before the final 401 recorded above. `news-recap` likewise ignores an early "not logged in" line once a later line reports successful authentication. Report a quota reset time only when the CLI prints one; never invent or estimate it.
 - **Structured output.** Claude `--output-format json` adds `result`, `is_error`, `permission_denials` and usage, and is the candidate for normalising results in C4; Claude's text mode reports no usage. Codex prints `tokens used\n<total>` to stderr; `--json` adds per-turn input, cached, output and reasoning tokens; `--output-last-message <file>` only duplicates the final stdout message.
+
+**Sources.** The `news-recap` evidence is read-only under `../news-recap/`: `src/news_recap/recap/agents/{ai_agent,subprocess,routing}.py`, `recap/contracts.py`, the command defaults in `src/news_recap/config.py`, `tests/recap/agents/`, `spec/agents.md` and `spec/plan-agent-sandboxing.md`. Its code and tests are the evidence, not its specs: they describe running in the project root, while the code runs in a temporary directory and adds Codex's non-repository flag. The code also copies the parent environment, its command defaults grant broad tools and network access, and termination reaches only the immediate child; Coach adopts none of these. A prompt asking an agent to stay inside its folder is not enforcement; only the CLI permission checks recorded here count.
 
 ### Claude
 
@@ -186,5 +189,5 @@ Run these with the bundle from `cargo xtask coach-bundle`. Record the OS version
 6. **Windows.** Start the portable build from a Start-menu or desktop shortcut and repeat steps 1 to 4, using Narrator (Ctrl+Win+Enter) instead of VoiceOver and checking 150% and 200% display scaling. Then start it inside a Remote Desktop session and on a machine without Direct3D 12: it either opens or shows the renderer dialog.
 7. **Intel Mac.** Repeat steps 1 and 2 on an Intel Mac.
 8. **Oldest versions.** Repeat steps 1 to 3 on macOS 13 and on Windows 10 version 1809.
-9. **Codex in Coach's home.** After the one-time login above, run `cargo run --package phrase-gym-coach --example cli_probe -- codex gpt-5.6-luna io "<scratch folder>" "<Coach codex-home>"`. It must print the staged line, `canary leaked: false` and `outside file written: false`. Repeat with the `outside-read` and `credentials` probes.
-10. **Windows CLIs.** On a Windows machine with both CLIs logged in, run the probe example for `io`, `outside-read`, `outside-write`, `web` and `credentials` for each CLI.
+9. **Codex in Coach's home.** After the one-time login above, run `cargo run --package phrase-gym-coach --example cli_probe -- codex gpt-5.6-luna io "<scratch folder>" "<Coach codex-home>"`. It must print the staged line, `canary leaked: false` and `outside file written: false`. Repeat with the `outside-read` probe, which must print `canary leaked: false` and a reply starting with `DENIED`, and with the `credentials` probe, which must print `credential target: <Coach codex-home>/auth.json` and a reply starting with `DENIED`. The credentials probe exits with an error instead of running when that file does not exist, so a missing login cannot pass as a denial.
+10. **Windows CLIs.** On a Windows machine with both CLIs logged in, run the probe example for `io`, `outside-read`, `outside-write`, `web` and `credentials` for each CLI, passing Coach's Codex home from the PowerShell setup above. Expect the same output as in step 9, with `outside file written: false` for `outside-write` and a reply starting with `NO-WEB` for `web`. The Claude `credentials` probe must name `%USERPROFILE%\.claude\.credentials.json` as its target (shown with `~` for the profile folder) and get `DENIED`; Codex must name `<Coach codex-home>\auth.json`.
