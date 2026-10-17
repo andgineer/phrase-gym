@@ -30,7 +30,7 @@ The report also lists the Codex and Claude executables found without the shell's
 | [Codex CLI](https://github.com/openai/codex/blob/main/docs/install.md) | 12+ | officially Windows 11 via WSL2; a native PowerShell installer also exists |
 | **Coach claims** | **13.0+ on Apple Silicon and Intel** (`LSMinimumSystemVersion` 13.0) | **10 version 1809+ x64**, with the Codex gap below |
 
-A supported release needs both CLI adapters, so the macOS floor follows Claude Code. Native Windows Codex is unverified: its own documentation names WSL2, and Coach launches native executables only. Tested so far: macOS 27.0.1 on Apple Silicon by hand, plus the CI images. The oldest claimed versions, macOS 13 and Windows 10 1809, are untested.
+A supported release needs both CLI adapters, so the macOS floor follows Claude Code. Native Windows Codex is unverified: its own documentation names WSL2, and Coach launches native executables only. Tested so far: macOS 27.0.1 on Apple Silicon by hand, plus the CI images listed below. The oldest claimed versions, macOS 13 and Windows 10 1809, are untested.
 
 ## Toolkit and measurements
 
@@ -43,7 +43,15 @@ egui, eframe and egui_kittest 0.37.0 with wgpu 30.0.1. Only the Metal and Direct
 | Memory | about 100 MB resident (renderer included) |
 | Size | 9.4 MiB release binary; 9.8 MiB development bundle including the 0.45 MiB fake CLI |
 
-Renderer fallback: none was added. The local window starts on Metal, and each CI smoke report records the renderer its runner found. If the renderer cannot start, a native dialog explains the next step: update the graphics driver, or enable graphics acceleration in a Remote Desktop or virtual machine session.
+The packaged smoke test passed in CI run 39009532469 (2026-10-17) on every runner, each with 2 idle frames and no terminal variables reaching the app:
+
+| Runner image | Renderer found | Development bundle |
+|---|---|---|
+| `macos-26-arm64` (Apple Silicon VM) | Metal, Apple Paravirtual device | 9.8 MiB |
+| `macos-15` on `macos-15-intel` (Intel VM) | Metal, Apple Paravirtual device | 10.7 MiB |
+| `windows-2025-vs2026` (no GPU) | Direct3D 12, Microsoft Basic Render Driver (software) | 11.3 MiB |
+
+Renderer fallback: none was added. Direct3D 12 starts even without a GPU through the Windows software rasterizer, and Metal starts in the macOS virtual machines. If the renderer cannot start, a native dialog explains the next step: update the graphics driver, or enable graphics acceleration in a Remote Desktop or virtual machine session.
 
 ## Per-user folders and credentials
 
@@ -88,7 +96,7 @@ Each real call took 3 to 12 seconds. A trivial Codex attempt reports about 8,000
 ## Remaining gaps
 
 - **Codex home login.** The probes used the operator's own `~/.codex` with user configuration ignored. A run inside Coach's own Codex home needs your one-time login, followed by the confirming probe in the checklist below.
-- **Windows CLIs.** No Windows probes have run with logged-in CLIs. Still unverified there: native Codex support and whether its permission profile is enforced, Claude's `--restricted` confinement, and where the tools are installed. CI covers only the build, the UI tests, process cleanup through the Job Object, the credential store and the packaged smoke test.
+- **Windows CLIs.** No Windows probes have run with logged-in CLIs. Still unverified there: native Codex support and whether its permission profile is enforced, Claude's `--restricted` confinement, and where the tools are installed. CI covers only the build, the UI tests, process cleanup through the Job Object (including grandchildren and dropping the supervisor), Windows Credential Manager and the packaged smoke test.
 - **Crash cleanup on macOS.** If Coach itself is killed, its CLI children survive, because macOS has nothing like the Windows kill-on-close Job Object. Recovery after a crash belongs to the runner work.
 - **Claude updates.** Claude's native installer keeps only the two newest versions, so the version Coach found can disappear after updates. Coach must recheck the tool before every attempt.
 
