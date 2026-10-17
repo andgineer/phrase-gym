@@ -23,6 +23,7 @@ pub(crate) fn routes(client_dir: Option<&Path>) -> Router {
             .route("/", get(index))
             .route("/index.html", get(index))
             .route("/learn", get(index))
+            .route("/learn/", get(index))
             .route("/learn/{*rest}", get(index))
             .route("/icon.svg", get(icon))
             .route("/assets/{*path}", get(asset))

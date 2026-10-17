@@ -475,6 +475,7 @@ successors = []
 [[module]]
 path = "tests/browser_legacy.py"
 responsibility = "Browser harness that serves a legacy offline worker to verify its retirement."
-status = "pending"
-stage = 6
-successors = []
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "Retired without a successor: no Python-era service worker is installed, so the client drops its retirement path and this harness in stage 2b."
+stage = 2

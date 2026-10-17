@@ -48,7 +48,13 @@ async fn the_built_client_is_served_same_origin_without_caching_or_offline_asset
     std::fs::write(client.path().join("assets/.hidden"), "secret").unwrap();
     let server = start(Some(client.path().to_owned()));
 
-    for path in ["/", "/index.html", "/learn", "/learn/en/practice/retained"] {
+    for path in [
+        "/",
+        "/index.html",
+        "/learn",
+        "/learn/",
+        "/learn/en/practice/retained",
+    ] {
         let reply = send(&server.router, get(path)).await;
         assert_eq!(reply.status, StatusCode::OK, "{path}");
         assert_eq!(reply.body, "<main>Online client</main>");
