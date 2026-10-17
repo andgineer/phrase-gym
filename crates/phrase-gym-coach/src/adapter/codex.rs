@@ -116,111 +116,150 @@ fn toml_string(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::super::CliAdapter;
     use super::super::environment::HostEnvironment;
     use super::super::invocation::{AttemptFiles, Effort, ModelSelection};
     use super::*;
 
-    fn build(executable: &Path) -> Invocation {
-        let root = std::env::temp_dir();
-        let attempt = AttemptFiles::new(root.join("attempt Ünï Ђ"), "prompt.md").unwrap();
-        let model = ModelSelection::new("gpt-5.6-luna", Some(Effort::Low)).unwrap();
-        let host = HostEnvironment::from_variables([
-            (
-                OsString::from("OPENAI_API_KEY"),
-                OsString::from("sk-openai"),
-            ),
-            (
-                OsString::from("CODEX_HOME"),
-                OsString::from("/Users/learner/.codex"),
-            ),
-        ]);
+    #[cfg(unix)]
+    const EXECUTABLE: &str = "/opt/homebrew/Caskroom/codex/0.159.2 Ünï/bin/codex";
+    #[cfg(unix)]
+    const INSTALL_READ: &str = r#""/opt/homebrew/Caskroom/codex/0.159.2 Ünï/bin"="read""#;
+    #[cfg(unix)]
+    const ATTEMPT: &str = "/Users/learner/Library/Caches/Coach Ünï/attempts/attempt Ђ";
+    #[cfg(unix)]
+    const BOOTSTRAP: &str = "Read your task from \
+        /Users/learner/Library/Caches/Coach Ünï/attempts/attempt Ђ/prompt.md and execute it.";
+    #[cfg(unix)]
+    const CODEX_HOME: &str = "/Users/learner/Library/Application Support/Coach Ünï/codex-home";
+    #[cfg(windows)]
+    const EXECUTABLE: &str = r"C:\Users\learner\AppData\Local\Programs\Codex Ünï\codex.exe";
+    #[cfg(windows)]
+    const INSTALL_READ: &str =
+        r#""C:\\Users\\learner\\AppData\\Local\\Programs\\Codex Ünï"="read""#;
+    #[cfg(windows)]
+    const ATTEMPT: &str = r"C:\Users\learner\AppData\Local\Coach Ünï\attempts\attempt Ђ";
+    #[cfg(windows)]
+    const BOOTSTRAP: &str = r"Read your task from C:\Users\learner\AppData\Local\Coach Ünï\attempts\attempt Ђ\prompt.md and execute it.";
+    #[cfg(windows)]
+    const CODEX_HOME: &str = r"C:\Users\learner\AppData\Local\Coach Ünï\data\codex-home";
+
+    fn host() -> HostEnvironment {
+        HostEnvironment::from_variables(
+            [
+                ("HOME", "/Users/learner"),
+                ("USERPROFILE", r"C:\Users\learner"),
+                ("OPENAI_API_KEY", "sk-openai"),
+                ("CODEX_HOME", "/Users/learner/.codex"),
+            ]
+            .map(|(key, value)| (OsString::from(key), OsString::from(value))),
+        )
+    }
+
+    fn build(executable: &Path, effort: Option<Effort>) -> Invocation {
+        let attempt = AttemptFiles::new(ATTEMPT.into(), "prompt.md").unwrap();
+        let model = ModelSelection::new("gpt-5.6-luna", effort).unwrap();
         CliAdapter::Codex
             .invocation(&LaunchContext {
                 executable,
                 attempt: &attempt,
                 model: &model,
-                host: &host,
-                codex_home: &root.join("Coach codex home"),
+                host: &host(),
+                codex_home: Path::new(CODEX_HOME),
             })
             .unwrap()
     }
 
-    fn option_values<'a>(args: &'a [String], flag: &str) -> Vec<&'a str> {
-        args.windows(2)
-            .filter(|pair| pair[0] == flag)
-            .map(|pair| pair[1].as_str())
-            .collect()
+    fn expected_arguments(effort: &[&str]) -> Vec<String> {
+        let profile = [
+            r#"permissions.coach_job={filesystem={":root"="deny", ":minimal"="read", "#,
+            r#"":slash_tmp"="deny", ":tmpdir"="deny", "#,
+            INSTALL_READ,
+            r#", ":workspace_roots"={"."="write"}}, network={enabled=false}}"#,
+        ]
+        .concat();
+        let mut expected: Vec<String> = [
+            "exec",
+            "--skip-git-repo-check",
+            "--ignore-user-config",
+            "--ignore-rules",
+            "--ephemeral",
+            "-c",
+            r#"default_permissions="coach_job""#,
+            "-c",
+            &profile,
+            "-c",
+            r#"forced_login_method="chatgpt""#,
+            "-c",
+            r#"approval_policy="never""#,
+            "-c",
+            r#"web_search="disabled""#,
+            "-c",
+            r#"history.persistence="none""#,
+            "-c",
+            "check_for_update_on_startup=false",
+            "--disable",
+            "apps",
+            "--disable",
+            "browser_use",
+            "--disable",
+            "browser_use_external",
+            "--disable",
+            "computer_use",
+            "--disable",
+            "goals",
+            "--disable",
+            "hooks",
+            "--disable",
+            "image_generation",
+            "--disable",
+            "in_app_browser",
+            "--disable",
+            "multi_agent",
+            "--disable",
+            "plugins",
+            "--disable",
+            "remote_plugin",
+            "--disable",
+            "skill_mcp_dependency_install",
+            "--disable",
+            "tool_suggest",
+            "--disable",
+            "view_image",
+            "--model",
+            "gpt-5.6-luna",
+        ]
+        .map(str::to_owned)
+        .to_vec();
+        expected.extend(effort.iter().map(|value| (*value).to_owned()));
+        expected.push(BOOTSTRAP.to_owned());
+        expected
     }
 
     #[test]
-    fn runs_exec_outside_git_with_a_file_bootstrap_and_low_effort() {
-        let executable = std::env::temp_dir().join("Caskroom").join("codex");
-        let args = build(&executable).arguments();
-        assert_eq!(&args[..5], ISOLATION);
-        assert!(args.contains(&"--skip-git-repo-check".to_owned()));
-        let prompt = std::env::temp_dir().join("attempt Ünï Ђ").join("prompt.md");
+    fn passes_exactly_the_verified_arguments_with_low_effort() {
+        let invocation = build(Path::new(EXECUTABLE), Some(Effort::Low));
         assert_eq!(
-            args.last().unwrap(),
-            &format!("Read your task from {} and execute it.", prompt.display())
+            invocation.arguments(),
+            expected_arguments(&["-c", "model_reasoning_effort=low"])
         );
-        assert_eq!(option_values(&args, "--model"), ["gpt-5.6-luna"]);
-        assert!(option_values(&args, "-c").contains(&"model_reasoning_effort=low"));
+        assert_eq!(invocation.program, Path::new(EXECUTABLE));
+        assert_eq!(invocation.cwd, Path::new(ATTEMPT));
     }
 
     #[test]
-    fn confines_commands_with_a_permission_profile_and_disables_extensions() {
-        let executable = std::env::temp_dir().join("Caskroom").join("codex");
-        let args = build(&executable).arguments();
-        let settings = option_values(&args, "-c");
-        assert!(settings.contains(&"default_permissions=\"coach_job\""));
-        let profile = settings
-            .iter()
-            .find(|setting| setting.starts_with("permissions.coach_job="))
-            .unwrap();
-        for rule in [
-            "\":root\"=\"deny\"",
-            "\":slash_tmp\"=\"deny\"",
-            "\":tmpdir\"=\"deny\"",
-            "\":workspace_roots\"={\".\"=\"write\"}",
-            "network={enabled=false}",
-        ] {
-            assert!(profile.contains(rule), "{rule} missing from {profile}");
-        }
-        assert!(settings.contains(&"web_search=\"disabled\""));
-        assert!(settings.contains(&"forced_login_method=\"chatgpt\""));
-        assert_eq!(option_values(&args, "--disable"), DISABLED_FEATURES);
-        for forbidden in [
-            "--sandbox",
-            "--dangerously-bypass-approvals-and-sandbox",
-            "--full-auto",
-            "danger-full-access",
-            "network_access=true",
-            "--profile",
-        ] {
-            assert!(!args.iter().any(|a| a.contains(forbidden)), "{forbidden}");
-        }
+    fn passes_exactly_the_verified_arguments_without_effort() {
+        let invocation = build(Path::new(EXECUTABLE), None);
+        assert_eq!(invocation.arguments(), expected_arguments(&[]));
     }
 
     #[test]
-    fn uses_the_coach_codex_home_and_strips_api_keys() {
-        let executable = std::env::temp_dir().join("Caskroom").join("codex");
-        let invocation = build(&executable);
-        let home = invocation
-            .env
-            .iter()
-            .filter(|(key, _)| key == "CODEX_HOME")
-            .map(|(_, value)| PathBuf::from(value))
-            .collect::<Vec<_>>();
-        assert_eq!(home, [std::env::temp_dir().join("Coach codex home")]);
-        assert!(
-            !invocation
-                .env
-                .iter()
-                .any(|(key, _)| key == "OPENAI_API_KEY")
-        );
+    fn adds_only_the_coach_codex_home_to_the_allowlisted_environment() {
+        let env = build(Path::new(EXECUTABLE), Some(Effort::Low)).env;
+        let mut expected = child_environment(&host(), Path::new(EXECUTABLE).parent().unwrap());
+        expected.push((OsString::from("CODEX_HOME"), OsString::from(CODEX_HOME)));
+        assert_eq!(env, expected);
+        assert!(!env.iter().any(|(key, _)| key == "OPENAI_API_KEY"));
     }
 
     #[test]
@@ -231,7 +270,7 @@ mod tests {
         );
         assert_eq!(toml_string("a\"b\nc"), r#""a\"b\u000Ac""#);
         let executable = std::env::temp_dir().join("Ünï \"tools\"").join("codex");
-        let args = build(&executable).arguments();
+        let args = build(&executable, Some(Effort::Low)).arguments();
         let directory = executable.parent().unwrap().to_str().unwrap();
         assert!(args.iter().any(|a| a.contains(&toml_string(directory))));
     }

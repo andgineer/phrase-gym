@@ -5,7 +5,14 @@ use std::time::{Duration, Instant};
 use crate::coach::{BINARY, bundle, io};
 use crate::tools::{Failure, Workspace};
 
-const CANARY: &str = "PHRASE_GYM_TERMINAL_CANARY";
+const TERMINAL_CANARY: &str = "PHRASE_GYM_TERMINAL_CANARY";
+// Injected into the app's own launch environment with fake values; the app must keep them from the
+// bundled fake CLI. Kept in step with the app's smoke checks.
+const LAUNCH_VARIABLES: [(&str, &str); 3] = [
+    ("PHRASE_GYM_LAUNCH_CANARY", "1"),
+    ("ANTHROPIC_API_KEY", "sk-ant-fake-coach-smoke"),
+    ("OPENAI_API_KEY", "sk-fake-coach-smoke"),
+];
 const LAUNCH_DEADLINE: Duration = Duration::from_mins(4);
 
 // Launches the bundle the way a user does (LaunchServices on macOS, a fresh user environment on
@@ -29,6 +36,14 @@ pub fn smoke(workspace: &Workspace) -> Result<(), Failure> {
     }
     if document["terminal_canary_inherited"] != serde_json::Value::Bool(false) {
         problems.push("the app inherited the launching terminal's environment".to_owned());
+    }
+    let injected: Vec<&str> = LAUNCH_VARIABLES.iter().map(|(name, _)| *name).collect();
+    if document["launch_variables"] != serde_json::json!(injected) {
+        problems.push(
+            "the injected launch variables did not all reach the app, so the fake CLI's \
+             environment check proved nothing"
+                .to_owned(),
+        );
     }
     let failing = out.join("renderer failure report.json");
     let status = Command::new(binary_inside(&launcher))
@@ -95,7 +110,7 @@ fn binary_inside(launcher: &Path) -> PathBuf {
 fn user_launch(launcher: &Path, report: &Path) -> Result<Command, Failure> {
     if cfg!(target_os = "macos") {
         // `open` forwards its own environment to the app, so it gets only what launchd gives a
-        // Finder launch: no shell PATH additions and no variables exported in a terminal.
+        // Finder launch plus the variables added with --env.
         let mut command = Command::new("/usr/bin/open");
         command.env_clear();
         for name in ["HOME", "USER", "LOGNAME", "SHELL", "TMPDIR"] {
@@ -104,27 +119,38 @@ fn user_launch(launcher: &Path, report: &Path) -> Result<Command, Failure> {
             }
         }
         command.env("PATH", "/usr/bin:/bin:/usr/sbin:/sbin");
-        command.arg("-n").arg("-W").arg(launcher);
+        command.arg("-n").arg("-W");
+        for (name, value) in LAUNCH_VARIABLES {
+            command.arg("--env").arg(format!("{name}={value}"));
+        }
+        command.arg(launcher);
         command.arg("--args").arg("--smoke-test").arg(report);
         Ok(command)
     } else if cfg!(windows) {
         let quote = |path: &Path| format!("'\"{}\"'", path.display());
+        let injected: Vec<String> = LAUNCH_VARIABLES
+            .iter()
+            .map(|(name, value)| format!("'{name}' = '{value}'"))
+            .collect();
+        // -Environment (PowerShell 7.4+) adds variables on top of the fresh user environment;
+        // Windows PowerShell 5.1 lacks it and builds an incomplete -UseNewEnvironment block.
         let script = format!(
             "$p = Start-Process -FilePath {} -ArgumentList '--smoke-test', {} \
-             -UseNewEnvironment -Wait -PassThru; exit $p.ExitCode",
+             -UseNewEnvironment -Environment @{{ {} }} -Wait -PassThru; exit $p.ExitCode",
             quote(launcher),
-            quote(report)
+            quote(report),
+            injected.join("; ")
         );
-        // Windows PowerShell 5.1 builds an incomplete -UseNewEnvironment block; prefer PowerShell 7.
-        let shell = if Command::new("pwsh").arg("-Version").output().is_ok() {
-            "pwsh"
-        } else {
-            "powershell"
-        };
-        let mut command = Command::new(shell);
+        if Command::new("pwsh").arg("-Version").output().is_err() {
+            return Err(Failure::new(
+                "coach-smoke on Windows needs PowerShell 7.4 or newer (pwsh) for Start-Process \
+                 -UseNewEnvironment -Environment",
+            ));
+        }
+        let mut command = Command::new("pwsh");
         command.args(["-NoProfile", "-NonInteractive", "-Command", &script]);
         // Visible to PowerShell only; -UseNewEnvironment must keep it from the app.
-        command.env(CANARY, "1");
+        command.env(TERMINAL_CANARY, "1");
         Ok(command)
     } else {
         Err(Failure::new("Coach smoke tests run on macOS or Windows"))

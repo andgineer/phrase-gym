@@ -8,10 +8,21 @@ use serde::Serialize;
 use crate::adapter::CliAdapter;
 use crate::adapter::environment::{HostEnvironment, child_environment};
 use crate::platform::paths::CoachPaths;
-use crate::platform::{resources, tools};
+use crate::platform::resources;
+use crate::platform::tools::{self, Discovery};
 use crate::process::{Ending, Limits, ProcessSpec, run};
 
 const ARGUMENTS: [&str; 3] = ["Grüße", "Ђурђевак", "two words"];
+
+// Set only in the launching shell; a user-like launch must keep it from the app.
+pub const TERMINAL_CANARY: &str = "PHRASE_GYM_TERMINAL_CANARY";
+// The smoke launcher puts these into the app's own environment; the app must keep them from its
+// children, and reports which arrived so that check cannot pass vacuously.
+pub const LAUNCH_VARIABLES: [&str; 3] = [
+    "PHRASE_GYM_LAUNCH_CANARY",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+];
 
 const EXPECTED: [&str; 5] = [
     "arguments_round_trip",
@@ -40,7 +51,15 @@ pub struct ProcessChecks {
 pub struct ToolProbe {
     pub adapter: CliAdapter,
     pub path: Option<PathBuf>,
+    pub native: bool,
     pub version: Option<String>,
+}
+
+pub fn launch_variables_received() -> Vec<&'static str> {
+    LAUNCH_VARIABLES
+        .into_iter()
+        .filter(|name| std::env::var_os(name).is_some())
+        .collect()
 }
 
 impl ProcessChecks {
@@ -125,13 +144,10 @@ async fn fake_child_checks(executable: &Path, checks: &mut ProcessChecks) -> Res
         .and_then(|cwd| Path::new(cwd).canonicalize().ok());
     checks.record("working_directory", cwd == attempt.canonicalize().ok());
     let isolated = document["env"].as_object().is_some_and(|environment| {
-        [
-            "PHRASE_GYM_TERMINAL_CANARY",
-            "ANTHROPIC_API_KEY",
-            "OPENAI_API_KEY",
-        ]
-        .iter()
-        .all(|name| !environment.contains_key(*name))
+        LAUNCH_VARIABLES
+            .iter()
+            .chain([&TERMINAL_CANARY])
+            .all(|name| !environment.contains_key(*name))
     });
     checks.record("environment_isolated", isolated);
 
@@ -169,9 +185,13 @@ async fn tool_probes(directory: &Path) -> Vec<ToolProbe> {
     let host = HostEnvironment::current();
     let mut probes = Vec::new();
     for adapter in CliAdapter::ALL {
-        let path = tools::discover(adapter, &host);
+        let (path, native) = match tools::discover(adapter, &host) {
+            Discovery::Native(path) => (Some(path), true),
+            Discovery::Script(path) => (Some(path), false),
+            Discovery::Missing => (None, false),
+        };
         let mut version = None;
-        if let Some(executable) = &path {
+        if let Some(executable) = path.as_ref().filter(|_| native) {
             let spec = ProcessSpec {
                 program: executable.clone(),
                 args: vec![OsString::from("--version")],
@@ -197,6 +217,7 @@ async fn tool_probes(directory: &Path) -> Vec<ToolProbe> {
         probes.push(ToolProbe {
             adapter,
             path,
+            native,
             version,
         });
     }

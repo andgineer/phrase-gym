@@ -56,103 +56,124 @@ pub(super) fn invocation(context: &LaunchContext<'_>) -> Result<Invocation, Invo
 
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
 
     use super::super::CliAdapter;
     use super::super::environment::HostEnvironment;
     use super::super::invocation::{AttemptFiles, Effort, ModelSelection};
     use super::*;
 
+    #[cfg(unix)]
+    const EXECUTABLE: &str = "/Users/learner/.local/share/claude/versions/2.1.302";
+    #[cfg(unix)]
+    const ATTEMPT: &str = "/Users/learner/Library/Caches/Coach Ünï/attempts/attempt Ђ";
+    #[cfg(unix)]
+    const BOOTSTRAP: &str = "Read your task from \
+        /Users/learner/Library/Caches/Coach Ünï/attempts/attempt Ђ/prompt.md and execute it.";
+    #[cfg(windows)]
+    const EXECUTABLE: &str = r"C:\Users\learner\.local\bin\claude.exe";
+    #[cfg(windows)]
+    const ATTEMPT: &str = r"C:\Users\learner\AppData\Local\Coach Ünï\attempts\attempt Ђ";
+    #[cfg(windows)]
+    const BOOTSTRAP: &str = r"Read your task from C:\Users\learner\AppData\Local\Coach Ünï\attempts\attempt Ђ\prompt.md and execute it.";
+
+    fn host() -> HostEnvironment {
+        HostEnvironment::from_variables(
+            [
+                ("HOME", "/Users/learner"),
+                ("USERPROFILE", r"C:\Users\learner"),
+                ("ANTHROPIC_API_KEY", "sk-ant"),
+                ("CLAUDECODE", "1"),
+                ("PATH", "/Users/learner/.npm/bin:/usr/bin"),
+            ]
+            .map(|(key, value)| (OsString::from(key), OsString::from(value))),
+        )
+    }
+
     fn build(model: &ModelSelection) -> Invocation {
-        let root = std::env::temp_dir();
-        let attempt = AttemptFiles::new(root.join("attempt Ünï Ђ"), "prompt.md").unwrap();
-        let host = HostEnvironment::from_variables([
-            (OsString::from("HOME"), OsString::from("/Users/learner")),
-            (
-                OsString::from("ANTHROPIC_API_KEY"),
-                OsString::from("sk-ant"),
-            ),
-        ]);
-        let executable = root.join("tools").join("claude");
+        let attempt = AttemptFiles::new(ATTEMPT.into(), "prompt.md").unwrap();
         CliAdapter::Claude
             .invocation(&LaunchContext {
-                executable: &executable,
+                executable: Path::new(EXECUTABLE),
                 attempt: &attempt,
                 model,
-                host: &host,
+                host: &host(),
                 codex_home: Path::new("/unused"),
             })
             .unwrap()
     }
 
     #[test]
-    fn runs_print_mode_with_a_file_bootstrap_after_the_option_separator() {
-        let model = ModelSelection::new("haiku", None).unwrap();
-        let invocation = build(&model);
-        let args = invocation.arguments();
-        let prompt = std::env::temp_dir().join("attempt Ünï Ђ").join("prompt.md");
-        assert_eq!(&args[..3], ["-p", "--model", "haiku"]);
-        assert_eq!(args[args.len() - 2], "--");
+    fn passes_exactly_the_verified_arguments_without_effort() {
+        let invocation = build(&ModelSelection::new("haiku", None).unwrap());
         assert_eq!(
-            args[args.len() - 1],
-            format!("Read your task from {} and execute it.", prompt.display())
+            invocation.arguments(),
+            [
+                "-p",
+                "--model",
+                "haiku",
+                "--safe-mode",
+                "--restricted",
+                "--strict-mcp-config",
+                "--tools",
+                "Read",
+                "--allowed-tools",
+                "Read",
+                "--permission-prompts",
+                "none",
+                "--no-session-persistence",
+                "--disable-slash-commands",
+                "--",
+                BOOTSTRAP,
+            ]
         );
-        assert_eq!(invocation.cwd, std::env::temp_dir().join("attempt Ünï Ђ"));
+        assert_eq!(invocation.program, Path::new(EXECUTABLE));
+        assert_eq!(invocation.cwd, Path::new(ATTEMPT));
+    }
+
+    #[test]
+    fn passes_exactly_the_verified_arguments_with_effort() {
+        let invocation = build(&ModelSelection::new("haiku", Some(Effort::Low)).unwrap());
         assert_eq!(
-            invocation.program,
-            std::env::temp_dir().join("tools").join("claude")
+            invocation.arguments(),
+            [
+                "-p",
+                "--model",
+                "haiku",
+                "--effort",
+                "low",
+                "--safe-mode",
+                "--restricted",
+                "--strict-mcp-config",
+                "--tools",
+                "Read",
+                "--allowed-tools",
+                "Read",
+                "--permission-prompts",
+                "none",
+                "--no-session-persistence",
+                "--disable-slash-commands",
+                "--",
+                BOOTSTRAP,
+            ]
         );
     }
 
     #[test]
-    fn grants_only_read_and_loads_no_user_configuration() {
-        let model = ModelSelection::new("haiku", Some(Effort::Low)).unwrap();
-        let args = build(&model).arguments();
-        let separator = args.iter().position(|argument| argument == "--").unwrap();
-        let options = &args[..separator];
-        assert_eq!(&options[3..5], ["--effort", "low"]);
-        for required in ISOLATION {
-            assert!(options.contains(&(*required).to_owned()), "{required}");
-        }
-        let tools = options.iter().position(|a| a == "--tools").unwrap();
-        assert_eq!(options[tools + 1], "Read");
-        let allowed = options.iter().position(|a| a == "--allowed-tools").unwrap();
-        assert_eq!(options[allowed + 1], "Read");
-        for forbidden in [
-            "--bare",
-            "--dangerously-skip-permissions",
-            "--allow-dangerously-skip-permissions",
-            "dontAsk",
-            "bypassPermissions",
-            "WebFetch",
-            "WebSearch",
-            "Bash",
-            "Write",
-            "--mcp-config",
-            "--add-dir",
-            "--chrome",
-        ] {
-            assert!(
-                !options.iter().any(|argument| argument.contains(forbidden)),
-                "{forbidden}"
-            );
-        }
-    }
-
-    #[test]
-    fn strips_paid_api_credentials_and_disables_updates_and_connectors() {
-        let model = ModelSelection::new("haiku", None).unwrap();
-        let env = build(&model).env;
-        let names: Vec<PathBuf> = env.iter().map(|(key, _)| PathBuf::from(key)).collect();
-        assert!(!names.contains(&PathBuf::from("ANTHROPIC_API_KEY")));
-        for (key, value) in [
-            ("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "1"),
-            ("ENABLE_CLAUDEAI_MCP_SERVERS", "false"),
-        ] {
-            assert!(
-                env.contains(&(OsString::from(key), OsString::from(value))),
-                "{key}"
-            );
-        }
+    fn adds_exactly_the_update_and_connector_switches_to_the_allowlisted_environment() {
+        let env = build(&ModelSelection::new("haiku", None).unwrap()).env;
+        let mut expected = child_environment(&host(), Path::new(EXECUTABLE).parent().unwrap());
+        expected.extend(
+            [
+                ("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC", "1"),
+                ("ENABLE_CLAUDEAI_MCP_SERVERS", "false"),
+            ]
+            .map(|(key, value)| (OsString::from(key), OsString::from(value))),
+        );
+        assert_eq!(env, expected);
+        assert!(
+            !env.iter()
+                .any(|(key, _)| key == "ANTHROPIC_API_KEY" || key == "CLAUDECODE")
+        );
     }
 }

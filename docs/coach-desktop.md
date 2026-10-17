@@ -12,14 +12,17 @@ Coach is not released. This page covers the development build, the platform fact
 
 `coach-bundle` writes `Phrase Gym Coach.app` on macOS (the fake CLI used by the checks sits in `Contents/Resources`) and `Phrase Gym Coach\phrase-gym-coach.exe` with a `resources` folder on Windows. It is a development layout: unsigned, no icon, no installer.
 
-`coach-smoke` places the bundle under a path with spaces and non-ASCII characters and starts it the way a person does. On macOS that is LaunchServices (`open`) with only the variables launchd gives a Finder launch, because `open` forwards its own environment. On Windows it is `Start-Process -UseNewEnvironment` from PowerShell. The app then writes a report, and the smoke test fails unless all of these hold:
+`coach-smoke` places the bundle under a path with spaces and non-ASCII characters and starts it the way a person does. On macOS that is LaunchServices (`open`) with only the variables launchd gives a Finder launch, because `open` forwards its own environment. On Windows it is `Start-Process -UseNewEnvironment` from PowerShell 7.4 or newer (`pwsh`). Both launches add three variables to the app's own environment: `PHRASE_GYM_LAUNCH_CANARY` plus fake `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` values, passed with `open --env` on macOS and `Start-Process -Environment` on Windows. The app then writes a report, and the smoke test fails unless all of these hold:
 
 - the real window opened on a hardware or software renderer;
 - at most 2 frames were drawn during a 3-second idle period;
-- the bundled fake CLI received Unicode arguments and its working directory, saw none of the launching terminal's variables, was cut off at the 64 KiB output limit and left no grandchild running;
+- the app received all three injected variables, and the bundled fake CLI it started saw none of them;
+- the bundled fake CLI received Unicode arguments and its working directory, was cut off at the 64 KiB output limit and left no grandchild running;
 - the per-user folders exist and the credential store answered a read-only probe.
 
-The report also lists the Codex and Claude executables found without the shell's PATH and their `--version` output. Two failure paths are checked as well: a launch with no usable renderer (`WGPU_BACKEND=gl`) must exit with code 2 and an actionable message, and a launch while Coach's instance lock is held must exit with code 3. CI runs the smoke test on macOS Apple Silicon, macOS Intel and Windows x64.
+On Windows the PowerShell that launches Coach also carries `PHRASE_GYM_TERMINAL_CANARY`, and the smoke test fails if the app sees it, which proves `-UseNewEnvironment` keeps the terminal's variables out. On macOS the smoke test gives `open` a rebuilt environment, so the same property holds by construction and is not tested; a real Finder launch is step 1 of the manual checklist.
+
+The report also lists the Codex and Claude executables found without the shell's PATH, whether each is a native build, and the `--version` output of the native ones. Two failure paths are checked as well: a launch with no usable renderer (`WGPU_BACKEND=gl`) must exit with code 2 and an actionable message, and a launch while Coach's instance lock is held must exit with code 3. CI runs the smoke test on macOS Apple Silicon, macOS Intel and Windows x64.
 
 ## Supported platforms
 
@@ -43,7 +46,7 @@ egui, eframe and egui_kittest 0.37.0 with wgpu 30.0.1. Only the Metal and Direct
 | Memory | about 100 MB resident (renderer included) |
 | Size | 9.4 MiB release binary; 9.8 MiB development bundle including the 0.45 MiB fake CLI |
 
-The packaged smoke test passed in CI run 39009532469 (2026-10-17) on every runner, each with 2 idle frames and no terminal variables reaching the app:
+The packaged smoke test passed in CI run 39009532469 (2026-10-17) on every runner, each with 2 idle frames:
 
 | Runner image | Renderer found | Development bundle |
 |---|---|---|
@@ -66,15 +69,27 @@ Secrets go only to the login Keychain or Windows Credential Manager, under the s
 
 ## Agent CLI setup
 
-Verified with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon) on 2026-10-17. The exact invocation and the evidence behind each flag are in the [Coach plan](../specs/plan/coach-desktop.md#proven-cli-invocation-contract).
+Verified with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon) on 2026-10-17. The exact invocation and the evidence behind each flag are in [Verified CLI invocation](#verified-cli-invocation) below.
+
+**Supported installs.** Only native builds are verified: Claude Code from its native installer (`~/.local/bin/claude`) and Codex from the Homebrew cask (`brew install --cask codex`). Coach starts a CLI with a PATH of only the executable's folder and the system folders, so an install that is a Node script fails inside an attempt with `env: node: No such file or directory` (exit 127). That covers `npm install -g @openai/codex` (which runs `bin/codex.js`), `npm install -g @anthropic-ai/claude-code` (which runs `cli.js`) and the older `~/.claude/local/claude` wrapper. The status window reports such an install as unsupported rather than found, and Coach does not look in `~/.claude/local`. Script installs stay unsupported until the C3 settings in the [Coach plan](../specs/plan/coach-desktop.md#c3-implement-the-minimal-v1-surface) add an explicit runtime.
 
 **Claude CLI** uses the existing subscription login. Check it without using the model: `claude auth status` must report `"loggedIn": true` and `"authMethod": "claude.ai"`. Coach strips `ANTHROPIC_API_KEY` and similar variables, so an exported key never takes over.
 
-**Codex CLI** gets a separate Codex home that belongs to Coach, so the instructions (`AGENTS.md`) and skills in your normal `~/.codex` never reach a job. Sign in to it once with your ChatGPT plan:
+**Codex CLI** gets a separate Codex home that belongs to Coach, so the instructions (`AGENTS.md`) and skills in your normal `~/.codex` never reach a job. Coach creates that folder each time it starts: owner-only on macOS, and on Windows it inherits your profile's access list. Codex refuses a home that does not exist yet (`CODEX_HOME points to "…", but that path does not exist`, exit 1), so the commands below create it first and work before Coach has ever run. Sign in once with your ChatGPT plan:
 
 ```bash
-CODEX_HOME="$HOME/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/codex-home" codex login
-CODEX_HOME="$HOME/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/codex-home" codex login status
+COACH_CODEX_HOME="$HOME/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/codex-home"
+mkdir -p "$COACH_CODEX_HOME" && chmod 700 "$COACH_CODEX_HOME"
+CODEX_HOME="$COACH_CODEX_HOME" codex login
+CODEX_HOME="$COACH_CODEX_HOME" codex login status
+```
+
+On Windows, where native Codex is still unverified (see [Remaining gaps](#remaining-gaps)), the PowerShell equivalent is:
+
+```powershell
+$coachCodexHome = "$env:LOCALAPPDATA\andgineer\Phrase Gym Coach\data\codex-home"
+New-Item -ItemType Directory -Force -Path $coachCodexHome | Out-Null
+$env:CODEX_HOME = $coachCodexHome; codex login; codex login status; Remove-Item Env:CODEX_HOME
 ```
 
 The status must read `Logged in using ChatGPT`. Coach forces ChatGPT login, so an API-key login in that home is refused and logged out instead of being billed.
@@ -92,6 +107,65 @@ What a job can and cannot do, checked with synthetic canary files and the cheape
 | Launch from a LaunchServices-started app without the shell's PATH | works | works |
 
 Each real call took 3 to 12 seconds. A trivial Codex attempt reports about 8,000 tokens; Claude reports no usage in text mode.
+
+## Verified CLI invocation
+
+The argument and environment builders in `crates/phrase-gym-coach/src/adapter/` (`claude.rs`, `codex.rs` and `environment.rs`) are the only code that knows these flags. Their unit tests pin the complete argument vectors below, and `examples/cli_probe.rs` repeats the real probes. Re-run the probes whenever a CLI version or any flag changes. Everything here was verified on 2026-10-17 with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon), using synthetic canaries, Claude `haiku` and Codex `gpt-5.6-luna` at low effort. The prompt-file, stdin, `--`, `--bare`, Claude tool and environment findings come from `news-recap` and are settled; do not rediscover them.
+
+### Every attempt
+
+- **Executable.** Resolve the canonical path, following symlinks, from the documented install locations (`~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin`, `%USERPROFILE%\.local\bin`) and then the GUI's PATH; never rely on shell initialisation. A native build found later in that order wins over a script found earlier. Claude's native installer keeps only the two newest versions, so recheck the path before each attempt.
+- **Attempt folder.** A fresh folder per attempt under the Coach cache holds `prompt.md`, the staged inputs and bounded `stdout.log`/`stderr.log`. It is also the working directory, so no repository instructions or git context load.
+- **Prompt delivery.** The full prompt stays in the file. The only prompt argument is `Read your task from <absolute prompt path> and execute it.`, and stdin is null. Never use stdin: `claude -p` returns empty output once piped stdin exceeds a few KB ([anthropics/claude-code#7263](https://github.com/anthropics/claude-code/issues/7263)), and `codex exec` with a non-TTY stdin hangs waiting for EOF ([openai/codex#20919](https://github.com/openai/codex/issues/20919)). With null stdin, Codex prints `Reading additional input from stdin...` and continues.
+- **Environment.** Built from an allowlist; nothing else is inherited. On macOS: `HOME USER LOGNAME SHELL TMPDIR LANG LC_ALL LC_CTYPE`. On Windows: system and profile folders, `TEMP`/`TMP`, user and computer names and processor variables. `PATH` is the executable's folder plus the system folders, which is why Node-script installs cannot start. Everything else is dropped, including `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `CODEX_API_KEY`, proxies and parent agent session variables (`CLAUDECODE`, `CLAUDE_CODE_*`). With `ANTHROPIC_API_KEY` present, `claude auth status` reports API-key auth; with the allowlist it reports the claude.ai subscription.
+- **Supervision.** Each attempt has a deadline. A deadline, cancellation or output overflow sends TERM to the process group and KILL after a grace period (on Windows, the Job Object is terminated). Descendants are killed after a normal exit too.
+- **Answer.** Plain stdout is the default answer channel and is proven for both CLIs. Exit 0 with empty stdout is a failure ("no output produced").
+
+### Readiness, failures and usage
+
+- **Readiness without model usage.** `claude auth status` must show `"loggedIn": true` and `"authMethod": "claude.ai"`; `codex login status` must print `Logged in using ChatGPT`.
+- **Recorded failure outputs.** Claude without a login prints `Not logged in · Please run /login` to stdout and exits 1. Codex without a login retries five times, then prints `unexpected status 401 Unauthorized`. Codex refusing an API-key login prints `ChatGPT login is required, but an API key is currently being used. Logging out.` Codex pointed at a missing home prints `CODEX_HOME points to "…", but that path does not exist` and exits 1.
+- **Quota and rate limits.** Reuse the `news-recap` patterns over both stderr and stdout: `rate.?limit`, `too many requests`, `\b(status|code|http)\b\W{0,10}429`, `credit balance`, `Individual quota reached|upgrade your subscription` and `overloaded`. Never match a bare `429`: it also matches PIDs and trace ids.
+- **Structured output.** Claude `--output-format json` adds `result`, `is_error`, `permission_denials` and usage, and is the candidate for normalising results in C4; Claude's text mode reports no usage. Codex prints `tokens used\n<total>` to stderr; `--json` adds per-turn input, cached, output and reasoning tokens; `--output-last-message <file>` only duplicates the final stdout message.
+
+### Claude
+
+```text
+<claude> -p --model <model> [--effort <level>] --safe-mode --restricted --strict-mcp-config
+  --tools Read --allowed-tools Read --permission-prompts none --no-session-persistence
+  --disable-slash-commands -- "Read your task from <prompt> and execute it."
+env += CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 ENABLE_CLAUDEAI_MCP_SERVERS=false
+```
+
+- `--restricted` ignores user, project and local settings (permission allow lists, enabled plugins) and the user's `CLAUDE.md`, removes code-running tools and confines file tools to the working directory: reading a canary or `~/.claude.json` outside it fails with "--restricted confines the file tools to the working directory". Neither `--tools Read` nor `--safe-mode` replaces it: `--tools Read` alone still loads the user's `CLAUDE.md`, and `--safe-mode` alone still offers Bash, WebFetch and Write. With `--strict-mcp-config` as well, the session init lists only the Read tool, no MCP servers, skills or slash commands, two built-in plugins and `apiKeySource: none`.
+- `--` is required because `--allowed-tools` is variadic and would otherwise swallow the bootstrap. `--allowed-tools Read` lets Read run without a prompt; `--permission-prompts none` denies anything that would prompt.
+- The environment additions stop background self-updates and telemetry during a pinned attempt, and stop the fetching of claude.ai connectors (remote MCP servers).
+- `haiku` resolves to Claude Haiku 5.5, whose thinking `MAX_THINKING_TOKENS=0` cannot disable; `CLAUDE_CODE_MAX_OUTPUT_TOKENS=64000` remains the knob for large outputs. Never set `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` alone: it pushes reasoning into stdout on models that honour it.
+- Never pass `--bare` (it limits authentication to `ANTHROPIC_API_KEY`, so the subscription login is ignored), `--permission-mode dontAsk|bypassPermissions`, `--dangerously-skip-permissions`, the WebFetch or Bash tools, or `--add-dir`.
+
+### Codex
+
+```text
+<codex canonical path> exec --skip-git-repo-check --ignore-user-config --ignore-rules --ephemeral
+  -c default_permissions="coach_job"
+  -c permissions.coach_job={filesystem={":root"="deny", ":minimal"="read", ":slash_tmp"="deny",
+       ":tmpdir"="deny", "<codex install dir>"="read", ":workspace_roots"={"."="write"}},
+       network={enabled=false}}
+  -c forced_login_method="chatgpt" -c approval_policy="never" -c web_search="disabled"
+  -c history.persistence="none" -c check_for_update_on_startup=false
+  --disable apps --disable browser_use --disable browser_use_external --disable computer_use
+  --disable goals --disable hooks --disable image_generation --disable in_app_browser
+  --disable multi_agent --disable plugins --disable remote_plugin
+  --disable skill_mcp_dependency_install --disable tool_suggest --disable view_image
+  --model <model> -c model_reasoning_effort=<level> "Read your task from <prompt> and execute it."
+env += CODEX_HOME=<Coach-owned Codex home>
+```
+
+- A permission profile replaces `--sandbox workspace-write`: that legacy sandbox lets commands read the whole disk and write `/tmp`, and passing any `--sandbox` makes Codex ignore permission profiles. `codex sandbox -P` showed that `:minimal` opens writes to `/tmp` and `$TMPDIR` unless they are denied explicitly, and that the sandbox helper re-executes Codex by its invoked path. The install folder therefore needs read access, and Codex must be launched by its canonical path; a rule on the Homebrew symlink is not enough. With the profile, reading or writing canaries outside the attempt and reading `~/.codex/auth.json` fail with "Operation not permitted", and `curl` cannot resolve hosts.
+- `--ignore-user-config` drops `config.toml` (MCP servers, plugins, `notify`, model, developer instructions) but still loads `$CODEX_HOME/AGENTS.md` and `$CODEX_HOME/skills`, shown by capturing the request of a synthetic home against a local endpoint. That is why Coach owns a separate Codex home with its own ChatGPT login. Bundled system skills (imagegen, openai-docs, skill-creator, skill-installer) still appear; the remaining tools are command execution, stdin writes, patching, waiting and user-input requests. `view_image` (it reads files from the unsandboxed Codex process) and goals (they persist state in the Codex home) are disabled.
+- `forced_login_method="chatgpt"` refuses and logs out an API-key login; without it, a stored API key is used.
+- `--skip-git-repo-check` is required because the attempt folder is not a git repository.
+- An unknown `--disable` name fails the launch, which surfaces version drift; unknown `-c` keys are only ignored with a warning on stderr.
 
 ## Remaining gaps
 

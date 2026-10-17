@@ -22,6 +22,11 @@ pub fn tool(readiness: &ToolReadiness) -> String {
     match readiness {
         ToolReadiness::Checking => CHECKING.to_owned(),
         ToolReadiness::Found(path) => format!("Found at {}", path.display()),
+        ToolReadiness::Unsupported(path) => format!(
+            "Unsupported install at {}: a script that needs Node.js or another runtime. Install \
+             the native build instead.",
+            path.display()
+        ),
         ToolReadiness::Missing => "Not found in its documented install locations".to_owned(),
     }
 }
@@ -75,6 +80,9 @@ mod tests {
     fn tool_readiness_names_the_resolved_executable() {
         let found = ToolReadiness::Found(PathBuf::from("/opt/Tööls/codex"));
         assert_eq!(tool(&found), "Found at /opt/Tööls/codex");
+        let script = ToolReadiness::Unsupported(PathBuf::from("/opt/node/codex.js"));
+        assert!(tool(&script).starts_with("Unsupported install at /opt/node/codex.js"));
+        assert!(!tool(&script).contains("Found"));
         assert_eq!(tool(&ToolReadiness::Checking), CHECKING);
         assert!(processing(false).starts_with("Paused"));
     }

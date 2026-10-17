@@ -2,12 +2,24 @@ use std::path::PathBuf;
 
 use crate::adapter::CliAdapter;
 use crate::platform::paths::CoachPaths;
+use crate::platform::tools::Discovery;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ToolReadiness {
     Checking,
     Found(PathBuf),
+    Unsupported(PathBuf),
     Missing,
+}
+
+impl From<Discovery> for ToolReadiness {
+    fn from(discovery: Discovery) -> Self {
+        match discovery {
+            Discovery::Native(path) => Self::Found(path),
+            Discovery::Script(path) => Self::Unsupported(path),
+            Discovery::Missing => Self::Missing,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -142,5 +154,22 @@ mod tests {
             ]
         );
         assert!(!snapshot.processing_enabled);
+    }
+
+    #[test]
+    fn a_script_install_is_unsupported_rather_than_found() {
+        let path = PathBuf::from("/opt/homebrew/lib/node_modules/@openai/codex/bin/codex.js");
+        assert_eq!(
+            ToolReadiness::from(Discovery::Script(path.clone())),
+            ToolReadiness::Unsupported(path.clone())
+        );
+        assert_eq!(
+            ToolReadiness::from(Discovery::Native(path.clone())),
+            ToolReadiness::Found(path)
+        );
+        assert_eq!(
+            ToolReadiness::from(Discovery::Missing),
+            ToolReadiness::Missing
+        );
     }
 }

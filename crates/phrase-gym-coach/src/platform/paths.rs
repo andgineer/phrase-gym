@@ -1,4 +1,6 @@
 use std::io;
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
 use directories::{BaseDirs, ProjectDirs};
@@ -14,6 +16,8 @@ pub enum PathsError {
     NoHome,
     #[error("cannot create {path}: {source}")]
     Create { path: PathBuf, source: io::Error },
+    #[error("cannot restrict {path} to the current user: {source}")]
+    Restrict { path: PathBuf, source: io::Error },
 }
 
 // Per-user locations only: Coach never writes configuration or cache beside its installed binary.
@@ -50,13 +54,29 @@ impl CoachPaths {
         self.state.join("codex-home")
     }
 
+    // Codex refuses a missing CODEX_HOME, and that folder holds Coach's Codex login; Windows
+    // per-user local data already admits only the user, SYSTEM and administrators.
     pub fn ensure(&self) -> Result<(), PathsError> {
-        for directory in [&self.config, &self.cache, &self.logs, &self.state] {
+        let codex_home = self.codex_home();
+        for directory in [
+            &self.config,
+            &self.cache,
+            &self.logs,
+            &self.state,
+            &codex_home,
+        ] {
             std::fs::create_dir_all(directory).map_err(|source| PathsError::Create {
                 path: directory.clone(),
                 source,
             })?;
         }
+        #[cfg(unix)]
+        std::fs::set_permissions(&codex_home, std::fs::Permissions::from_mode(0o700)).map_err(
+            |source| PathsError::Restrict {
+                path: codex_home.clone(),
+                source,
+            },
+        )?;
         Ok(())
     }
 }
@@ -120,5 +140,29 @@ mod tests {
         paths.ensure().unwrap();
         paths.ensure().unwrap();
         assert!(paths.logs.is_dir() && paths.state.is_dir());
+    }
+
+    #[test]
+    fn ensure_prepares_the_codex_home_for_its_owner_only() {
+        let root = tempfile::tempdir().unwrap();
+        let base = root.path().join("Ünï Ђ user");
+        let paths = CoachPaths {
+            config: base.join("config"),
+            cache: base.join("cache"),
+            logs: base.join("logs"),
+            state: base.join("state"),
+        };
+        paths.ensure().unwrap();
+        assert!(paths.codex_home().is_dir());
+        #[cfg(unix)]
+        {
+            let mode =
+                |path: PathBuf| std::fs::metadata(path).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode(paths.codex_home()), 0o700);
+            std::fs::set_permissions(paths.codex_home(), std::fs::Permissions::from_mode(0o755))
+                .unwrap();
+            paths.ensure().unwrap();
+            assert_eq!(mode(paths.codex_home()), 0o700);
+        }
     }
 }

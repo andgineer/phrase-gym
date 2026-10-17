@@ -10,7 +10,7 @@ use std::time::Duration;
 use phrase_gym_coach::adapter::CliAdapter;
 use phrase_gym_coach::adapter::environment::HostEnvironment;
 use phrase_gym_coach::adapter::invocation::{AttemptFiles, Effort, LaunchContext, ModelSelection};
-use phrase_gym_coach::platform::tools;
+use phrase_gym_coach::platform::tools::{self, Discovery};
 use phrase_gym_coach::process::{Limits, ProcessSpec, run};
 
 const INPUT_LINE: &str = "Zdravo — Здраво — Grüß Gott 7319";
@@ -117,7 +117,16 @@ fn diagnostic_arguments(adapter: CliAdapter, args: &mut Vec<OsString>) {
 
 async fn execute(probe: &Probe) -> Result<(), String> {
     let host = HostEnvironment::current();
-    let executable = tools::discover(probe.adapter, &host).ok_or("CLI not found")?;
+    let executable = match tools::discover(probe.adapter, &host) {
+        Discovery::Native(path) => path,
+        Discovery::Script(path) => {
+            return Err(format!(
+                "{} is a script install; only native builds are supported",
+                path.display()
+            ));
+        }
+        Discovery::Missing => return Err("CLI not found".to_owned()),
+    };
     let (attempt, outside) = stage(probe)?;
     let effort = (probe.adapter == CliAdapter::Codex).then_some(Effort::Low);
     let model = ModelSelection::new(&probe.model, effort).map_err(|error| error.to_string())?;

@@ -22,9 +22,7 @@ impl StartupChecks {
         let host = HostEnvironment::current();
         Self {
             folders: Box::new(folders),
-            tool: Box::new(move |adapter| {
-                tools::discover(adapter, &host).map_or(ToolReadiness::Missing, ToolReadiness::Found)
-            }),
+            tool: Box::new(move |adapter| tools::discover(adapter, &host).into()),
             credentials: Box::new(credentials),
         }
     }

@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 use eframe::egui_wgpu::wgpu;
 use serde::Serialize;
 
-use super::smoke_checks::{self, ProcessChecks};
+use super::smoke_checks::{self, ProcessChecks, TERMINAL_CANARY};
 use super::state::{CredentialHealth, FolderHealth, StatusSnapshot};
 use super::text;
 use crate::platform::paths::CoachPaths;
@@ -50,6 +50,7 @@ struct Report<'a> {
     executable: Option<PathBuf>,
     resources: Option<PathBuf>,
     terminal_canary_inherited: bool,
+    launch_variables: Vec<&'static str>,
     renderer: Option<&'a RendererInfo>,
     idle_window_ms: u128,
     idle_frames: u64,
@@ -140,7 +141,8 @@ impl SmokeRun {
             arch: std::env::consts::ARCH,
             resources: executable.as_deref().map(resources::resource_directory),
             executable,
-            terminal_canary_inherited: std::env::var_os("PHRASE_GYM_TERMINAL_CANARY").is_some(),
+            terminal_canary_inherited: std::env::var_os(TERMINAL_CANARY).is_some(),
+            launch_variables: smoke_checks::launch_variables_received(),
             renderer: self.renderer.as_ref(),
             idle_window_ms: elapsed.as_millis(),
             idle_frames,
@@ -170,7 +172,8 @@ pub fn write_failure(path: &Path, problem: &str) {
         arch: std::env::consts::ARCH,
         executable: std::env::current_exe().ok(),
         resources: None,
-        terminal_canary_inherited: std::env::var_os("PHRASE_GYM_TERMINAL_CANARY").is_some(),
+        terminal_canary_inherited: std::env::var_os(TERMINAL_CANARY).is_some(),
+        launch_variables: smoke_checks::launch_variables_received(),
         renderer: None,
         idle_window_ms: 0,
         idle_frames: 0,
