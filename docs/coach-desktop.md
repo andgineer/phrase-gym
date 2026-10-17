@@ -12,7 +12,7 @@ Coach is not released. This page covers the development build, the platform fact
 
 `coach-bundle` writes `Phrase Gym Coach.app` on macOS (the fake CLI used by the checks sits in `Contents/Resources`) and `Phrase Gym Coach\phrase-gym-coach.exe` with a `resources` folder on Windows. It is a development layout: unsigned, no icon, no installer.
 
-`coach-smoke` places the bundle under a path with spaces and non-ASCII characters and starts it the way a person does. On macOS that is LaunchServices (`open`) with only the variables launchd gives a Finder launch, because `open` forwards its own environment. On Windows it is `Start-Process -UseNewEnvironment` from PowerShell 7.4 or newer (`pwsh`). Both launches add three variables to the app's own environment: `PHRASE_GYM_LAUNCH_CANARY` plus fake `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` values, passed with `open --env` on macOS and `Start-Process -Environment` on Windows. The app then writes a report, and the smoke test fails unless all of these hold:
+`coach-smoke` places the bundle under a path with spaces and non-ASCII characters and starts it the way a person does, with a rebuilt environment. On macOS that is LaunchServices (`open`) with only the variables launchd gives a Finder launch, because `open` forwards its own environment. On Windows it is PowerShell 7 (`pwsh`) starting Coach with only the machine and user environment variables, the same block `Start-Process -UseNewEnvironment` builds. Both launches add three variables to the app's own environment: `PHRASE_GYM_LAUNCH_CANARY` plus fake `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` values, passed with `open --env` on macOS and set on the .NET process start on Windows; `Start-Process -Environment` silently dropped them when combined with `-UseNewEnvironment`. The app then writes a report, and the smoke test fails unless all of these hold:
 
 - the real window opened on a hardware or software renderer;
 - at most 2 frames were drawn during a 3-second idle period;
@@ -20,7 +20,7 @@ Coach is not released. This page covers the development build, the platform fact
 - the bundled fake CLI received Unicode arguments and its working directory, was cut off at the 64 KiB output limit and left no grandchild running;
 - the per-user folders exist and the credential store answered a read-only probe.
 
-On Windows the PowerShell that launches Coach also carries `PHRASE_GYM_TERMINAL_CANARY`, and the smoke test fails if the app sees it, which proves `-UseNewEnvironment` keeps the terminal's variables out. On macOS the smoke test gives `open` a rebuilt environment, so the same property holds by construction and is not tested; a real Finder launch is step 1 of the manual checklist.
+Keeping the launching terminal's variables away from the app is a property of the launcher itself, not of Coach. On Windows the PowerShell that starts Coach carries `PHRASE_GYM_TERMINAL_CANARY`, and the smoke test fails if the app sees it, which only confirms the environment was rebuilt; on macOS this is not tested. Real Finder and Start-menu launches are in the manual checklist.
 
 The report also lists the Codex and Claude executables found without the shell's PATH, whether each is a native build, and the `--version` output of the native ones. Two failure paths are checked as well: a launch with no usable renderer (`WGPU_BACKEND=gl`) must exit with code 2 and an actionable message, and a launch while Coach's instance lock is held must exit with code 3. CI runs the smoke test on macOS Apple Silicon, macOS Intel and Windows x64.
 

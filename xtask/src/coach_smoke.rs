@@ -127,34 +127,55 @@ fn user_launch(launcher: &Path, report: &Path) -> Result<Command, Failure> {
         command.arg("--args").arg("--smoke-test").arg(report);
         Ok(command)
     } else if cfg!(windows) {
-        let quote = |path: &Path| format!("'\"{}\"'", path.display());
-        let injected: Vec<String> = LAUNCH_VARIABLES
-            .iter()
-            .map(|(name, value)| format!("'{name}' = '{value}'"))
-            .collect();
-        // -Environment (PowerShell 7.4+) adds variables on top of the fresh user environment;
-        // Windows PowerShell 5.1 lacks it and builds an incomplete -UseNewEnvironment block.
-        let script = format!(
-            "$p = Start-Process -FilePath {} -ArgumentList '--smoke-test', {} \
-             -UseNewEnvironment -Environment @{{ {} }} -Wait -PassThru; exit $p.ExitCode",
-            quote(launcher),
-            quote(report),
-            injected.join("; ")
-        );
         if Command::new("pwsh").arg("-Version").output().is_err() {
             return Err(Failure::new(
-                "coach-smoke on Windows needs PowerShell 7.4 or newer (pwsh) for Start-Process \
-                 -UseNewEnvironment -Environment",
+                "coach-smoke on Windows needs PowerShell 7 (pwsh) to start Coach",
             ));
         }
         let mut command = Command::new("pwsh");
+        let script = windows_launch_script(launcher, report);
         command.args(["-NoProfile", "-NonInteractive", "-Command", &script]);
-        // Visible to PowerShell only; -UseNewEnvironment must keep it from the app.
+        // Visible to PowerShell only; the rebuilt environment must keep it from the app.
         command.env(TERMINAL_CANARY, "1");
         Ok(command)
     } else {
         Err(Failure::new("Coach smoke tests run on macOS or Windows"))
     }
+}
+
+// Rebuilds the environment as Start-Process -UseNewEnvironment does (machine and user variables,
+// merged Path), then adds the injected ones, which that cmdlet's -Environment silently dropped.
+fn windows_launch_script(launcher: &Path, report: &Path) -> String {
+    let quote = |text: String| format!("'{}'", text.replace('\'', "''"));
+    let mut lines = vec![
+        format!(
+            "$psi = [System.Diagnostics.ProcessStartInfo]::new({})",
+            quote(launcher.display().to_string())
+        ),
+        "$psi.UseShellExecute = $false".to_owned(),
+        "$psi.ArgumentList.Add('--smoke-test')".to_owned(),
+        format!(
+            "$psi.ArgumentList.Add({})",
+            quote(report.display().to_string())
+        ),
+        "$psi.Environment.Clear()".to_owned(),
+        "foreach ($scope in 'Machine', 'User') { $vars = [Environment]::GetEnvironmentVariables($scope); \
+         foreach ($name in $vars.Keys) { $psi.Environment[$name] = $vars[$name] } }"
+            .to_owned(),
+        "$psi.Environment['Path'] = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + \
+         [Environment]::GetEnvironmentVariable('Path', 'User')"
+            .to_owned(),
+    ];
+    lines.extend(
+        LAUNCH_VARIABLES
+            .iter()
+            .map(|(name, value)| format!("$psi.Environment['{name}'] = '{value}'")),
+    );
+    lines.push(
+        "$p = [System.Diagnostics.Process]::Start($psi); $p.WaitForExit(); exit $p.ExitCode"
+            .to_owned(),
+    );
+    lines.join("\n")
 }
 
 fn wait(command: &mut Command) -> Result<(), Failure> {
@@ -178,4 +199,32 @@ fn read_report(path: &Path) -> Result<serde_json::Value, Failure> {
         .map_err(|error| Failure::new(format!("no smoke report at {}: {error}", path.display())))?;
     serde_json::from_str(&text)
         .map_err(|error| Failure::new(format!("invalid smoke report: {error}")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_windows_launch_rebuilds_the_environment_and_injects_the_variables() {
+        let script = windows_launch_script(
+            Path::new(r"D:\Coach Smoke Ünï Ђ\Phrase Gym Coach\phrase-gym-coach.exe"),
+            Path::new(r"D:\Coach Smoke Ünï Ђ\it's report.json"),
+        );
+        let clear = script.find("$psi.Environment.Clear()").unwrap();
+        let machine_and_user = script.find("GetEnvironmentVariables($scope)").unwrap();
+        assert!(clear < machine_and_user);
+        for (name, value) in LAUNCH_VARIABLES {
+            let injected = script
+                .find(&format!("$psi.Environment['{name}'] = '{value}'"))
+                .unwrap();
+            assert!(machine_and_user < injected, "{name}");
+        }
+        assert!(
+            script.contains(r"::new('D:\Coach Smoke Ünï Ђ\Phrase Gym Coach\phrase-gym-coach.exe')")
+        );
+        assert!(script.contains(r"ArgumentList.Add('D:\Coach Smoke Ünï Ђ\it''s report.json')"));
+        assert!(!script.contains("UseNewEnvironment"));
+        assert!(script.ends_with("exit $p.ExitCode"));
+    }
 }
