@@ -63,7 +63,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.
 - Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone and content gaps explicit.
-- `fixtures/preservation/` records legacy behavior for the Rust replacement: synthetic HTTP scenarios, scheduler sequences and legacy schemas. Re-record them only for an intended legacy change. Every legacy test module keeps an entry in `fixtures/preservation/successors.toml`; add, move or delete entries with the module, and delete a legacy harness only when its entries are covered or superseded.
+- `fixtures/preservation/` records Python behavior that encodes spec rules the Rust replacement keeps: synthetic HTTP scenarios and scheduler sequences. They are not compatibility requirements: the Rust release reads no Python-era data and keeps no Python-era contract for its own sake ([architecture](specs/architecture.md#releases-and-data-compatibility)). Re-record them only for an intended behavior change. Every legacy test module keeps an entry in `fixtures/preservation/successors.toml`; add, move or delete entries with the module, mark modules that only guard compatibility with Python-era data or clients as superseded by that decision, and delete a legacy harness only when its entries are covered or superseded.
 
 ## Code conventions
 
