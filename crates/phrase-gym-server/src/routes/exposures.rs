@@ -24,6 +24,6 @@ pub(crate) async fn expose(
     ApiJson(input): ApiJson<ExposureInput>,
 ) -> Result<Json<ExposureReceipt>, ApiError> {
     let service = state.exposures.clone();
-    let receipt = state.storage(move || service.expose(&input)).await??;
+    let receipt = state.blocking(move || service.expose(&input)).await??;
     Ok(Json(receipt))
 }

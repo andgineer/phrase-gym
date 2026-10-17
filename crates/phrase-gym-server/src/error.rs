@@ -33,6 +33,7 @@ impl From<CoreError> for ApiError {
             CoreError::NotFound(detail) => Self::new(StatusCode::NOT_FOUND, detail),
             CoreError::Conflict(detail) => Self::new(StatusCode::CONFLICT, detail),
             CoreError::Invalid(detail) => Self::new(StatusCode::UNPROCESSABLE_ENTITY, detail),
+            CoreError::Unavailable(detail) => Self::new(StatusCode::SERVICE_UNAVAILABLE, detail),
             CoreError::Storage(error) => {
                 tracing::error!(%error, "storage failure");
                 Self::internal()

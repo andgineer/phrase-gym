@@ -1,0 +1,701 @@
+{
+  "description": "Library reads page and scope consistently: lessons order by title, phrases by lesson position or identity, totals count every match before paging, search ignores case and surrounding spaces across text, purpose and concepts, every read stays within its learning language, and malformed paging, search, language or identifiers are rejected.",
+  "implementations": [
+    "python",
+    "rust"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "en-stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "en_import": "/id"
+      }
+    },
+    {
+      "id": "en-publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{en_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "en_day": "/changes/0/target_id"
+      }
+    },
+    {
+      "id": "lessons",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items",
+            "length": 2
+          },
+          {
+            "at": "/offset",
+            "equals": 0
+          },
+          {
+            "at": "/limit",
+            "equals": 50
+          },
+          {
+            "at": "/items/0/title",
+            "equals": "Building rapport"
+          },
+          {
+            "at": "/items/0/phrase_count",
+            "equals": 2
+          },
+          {
+            "at": "/items/0/language",
+            "equals": "en"
+          },
+          {
+            "at": "/items/1/title",
+            "equals": "Making plans"
+          }
+        ]
+      },
+      "capture": {
+        "rapport": "/items/0/id",
+        "plans": "/items/1/id"
+      }
+    },
+    {
+      "id": "lessons-search-ignores-case",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en&q=RAP"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{rapport}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lessons-second-page",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en&limit=1&offset=1"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items",
+            "length": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{plans}}"
+          },
+          {
+            "at": "/offset",
+            "equals": 1
+          },
+          {
+            "at": "/limit",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "lessons-past-the-end",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en&offset=5"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items",
+            "length": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-all",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q="
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          },
+          {
+            "at": "/items",
+            "length": 3
+          },
+          {
+            "at": "/offset",
+            "equals": 0
+          },
+          {
+            "at": "/limit",
+            "equals": 50
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-second-page",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&limit=1&offset=1"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          },
+          {
+            "at": "/items",
+            "length": 1
+          },
+          {
+            "at": "/offset",
+            "equals": 1
+          },
+          {
+            "at": "/limit",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-last-partial-page",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&limit=2&offset=2"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          },
+          {
+            "at": "/items",
+            "length": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-by-concept",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q=greetings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/content/source_id",
+            "equals": "day"
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{en_day}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-trimmed-case-insensitive",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q=%20%20COFFEE%20"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/content/source_id",
+            "equals": "catch-up"
+          },
+          {
+            "at": "/items/0/lessons",
+            "length": 2
+          },
+          {
+            "at": "/items/0/lessons/0/title",
+            "equals": "Building rapport"
+          },
+          {
+            "at": "/items/0/lessons/1/title",
+            "equals": "Making plans"
+          },
+          {
+            "at": "/items/0/audio_status",
+            "equals": "missing"
+          },
+          {
+            "at": "/items/0/retrieval_ready",
+            "equals": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrases-no-match",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q=nothing-in-this-library"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 0
+          },
+          {
+            "at": "/items",
+            "length": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-members-in-order",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons/{{plans}}/phrases?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items/0/content/source_id",
+            "equals": "rather"
+          },
+          {
+            "at": "/items/1/content/source_id",
+            "equals": "catch-up"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-members-second-page",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons/{{plans}}/phrases?language=en&limit=1&offset=1"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items",
+            "length": 1
+          },
+          {
+            "at": "/items/0/content/source_id",
+            "equals": "catch-up"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-in-another-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons/{{plans}}/phrases?language=sr"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "unknown-lesson",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons/0000dead-0000-4000-8000-000000000003/phrases?language=en"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "serbian-empty-before-publication",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=sr"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "sr-stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/language": "sr",
+            "/namespace": "manual.examples.sr"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "sr_import": "/id"
+      }
+    },
+    {
+      "id": "sr-publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{sr_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "sr_day": "/changes/0/target_id"
+      }
+    },
+    {
+      "id": "serbian-scoped-search",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=sr&q=greetings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{sr_day}}"
+          },
+          {
+            "at": "/items/0/language",
+            "equals": "sr"
+          }
+        ]
+      }
+    },
+    {
+      "id": "english-unchanged-by-serbian",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "english-phrase-not-in-serbian",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{en_day}}?language=sr"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "serbian-lessons-separate",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=sr"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 2
+          },
+          {
+            "at": "/items/0/language",
+            "equals": "sr"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dialogues",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items",
+            "length": 1
+          },
+          {
+            "at": "/offset",
+            "equals": 0
+          },
+          {
+            "at": "/limit",
+            "equals": 50
+          }
+        ]
+      },
+      "capture": {
+        "dialogue": "/items/0/id"
+      }
+    },
+    {
+      "id": "dialogues-past-the-end",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en&limit=1&offset=1"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items",
+            "length": 0
+          },
+          {
+            "at": "/limit",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "dialogue-in-another-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues/{{dialogue}}?language=sr"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "unknown-revision",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{en_day}}?language=en&revision=2"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "zero-limit",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&limit=0"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "limit-above-maximum",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en&limit=101"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "negative-offset",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/dialogues?language=en&offset=-1"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "search-too-long",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=en&q=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unknown-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=xx"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "missing-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "malformed-lesson-id",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons/not-a-uuid/phrases?language=en"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "malformed-phrase-id",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/not-a-uuid?language=en"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "revision-below-one",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/{{en_day}}?language=en&revision=0"
+      },
+      "expect": {
+        "status": 422
+      }
+    }
+  ]
+}

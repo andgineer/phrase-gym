@@ -1,0 +1,493 @@
+{
+  "description": "Readiness is read-only and scoped by language and lesson: targets without playable reference audio or a usable reviewed cue count as preparing even when a review is due, unscheduled ready targets are new, due reviews include the current instant, and the earliest future due time is reported.",
+  "implementations": [
+    "python",
+    "rust"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/mpeg",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/tone.mp3"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id",
+        "day_sha256": "/sha256"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/available",
+            "equals": true
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "empty-library",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 0
+          },
+          {
+            "at": "/next_due_at",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "first-stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "first_import": "/id"
+      }
+    },
+    {
+      "id": "first-publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{first_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "day": "/changes/0/target_id",
+        "catch_up": "/changes/1/target_id"
+      }
+    },
+    {
+      "id": "lessons",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=en"
+      },
+      "expect": {
+        "status": 200
+      },
+      "capture": {
+        "rapport": "/items/0/id",
+        "plans": "/items/1/id"
+      }
+    },
+    {
+      "id": "unscheduled-ready-targets-are-new",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 2
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 1
+          },
+          {
+            "at": "/next_due_at",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "future-and-current-due-times",
+      "setup": {
+        "sql": [
+          "INSERT INTO target_schedule (target_id, version, due_at) VALUES ('{{day}}', 1, '2026-10-22T12:00:00+00:00');",
+          "INSERT INTO target_schedule (target_id, version, due_at) VALUES ('{{catch_up}}', 4, '2026-10-12T12:00:00+00:00');"
+        ]
+      },
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 1
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 1
+          },
+          {
+            "at": "/next_due_at",
+            "instant": "2026-10-22T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "repeated-read-changes-nothing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "future-and-current-due-times:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-scope-with-unprepared-member",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en&lesson_id={{plans}}"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 1
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 1
+          },
+          {
+            "at": "/next_due_at",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-scope-with-future-review",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en&lesson_id={{rapport}}"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 1
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 0
+          },
+          {
+            "at": "/next_due_at",
+            "instant": "2026-10-22T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "other-language-is-empty",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=sr"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 0
+          },
+          {
+            "at": "/next_due_at",
+            "equals": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "lesson-in-another-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=sr&lesson_id={{rapport}}"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "unknown-lesson",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en&lesson_id=0000dead-0000-4000-8000-000000000004"
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "id": "malformed-lesson",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en&lesson_id=not-a-uuid"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "missing-language",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "revealing-word-stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/source_revision": "2",
+            "/targets/1/required_chunks": [
+              "verb",
+              "ending"
+            ]
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "revealing-word_import": "/id"
+      }
+    },
+    {
+      "id": "revealing-word-publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{revealing-word_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {}
+    },
+    {
+      "id": "due-word-whose-cue-reveals-required-text-is-preparing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 2
+          },
+          {
+            "at": "/next_due_at",
+            "instant": "2026-10-22T12:00:00+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-reference-file-is-preparing",
+      "setup": {
+        "files": [
+          {
+            "path": "media/{{day_sha256}}",
+            "absent": true
+          }
+        ]
+      },
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 0
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 3
+          },
+          {
+            "at": "/next_due_at",
+            "equals": null
+          }
+        ]
+      }
+    }
+  ]
+}

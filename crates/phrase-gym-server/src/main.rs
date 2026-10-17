@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::Context;
 use clap::{Parser, Subcommand};
 use phrase_gym_core::clock::SystemClock;
+use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::storage::Database;
 use phrase_gym_server::{AppState, ServerSettings, openapi, router};
 use tracing_subscriber::EnvFilter;
@@ -67,7 +68,9 @@ fn serve(data_dir: &std::path::Path, port: u16, settings: &ServerSettings) -> an
         .init();
     let database = Database::open(data_dir)
         .with_context(|| format!("opening database in {}", data_dir.display()))?;
-    let state = AppState::new(Arc::new(database), Arc::new(SystemClock));
+    let store = MediaStore::open(data_dir)
+        .with_context(|| format!("opening media storage in {}", data_dir.display()))?;
+    let state = AppState::new(Arc::new(database), Arc::new(store), Arc::new(SystemClock));
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;

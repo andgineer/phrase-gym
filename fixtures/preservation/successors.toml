@@ -95,56 +95,69 @@ successors = ["rust:crates/phrase-gym-server/tests/api/client_delivery.rs"]
 [[module]]
 path = "tests/integration/test_cli.py"
 responsibility = "Local CLI dry-run, staging, publication and export share the publication boundary."
-status = "pending"
-stage = 2
-successors = []
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "No manual import CLI: Coach delivers through the inbox and job publication APIs, and tests seed content through the test-only path that runs the same validation and publication services."
+stage = 4
+successors = ["rust:crates/phrase-gym-server/tests/api/content_publication.rs"]
 
 [[module]]
 path = "tests/integration/test_imports.py"
 responsibility = "Dry run, staging and explicit publication with stable identities, editorial revisions, rollback and single source consumption."
-status = "pending"
-stage = 2
-successors = ["scenario:publication"]
+status = "covered"
+successors = [
+    "scenario:publication",
+    "rust:crates/phrase-gym-server/tests/api/content_publication.rs",
+    "rust:crates/phrase-gym-server/tests/api/content_validation.rs",
+]
 
 [[module]]
 path = "tests/integration/test_content_identity.py"
 responsibility = "Object key order never creates revisions; array order does."
-status = "pending"
-stage = 2
-successors = ["scenario:publication"]
+status = "covered"
+successors = ["rust:crates/phrase-gym-server/tests/api/content_publication.rs", "rust:crates/phrase-gym-core/src/hashing.rs"]
 
 [[module]]
 path = "tests/integration/test_content_rejections.py"
 responsibility = "Broken references, language changes and missing media cannot publish or disturb published content."
-status = "pending"
-stage = 2
-successors = ["scenario:publication"]
+status = "covered"
+successors = ["scenario:publication", "rust:crates/phrase-gym-server/tests/api/content_validation.rs"]
 
 [[module]]
 path = "tests/integration/test_library.py"
 responsibility = "Lookup, lesson membership, language scoping and dialogue revisions pinned to target content."
-status = "pending"
-stage = 2
-successors = ["scenario:publication"]
+status = "covered"
+successors = [
+    "scenario:publication",
+    "scenario:library-paging",
+    "rust:crates/phrase-gym-server/tests/api/content_publication.rs",
+]
 
 [[module]]
 path = "tests/integration/test_media.py"
 responsibility = "Original reference bytes, ranges, retry recovery, audio binding checks, invalid audio and orphan reconciliation."
-status = "pending"
-stage = 2
-successors = ["scenario:reference-media", "scenario:media-reconciliation"]
+status = "covered"
+successors = [
+    "scenario:reference-media",
+    "scenario:media-reconciliation",
+    "rust:crates/phrase-gym-server/tests/api/content_validation.rs",
+]
 
 [[module]]
 path = "tests/integration/test_media_containers.py"
 responsibility = "MP3/Ogg/MP4 containers keep original bytes; mismatched MIME, bad provenance and malformed base64 are rejected."
-status = "pending"
-stage = 2
-successors = ["scenario:reference-media"]
+status = "covered"
+successors = [
+    "scenario:reference-media",
+    "rust:crates/phrase-gym-core/src/media/containers/tests.rs",
+]
 
 [[module]]
 path = "tests/integration/test_media_identity.py"
 responsibility = "Media identity ignores provenance key order and preserves legacy asset IDs on retry."
-status = "pending"
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "Identity from bytes, MIME and canonical provenance, independent of key order, is covered by the reference-media scenario on Rust. Preserving asset IDs written before canonical serialization is retired: no Python-era media rows exist."
 stage = 2
 successors = ["scenario:reference-media"]
 
@@ -165,9 +178,8 @@ successors = ["scenario:session-events"]
 [[module]]
 path = "tests/integration/test_session_readiness.py"
 responsibility = "Readiness is scoped and read-only and never presents unprepared targets as due work."
-status = "pending"
-stage = 2
-successors = []
+status = "covered"
+successors = ["scenario:readiness"]
 
 [[module]]
 path = "tests/integration/test_practice_events.py"
@@ -186,9 +198,10 @@ successors = ["scenario:session-events"]
 [[module]]
 path = "tests/integration/test_legacy_event_retry.py"
 responsibility = "Historical queued ratings keep their payload and receipt; retired options are rejected for new sessions."
-status = "pending"
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "Retired without a successor: no Python-era queued ratings or sessions exist, and the Rust event contract has no deferral option to reject. The historical-ratings scenario is removed for the same reason."
 stage = 2
-successors = ["scenario:historical-ratings"]
 
 [[module]]
 path = "tests/integration/test_practice_repairs.py"

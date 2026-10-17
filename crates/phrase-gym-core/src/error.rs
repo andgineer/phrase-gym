@@ -10,6 +10,8 @@ pub enum CoreError {
     Conflict(String),
     #[error("{0}")]
     Invalid(String),
+    #[error("{0}")]
+    Unavailable(String),
     #[error(transparent)]
     Storage(#[from] StorageError),
 }
@@ -17,5 +19,11 @@ pub enum CoreError {
 impl From<rusqlite::Error> for CoreError {
     fn from(error: rusqlite::Error) -> Self {
         Self::Storage(StorageError::Sqlite(error))
+    }
+}
+
+impl From<std::io::Error> for CoreError {
+    fn from(error: std::io::Error) -> Self {
+        Self::Storage(StorageError::Io(error))
     }
 }

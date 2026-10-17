@@ -10,6 +10,139 @@
     "version": "0.0.0"
   },
   "paths": {
+    "/api/v1/dialogues": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "list_dialogues",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current dialogue revisions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DialoguePage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dialogues/{dialogue_id}": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "read_dialogue",
+        "parameters": [
+          {
+            "name": "dialogue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dialogue at its current or requested revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dialogue"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Dialogue not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/exposures": {
       "post": {
         "tags": [
@@ -59,10 +192,749 @@
           }
         }
       }
+    },
+    "/api/v1/lessons": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "list_lessons",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lessons in the learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lessons/{lesson_id}/phrases": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "lesson_phrases",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lesson members in lesson order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhrasePage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "upload_reference_media",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUpload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Stored or previously stored reference media",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAsset"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid provenance, base64 or audio container",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/reconcile": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "reconcile_reference_media",
+        "responses": {
+          "200": {
+            "description": "Missing and orphaned originals; nothing is deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reconciliation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/{media_id}": {
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "play_reference_media",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original reference bytes"
+          },
+          "206": {
+            "description": "Requested byte range of the original"
+          },
+          "404": {
+            "description": "Reference media not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Unsatisfiable byte range"
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Original is missing or damaged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/{media_id}/metadata": {
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "reference_media_metadata",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reference media provenance and availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAsset"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reference media not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/search": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "search_phrases",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching phrases in the learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhrasePage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/{target_id}": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "read_phrase",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phrase at its current or requested revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Phrase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Phrase or revision not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/readiness": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "practice_readiness",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Due, new and preparing counts without starting a session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DueSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AudioStatus": {
+        "type": "string",
+        "enum": [
+          "ready",
+          "missing"
+        ]
+      },
+      "Chunk": {
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Cue": {
+        "type": "object",
+        "required": [
+          "id",
+          "prompt",
+          "visible_chunks"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "reviewed": {
+            "type": "boolean",
+            "default": false
+          },
+          "visible_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Dialogue": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision",
+          "language",
+          "content",
+          "target_ids",
+          "target_revisions"
+        ],
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/DialogueInput"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "target_ids": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "target_revisions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DialogueInput": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "title",
+          "turns"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "turns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DialogueTurn"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "DialoguePage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dialogue"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DialogueTurn": {
+        "type": "object",
+        "required": [
+          "speaker",
+          "text"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "speaker": {
+            "type": "string"
+          },
+          "target_source_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DueSummary": {
+        "type": "object",
+        "required": [
+          "due_count",
+          "new_count",
+          "preparing_count",
+          "next_due_at"
+        ],
+        "properties": {
+          "due_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "new_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "next_due_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preparing_count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "ErrorBody": {
         "type": "object",
         "required": [
@@ -73,6 +945,30 @@
             "type": "string"
           }
         }
+      },
+      "Explanation": {
+        "type": "object",
+        "required": [
+          "meaning"
+        ],
+        "properties": {
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "usage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
       },
       "ExposureInput": {
         "type": "object",
@@ -137,6 +1033,428 @@
           "ru",
           "sr",
           "de"
+        ]
+      },
+      "Lesson": {
+        "type": "object",
+        "required": [
+          "id",
+          "language",
+          "title",
+          "phrase_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "phrase_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "LessonPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lesson"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaAsset": {
+        "type": "object",
+        "required": [
+          "id",
+          "sha256",
+          "byte_length",
+          "mime_type",
+          "metadata",
+          "available"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "byte_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MediaMetadata"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaMetadata": {
+        "type": "object",
+        "required": [
+          "language",
+          "text",
+          "role",
+          "origin",
+          "source",
+          "locale",
+          "preparation_version"
+        ],
+        "properties": {
+          "accent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "engine": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/MediaOrigin"
+          },
+          "performer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preparation_version": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/MediaRole"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SettingValue"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string"
+          },
+          "speech_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "voice": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediaOrigin": {
+        "type": "string",
+        "enum": [
+          "actor",
+          "course",
+          "generated",
+          "test"
+        ]
+      },
+      "MediaRole": {
+        "type": "string",
+        "enum": [
+          "reference",
+          "cue",
+          "partner"
+        ]
+      },
+      "MediaUpload": {
+        "type": "object",
+        "required": [
+          "metadata",
+          "mime_type",
+          "audio_base64"
+        ],
+        "properties": {
+          "audio_base64": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MediaMetadata"
+          },
+          "mime_type": {
+            "$ref": "#/components/schemas/ReferenceMime"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Phrase": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision",
+          "language",
+          "content",
+          "lessons",
+          "audio_status",
+          "retrieval_ready"
+        ],
+        "properties": {
+          "audio_status": {
+            "$ref": "#/components/schemas/AudioStatus"
+          },
+          "content": {
+            "$ref": "#/components/schemas/TargetInput"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lesson"
+            }
+          },
+          "retrieval_ready": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PhrasePage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Phrase"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Reconciliation": {
+        "type": "object",
+        "required": [
+          "missing_ids",
+          "orphan_hashes",
+          "removed_staging_files"
+        ],
+        "properties": {
+          "missing_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "orphan_hashes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removed_staging_files": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReferenceMime": {
+        "type": "string",
+        "enum": [
+          "audio/wav",
+          "audio/mpeg",
+          "audio/ogg",
+          "audio/mp4"
+        ]
+      },
+      "SettingValue": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "TargetInput": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "kind",
+          "meaning_key",
+          "recall_expression",
+          "text",
+          "purpose",
+          "chunks",
+          "required_chunks"
+        ],
+        "properties": {
+          "acceptable_equivalents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            }
+          },
+          "concepts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cue"
+            }
+          },
+          "explanations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Explanation"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TargetKind"
+          },
+          "meaning_key": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "recall_expression": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "required_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "slots": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TargetKind": {
+        "type": "string",
+        "enum": [
+          "fixed_phrase",
+          "word_sense",
+          "frame"
         ]
       }
     }

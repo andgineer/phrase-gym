@@ -3,6 +3,7 @@ mod client;
 mod error;
 mod extract;
 pub mod openapi;
+mod range;
 mod routes;
 mod settings;
 mod state;
@@ -13,7 +14,6 @@ use axum::http::HeaderValue;
 use axum::http::header::CACHE_CONTROL;
 use axum::middleware;
 use axum::response::Response;
-use axum::routing::post;
 
 pub use settings::ServerSettings;
 pub use state::AppState;
@@ -27,9 +27,7 @@ async fn no_store(mut response: Response) -> Response {
 }
 
 pub fn router(state: AppState, settings: &ServerSettings) -> Router {
-    let api = Router::new()
-        .route("/api/v1/exposures", post(routes::exposures::expose))
-        .with_state(state);
+    let api = routes::api().with_state(state);
     Router::new()
         .merge(api)
         .merge(client::routes(settings.client_dir.as_deref()))

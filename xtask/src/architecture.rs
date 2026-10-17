@@ -62,7 +62,12 @@ const FORBIDDEN_SERVER_CRATES: &[&str] = &[
     "sherpa*",
     "coqui*",
 ];
-const FORBIDDEN_SERVER_FEATURES: &[(&str, &str)] = &[("tokio", "process")];
+// Test-only seeding and clocks must never reach a release Server build.
+const FORBIDDEN_SERVER_FEATURES: &[(&str, &str)] = &[
+    ("tokio", "process"),
+    ("phrase-gym-server", "test-support"),
+    ("phrase-gym-core", "test-support"),
+];
 
 pub fn check(workspace: &Workspace) -> Result<(), Failure> {
     let metadata =
@@ -110,7 +115,9 @@ pub fn manifest_problems(metadata: &Value) -> Vec<String> {
         for dependency in package["dependencies"].as_array().into_iter().flatten() {
             let target = dependency["name"].as_str().unwrap_or_default();
             if dependency["path"].is_string() {
-                if !allowed.contains(&target) {
+                // A crate may list itself as a dev-dependency only to enable its own test features.
+                let own_features = target == name && dependency["kind"].as_str() == Some("dev");
+                if !allowed.contains(&target) && !own_features {
                     problems.push(format!("{name} must not depend on {target}"));
                 }
             } else if dependency["uses_default_features"].as_bool() != Some(false) {
@@ -181,6 +188,10 @@ mod tests {
                 {"name": "axum", "uses_default_features": false},
             ])),
             package("phrase-gym-helpers", &json!([])),
+            package("phrase-gym-contracts", &json!([
+                {"name": "phrase-gym-contracts", "path": "/w/crates/phrase-gym-contracts", "kind": "dev", "uses_default_features": true},
+                {"name": "phrase-gym-contracts", "path": "/w/crates/phrase-gym-contracts", "kind": null, "uses_default_features": true},
+            ])),
         ]});
         assert_eq!(
             manifest_problems(&metadata),
@@ -189,6 +200,7 @@ mod tests {
                 "phrase-gym-core: rusqlite must set default-features = false and list the features it needs",
                 "phrase-gym-coach must not depend on phrase-gym-core",
                 "workspace member phrase-gym-helpers has no declared dependency direction",
+                "phrase-gym-contracts must not depend on phrase-gym-contracts",
             ]
         );
     }
@@ -202,7 +214,8 @@ mod tests {
                     reqwest v0.12.0 [json]\n\
                     tokio v1.53.3 [net,process,rt]\n\
                     ordered-float v5.0.0 []\n\
-                    tokio v1.53.3 [net,process,rt] (*)\n";
+                    tokio v1.53.3 [net,process,rt] (*)\n\
+                    phrase-gym-core v0.0.0 [test-support]\n";
         assert_eq!(
             server_graph_problems(tree),
             [
@@ -210,6 +223,7 @@ mod tests {
                 "server dependency graph contains keyring-core",
                 "server dependency graph contains process-wrap",
                 "server dependency graph contains reqwest",
+                "server enables phrase-gym-core feature test-support",
                 "server enables tokio feature process",
             ]
         );

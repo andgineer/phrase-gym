@@ -1,7 +1,8 @@
 {
   "description": "Reference media identity is derived from original bytes, MIME and canonical provenance; retries reuse it, originals are served byte-for-byte with ranges, and invalid containers or provenance are rejected.",
   "implementations": [
-    "python"
+    "python",
+    "rust"
   ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [

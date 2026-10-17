@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/v1/dialogues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_dialogues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dialogues/{dialogue_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["read_dialogue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/exposures": {
         parameters: {
             query?: never;
@@ -20,12 +52,220 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_lessons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{lesson_id}/phrases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["lesson_phrases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["upload_reference_media"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["reconcile_reference_media"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{media_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["play_reference_media"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/{media_id}/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["reference_media_metadata"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/phrases/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["search_phrases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/phrases/{target_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["read_phrase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["practice_readiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {string} */
+        AudioStatus: "ready" | "missing";
+        Chunk: {
+            id: string;
+            text: string;
+        };
+        Cue: {
+            /** Format: uuid */
+            audio_id?: string | null;
+            id: string;
+            prompt: string;
+            /** @default false */
+            reviewed: boolean;
+            visible_chunks: string[];
+        };
+        Dialogue: {
+            content: components["schemas"]["DialogueInput"];
+            /** Format: uuid */
+            id: string;
+            language: components["schemas"]["Language"];
+            /** Format: int64 */
+            revision: number;
+            target_ids: {
+                [key: string]: string;
+            };
+            target_revisions: {
+                [key: string]: number;
+            };
+        };
+        DialogueInput: {
+            source_id: string;
+            title: string;
+            turns: components["schemas"]["DialogueTurn"][];
+        };
+        DialoguePage: {
+            items: components["schemas"]["Dialogue"][];
+            /** Format: int64 */
+            limit: number;
+            /** Format: int64 */
+            offset: number;
+            /** Format: int64 */
+            total: number;
+        };
+        DialogueTurn: {
+            /** Format: uuid */
+            audio_id?: string | null;
+            speaker: string;
+            target_source_id?: string | null;
+            text: string;
+        };
+        DueSummary: {
+            /** Format: int64 */
+            due_count: number;
+            /** Format: int64 */
+            new_count: number;
+            next_due_at: string | null;
+            /** Format: int64 */
+            preparing_count: number;
+        };
         ErrorBody: {
             detail: string;
+        };
+        Explanation: {
+            breakdown?: string[];
+            meaning: string;
+            usage?: string | null;
         };
         ExposureInput: {
             /** Format: uuid */
@@ -46,6 +286,111 @@ export interface components {
         };
         /** @enum {string} */
         Language: "en" | "ru" | "sr" | "de";
+        Lesson: {
+            /** Format: uuid */
+            id: string;
+            language: components["schemas"]["Language"];
+            /** Format: int64 */
+            phrase_count: number;
+            title: string;
+        };
+        LessonPage: {
+            items: components["schemas"]["Lesson"][];
+            /** Format: int64 */
+            limit: number;
+            /** Format: int64 */
+            offset: number;
+            /** Format: int64 */
+            total: number;
+        };
+        MediaAsset: {
+            available: boolean;
+            /** Format: int64 */
+            byte_length: number;
+            /** Format: uuid */
+            id: string;
+            metadata: components["schemas"]["MediaMetadata"];
+            mime_type: string;
+            sha256: string;
+        };
+        MediaMetadata: {
+            accent?: string | null;
+            engine?: string | null;
+            language: components["schemas"]["Language"];
+            locale: string;
+            origin: components["schemas"]["MediaOrigin"];
+            performer?: string | null;
+            preparation_version: string;
+            role: components["schemas"]["MediaRole"];
+            settings?: {
+                [key: string]: components["schemas"]["SettingValue"];
+            };
+            source: string;
+            speech_text?: string | null;
+            text: string;
+            voice?: string | null;
+        };
+        /** @enum {string} */
+        MediaOrigin: "actor" | "course" | "generated" | "test";
+        /** @enum {string} */
+        MediaRole: "reference" | "cue" | "partner";
+        MediaUpload: {
+            audio_base64: string;
+            metadata: components["schemas"]["MediaMetadata"];
+            mime_type: components["schemas"]["ReferenceMime"];
+        };
+        Phrase: {
+            audio_status: components["schemas"]["AudioStatus"];
+            content: components["schemas"]["TargetInput"];
+            /** Format: uuid */
+            id: string;
+            language: components["schemas"]["Language"];
+            lessons: components["schemas"]["Lesson"][];
+            retrieval_ready: boolean;
+            /** Format: int64 */
+            revision: number;
+        };
+        PhrasePage: {
+            items: components["schemas"]["Phrase"][];
+            /** Format: int64 */
+            limit: number;
+            /** Format: int64 */
+            offset: number;
+            /** Format: int64 */
+            total: number;
+        };
+        Reconciliation: {
+            missing_ids: string[];
+            orphan_hashes: string[];
+            /** Format: int64 */
+            removed_staging_files: number;
+        };
+        /** @enum {string} */
+        ReferenceMime: "audio/wav" | "audio/mpeg" | "audio/ogg" | "audio/mp4";
+        SettingValue: string | number | boolean;
+        TargetInput: {
+            acceptable_equivalents?: string[];
+            chunks: components["schemas"]["Chunk"][];
+            concepts?: string[];
+            cues?: components["schemas"]["Cue"][];
+            explanations?: {
+                [key: string]: components["schemas"]["Explanation"];
+            };
+            kind: components["schemas"]["TargetKind"];
+            meaning_key: string;
+            purpose: string;
+            recall_expression: string;
+            /** Format: uuid */
+            reference_audio_id?: string | null;
+            required_chunks: string[];
+            slots?: {
+                [key: string]: string[];
+            };
+            source_id: string;
+            text: string;
+        };
+        /** @enum {string} */
+        TargetKind: "fixed_phrase" | "word_sense" | "frame";
     };
     responses: never;
     parameters: never;
@@ -55,6 +400,82 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_dialogues: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current dialogue revisions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialoguePage"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    read_dialogue: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                revision?: number | null;
+            };
+            header?: never;
+            path: {
+                dialogue_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dialogue at its current or requested revision */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dialogue"];
+                };
+            };
+            /** @description Dialogue not found in this learning language */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     record_exposure: {
         parameters: {
             query?: never;
@@ -87,6 +508,356 @@ export interface operations {
                 };
             };
             /** @description Invalid payload or unknown phrase revision */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    list_lessons: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lessons in the learning language */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonPage"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    lesson_phrases: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lesson members in lesson order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhrasePage"];
+                };
+            };
+            /** @description Lesson not found in this learning language */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    upload_reference_media: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MediaUpload"];
+            };
+        };
+        responses: {
+            /** @description Stored or previously stored reference media */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaAsset"];
+                };
+            };
+            /** @description Invalid provenance, base64 or audio container */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    reconcile_reference_media: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Missing and orphaned originals; nothing is deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reconciliation"];
+                };
+            };
+        };
+    };
+    play_reference_media: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Original reference bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Requested byte range of the original */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Reference media not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unsatisfiable byte range */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Original is missing or damaged */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    reference_media_metadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reference media provenance and availability */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaAsset"];
+                };
+            };
+            /** @description Reference media not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    search_phrases: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matching phrases in the learning language */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhrasePage"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    read_phrase: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                revision?: number | null;
+            };
+            header?: never;
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Phrase at its current or requested revision */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Phrase"];
+                };
+            };
+            /** @description Phrase or revision not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    practice_readiness: {
+        parameters: {
+            query: {
+                language: components["schemas"]["Language"];
+                lesson_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Due, new and preparing counts without starting a session */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DueSummary"];
+                };
+            };
+            /** @description Lesson not found in this learning language */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid query */
             422: {
                 headers: {
                     [name: string]: unknown;

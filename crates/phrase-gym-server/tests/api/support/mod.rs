@@ -1,3 +1,4 @@
+pub mod content;
 pub mod documents;
 pub mod http;
 pub mod scenario;
@@ -9,6 +10,7 @@ use std::sync::Arc;
 use axum::Router;
 use chrono::{DateTime, Utc};
 use phrase_gym_core::clock::ManualClock;
+use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::storage::Database;
 use phrase_gym_server::{AppState, ServerSettings, router};
 use tempfile::TempDir;
@@ -40,7 +42,8 @@ impl TestServer {
         let database = Database::open(data_dir.path()).unwrap();
         let database_path = database.path().to_owned();
         let clock = Arc::new(ManualClock::new(now));
-        let state = AppState::new(Arc::new(database), clock.clone());
+        let store = MediaStore::open(data_dir.path()).unwrap();
+        let state = AppState::new(Arc::new(database), Arc::new(store), clock.clone());
         Self {
             router: router(state, settings),
             clock,

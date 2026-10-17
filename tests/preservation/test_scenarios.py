@@ -13,9 +13,10 @@ def test_scenarios_are_declared_for_python_and_cover_each_preserved_area():
     assert all("python" in load(name)["implementations"] for name in names)
     assert {
         "publication",
+        "library-paging",
+        "readiness",
         "session-events",
         "practice-repairs",
-        "historical-ratings",
         "recordings",
         "reference-media",
         "media-reconciliation",
