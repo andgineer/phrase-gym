@@ -11,7 +11,7 @@
 | src/phrase\_gym/api/exposures.py                              |        6 |        0 |    100% |           |
 | src/phrase\_gym/api/imports.py                                |       18 |        0 |    100% |           |
 | src/phrase\_gym/api/library.py                                |       25 |        0 |    100% |           |
-| src/phrase\_gym/api/media.py                                  |       18 |        1 |     94% |        18 |
+| src/phrase\_gym/api/media.py                                  |       18 |        0 |    100% |           |
 | src/phrase\_gym/api/parameters.py                             |        5 |        0 |    100% |           |
 | src/phrase\_gym/api/practice.py                               |       22 |        0 |    100% |           |
 | src/phrase\_gym/api/preparation.py                            |       20 |        3 |     85% |13, 23, 33 |
@@ -22,9 +22,9 @@
 | src/phrase\_gym/config.py                                     |       16 |        0 |    100% |           |
 | src/phrase\_gym/content/catalog.py                            |       73 |        1 |     99% |        63 |
 | src/phrase\_gym/content/cues.py                               |        3 |        0 |    100% |           |
-| src/phrase\_gym/content/exposures.py                          |       25 |        1 |     96% |        26 |
+| src/phrase\_gym/content/exposures.py                          |       25 |        0 |    100% |           |
 | src/phrase\_gym/content/identity.py                           |       18 |        0 |    100% |           |
-| src/phrase\_gym/content/imports.py                            |       59 |        3 |     95% |54, 64, 71 |
+| src/phrase\_gym/content/imports.py                            |       59 |        2 |     97% |    54, 71 |
 | src/phrase\_gym/content/publication.py                        |       49 |        0 |    100% |           |
 | src/phrase\_gym/content/source\_identity.py                   |       28 |        1 |     96% |        33 |
 | src/phrase\_gym/content/validation.py                         |       57 |        0 |    100% |           |
@@ -35,7 +35,7 @@
 | src/phrase\_gym/contracts/imports.py                          |        9 |        0 |    100% |           |
 | src/phrase\_gym/contracts/library.py                          |       10 |        0 |    100% |           |
 | src/phrase\_gym/contracts/media.py                            |       24 |        0 |    100% |           |
-| src/phrase\_gym/contracts/practice.py                         |       64 |        4 |     94% |47, 49, 51, 122 |
+| src/phrase\_gym/contracts/practice.py                         |       64 |        3 |     95% |47, 49, 51 |
 | src/phrase\_gym/contracts/preparation.py                      |       46 |        3 |     93% |38, 40, 44 |
 | src/phrase\_gym/contracts/readiness.py                        |        3 |        0 |    100% |           |
 | src/phrase\_gym/contracts/sessions.py                         |       29 |        0 |    100% |           |
@@ -47,7 +47,7 @@
 | src/phrase\_gym/integrations/legacy\_notes.py                 |       60 |        3 |     95% |40, 43, 85 |
 | src/phrase\_gym/integrations/vault.py                         |      126 |       17 |     87% |31, 55-73, 86-87, 90, 104, 166, 207, 241 |
 | src/phrase\_gym/main.py                                       |      101 |       22 |     78% |49-50, 72-74, 87, 94-95, 116-133, 140-145 |
-| src/phrase\_gym/media/service.py                              |      107 |        3 |     97% |33, 44, 130 |
+| src/phrase\_gym/media/service.py                              |      107 |        2 |     98% |    33, 44 |
 | src/phrase\_gym/migrations/env.py                             |        5 |        0 |    100% |           |
 | src/phrase\_gym/migrations/versions/0001\_foundation.py       |       20 |        2 |     90% |    95-107 |
 | src/phrase\_gym/migrations/versions/0002\_device\_language.py |       16 |        1 |     94% |        27 |
@@ -55,11 +55,11 @@
 | src/phrase\_gym/migrations/versions/0004\_practice.py         |       39 |       14 |     64% |92-97, 107-128 |
 | src/phrase\_gym/migrations/versions/0005\_preparation.py      |       12 |        2 |     83% |     39-40 |
 | src/phrase\_gym/practice/cues.py                              |       14 |        0 |    100% |           |
-| src/phrase\_gym/practice/events.py                            |       62 |        2 |     97% |    49, 75 |
+| src/phrase\_gym/practice/events.py                            |       62 |        0 |    100% |           |
 | src/phrase\_gym/practice/evidence.py                          |       44 |        0 |    100% |           |
 | src/phrase\_gym/practice/observations.py                      |       70 |        4 |     94% |31, 57, 78, 92 |
 | src/phrase\_gym/practice/policy.py                            |       16 |        0 |    100% |           |
-| src/phrase\_gym/practice/recordings.py                        |       83 |        4 |     95% |51, 92, 96, 98 |
+| src/phrase\_gym/practice/recordings.py                        |       83 |        1 |     99% |        98 |
 | src/phrase\_gym/practice/repairs.py                           |       45 |        3 |     93% | 59-60, 70 |
 | src/phrase\_gym/practice/reviews.py                           |       59 |        1 |     98% |        74 |
 | src/phrase\_gym/practice/support.py                           |       26 |        0 |    100% |           |
@@ -86,7 +86,7 @@
 | src/phrase\_gym/settings.py                                   |       14 |        0 |    100% |           |
 | src/phrase\_gym/storage.py                                    |       43 |        0 |    100% |           |
 | src/phrase\_gym/tables.py                                     |       66 |        0 |    100% |           |
-| **TOTAL**                                                     | **3072** |  **208** | **93%** |           |
+| **TOTAL**                                                     | **3072** |  **198** | **94%** |           |
 
 
 ## Setup coverage badge

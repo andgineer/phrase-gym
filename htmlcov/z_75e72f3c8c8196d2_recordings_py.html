@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/phrase_gym/practice/recordings.py: 95%</title>
+    <title>Coverage for src/phrase_gym/practice/recordings.py: 99%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_15cffcd0.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src<span class="sep">/</span>phrase_gym<span class="sep">/</span>practice<span class="sep">/</span>recordings.py</b>:
-            <span class="pc_cov">95%</span>
+            <span class="pc_cov">99%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">83 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">79<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">4<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">82<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_75e72f3c8c8196d2_repairs_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-16 14:50 +0000
+            created at 2026-10-17 06:21 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -130,7 +130,7 @@
     <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="key">except</span> <span class="op">(</span><span class="nam">ValueError</span><span class="op">,</span> <span class="nam">binascii</span><span class="op">.</span><span class="nam">Error</span><span class="op">)</span> <span class="key">as</span> <span class="nam">error</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">            <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Take audio must be valid base64&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span> <span class="key">from</span> <span class="nam">error</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">audio</span> <span class="key">or</span> <span class="nam">len</span><span class="op">(</span><span class="nam">audio</span><span class="op">)</span> <span class="op">&gt;</span> <span class="nam">MAX_TAKE_BYTES</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">            <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;A take must contain audio and be at most 12 MiB&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">            <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;A take must contain audio and be at most 12 MiB&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="key">if</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">mime_type</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">&quot;;&quot;</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">ALLOWED_MIME_TYPES</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">            <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Unsupported recording MIME type&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">        <span class="nam">metadata</span> <span class="op">=</span> <span class="nam">canonical_json</span><span class="op">(</span><span class="nam">payload</span><span class="op">.</span><span class="nam">model_dump_json</span><span class="op">(</span><span class="nam">exclude</span><span class="op">=</span><span class="op">{</span><span class="str">&quot;audio_base64&quot;</span><span class="op">}</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -171,11 +171,11 @@
     <p class="run"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Persist the attempt before its take&quot;</span><span class="op">,</span> <span class="num">409</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">            <span class="nam">evidence</span> <span class="op">=</span> <span class="nam">AttemptEvidence</span><span class="op">.</span><span class="nam">model_validate_json</span><span class="op">(</span><span class="nam">attempt</span><span class="op">.</span><span class="nam">payload</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">            <span class="key">if</span> <span class="nam">evidence</span><span class="op">.</span><span class="nam">target_id</span> <span class="op">!=</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">target_id</span> <span class="key">or</span> <span class="nam">evidence</span><span class="op">.</span><span class="nam">revision</span> <span class="op">!=</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">revision</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Take does not match its attempt&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Take does not match its attempt&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">        <span class="key">if</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">capture_event_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">            <span class="nam">event</span> <span class="op">=</span> <span class="nam">transaction</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">PracticeEvent</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">payload</span><span class="op">.</span><span class="nam">capture_event_id</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="key">if</span> <span class="nam">event</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">PracticeInput</span><span class="op">.</span><span class="nam">model_validate_json</span><span class="op">(</span><span class="nam">event</span><span class="op">.</span><span class="nam">payload</span><span class="op">)</span><span class="op">.</span><span class="nam">kind</span> <span class="op">!=</span> <span class="str">&quot;respond&quot;</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Take requires an acknowledged capture event&quot;</span><span class="op">,</span> <span class="num">409</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Take requires an acknowledged capture event&quot;</span><span class="op">,</span> <span class="num">409</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">            <span class="key">if</span> <span class="nam">EventReceipt</span><span class="op">.</span><span class="nam">model_validate_json</span><span class="op">(</span><span class="nam">event</span><span class="op">.</span><span class="nam">receipt</span><span class="op">)</span><span class="op">.</span><span class="nam">attempt_id</span> <span class="op">!=</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">attempt_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="key">raise</span> <span class="nam">DomainError</span><span class="op">(</span><span class="str">&quot;Capture event does not match its take&quot;</span><span class="op">,</span> <span class="num">422</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">        <span class="key">if</span> <span class="nam">payload</span><span class="op">.</span><span class="nam">exposure_id</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -218,7 +218,7 @@
             <a class="nav" href="z_75e72f3c8c8196d2_repairs_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-16 14:50 +0000
+            created at 2026-10-17 06:21 +0000
         </p>
     </div>
 </footer>
