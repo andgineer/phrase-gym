@@ -1,75 +1,89 @@
-use rusqlite::{Connection, Transaction, TransactionBehavior};
+use rusqlite::{Connection, ErrorCode, TransactionBehavior};
 
 use super::StorageError;
 
 pub struct Migration {
-    pub revision: &'static str,
+    pub revision: i64,
     pub sql: &'static str,
 }
 
-// Revision identifiers continue the existing Alembic chain so legacy databases are recognized in place.
 pub const MIGRATIONS: &[Migration] = &[Migration {
-    revision: "0001",
-    sql: include_str!("../../migrations/0001_foundation.sql"),
+    revision: 1,
+    sql: include_str!("../../migrations/0001_initial.sql"),
 }];
 
+// Marks the file as a Phrase Gym database so a foreign SQLite file is never mistaken for an empty one.
+pub const APPLICATION_ID: i64 = 0x5047_5359;
+
 enum Recognized {
-    Empty,
-    At(String),
+    Fresh,
+    At(i64),
 }
 
-pub fn migrate(connection: &mut Connection) -> Result<(), StorageError> {
-    let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
-    let pending = match recognize(&transaction)? {
-        Recognized::Empty => 0,
-        Recognized::At(revision) => MIGRATIONS
+pub fn latest_revision(chain: &[Migration]) -> i64 {
+    chain.last().map_or(0, |migration| migration.revision)
+}
+
+// Recognition happens before any write, including the switch to WAL, so a refused file stays untouched.
+pub fn migrate(connection: &mut Connection, chain: &[Migration]) -> Result<(), StorageError> {
+    assert!(
+        chain
             .iter()
-            .position(|migration| migration.revision == revision)
-            .map(|index| index + 1)
-            .ok_or_else(|| {
-                StorageError::UnsupportedSchema(format!(
-                    "database schema revision {revision} is not supported by this build"
-                ))
-            })?,
+            .zip(1..)
+            .all(|(migration, expected)| migration.revision == expected),
+        "migration revisions must count up from 1"
+    );
+    recognize(connection, chain)?;
+    connection
+        .pragma_update_and_check(None, "journal_mode", "WAL", |row| row.get::<_, String>(0))?;
+    let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let applied = match recognize(&transaction, chain)? {
+        Recognized::Fresh => 0,
+        Recognized::At(revision) => revision,
     };
-    if let Some(latest) = MIGRATIONS[pending..].last() {
-        for migration in &MIGRATIONS[pending..] {
+    let latest = latest_revision(chain);
+    if applied < latest {
+        for migration in chain
+            .iter()
+            .filter(|migration| migration.revision > applied)
+        {
             transaction.execute_batch(migration.sql)?;
         }
-        transaction.execute("DELETE FROM alembic_version", [])?;
-        transaction.execute(
-            "INSERT INTO alembic_version (version_num) VALUES (?1)",
-            [latest.revision],
-        )?;
+        transaction.pragma_update(None, "application_id", APPLICATION_ID)?;
+        transaction.pragma_update(None, "user_version", latest)?;
     }
     transaction.commit()?;
     Ok(())
 }
 
-fn recognize(transaction: &Transaction<'_>) -> Result<Recognized, StorageError> {
-    let tables: i64 = transaction.query_row(
-        "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+fn recognize(connection: &Connection, chain: &[Migration]) -> Result<Recognized, StorageError> {
+    let read = |pragma: &str| -> Result<i64, StorageError> {
+        connection
+            .query_row(&format!("PRAGMA {pragma}"), [], |row| row.get(0))
+            .map_err(|error| match error.sqlite_error_code() {
+                Some(ErrorCode::NotADatabase) => {
+                    StorageError::UnsupportedSchema("the file is not a SQLite database".to_owned())
+                }
+                _ => StorageError::Sqlite(error),
+            })
+    };
+    let application = read("application_id")?;
+    let revision = read("user_version")?;
+    let objects: i64 = connection.query_row(
+        "SELECT count(*) FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
         [],
         |row| row.get(0),
     )?;
-    if tables == 0 {
-        return Ok(Recognized::Empty);
+    let latest = latest_revision(chain);
+    match (application, revision) {
+        (0, 0) if objects == 0 => Ok(Recognized::Fresh),
+        (APPLICATION_ID, 1..) if revision <= latest => Ok(Recognized::At(revision)),
+        (APPLICATION_ID, 1..) => Err(StorageError::UnsupportedSchema(format!(
+            "database schema revision {revision} was written by a newer release; \
+             this build supports revisions up to {latest}"
+        ))),
+        _ => Err(StorageError::UnsupportedSchema(
+            "the file is not a Phrase Gym database with a recognized schema revision".to_owned(),
+        )),
     }
-    let unrecognized =
-        || StorageError::UnsupportedSchema("database has no recognized schema revision".to_owned());
-    let has_version_table: bool = transaction.query_row(
-        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'alembic_version')",
-        [],
-        |row| row.get(0),
-    )?;
-    if !has_version_table {
-        return Err(unrecognized());
-    }
-    let mut statement = transaction.prepare("SELECT version_num FROM alembic_version")?;
-    let mut revisions = statement.query_map([], |row| row.get::<_, String>(0))?;
-    let first = revisions.next().transpose()?.ok_or_else(unrecognized)?;
-    if revisions.next().transpose()?.is_some() {
-        return Err(unrecognized());
-    }
-    Ok(Recognized::At(first))
 }

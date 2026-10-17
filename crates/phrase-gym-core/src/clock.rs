@@ -8,7 +8,7 @@ pub trait Clock: Send + Sync {
 pub struct SystemClock;
 
 impl Clock for SystemClock {
-    // Stored timestamps keep the microsecond precision of existing records.
+    // Microsecond precision gives every stored instant one textual form.
     fn now(&self) -> DateTime<Utc> {
         Utc::now().trunc_subsecs(6)
     }

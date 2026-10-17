@@ -18,8 +18,10 @@ fn server() -> TestServer {
     rusqlite::Connection::open(&server.database_path)
         .unwrap()
         .execute_batch(&format!(
-            "INSERT INTO target VALUES ('{TARGET}', 'en', 'fixed_phrase', 'ask-day', 'How has your day been so far?', 1);
-             INSERT INTO target_revision VALUES ('{TARGET}', 1, '{{}}', 'synthetic', '2026-10-01T09:00:00+00:00');"
+            "INSERT INTO target (id, language, kind, meaning_key, recall_expression, current_revision)
+             VALUES ('{TARGET}', 'en', 'fixed_phrase', 'ask-day', 'How has your day been so far?', 1);
+             INSERT INTO target_revision (target_id, revision, payload, fingerprint, created_at)
+             VALUES ('{TARGET}', 1, '{{}}', 'synthetic', '2026-10-01T09:00:00+00:00');"
         ))
         .unwrap();
     server
@@ -72,36 +74,6 @@ async fn concurrent_identical_requests_commit_one_exposure_and_one_receipt() {
             .iter()
             .all(|(_, receipt)| *receipt == responses[0].1)
     );
-    assert_eq!(stored_rows(&server), 1);
-}
-
-#[tokio::test]
-async fn receipts_written_by_the_legacy_server_are_recognized_semantically() {
-    let server = server();
-    let id = "8c7b6a5f-4e3d-4c2b-9a1f-0e9d8c7b6a5f";
-    let legacy_payload = format!(
-        r#"{{"id":"{id}","target_id":"{TARGET}","revision":1,"language":"en","kind":"explanation"}}"#
-    );
-    rusqlite::Connection::open(&server.database_path)
-        .unwrap()
-        .execute(
-            "INSERT INTO exposure VALUES (?1, ?2, 1, ?3, '2026-03-01T08:00:00.123456+00:00')",
-            [id, TARGET, legacy_payload.as_str()],
-        )
-        .unwrap();
-    let (status, receipt) = post(
-        server.router.clone(),
-        serde_json::to_vec(&exposure(id, "explanation")).unwrap(),
-    )
-    .await;
-    assert_eq!(status, StatusCode::OK);
-    assert_eq!(receipt["received_at"], "2026-03-01T08:00:00.123456+00:00");
-    let (status, _) = post(
-        server.router.clone(),
-        serde_json::to_vec(&exposure(id, "reference")).unwrap(),
-    )
-    .await;
-    assert_eq!(status, StatusCode::CONFLICT);
     assert_eq!(stored_rows(&server), 1);
 }
 

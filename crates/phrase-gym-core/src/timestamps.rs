@@ -1,6 +1,5 @@
 use chrono::{DateTime, ParseError, SecondsFormat, Timelike, Utc};
 
-// Matches Python's datetime.isoformat() for UTC so stored text stays uniform with existing rows.
 pub fn isoformat(moment: DateTime<Utc>) -> String {
     if moment.nanosecond() == 0 {
         moment.to_rfc3339_opts(SecondsFormat::Secs, false)
@@ -18,7 +17,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn formats_like_existing_records_and_parses_offsets() {
+    fn formats_utc_instants_and_parses_offsets() {
         let whole = parse("2026-10-12T12:00:00+00:00").unwrap();
         assert_eq!(isoformat(whole), "2026-10-12T12:00:00+00:00");
         let fractional = parse("2026-10-12T14:00:00.120000+02:00").unwrap();

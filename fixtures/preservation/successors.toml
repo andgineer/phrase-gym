@@ -45,15 +45,6 @@ stage = 7
 successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
 
 [[module]]
-path = "tests/preservation/test_schema_fixtures.py"
-responsibility = "Committed SQL schemas reproduce every legacy Alembic revision."
-status = "superseded"
-decision = "specs/plan/implementation-plan.md"
-replacement = "The Python exporter and drift check are removed at cutover; the recorded schemas stay frozen inputs to the Rust migration tests."
-stage = 7
-successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
-
-[[module]]
 path = "tests/preservation/test_scenarios.py"
 responsibility = "Language-neutral HTTP preservation scenarios pass against the Python server."
 status = "pending"
@@ -71,7 +62,9 @@ stage = 7
 [[module]]
 path = "tests/integration/test_storage.py"
 responsibility = "Migrations match the models, SQLite runs with foreign keys/WAL/busy timeout, legacy settings migrate."
-status = "pending"
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "The Rust-native schema chain has its own tests for fresh initialization, repeated startup, interrupted upgrades, refusal of foreign or newer files, foreign keys, WAL and query-only reads. Alembic model parity and Python-era settings migration have no successor: no Python database is ever opened by the Rust release."
 stage = 2
 successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
 
