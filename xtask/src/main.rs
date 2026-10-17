@@ -1,4 +1,6 @@
 mod architecture;
+mod coach;
+mod coach_smoke;
 mod contracts;
 mod hygiene;
 mod modules;
@@ -9,8 +11,8 @@ use std::process::ExitCode;
 
 use tools::{Failure, Workspace};
 
-const USAGE: &str =
-    "usage: cargo xtask <pre|test|api-types|app-build|run [--data-dir DIR] [--port PORT]>";
+const USAGE: &str = "usage: cargo xtask <pre|test|api-types|app-build|coach-bundle [--out DIR]|\
+                     coach-smoke|run [--data-dir DIR] [--port PORT]>";
 
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -20,6 +22,8 @@ fn main() -> ExitCode {
         Some("test") if arguments.len() == 1 => test(&workspace),
         Some("api-types") if arguments.len() == 1 => api_types(&workspace),
         Some("app-build") if arguments.len() == 1 => app_build(&workspace),
+        Some("coach-bundle") => coach_bundle(&workspace, &arguments[1..]),
+        Some("coach-smoke") if arguments.len() == 1 => coach_smoke::smoke(&workspace),
         Some("run") => run(&workspace, &arguments[1..]),
         _ => Err(Failure::new(USAGE)),
     };
@@ -83,7 +87,18 @@ fn app_build(workspace: &Workspace) -> Result<(), Failure> {
         "--locked",
         "--package",
         "phrase-gym-coach",
+        "--features",
+        "desktop",
     ])
+}
+
+fn coach_bundle(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
+    let out = match options {
+        [] => workspace.root.join("target/coach-bundle"),
+        [flag, directory] if flag == "--out" => PathBuf::from(directory),
+        _ => return Err(Failure::new(USAGE)),
+    };
+    coach::bundle(workspace, &out).map(|_| ())
 }
 
 fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {

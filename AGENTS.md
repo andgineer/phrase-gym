@@ -30,6 +30,8 @@ Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/
 | Refresh the Rust OpenAPI and its generated TypeScript fixture | `cargo xtask api-types` |
 | Build the client and release Rust binaries | `cargo xtask app-build` |
 | Run the Rust server on loopback with a synthetic data directory | `cargo xtask run` |
+| Build the unsigned Coach development bundle (macOS/Windows) | `cargo xtask coach-bundle` |
+| Launch the Coach bundle like a user and verify the packaged smoke checks | `cargo xtask coach-smoke` |
 | Re-record scheduler and legacy-schema fixtures from the Python implementation | `uv run python -m tests.preservation.export` |
 
 Use `uv sync --frozen`, `npm --prefix frontend ci`, and install the browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python is 3.12+; use Node 22.12+ on an LTS release (`.nvmrc`). Rust uses the exact toolchain pinned in `rust-toolchain.toml` through rustup. The pyrefly hook uses `.venv/bin/python`; the Rust hook runs `cargo xtask pre` and needs that toolchain plus Node. Adding/changing Python dependencies means updating `uv.lock`; client dependencies update the npm lockfile; Rust dependencies update the committed `Cargo.lock`, disable default features and list the features they need. Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.

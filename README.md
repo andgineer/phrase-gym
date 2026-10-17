@@ -75,7 +75,11 @@ cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and W
 cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
 cargo xtask app-build  # build the client and release Rust binaries
 cargo xtask run        # Rust server on 127.0.0.1:8010 with the synthetic .data/rust-server directory
+cargo xtask coach-bundle  # unsigned development bundle of the Coach desktop app (macOS or Windows)
+cargo xtask coach-smoke   # launch that bundle like a user and verify its window, process supervision and failure paths
 ```
+
+Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 
 The Rust server currently implements only a subset of the API and must not be pointed at a real learner database. Preservation fixtures under `fixtures/preservation/` record the Python behavior that the Rust server must keep.
 

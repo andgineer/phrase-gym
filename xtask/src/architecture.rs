@@ -13,7 +13,8 @@ const DEPENDENCY_DIRECTION: &[(&str, &[&str])] = &[
     ("phrase-gym-coach", &["phrase-gym-contracts"]),
     ("xtask", &[]),
 ];
-// GUI toolkits, agent/provider clients and model or speech engines belong to Coach, never to Server.
+// GUI toolkits, agent/provider clients, model or speech engines, Coach's process-tree supervision and
+// OS credential stores belong to Coach, never to Server.
 const FORBIDDEN_SERVER_CRATES: &[&str] = &[
     "phrase-gym-coach",
     "eframe",
@@ -22,10 +23,18 @@ const FORBIDDEN_SERVER_CRATES: &[&str] = &[
     "emath",
     "winit",
     "wgpu*",
+    "naga",
     "glow",
     "glutin*",
     "accesskit*",
+    "kittest",
     "rfd",
+    "process-wrap",
+    "command-group",
+    "keyring*",
+    "apple-native-keyring-store",
+    "windows-native-keyring-store",
+    "security-framework*",
     "tray-icon",
     "muda",
     "reqwest",
@@ -188,6 +197,8 @@ mod tests {
     fn rejects_gui_provider_and_subprocess_dependencies_in_the_server_graph() {
         let tree = "phrase-gym-server v0.0.0 [default]\n\
                     egui-wgpu v0.33.0 []\n\
+                    process-wrap v10.0.1 [job-object]\n\
+                    keyring-core v1.0.1 []\n\
                     reqwest v0.12.0 [json]\n\
                     tokio v1.53.3 [net,process,rt]\n\
                     ordered-float v5.0.0 []\n\
@@ -196,6 +207,8 @@ mod tests {
             server_graph_problems(tree),
             [
                 "server dependency graph contains egui-wgpu",
+                "server dependency graph contains keyring-core",
+                "server dependency graph contains process-wrap",
                 "server dependency graph contains reqwest",
                 "server enables tokio feature process",
             ]

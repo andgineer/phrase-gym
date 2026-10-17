@@ -1,4 +1,11 @@
+mod claude;
+mod codex;
+pub mod environment;
+pub mod invocation;
+
 use serde::{Deserialize, Serialize};
+
+use invocation::{Invocation, InvocationError, LaunchContext};
 
 // Persisted as a closed choice so settings can never smuggle in an arbitrary shell command.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -9,10 +16,26 @@ pub enum CliAdapter {
 }
 
 impl CliAdapter {
+    pub const ALL: [Self; 2] = [Self::Codex, Self::Claude];
+
     pub fn executable_name(self) -> &'static str {
         match self {
             Self::Codex => "codex",
             Self::Claude => "claude",
+        }
+    }
+
+    pub fn display_name(self) -> &'static str {
+        match self {
+            Self::Codex => "Codex CLI",
+            Self::Claude => "Claude CLI",
+        }
+    }
+
+    pub fn invocation(self, context: &LaunchContext<'_>) -> Result<Invocation, InvocationError> {
+        match self {
+            Self::Codex => codex::invocation(context),
+            Self::Claude => claude::invocation(context),
         }
     }
 }
