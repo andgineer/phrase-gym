@@ -10,7 +10,7 @@ use tower::ServiceExt;
 
 use super::documents::{expand, scenario_bytes, substitute};
 use super::setup::{DataFile, Setup, check_files, execute_sql, prepare};
-use super::{TestServer, repository_root};
+use super::{HOST, TestServer, repository_root};
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -137,10 +137,16 @@ fn http_request(request: ScenarioRequest) -> Request<Body> {
     let mut builder = Request::builder()
         .method(request.method.as_str())
         .uri(&request.path);
-    let has_type = request
-        .headers
-        .keys()
-        .any(|name| name.eq_ignore_ascii_case("content-type"));
+    let named = |header: &str| {
+        request
+            .headers
+            .keys()
+            .any(|name| name.eq_ignore_ascii_case(header))
+    };
+    let has_type = named("content-type");
+    if !named("host") {
+        builder = builder.header("host", HOST);
+    }
     for (name, value) in &request.headers {
         builder = builder.header(name, value);
     }

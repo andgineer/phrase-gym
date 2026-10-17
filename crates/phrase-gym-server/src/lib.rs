@@ -1,20 +1,43 @@
+mod boundary;
+mod client;
 mod error;
 mod extract;
 pub mod openapi;
 mod routes;
+mod settings;
 mod state;
 
 use axum::Router;
 use axum::extract::DefaultBodyLimit;
+use axum::http::HeaderValue;
+use axum::http::header::CACHE_CONTROL;
+use axum::middleware;
+use axum::response::Response;
 use axum::routing::post;
 
+pub use settings::ServerSettings;
 pub use state::AppState;
 
-const MAX_REQUEST_BYTES: usize = 24 * 1024 * 1024;
+// Every response is uncached: practice is online-only and no client asset may outlive a deployment.
+async fn no_store(mut response: Response) -> Response {
+    response
+        .headers_mut()
+        .insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
+    response
+}
 
-pub fn router(state: AppState) -> Router {
-    Router::new()
+pub fn router(state: AppState, settings: &ServerSettings) -> Router {
+    let api = Router::new()
         .route("/api/v1/exposures", post(routes::exposures::expose))
-        .layer(DefaultBodyLimit::max(MAX_REQUEST_BYTES))
-        .with_state(state)
+        .with_state(state);
+    Router::new()
+        .merge(api)
+        .merge(client::routes(settings.client_dir.as_deref()))
+        .fallback(|| async { client::not_found() })
+        .layer(DefaultBodyLimit::max(boundary::MAX_REQUEST_BYTES))
+        .layer(middleware::from_fn_with_state(
+            boundary::Boundary::new(settings),
+            boundary::enforce,
+        ))
+        .layer(middleware::map_response(no_store))
 }

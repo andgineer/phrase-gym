@@ -116,7 +116,9 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
         }
     }
     let data_dir = data_dir.to_string_lossy().into_owned();
-    workspace.cargo(&[
+    let client_dir = workspace.frontend().join("dist");
+    let client_dir = client_dir.to_string_lossy().into_owned();
+    let mut arguments = vec![
         "run",
         "--locked",
         "--package",
@@ -127,5 +129,9 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
         &data_dir,
         "--port",
         &port,
-    ])
+    ];
+    if workspace.frontend().join("dist/index.html").is_file() {
+        arguments.extend(["--client-dir", &client_dir]);
+    }
+    workspace.cargo(&arguments)
 }

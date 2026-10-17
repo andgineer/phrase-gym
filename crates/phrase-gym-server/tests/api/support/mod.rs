@@ -1,4 +1,5 @@
 pub mod documents;
+pub mod http;
 pub mod scenario;
 pub mod setup;
 
@@ -9,8 +10,10 @@ use axum::Router;
 use chrono::{DateTime, Utc};
 use phrase_gym_core::clock::ManualClock;
 use phrase_gym_core::storage::Database;
-use phrase_gym_server::{AppState, router};
+use phrase_gym_server::{AppState, ServerSettings, router};
 use tempfile::TempDir;
+
+pub const HOST: &str = "testserver";
 
 pub fn repository_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -26,13 +29,20 @@ pub struct TestServer {
 
 impl TestServer {
     pub fn start(now: DateTime<Utc>) -> Self {
+        Self::with_settings(
+            now,
+            &ServerSettings::loopback().with_hosts([HOST.to_owned()]),
+        )
+    }
+
+    pub fn with_settings(now: DateTime<Utc>, settings: &ServerSettings) -> Self {
         let data_dir = tempfile::tempdir().unwrap();
         let database = Database::open(data_dir.path()).unwrap();
         let database_path = database.path().to_owned();
         let clock = Arc::new(ManualClock::new(now));
         let state = AppState::new(Arc::new(database), clock.clone());
         Self {
-            router: router(state),
+            router: router(state, settings),
             clock,
             data_dir: data_dir.path().to_owned(),
             database_path,

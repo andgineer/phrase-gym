@@ -71,23 +71,26 @@ successors = ["rust:crates/phrase-gym-core/tests/migrations.rs"]
 [[module]]
 path = "tests/integration/test_boundary.py"
 responsibility = "Cross-site mutations, unknown hosts and oversized bodies are rejected; the schema snapshot matches the API."
-status = "pending"
-stage = 2
-successors = []
+status = "covered"
+successors = [
+    "rust:crates/phrase-gym-server/tests/api/boundary.rs",
+    "rust:crates/phrase-gym-server/tests/openapi.rs",
+]
 
 [[module]]
 path = "tests/integration/test_boundary_streaming.py"
 responsibility = "Streamed bodies are bounded without trusting Content-Length; disconnects never reach handlers."
-status = "pending"
-stage = 2
-successors = []
+status = "covered"
+successors = ["rust:crates/phrase-gym-server/tests/api/boundary.rs"]
 
 [[module]]
 path = "tests/integration/test_client_delivery.py"
 responsibility = "The built client is served same-origin with no-store caching, the worker retirement script and no offline assets."
-status = "pending"
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "The Rust Server serves the built client same-origin with no-store caching, typed static assets and no offline assets. The worker-retirement script is retired: no Python-era service worker is installed anywhere."
 stage = 2
-successors = []
+successors = ["rust:crates/phrase-gym-server/tests/api/client_delivery.rs"]
 
 [[module]]
 path = "tests/integration/test_cli.py"
