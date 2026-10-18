@@ -61,7 +61,7 @@ async function flush() {
             (entry) => entry.key === key,
           )?.value
           if (!take || take.status !== 'pending' || volatile.has(take.id)) return
-          const { audio, status: _status, owner: _owner, capture_lease: _lease, ...metadata } = take
+          const { audio, status: _status, owner: _owner, ...metadata } = take
           const receipt = await api<RecordingReceipt>('/recordings', {
             method: 'POST',
             body: JSON.stringify({ ...metadata, audio_base64: base64(audio) }),

@@ -78,7 +78,7 @@ test('an oversized retained take cannot block a later valid recording', async ({
             audio: new ArrayBuffer(12 * 1024 * 1024 + 1),
             status: 'pending',
           },
-          'take:00000000-0000-4000-8000-000000000001',
+          'take-v2:00000000-0000-4000-8000-000000000001',
         )
         transaction.oncomplete = () => resolve()
         transaction.onerror = () => reject(transaction.error)

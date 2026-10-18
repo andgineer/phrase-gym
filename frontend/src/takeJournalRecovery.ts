@@ -1,21 +1,14 @@
 import { journalEntries, journalModify } from './practiceJournal'
 import type { StoredTake } from './practiceTypes'
 
-// Earlier clients must not reclaim entries protected by the new capture protocol.
 export const takePrefix = 'take-v2:'
 export async function takeEntries() {
-  return (await journalEntries<StoredTake>('take')).filter(
-    (entry) => entry.key.startsWith(takePrefix) || entry.key.startsWith('take:'),
-  )
+  return journalEntries<StoredTake>(takePrefix)
 }
 
 export async function recoverTake(key: string) {
   await journalModify<StoredTake>(key, (current) => {
     if (!current || current.status !== 'capturing') return
-    if (!key.startsWith(takePrefix) || current.capture_lease !== 1)
-      throw new Error(
-        'An older capture needs a compatible app for safe recovery. Its audio remains on this device; finish it in the original recording tab if it is still open.',
-      )
     return current.audio.byteLength ? { ...current, status: 'pending', complete: false } : null
   })
 }

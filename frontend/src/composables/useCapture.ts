@@ -93,7 +93,6 @@ export function useCapture(options: CaptureOptions) {
         capture_settings,
         audio: new ArrayBuffer(0),
         owner: captureOwner,
-        capture_lease: 1,
         status: 'capturing',
       }
       await options.retain(take)

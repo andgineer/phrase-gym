@@ -450,11 +450,11 @@ stage = 7
 successors = []
 
 [[module]]
-path = "tests/browser_server.py"
-responsibility = "Real-browser server harness with synthetic seed data and deterministic failure controls."
+path = "tests/browser_preparation_server.py"
+responsibility = "Temporary real-browser Python preparation server and synthetic seed data; general practice/failure controls now run on Rust."
 status = "pending"
 stage = 6
-successors = []
+successors = ["rust:crates/phrase-gym-server/tests/api/browser_controls.rs", "client:frontend/tests/browser/connection-retry.spec.ts", "client:frontend/tests/browser/take-recovery-races.spec.ts"]
 
 [[module]]
 path = "tests/browser_preparation.py"
@@ -462,11 +462,3 @@ responsibility = "Browser harness that drives a generated-draft preparation life
 status = "pending"
 stage = 6
 successors = []
-
-[[module]]
-path = "tests/browser_legacy.py"
-responsibility = "Browser harness that serves a legacy offline worker to verify its retirement."
-status = "superseded"
-decision = "specs/architecture.md"
-replacement = "Retired without a successor: no Python-era service worker is installed, so the client drops its retirement path and this harness in stage 2b."
-stage = 2

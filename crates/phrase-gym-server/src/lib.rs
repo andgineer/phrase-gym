@@ -7,6 +7,8 @@ mod range;
 mod routes;
 mod settings;
 mod state;
+#[cfg(feature = "test-support")]
+mod test_support;
 
 use axum::Router;
 use axum::extract::DefaultBodyLimit;
@@ -27,7 +29,16 @@ async fn no_store(mut response: Response) -> Response {
 }
 
 pub fn router(state: AppState, settings: &ServerSettings) -> Router {
-    let api = routes::api().with_state(state);
+    #[cfg(feature = "test-support")]
+    let browser = state.browser.clone();
+    let api = routes::api().with_state(state.clone());
+    #[cfg(feature = "test-support")]
+    let api =
+        api.merge(test_support::routes().with_state(state))
+            .layer(middleware::from_fn_with_state(
+                browser,
+                test_support::intercept,
+            ));
     Router::new()
         .merge(api)
         .merge(client::routes(settings.client_dir.as_deref()))

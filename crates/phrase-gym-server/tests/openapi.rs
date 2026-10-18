@@ -57,6 +57,6 @@ fn test_only_seeding_routes_are_not_part_of_the_contract() {
             .as_object()
             .unwrap()
             .keys()
-            .all(|path| !path.starts_with("/api/v1/imports"))
+            .all(|path| !path.starts_with("/api/v1/imports") && !path.starts_with("/_test/"))
     );
 }

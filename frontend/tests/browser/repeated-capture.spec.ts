@@ -113,6 +113,18 @@ test('an empty second take reports failure and a third take still saves', async 
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
   await expect.poll(async () => (await (await request.get(recordings)).json()).length).toBe(1)
   await expectComparison(page, 1)
+  const original = (await (await request.get(`/api/v1/sessions/${sessionId}`)).json()).attempts[0]
+    .original
+  expect(original).toMatchObject({ modality: 'recorded', supported: false })
+  const failureResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith(`/sessions/${sessionId}/events`) &&
+      response.request().method() === 'POST' &&
+      response
+        .request()
+        .postDataJSON()
+        .events.some((event: { kind: string }) => event.kind === 'failure'),
+  )
   await page.getByRole('button', { name: 'Record', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Stop recording', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
@@ -121,7 +133,27 @@ test('an empty second take reports failure and a third take still saves', async 
   await expect.poll(() => retainedAudio(page)).toBe(0)
   await expect(page.getByText(/Recording pending/)).toHaveCount(0)
   const failed = await (await request.get(`/api/v1/sessions/${sessionId}`)).json()
-  expect(failed.attempts[0]).toMatchObject({ technical_failure: true, capture_pending: false })
+  const acknowledgement = await failureResponse
+  expect(acknowledgement.ok()).toBe(true)
+  const failure = acknowledgement
+    .request()
+    .postDataJSON()
+    .events.find((event: { kind: string }) => event.kind === 'failure')
+  const receipt = (await acknowledgement.json()).receipts[0]
+  expect(receipt).toMatchObject({
+    id: failure.id,
+    attempt_id: session.attempts[0].id,
+    schedule_changed: false,
+  })
+  expect(failed.attempts[0]).toMatchObject({
+    technical_failure: false,
+    capture_pending: false,
+    original,
+  })
+  expect(await (await request.get(`/api/v1/sessions/${sessionId}/events`)).json()).toContainEqual(
+    receipt,
+  )
+  expect(await (await request.get(recordings)).json()).toHaveLength(1)
   await page.getByRole('button', { name: 'Record', exact: true }).click()
   await expect.poll(() => retainedAudio(page)).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Stop recording', exact: true }).click()
@@ -134,6 +166,22 @@ test('an empty second take reports failure and a third take still saves', async 
     ),
   ).toBe(true)
   await expect(page.getByRole('alert')).toHaveCount(0)
+  const final = await (await request.get(`/api/v1/sessions/${sessionId}`)).json()
+  expect(final.attempts[0].original).toEqual(original)
+  const rated = page.waitForResponse(
+    (response) =>
+      response.url().endsWith(`/sessions/${sessionId}/events`) &&
+      response.request().method() === 'POST' &&
+      response
+        .request()
+        .postDataJSON()
+        .events.some((event: { kind: string }) => event.kind === 'rate'),
+  )
+  await page.getByRole('button', { name: 'Recalled' }).click()
+  expect((await (await rated).json()).receipts[0]).toMatchObject({
+    eligibility_reason: 'eligible',
+    schedule_changed: true,
+  })
   expect(
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,

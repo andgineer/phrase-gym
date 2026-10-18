@@ -36,7 +36,6 @@ export async function takeFixture(request: APIRequestContext, sessionId: string)
     complete: false,
     capture_settings: {},
     owner: crypto.randomUUID(),
-    capture_lease: 1,
     status: 'capturing',
   }
   return { take, bytes: Array.from(bytes) }
@@ -50,10 +49,7 @@ export async function writeTake(page: Page, take: Omit<StoredTake, 'audio'>, byt
           const transaction = opening.result.transaction('journal', 'readwrite')
           transaction
             .objectStore('journal')
-            .put(
-              { ...take, audio: Uint8Array.from(bytes).buffer },
-              `${take.capture_lease === 1 ? 'take-v2:' : 'take:'}${take.id}`,
-            )
+            .put({ ...take, audio: Uint8Array.from(bytes).buffer }, `take-v2:${take.id}`)
           transaction.oncomplete = () => resolve()
           transaction.onerror = () => reject(transaction.error)
         }
@@ -78,13 +74,7 @@ export async function readTake(page: Page, id: string) {
                 : null,
             )
           }
-          read.onsuccess = () => {
-            if (read.result) finish(read.result)
-            else {
-              const legacy = store.get(`take:${id}`)
-              legacy.onsuccess = () => finish(legacy.result)
-            }
-          }
+          read.onsuccess = () => finish(read.result)
         }
       }),
     id,

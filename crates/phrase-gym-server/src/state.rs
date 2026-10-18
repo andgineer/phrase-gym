@@ -35,12 +35,16 @@ pub struct AppState {
     pub(crate) settings: Arc<DeviceSettings>,
     #[cfg(feature = "test-support")]
     pub(crate) staging: Arc<PackageStaging>,
+    #[cfg(feature = "test-support")]
+    pub(crate) browser: Arc<crate::test_support::Controls>,
     storage_slots: Arc<Semaphore>,
 }
 
 impl AppState {
     pub fn new(database: Arc<Database>, store: Arc<MediaStore>, clock: Arc<dyn Clock>) -> Self {
         Self {
+            #[cfg(feature = "test-support")]
+            browser: Arc::new(crate::test_support::Controls::new(database.clone())),
             exposures: Arc::new(ExposureService::new(database.clone(), clock.clone())),
             library: Arc::new(Library::new(database.clone(), store.clone())),
             readiness: Arc::new(Readiness::new(
