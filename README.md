@@ -35,7 +35,7 @@
 | src/phrase\_gym/contracts/imports.py                          |        9 |        0 |    100% |           |
 | src/phrase\_gym/contracts/library.py                          |       10 |        0 |    100% |           |
 | src/phrase\_gym/contracts/media.py                            |       24 |        0 |    100% |           |
-| src/phrase\_gym/contracts/practice.py                         |       64 |        2 |     97% |    47, 51 |
+| src/phrase\_gym/contracts/practice.py                         |       54 |        1 |     98% |        39 |
 | src/phrase\_gym/contracts/preparation.py                      |       46 |        3 |     93% |38, 40, 44 |
 | src/phrase\_gym/contracts/readiness.py                        |        3 |        0 |    100% |           |
 | src/phrase\_gym/contracts/sessions.py                         |       29 |        0 |    100% |           |
@@ -55,12 +55,12 @@
 | src/phrase\_gym/migrations/versions/0004\_practice.py         |       39 |       14 |     64% |92-97, 107-128 |
 | src/phrase\_gym/migrations/versions/0005\_preparation.py      |       12 |        2 |     83% |     39-40 |
 | src/phrase\_gym/practice/cues.py                              |       14 |        0 |    100% |           |
-| src/phrase\_gym/practice/events.py                            |       62 |        0 |    100% |           |
+| src/phrase\_gym/practice/events.py                            |       60 |        0 |    100% |           |
 | src/phrase\_gym/practice/evidence.py                          |       44 |        0 |    100% |           |
 | src/phrase\_gym/practice/observations.py                      |       70 |        4 |     94% |31, 57, 78, 92 |
 | src/phrase\_gym/practice/policy.py                            |       16 |        0 |    100% |           |
 | src/phrase\_gym/practice/recordings.py                        |       83 |        1 |     99% |        98 |
-| src/phrase\_gym/practice/repairs.py                           |       45 |        3 |     93% | 59-60, 70 |
+| src/phrase\_gym/practice/repairs.py                           |       37 |        1 |     97% |        58 |
 | src/phrase\_gym/practice/reviews.py                           |       59 |        1 |     98% |        74 |
 | src/phrase\_gym/practice/support.py                           |       26 |        0 |    100% |           |
 | src/phrase\_gym/practice/tables.py                            |       41 |        0 |    100% |           |
@@ -86,7 +86,7 @@
 | src/phrase\_gym/settings.py                                   |       14 |        0 |    100% |           |
 | src/phrase\_gym/storage.py                                    |       43 |        0 |    100% |           |
 | src/phrase\_gym/tables.py                                     |       66 |        0 |    100% |           |
-| **TOTAL**                                                     | **3072** |  **196** | **94%** |           |
+| **TOTAL**                                                     | **3052** |  **193** | **94%** |           |
 
 
 ## Setup coverage badge
