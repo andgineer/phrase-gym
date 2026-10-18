@@ -195,14 +195,6 @@ status = "covered"
 successors = ["scenario:session-events", "rust:crates/phrase-gym-server/tests/api/practice_events.rs"]
 
 [[module]]
-path = "tests/integration/test_legacy_event_retry.py"
-responsibility = "Historical queued ratings keep their payload and receipt; retired options are rejected for new sessions."
-status = "superseded"
-decision = "specs/architecture.md"
-replacement = "Retired without a successor: no Python-era queued ratings or sessions exist, and the Rust event contract has no deferral option to reject. The historical-ratings scenario is removed for the same reason."
-stage = 2
-
-[[module]]
 path = "tests/integration/test_practice_repairs.py"
 responsibility = "Repairs wait for spacing without a timer and update the schedule once per review group."
 status = "covered"

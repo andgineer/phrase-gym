@@ -66,6 +66,7 @@ pub(crate) fn refresh_support(
 
 // The first response snapshots modality and support before this event's own exposure applies.
 pub(crate) fn observe(evidence: &mut AttemptEvidence, event: &PracticeInput, now: DateTime<Utc>) {
+    let first_response = evidence.original.is_none();
     if matches!(event.kind, Respond | Answer | Rate) && evidence.original.is_none() {
         evidence.original = Some(OriginalResponse {
             modality: event.modality,
@@ -79,13 +80,13 @@ pub(crate) fn observe(evidence: &mut AttemptEvidence, event: &PracticeInput, now
             evidence.revealed = true;
             evidence.expanded |= event.kind == Explain;
         }
-        Respond => evidence.capture_pending = true,
+        Respond if first_response => evidence.capture_pending = true,
         CaptureComplete => {
             evidence.revealed = true;
             evidence.capture_pending = false;
         }
         Failure => {
-            evidence.technical_failure = true;
+            evidence.technical_failure |= first_response || evidence.capture_pending;
             evidence.capture_pending = false;
         }
         _ => {}

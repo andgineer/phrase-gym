@@ -7,8 +7,16 @@ from phrase_gym.storage import Database
 from phrase_gym.tables import ScheduleRow
 from phrase_gym.practice.tables import ReviewReceiptRow
 from tests.integration.helpers import NOW, publish
-from tests.integration.practice_helpers import apply, session_fixture
+from tests.integration.practice_helpers import apply, event, session_fixture
 from tests.integration.session_helpers import start
+
+
+def test_current_sessions_reject_retired_rating_options(client, package):
+    state = session_fixture(client, package)
+    for retired in (True, False):
+        _, response = event(client, state, "rate", rating="not_yet", defer_repairs=retired)
+        assert response.status_code == 422
+        assert client.get(f"/api/v1/sessions/{state['id']}").json()["last_sequence"] == 0
 
 
 def test_eligible_rating_idempotent_original_snapshot_and_completion(client, package, config):

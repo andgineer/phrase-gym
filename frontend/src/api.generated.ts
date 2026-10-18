@@ -1212,9 +1212,9 @@ export interface components {
             /**
              * Planner Version
              * @default due-new-v3-online
-             * @enum {string}
+             * @constant
              */
-            planner_version: "due-new-v1" | "due-new-v2" | "due-new-v3-online";
+            planner_version: "due-new-v3-online";
             /**
              * Policy Version
              * @default fsrs-6.3.2-retention90-v1

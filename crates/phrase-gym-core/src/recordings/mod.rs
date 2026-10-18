@@ -10,6 +10,7 @@ use uuid::Uuid;
 use crate::clock::Clock;
 use crate::content::records;
 use crate::error::CoreError;
+use crate::practice::events;
 use crate::sessions::attempts;
 use crate::storage::{Database, StorageError};
 use crate::timestamps;
@@ -95,6 +96,7 @@ impl Recordings {
             }
             validation::context(transaction, input)?;
             if let Some(attempt_id) = input.attempt_id.filter(|_| !input.complete)
+                && events::original_capture(transaction, attempt_id, input.capture_event_id)?
                 && let Some(mut attempt) = attempts::find(transaction, attempt_id)?
             {
                 attempt.technical_failure = true;

@@ -2098,8 +2098,6 @@
       "PlannerVersion": {
         "type": "string",
         "enum": [
-          "due-new-v1",
-          "due-new-v2",
           "due-new-v3-online"
         ]
       },

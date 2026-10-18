@@ -5,6 +5,7 @@ mod content_validation;
 mod exposures;
 mod practice_dialogues;
 mod practice_events;
+mod practice_original_capture;
 mod practice_repairs;
 mod preservation;
 mod recordings;

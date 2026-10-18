@@ -9,7 +9,7 @@ from phrase_gym.contracts.sessions import SessionManifest, SessionStep
 from phrase_gym.errors import DomainError
 from phrase_gym.practice.evidence import create_attempt, observe, refresh_support
 from phrase_gym.practice.policy import ReviewPolicy
-from phrase_gym.practice.repairs import Advancement, advance
+from phrase_gym.practice.repairs import advance
 from phrase_gym.practice.reviews import ReviewContext, finalize_review
 from phrase_gym.practice.tables import AttemptRow, CueReportRow
 from phrase_gym.tables import ExposureRow, SessionRow
@@ -109,7 +109,7 @@ class ObservationProcessor:
                 session,
                 evidence,
                 queue,
-                Advancement(receipt.occurred_at, bool(event.legacy_deferral)),
+                receipt.occurred_at,
             )
 
     @staticmethod

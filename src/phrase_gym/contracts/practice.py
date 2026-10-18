@@ -1,10 +1,8 @@
-import json
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
 from pydantic import AwareDatetime, Field, model_validator
-from pydantic.json_schema import SkipJsonSchema
 
 from phrase_gym.contracts.base import Contract, Identifier
 
@@ -34,12 +32,6 @@ class PracticeInput(Contract):
     modality: Modality = "self_report"
     rating: RecallRating | None = None
     reason: str | None = Field(default=None, max_length=1000)
-    legacy_deferral: SkipJsonSchema[bool | None] = Field(
-        default=None,
-        validation_alias="defer_repairs",
-        exclude=True,
-        strict=True,
-    )
 
     @model_validator(mode="after")
     def validate_kind(self) -> "PracticeInput":
@@ -47,15 +39,7 @@ class PracticeInput(Contract):
             raise ValueError("Only a rate event supplies a rating")
         if self.kind == "report" and not self.reason:
             raise ValueError("Cue reports require a reason")
-        if self.legacy_deferral and self.kind != "rate":
-            raise ValueError("The retired deferral flag is valid only on historical ratings")
         return self
-
-    def retained_payload(self) -> str:
-        body = self.model_dump(mode="json")
-        if self.legacy_deferral is not None:
-            body["defer_repairs"] = self.legacy_deferral
-        return json.dumps(body)
 
 
 class OriginalResponse(Contract):

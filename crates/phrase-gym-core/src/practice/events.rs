@@ -178,3 +178,30 @@ pub(crate) fn binding(
     row.map(|(kind, attempt)| Ok((kind, records::uuid(&attempt)?)))
         .transpose()
 }
+
+pub(crate) fn original_capture(
+    connection: &Connection,
+    attempt: uuid::Uuid,
+    capture: Option<uuid::Uuid>,
+) -> Result<bool, CoreError> {
+    let first: Option<(String, String)> = connection
+        .query_row(
+            "SELECT id, kind FROM practice_event WHERE attempt_id = ?1 \
+             AND kind IN ('respond', 'answer', 'rate') ORDER BY sequence LIMIT 1",
+            [attempt.to_string()],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .optional()?;
+    let Some((id, kind)) = first.filter(|(_, kind)| kind == "respond") else {
+        return Ok(false);
+    };
+    if let Some(capture) = capture {
+        return Ok(id == capture.to_string());
+    }
+    // Without an explicit binding, only a single capture identifies the original unambiguously.
+    Ok(connection.query_row(
+        "SELECT count(*) = 1 FROM practice_event WHERE attempt_id = ?1 AND kind = ?2",
+        params![attempt.to_string(), kind],
+        |row| row.get(0),
+    )?)
+}

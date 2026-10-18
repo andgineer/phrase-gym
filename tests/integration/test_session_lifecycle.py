@@ -3,16 +3,26 @@ from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from phrase_gym.api.app import create_app
-from phrase_gym.contracts.sessions import SessionStart
+from phrase_gym.contracts.sessions import SessionManifest, SessionStart
 from phrase_gym.errors import DomainError
 from phrase_gym.storage import Database
 from phrase_gym.tables import SessionRow
 from tests.integration.helpers import NOW
 from tests.integration.session_helpers import ready_package, start
+
+
+def test_session_manifest_accepts_only_the_current_planner(client, package):
+    ready_package(client, package)
+    manifest = start(client).json()["manifest"]
+    assert SessionManifest.model_validate(manifest).planner_version == "due-new-v3-online"
+    for retired in ("due-new-v1", "due-new-v2"):
+        with pytest.raises(ValidationError):
+            SessionManifest.model_validate({**manifest, "planner_version": retired})
 
 
 def test_start_idempotency_and_payload_conflict_survive_restart(client, package, config):

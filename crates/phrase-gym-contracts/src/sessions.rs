@@ -137,10 +137,6 @@ impl utoipa::ToSchema for ManifestSchema {}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub enum PlannerVersion {
-    #[serde(rename = "due-new-v1")]
-    DueNewV1,
-    #[serde(rename = "due-new-v2")]
-    DueNewV2,
     #[default]
     #[serde(rename = "due-new-v3-online")]
     DueNewV3Online,
@@ -203,4 +199,23 @@ pub struct PracticeSession {
 pub struct PracticeBatchReceipt {
     pub receipts: Vec<EventReceipt>,
     pub session: PracticeSession,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PlannerVersion;
+
+    #[test]
+    fn only_the_current_planner_version_decodes() {
+        let current = PlannerVersion::DueNewV3Online;
+        let encoded = serde_json::to_value(current).unwrap();
+        assert_eq!(encoded, "due-new-v3-online");
+        assert_eq!(
+            serde_json::from_value::<PlannerVersion>(encoded).unwrap(),
+            current
+        );
+        for retired in ["due-new-v1", "due-new-v2"] {
+            assert!(serde_json::from_value::<PlannerVersion>(retired.into()).is_err());
+        }
+    }
 }

@@ -559,7 +559,7 @@ export interface components {
             schedule_version: number;
         };
         /** @enum {string} */
-        PlannerVersion: "due-new-v1" | "due-new-v2" | "due-new-v3-online";
+        PlannerVersion: "due-new-v3-online";
         PracticeBatchReceipt: {
             receipts: components["schemas"]["EventReceipt"][];
             session: components["schemas"]["PracticeSession"];
