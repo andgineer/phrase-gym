@@ -20,7 +20,7 @@
 | src/phrase\_gym/api/settings.py                               |        9 |        0 |    100% |           |
 | src/phrase\_gym/clock.py                                      |        3 |        0 |    100% |           |
 | src/phrase\_gym/config.py                                     |       16 |        0 |    100% |           |
-| src/phrase\_gym/content/catalog.py                            |       73 |        1 |     99% |        63 |
+| src/phrase\_gym/content/catalog.py                            |       73 |        0 |    100% |           |
 | src/phrase\_gym/content/cues.py                               |        3 |        0 |    100% |           |
 | src/phrase\_gym/content/exposures.py                          |       25 |        0 |    100% |           |
 | src/phrase\_gym/content/identity.py                           |       18 |        0 |    100% |           |
@@ -35,7 +35,7 @@
 | src/phrase\_gym/contracts/imports.py                          |        9 |        0 |    100% |           |
 | src/phrase\_gym/contracts/library.py                          |       10 |        0 |    100% |           |
 | src/phrase\_gym/contracts/media.py                            |       24 |        0 |    100% |           |
-| src/phrase\_gym/contracts/practice.py                         |       64 |        3 |     95% |47, 49, 51 |
+| src/phrase\_gym/contracts/practice.py                         |       64 |        2 |     97% |    47, 51 |
 | src/phrase\_gym/contracts/preparation.py                      |       46 |        3 |     93% |38, 40, 44 |
 | src/phrase\_gym/contracts/readiness.py                        |        3 |        0 |    100% |           |
 | src/phrase\_gym/contracts/sessions.py                         |       29 |        0 |    100% |           |
@@ -86,7 +86,7 @@
 | src/phrase\_gym/settings.py                                   |       14 |        0 |    100% |           |
 | src/phrase\_gym/storage.py                                    |       43 |        0 |    100% |           |
 | src/phrase\_gym/tables.py                                     |       66 |        0 |    100% |           |
-| **TOTAL**                                                     | **3072** |  **198** | **94%** |           |
+| **TOTAL**                                                     | **3072** |  **196** | **94%** |           |
 
 
 ## Setup coverage badge
