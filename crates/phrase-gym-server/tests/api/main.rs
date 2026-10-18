@@ -3,6 +3,7 @@ mod client_delivery;
 mod content_publication;
 mod content_validation;
 mod exposures;
+mod practice_capture_recovery;
 mod practice_dialogues;
 mod practice_events;
 mod practice_original_capture;

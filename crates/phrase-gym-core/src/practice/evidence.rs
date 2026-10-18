@@ -80,7 +80,11 @@ pub(crate) fn observe(evidence: &mut AttemptEvidence, event: &PracticeInput, now
             evidence.revealed = true;
             evidence.expanded |= event.kind == Explain;
         }
-        Respond if first_response => evidence.capture_pending = true,
+        Respond => {
+            // Distinct captures abandon an unfinished original; ID retries never reach this step.
+            evidence.technical_failure |= evidence.capture_pending;
+            evidence.capture_pending = first_response;
+        }
         CaptureComplete => {
             evidence.revealed = true;
             evidence.capture_pending = false;

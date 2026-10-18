@@ -1,3 +1,4 @@
+pub mod capture;
 pub mod content;
 pub mod documents;
 pub mod http;
