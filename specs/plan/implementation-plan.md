@@ -21,12 +21,6 @@ The authorities are [architecture](../architecture.md), [learning policy](../dec
 
 Use one temporary transition, with no permanent dual backend, Python bridge or dual writes. The Rust release is the first installed version and keeps no [backward compatibility](../architecture.md#releases-and-data-compatibility) with the Python implementation's databases, APIs or browser data, so nothing is migrated or decoded from it. Both implementations run against separate synthetic databases for comparison. The language-neutral preservation fixtures in `fixtures/preservation/` (HTTP scenarios and scheduler sequences) define that comparison where they encode spec rules; scenarios that only guarded compatibility with Python-era data or clients are retired. The successor record maps every legacy test module to a Rust/client successor or a superseded-behavior replacement. Keep the Python application and its gate until Rust passes the complete material-to-practice and browser gates. Do not touch private learner data, deploy, push or modify source projects as part of implementation acceptance.
 
-## 2b recovery. Add consistent backup and restore
-
-- Add consistent database-plus-media backup, isolated restore and matching-snapshot rollback tests for Rust schema revisions. Never roll back only schema while keeping incompatible media/data, or copy only the main file of a live WAL database. Protect referenced active-session, inbox, staged and backup assets during reconciliation.
-
-**Exit:** synthetic backup, isolated restore and matching-snapshot rollback preserve the database and all referenced media together across Rust schema revisions.
-
 ## 3. Add profiles, revised content and target lifecycle
 
 - Add immutable personal-profile revisions, expected-current-revision checks, idempotent mutation IDs, complete atomic validation, originating authorized request and restore-as-new-revision. Distinguish profile read/update, material submission, learner actions and worker permissions; authenticate before accepting work. The Server router already keeps learner routes, including learner recordings, apart from reference-media material routes. Retain host/origin protections, but never treat them as authentication or trust arbitrary identity headers.
@@ -42,6 +36,7 @@ Use one temporary transition, with no permanent dual backend, Python bridge or d
 
 - Accept typed phrases/words, pasted text and uploaded audio/context with explicit language, sender/item/submission identity, source/group/turn references and attachment roles. Reject URL-only requests; retain URLs inside text/provenance as opaque data. Neither Server nor Coach fetches arbitrary source/media URLs.
 - Verify and durably store uploaded bytes before acknowledging input ownership. Preserve originals in core-owned hash-addressed storage with database references. Detect missing, invalid, oversized, truncated or hash-mismatched attachments. Never replace invalid supplied audio with TTS. Reconcile staged/orphan files across transfer, atomic file move and database-commit crashes.
+- Extend recovery inventories and isolated-restore tests for inbox attachment/generation references and guide versions as those records are introduced. Invalidate recovered worker leases and reconcile pending transfers/receipts before workers resume; retain all staging and orphan assets during reconciliation.
 - Preserve original input; note changes, reprocessing and recreation create immutable generations. Pin input, expected target revisions, profile revision and guide version. Same identity/payload returns the same receipt; changed payload conflicts. Complete the atomic suspend-and-recreate workflow while Coach is offline.
 - Implement scoped claim, lease renewal, retry, cancellation, staged media/package submission, publication and receipt recovery. Check current generation, lease/fencing token and expected target revisions inside the publication transaction. Expired, cancelled, replaced or superseded workers cannot publish. Preparation/synthesis and upload remain outside that transaction; publication commits content and receipt together.
 - Recover a committed receipt after connection loss or worker crash without re-running preparation or inventing identities. Apply bounded attempts, leases and upload/output limits; coordinate durable job state and run-budget accounting with Coach. Preserve committed receipt lookup when a retry follows an expired lease, without allowing the expired worker a new write.
@@ -79,7 +74,7 @@ This batch is required to exercise the server's real workflows and remove all pr
 
 ## 7. Cut over and remove every Python scaffold dependency
 
-Do this only after batches 2b–6, [Coach C6 packaging acceptance](coach-desktop.md#c6-package-update-and-document-the-desktop-app) on the transition tree and a synthetic backup/restore/rollback rehearsal of the Rust schema pass. This batch owns the final gate after Python removal; C6 does not depend on that gate. Port required checks before deleting their owners.
+Do this only after batches 3–6, [Coach C6 packaging acceptance](coach-desktop.md#c6-package-update-and-document-the-desktop-app) on the transition tree and a synthetic backup/restore/rollback rehearsal of the Rust schema pass. This batch owns the final gate after Python removal; C6 does not depend on that gate. Port required checks before deleting their owners.
 
 | Surface | Required cutover action |
 |---|---|

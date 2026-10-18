@@ -1,4 +1,4 @@
-mod connection;
+pub(crate) mod connection;
 pub mod migrations;
 
 use std::path::{Path, PathBuf};
@@ -8,7 +8,15 @@ use rusqlite::{Connection, Transaction, TransactionBehavior};
 use thiserror::Error;
 
 pub const DATABASE_FILE: &str = "phrase-gym.sqlite3";
+pub const RECOVERY_PENDING: &str = ".recovery-pending";
+pub const SNAPSHOT_MANIFEST: &str = "snapshot.json";
 const IDLE_READERS: usize = 8;
+
+pub fn recovery_reservation(directory: &Path) -> PathBuf {
+    let mut name = directory.file_name().unwrap_or_default().to_os_string();
+    name.push(RECOVERY_PENDING);
+    directory.with_file_name(name)
+}
 
 #[derive(Debug, Error)]
 pub enum StorageError {
@@ -35,6 +43,15 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 
 impl Database {
     pub fn open(data_dir: &Path) -> Result<Self, StorageError> {
+        if data_dir.join(RECOVERY_PENDING).try_exists()?
+            || data_dir.join(SNAPSHOT_MANIFEST).try_exists()?
+            || recovery_reservation(data_dir).try_exists()?
+        {
+            return Err(StorageError::UnsupportedSchema(
+                "snapshot or incomplete recovery directory; restore to a fresh directory first"
+                    .to_owned(),
+            ));
+        }
         std::fs::create_dir_all(data_dir)?;
         let path = data_dir.join(DATABASE_FILE);
         migrations::recognize_file(&path, migrations::MIGRATIONS)?;

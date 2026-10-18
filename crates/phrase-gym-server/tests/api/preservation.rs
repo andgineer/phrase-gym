@@ -4,10 +4,14 @@ use crate::support::scenario::{load, run, scenario_names};
 use crate::support::setup::{DataFile, Setup, check_files, prepare};
 
 #[tokio::test]
-async fn rust_server_preserves_every_scenario() {
+async fn rust_server_preserves_shared_scenarios_with_explicit_retention_replacement() {
     let names = scenario_names();
     assert!(!names.is_empty());
     for name in &names {
+        if name == "media-reconciliation" {
+            assert_eq!(load(name).implementations, ["python"]);
+            continue;
+        }
         assert!(
             load(name).implementations.iter().any(|item| item == "rust"),
             "{name} is not declared for Rust"

@@ -10,6 +10,7 @@ pub mod practice;
 mod prompts;
 pub mod readiness;
 pub mod recordings;
+pub mod recovery;
 pub mod scheduler;
 mod schedules;
 pub mod sessions;

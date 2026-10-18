@@ -81,9 +81,11 @@ cargo xtask coach-smoke   # launch that bundle like a user and verify its window
 
 Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 
+The Rust Server has local `backup`, `verify-backup` and `restore` commands for consistent SQLite-plus-media snapshots and isolated recovery. Follow the [backup and rollback instructions](docs/recovery.md) before upgrading a Rust data directory.
+
 The Rust server implements every endpoint the retained client calls; the Python preparation and handoff routes are not ported because the inbox replaces them. It uses its own schema and does not open databases created by the Python application. Builds with `--features test-support` add content-seeding routes under `/api/v1/imports` and deterministic browser fault controls under `/_test`; release builds and the OpenAPI document omit them. The browser suite starts disposable Rust servers and runs the built Vue client in Chromium and WebKit. Only the named `*-python-preparation` projects use the temporary Python preparation server until that workflow moves to Rust. Preservation fixtures under `fixtures/preservation/` record the Python behavior that encodes rules the Rust server keeps.
 
-The local server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and verified backups remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
+The local server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and operational recovery rehearsals remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
 
 ## Project context
 

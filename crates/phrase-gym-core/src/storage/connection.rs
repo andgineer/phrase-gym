@@ -20,7 +20,7 @@ pub(super) fn open_reader(path: &Path) -> rusqlite::Result<Connection> {
     Ok(connection)
 }
 
-pub(super) fn open_inspector(path: &Path) -> rusqlite::Result<Connection> {
+pub(crate) fn open_inspector(path: &Path) -> rusqlite::Result<Connection> {
     let connection = Connection::open_with_flags(
         path,
         OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,

@@ -1,13 +1,10 @@
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::time::{Duration, SystemTime};
 
 use uuid::Uuid;
 
 use crate::hashing::sha256_hex;
-
-const STAGING_RETENTION: Duration = Duration::from_hours(1);
 
 #[derive(Debug)]
 pub struct MediaStore {
@@ -76,25 +73,6 @@ impl MediaStore {
         }
         names.sort();
         Ok(names)
-    }
-
-    // Staging age is the file's modification time against the wall clock, so an interrupted upload
-    // is recognized whatever clock the application injects.
-    pub fn remove_stale_staging(&self) -> std::io::Result<i64> {
-        let mut removed = 0;
-        let cutoff = SystemTime::now() - STAGING_RETENTION;
-        for entry in std::fs::read_dir(&self.staging)? {
-            let path = entry?.path();
-            let modified = std::fs::metadata(&path).and_then(|metadata| metadata.modified());
-            let stale = path
-                .extension()
-                .is_some_and(|extension| extension == "part")
-                && modified.is_ok_and(|moment| moment < cutoff);
-            if stale && std::fs::remove_file(&path).is_ok() {
-                removed += 1;
-            }
-        }
-        Ok(removed)
     }
 }
 

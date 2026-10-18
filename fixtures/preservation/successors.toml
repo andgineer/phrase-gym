@@ -48,7 +48,22 @@ successors = ["rust:crates/phrase-gym-core/tests/fsrs_fixtures.rs"]
 path = "tests/preservation/test_scenarios.py"
 responsibility = "Language-neutral HTTP preservation scenarios pass against the Python server."
 status = "covered"
-successors = ["rust:crates/phrase-gym-server/tests/api/preservation.rs"]
+successors = [
+    "scenario:cue-reports",
+    "scenario:library-paging",
+    "scenario:lookup-exposures",
+    "scenario:practice-repair-deferral",
+    "scenario:practice-repairs",
+    "scenario:publication",
+    "scenario:readiness",
+    "scenario:recordings",
+    "scenario:reference-media",
+    "scenario:session-events",
+    "scenario:session-replacement",
+    "scenario:settings",
+    "rust:crates/phrase-gym-server/tests/api/preservation.rs",
+    "rust:crates/phrase-gym-server/tests/api/recovery.rs",
+]
 
 [[module]]
 path = "tests/preservation/test_successors.py"
@@ -138,7 +153,7 @@ responsibility = "Original reference bytes, ranges, retry recovery, audio bindin
 status = "covered"
 successors = [
     "scenario:reference-media",
-    "scenario:media-reconciliation",
+    "rust:crates/phrase-gym-server/tests/api/recovery.rs",
     "rust:crates/phrase-gym-server/tests/api/content_validation.rs",
 ]
 

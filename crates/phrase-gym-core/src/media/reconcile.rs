@@ -19,10 +19,8 @@ impl MediaReconciler {
         Self { database, store }
     }
 
-    // Reports missing and orphaned originals without deleting either; only interrupted staging
-    // files are removed, because they were never acknowledged.
+    // Age alone cannot establish that a transfer or a recovery asset is unreferenced.
     pub fn reconcile(&self) -> Result<Reconciliation, CoreError> {
-        let removed_staging_files = self.store.remove_stale_staging()?;
         let rows = self
             .database
             .read(|transaction| records::all(transaction))?;
@@ -41,7 +39,7 @@ impl MediaReconciler {
         Ok(Reconciliation {
             missing_ids,
             orphan_hashes,
-            removed_staging_files,
+            removed_staging_files: 0,
         })
     }
 }
