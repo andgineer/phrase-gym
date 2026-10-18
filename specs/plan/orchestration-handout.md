@@ -1,12 +1,12 @@
 # Orchestration handout: continuing the Rust migration
 
-This handout lets a new Claude session take over orchestration of [the implementation plan](implementation-plan.md) and [the Coach desktop plan](coach-desktop.md) with no access to the previous session's memory. Read it fully before acting. Written 2026-10-18.
+This handout lets a new Astra session take over orchestration of [the implementation plan](implementation-plan.md) and [the Coach desktop plan](coach-desktop.md) with no access to the previous session's memory. Read it fully before acting. Written 2026-10-18.
 
 ## 1. Your role (the user's instruction)
 
 The user asked: implement `specs/plan/implementation-plan.md`, working **as orchestrator only**:
 
-1. For each stage, run the implementation in a **fresh session** (Agent tool, `model: "opus"`, which is Opus 5.5).
+1. For each stage, run the implementation in a **fresh session** (Agent tool, `model: "GPT-6.1"`, which is Sol 6.1 with high reasoning).
 2. Then run a review in a **fresh session**.
 3. Decide which findings to pass on, and run the fixes in a **fresh session**.
 4. Review again in a fresh session.
