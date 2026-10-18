@@ -1,8 +1,10 @@
 use std::path::{Path, PathBuf};
 
+use phrase_gym_core::hashing::sha256_hex;
 use phrase_gym_core::storage::migrations::{APPLICATION_ID, MIGRATIONS, Migration, migrate};
 use phrase_gym_core::storage::{DATABASE_FILE, Database, StorageError};
 use rusqlite::Connection;
+use rusqlite::config::DbConfig;
 
 fn schema(path: &Path) -> Vec<(String, String)> {
     let connection = Connection::open(path).unwrap();
@@ -148,17 +150,28 @@ fn an_interrupted_initialization_leaves_an_empty_database_that_initializes_later
     assert_eq!(pragma(&path, "user_version"), 1);
 }
 
+fn digest(path: &Path) -> Option<String> {
+    std::fs::read(path).ok().map(|bytes| sha256_hex(&bytes))
+}
+
+// Every SQLite reader refreshes the wal-index header and read marks in -shm; it holds no database content.
+fn snapshot(directory: &Path) -> (Option<String>, Option<String>, bool) {
+    let file = |suffix: &str| directory.join(format!("{DATABASE_FILE}{suffix}"));
+    (
+        digest(&file("")),
+        digest(&file("-wal")),
+        file("-shm").exists(),
+    )
+}
+
 fn assert_refused_untouched(directory: &Path, expected: &str) {
-    let path = database_file(directory);
-    let before = std::fs::read(&path).unwrap();
+    let before = snapshot(directory);
     let error = Database::open(directory).unwrap_err();
     assert!(
         matches!(&error, StorageError::UnsupportedSchema(message) if message.contains(expected)),
         "{error}"
     );
-    assert_eq!(std::fs::read(&path).unwrap(), before);
-    let wal = path.with_file_name(format!("{DATABASE_FILE}-wal"));
-    assert!(!wal.exists());
+    assert_eq!(snapshot(directory), before);
 }
 
 #[test]
@@ -171,6 +184,33 @@ fn a_newer_schema_is_refused_without_writing() {
         ))
         .unwrap();
     drop(connection);
+    assert_refused_untouched(
+        directory.path(),
+        "revision 99 was written by a newer release",
+    );
+}
+
+#[test]
+fn a_newer_schema_left_in_an_uncheckpointed_wal_is_refused_without_checkpointing() {
+    let directory = tempfile::tempdir().unwrap();
+    let connection = Connection::open(database_file(directory.path())).unwrap();
+    connection
+        .execute_batch("CREATE TABLE settled (id TEXT); INSERT INTO settled VALUES ('main file');")
+        .unwrap();
+    connection
+        .pragma_update_and_check(None, "journal_mode", "WAL", |row| row.get::<_, String>(0))
+        .unwrap();
+    connection
+        .set_db_config(DbConfig::SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE, true)
+        .unwrap();
+    connection
+        .execute_batch(&format!(
+            "CREATE TABLE future (id TEXT); PRAGMA application_id = {APPLICATION_ID}; PRAGMA user_version = 99;"
+        ))
+        .unwrap();
+    drop(connection);
+    let wal = database_file(directory.path()).with_file_name(format!("{DATABASE_FILE}-wal"));
+    assert!(std::fs::metadata(wal).unwrap().len() > 0);
     assert_refused_untouched(
         directory.path(),
         "revision 99 was written by a newer release",

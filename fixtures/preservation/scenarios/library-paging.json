@@ -1,5 +1,5 @@
 {
-  "description": "Library reads page and scope consistently: lessons order by title, phrases by lesson position or identity, totals count every match before paging, search ignores case and surrounding spaces across text, purpose and concepts, every read stays within its learning language, and malformed paging, search, language or identifiers are rejected.",
+  "description": "Library reads page and scope consistently: lessons order by title, phrases by lesson position or identity, totals count every match before paging, search ignores surrounding spaces and folds case fully (so ß, ẞ and SS match) across text, purpose, concepts and lesson titles, every read stays within its learning language, and malformed paging, search, language or identifiers are rejected.",
   "implementations": [
     "python",
     "rust"
@@ -528,6 +528,167 @@
           {
             "at": "/items/0/language",
             "equals": "sr"
+          }
+        ]
+      }
+    },
+    {
+      "id": "de-stage",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/language": "de",
+            "/namespace": "manual.examples.de",
+            "/targets/0/recall_expression": "Nach der Straße fragen",
+            "/targets/0/text": "Nach der Straße fragen",
+            "/targets/0/chunks": [
+              {
+                "id": "opening",
+                "text": "Nach "
+              },
+              {
+                "id": "subject",
+                "text": "der Straße "
+              },
+              {
+                "id": "ending",
+                "text": "fragen"
+              }
+            ],
+            "/lessons/0/title": "Straßen und Wege"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "de_import": "/id"
+      }
+    },
+    {
+      "id": "de-publish",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{de_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "de_street": "/changes/0/target_id"
+      }
+    },
+    {
+      "id": "german-search-folds-sharp-s",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=de&q=strasse"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{de_street}}"
+          },
+          {
+            "at": "/items/0/content/text",
+            "equals": "Nach der Straße fragen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "german-search-folds-capitals",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=de&q=STRASSE"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{de_street}}"
+          },
+          {
+            "at": "/items/0/content/text",
+            "equals": "Nach der Straße fragen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "german-search-folds-capital-sharp-s",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/phrases/search?language=de&q=STRA%E1%BA%9EE"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/id",
+            "equals": "{{de_street}}"
+          },
+          {
+            "at": "/items/0/content/text",
+            "equals": "Nach der Straße fragen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "german-lessons-search-folds-sharp-s",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/lessons?language=de&q=STRASSEN"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/total",
+            "equals": 1
+          },
+          {
+            "at": "/items/0/title",
+            "equals": "Straßen und Wege"
+          },
+          {
+            "at": "/items/0/language",
+            "equals": "de"
           }
         ]
       }

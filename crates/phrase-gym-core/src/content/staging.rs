@@ -14,8 +14,6 @@ use crate::media::store::MediaStore;
 use crate::storage::Database;
 use crate::timestamps;
 
-// Stages a validated package against the published state it was checked with, and later
-// publishes it atomically only if that state is unchanged.
 pub struct PackageStaging {
     database: Arc<Database>,
     store: Arc<MediaStore>,

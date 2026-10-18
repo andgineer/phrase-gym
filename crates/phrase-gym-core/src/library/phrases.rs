@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::content::{cues, records};
 use crate::error::CoreError;
 use crate::library::lessons;
+use crate::library::search::Search;
 use crate::media::index::MediaIndex;
 
 pub(crate) struct Draft {
@@ -25,7 +26,6 @@ pub(crate) fn media_ids(content: &TargetInput) -> impl Iterator<Item = Uuid> + '
         .chain(content.reference_audio_id)
 }
 
-// Ready for retrieval means playable reference audio, playable cue audio and a usable hint.
 pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex) -> bool {
     let reference = content
         .reference_audio_id
@@ -86,7 +86,6 @@ pub(crate) struct Listed {
     pub content: TargetInput,
 }
 
-// Targets in scope with their current content, ordered by lesson position or by identifier.
 pub(crate) fn listed(
     connection: &Connection,
     language: Language,
@@ -124,12 +123,11 @@ pub(crate) fn listed(
         .collect()
 }
 
-pub(crate) fn matches(content: &TargetInput, search: &str) -> bool {
+pub(crate) fn matches(content: &TargetInput, search: &Search) -> bool {
     let haystack = std::iter::once(content.text.as_str())
         .chain(std::iter::once(content.purpose.as_str()))
         .chain(content.concepts.iter().map(String::as_str))
         .collect::<Vec<_>>()
-        .join(" ")
-        .to_lowercase();
-    haystack.contains(search)
+        .join(" ");
+    search.matches(&haystack)
 }

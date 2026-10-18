@@ -1,6 +1,7 @@
 mod dialogues;
 pub(crate) mod lessons;
 pub(crate) mod phrases;
+mod search;
 
 use std::sync::Arc;
 
@@ -15,6 +16,7 @@ use crate::media::store::MediaStore;
 use crate::storage::Database;
 
 use phrases::Draft;
+use search::Search;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Paging {
@@ -34,7 +36,6 @@ fn count(items: usize) -> i64 {
     i64::try_from(items).unwrap_or(i64::MAX)
 }
 
-// Read-only library views; availability of reference files is checked after the read snapshot.
 pub struct Library {
     database: Arc<Database>,
     store: Arc<MediaStore>,
@@ -65,7 +66,7 @@ impl Library {
     ) -> Result<LessonPage, CoreError> {
         let matches = self
             .database
-            .read(|transaction| lessons::in_language(transaction, language, query))?;
+            .read(|transaction| lessons::in_language(transaction, language, &Search::new(query)))?;
         Ok(LessonPage {
             total: count(matches.len()),
             items: paging.window(matches),
@@ -81,7 +82,7 @@ impl Library {
         lesson: Option<Uuid>,
         paging: Paging,
     ) -> Result<PhrasePage, CoreError> {
-        let search = query.trim().to_lowercase();
+        let search = Search::new(query.trim());
         let (drafts, total) = self.database.read(|transaction| {
             if let Some(lesson) = lesson {
                 lessons::require(transaction, lesson, language)?;

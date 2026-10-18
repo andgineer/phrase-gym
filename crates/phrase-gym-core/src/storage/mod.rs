@@ -37,6 +37,7 @@ impl Database {
     pub fn open(data_dir: &Path) -> Result<Self, StorageError> {
         std::fs::create_dir_all(data_dir)?;
         let path = data_dir.join(DATABASE_FILE);
+        migrations::recognize_file(&path, migrations::MIGRATIONS)?;
         let mut writer = connection::open_writer(&path)?;
         migrations::migrate(&mut writer, migrations::MIGRATIONS)?;
         Ok(Self {

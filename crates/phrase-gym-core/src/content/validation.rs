@@ -151,7 +151,6 @@ impl Checker<'_> {
     }
 }
 
-// Reads published state only; the caller decides whether a clean report is staged or published.
 pub fn report(
     connection: &Connection,
     package: &ContentPackage,

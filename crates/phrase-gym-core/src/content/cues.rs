@@ -16,7 +16,6 @@ pub fn spoken_hint(content: &TargetInput, cue: &Cue) -> String {
     visible(content, cue).collect()
 }
 
-// Words and frames must hide every required chunk; a phrase cue may show part of the answer.
 pub fn practicable(content: &TargetInput, cue: &Cue) -> bool {
     cue.reviewed
         && has_visible_hint(content, cue)

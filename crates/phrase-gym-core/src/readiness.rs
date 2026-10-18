@@ -30,7 +30,6 @@ impl Readiness {
         }
     }
 
-    // Read-only: unprepared targets count as preparing and never appear as due or new work.
     pub fn summary(
         &self,
         language: Language,

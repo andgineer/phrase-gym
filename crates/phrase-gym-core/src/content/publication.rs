@@ -199,7 +199,6 @@ fn publish_dialogues(
     Ok(())
 }
 
-// Runs inside the caller's write transaction, which also records the publication receipt.
 pub fn publish(
     transaction: &Transaction<'_>,
     package: &ContentPackage,

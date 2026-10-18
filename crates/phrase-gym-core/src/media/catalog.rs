@@ -38,7 +38,6 @@ impl MediaCatalog {
         Ok(record.asset(available))
     }
 
-    // Only bytes that still match the recorded hash are served; damage is reported, never hidden.
     pub fn delivery(&self, id: Uuid) -> Result<Delivery, CoreError> {
         let record = self.record(id)?;
         let bytes = self

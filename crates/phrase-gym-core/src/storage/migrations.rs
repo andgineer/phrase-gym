@@ -1,6 +1,8 @@
+use std::path::Path;
+
 use rusqlite::{Connection, ErrorCode, TransactionBehavior};
 
-use super::StorageError;
+use super::{StorageError, connection};
 
 pub struct Migration {
     pub revision: i64,
@@ -24,7 +26,16 @@ pub fn latest_revision(chain: &[Migration]) -> i64 {
     chain.last().map_or(0, |migration| migration.revision)
 }
 
-// Recognition happens before any write, including the switch to WAL, so a refused file stays untouched.
+// Closing a writable connection checkpoints a hot WAL into the main file, so a file that may be refused
+// is recognized through a read-only connection before any writer opens it.
+pub fn recognize_file(path: &Path, chain: &[Migration]) -> Result<(), StorageError> {
+    if !path.try_exists()? {
+        return Ok(());
+    }
+    recognize(&connection::open_inspector(path)?, chain)?;
+    Ok(())
+}
+
 pub fn migrate(connection: &mut Connection, chain: &[Migration]) -> Result<(), StorageError> {
     assert!(
         chain
@@ -33,7 +44,6 @@ pub fn migrate(connection: &mut Connection, chain: &[Migration]) -> Result<(), S
             .all(|(migration, expected)| migration.revision == expected),
         "migration revisions must count up from 1"
     );
-    recognize(connection, chain)?;
     connection
         .pragma_update_and_check(None, "journal_mode", "WAL", |row| row.get::<_, String>(0))?;
     let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;

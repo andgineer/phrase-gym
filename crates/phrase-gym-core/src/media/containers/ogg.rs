@@ -25,7 +25,6 @@ fn page(bytes: &[u8], at: usize) -> Option<Page> {
     })
 }
 
-// Vorbis in Ogg: identification and comment headers, then pages up to a positive end granule.
 pub(super) fn valid(bytes: &[u8]) -> bool {
     let mut pages = Vec::new();
     let mut at = 0;

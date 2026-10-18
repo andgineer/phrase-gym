@@ -1,5 +1,5 @@
 {
-  "description": "Reference media reconciliation only reports: missing originals and orphan files are listed and never deleted, interrupted staging files older than an hour are removed while active ones stay, and an identical upload restores a missing original under its identity. Staging age is the file modification time measured against the wall clock, never the fixed scenario clock: setup backdates files from the wall clock, so an implementation measuring age with its injected clock keeps the interrupted file.",
+  "description": "Reference media reconciliation only reports: missing originals and orphan files are listed and never deleted, an original whose bytes no longer match its hash is unavailable and never served even at its recorded length, interrupted staging files older than an hour are removed while active ones stay, and an identical upload restores a missing original under its identity. Staging age is the file modification time measured against the wall clock, never the fixed scenario clock: setup backdates files from the wall clock, so an implementation measuring age with its injected clock keeps the interrupted file.",
   "implementations": [
     "python",
     "rust"
@@ -36,6 +36,10 @@
           {
             "at": "/available",
             "equals": true
+          },
+          {
+            "at": "/byte_length",
+            "equals": 3244
           }
         ]
       },
@@ -158,6 +162,45 @@
             }
           }
         ]
+      }
+    },
+    {
+      "id": "damaged-original-is-unavailable",
+      "setup": {
+        "files": [
+          {
+            "path": "media/{{sha256}}",
+            "bytes": {
+              "fill": [
+                0,
+                3244
+              ]
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}/metadata"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/available",
+            "equals": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "damaged-original-not-served",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/media/{{media}}"
+      },
+      "expect": {
+        "status": 503
       }
     },
     {

@@ -3,7 +3,6 @@ use super::bytes::{u16_le, u32_le};
 const PCM: u16 = 1;
 const EXTENSIBLE: u16 = 0xFFFE;
 
-// Accepts RIFF/WAVE PCM only and requires every declared sample frame to be present.
 pub(super) fn valid(bytes: &[u8]) -> bool {
     if bytes.get(0..4) != Some(b"RIFF") || bytes.get(8..12) != Some(b"WAVE") {
         return false;

@@ -4,7 +4,7 @@ use serde_json::{Value, json};
 
 use crate::support::TestServer;
 use crate::support::content::{
-    get, package, package_text, phrases, post, post_text, publish, stage,
+    WAV, get, package, package_text, phrases, post, post_text, publish, stage, upload,
 };
 
 fn server() -> TestServer {
@@ -183,6 +183,65 @@ async fn a_stale_lesson_edit_conflicts_without_writing() {
         .await
         .json();
     assert_eq!(lessons["total"], 1);
+}
+
+#[tokio::test]
+async fn a_stale_dialogue_edit_conflicts_without_writing() {
+    let server = server();
+    let mut content = package();
+    publish(&server.router, &content).await;
+    let mut older = content.clone();
+    older["dialogues"][0]["turns"][0]["text"] = json!("Old pending line.");
+    let staged = stage(&server.router, &older).await.json();
+    content["dialogues"][0]["turns"][0]["text"] = json!("New dialogue line.");
+    publish(&server.router, &content).await;
+    let path = format!("/api/v1/imports/{}/publish", staged["id"].as_str().unwrap());
+    assert_eq!(
+        post(&server.router, &path, &json!({})).await.status,
+        StatusCode::CONFLICT
+    );
+    let dialogue = get(&server.router, "/api/v1/dialogues?language=en")
+        .await
+        .json()["items"][0]
+        .clone();
+    assert_eq!(
+        (
+            dialogue["revision"].clone(),
+            dialogue["content"]["turns"][0]["text"].clone()
+        ),
+        (json!(2), json!("New dialogue line."))
+    );
+    assert_eq!(count(&server, "dialogue_revision"), 2);
+}
+
+#[tokio::test]
+async fn reference_audio_damaged_after_staging_blocks_publication() {
+    let server = server();
+    let reference = upload(&server.router, &json!({}), WAV, "audio/wav").await;
+    let mut content = package();
+    content["targets"][0]["reference_audio_id"] = reference["id"].clone();
+    let staged = stage(&server.router, &content).await.json();
+    assert_eq!(staged["status"], "staged", "{staged}");
+    let original = server
+        .data_dir
+        .join("media")
+        .join(reference["sha256"].as_str().unwrap());
+    let mut damaged = std::fs::read(&original).unwrap();
+    damaged[0] ^= 0xff;
+    std::fs::write(&original, damaged).unwrap();
+    let id = staged["id"].as_str().unwrap();
+    let reply = post(
+        &server.router,
+        &format!("/api/v1/imports/{id}/publish"),
+        &json!({}),
+    )
+    .await;
+    assert_eq!(reply.status, StatusCode::CONFLICT, "{:?}", reply.body);
+    assert_eq!(count(&server, "target"), 0);
+    let after = get(&server.router, &format!("/api/v1/imports/{id}"))
+        .await
+        .json();
+    assert_eq!(after["status"], "staged");
 }
 
 #[tokio::test]

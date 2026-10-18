@@ -9,7 +9,6 @@ use crate::hashing::sha256_hex;
 
 const STAGING_RETENTION: Duration = Duration::from_hours(1);
 
-// Core-owned reference bytes live under their SHA-256 name; the database refers to them by hash.
 #[derive(Debug)]
 pub struct MediaStore {
     root: PathBuf,

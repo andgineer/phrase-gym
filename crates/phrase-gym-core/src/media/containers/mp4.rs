@@ -46,7 +46,6 @@ fn sound_duration(bytes: &[u8], track: &Range<usize>) -> Option<bool> {
     Some(timescale > 0 && duration > 0)
 }
 
-// An MP4/M4A file is accepted when its box tree parses and a sound track declares a duration.
 pub(super) fn valid(bytes: &[u8]) -> bool {
     let Some(top) = boxes(bytes, 0..bytes.len()) else {
         return false;

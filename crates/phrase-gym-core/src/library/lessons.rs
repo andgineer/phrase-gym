@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::content::records;
 use crate::error::CoreError;
+use crate::library::search::Search;
 
 type LessonRow = (String, String, String);
 
@@ -43,16 +44,15 @@ pub(crate) fn of_target(connection: &Connection, target: Uuid) -> Result<Vec<Les
 pub(crate) fn in_language(
     connection: &Connection,
     language: Language,
-    query: &str,
+    search: &Search,
 ) -> Result<Vec<Lesson>, CoreError> {
     let mut statement = connection
         .prepare("SELECT id, title, language FROM lesson WHERE language = ?1 ORDER BY title, id")?;
     let rows: Vec<LessonRow> = statement
         .query_map([language.code()], row)?
         .collect::<Result<_, _>>()?;
-    let query = query.to_lowercase();
     rows.into_iter()
-        .filter(|(_, title, _)| title.to_lowercase().contains(&query))
+        .filter(|(_, title, _)| search.matches(title))
         .map(|item| lesson(connection, item))
         .collect()
 }
