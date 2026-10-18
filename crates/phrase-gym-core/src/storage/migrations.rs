@@ -9,10 +9,16 @@ pub struct Migration {
     pub sql: &'static str,
 }
 
-pub const MIGRATIONS: &[Migration] = &[Migration {
-    revision: 1,
-    sql: include_str!("../../migrations/0001_initial.sql"),
-}];
+pub const MIGRATIONS: &[Migration] = &[
+    Migration {
+        revision: 1,
+        sql: include_str!("../../migrations/0001_initial.sql"),
+    },
+    Migration {
+        revision: 2,
+        sql: include_str!("../../migrations/0002_practice.sql"),
+    },
+];
 
 // Marks the file as a Phrase Gym database so a foreign SQLite file is never mistaken for an empty one.
 pub const APPLICATION_ID: i64 = 0x5047_5359;

@@ -1,7 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use phrase_gym_core::hashing::sha256_hex;
-use phrase_gym_core::storage::migrations::{APPLICATION_ID, MIGRATIONS, Migration, migrate};
+use phrase_gym_core::storage::migrations::{
+    APPLICATION_ID, MIGRATIONS, Migration, latest_revision, migrate,
+};
 use phrase_gym_core::storage::{DATABASE_FILE, Database, StorageError};
 use rusqlite::Connection;
 use rusqlite::config::DbConfig;
@@ -33,17 +35,27 @@ fn table_names(path: &Path) -> Vec<String> {
         .collect()
 }
 
-fn chain_with(second: &'static str) -> Vec<Migration> {
-    vec![
-        Migration {
-            revision: 1,
-            sql: MIGRATIONS[0].sql,
-        },
-        Migration {
-            revision: 2,
-            sql: second,
-        },
-    ]
+fn latest() -> i64 {
+    latest_revision(MIGRATIONS)
+}
+
+fn released(count: usize) -> Vec<Migration> {
+    MIGRATIONS[..count]
+        .iter()
+        .map(|migration| Migration {
+            revision: migration.revision,
+            sql: migration.sql,
+        })
+        .collect()
+}
+
+fn chain_with(next: &'static str) -> Vec<Migration> {
+    let mut chain = released(MIGRATIONS.len());
+    chain.push(Migration {
+        revision: latest() + 1,
+        sql: next,
+    });
+    chain
 }
 
 const BROKEN_SECOND: &str = "CREATE TABLE partial_step (id TEXT PRIMARY KEY) STRICT;\
@@ -59,7 +71,7 @@ fn fresh_initialization_applies_the_chain_once_with_integrity_settings() {
     let directory = tempfile::tempdir().unwrap();
     let database = Database::open(directory.path()).unwrap();
     let path = database.path().to_owned();
-    assert_eq!(pragma(&path, "user_version"), 1);
+    assert_eq!(pragma(&path, "user_version"), latest());
     assert_eq!(pragma(&path, "application_id"), APPLICATION_ID);
     assert!(table_names(&path).contains(&"target".to_owned()));
     let connection = Connection::open(&path).unwrap();
@@ -97,7 +109,31 @@ fn repeated_startup_changes_nothing() {
     drop(Database::open(directory.path()).unwrap());
     drop(Database::open(directory.path()).unwrap());
     assert_eq!(schema(&path), before);
+    assert_eq!(pragma(&path, "user_version"), latest());
+}
+
+#[test]
+fn an_earlier_revision_upgrades_in_place_keeping_its_rows() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = database_file(directory.path());
+    let mut connection = Connection::open(&path).unwrap();
+    migrate(&mut connection, &released(1)).unwrap();
+    connection
+        .execute_batch("INSERT INTO lesson VALUES ('l', 'n', 's', 'en', 'Title');")
+        .unwrap();
+    drop(connection);
     assert_eq!(pragma(&path, "user_version"), 1);
+    drop(Database::open(directory.path()).unwrap());
+    assert_eq!(pragma(&path, "user_version"), latest());
+    let tables = table_names(&path);
+    for table in ["practice_session", "learner_recording", "device_settings"] {
+        assert!(tables.contains(&table.to_owned()), "{table}");
+    }
+    let lessons: i64 = Connection::open(&path)
+        .unwrap()
+        .query_row("SELECT count(*) FROM lesson", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(lessons, 1);
 }
 
 #[test]
@@ -127,12 +163,12 @@ fn an_interrupted_upgrade_keeps_the_previous_revision_and_completes_on_retry() {
     let mut connection = Connection::open(&path).unwrap();
     assert!(migrate(&mut connection, &chain_with(BROKEN_SECOND)).is_err());
     drop(connection);
-    assert_eq!(pragma(&path, "user_version"), 1);
+    assert_eq!(pragma(&path, "user_version"), latest());
     assert!(!table_names(&path).contains(&"partial_step".to_owned()));
     let mut connection = Connection::open(&path).unwrap();
     migrate(&mut connection, &chain_with(FIXED_SECOND)).unwrap();
     drop(connection);
-    assert_eq!(pragma(&path, "user_version"), 2);
+    assert_eq!(pragma(&path, "user_version"), latest() + 1);
     assert!(table_names(&path).contains(&"partial_step".to_owned()));
 }
 
@@ -147,7 +183,7 @@ fn an_interrupted_initialization_leaves_an_empty_database_that_initializes_later
     assert_eq!(pragma(&path, "application_id"), 0);
     assert!(table_names(&path).is_empty());
     drop(Database::open(directory.path()).unwrap());
-    assert_eq!(pragma(&path, "user_version"), 1);
+    assert_eq!(pragma(&path, "user_version"), latest());
 }
 
 fn digest(path: &Path) -> Option<String> {

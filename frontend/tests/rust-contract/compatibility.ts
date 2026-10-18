@@ -72,10 +72,54 @@ export const mediaReconciliation: Same<
   PythonPaths['/api/v1/media/reconcile']['post'],
   RustPaths['/api/v1/media/reconcile']['post']
 > = [true, true, true]
-// Reference audio is fetched by URL; only its address and parameters are part of the contract.
+export const settings: Same<
+  PythonPaths['/api/v1/settings']['get'],
+  RustPaths['/api/v1/settings']['get']
+> = [true, true, true]
+export const settingsReplacement: Same<
+  PythonPaths['/api/v1/settings']['put'],
+  RustPaths['/api/v1/settings']['put']
+> = [true, true, true]
+export const sessionStart: Same<
+  PythonPaths['/api/v1/sessions']['post'],
+  RustPaths['/api/v1/sessions']['post']
+> = [true, true, true]
+export const currentSession: Same<
+  PythonPaths['/api/v1/sessions/current']['get'],
+  RustPaths['/api/v1/sessions/current']['get']
+> = [true, true, true]
+export const session: Same<
+  PythonPaths['/api/v1/sessions/{session_id}']['get'],
+  RustPaths['/api/v1/sessions/{session_id}']['get']
+> = [true, true, true]
+export const sessionTransition: Same<
+  PythonPaths['/api/v1/sessions/{session_id}']['patch'],
+  RustPaths['/api/v1/sessions/{session_id}']['patch']
+> = [true, true, true]
+export const practiceEvents: Same<
+  PythonPaths['/api/v1/sessions/{session_id}/events']['post'],
+  RustPaths['/api/v1/sessions/{session_id}/events']['post']
+> = [true, true, true]
+export const practiceReceipts: Same<
+  PythonPaths['/api/v1/sessions/{session_id}/events']['get'],
+  RustPaths['/api/v1/sessions/{session_id}/events']['get']
+> = [true, true, true]
+export const takeUpload: Same<
+  PythonPaths['/api/v1/recordings']['post'],
+  RustPaths['/api/v1/recordings']['post']
+> = [true, true, true]
+export const phraseTakes: Same<
+  PythonPaths['/api/v1/phrases/{target_id}/recordings']['get'],
+  RustPaths['/api/v1/phrases/{target_id}/recordings']['get']
+> = [true, true, true]
+// Reference audio and takes are fetched by URL; only their address and parameters are contracts.
 export const mediaBytes: Exact<
   Parameters<RustPaths['/api/v1/media/{media_id}']['get']>,
   Parameters<PythonPaths['/api/v1/media/{media_id}']['get']>
+> = true
+export const takeBytes: Exact<
+  Parameters<RustPaths['/api/v1/recordings/{recording_id}']['get']>,
+  Parameters<PythonPaths['/api/v1/recordings/{recording_id}']['get']>
 > = true
 
 // The comparison must reject added optional fields on either side and in nested objects.

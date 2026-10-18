@@ -12,6 +12,7 @@ use super::store::MediaStore;
 // consistent, and no file I/O happens inside a database transaction.
 #[derive(Debug, Default)]
 pub struct MediaIndex {
+    requested: BTreeSet<Uuid>,
     entries: HashMap<Uuid, (MediaRecord, bool)>,
 }
 
@@ -38,7 +39,15 @@ impl MediaIndex {
                 (record.id, (record, available))
             })
             .collect();
-        Ok(Self { entries })
+        Ok(Self {
+            requested: wanted,
+            entries,
+        })
+    }
+
+    // Whether availability was checked for every given ID, present or not.
+    pub fn covers<'a>(&self, ids: impl IntoIterator<Item = &'a Uuid>) -> bool {
+        ids.into_iter().all(|id| self.requested.contains(id))
     }
 
     pub fn record(&self, id: Uuid) -> Option<&MediaRecord> {

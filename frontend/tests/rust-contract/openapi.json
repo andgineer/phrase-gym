@@ -656,6 +656,237 @@
         }
       }
     },
+    "/api/v1/phrases/{target_id}/recordings": {
+      "get": {
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "list_learner_takes",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every take of the phrase in capture order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecordingReceipt"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recordings": {
+      "post": {
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "store_learner_take",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Stored take, or the take already stored with this ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingReceipt"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Take ID reused with other audio or metadata, or its attempt or capture event is not persisted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid transfer, MIME type, size or context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recordings/{recording_id}": {
+      "get": {
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "play_learner_take",
+        "parameters": [
+          {
+            "name": "recording_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original take bytes"
+          },
+          "206": {
+            "description": "Requested byte range of the original take"
+          },
+          "404": {
+            "description": "Take not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Unsatisfiable byte range"
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "start_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Started session, or the session already started with this ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson or dialogue not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another session is open, the ID has other parameters or nothing is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid start parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/current": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "current_session",
+        "responses": {
+          "200": {
+            "description": "The open session, or null when none is open",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PracticeSession"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sessions/readiness": {
       "get": {
         "tags": [
@@ -717,10 +948,409 @@
           }
         }
       }
+    },
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "read_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session with its immutable manifest, position and attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "transition_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionTransition"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paused or resumed session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Closed session or stale expected version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/events": {
+      "get": {
+        "tags": [
+          "practice"
+        ],
+        "operationId": "practice_event_receipts",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipts in event order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventReceipt"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "practice"
+        ],
+        "operationId": "submit_practice_events",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Receipts for every event, including retried ones, and the session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeBatchReceipt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Out-of-order event, stale step or event ID reused with another payload; nothing in the batch is kept",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "operationId": "read_device_settings",
+        "responses": {
+          "200": {
+            "description": "Device and interface settings, with defaults before the first save",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "operationId": "replace_device_settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The complete replacement settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid or unknown settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AttemptEvidence": {
+        "type": "object",
+        "required": [
+          "id",
+          "step",
+          "target_id",
+          "revision",
+          "cue_id",
+          "review_group_id",
+          "repair",
+          "supported",
+          "revealed",
+          "expanded",
+          "technical_failure",
+          "capture_pending",
+          "presented_at"
+        ],
+        "properties": {
+          "capture_pending": {
+            "type": "boolean"
+          },
+          "cue_id": {
+            "type": "string"
+          },
+          "eligibility_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expanded": {
+            "type": "boolean"
+          },
+          "finalized_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "original": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OriginalResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "presented_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecallRating"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair": {
+            "type": "boolean"
+          },
+          "revealed": {
+            "type": "boolean"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "step": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "technical_failure": {
+            "type": "boolean"
+          }
+        }
+      },
       "AudioStatus": {
         "type": "string",
         "enum": [
@@ -935,6 +1565,13 @@
           }
         }
       },
+      "Eligibility": {
+        "type": "string",
+        "enum": [
+          "new",
+          "due"
+        ]
+      },
       "ErrorBody": {
         "type": "object",
         "required": [
@@ -943,6 +1580,89 @@
         "properties": {
           "detail": {
             "type": "string"
+          }
+        }
+      },
+      "EventBatch": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeInput"
+            },
+            "maxItems": 100,
+            "minItems": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "EventReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "attempt_id",
+          "received_at",
+          "occurred_at",
+          "clock_adjusted",
+          "schedule_changed"
+        ],
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "capture_supported": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "clock_adjusted": {
+            "type": "boolean"
+          },
+          "due_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "eligibility_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "schedule_changed": {
+            "type": "boolean"
+          },
+          "schedule_version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -1234,6 +1954,41 @@
         },
         "additionalProperties": false
       },
+      "Modality": {
+        "type": "string",
+        "enum": [
+          "self_report",
+          "recorded",
+          "unrecorded"
+        ]
+      },
+      "OpenStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "paused"
+        ]
+      },
+      "OriginalResponse": {
+        "type": "object",
+        "required": [
+          "modality",
+          "supported",
+          "occurred_at"
+        ],
+        "properties": {
+          "modality": {
+            "$ref": "#/components/schemas/Modality"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        }
+      },
       "Phrase": {
         "type": "object",
         "required": [
@@ -1303,6 +2058,209 @@
           }
         }
       },
+      "PlannedTarget": {
+        "type": "object",
+        "required": [
+          "phrase",
+          "cue_id",
+          "hidden_chunks",
+          "review_group_id",
+          "schedule_version",
+          "eligibility"
+        ],
+        "properties": {
+          "cue_id": {
+            "type": "string"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/Eligibility"
+          },
+          "hidden_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phrase": {
+            "$ref": "#/components/schemas/Phrase"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schedule_version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "PlannerVersion": {
+        "type": "string",
+        "enum": [
+          "due-new-v1",
+          "due-new-v2",
+          "due-new-v3-online"
+        ]
+      },
+      "PracticeBatchReceipt": {
+        "type": "object",
+        "required": [
+          "receipts",
+          "session"
+        ],
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventReceipt"
+            }
+          },
+          "session": {
+            "$ref": "#/components/schemas/PracticeSession"
+          }
+        }
+      },
+      "PracticeInput": {
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "step",
+          "occurred_at",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PracticeKind"
+          },
+          "modality": {
+            "$ref": "#/components/schemas/Modality",
+            "default": "self_report"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecallRating"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "step": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "PracticeKind": {
+        "type": "string",
+        "enum": [
+          "present",
+          "respond",
+          "capture_complete",
+          "answer",
+          "explain",
+          "reference",
+          "rate",
+          "failure",
+          "report",
+          "detour",
+          "dialogue_exposure",
+          "dialogue_begin"
+        ]
+      },
+      "PracticeSession": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "version",
+          "created_at",
+          "updated_at",
+          "manifest",
+          "cursor",
+          "last_sequence",
+          "queue",
+          "attempts"
+        ],
+        "properties": {
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptEvidence"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cursor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_sequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/SessionManifest"
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionStep"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/SessionStatus"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "RecallRating": {
+        "type": "string",
+        "enum": [
+          "not_yet",
+          "with_effort",
+          "recalled"
+        ]
+      },
       "Reconciliation": {
         "type": "object",
         "required": [
@@ -1330,6 +2288,124 @@
           }
         }
       },
+      "RecordingInput": {
+        "type": "object",
+        "required": [
+          "id",
+          "target_id",
+          "revision",
+          "captured_at",
+          "mime_type",
+          "complete",
+          "audio_base64"
+        ],
+        "properties": {
+          "attempt_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "audio_base64": {
+            "type": "string",
+            "maxLength": 17000000,
+            "minLength": 1
+          },
+          "capture_event_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "capture_settings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SettingValue"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "duration_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "exposure_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecordingReceipt": {
+        "type": "object",
+        "required": [
+          "id",
+          "sha256",
+          "byte_length",
+          "captured_at",
+          "received_at",
+          "complete"
+        ],
+        "properties": {
+          "byte_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
+      },
       "ReferenceMime": {
         "type": "string",
         "enum": [
@@ -1338,6 +2414,156 @@
           "audio/ogg",
           "audio/mp4"
         ]
+      },
+      "SessionManifest": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "planner_version",
+          "policy_version",
+          "language",
+          "targets",
+          "required_media_ids"
+        ],
+        "properties": {
+          "dialogue": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Dialogue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lesson_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "planner_version": {
+            "$ref": "#/components/schemas/PlannerVersion"
+          },
+          "policy_version": {
+            "type": "string"
+          },
+          "required_media_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "schema_version": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedTarget"
+            }
+          }
+        }
+      },
+      "SessionStart": {
+        "type": "object",
+        "required": [
+          "id",
+          "language"
+        ],
+        "properties": {
+          "dialogue_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lesson_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "takeover_session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SessionStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "paused",
+          "superseded",
+          "completed"
+        ]
+      },
+      "SessionStep": {
+        "type": "object",
+        "required": [
+          "target_index",
+          "repair",
+          "introduced"
+        ],
+        "properties": {
+          "dialogue_turn": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "introduced": {
+            "type": "boolean"
+          },
+          "repair": {
+            "type": "boolean"
+          },
+          "target_index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "SessionTransition": {
+        "type": "object",
+        "required": [
+          "expected_version",
+          "status"
+        ],
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/OpenStatus"
+          }
+        },
+        "additionalProperties": false
       },
       "SettingValue": {
         "oneOf": [
@@ -1356,6 +2582,43 @@
             "type": "boolean"
           }
         ]
+      },
+      "Settings": {
+        "type": "object",
+        "required": [
+          "ui_language_mode"
+        ],
+        "properties": {
+          "native_language": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Language"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ui_language_mode": {
+            "$ref": "#/components/schemas/UiLanguageMode"
+          }
+        }
+      },
+      "SettingsUpdate": {
+        "type": "object",
+        "required": [
+          "native_language"
+        ],
+        "properties": {
+          "native_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "ui_language_mode": {
+            "$ref": "#/components/schemas/UiLanguageMode",
+            "default": "native"
+          }
+        },
+        "additionalProperties": false
       },
       "TargetInput": {
         "type": "object",
@@ -1455,6 +2718,13 @@
           "fixed_phrase",
           "word_sense",
           "frame"
+        ]
+      },
+      "UiLanguageMode": {
+        "type": "string",
+        "enum": [
+          "native",
+          "learning"
         ]
       }
     }

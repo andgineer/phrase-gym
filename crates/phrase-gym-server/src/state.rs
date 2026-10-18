@@ -9,7 +9,11 @@ use phrase_gym_core::media::catalog::MediaCatalog;
 use phrase_gym_core::media::ingest::MediaIngest;
 use phrase_gym_core::media::reconcile::MediaReconciler;
 use phrase_gym_core::media::store::MediaStore;
+use phrase_gym_core::practice::Practice;
 use phrase_gym_core::readiness::Readiness;
+use phrase_gym_core::recordings::Recordings;
+use phrase_gym_core::sessions::Sessions;
+use phrase_gym_core::settings::DeviceSettings;
 use phrase_gym_core::storage::Database;
 use tokio::sync::Semaphore;
 
@@ -25,6 +29,10 @@ pub struct AppState {
     pub(crate) media_ingest: Arc<MediaIngest>,
     pub(crate) media_catalog: Arc<MediaCatalog>,
     pub(crate) media_reconciler: Arc<MediaReconciler>,
+    pub(crate) sessions: Arc<Sessions>,
+    pub(crate) practice: Arc<Practice>,
+    pub(crate) recordings: Arc<Recordings>,
+    pub(crate) settings: Arc<DeviceSettings>,
     #[cfg(feature = "test-support")]
     pub(crate) staging: Arc<PackageStaging>,
     storage_slots: Arc<Semaphore>,
@@ -40,6 +48,14 @@ impl AppState {
                 store.clone(),
                 clock.clone(),
             )),
+            sessions: Arc::new(Sessions::new(
+                database.clone(),
+                store.clone(),
+                clock.clone(),
+            )),
+            practice: Arc::new(Practice::new(database.clone(), clock.clone())),
+            recordings: Arc::new(Recordings::new(database.clone(), clock.clone())),
+            settings: Arc::new(DeviceSettings::new(database.clone())),
             media_ingest: Arc::new(MediaIngest::new(database.clone(), store.clone())),
             media_catalog: Arc::new(MediaCatalog::new(database.clone(), store.clone())),
             #[cfg(feature = "test-support")]

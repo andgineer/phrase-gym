@@ -1,23 +1,17 @@
 use std::sync::Arc;
 
-use base64::Engine;
-use base64::alphabet::STANDARD;
-use base64::engine::{GeneralPurpose, GeneralPurposeConfig};
 use phrase_gym_contracts::media::{MediaAsset, MediaUpload};
 use rusqlite::params;
 
 use crate::error::CoreError;
 use crate::hashing::{canonical_json, sha256_hex};
 use crate::storage::Database;
+use crate::transfer::decode_base64;
 
 use super::store::MediaStore;
 use super::{containers, identity, provenance, records};
 
 const MAX_BASE64_CHARACTERS: usize = 17_000_000;
-const DECODER: GeneralPurpose = GeneralPurpose::new(
-    &STANDARD,
-    GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
-);
 
 pub struct MediaIngest {
     database: Arc<Database>,
@@ -39,9 +33,8 @@ impl MediaIngest {
                 "audio_base64 must be 1-{MAX_BASE64_CHARACTERS} characters"
             )));
         }
-        let audio = DECODER
-            .decode(encoded)
-            .map_err(|_| CoreError::Invalid("Audio must be valid base64".to_owned()))?;
+        let audio = decode_base64(encoded)
+            .ok_or_else(|| CoreError::Invalid("Audio must be valid base64".to_owned()))?;
         containers::validate(&audio, upload.mime_type)?;
         let sha256 = sha256_hex(&audio);
         let id = identity::media_id(&sha256, upload.mime_type, &upload.metadata);

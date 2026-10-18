@@ -7,11 +7,11 @@ use rusqlite::OptionalExtension;
 use uuid::Uuid;
 
 use crate::clock::Clock;
-use crate::content::cues;
 use crate::error::CoreError;
 use crate::library::{lessons, phrases};
 use crate::media::index::MediaIndex;
 use crate::media::store::MediaStore;
+use crate::prompts::selection;
 use crate::storage::{Database, StorageError};
 use crate::timestamps;
 
@@ -49,13 +49,15 @@ impl Readiness {
                             |row| row.get(0),
                         )
                         .optional()?;
-                    Ok((item.content, due))
+                    let cue =
+                        selection::select(transaction, item.id, item.revision, &item.content)?;
+                    Ok((item.content, due, cue.is_some()))
                 })
                 .collect::<Result<Vec<_>, CoreError>>()
         })?;
         let ids: Vec<Uuid> = targets
             .iter()
-            .flat_map(|(content, _)| phrases::media_ids(content))
+            .flat_map(|(content, _, _)| phrases::media_ids(content))
             .collect();
         let media = MediaIndex::load(&self.database, &self.store, ids)?;
         let now = self.clock.now();
@@ -66,12 +68,8 @@ impl Readiness {
             next_due_at: None,
         };
         let mut next: Option<DateTime<Utc>> = None;
-        for (content, due) in targets {
-            let practicable = content
-                .cues
-                .iter()
-                .any(|cue| cues::practicable(&content, cue));
-            if !phrases::retrieval_ready(&content, &media) || !practicable {
+        for (content, due, has_cue) in targets {
+            if !phrases::retrieval_ready(&content, &media) || !has_cue {
                 summary.preparing_count += 1;
                 continue;
             }

@@ -7,3 +7,6 @@ pub mod library;
 pub mod media;
 pub mod practice;
 pub mod readiness;
+pub mod recordings;
+pub mod sessions;
+pub mod settings;

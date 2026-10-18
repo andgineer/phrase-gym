@@ -1,6 +1,7 @@
 pub mod content;
 pub mod documents;
 pub mod http;
+pub mod practice;
 pub mod scenario;
 pub mod setup;
 
@@ -51,5 +52,16 @@ impl TestServer {
             database_path,
             _temporary: data_dir,
         }
+    }
+
+    // A fresh application over the same data directory, as after a process restart.
+    pub fn restarted(&self) -> Router {
+        let database = Database::open(&self.data_dir).unwrap();
+        let store = MediaStore::open(&self.data_dir).unwrap();
+        let state = AppState::new(Arc::new(database), Arc::new(store), self.clock.clone());
+        router(
+            state,
+            &ServerSettings::loopback().with_hosts([HOST.to_owned()]),
+        )
     }
 }

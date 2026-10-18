@@ -2,9 +2,11 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use phrase_gym_contracts::exposures::{ExposureInput, ExposureReceipt};
-use rusqlite::{OptionalExtension, Transaction, params};
+use rusqlite::{Connection, OptionalExtension, Transaction, params};
+use uuid::Uuid;
 
 use crate::clock::Clock;
+use crate::content::records;
 use crate::error::CoreError;
 use crate::storage::{Database, StorageError};
 use crate::timestamps;
@@ -81,4 +83,16 @@ fn record(
         id: input.id,
         received_at,
     })
+}
+
+pub(crate) fn binding(connection: &Connection, id: Uuid) -> Result<Option<(Uuid, i64)>, CoreError> {
+    let row: Option<(String, i64)> = connection
+        .query_row(
+            "SELECT target_id, revision FROM exposure WHERE id = ?1",
+            [id.to_string()],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .optional()?;
+    row.map(|(target, revision)| Ok((records::uuid(&target)?, revision)))
+        .transpose()
 }

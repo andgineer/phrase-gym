@@ -11,7 +11,17 @@ use phrase_gym_contracts::media::{
     MediaAsset, MediaMetadata, MediaOrigin, MediaRole, MediaUpload, Reconciliation, ReferenceMime,
     SettingValue,
 };
+use phrase_gym_contracts::practice::{
+    AttemptEvidence, EventBatch, EventReceipt, Modality, OriginalResponse, PracticeInput,
+    PracticeKind, RecallRating,
+};
 use phrase_gym_contracts::readiness::DueSummary;
+use phrase_gym_contracts::recordings::{RecordingInput, RecordingReceipt};
+use phrase_gym_contracts::sessions::{
+    Eligibility, OpenStatus, PlannedTarget, PlannerVersion, PracticeBatchReceipt, PracticeSession,
+    SessionManifest, SessionStart, SessionStatus, SessionStep, SessionTransition,
+};
+use phrase_gym_contracts::settings::{Settings, SettingsUpdate, UiLanguageMode};
 use utoipa::OpenApi;
 
 use crate::routes;
@@ -35,8 +45,20 @@ use crate::routes;
         routes::media::metadata,
         routes::media::play,
         routes::media::reconcile,
+        routes::sessions::start,
+        routes::sessions::current,
+        routes::sessions::read,
+        routes::sessions::transition,
+        routes::practice::submit,
+        routes::practice::receipts,
+        routes::recordings::store,
+        routes::recordings::list,
+        routes::recordings::play,
+        routes::settings::read,
+        routes::settings::replace,
     ),
     components(schemas(
+        AttemptEvidence,
         AudioStatus,
         Chunk,
         Cue,
@@ -45,7 +67,10 @@ use crate::routes;
         DialoguePage,
         DialogueTurn,
         DueSummary,
+        Eligibility,
         ErrorBody,
+        EventBatch,
+        EventReceipt,
         Explanation,
         ExposureInput,
         ExposureKind,
@@ -58,13 +83,33 @@ use crate::routes;
         MediaOrigin,
         MediaRole,
         MediaUpload,
+        Modality,
+        OpenStatus,
+        OriginalResponse,
         Phrase,
         PhrasePage,
+        PlannedTarget,
+        PlannerVersion,
+        PracticeBatchReceipt,
+        PracticeInput,
+        PracticeKind,
+        PracticeSession,
+        RecallRating,
         Reconciliation,
+        RecordingInput,
+        RecordingReceipt,
         ReferenceMime,
+        SessionManifest,
+        SessionStart,
+        SessionStatus,
+        SessionStep,
+        SessionTransition,
         SettingValue,
+        Settings,
+        SettingsUpdate,
         TargetInput,
         TargetKind,
+        UiLanguageMode,
     ))
 )]
 struct ApiDoc;

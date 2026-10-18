@@ -180,6 +180,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/phrases/{target_id}/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_learner_takes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["store_learner_take"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recordings/{recording_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["play_learner_take"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["start_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["current_session"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sessions/readiness": {
         parameters: {
             query?: never;
@@ -196,10 +276,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["read_session"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["transition_session"];
+        trace?: never;
+    };
+    "/api/v1/sessions/{session_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["practice_event_receipts"];
+        put?: never;
+        post: operations["submit_practice_events"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["read_device_settings"];
+        put: operations["replace_device_settings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AttemptEvidence: {
+            capture_pending: boolean;
+            cue_id: string;
+            eligibility_reason?: string | null;
+            expanded: boolean;
+            /** Format: date-time */
+            finalized_at?: string | null;
+            /** Format: uuid */
+            id: string;
+            original?: components["schemas"]["OriginalResponse"] | null;
+            /** Format: date-time */
+            presented_at: string;
+            rating?: components["schemas"]["RecallRating"] | null;
+            repair: boolean;
+            revealed: boolean;
+            /** Format: uuid */
+            review_group_id: string;
+            /** Format: int64 */
+            revision: number;
+            /** Format: int64 */
+            step: number;
+            supported: boolean;
+            /** Format: uuid */
+            target_id: string;
+            technical_failure: boolean;
+        };
         /** @enum {string} */
         AudioStatus: "ready" | "missing";
         Chunk: {
@@ -259,8 +413,33 @@ export interface components {
             /** Format: int64 */
             preparing_count: number;
         };
+        /** @enum {string} */
+        Eligibility: "new" | "due";
         ErrorBody: {
             detail: string;
+        };
+        EventBatch: {
+            events: components["schemas"]["PracticeInput"][];
+        };
+        EventReceipt: {
+            /** Format: uuid */
+            attempt_id: string;
+            capture_supported?: boolean | null;
+            clock_adjusted: boolean;
+            /** Format: date-time */
+            due_at?: string | null;
+            eligibility_reason?: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurred_at: string;
+            /** Format: date-time */
+            received_at: string;
+            schedule_changed: boolean;
+            /** Format: int64 */
+            schedule_version?: number | null;
+            /** Format: int64 */
+            sequence: number;
         };
         Explanation: {
             breakdown?: string[];
@@ -339,6 +518,16 @@ export interface components {
             metadata: components["schemas"]["MediaMetadata"];
             mime_type: components["schemas"]["ReferenceMime"];
         };
+        /** @enum {string} */
+        Modality: "self_report" | "recorded" | "unrecorded";
+        /** @enum {string} */
+        OpenStatus: "active" | "paused";
+        OriginalResponse: {
+            modality: components["schemas"]["Modality"];
+            /** Format: date-time */
+            occurred_at: string;
+            supported: boolean;
+        };
         Phrase: {
             audio_status: components["schemas"]["AudioStatus"];
             content: components["schemas"]["TargetInput"];
@@ -359,15 +548,149 @@ export interface components {
             /** Format: int64 */
             total: number;
         };
+        PlannedTarget: {
+            cue_id: string;
+            eligibility: components["schemas"]["Eligibility"];
+            hidden_chunks: string[];
+            phrase: components["schemas"]["Phrase"];
+            /** Format: uuid */
+            review_group_id: string;
+            /** Format: int64 */
+            schedule_version: number;
+        };
+        /** @enum {string} */
+        PlannerVersion: "due-new-v1" | "due-new-v2" | "due-new-v3-online";
+        PracticeBatchReceipt: {
+            receipts: components["schemas"]["EventReceipt"][];
+            session: components["schemas"]["PracticeSession"];
+        };
+        PracticeInput: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["PracticeKind"];
+            /** @default self_report */
+            modality: components["schemas"]["Modality"];
+            /** Format: date-time */
+            occurred_at: string;
+            rating?: components["schemas"]["RecallRating"] | null;
+            reason?: string | null;
+            /** Format: int64 */
+            sequence: number;
+            /** Format: int64 */
+            step: number;
+        };
+        /** @enum {string} */
+        PracticeKind: "present" | "respond" | "capture_complete" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
+        PracticeSession: {
+            attempts: components["schemas"]["AttemptEvidence"][];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: int64 */
+            cursor: number;
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            last_sequence: number;
+            manifest: components["schemas"]["SessionManifest"];
+            queue: components["schemas"]["SessionStep"][];
+            status: components["schemas"]["SessionStatus"];
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            version: number;
+        };
+        /** @enum {string} */
+        RecallRating: "not_yet" | "with_effort" | "recalled";
         Reconciliation: {
             missing_ids: string[];
             orphan_hashes: string[];
             /** Format: int64 */
             removed_staging_files: number;
         };
+        RecordingInput: {
+            /** Format: uuid */
+            attempt_id?: string | null;
+            audio_base64: string;
+            /** Format: uuid */
+            capture_event_id?: string | null;
+            capture_settings?: {
+                [key: string]: components["schemas"]["SettingValue"];
+            };
+            /** Format: date-time */
+            captured_at: string;
+            complete: boolean;
+            /** Format: int64 */
+            duration_ms?: number | null;
+            /** Format: uuid */
+            exposure_id?: string | null;
+            /** Format: uuid */
+            id: string;
+            mime_type: string;
+            /** Format: int64 */
+            revision: number;
+            /** Format: uuid */
+            target_id: string;
+        };
+        RecordingReceipt: {
+            /** Format: int64 */
+            byte_length: number;
+            /** Format: date-time */
+            captured_at: string;
+            complete: boolean;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            received_at: string;
+            sha256: string;
+        };
         /** @enum {string} */
         ReferenceMime: "audio/wav" | "audio/mpeg" | "audio/ogg" | "audio/mp4";
+        SessionManifest: {
+            dialogue?: components["schemas"]["Dialogue"] | null;
+            language: components["schemas"]["Language"];
+            /** Format: uuid */
+            lesson_id?: string | null;
+            planner_version: components["schemas"]["PlannerVersion"];
+            policy_version: string;
+            required_media_ids: string[];
+            /** @enum {integer} */
+            schema_version: 1;
+            targets: components["schemas"]["PlannedTarget"][];
+        };
+        SessionStart: {
+            /** Format: uuid */
+            dialogue_id?: string | null;
+            /** Format: uuid */
+            id: string;
+            language: components["schemas"]["Language"];
+            /** Format: uuid */
+            lesson_id?: string | null;
+            /** Format: uuid */
+            takeover_session_id?: string | null;
+        };
+        /** @enum {string} */
+        SessionStatus: "active" | "paused" | "superseded" | "completed";
+        SessionStep: {
+            dialogue_turn?: number | null;
+            introduced: boolean;
+            repair: boolean;
+            target_index: number;
+        };
+        SessionTransition: {
+            /** Format: int64 */
+            expected_version: number;
+            status: components["schemas"]["OpenStatus"];
+        };
         SettingValue: string | number | boolean;
+        Settings: {
+            native_language?: components["schemas"]["Language"] | null;
+            ui_language_mode: components["schemas"]["UiLanguageMode"];
+        };
+        SettingsUpdate: {
+            native_language: components["schemas"]["Language"];
+            /** @default native */
+            ui_language_mode: components["schemas"]["UiLanguageMode"];
+        };
         TargetInput: {
             acceptable_equivalents?: string[];
             chunks: components["schemas"]["Chunk"][];
@@ -391,6 +714,8 @@ export interface components {
         };
         /** @enum {string} */
         TargetKind: "fixed_phrase" | "word_sense" | "frame";
+        /** @enum {string} */
+        UiLanguageMode: "native" | "learning";
     };
     responses: never;
     parameters: never;
@@ -827,6 +1152,202 @@ export interface operations {
             };
         };
     };
+    list_learner_takes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every take of the phrase in capture order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingReceipt"][];
+                };
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    store_learner_take: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingInput"];
+            };
+        };
+        responses: {
+            /** @description Stored take, or the take already stored with this ID */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingReceipt"];
+                };
+            };
+            /** @description Take ID reused with other audio or metadata, or its attempt or capture event is not persisted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid transfer, MIME type, size or context */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    play_learner_take: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Original take bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Requested byte range of the original take */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Take not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Unsatisfiable byte range */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    start_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionStart"];
+            };
+        };
+        responses: {
+            /** @description Started session, or the session already started with this ID */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Lesson or dialogue not found in this learning language */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Another session is open, the ID has other parameters or nothing is ready */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid start parameters */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    current_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The open session, or null when none is open */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"] | null;
+                };
+            };
+        };
+    };
     practice_readiness: {
         parameters: {
             query: {
@@ -858,6 +1379,245 @@ export interface operations {
                 };
             };
             /** @description Invalid query */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    read_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session with its immutable manifest, position and attempts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    transition_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionTransition"];
+            };
+        };
+        responses: {
+            /** @description Paused or resumed session */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSession"];
+                };
+            };
+            /** @description Session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Closed session or stale expected version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid transition */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    practice_event_receipts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Receipts in event order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventReceipt"][];
+                };
+            };
+            /** @description Session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid identifier */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    submit_practice_events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventBatch"];
+            };
+        };
+        responses: {
+            /** @description Receipts for every event, including retried ones, and the session */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeBatchReceipt"];
+                };
+            };
+            /** @description Session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Out-of-order event, stale step or event ID reused with another payload; nothing in the batch is kept */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Invalid event */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    read_device_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Device and interface settings, with defaults before the first save */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+        };
+    };
+    replace_device_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description The complete replacement settings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+            /** @description Invalid or unknown settings */
             422: {
                 headers: {
                     [name: string]: unknown;

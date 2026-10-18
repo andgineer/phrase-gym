@@ -1,7 +1,8 @@
 {
   "description": "A repair that has not yet waited five minutes is never awaited: once the other cards are done the session completes without it and keeps the original failed rating.",
   "implementations": [
-    "python"
+    "python",
+    "rust"
   ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [

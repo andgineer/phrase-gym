@@ -81,7 +81,7 @@ cargo xtask coach-smoke   # launch that bundle like a user and verify its window
 
 Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 
-The Rust server currently implements only a subset of the API. It uses its own schema and does not open databases created by the Python application. Builds with `--features test-support` add content-seeding routes under `/api/v1/imports` for tests; release builds and the OpenAPI document omit them. Preservation fixtures under `fixtures/preservation/` record the Python behavior that encodes rules the Rust server keeps.
+The Rust server implements every endpoint the retained client calls; the Python preparation and handoff routes are not ported because the inbox replaces them. It uses its own schema and does not open databases created by the Python application. Builds with `--features test-support` add content-seeding routes under `/api/v1/imports` for tests; release builds and the OpenAPI document omit them. Preservation fixtures under `fixtures/preservation/` record the Python behavior that encodes rules the Rust server keeps.
 
 The local server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and verified backups remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
 

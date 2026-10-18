@@ -4,13 +4,14 @@ use crate::support::scenario::{load, run, scenario_names};
 use crate::support::setup::{DataFile, Setup, check_files, prepare};
 
 #[tokio::test]
-async fn rust_server_preserves_ported_scenarios() {
-    let ported: Vec<String> = scenario_names()
-        .into_iter()
-        .filter(|name| load(name).implementations.iter().any(|item| item == "rust"))
-        .collect();
-    assert!(!ported.is_empty());
-    for name in &ported {
+async fn rust_server_preserves_every_scenario() {
+    let names = scenario_names();
+    assert!(!names.is_empty());
+    for name in &names {
+        assert!(
+            load(name).implementations.iter().any(|item| item == "rust"),
+            "{name} is not declared for Rust"
+        );
         run(name).await;
     }
 }

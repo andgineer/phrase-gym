@@ -1,7 +1,8 @@
 {
   "description": "Ordered session events: server-derived attempt identities, identical-retry receipts, changed-payload conflicts, whole-batch rollback on a sequence gap, bounded and monotonic client time, and one atomic rating/schedule/receipt commit with the FSRS due time.",
   "implementations": [
-    "python"
+    "python",
+    "rust"
   ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [

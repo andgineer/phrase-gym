@@ -1,0 +1,426 @@
+{
+  "description": "Cue reports: reporting a cue leaves the attempt ungraded and the schedule untouched, and readiness and later plans treat that cue revision as unusable until a new revision is published.",
+  "implementations": [
+    "python",
+    "rust"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "reference-day",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "How has your day been so far?",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "622c73f6-c932-5b0a-95a0-fac4785a1bd0"
+          }
+        ]
+      },
+      "capture": {
+        "media_day": "/id"
+      }
+    },
+    {
+      "id": "reference-catch-up",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "Let’s catch up over coffee.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "5d5e93bc-5197-53cc-be83-0fc1d7441466"
+          }
+        ]
+      },
+      "capture": {
+        "media_catch_up": "/id"
+      }
+    },
+    {
+      "id": "reference-rather",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/media",
+        "json": {
+          "metadata": {
+            "language": "en",
+            "text": "I’d rather meet tomorrow.",
+            "role": "reference",
+            "origin": "actor",
+            "source": "preservation-fixture",
+            "performer": "Synthetic test fixture",
+            "locale": "en-US",
+            "preparation_version": "1"
+          },
+          "mime_type": "audio/wav",
+          "audio_base64": {
+            "$base64": {
+              "file": "fixtures/preservation/media/silence-100ms.wav"
+            }
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/id",
+            "equals": "e3421577-fc46-5f46-8dca-3da71bd8e1f5"
+          }
+        ]
+      },
+      "capture": {
+        "media_rather": "/id"
+      }
+    },
+    {
+      "id": "stage-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}"
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "content_import": "/id"
+      }
+    },
+    {
+      "id": "publish-content",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{content_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      },
+      "capture": {
+        "target_day": "/changes/0/target_id",
+        "target_catch_up": "/changes/1/target_id",
+        "target_rather": "/changes/2/target_id"
+      }
+    },
+    {
+      "id": "start",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e554044-0000-4000-8000-000000000001",
+          "language": "en"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/manifest/targets",
+            "length": 3
+          }
+        ]
+      },
+      "capture": {
+        "first_target": "/manifest/targets/0/phrase/id"
+      }
+    },
+    {
+      "id": "ready-before-report",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 3
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "present",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e554044-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e4a-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "step": 0,
+              "kind": "present",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/session/attempts/0/target_id",
+            "equals": "{{first_target}}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "report",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e554044-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e4a-0000-4000-8000-000000000002",
+              "sequence": 2,
+              "step": 0,
+              "kind": "report",
+              "occurred_at": "2026-10-12T12:00:00+00:00",
+              "reason": "The prompt fits two different phrases"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/receipts/0/schedule_changed",
+            "equals": false
+          },
+          {
+            "at": "/session/attempts/0/rating",
+            "equals": null
+          },
+          {
+            "at": "/session/attempts/0/eligibility_reason",
+            "equals": "reported_cue"
+          },
+          {
+            "at": "/session/cursor",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "report-requires-reason",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions/5e554044-0000-4000-8000-000000000001/events",
+        "json": {
+          "events": [
+            {
+              "id": "000e7e4a-0000-4000-8000-000000000003",
+              "sequence": 3,
+              "step": 1,
+              "kind": "report",
+              "occurred_at": "2026-10-12T12:00:00+00:00"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "reported-cue-is-preparing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 2
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "replacement-excludes-reported-cue",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/sessions",
+        "json": {
+          "id": "5e554044-0000-4000-8000-000000000002",
+          "language": "en",
+          "takeover_session_id": "5e554044-0000-4000-8000-000000000001"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/manifest/targets",
+            "length": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "stage-revision",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports",
+        "json": {
+          "$json_file": "fixtures/preservation/packages/en-basic.json",
+          "set": {
+            "/targets/0/reference_audio_id": "{{media_day}}",
+            "/targets/1/reference_audio_id": "{{media_catch_up}}",
+            "/targets/2/reference_audio_id": "{{media_rather}}",
+            "/source_revision": "2",
+            "/targets/0/purpose": "Ask how their day has gone until now.",
+            "/targets/1/purpose": "Suggest a coffee to share recent news.",
+            "/targets/2/purpose": "Say that tomorrow suits you better."
+          }
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "staged"
+          }
+        ]
+      },
+      "capture": {
+        "revision_import": "/id"
+      }
+    },
+    {
+      "id": "publish-revision",
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imports/{{revision_import}}/publish",
+        "json": {
+          "reviewed": true
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/status",
+            "equals": "published"
+          }
+        ]
+      }
+    },
+    {
+      "id": "new-revision-is-ready-again",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions/readiness?language=en"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/due_count",
+            "equals": 0
+          },
+          {
+            "at": "/new_count",
+            "equals": 3
+          },
+          {
+            "at": "/preparing_count",
+            "equals": 0
+          }
+        ]
+      }
+    }
+  ]
+}

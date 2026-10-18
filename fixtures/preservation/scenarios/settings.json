@@ -1,0 +1,163 @@
+{
+  "description": "Device settings: the first launch reads defaults, each save replaces the complete device and interface set and returns it, and incomplete, unknown or invalid fields are rejected without changing what is stored.",
+  "implementations": [
+    "python",
+    "rust"
+  ],
+  "clock": "2026-10-12T12:00:00+00:00",
+  "steps": [
+    {
+      "id": "first-launch-defaults",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/settings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/native_language",
+            "equals": null
+          },
+          {
+            "at": "/ui_language_mode",
+            "equals": "native"
+          }
+        ]
+      }
+    },
+    {
+      "id": "save",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "native_language": "ru",
+          "ui_language_mode": "learning"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/native_language",
+            "equals": "ru"
+          },
+          {
+            "at": "/ui_language_mode",
+            "equals": "learning"
+          }
+        ]
+      }
+    },
+    {
+      "id": "read-saved",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/settings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "save:"
+          }
+        ]
+      }
+    },
+    {
+      "id": "replace-complete-set",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "native_language": "sr"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "/native_language",
+            "equals": "sr"
+          },
+          {
+            "at": "/ui_language_mode",
+            "equals": "native"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-field",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "native_language": "en",
+          "last_learning_language": "sr"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "missing-native-language",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "ui_language_mode": "learning"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unknown-language",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "native_language": "fr"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "unknown-mode",
+      "request": {
+        "method": "PUT",
+        "path": "/api/v1/settings",
+        "json": {
+          "native_language": "en",
+          "ui_language_mode": "device"
+        }
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "id": "rejections-change-nothing",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/settings"
+      },
+      "expect": {
+        "status": 200,
+        "json": [
+          {
+            "at": "",
+            "same_as": "replace-complete-set:"
+          }
+        ]
+      }
+    }
+  ]
+}
