@@ -8,6 +8,8 @@ Website import is outside Coach and the inbox. The learner uses an external agen
 
 There is no routine human approval before prepared cards enter practice. Accepted preparation workflows require representative semantic assessment before unattended use; structural validation alone cannot establish language quality. The learner can suspend and recreate bad cards during practice.
 
+The [first client-feedback demo](decision-targeted-drilling.md#first-client-feedback-demo) uses a supplied prepared English lesson through this same inbox and fenced publication protocol. Automatic model preparation and the fuller v1 surface below are deferred from that demo; the [product milestones](plan/implementation-plan.md#product-milestones) separate generated-lesson and learning-MVP acceptance.
+
 ## Desktop application
 
 V1 contains only an inbox drop area, settings selecting Codex or Claude CLI, and basic processing status/database counts. Detailed GUI design and queue browsing, job-detail screens, charts and diagnostics dashboards are deferred. Dropping/pasting material populates a draft; explicit Send submits through the existing inbox API. Text/audio validation and durable acknowledgement follow the same contract as other senders. A bounded local sender outbox retains unacknowledged submissions for identical retry; accepted processing remains Server-owned.
