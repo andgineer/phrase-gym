@@ -8,7 +8,6 @@ import type { Language } from './api'
 import { flushExposures } from './exposures'
 import PracticePanel from './components/PracticePanel.vue'
 import SessionLauncher from './components/SessionLauncher.vue'
-import DueOverview from './components/DueOverview.vue'
 import ConnectionNotice from './components/ConnectionNotice.vue'
 import { useServerRetry } from './composables/useServerRetry'
 import DialogueLibrary from './components/DialogueLibrary.vue'
@@ -204,6 +203,9 @@ function leavePractice() {
               :t="t"
               :language="currentLanguage"
               :lesson-title="lessonTitle"
+              :lesson-id="route.path.split('/')[4]!"
+              :pt="pt"
+              :locale="locale"
               :results="results"
               :total="total"
               :link="link"
@@ -215,6 +217,8 @@ function leavePractice() {
               v-else-if="kind === 'home'"
               :t="t"
               :language="currentLanguage"
+              :pt="pt"
+              :locale="locale"
               :lesson-query="lessonQuery"
               :phrase-query="phraseQuery"
               :lessons="lessons"
@@ -232,12 +236,6 @@ function leavePractice() {
               @more="loadMore"
               @start="startSession(selectedLesson)"
               @more-lessons="loadMoreLessons"
-            />
-            <DueOverview
-              v-if="kind === 'home'"
-              :language="currentLanguage"
-              :lesson-id="selectedLesson"
-              :pt="pt"
             />
             <DialogueLibrary
               v-if="kind === 'home'"

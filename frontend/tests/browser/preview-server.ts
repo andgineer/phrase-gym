@@ -18,6 +18,11 @@ export const test = base.extend<{ preview: { url: string; restart: () => Promise
           token,
           capabilities: ['learner', 'worker', 'material_submit', 'profile_read', 'profile_update'],
         },
+        {
+          actor: 'synthetic-denied',
+          token: 'synthetic-learner-00000000000000000000',
+          capabilities: ['learner'],
+        },
       ]),
       { mode: 0o600 },
     )

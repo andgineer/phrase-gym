@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { expect, type APIRequestContext } from '@playwright/test'
 import { tone } from './seed-library'
+import type { components } from '../rust-contract/api.generated'
 
 export async function englishLesson(request: APIRequestContext) {
   const media = await request.post('/api/v1/media', {
@@ -45,6 +46,16 @@ export async function englishLesson(request: APIRequestContext) {
   const claim = await (
     await request.post('/api/v1/preparation/claims', { data: { claim_id: randomUUID() } })
   ).json()
+  await stageEnglishClaim(request, claim)
+  const publication = await request.post('/api/v1/preparation/publish', { data: claim.fence })
+  expect(publication.ok()).toBe(true)
+  return { publication: await publication.json(), asset }
+}
+
+export async function stageEnglishClaim(
+  request: APIRequestContext,
+  claim: components['schemas']['JobClaim'],
+) {
   const staged = await request.post('/api/v1/preparation/stage', {
     data: {
       fence: claim.fence,
@@ -58,10 +69,14 @@ export async function englishLesson(request: APIRequestContext) {
         profile_revision: claim.receipt.profile_revision,
         guide_version: claim.receipt.guide_version,
         assessment_version: 'situation-v1',
-        lesson: { source_id: 'meeting', title: 'Opening a meeting', target_source_ids: ['open'] },
+        lesson: {
+          source_id: claim.input.item_id,
+          title: claim.input.title,
+          target_source_ids: [claim.input.phrases[0].source_id],
+        },
         phrases: [
           {
-            source_id: 'open',
+            source_id: claim.input.phrases[0].source_id,
             text: "Let's get started.",
             meaning_key: 'begin-activity',
             intention_key: 'open-meeting',
@@ -84,7 +99,7 @@ export async function englishLesson(request: APIRequestContext) {
               translation: null,
             },
             familiarity: { kind: 'new' },
-            reference_audio_id: asset.id,
+            reference_audio_id: claim.input.phrases[0].reference_audio_id,
             expected_revision: null,
           },
         ],
@@ -92,7 +107,4 @@ export async function englishLesson(request: APIRequestContext) {
     },
   })
   expect(staged.ok(), await staged.text()).toBe(true)
-  const publication = await request.post('/api/v1/preparation/publish', { data: claim.fence })
-  expect(publication.ok()).toBe(true)
-  return { publication: await publication.json(), asset }
 }

@@ -51,13 +51,18 @@ impl Readiness {
                         .optional()?;
                     let cue =
                         selection::select(transaction, item.id, item.revision, &item.content)?;
-                    Ok((item.content, due, cue.is_some()))
+                    let reference_only: bool = transaction.query_row(
+                        "SELECT EXISTS(SELECT 1 FROM english_revision WHERE target_id = ?1 AND revision = ?2)",
+                        rusqlite::params![item.id.to_string(), item.revision],
+                        |row| row.get(0),
+                    )?;
+                    Ok((item.content, due, cue.is_some(), reference_only))
                 })
                 .collect::<Result<Vec<_>, CoreError>>()
         })?;
         let ids: Vec<Uuid> = targets
             .iter()
-            .flat_map(|(content, _, _)| phrases::media_ids(content))
+            .flat_map(|(content, _, _, _)| phrases::media_ids(content))
             .collect();
         let media = MediaIndex::load(&self.database, &self.store, ids)?;
         let now = self.clock.now();
@@ -65,12 +70,21 @@ impl Readiness {
             due_count: 0,
             new_count: 0,
             preparing_count: 0,
+            reference_only_count: 0,
             next_due_at: None,
         };
         let mut next: Option<DateTime<Utc>> = None;
-        for (content, due, has_cue) in targets {
+        for (content, due, has_cue, reference_only) in targets {
             if !phrases::retrieval_ready(&content, &media) || !has_cue {
-                summary.preparing_count += 1;
+                if reference_only
+                    && content
+                        .reference_audio_id
+                        .is_some_and(|id| media.available(id))
+                {
+                    summary.reference_only_count += 1;
+                } else {
+                    summary.preparing_count += 1;
+                }
                 continue;
             }
             let Some(due) = due else {

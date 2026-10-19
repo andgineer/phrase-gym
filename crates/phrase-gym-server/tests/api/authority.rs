@@ -282,3 +282,41 @@ async fn inbox_and_jobs_have_separate_capabilities() {
         StatusCode::UNPROCESSABLE_ENTITY
     );
 }
+
+#[tokio::test]
+async fn inbox_status_is_learner_readable_but_submission_and_status_remain_scoped() {
+    let directory = tempfile::tempdir().unwrap();
+    let app = app(directory.path());
+    let id = uuid::Uuid::new_v4();
+    let receipt = serde_json::json!({
+        "generation_id": id, "submission_id": uuid::Uuid::new_v4(), "generation": 1,
+        "namespace": "synthetic", "profile_revision": 1, "guide_version": "english-preview-v1",
+        "received_at": "2026-10-19T10:00:00Z"
+    });
+    let database = Database::open(directory.path()).unwrap();
+    rusqlite::Connection::open(database.path()).unwrap().execute(
+        "INSERT INTO inbox_generation (id, actor, item_id, generation, submission_id, request, receipt, profile_revision, guide_version, status) VALUES (?1, 'learner', 'synthetic', 1, ?2, '{}', ?3, 1, 'english-preview-v1', 'waiting')",
+        rusqlite::params![id.to_string(), receipt["submission_id"].as_str().unwrap(), receipt.to_string()],
+    ).unwrap();
+    let path = format!("/api/v1/inbox/lessons/{id}");
+    assert_eq!(
+        status(&app, None, "GET", &path).await,
+        StatusCode::UNAUTHORIZED
+    );
+    assert_eq!(
+        status(&app, Some("learner"), "GET", &path).await,
+        StatusCode::OK
+    );
+    assert_eq!(
+        status(&app, Some("material"), "GET", &path).await,
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        status(&app, Some("worker"), "GET", &path).await,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+        status(&app, Some("learner"), "POST", "/api/v1/inbox/lessons").await,
+        StatusCode::FORBIDDEN
+    );
+}

@@ -642,6 +642,8 @@ export interface components {
             next_due_at: string | null;
             /** Format: int64 */
             preparing_count: number;
+            /** Format: int64 */
+            reference_only_count: number;
         };
         /** @enum {string} */
         Eligibility: "new" | "due";

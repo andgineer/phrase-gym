@@ -1,10 +1,17 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import DueOverview from './DueOverview.vue'
+import LessonIntake from './LessonIntake.vue'
+import { onboardingMessages } from '../onboardingMessages'
+import type { PracticeMessages } from '../practiceMessages'
 import type { RouteLocationRaw } from 'vue-router'
 import type { Language, Lesson, Phrase } from '../api'
 import { languageNames } from '../i18n'
 import type { Messages } from '../i18n'
 defineProps<{
   t: Messages
+  pt: PracticeMessages
+  locale: Language
   language: Language
   lessonQuery: string
   phraseQuery: string
@@ -20,6 +27,7 @@ defineProps<{
   loadingMoreLessons: boolean
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
+const eligible = ref(false)
 const emit = defineEmits<{
   start: []
   query: ['q' | 'lessonQ', Event]
@@ -32,6 +40,8 @@ const emit = defineEmits<{
   <section class="home">
     <p class="eyebrow">{{ languageNames[language] }}</p>
     <h1>{{ t.home }}</h1>
+    <p v-if="!loading && !failed && !hasCollection">{{ onboardingMessages(locale).empty }}</p>
+    <LessonIntake :language="language" :locale="locale" />
     <div class="card session-entry">
       <label
         >{{ t.lessonScope
@@ -64,12 +74,19 @@ const emit = defineEmits<{
       >
       <button
         class="primary"
-        :disabled="loading || failed || !hasCollection"
+        :disabled="loading || failed || !hasCollection || !eligible"
         @click="emit('start')"
       >
         {{ t.start }}
       </button>
     </div>
+    <DueOverview
+      :language="language"
+      :lesson-id="selectedLesson"
+      :pt="pt"
+      :locale="locale"
+      @eligible="eligible = $event"
+    />
     <section class="lookup">
       <label
         ><h2>{{ t.lookup }}</h2>
@@ -80,8 +97,7 @@ const emit = defineEmits<{
           :value="phraseQuery"
           @input="emit('query', 'q', $event)"
       /></label>
-      <p v-if="!loading && !failed && !hasCollection" class="muted">{{ t.empty }}</p>
-      <p v-else-if="!loading && !failed && !results.length">{{ t.noMatches }}</p>
+      <p v-if="!loading && !failed && hasCollection && !results.length">{{ t.noMatches }}</p>
       <ul class="phrase-list">
         <li v-for="item in results" :key="item.id">
           <RouterLink :to="link('phrases', item.id)" :lang="language"

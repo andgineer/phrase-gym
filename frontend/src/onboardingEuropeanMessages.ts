@@ -1,0 +1,94 @@
+export const sr = {
+  accepted: 'Server je prihvatio unos. Proveri status lekcije za napredak pripreme.',
+  statusUnavailable:
+    'Lekcija je prihvaćena, ali trenutni status nije dostupan ovoj vezi. Proveri vezu sa serverom i nalog pre novog pokušaja.',
+  empty: 'Još nema objavljenih fraza na ovom jeziku. Izbor jezika ne dodaje lekciju.',
+  add: 'Dodaj prvu lekciju',
+  supported:
+    'Trenutno možeš poslati jednu fiksnu englesku frazu sa originalnim referentnim zvukom. Coach mora raditi sa podešenom pripremom gotove lekcije. Automatska priprema sirovog teksta još nije dostupna.',
+  unsupported:
+    'Unos novih lekcija trenutno podržava samo engleski. Objavljeni materijal na drugim jezicima ostaje u biblioteci.',
+  title: 'Naslov lekcije',
+  phrase: 'Tačna engleska fraza',
+  context: 'Situacija ili značenje',
+  note: 'Neobavezna napomena',
+  audio: 'Originalni referentni zvuk (WAV, MP3, OGG ili MP4; do 2 MB)',
+  performer: 'Izvođač ili izvorni govornik',
+  abandon: 'Odbaci lokalni unos (prihvaćeni materijal ostaje na serveru)',
+  locale: 'Jezička varijanta zvuka (na primer en-US)',
+  submit: 'Pošalji lekciju',
+  close: 'Zatvori',
+  refresh: 'Proveri status lekcije',
+  retry: 'Ponovi istu dostavu',
+  another: 'Dodaj još jednu lekciju',
+  busy: 'Čuvanje i slanje lekcije…',
+  unsent: 'Dostava nije potvrđena. Sačuvani unos biće poslat sa istim identitetom.',
+  waiting: 'Prihvaćeno — čeka Coach. Možeš zatvoriti panel; server čuva tvoju lekciju.',
+  preparing: 'Coach priprema prihvaćenu lekciju.',
+  pending_delivery: 'Priprema je završena; čeka potvrdu objavljivanja.',
+  published: 'Objavljeno. Otvori lekciju da vidiš podržane mogućnosti vežbanja.',
+  failed: 'Priprema nije uspela. Proveri razlog ispod i popravi Coach pre novog pokušaja.',
+  cancelled: 'Priprema je otkazana. Prihvaćeni unos ostaje na serveru.',
+  superseded: 'Ovaj unos je zamenjen novijom verzijom.',
+  retryPreparation: 'Ponovi pripremu',
+  open: 'Otvori objavljenu lekciju',
+  referenceOnly:
+    'Spremno za vežbu uz primer. Otvori frazu da slušaš, snimaš i porediš. Zakazano prisećanje za ovaj materijal još nije podržano.',
+  referenceCount: 'Spremno samo za vežbu uz primer',
+  awaiting: 'Čeka pripremu ili popravku',
+  permission:
+    'Ova veza ne može slati materijal. Zatraži od operatera servera da omogući podržani unos; tvoj unos je sačuvan. Prijem lekcije nije potvrđen.',
+  invalidAudio: 'Izaberi podržanu, nepraznu zvučnu datoteku do 2 MB.',
+  storage:
+    'Unos nije sačuvan na ovom uređaju. Ništa nije poslato. Zadrži panel otvoren i omogući skladište pregledača pre novog pokušaja.',
+  retryStorage: 'Ponovo proveri lokalno skladište',
+}
+export const de = {
+  accepted: 'Vom Server angenommen. Prüfe den Lektionsstatus für den aktuellen Fortschritt.',
+  statusUnavailable:
+    'Die Lektion wurde angenommen, ihr aktueller Status ist für diese Verbindung nicht verfügbar. Prüfe Serververbindung und Konto vor einem neuen Versuch.',
+  empty:
+    'Noch keine veröffentlichten Phrasen in dieser Sprache. Die Sprachauswahl fügt keine Lektion hinzu.',
+  add: 'Erste Lektion hinzufügen',
+  supported:
+    'Du kannst derzeit eine feste englische Phrase mit ihrem ursprünglichen Referenzaudio senden. Coach muss mit eingerichteter Vorbereitung einer fertigen Lektion laufen. Automatische Vorbereitung von Rohtext ist noch nicht verfügbar.',
+  unsupported:
+    'Neue Lektionen können derzeit nur auf Englisch eingegeben werden. Veröffentlichte Inhalte anderer Sprachen bleiben in ihrer Bibliothek.',
+  title: 'Lektionstitel',
+  phrase: 'Genauer englischer Wortlaut',
+  context: 'Situation oder Bedeutung',
+  note: 'Optionale Notiz',
+  audio: 'Ursprüngliches Referenzaudio (WAV, MP3, OGG oder MP4; bis 2 MB)',
+  performer: 'Sprecher der Referenzaufnahme',
+  abandon: 'Lokale Eingabe verwerfen (angenommene Inhalte bleiben auf dem Server)',
+  locale: 'Sprachregion des Audios (zum Beispiel en-US)',
+  submit: 'Lektion senden',
+  close: 'Schließen',
+  refresh: 'Lektionsstatus prüfen',
+  retry: 'Dieselbe Übermittlung wiederholen',
+  another: 'Weitere Lektion hinzufügen',
+  busy: 'Lektion wird gespeichert und gesendet…',
+  unsent:
+    'Übermittlung unbestätigt. Die gespeicherte Eingabe wird mit derselben Identität erneut gesendet.',
+  waiting:
+    'Angenommen — wartet auf Coach. Du kannst das Fenster schließen; der Server hat die Lektion.',
+  preparing: 'Coach bereitet die angenommene Lektion vor.',
+  pending_delivery: 'Vorbereitung abgeschlossen; Veröffentlichung noch unbestätigt.',
+  published: 'Veröffentlicht. Öffne die Lektion für die unterstützten Übungsmöglichkeiten.',
+  failed:
+    'Vorbereitung fehlgeschlagen. Prüfe den Grund unten und behebe das Coach-Problem vor einem neuen Versuch.',
+  cancelled: 'Vorbereitung abgebrochen. Die angenommene Eingabe bleibt auf dem Server.',
+  superseded: 'Diese Eingabe wurde durch eine neuere Version ersetzt.',
+  retryPreparation: 'Vorbereitung wiederholen',
+  open: 'Veröffentlichte Lektion öffnen',
+  referenceOnly:
+    'Bereit zum Üben mit Referenz. Öffne eine Phrase zum Hören, Aufnehmen und Vergleichen. Geplantes Abrufen wird für dieses Material noch nicht unterstützt.',
+  referenceCount: 'Nur zum Üben mit Referenz bereit',
+  awaiting: 'Wartet auf Vorbereitung oder Korrektur',
+  permission:
+    'Diese Verbindung kann kein Material senden. Bitte den Serverbetreiber um Einrichtung der unterstützten Eingabe; deine Eingabe bleibt gespeichert. Die Annahme der Lektion ist unbestätigt.',
+  invalidAudio: 'Wähle eine unterstützte, nicht leere Audiodatei bis 2 MB.',
+  storage:
+    'Eingabe konnte lokal nicht gespeichert werden. Nichts wurde gesendet. Lass das Fenster offen und aktiviere den Browserspeicher vor einem neuen Versuch.',
+  retryStorage: 'Lokalen Speicher erneut prüfen',
+}

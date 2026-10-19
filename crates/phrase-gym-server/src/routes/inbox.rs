@@ -1,5 +1,5 @@
 use axum::extract::State;
-use axum::routing::{get, post};
+use axum::routing::post;
 use axum::{Extension, Json, Router};
 use phrase_gym_contracts::inbox::{LessonReceipt, LessonStatus, LessonSubmission};
 use uuid::Uuid;
@@ -12,7 +12,6 @@ use crate::state::AppState;
 pub(crate) fn routes() -> Router<AppState> {
     Router::new()
         .route("/api/v1/inbox/lessons", post(submit))
-        .route("/api/v1/inbox/lessons/{id}", get(status))
         .route("/api/v1/inbox/lessons/{id}/cancel", post(cancel))
         .route("/api/v1/inbox/lessons/{id}/retry", post(retry))
 }

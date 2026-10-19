@@ -33,6 +33,14 @@ pub(crate) fn api(authority: &Arc<Authority>) -> Router<AppState> {
     };
     let routes = Router::new()
         .merge(inbox::routes().route_layer(protect(vec![Capability::MaterialSubmit])))
+        .merge(
+            Router::new()
+                .route("/api/v1/inbox/lessons/{id}", get(inbox::status))
+                .route_layer(protect(vec![
+                    Capability::Learner,
+                    Capability::MaterialSubmit,
+                ])),
+        )
         .merge(jobs::routes().route_layer(protect(vec![Capability::Worker])))
         .merge(learner().route_layer(protect(vec![Capability::Learner])))
         .merge(material().route_layer(protect(vec![
