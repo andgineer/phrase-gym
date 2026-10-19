@@ -83,6 +83,89 @@ fn fresh_nested_and_existing_directories_remain_usable() {
     assert_eq!(title, "Retained");
 }
 
+#[test]
+fn fresh_paths_can_cancel_missing_parent_components_and_reopen() {
+    for absolute in [false, true] {
+        let root = tempfile::tempdir_in(".").unwrap();
+        for suffix in ["unused/../live", "unused/nested/../../other-live"] {
+            let relative = root.path().join(suffix);
+            let directory = if absolute {
+                std::env::current_dir().unwrap().join(relative)
+            } else {
+                relative
+            };
+            drop(Database::open(&directory).unwrap());
+            let database = Database::open(&directory).unwrap();
+            assert!(database.path().is_file());
+            assert_eq!(
+                database.path().canonicalize().unwrap(),
+                root.path()
+                    .join(directory.file_name().unwrap())
+                    .join(DATABASE_FILE)
+                    .canonicalize()
+                    .unwrap()
+            );
+        }
+    }
+}
+
+#[test]
+fn missing_parent_traversal_refuses_reservations_before_creating_directories() {
+    let root = tempfile::tempdir().unwrap();
+    for exists in [false, true] {
+        let destination = root
+            .path()
+            .join(if exists { "existing" } else { "not-created" });
+        std::fs::write(recovery_reservation(&destination), b"reserved").unwrap();
+        if exists {
+            std::fs::create_dir(&destination).unwrap();
+        }
+        let path = root
+            .path()
+            .join("unused/nested/../..")
+            .join(destination.file_name().unwrap());
+        assert_reserved_untouched(&path, &destination);
+        assert!(!root.path().join("unused").exists());
+        assert_eq!(destination.exists(), exists);
+        if exists {
+            assert_eq!(std::fs::read_dir(&destination).unwrap().count(), 0);
+        }
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn existing_symlink_parent_traversal_keeps_filesystem_semantics() {
+    let root = tempfile::tempdir().unwrap();
+    let target_parent = root.path().join("real");
+    let target = target_parent.join("child");
+    std::fs::create_dir_all(&target).unwrap();
+    symlink(&target, root.path().join("alias")).unwrap();
+    for exists in [false, true] {
+        let destination = target_parent.join("reserved-српски");
+        std::fs::write(recovery_reservation(&destination), b"reserved").unwrap();
+        if exists {
+            std::fs::create_dir(&destination).unwrap();
+        }
+        for prefix in ["alias/..", "unused/../alias/.."] {
+            assert_reserved_untouched(
+                &root
+                    .path()
+                    .join(prefix)
+                    .join(destination.file_name().unwrap()),
+                &destination,
+            );
+            assert_eq!(destination.exists(), exists);
+            assert!(!root.path().join("unused").exists());
+            assert!(!root.path().join(destination.file_name().unwrap()).exists());
+        }
+    }
+    let fresh = root.path().join("unused/../alias/../live");
+    drop(Database::open(&fresh).unwrap());
+    assert!(target_parent.join("live").join(DATABASE_FILE).is_file());
+    assert!(!root.path().join("live").exists());
+}
+
 #[cfg(unix)]
 #[test]
 fn unreserved_aliases_work_and_unresolvable_aliases_fail_without_creating_data() {
@@ -99,7 +182,14 @@ fn unreserved_aliases_work_and_unresolvable_aliases_fail_without_creating_data()
     symlink(&missing, &dangling).unwrap();
     let looping = root.path().join("looping");
     symlink(&looping, &looping).unwrap();
-    for path in [&dangling, &dangling.join("child"), &looping] {
+    for path in [
+        &dangling,
+        &dangling.join("child"),
+        &looping,
+        &root.path().join("unused/../dangling"),
+        &root.path().join("unused/../dangling/../other-live"),
+        &root.path().join("unused/../looping"),
+    ] {
         assert!(matches!(Database::open(path), Err(StorageError::Io(_))));
     }
     assert!(!missing.exists());

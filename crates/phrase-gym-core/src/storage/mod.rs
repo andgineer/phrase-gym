@@ -2,7 +2,7 @@ pub(crate) mod connection;
 pub mod migrations;
 
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
 use rusqlite::{Connection, Transaction, TransactionBehavior};
@@ -46,12 +46,22 @@ fn resolve_directory(directory: &Path) -> io::Result<PathBuf> {
     match std::fs::symlink_metadata(directory) {
         Ok(_) => directory.canonicalize(),
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
-            let name = directory.file_name().ok_or(error)?;
             let parent = directory
                 .parent()
                 .filter(|path| !path.as_os_str().is_empty())
                 .unwrap_or_else(|| Path::new("."));
-            Ok(resolve_directory(parent)?.join(name))
+            let mut resolved = resolve_directory(parent)?;
+            if directory.components().next_back() == Some(Component::ParentDir) {
+                resolved.pop();
+                return Ok(resolved);
+            }
+            resolved.push(directory.file_name().ok_or(error)?);
+            // Cancelling missing components can expose an existing symlink again.
+            match std::fs::symlink_metadata(&resolved) {
+                Ok(_) => resolved.canonicalize(),
+                Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(resolved),
+                Err(error) => Err(error),
+            }
         }
         Err(error) => Err(error),
     }
