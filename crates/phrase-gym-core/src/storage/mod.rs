@@ -1,6 +1,7 @@
 pub(crate) mod connection;
 pub mod migrations;
 
+use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
@@ -41,11 +42,28 @@ fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
+fn resolve_directory(directory: &Path) -> io::Result<PathBuf> {
+    match std::fs::symlink_metadata(directory) {
+        Ok(_) => directory.canonicalize(),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            let name = directory.file_name().ok_or(error)?;
+            let parent = directory
+                .parent()
+                .filter(|path| !path.as_os_str().is_empty())
+                .unwrap_or_else(|| Path::new("."));
+            Ok(resolve_directory(parent)?.join(name))
+        }
+        Err(error) => Err(error),
+    }
+}
+
 impl Database {
     pub fn open(data_dir: &Path) -> Result<Self, StorageError> {
-        if data_dir.join(RECOVERY_PENDING).try_exists()?
-            || data_dir.join(SNAPSHOT_MANIFEST).try_exists()?
-            || recovery_reservation(data_dir).try_exists()?
+        // Recovery reserves the canonical destination before its internal marker can be written.
+        let recovery_dir = resolve_directory(data_dir)?;
+        if recovery_dir.join(RECOVERY_PENDING).try_exists()?
+            || recovery_dir.join(SNAPSHOT_MANIFEST).try_exists()?
+            || recovery_reservation(&recovery_dir).try_exists()?
         {
             return Err(StorageError::UnsupportedSchema(
                 "snapshot or incomplete recovery directory; restore to a fresh directory first"
