@@ -1,4 +1,6 @@
 export const sr = {
+  conflict:
+    'Sačuvana dostava je promenjena u drugoj kartici. Proveri sačuvanu lekciju pre ponavljanja ili odbacivanja.',
   accepted: 'Server je prihvatio unos. Proveri status lekcije za napredak pripreme.',
   statusUnavailable:
     'Lekcija je prihvaćena, ali trenutni status nije dostupan ovoj vezi. Proveri vezu sa serverom i nalog pre novog pokušaja.',
@@ -44,6 +46,8 @@ export const sr = {
   retryStorage: 'Ponovo proveri lokalno skladište',
 }
 export const de = {
+  conflict:
+    'Die gespeicherte Übermittlung wurde in einem anderen Tab geändert. Prüfe die gespeicherte Lektion vor einem erneuten Versuch oder Verwerfen.',
   accepted: 'Vom Server angenommen. Prüfe den Lektionsstatus für den aktuellen Fortschritt.',
   statusUnavailable:
     'Die Lektion wurde angenommen, ihr aktueller Status ist für diese Verbindung nicht verfügbar. Prüfe Serververbindung und Konto vor einem neuen Versuch.',

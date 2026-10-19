@@ -75,7 +75,14 @@ const {
         <button v-if="status?.status === 'failed'" :disabled="busy" @click="retryPreparation">
           {{ messages.retryPreparation }}
         </button>
-        <button v-if="!draft.receipt" :disabled="busy" @click="clear">
+        <button
+          v-if="
+            !draft.receipt ||
+            (status && ['failed', 'cancelled', 'superseded'].includes(status.status))
+          "
+          :disabled="busy"
+          @click="clear"
+        >
           {{ messages.abandon }}
         </button>
         <button v-if="status?.status === 'published'" :disabled="busy" @click="clear">

@@ -3,6 +3,8 @@ import { sr, de } from './onboardingEuropeanMessages'
 
 const en = {
   retryStorage: 'Retry local storage',
+  conflict:
+    'Saved delivery changed in another tab. Review the saved lesson before retrying or discarding.',
   accepted: 'Accepted by the Server. Check lesson status for current preparation progress.',
   statusUnavailable:
     'The saved lesson is accepted, but its current status is unavailable to this connection. Check the Server connection and account before retrying.',
@@ -49,6 +51,8 @@ const en = {
 export type OnboardingMessages = typeof en
 const ru: OnboardingMessages = {
   ...en,
+  conflict:
+    'Сохранённая отправка изменилась в другой вкладке. Проверьте сохранённый урок перед повтором или удалением.',
   accepted: 'Принято сервером. Проверьте статус урока, чтобы узнать о подготовке.',
   statusUnavailable:
     'Урок принят, но его текущий статус недоступен этому подключению. Проверьте подключение к серверу и учётную запись перед повтором.',

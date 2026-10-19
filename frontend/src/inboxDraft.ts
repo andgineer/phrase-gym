@@ -15,19 +15,38 @@ async function database(): Promise<IDBDatabase> {
     request.onerror = () => reject(request.error)
   })
 }
-export async function inboxDraft(value?: InboxDraft | null): Promise<InboxDraft | undefined> {
+export async function inboxDraft(
+  value?: InboxDraft | null,
+  expectedId?: string,
+): Promise<InboxDraft | undefined> {
   const db = await database()
   try {
     return await new Promise((resolve, reject) => {
       const tx = db.transaction('draft', value === undefined ? 'readonly' : 'readwrite')
       const store = tx.objectStore('draft')
-      const request =
-        value === undefined
-          ? store.get('current')
-          : value === null
-            ? store.delete('current')
-            : store.put(value, 'current')
-      tx.oncomplete = () => resolve(value === undefined ? request.result : (value ?? undefined))
+      const request = store.get('current')
+      let current: InboxDraft | undefined
+      request.onsuccess = () => {
+        current = request.result
+        if (value === undefined || current?.submission.submission_id !== expectedId) return
+        if (value === null) {
+          store.delete('current')
+          current = undefined
+        } else {
+          // Concurrent retries may add a receipt or upload binding, but never erase one.
+          current = current
+            ? {
+                ...current,
+                submission: current.submission.phrases[0]!.audio_sha256
+                  ? current.submission
+                  : value.submission,
+                receipt: current.receipt ?? value.receipt,
+              }
+            : value
+          store.put(current, 'current')
+        }
+      }
+      tx.oncomplete = () => resolve(current)
       tx.onabort = tx.onerror = () => reject(tx.error ?? new Error('Inbox storage failed'))
     })
   } finally {

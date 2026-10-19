@@ -1,22 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import { expect, type Page } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { test } from './preview-server'
-import { tone } from './seed-library'
+import { fillLesson } from './lesson-intake-helpers'
 import { stageEnglishClaim } from './english-lesson'
-
-async function fillLesson(page: Page) {
-  await page.getByLabel('Lesson title', { exact: true }).fill('Opening a meeting')
-  await page.getByLabel('Exact English phrase', { exact: true }).fill("Let's get started.")
-  await page
-    .getByLabel('Situation or meaning', { exact: true })
-    .fill('All participants are present.')
-  await page.getByLabel('Reference performer or source speaker').fill('Synthetic')
-  await page.getByLabel(/Original reference audio/).setInputFiles({
-    name: 'reference.wav',
-    mimeType: 'audio/wav',
-    buffer: Buffer.from(tone(), 'base64'),
-  })
-}
 
 test('first lesson retains delivery identity and shows actual preparation and rehearsal readiness', async ({
   page,

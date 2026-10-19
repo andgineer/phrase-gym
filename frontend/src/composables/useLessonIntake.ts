@@ -26,6 +26,15 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
           : messages().permission
         : String(cause)
   }
+  async function save(input: InboxDraft, expectedId?: string) {
+    const current = await inboxDraft(input, expectedId)
+    draft.value = current
+    if (current?.submission.submission_id !== input.submission.submission_id) {
+      status.value = undefined
+      throw new Error(messages().conflict)
+    }
+    return current
+  }
   async function refresh() {
     if (!draft.value?.receipt || busy.value) return
     busy.value = true
@@ -91,13 +100,16 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
           },
         }
         try {
-          await inboxDraft(input)
-        } catch {
+          await save(input)
+        } catch (cause) {
+          if (draft.value) throw cause
           throw new Error(messages().storage)
         }
-        draft.value = input
       }
-      const input: InboxDraft = JSON.parse(JSON.stringify(draft.value))
+      let input = await save(
+        JSON.parse(JSON.stringify(draft.value)),
+        draft.value!.submission.submission_id,
+      )
       if (!input.receipt) {
         if (!input.submission.phrases[0]!.audio_sha256) {
           const asset = await api<Schemas['MediaAsset']>('/media', {
@@ -106,28 +118,25 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
           })
           input.submission.phrases[0]!.reference_audio_id = asset.id
           input.submission.phrases[0]!.audio_sha256 = asset.sha256
-          await inboxDraft(input)
-          draft.value = input
+          input = await save(input, input.submission.submission_id)
         }
         input.receipt = await api<Schemas['LessonReceipt']>('/inbox/lessons', {
           method: 'POST',
           body: JSON.stringify(input.submission),
         })
-        draft.value = input
-        await inboxDraft(input)
+        await save(input, input.submission.submission_id)
       }
     } catch (cause) {
       failure(cause)
     } finally {
       busy.value = false
     }
-    if (draft.value?.receipt) await refresh()
+    if (draft.value?.receipt && !error.value) await refresh()
   }
   async function retryPreparation() {
     if (!draft.value?.receipt || busy.value) return
     busy.value = true
     error.value = ''
-    status.value = undefined
     try {
       status.value = await api<Schemas['LessonStatus']>(
         `/inbox/lessons/${draft.value.receipt.generation_id}/retry`,
@@ -141,15 +150,19 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
   }
   async function clear() {
     if (busy.value) return
+    busy.value = true
     try {
-      await inboxDraft(null)
-      draft.value = undefined
+      const expectedId = draft.value?.submission.submission_id
+      draft.value = await inboxDraft(null, expectedId)
       status.value = undefined
+      if (draft.value) throw new Error(messages().conflict)
       title.value = phrase.value = context.value = note.value = ''
       file.value = undefined
       error.value = ''
     } catch (cause) {
       failure(cause)
+    } finally {
+      busy.value = false
     }
   }
   async function restore() {
