@@ -1,6 +1,6 @@
 # Phrase Gym Coach desktop: development setup
 
-Coach is not released. This page covers the development build, the platform facts measured so far, how to prepare the agent CLIs and what still has to be checked by a person. Product behavior lives in the [Coach decision](../specs/decision-external-preparation-agent.md); remaining work lives in the [Coach plan](../specs/plan/coach-desktop.md).
+Coach is not released. This page covers the development build, the platform facts measured so far, how to prepare the agent CLIs and what still has to be checked by a person. Product behavior lives in the [Coach decision](../specs/decision-external-preparation-agent.md); remaining work lives in the [Coach plan](../specs/plan/implementation-plan.md#coach-desktop-workstream).
 
 ## Build, run and smoke-test
 
@@ -95,7 +95,7 @@ Secrets go only to the login Keychain or Windows Credential Manager, under the s
 
 Verified with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon) on 2026-10-17. The exact invocation and the evidence behind each flag are in [Verified CLI invocation](#verified-cli-invocation) below.
 
-**Supported installs.** Only native builds are verified: Claude Code from its native installer (`~/.local/bin/claude`) and Codex from the Homebrew cask (`brew install --cask codex`). Coach starts a CLI with a PATH of only the executable's folder and the system folders, so an install that is a Node script fails inside an attempt with `env: node: No such file or directory` (exit 127). That covers `npm install -g @openai/codex` (which runs `bin/codex.js`), `npm install -g @anthropic-ai/claude-code` (which runs `cli.js`) and the older `~/.claude/local/claude` wrapper. The status window reports such an install as unsupported rather than found, and Coach does not look in `~/.claude/local`. Script installs stay unsupported until the C3 settings in the [Coach plan](../specs/plan/coach-desktop.md#c3-implement-the-minimal-v1-surface) add an explicit runtime.
+**Supported installs.** Only native builds are verified: Claude Code from its native installer (`~/.local/bin/claude`) and Codex from the Homebrew cask (`brew install --cask codex`). Coach starts a CLI with a PATH of only the executable's folder and the system folders, so an install that is a Node script fails inside an attempt with `env: node: No such file or directory` (exit 127). That covers `npm install -g @openai/codex` (which runs `bin/codex.js`), `npm install -g @anthropic-ai/claude-code` (which runs `cli.js`) and the older `~/.claude/local/claude` wrapper. The status window reports such an install as unsupported rather than found, and Coach does not look in `~/.claude/local`. Script installs stay unsupported until the C3 settings in the [Coach plan](../specs/plan/implementation-plan.md#c3-implement-the-minimal-v1-surface) add an explicit runtime.
 
 **Claude CLI** uses the existing subscription login. Check it without using the model: `claude auth status` must report `"loggedIn": true` and `"authMethod": "claude.ai"`. Coach strips `ANTHROPIC_API_KEY` and similar variables, so an exported key never takes over.
 

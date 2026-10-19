@@ -2,6 +2,8 @@
 
 Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Server and Coach are migrating to Rust under that plan; retain the Vue client in `frontend/`. The existing Python scaffold and its commands remain in use until the tested Rust replacement permits their removal.
 
+For a root-session request to implement the next stage, follow the [orchestration handout](specs/plan/orchestration-handout.md) before making changes or delegating. Delegated agents follow their assigned scope and the regular rules below.
+
 `CLAUDE.md` links to this file; keep one instruction source.
 
 ## Architecture and file structure
