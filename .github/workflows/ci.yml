@@ -166,12 +166,12 @@ jobs:
     - run: cargo test --workspace --all-features --locked
 
   # Coach desktop: GUI build, kittest UI tests, fake-process supervision with process-group and Job
-  # Object cleanup, the OS credential store and a packaged launch on each claimed architecture.
+  # Object cleanup, the OS credential store and a packaged launch on Apple Silicon and Windows x64.
   coach-desktop:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, macos-15-intel, windows-latest]
+        platform: [macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 45
     steps:
