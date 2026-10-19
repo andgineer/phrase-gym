@@ -11,6 +11,7 @@ Code, tests and generated OpenAPI describe the implementation. These documents r
 - [Architecture and durability](architecture.md)
 - [Acceptance gaps](open-problems.md)
 - [Research evidence](research/README.md): sources behind learning decisions, for when a decision needs backing
+- [Fresh-session orchestration](plan/orchestration-handout.md): fresh-session delegation workflow
 - [Remaining work](plan/implementation-plan.md)
 - [Coach desktop implementation](plan/coach-desktop.md): Windows/macOS GUI work within the Rust migration
 

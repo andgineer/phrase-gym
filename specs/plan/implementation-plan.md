@@ -1,6 +1,6 @@
 # Remaining implementation work
 
-Deliver the first simple demo, then climb the product milestones below using client feedback. The second milestone is another demo, not a credible promise of a useful learning MVP: automatic Coach preparation and the new learning flow are both still missing. The local macOS MVP is the third target, subject to those demonstrations establishing feasibility. Keep the existing Rust Server/Coach architecture and Vue client. The later technical backlog records remaining trainer/migration work; it is not a prerequisite checklist for early demos. Remove completed entries and keep lasting decisions in their linked specs.
+The next implementation target is the generated-lesson demo, including the next-stage release blockers below. Carry unresolved native acceptance into that automatic flow rather than repairing the obsolete manual demo workflow. Use client feedback to select later milestones. The second milestone is another demo, not a credible promise of a useful learning MVP: automatic Coach preparation and the new learning flow are both still missing. The local macOS MVP is the third target, subject to those demonstrations establishing feasibility. Keep the existing Rust Server/Coach architecture and Vue client. The later technical backlog records remaining trainer/migration work; it is not a prerequisite checklist for early demos. Remove completed entries and keep lasting decisions in their linked specs.
 
 ## Product milestones
 
@@ -15,7 +15,7 @@ Stop after each demonstration to assess client feedback and concrete failures, t
 
 ## Next-stage release blockers
 
-All six items below must be implemented and accepted before releasing the next stage (M2), rather than deferred to M4. This records required future work; do not fix the current demo version as part of this documentation batch. The focused decisions linked below own the intended behavior.
+All six items below must be implemented and accepted before releasing the next stage (M2), rather than deferred to M4. The focused decisions linked below own the intended behavior.
 
 | Blocker | Required work and acceptance |
 |---|---|
@@ -28,13 +28,11 @@ All six items below must be implemented and accepted before releasing the next s
 
 ## First deliverable: a usable macOS preview
 
-M1's [prepared-lesson demo](../decision-targeted-drilling.md#first-client-feedback-demo) remains an attended local rehearsal with synthetic material and a disposable data directory. Its current implementation requires manually configured scoped tokens, a prepared-lesson file path, Load and explicit Send. Load displays prepared JSON; it neither opens a chooser nor establishes publication. These are current operational facts, superseded for future product behavior by the blockers above. Exact launch/setup commands belong in operational docs.
+The [prepared-lesson demo](../decision-targeted-drilling.md#first-client-feedback-demo) has unresolved attended native transfer acceptance: Coach Send produced an unavailable/response-lost outcome. Carry reliable native transfer, browser readiness and saved replay forward into M2's automatic path under the release blockers above; do not return to fixing the manual token/Load/Send workflow as a prerequisite. Reconcile actual receipt/publication state before diagnosing or retrying; do not infer data loss. Automated/package checks and direct operational placement of a lesson cannot substitute for product acceptance.
 
-**Acceptance still open:** attended native Coach Send failed with an unavailable/response-lost outcome. Automated/package checks do not establish this acceptance, and direct operational placement of a lesson cannot substitute for it. Reconcile actual receipt/publication state before diagnosing or retrying; do not infer data loss. The learner must be able to open the supplied phrase/situation/reference card, hear, record, compare and replay a saved take. With Coach closed, browser reload and Server restart must preserve the lesson, reference and take. Report physical microphone/output checks separately from synthetic capture.
+Accept the next-stage path with synthetic material and a disposable data directory. The learner must hear/read the phrase and situation, record, compare and replay a saved take. With Coach closed, browser reload and Server restart must preserve the lesson, reference and take. Report physical microphone/output checks separately from synthetic capture. Disposable demo data needs no backups; this does not authorize changing source projects or real learner data.
 
-The current narrow supplied-lesson worker binds reviewed preparation fields and media to the real pinned generation/profile/guide and existing claim/stage/publish protocol. Missing fields fail actionably; no model call fills them. Keep atomic publication, media checks, stable receipts, fenced retries and saved-recording protections when replacing the manual surface. Scheduled retrieval, a study/Next rewrite, TTS, bulk/source import, statistics and broad recovery qualification are outside this demo. No current-version changes, deployment, push or source-project edits are authorized by this feedback batch.
-
-The published, audio-ready M1 English lesson supports reference rehearsal but is not retrieval-ready: Start session currently fails with no eligible due/new targets. This is a session-entry gap, not evidence of missing published data. The next-stage input-to-learning blocker requires successful one-lesson session startup before M2 release.
+The published, audio-ready English lesson supports reference rehearsal but is not retrieval-ready: normal Start session has no eligible due/new targets. This is a session-entry gap, not evidence of missing published data. A manual bridge in disposable demo data does not resolve production session integration. M2 must establish successful one-lesson session startup through automatic intake while preserving atomic publication, media checks, stable receipts, fenced retries and saved-recording protections. Exact launch/setup commands belong in operational docs.
 
 ## M2. Generated-lesson demo on local macOS
 
@@ -71,10 +69,10 @@ The following workstreams and numbered batches retain all remaining long-term wo
 
 The current server provides a substantial foundation, but the latest specs require more than a language port with minor adjustments. Preserve its durability and practice infrastructure; replace superseded behavior deliberately. The following work identifies the boundary between preservation and new implementation, rather than treating all current tests as the desired specification.
 
-| Workstream | Starting evidence and required action |
+| Workstream | Remaining work and constraints |
 |---|---|
 | Content and durability | Extend the bounded English production intake/publication path to the remaining revised package forms. Port applicable chunk identity reconciliation from `preparation/` with those forms (batch 3). |
-| Practice infrastructure | Rust sessions, ordered events/receipts, original-response evidence, repairs, recordings and device settings serve every endpoint the retained client calls, with concurrency, retry and preservation coverage. The retained client and its applicable Chromium/WebKit suites use Rust; the preparation lifecycle suite retains a temporary Python harness until batches 4 and 6. |
+| Preparation test harness | Replace the temporary Python preparation-lifecycle harness with the Rust Server and built client in batches 4 and 6; preserve deterministic provisional/error-state coverage. |
 | Prompts and eligibility | The Rust `prompts` and `planning` modules use visible/hidden chunks, chunk-history priority and the current due/new planner. Implement the specified situation/partner prompts, prompt-level rotation, familiarity provenance, preferred expressions and introduction dependencies. Do not mechanically translate gapped phrase cues. |
 | Grading and completion | Rust `practice/reviews.rs` excludes supported responses wholesale; `practice/support.rs` uses a five-minute window; `practice/observations.rs` finalizes through ratings; dialogue script exposure is ordinary five-minute support. Implement the hint-failure exception, explicit ungraded study/Next, first spaced recall, unconditional dialogue rehearsal exclusion and persistent declared exposure. Preserve the original-response invariant. |
 | Preferences | Make session and client reads use the revisioned personal profile, leaving only independent device/UI controls in `settings.rs`. |
@@ -93,7 +91,7 @@ Use one temporary transition, with no permanent dual backend, Python bridge or d
 - Add retirement and Removed-items restoration, retaining histories/recordings and invalidating stale bindings on both transitions. Prepare recreation as one transaction that suspends the expected revision and inserts its inbox request (completed with batch 4). Reject a stale expected revision without partially suspending or enqueueing. Compatible repair retains identity; changed meanings create targets; changed assessment conditions require a fresh independent check.
 - The revised package format replaces gapped phrase cues outright; no installed gapped revision needs a history or readiness state. Re-prepare the local 44-phrase pack under the new format only in the separately assessed content work.
 
-**Exit:** profile concurrency/authorization, revised-package validation, identity compatibility, lifecycle invalidation, dependency cycles and the schema revisions they add have deterministic coverage; generated TypeScript contracts describe the new boundary.
+**Exit:** revised-package/profile integration, identity compatibility, lifecycle invalidation, dependency cycles and the schema revisions they add have deterministic coverage; generated TypeScript contracts describe the new boundary.
 
 ## 4. Implement durable inbox, fenced jobs and publication APIs
 
@@ -124,6 +122,7 @@ Use one temporary transition, with no permanent dual backend, Python bridge or d
 This batch is required to exercise the server's real workflows and remove all project Python; it does not authorize a frontend rewrite or unrelated external-project changes.
 
 - Update the existing pure practice reducer and focused composables for the new contracts, first-meeting study/Next, conditional say-along, hint behavior, preference switching, Delete/Removed-items Restore and recreation status. Render pinned help/translation at answer/comparison, omit missing-help placeholders, and show no answer text before response. Keep URL language/session ownership and online-only recovery intact.
+- When an outside action (system, headset or media key) pauses comparison playback, end comparison quietly, return the main action to Record and keep both replays available. Add the focused recording decision and a real-browser test that pauses the media element externally; retain actual-device acceptance in batch 8.
 - Render Server-owned lesson recall/overdue counts and weekly distinct-target progress in the Vue client, following [progress behavior](../decision-targeted-drilling.md#keeping-practice-going). Use focused read composables; do not calculate eligibility in views. Add real-browser checks for retirement/restoration, preferred-target changes, changed assessment conditions, duplicate reviews and repairs/rehearsal, plus learning-week rollover in the profile timezone using deterministic Server clock controls.
 - Add the optional real-call flow in Vue: select two or three phrases for a concrete opportunity, then record used/no chance/forgot for each. Optional means the learner can omit the activity; its client workflow is part of this batch. Test persistence after reload and ambiguous-write retries against the real Server, and verify all marks leave schedules and eligible-review progress unchanged.
 - Add the + drop panel with clipboard read only on deliberate paste/input, empty fallback, optional note and recent statuses under the automatic intake decision. Preserve initiating-card identity and recoverable bytes through permission-pending capture, interruption, release and comparison cancellation. Test that opening/closing never sends, grades or rebinds an attempt.
