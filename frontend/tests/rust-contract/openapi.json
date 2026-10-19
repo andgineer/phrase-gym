@@ -193,6 +193,125 @@
         }
       }
     },
+    "/api/v1/inbox/lessons": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "submit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}/cancel": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}/retry": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "retry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/lessons": {
       "get": {
         "tags": [
@@ -697,6 +816,201 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/v1/preparation/audio": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "audio",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobMediaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Original audio bytes for this active job"
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/claims": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "claim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/JobClaim"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/fail": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "fail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFailure"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/api/v1/preparation/publish": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "publish",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicationReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/receipt": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "receipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicationReceipt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/renew": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "renew",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/stage": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "stage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonOutput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {}
         }
       }
     },
@@ -1479,6 +1793,19 @@
         },
         "additionalProperties": false
       },
+      "ClaimRequest": {
+        "type": "object",
+        "required": [
+          "claim_id"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
       "Cue": {
         "type": "object",
         "required": [
@@ -1512,6 +1839,18 @@
           }
         },
         "additionalProperties": false
+      },
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "waiting",
+          "preparing",
+          "failed",
+          "pending_delivery",
+          "published",
+          "cancelled",
+          "superseded"
+        ]
       },
       "Dialogue": {
         "type": "object",
@@ -1857,6 +2196,102 @@
           }
         }
       },
+      "JobClaim": {
+        "type": "object",
+        "required": [
+          "fence",
+          "lease_until",
+          "deadline",
+          "receipt",
+          "input",
+          "profile",
+          "guide"
+        ],
+        "properties": {
+          "deadline": {
+            "type": "string"
+          },
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "guide": {
+            "type": "string"
+          },
+          "input": {
+            "$ref": "#/components/schemas/LessonSubmission"
+          },
+          "lease_until": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileRevision"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/LessonReceipt"
+          }
+        }
+      },
+      "JobFailure": {
+        "type": "object",
+        "required": [
+          "fence",
+          "reason"
+        ],
+        "properties": {
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JobFence": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "claim_id",
+          "token",
+          "fence"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JobMediaRequest": {
+        "type": "object",
+        "required": [
+          "fence",
+          "media_id"
+        ],
+        "properties": {
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "media_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
       "Language": {
         "type": "string",
         "enum": [
@@ -1952,6 +2387,31 @@
         },
         "additionalProperties": false
       },
+      "LessonOutput": {
+        "type": "object",
+        "required": [
+          "fence",
+          "publication_id",
+          "adapter",
+          "package"
+        ],
+        "properties": {
+          "adapter": {
+            "type": "string"
+          },
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "package": {
+            "$ref": "#/components/schemas/PreparedEnglishLesson"
+          },
+          "publication_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
       "LessonPage": {
         "type": "object",
         "required": [
@@ -1980,6 +2440,155 @@
             "format": "int64"
           }
         }
+      },
+      "LessonPhraseInput": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "text",
+          "reference_audio_id",
+          "audio_sha256"
+        ],
+        "properties": {
+          "audio_sha256": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "reference_audio_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LessonReceipt": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "submission_id",
+          "generation",
+          "namespace",
+          "profile_revision",
+          "guide_version",
+          "received_at"
+        ],
+        "properties": {
+          "generation": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guide_version": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "profile_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "received_at": {
+            "type": "string"
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "LessonStatus": {
+        "type": "object",
+        "required": [
+          "receipt",
+          "status"
+        ],
+        "properties": {
+          "publication": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PublicationReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/LessonReceipt"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeliveryStatus"
+          }
+        }
+      },
+      "LessonSubmission": {
+        "type": "object",
+        "required": [
+          "submission_id",
+          "item_id",
+          "language",
+          "title",
+          "context",
+          "note",
+          "phrases"
+        ],
+        "properties": {
+          "context": {
+            "type": "string"
+          },
+          "expected_generation": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "item_id": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "note": {
+            "type": "string"
+          },
+          "phrases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LessonPhraseInput"
+            }
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "MediaAsset": {
         "type": "object",
@@ -2786,6 +3395,40 @@
           }
         },
         "additionalProperties": false
+      },
+      "PublicationReceipt": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "publication_id",
+          "lesson_id",
+          "target_ids",
+          "published_at"
+        ],
+        "properties": {
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publication_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string"
+          },
+          "target_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
       },
       "RecallRating": {
         "type": "string",

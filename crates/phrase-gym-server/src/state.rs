@@ -3,7 +3,9 @@ use std::sync::Arc;
 use phrase_gym_core::clock::Clock;
 #[cfg(feature = "test-support")]
 use phrase_gym_core::content::staging::PackageStaging;
+use phrase_gym_core::english::EnglishPackages;
 use phrase_gym_core::exposures::ExposureService;
+use phrase_gym_core::inbox::{Inbox, delivery::Delivery, jobs::Jobs};
 use phrase_gym_core::library::Library;
 use phrase_gym_core::media::catalog::MediaCatalog;
 use phrase_gym_core::media::ingest::MediaIngest;
@@ -34,6 +36,9 @@ pub struct AppState {
     pub(crate) practice: Arc<Practice>,
     pub(crate) recordings: Arc<Recordings>,
     pub(crate) settings: Arc<DeviceSettings>,
+    pub(crate) inbox: Arc<Inbox>,
+    pub(crate) jobs: Arc<Jobs>,
+    pub(crate) delivery: Arc<Delivery>,
     pub(crate) profiles: Arc<Profiles>,
     #[cfg(feature = "test-support")]
     pub(crate) staging: Arc<PackageStaging>,
@@ -44,7 +49,15 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(database: Arc<Database>, store: Arc<MediaStore>, clock: Arc<dyn Clock>) -> Self {
+        let profiles = Arc::new(Profiles::new(database.clone(), clock.clone()));
+        let validator = Arc::new(EnglishPackages::new(
+            database.clone(),
+            store.clone(),
+            profiles.clone(),
+        ));
         Self {
+            inbox: Arc::new(Inbox::new(database.clone(), store.clone(), clock.clone())),
+            jobs: Arc::new(Jobs::new(database.clone(), clock.clone())),
             #[cfg(feature = "test-support")]
             browser: Arc::new(crate::test_support::Controls::new(database.clone())),
             exposures: Arc::new(ExposureService::new(database.clone(), clock.clone())),
@@ -70,7 +83,8 @@ impl AppState {
                 store.clone(),
                 clock.clone(),
             )),
-            profiles: Arc::new(Profiles::new(database.clone(), clock)),
+            profiles,
+            delivery: Arc::new(Delivery::new(database.clone(), validator, clock)),
             media_reconciler: Arc::new(MediaReconciler::new(database, store)),
             storage_slots: Arc::new(Semaphore::new(MAX_BLOCKING_STORAGE_TASKS)),
         }

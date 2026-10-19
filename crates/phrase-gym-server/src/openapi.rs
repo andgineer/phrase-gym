@@ -8,6 +8,11 @@ use phrase_gym_contracts::english::{
 };
 use phrase_gym_contracts::errors::ErrorBody;
 use phrase_gym_contracts::exposures::{ExposureInput, ExposureKind, ExposureReceipt};
+use phrase_gym_contracts::inbox::JobMediaRequest;
+use phrase_gym_contracts::inbox::{
+    ClaimRequest, DeliveryStatus, JobClaim, JobFailure, JobFence, LessonOutput, LessonPhraseInput,
+    LessonReceipt, LessonStatus, LessonSubmission, PublicationReceipt,
+};
 use phrase_gym_contracts::library::{
     AudioStatus, Dialogue, DialoguePage, Lesson, LessonPage, Phrase, PhrasePage,
 };
@@ -41,6 +46,9 @@ use crate::routes;
     ),
     security(("bearerAuth" = []), ("learnerCookie" = [])),
     paths(
+        routes::inbox::submit, routes::inbox::status, routes::inbox::cancel, routes::inbox::retry,
+        routes::jobs::audio,
+        routes::jobs::claim, routes::jobs::renew, routes::jobs::fail, routes::jobs::stage, routes::jobs::publish, routes::jobs::receipt,
         routes::profiles::current,
         routes::profiles::revision,
         routes::profiles::update,
@@ -70,6 +78,7 @@ use crate::routes;
         routes::settings::replace,
     ),
     components(schemas(
+        JobMediaRequest, LessonPhraseInput, LessonSubmission, LessonReceipt, PublicationReceipt, DeliveryStatus, LessonStatus, ClaimRequest, JobFence, JobClaim, LessonOutput, JobFailure,
         EnglishPackageVersion, PartnerPrompt, PhraseSituation, PhraseHelp, PhraseFamiliarity, PreparedEnglishPhrase, PreparedEnglishLesson,
         PersonalProfile, LanguagePreferences, ProfileRevision, ProfileUpdate, ProfileRestore,
         AttemptEvidence,

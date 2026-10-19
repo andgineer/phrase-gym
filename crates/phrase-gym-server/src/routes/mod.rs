@@ -1,4 +1,6 @@
 pub(crate) mod exposures;
+pub(crate) mod inbox;
+pub(crate) mod jobs;
 pub(crate) mod library;
 pub(crate) mod media;
 mod params;
@@ -29,8 +31,10 @@ pub(crate) fn api(authority: &Arc<Authority>) -> Router<AppState> {
             crate::authority::enforce,
         )
     };
-    let routes = learner()
-        .route_layer(protect(vec![Capability::Learner]))
+    let routes = Router::new()
+        .merge(inbox::routes().route_layer(protect(vec![Capability::MaterialSubmit])))
+        .merge(jobs::routes().route_layer(protect(vec![Capability::Worker])))
+        .merge(learner().route_layer(protect(vec![Capability::Learner])))
         .merge(material().route_layer(protect(vec![
             Capability::MaterialSubmit,
             Capability::Worker,

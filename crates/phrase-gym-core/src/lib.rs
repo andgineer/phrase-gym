@@ -4,6 +4,7 @@ pub mod english;
 pub mod error;
 pub mod exposures;
 pub mod hashing;
+pub mod inbox;
 pub mod library;
 pub mod media;
 mod planning;

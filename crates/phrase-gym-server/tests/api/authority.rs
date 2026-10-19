@@ -246,3 +246,39 @@ async fn unauthorized_uploads_are_rejected_before_consuming_the_body() {
         );
     }
 }
+
+#[tokio::test]
+async fn inbox_and_jobs_have_separate_capabilities() {
+    let directory = tempfile::tempdir().unwrap();
+    let app = app(directory.path());
+    for actor in ["learner", "worker", "reader", "editor"] {
+        assert_eq!(
+            status(&app, Some(actor), "POST", "/api/v1/inbox/lessons").await,
+            StatusCode::FORBIDDEN
+        );
+    }
+    for actor in ["learner", "material", "reader", "editor"] {
+        for path in [
+            "claims", "stage", "publish", "receipt", "renew", "fail", "audio",
+        ] {
+            assert_eq!(
+                status(
+                    &app,
+                    Some(actor),
+                    "POST",
+                    &format!("/api/v1/preparation/{path}")
+                )
+                .await,
+                StatusCode::FORBIDDEN
+            );
+        }
+    }
+    assert_eq!(
+        status(&app, Some("material"), "POST", "/api/v1/inbox/lessons").await,
+        StatusCode::UNPROCESSABLE_ENTITY
+    );
+    assert_eq!(
+        status(&app, Some("worker"), "POST", "/api/v1/preparation/claims").await,
+        StatusCode::UNPROCESSABLE_ENTITY
+    );
+}

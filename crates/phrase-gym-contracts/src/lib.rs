@@ -4,6 +4,7 @@ pub mod english;
 pub mod errors;
 pub mod exposures;
 pub mod imports;
+pub mod inbox;
 pub mod library;
 pub mod media;
 pub mod practice;

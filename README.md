@@ -79,7 +79,7 @@ cargo xtask coach-bundle  # unsigned development bundle of the Coach desktop app
 cargo xtask coach-smoke   # launch that bundle like a user and verify its window, process supervision and failure paths
 ```
 
-The Rust preview requires a private scoped credential file and learner login; follow [preview access and launch instructions](docs/rust-preview.md).
+The Rust preview requires a private scoped credential file and learner login; follow [preview access and launch instructions](docs/rust-preview.md). The production [bounded English lesson inbox](docs/preview-inbox.md) supports durable supplied-audio intake and fake-worker publication; browser and Coach integration remain preview work.
 
 Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 

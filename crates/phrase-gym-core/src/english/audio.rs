@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::error::CoreError;
 use crate::media::index::MediaIndex;
 
-pub(super) fn references(package: &PreparedEnglishLesson) -> Vec<Uuid> {
+pub(crate) fn references(package: &PreparedEnglishLesson) -> Vec<Uuid> {
     package
         .phrases
         .iter()

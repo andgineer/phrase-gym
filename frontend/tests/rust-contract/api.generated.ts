@@ -52,6 +52,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inbox/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/lessons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/lessons/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inbox/lessons/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/lessons": {
         parameters: {
             query?: never;
@@ -190,6 +254,118 @@ export interface paths {
         get: operations["list_learner_takes"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["audio"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["claim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/fail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["fail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["receipt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["renew"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preparation/stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["stage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -408,6 +584,10 @@ export interface components {
             id: string;
             text: string;
         };
+        ClaimRequest: {
+            /** Format: uuid */
+            claim_id: string;
+        };
         Cue: {
             /** Format: uuid */
             audio_id?: string | null;
@@ -417,6 +597,8 @@ export interface components {
             reviewed: boolean;
             visible_chunks: string[];
         };
+        /** @enum {string} */
+        DeliveryStatus: "waiting" | "preparing" | "failed" | "pending_delivery" | "published" | "cancelled" | "superseded";
         Dialogue: {
             content: components["schemas"]["DialogueInput"];
             /** Format: uuid */
@@ -513,6 +695,34 @@ export interface components {
             id: string;
             received_at: string;
         };
+        JobClaim: {
+            deadline: string;
+            fence: components["schemas"]["JobFence"];
+            guide: string;
+            input: components["schemas"]["LessonSubmission"];
+            lease_until: string;
+            profile: components["schemas"]["ProfileRevision"];
+            receipt: components["schemas"]["LessonReceipt"];
+        };
+        JobFailure: {
+            fence: components["schemas"]["JobFence"];
+            reason: string;
+        };
+        JobFence: {
+            /** Format: uuid */
+            claim_id: string;
+            /** Format: int64 */
+            fence: number;
+            /** Format: uuid */
+            generation_id: string;
+            /** Format: uuid */
+            token: string;
+        };
+        JobMediaRequest: {
+            fence: components["schemas"]["JobFence"];
+            /** Format: uuid */
+            media_id: string;
+        };
         /** @enum {string} */
         Language: "en" | "ru" | "sr" | "de";
         LanguagePreferences: {
@@ -535,6 +745,13 @@ export interface components {
             target_source_ids: string[];
             title: string;
         };
+        LessonOutput: {
+            adapter: string;
+            fence: components["schemas"]["JobFence"];
+            package: components["schemas"]["PreparedEnglishLesson"];
+            /** Format: uuid */
+            publication_id: string;
+        };
         LessonPage: {
             items: components["schemas"]["Lesson"][];
             /** Format: int64 */
@@ -543,6 +760,46 @@ export interface components {
             offset: number;
             /** Format: int64 */
             total: number;
+        };
+        LessonPhraseInput: {
+            audio_sha256: string;
+            /** Format: int64 */
+            expected_revision?: number | null;
+            /** Format: uuid */
+            reference_audio_id: string;
+            source_id: string;
+            text: string;
+        };
+        LessonReceipt: {
+            /** Format: int64 */
+            generation: number;
+            /** Format: uuid */
+            generation_id: string;
+            guide_version: string;
+            namespace: string;
+            /** Format: int64 */
+            profile_revision: number;
+            received_at: string;
+            /** Format: uuid */
+            submission_id: string;
+        };
+        LessonStatus: {
+            publication?: components["schemas"]["PublicationReceipt"] | null;
+            reason?: string | null;
+            receipt: components["schemas"]["LessonReceipt"];
+            status: components["schemas"]["DeliveryStatus"];
+        };
+        LessonSubmission: {
+            context: string;
+            /** Format: int64 */
+            expected_generation?: number | null;
+            item_id: string;
+            language: components["schemas"]["Language"];
+            note: string;
+            phrases: components["schemas"]["LessonPhraseInput"][];
+            /** Format: uuid */
+            submission_id: string;
+            title: string;
         };
         MediaAsset: {
             available: boolean;
@@ -751,6 +1008,16 @@ export interface components {
             mutation_id: string;
             profile: components["schemas"]["PersonalProfile"];
             reason: string;
+        };
+        PublicationReceipt: {
+            /** Format: uuid */
+            generation_id: string;
+            /** Format: uuid */
+            lesson_id: string;
+            /** Format: uuid */
+            publication_id: string;
+            published_at: string;
+            target_ids: string[];
         };
         /** @enum {string} */
         RecallRating: "not_yet" | "with_effort" | "recalled";
@@ -992,6 +1259,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonSubmission"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonReceipt"];
+                };
+            };
+        };
+    };
+    status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonStatus"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonStatus"];
+                };
+            };
+        };
+    };
+    retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonStatus"];
                 };
             };
         };
@@ -1333,6 +1686,162 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
                 };
+            };
+        };
+    };
+    audio: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobMediaRequest"];
+            };
+        };
+        responses: {
+            /** @description Original audio bytes for this active job */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    claim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobClaim"] | null;
+                };
+            };
+        };
+    };
+    fail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobFailure"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobFence"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicationReceipt"];
+                };
+            };
+        };
+    };
+    receipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobFence"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicationReceipt"] | null;
+                };
+            };
+        };
+    };
+    renew: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobFence"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    stage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonOutput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

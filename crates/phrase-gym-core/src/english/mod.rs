@@ -1,4 +1,5 @@
-mod audio;
+pub(crate) mod audio;
+pub(crate) mod publication;
 mod structure;
 
 use std::collections::BTreeMap;
@@ -72,42 +73,43 @@ impl EnglishPackages {
         }
         let media = MediaIndex::load(&self.database, &self.store, audio::references(package))?;
         audio::validate(package, &media)?;
-        self.database.read(|transaction| {
-            package
-                .phrases
-                .iter()
-                .map(|phrase| {
-                    let existing = records::sourced_target(
-                        transaction,
-                        &package.namespace,
-                        &phrase.source_id,
-                    )?;
-                    let id = if let Some(existing) = existing {
-                        if existing.language != "en"
-                            || existing.kind != "fixed_phrase"
-                            || existing.meaning_key != phrase.meaning_key
-                        {
-                            return Err(CoreError::Invalid(
-                                "Changed meaning requires a new target source identity".into(),
-                            ));
-                        }
-                        if phrase.expected_revision != Some(existing.current_revision) {
-                            return Err(CoreError::Conflict(
-                                "Expected target revision changed".into(),
-                            ));
-                        }
-                        existing.id
-                    } else {
-                        if phrase.expected_revision.is_some() {
-                            return Err(CoreError::Conflict(
-                                "Expected target does not exist".into(),
-                            ));
-                        }
-                        target_id(&package.namespace, &phrase.source_id)
-                    };
-                    Ok((phrase.source_id.clone(), id))
-                })
-                .collect()
-        })
+        self.database
+            .read(|transaction| bindings(transaction, package))
     }
+}
+
+pub(crate) fn bindings(
+    transaction: &rusqlite::Connection,
+    package: &PreparedEnglishLesson,
+) -> Result<BTreeMap<String, Uuid>, CoreError> {
+    package
+        .phrases
+        .iter()
+        .map(|phrase| {
+            let existing =
+                records::sourced_target(transaction, &package.namespace, &phrase.source_id)?;
+            let id = if let Some(existing) = existing {
+                if existing.language != "en"
+                    || existing.kind != "fixed_phrase"
+                    || existing.meaning_key != phrase.meaning_key
+                {
+                    return Err(CoreError::Invalid(
+                        "Changed meaning requires a new target source identity".into(),
+                    ));
+                }
+                if phrase.expected_revision != Some(existing.current_revision) {
+                    return Err(CoreError::Conflict(
+                        "Expected target revision changed".into(),
+                    ));
+                }
+                existing.id
+            } else {
+                if phrase.expected_revision.is_some() {
+                    return Err(CoreError::Conflict("Expected target does not exist".into()));
+                }
+                target_id(&package.namespace, &phrase.source_id)
+            };
+            Ok((phrase.source_id.clone(), id))
+        })
+        .collect()
 }

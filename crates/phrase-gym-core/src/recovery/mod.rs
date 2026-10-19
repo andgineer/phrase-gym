@@ -76,6 +76,15 @@ pub fn restore(snapshot: &Path, destination: &Path) -> Result<Snapshot, CoreErro
     File::options().write(true).open(output)?.sync_all()?;
     copy_media(snapshot, &destination, &manifest.media)?;
     validate(&destination, &manifest)?;
+    if manifest.schema_revision >= 4 {
+        let connection = Connection::open(destination.join(DATABASE_FILE))?;
+        crate::inbox::recovery::invalidate_leases(&connection)?;
+        drop(connection);
+        File::options()
+            .write(true)
+            .open(destination.join(DATABASE_FILE))?
+            .sync_all()?;
+    }
     files::finish(&destination)?;
     Ok(manifest)
 }
