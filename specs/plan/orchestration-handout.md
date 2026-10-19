@@ -6,7 +6,7 @@ This handout lets a new Astra session take over orchestration of [the implementa
 
 The user asked: implement `specs/plan/implementation-plan.md`, working **as orchestrator only**:
 
-1. For each stage, run the implementation in a **fresh session** (Agent tool, `model: "GPT-6.1"`, which is Sol 6.1 with high reasoning).
+1. For each stage, run the implementation in a **fresh session** (Agent tool, `model: "GPT-6.1"`, which is Sol 6.1 with medium reasoning).
 2. Then run a review in a **fresh session**.
 3. Decide which findings to pass on, and run the fixes in a **fresh session**.
 4. Review again in a fresh session.
@@ -79,23 +79,21 @@ Local `main` is ahead of `origin/main`. Do not push except as allowed in section
 
 ## 4. Remaining order of work
 
-1. **2b part 1: review cycle.** Start with a review of `55c87e0..af48263`; the reviewer runs the full gate, which also settles the unconfirmed gate.
-2. **2b part 2** (the plan's "## 2b"):
-   - client removal of old-browser-data handling (surgically, per decision 2);
-   - the built client's Chromium and WebKit suites running against the Rust Server, with test-only controls behind the Server's `test-support` feature, absent from release builds and OpenAPI;
-   - backup, isolated restore and matching-snapshot rollback;
-   - the stage-2 Exit.
-3. **Stage 3:** profiles, revised content and target lifecycle.
-4. **Stage 4:** durable inbox, fenced jobs and publication APIs, including the Coach summary endpoint.
-5. **Stage 5:** planning, evidence and progress.
-6. **Coach C2–C4** (dependencies are in `specs/plan/coach-desktop.md`):
+The user's current priority is a small usable macOS preview. Execute the [bounded preview stages and exits](implementation-plan.md#bounded-preview-stages) before returning to the full-release backlog below. That plan is the single home for preview scope, acceptance and the freeze on broader recovery work; an unresolved demonstrated risk of learner-data loss still blocks the preview. Keep the fresh-session implementation/review/fix workflow, with reviews bounded to the delivered stage and concrete defects.
+
+The remaining full-release work is:
+
+1. **Stage 3:** profiles, revised content and target lifecycle.
+2. **Stage 4:** durable inbox, fenced jobs and publication APIs, including the Coach summary endpoint.
+3. **Stage 5:** planning, evidence and progress.
+4. **Coach C2–C4** (dependencies are in `specs/plan/coach-desktop.md`):
    - C2 is the headless runner against the real Rust Server.
-   - C3 needs stages 3–4.
+   - C3 needs the relevant stage 3–4 contracts and APIs.
    - C4 needs the revised package format and real adapters.
-   - Windows adapter-dependent work waits for the Windows real-CLI probes.
-7. **Stage 6:** client integration plus Coach C5 and C6, plus decision 6 (outside pause).
-8. **Stage 7:** the cutover that removes every trace of Python.
-9. **Batches 8–9** need separate user authorization: provider budget, source projects, devices, deployment. Stop before them and report.
+   - Windows adapter-dependent work waits for the Windows real-CLI probes; it does not block the macOS preview.
+5. **Stage 6:** remaining client integration plus Coach C5 and C6, plus decision 6 (outside pause).
+6. **Stage 7:** the cutover that removes every trace of Python.
+7. **Batches 8–9** need separate user authorization: provider budget, source projects, devices, deployment. Stop before them and report.
 
 **Split large stages** into parts with their own review cycle, as was done for stage 2 (2a, 2b part 1, 2b part 2). Smaller diffs review better and survive usage limits. Record a split in the plan, either through the implementer or in the next implementer's prompt.
 
@@ -103,6 +101,7 @@ Local `main` is ahead of `origin/main`. Do not push except as allowed in section
 
 ### Mechanics
 
+- Select checks from the complete change under [AGENTS.md's done gate](../../AGENTS.md#done-gate). The implementation/review/fix prompt templates below describe implementation batches; prose-only planning stages use documentation checks and do not run application gates. A fresh review does not by itself change a prose-only stage into an implementation batch.
 - **Agent tool:** `model: "opus"`, background, and **one session at a time**. Gates use fixed ports for the browser suites, so two concurrent gate runs collide.
   - Reviewers must work in a fresh `git clone` under the scratchpad, never in the main tree.
   - Implementers and fixers work in the main tree.
@@ -118,7 +117,7 @@ Local `main` is ahead of `origin/main`. Do not push except as allowed in section
   - Node 22 via nvm: `source ~/.nvm/nvm.sh && nvm use`, with `.nvmrc`. The default PATH Node 20 fails the Rust hook by design.
   - The Rust toolchain is pinned in `rust-toolchain.toml`.
   - The pre-commit hook is **not installed** in this checkout, so agents must run `uv run inv pre` themselves before committing.
-  - The full gate takes about 10–15 minutes: `uv run inv pre`, `uv run inv test`, `cargo xtask pre`, `cargo xtask test`, plus `cargo xtask coach-smoke` for Coach. The browser suite alone is about 7 minutes.
+  - The transition implementation gate is `uv run inv pre`, then `uv run inv test`; these already include the Rust checks/tests. Run `cargo xtask coach-smoke` for packaged Coach changes. Do not duplicate the included Rust gate without a new change, failure or unresolved concern.
 - **Flaky tests must be diagnosed and fixed** (AGENTS.md); never retried, skipped or padded with timeouts. Three were found and fixed so far:
   - host Now Playing pauses → test playback is muted;
   - a Resume click landing during a layout shift;
