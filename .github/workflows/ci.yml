@@ -181,6 +181,9 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - name: Clippy with the desktop feature
       run: cargo clippy --package phrase-gym-coach --all-targets --all-features --locked -- -D warnings
+    # Coach integration tests build the real Server offline across the process boundary.
+    - name: Build Server for Coach integration tests
+      run: cargo build --package phrase-gym-server --locked
     - name: Coach tests
       run: cargo test --package phrase-gym-coach --all-features --locked
     - name: Packaged launch smoke test
