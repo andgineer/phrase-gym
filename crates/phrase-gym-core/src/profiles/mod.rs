@@ -98,8 +98,7 @@ impl Profiles {
         restore: Option<i64>,
         profile: Option<phrase_gym_contracts::profiles::PersonalProfile>,
     ) -> Result<ProfileRevision, CoreError> {
-        if mutation.is_nil() || actor.is_empty() || reason.trim().is_empty() || reason.len() > 2_000
-        {
+        if mutation.is_nil() || actor.is_empty() {
             return Err(CoreError::Invalid(
                 "A nonempty mutation identity and reason are required".into(),
             ));
@@ -112,6 +111,9 @@ impl Profiles {
             ).optional()?;
             if let Some((stored, payload)) = existing {
                 return if stored == request { records::parse("profile receipt", &payload) } else { Err(CoreError::Conflict("Mutation identity has a different authorized request".into())) };
+            }
+            if reason.trim().is_empty() || reason.len() > 2_000 {
+                return Err(CoreError::Invalid("A nonempty reason of at most 2000 bytes is required".into()));
             }
             let current = read(transaction, None)?;
             if current.revision != expected {

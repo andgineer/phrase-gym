@@ -92,6 +92,22 @@ fn the_bounded_english_contract_rejects_unsupported_material_and_structural_leak
 }
 
 #[test]
+fn hints_must_not_reveal_any_complete_accepted_answer() {
+    let fixture = Fixture::new();
+    let mut package = fixture.package();
+    let phrase = &mut package.phrases[0];
+    phrase.text = "Thank you very much.".into();
+    phrase.reference_audio_id = fixture.upload(&json!({ "text": phrase.text })).id;
+    phrase.accepted_variants = vec!["Thank you.".into()];
+    phrase.hint = "Thank".into();
+    assert!(fixture.validator.validate(&package).is_ok());
+    for hint in ["Thank you.", "THANK, YOU", "Thank you very"] {
+        package.phrases[0].hint = hint.into();
+        assert!(fixture.validator.validate(&package).is_err(), "{hint}");
+    }
+}
+
+#[test]
 fn profile_revision_is_pinned_and_unresolved_serbian_does_not_block_english() {
     let fixture = Fixture::new();
     let package = fixture.package();

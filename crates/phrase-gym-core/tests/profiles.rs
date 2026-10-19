@@ -107,6 +107,59 @@ fn revisions_validate_atomically_recover_receipts_and_restore_without_rewriting_
 }
 
 #[test]
+fn committed_update_and_restore_receipts_precede_reason_validation() {
+    let directory = tempfile::tempdir().unwrap();
+    let profiles = Profiles::new(
+        Arc::new(Database::open(directory.path()).unwrap()),
+        Arc::new(SystemClock),
+    );
+    profiles.initialize_current_learner().unwrap();
+    let update = ProfileUpdate {
+        mutation_id: Uuid::new_v4(),
+        expected_revision: 1,
+        profile: profiles.get(None).unwrap().profile,
+        reason: "Requested change".into(),
+    };
+    let second = profiles.update("agent", &update).unwrap();
+    let restore = ProfileRestore {
+        mutation_id: Uuid::new_v4(),
+        expected_revision: 2,
+        restore_revision: 1,
+        reason: "Requested restore".into(),
+    };
+    let third = profiles.restore("agent", &restore).unwrap();
+    for reason in [String::new(), " ".into(), "a".repeat(2_001)] {
+        let mut retry = update.clone();
+        retry.reason.clone_from(&reason);
+        assert!(matches!(
+            profiles.update("agent", &retry),
+            Err(CoreError::Conflict(_))
+        ));
+        retry.mutation_id = Uuid::new_v4();
+        retry.expected_revision = third.revision;
+        assert!(matches!(
+            profiles.update("agent", &retry),
+            Err(CoreError::Invalid(_))
+        ));
+        let mut retry = restore.clone();
+        retry.reason = reason;
+        assert!(matches!(
+            profiles.restore("agent", &retry),
+            Err(CoreError::Conflict(_))
+        ));
+        retry.mutation_id = Uuid::new_v4();
+        retry.expected_revision = third.revision;
+        assert!(matches!(
+            profiles.restore("agent", &retry),
+            Err(CoreError::Invalid(_))
+        ));
+        assert_eq!(profiles.get(None).unwrap(), third);
+    }
+    assert_eq!(profiles.update("agent", &update).unwrap(), second);
+    assert_eq!(profiles.restore("agent", &restore).unwrap(), third);
+}
+
+#[test]
 fn concurrent_expected_revision_writes_have_one_winner() {
     let directory = tempfile::tempdir().unwrap();
     let profiles = Arc::new(Profiles::new(

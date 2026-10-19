@@ -64,6 +64,7 @@ fn phrase(phrase: &PreparedEnglishPhrase, source_ids: &BTreeSet<&str>) -> Result
     if hint.is_empty()
         || hint.len() >= answer.len()
         || !answer.windows(hint.len()).any(|window| window == hint)
+        || leaks(&phrase.hint, phrase)
     {
         return Err(CoreError::Invalid(
             "Hint must be one partial contiguous cue from the fixed phrase".into(),
