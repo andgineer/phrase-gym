@@ -16,7 +16,7 @@ The learner's native language is Russian and learning timezone is Europe/Belgrad
 
 ## Updates and preparation
 
-The API validates a complete profile revision and applies it atomically with an expected-current-revision check and idempotent mutation identity. Concurrent stale writes conflict rather than silently overwriting choices. Retain revision history and the originating authorized request so changes can be inspected and explicitly restored as a new revision. Credentials that submit material cannot update preferences unless separately granted that capability.
+The API validates a complete profile revision and applies it atomically with an expected-current-revision check and idempotent mutation identity. Concurrent stale writes conflict rather than silently overwriting choices. Retain revision history and the originating authorized request so changes can be inspected and explicitly restored as a new revision. Material submission does not confer preference-update authority under the [selected access boundary](architecture.md#private-release-and-recovery).
 
 Each preparation generation pins one profile revision. An accepted update affects later generations; it does not silently modify running jobs or existing cards. A newer profile can explicitly requeue affected work as a new generation. Existing items are re-prepared on request. Compatible changes retain target identity and history; a changed retrieval task requires a new independent check before old recall evidence is presented as evidence for the new conditions. New meanings require new targets.
 
