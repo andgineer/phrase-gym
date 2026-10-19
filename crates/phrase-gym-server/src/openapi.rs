@@ -2,6 +2,10 @@ use phrase_gym_contracts::base::Language;
 use phrase_gym_contracts::content::{
     Chunk, Cue, DialogueInput, DialogueTurn, Explanation, TargetInput, TargetKind,
 };
+use phrase_gym_contracts::english::{
+    EnglishPackageVersion, PartnerPrompt, PhraseFamiliarity, PhraseHelp, PhraseSituation,
+    PreparedEnglishLesson, PreparedEnglishPhrase,
+};
 use phrase_gym_contracts::errors::ErrorBody;
 use phrase_gym_contracts::exposures::{ExposureInput, ExposureKind, ExposureReceipt};
 use phrase_gym_contracts::library::{
@@ -14,6 +18,9 @@ use phrase_gym_contracts::media::{
 use phrase_gym_contracts::practice::{
     AttemptEvidence, EventBatch, EventReceipt, Modality, OriginalResponse, PracticeInput,
     PracticeKind, RecallRating,
+};
+use phrase_gym_contracts::profiles::{
+    LanguagePreferences, PersonalProfile, ProfileRestore, ProfileRevision, ProfileUpdate,
 };
 use phrase_gym_contracts::readiness::DueSummary;
 use phrase_gym_contracts::recordings::{RecordingInput, RecordingReceipt};
@@ -32,7 +39,12 @@ use crate::routes;
         title = "Phrase Gym Server",
         description = "Rust server API during the migration"
     ),
+    security(("bearerAuth" = []), ("learnerCookie" = [])),
     paths(
+        routes::profiles::current,
+        routes::profiles::revision,
+        routes::profiles::update,
+        routes::profiles::restore,
         routes::exposures::expose,
         routes::library::lessons,
         routes::library::search,
@@ -58,6 +70,8 @@ use crate::routes;
         routes::settings::replace,
     ),
     components(schemas(
+        EnglishPackageVersion, PartnerPrompt, PhraseSituation, PhraseHelp, PhraseFamiliarity, PreparedEnglishPhrase, PreparedEnglishLesson,
+        PersonalProfile, LanguagePreferences, ProfileRevision, ProfileUpdate, ProfileRestore,
         AttemptEvidence,
         AudioStatus,
         Chunk,
@@ -115,7 +129,18 @@ use crate::routes;
 struct ApiDoc;
 
 pub fn document() -> utoipa::openapi::OpenApi {
-    ApiDoc::openapi()
+    let mut document = ApiDoc::openapi();
+    let components = document.components.as_mut().expect("API schema components");
+    components.add_security_scheme(
+        "bearerAuth",
+        utoipa::openapi::security::SecurityScheme::Http(
+            utoipa::openapi::security::HttpBuilder::new()
+                .scheme(utoipa::openapi::security::HttpAuthScheme::Bearer)
+                .build(),
+        ),
+    );
+    components.add_security_scheme("learnerCookie", utoipa::openapi::security::SecurityScheme::ApiKey(utoipa::openapi::security::ApiKey::Cookie(utoipa::openapi::security::ApiKeyValue::with_description("phrase_gym_learner", "Learner-only HttpOnly cookie. Profile updates and material APIs require separately scoped Bearer credentials."))));
+    document
 }
 
 pub fn document_json() -> String {

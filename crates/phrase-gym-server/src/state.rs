@@ -10,6 +10,7 @@ use phrase_gym_core::media::ingest::MediaIngest;
 use phrase_gym_core::media::reconcile::MediaReconciler;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::practice::Practice;
+use phrase_gym_core::profiles::Profiles;
 use phrase_gym_core::readiness::Readiness;
 use phrase_gym_core::recordings::Recordings;
 use phrase_gym_core::sessions::Sessions;
@@ -33,6 +34,7 @@ pub struct AppState {
     pub(crate) practice: Arc<Practice>,
     pub(crate) recordings: Arc<Recordings>,
     pub(crate) settings: Arc<DeviceSettings>,
+    pub(crate) profiles: Arc<Profiles>,
     #[cfg(feature = "test-support")]
     pub(crate) staging: Arc<PackageStaging>,
     #[cfg(feature = "test-support")]
@@ -63,7 +65,12 @@ impl AppState {
             media_ingest: Arc::new(MediaIngest::new(database.clone(), store.clone())),
             media_catalog: Arc::new(MediaCatalog::new(database.clone(), store.clone())),
             #[cfg(feature = "test-support")]
-            staging: Arc::new(PackageStaging::new(database.clone(), store.clone(), clock)),
+            staging: Arc::new(PackageStaging::new(
+                database.clone(),
+                store.clone(),
+                clock.clone(),
+            )),
+            profiles: Arc::new(Profiles::new(database.clone(), clock)),
             media_reconciler: Arc::new(MediaReconciler::new(database, store)),
             storage_slots: Arc::new(Semaphore::new(MAX_BLOCKING_STORAGE_TASKS)),
         }

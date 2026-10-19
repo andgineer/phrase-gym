@@ -3,6 +3,7 @@ pub(crate) mod library;
 pub(crate) mod media;
 mod params;
 pub(crate) mod practice;
+pub(crate) mod profiles;
 pub(crate) mod readiness;
 pub(crate) mod recordings;
 #[cfg(feature = "test-support")]
@@ -13,12 +14,49 @@ pub(crate) mod settings;
 use axum::Router;
 use axum::routing::{get, post};
 
+use crate::authority::{Authority, Capability, Grant};
 use crate::state::AppState;
+use axum::middleware;
+use std::sync::Arc;
 
-pub(crate) fn api() -> Router<AppState> {
-    let routes = learner().merge(material());
+pub(crate) fn api(authority: &Arc<Authority>) -> Router<AppState> {
+    let protect = |any| {
+        middleware::from_fn_with_state(
+            Grant {
+                authority: authority.clone(),
+                any,
+            },
+            crate::authority::enforce,
+        )
+    };
+    let routes = learner()
+        .route_layer(protect(vec![Capability::Learner]))
+        .merge(material().route_layer(protect(vec![
+            Capability::MaterialSubmit,
+            Capability::Worker,
+        ])))
+        .merge(
+            Router::new()
+                .route("/api/v1/profile", get(profiles::current))
+                .route(
+                    "/api/v1/profile/revisions/{revision}",
+                    get(profiles::revision),
+                )
+                .route_layer(protect(vec![
+                    Capability::ProfileRead,
+                    Capability::Worker,
+                    Capability::Learner,
+                ])),
+        )
+        .merge(
+            Router::new()
+                .route("/api/v1/profile", axum::routing::put(profiles::update))
+                .route("/api/v1/profile/restore", post(profiles::restore))
+                .route_layer(protect(vec![Capability::ProfileUpdate])),
+        );
     #[cfg(feature = "test-support")]
-    let routes = routes.merge(seed::routes());
+    let routes =
+        routes.merge(seed::routes().route_layer(protect(vec![Capability::MaterialSubmit])));
     routes
 }
 
@@ -27,6 +65,7 @@ pub(crate) fn api() -> Router<AppState> {
 // learner recordings must never be added there.
 fn learner() -> Router<AppState> {
     Router::new()
+        .route("/api/v1/media/reconcile", post(media::reconcile))
         .route("/api/v1/exposures", post(exposures::expose))
         .route("/api/v1/lessons", get(library::lessons))
         .route(
@@ -64,7 +103,6 @@ fn learner() -> Router<AppState> {
 fn material() -> Router<AppState> {
     Router::new()
         .route("/api/v1/media", post(media::upload))
-        .route("/api/v1/media/reconcile", post(media::reconcile))
         .route("/api/v1/media/{media_id}/metadata", get(media::metadata))
 }
 

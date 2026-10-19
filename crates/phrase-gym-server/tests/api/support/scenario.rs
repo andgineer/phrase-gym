@@ -136,7 +136,8 @@ fn check(step: &str, body: &Value, check: &Check, responses: &BTreeMap<String, V
 fn http_request(request: ScenarioRequest) -> Request<Body> {
     let mut builder = Request::builder()
         .method(request.method.as_str())
-        .uri(&request.path);
+        .uri(&request.path)
+        .header("authorization", format!("Bearer {}", super::TOKEN));
     let named = |header: &str| {
         request
             .headers

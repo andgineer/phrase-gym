@@ -1,3 +1,4 @@
+mod authority;
 mod boundary;
 mod browser_controls;
 mod client_delivery;
@@ -10,6 +11,7 @@ mod practice_events;
 mod practice_original_capture;
 mod practice_repairs;
 mod preservation;
+mod profiles;
 mod recordings;
 mod recovery;
 mod sessions;

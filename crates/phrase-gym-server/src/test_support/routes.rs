@@ -24,10 +24,15 @@ pub(crate) fn routes() -> Router<AppState> {
 
 async fn reset(State(state): State<AppState>) -> Result<Json<Value>, ApiError> {
     let controls = state.browser.clone();
+    let profiles = state.profiles.clone();
     state
-        .blocking(move || controls.reset())
-        .await?
-        .map_err(|_| ApiError::internal())?;
+        .blocking(move || {
+            controls.reset().map_err(|_| ApiError::internal())?;
+            profiles
+                .initialize_current_learner()
+                .map_err(ApiError::from)
+        })
+        .await??;
     Ok(Json(json!({"reset": true})))
 }
 

@@ -4,7 +4,7 @@ use std::sync::mpsc;
 
 use phrase_gym_core::hashing::sha256_hex;
 use phrase_gym_core::recovery::{backup, restore, verify};
-use phrase_gym_core::storage::migrations::{MIGRATIONS, migrate};
+use phrase_gym_core::storage::migrations::{MIGRATIONS, latest_revision, migrate};
 use phrase_gym_core::storage::{
     DATABASE_FILE, Database, RECOVERY_PENDING, SNAPSHOT_MANIFEST, recovery_reservation,
 };
@@ -212,7 +212,7 @@ fn rollback_restores_the_matching_rust_revision_and_media_without_touching_upgra
         backup(&live, &root.path().join("after-upgrade"))
             .unwrap()
             .schema_revision,
-        2
+        latest_revision(MIGRATIONS)
     );
 }
 

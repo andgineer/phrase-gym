@@ -1,5 +1,6 @@
 pub mod clock;
 pub mod content;
+pub mod english;
 pub mod error;
 pub mod exposures;
 pub mod hashing;
@@ -7,6 +8,7 @@ pub mod library;
 pub mod media;
 mod planning;
 pub mod practice;
+pub mod profiles;
 mod prompts;
 pub mod readiness;
 pub mod recordings;

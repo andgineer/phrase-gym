@@ -700,6 +700,111 @@
         }
       }
     },
+    "/api/v1/profile": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "current",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile/restore": {
+      "post": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "restore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRestore"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile/revisions/{revision}": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "revision",
+        "parameters": [
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/recordings": {
       "post": {
         "tags": [
@@ -1572,6 +1677,12 @@
           "due"
         ]
       },
+      "EnglishPackageVersion": {
+        "type": "string",
+        "enum": [
+          "english_phrases_v1"
+        ]
+      },
       "ErrorBody": {
         "type": "object",
         "required": [
@@ -1755,6 +1866,44 @@
           "de"
         ]
       },
+      "LanguagePreferences": {
+        "type": "object",
+        "required": [
+          "card_language",
+          "preparation_guidance"
+        ],
+        "properties": {
+          "card_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "help_language": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Language"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preparation_guidance": {
+            "type": "string"
+          },
+          "proficiency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translation_with_answer": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "Lesson": {
         "type": "object",
         "required": [
@@ -1779,6 +1928,29 @@
             "type": "string"
           }
         }
+      },
+      "LessonInput": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "title",
+          "target_source_ids"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "target_source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "LessonPage": {
         "type": "object",
@@ -1989,6 +2161,51 @@
           }
         }
       },
+      "PartnerPrompt": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonalProfile": {
+        "type": "object",
+        "required": [
+          "native_language",
+          "learning_timezone",
+          "languages"
+        ],
+        "properties": {
+          "languages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LanguagePreferences"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "learning_timezone": {
+            "type": "string"
+          },
+          "native_language": {
+            "$ref": "#/components/schemas/Language"
+          }
+        },
+        "additionalProperties": false
+      },
       "Phrase": {
         "type": "object",
         "required": [
@@ -2029,6 +2246,70 @@
           }
         }
       },
+      "PhraseFamiliarity": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "new"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "provenance",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "studied"
+                ]
+              },
+              "provenance": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PhraseHelp": {
+        "type": "object",
+        "required": [
+          "language",
+          "meaning"
+        ],
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "translation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "usage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "PhrasePage": {
         "type": "object",
         "required": [
@@ -2057,6 +2338,50 @@
             "format": "int64"
           }
         }
+      },
+      "PhraseSituation": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "language",
+          "exposed_target_source_ids"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "exposed_target_source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "partner": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PartnerPrompt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "PlannedTarget": {
         "type": "object",
@@ -2250,6 +2575,217 @@
             "minimum": 1
           }
         }
+      },
+      "PreparedEnglishLesson": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "namespace",
+          "source_revision",
+          "language",
+          "profile_revision",
+          "guide_version",
+          "assessment_version",
+          "lesson",
+          "phrases"
+        ],
+        "properties": {
+          "assessment_version": {
+            "type": "string"
+          },
+          "guide_version": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lesson": {
+            "$ref": "#/components/schemas/LessonInput"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "phrases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreparedEnglishPhrase"
+            }
+          },
+          "profile_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "schema_version": {
+            "$ref": "#/components/schemas/EnglishPackageVersion"
+          },
+          "source_revision": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PreparedEnglishPhrase": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "meaning_key",
+          "intention_key",
+          "text",
+          "accepted_variants",
+          "situations",
+          "hint",
+          "familiarity",
+          "reference_audio_id"
+        ],
+        "properties": {
+          "accepted_variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expected_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "familiarity": {
+            "$ref": "#/components/schemas/PhraseFamiliarity"
+          },
+          "help": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhraseHelp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "type": "string"
+          },
+          "intention_key": {
+            "type": "string"
+          },
+          "meaning_key": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "situations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhraseSituation"
+            }
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileRestore": {
+        "type": "object",
+        "required": [
+          "mutation_id",
+          "expected_revision",
+          "restore_revision",
+          "reason"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mutation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "restore_revision": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileRevision": {
+        "type": "object",
+        "required": [
+          "revision",
+          "profile",
+          "actor",
+          "reason",
+          "created_at"
+        ],
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "mutation_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/PersonalProfile"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "restored_from": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "required": [
+          "mutation_id",
+          "expected_revision",
+          "profile",
+          "reason"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mutation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/PersonalProfile"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "RecallRating": {
         "type": "string",
@@ -2725,6 +3261,26 @@
           "learning"
         ]
       }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "learnerCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "phrase_gym_learner",
+        "description": "Learner-only HttpOnly cookie. Profile updates and material APIs require separately scoped Bearer credentials."
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "learnerCookie": []
+    }
+  ]
 }

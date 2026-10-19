@@ -196,6 +196,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["current"];
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profile/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profile/revisions/{revision}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["revision"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/recordings": {
         parameters: {
             query?: never;
@@ -415,6 +463,8 @@ export interface components {
         };
         /** @enum {string} */
         Eligibility: "new" | "due";
+        /** @enum {string} */
+        EnglishPackageVersion: "english_phrases_v1";
         ErrorBody: {
             detail: string;
         };
@@ -465,12 +515,24 @@ export interface components {
         };
         /** @enum {string} */
         Language: "en" | "ru" | "sr" | "de";
+        LanguagePreferences: {
+            card_language: components["schemas"]["Language"];
+            help_language?: components["schemas"]["Language"] | null;
+            preparation_guidance: string;
+            proficiency?: string | null;
+            translation_with_answer?: boolean | null;
+        };
         Lesson: {
             /** Format: uuid */
             id: string;
             language: components["schemas"]["Language"];
             /** Format: int64 */
             phrase_count: number;
+            title: string;
+        };
+        LessonInput: {
+            source_id: string;
+            target_source_ids: string[];
             title: string;
         };
         LessonPage: {
@@ -528,6 +590,18 @@ export interface components {
             occurred_at: string;
             supported: boolean;
         };
+        PartnerPrompt: {
+            /** Format: uuid */
+            audio_id?: string | null;
+            text: string;
+        };
+        PersonalProfile: {
+            languages: {
+                [key: string]: components["schemas"]["LanguagePreferences"];
+            };
+            learning_timezone: string;
+            native_language: components["schemas"]["Language"];
+        };
         Phrase: {
             audio_status: components["schemas"]["AudioStatus"];
             content: components["schemas"]["TargetInput"];
@@ -539,6 +613,20 @@ export interface components {
             /** Format: int64 */
             revision: number;
         };
+        PhraseFamiliarity: {
+            /** @enum {string} */
+            kind: "new";
+        } | {
+            /** @enum {string} */
+            kind: "studied";
+            provenance: string;
+        };
+        PhraseHelp: {
+            language: components["schemas"]["Language"];
+            meaning: string;
+            translation?: string | null;
+            usage?: string | null;
+        };
         PhrasePage: {
             items: components["schemas"]["Phrase"][];
             /** Format: int64 */
@@ -547,6 +635,15 @@ export interface components {
             offset: number;
             /** Format: int64 */
             total: number;
+        };
+        PhraseSituation: {
+            /** Format: uuid */
+            audio_id?: string | null;
+            exposed_target_source_ids: string[];
+            id: string;
+            language: components["schemas"]["Language"];
+            partner?: components["schemas"]["PartnerPrompt"] | null;
+            text: string;
         };
         PlannedTarget: {
             cue_id: string;
@@ -598,6 +695,62 @@ export interface components {
             updated_at: string;
             /** Format: int64 */
             version: number;
+        };
+        PreparedEnglishLesson: {
+            assessment_version: string;
+            guide_version: string;
+            language: components["schemas"]["Language"];
+            lesson: components["schemas"]["LessonInput"];
+            namespace: string;
+            phrases: components["schemas"]["PreparedEnglishPhrase"][];
+            /** Format: int64 */
+            profile_revision: number;
+            schema_version: components["schemas"]["EnglishPackageVersion"];
+            source_revision: string;
+        };
+        PreparedEnglishPhrase: {
+            accepted_variants: string[];
+            /** Format: int64 */
+            expected_revision?: number | null;
+            familiarity: components["schemas"]["PhraseFamiliarity"];
+            help?: components["schemas"]["PhraseHelp"] | null;
+            hint: string;
+            intention_key: string;
+            meaning_key: string;
+            /** Format: uuid */
+            reference_audio_id: string;
+            situations: components["schemas"]["PhraseSituation"][];
+            source_id: string;
+            text: string;
+        };
+        ProfileRestore: {
+            /** Format: int64 */
+            expected_revision: number;
+            /** Format: uuid */
+            mutation_id: string;
+            reason: string;
+            /** Format: int64 */
+            restore_revision: number;
+        };
+        ProfileRevision: {
+            actor: string;
+            created_at: string;
+            /** Format: uuid */
+            mutation_id?: string | null;
+            profile: components["schemas"]["PersonalProfile"];
+            reason: string;
+            /** Format: int64 */
+            restored_from?: number | null;
+            /** Format: int64 */
+            revision: number;
+        };
+        ProfileUpdate: {
+            /** Format: int64 */
+            expected_revision: number;
+            /** Format: uuid */
+            mutation_id: string;
+            profile: components["schemas"]["PersonalProfile"];
+            reason: string;
         };
         /** @enum {string} */
         RecallRating: "not_yet" | "with_effort" | "recalled";
@@ -1179,6 +1332,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    current: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileRevision"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileUpdate"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileRevision"];
+                };
+            };
+        };
+    };
+    restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileRestore"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileRevision"];
+                };
+            };
+        };
+    };
+    revision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                revision: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileRevision"];
                 };
             };
         };

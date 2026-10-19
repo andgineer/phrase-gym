@@ -29,7 +29,7 @@ Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/
 | Rust tests, client typecheck/unit/build and both browser engines | `cargo xtask test` |
 | Refresh the Rust OpenAPI and its generated TypeScript fixture | `cargo xtask api-types` |
 | Build the client and release Rust binaries | `cargo xtask app-build` |
-| Run the Rust server on loopback with a synthetic data directory | `cargo xtask run` |
+| Run the Rust server on loopback with a synthetic data directory | `cargo xtask run --credentials-file PATH` |
 | Build the unsigned Coach development bundle (macOS/Windows) | `cargo xtask coach-bundle` |
 | Launch the Coach bundle like a user and verify the packaged smoke checks | `cargo xtask coach-smoke` |
 | Re-record the scheduler fixture from the Python implementation | `uv run python -m tests.preservation.export` |

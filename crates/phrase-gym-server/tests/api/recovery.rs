@@ -8,14 +8,14 @@ use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::recovery::{backup, restore};
 use phrase_gym_core::storage::Database;
 use phrase_gym_core::timestamps;
-use phrase_gym_server::{AppState, ServerSettings, router};
+use phrase_gym_server::{AppState, router};
 use serde_json::{Value, json};
 use uuid::Uuid;
 
 use crate::support::content::{WAV, get, package, post, publish, stage, upload};
 use crate::support::documents::base64;
 use crate::support::practice::{apply, count, moment, ready, session};
-use crate::support::{HOST, TestServer, repository_root};
+use crate::support::{TestServer, repository_root};
 
 #[tokio::test]
 async fn isolated_restore_preserves_library_settings_history_sessions_all_takes_and_staged_audio() {
@@ -75,7 +75,7 @@ async fn isolated_restore_preserves_library_settings_history_sessions_all_takes_
     std::fs::remove_file(server.data_dir.join("media").join(sha256_hex(&audio))).unwrap();
     let app = router(
         AppState::new(Arc::new(database), Arc::new(store), server.clock.clone()),
-        &ServerSettings::loopback().with_hosts([HOST.to_owned()]),
+        &crate::support::settings(),
     );
     assert_eq!(get(&app, "/api/v1/settings").await.json(), settings);
     assert_eq!(session(&app, &saved_session["id"]).await, saved_session);

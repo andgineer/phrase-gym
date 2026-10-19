@@ -27,6 +27,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: chromiumURL,
+        extraHTTPHeaders: { Authorization: 'Bearer synthetic-browser-00000000000000000000' },
         // Preserve native playback clocks without requiring a runner audio device.
         launchOptions: { args: ['--disable-audio-output'] },
       },
@@ -34,7 +35,11 @@ export default defineConfig({
     {
       name: 'webkit',
       testIgnore: preparation,
-      use: { ...devices['Desktop Safari'], baseURL: webkitURL },
+      use: {
+        ...devices['Desktop Safari'],
+        baseURL: webkitURL,
+        extraHTTPHeaders: { Authorization: 'Bearer synthetic-browser-00000000000000000000' },
+      },
     },
     ...(['chromium', 'webkit'] as const).map((browserName, index) => ({
       name: `${browserName}-python-preparation`,

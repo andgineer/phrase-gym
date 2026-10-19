@@ -8,7 +8,7 @@ use phrase_gym_core::clock::SystemClock;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::recovery;
 use phrase_gym_core::storage::Database;
-use phrase_gym_server::{AppState, ServerSettings, openapi, router};
+use phrase_gym_server::{AppState, Authority, Credential, ServerSettings, openapi, router};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -24,6 +24,9 @@ enum Command {
     Serve {
         #[arg(long)]
         data_dir: PathBuf,
+        /// Private JSON array of named, scoped credentials.
+        #[arg(long)]
+        credentials_file: PathBuf,
         #[arg(long, default_value_t = 8000)]
         port: u16,
         /// Built client directory containing index.html.
@@ -63,12 +66,18 @@ fn main() -> anyhow::Result<()> {
     match Cli::parse().command {
         Command::Serve {
             data_dir,
+            credentials_file,
             port,
             client_dir,
             allowed_hosts,
             allowed_origins,
         } => {
+            let credentials: Vec<Credential> =
+                serde_json::from_slice(&std::fs::read(credentials_file)?)
+                    .context("reading private scoped credentials")?;
+            let authority = Authority::new(credentials).map_err(anyhow::Error::msg)?;
             let settings = ServerSettings {
+                authority: Arc::new(authority),
                 allowed_origins,
                 client_dir,
                 ..ServerSettings::loopback()
@@ -117,7 +126,10 @@ fn serve(data_dir: &std::path::Path, port: u16, settings: &ServerSettings) -> an
         .with_context(|| format!("opening database in {}", data_dir.display()))?;
     let store = MediaStore::open(data_dir)
         .with_context(|| format!("opening media storage in {}", data_dir.display()))?;
-    let state = AppState::new(Arc::new(database), Arc::new(store), Arc::new(SystemClock));
+    let database = Arc::new(database);
+    phrase_gym_core::profiles::Profiles::new(database.clone(), Arc::new(SystemClock))
+        .initialize_current_learner()?;
+    let state = AppState::new(database, Arc::new(store), Arc::new(SystemClock));
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;

@@ -12,7 +12,7 @@ use std::process::ExitCode;
 use tools::{Failure, Workspace};
 
 const USAGE: &str = "usage: cargo xtask <pre|test|api-types|app-build|coach-bundle [--out DIR]|\
-                     coach-smoke|run [--data-dir DIR] [--port PORT]>";
+                     coach-smoke|run --credentials-file FILE [--data-dir DIR] [--port PORT]>";
 
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -104,6 +104,7 @@ fn coach_bundle(workspace: &Workspace, options: &[String]) -> Result<(), Failure
 fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
     let mut data_dir = workspace.root.join(".data/rust-server");
     let mut port = String::from("8010");
+    let mut credentials_file = None;
     let mut remaining = options.iter();
     while let Some(option) = remaining.next() {
         let value = remaining
@@ -112,9 +113,12 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
         match option.as_str() {
             "--data-dir" => data_dir = PathBuf::from(value),
             "--port" => port.clone_from(value),
+            "--credentials-file" => credentials_file = Some(value.clone()),
             _ => return Err(Failure::new(USAGE)),
         }
     }
+    let credentials_file = credentials_file
+        .ok_or_else(|| Failure::new("--credentials-file is required; see docs/rust-preview.md"))?;
     let data_dir = data_dir.to_string_lossy().into_owned();
     let client_dir = workspace.frontend().join("dist");
     let client_dir = client_dir.to_string_lossy().into_owned();
@@ -125,6 +129,8 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
         "phrase-gym-server",
         "--",
         "serve",
+        "--credentials-file",
+        &credentials_file,
         "--data-dir",
         &data_dir,
         "--port",

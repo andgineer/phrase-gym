@@ -12,6 +12,7 @@ test-support = []
 [dependencies]
 base64.workspace = true
 chrono.workspace = true
+chrono-tz.workspace = true
 icu_casemap.workspace = true
 phrase-gym-contracts.workspace = true
 rusqlite.workspace = true

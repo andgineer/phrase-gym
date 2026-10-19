@@ -116,6 +116,10 @@ pub(crate) async fn enforce(
     if declared_too_large(request.headers()) {
         return too_large();
     }
+    next.run(request).await
+}
+
+pub(crate) async fn bounded_body(request: Request, next: Next) -> Response {
     let (parts, body) = request.into_parts();
     match Limited::new(body, MAX_REQUEST_BYTES).collect().await {
         Ok(collected) => {

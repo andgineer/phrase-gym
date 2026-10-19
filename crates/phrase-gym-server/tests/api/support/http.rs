@@ -25,7 +25,13 @@ impl Reply {
     }
 }
 
-pub async fn send(router: &Router, request: Request<Body>) -> Reply {
+pub async fn send(router: &Router, mut request: Request<Body>) -> Reply {
+    if !request.headers().contains_key("authorization") {
+        request.headers_mut().insert(
+            "authorization",
+            format!("Bearer {}", super::TOKEN).parse().unwrap(),
+        );
+    }
     let response = router.clone().oneshot(request).await.unwrap();
     let status = response.status();
     let headers = response.headers().clone();

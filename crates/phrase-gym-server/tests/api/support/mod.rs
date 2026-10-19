@@ -14,8 +14,30 @@ use chrono::{DateTime, Utc};
 use phrase_gym_core::clock::ManualClock;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::storage::Database;
-use phrase_gym_server::{AppState, ServerSettings, router};
+use phrase_gym_server::{AppState, Authority, Capability, Credential, ServerSettings, router};
 use tempfile::TempDir;
+
+pub const TOKEN: &str = "synthetic-test-credential-000000000000000000";
+
+pub fn settings() -> ServerSettings {
+    ServerSettings {
+        authority: Arc::new(
+            Authority::new(vec![Credential {
+                actor: "synthetic-tests".into(),
+                token: TOKEN.into(),
+                capabilities: vec![
+                    Capability::Learner,
+                    Capability::Worker,
+                    Capability::MaterialSubmit,
+                    Capability::ProfileRead,
+                    Capability::ProfileUpdate,
+                ],
+            }])
+            .unwrap(),
+        ),
+        ..ServerSettings::loopback().with_hosts([HOST.to_owned()])
+    }
+}
 
 pub const HOST: &str = "testserver";
 
@@ -33,10 +55,7 @@ pub struct TestServer {
 
 impl TestServer {
     pub fn start(now: DateTime<Utc>) -> Self {
-        Self::with_settings(
-            now,
-            &ServerSettings::loopback().with_hosts([HOST.to_owned()]),
-        )
+        Self::with_settings(now, &settings())
     }
 
     pub fn with_settings(now: DateTime<Utc>, settings: &ServerSettings) -> Self {
@@ -45,9 +64,19 @@ impl TestServer {
         let database_path = database.path().to_owned();
         let clock = Arc::new(ManualClock::new(now));
         let store = MediaStore::open(data_dir.path()).unwrap();
-        let state = AppState::new(Arc::new(database), Arc::new(store), clock.clone());
+        let database = Arc::new(database);
+        phrase_gym_core::profiles::Profiles::new(database.clone(), clock.clone())
+            .initialize_current_learner()
+            .unwrap();
+        let state = AppState::new(database, Arc::new(store), clock.clone());
         Self {
-            router: router(state, settings),
+            router: router(
+                state,
+                &ServerSettings {
+                    authority: self::settings().authority,
+                    ..settings.clone()
+                },
+            ),
             clock,
             data_dir: data_dir.path().to_owned(),
             database_path,
@@ -60,9 +89,6 @@ impl TestServer {
         let database = Database::open(&self.data_dir).unwrap();
         let store = MediaStore::open(&self.data_dir).unwrap();
         let state = AppState::new(Arc::new(database), Arc::new(store), self.clock.clone());
-        router(
-            state,
-            &ServerSettings::loopback().with_hosts([HOST.to_owned()]),
-        )
+        router(state, &settings())
     }
 }

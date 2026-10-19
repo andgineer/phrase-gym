@@ -34,6 +34,7 @@ fn exposure(id: &str, kind: &str) -> Value {
 async fn post(router: Router, body: Vec<u8>) -> (StatusCode, Value) {
     let request = Request::post("/api/v1/exposures")
         .header("host", HOST)
+        .header("authorization", format!("Bearer {}", crate::support::TOKEN))
         .header("content-type", "application/json")
         .body(Body::from(body))
         .unwrap();
