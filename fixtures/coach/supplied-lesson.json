@@ -1,0 +1,18 @@
+{
+  "lesson": {"source_id": "meeting", "title": "Opening a meeting", "target_source_ids": ["open"]},
+  "phrase": {
+    "source_id": "open", "meaning_key": "begin-activity", "intention_key": "open-meeting",
+    "text": "Let's get started.", "accepted_variants": [],
+    "situations": [{"id": "call", "text": "Everyone has arrived. Open the meeting.", "language": "en", "audio_id": null, "partner": null, "exposed_target_source_ids": []}],
+    "hint": "started",
+    "help": {"language": "en", "meaning": "Begin a shared activity.", "usage": null, "translation": null},
+    "familiarity": {"kind": "new"},
+    "reference_audio_id": "00000000-0000-0000-0000-000000000000", "expected_revision": null
+  },
+  "metadata": {
+    "language": "en", "text": "Let's get started.", "role": "reference", "origin": "test",
+    "source": "synthetic-preview", "performer": "Synthetic", "locale": "en-US",
+    "preparation_version": "supplied-preview-v1"
+  },
+  "mime_type": "audio/wav", "assessment_version": "situation-v1"
+}

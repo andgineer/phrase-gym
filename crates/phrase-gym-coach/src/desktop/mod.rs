@@ -3,6 +3,8 @@ pub mod app;
 pub mod appearance;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 mod failure;
+pub mod intake;
+mod intake_view;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 pub mod smoke;
 #[cfg(any(target_os = "macos", target_os = "windows"))]

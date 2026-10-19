@@ -7,6 +7,7 @@ use std::sync::mpsc::Receiver;
 
 use eframe::egui_wgpu::{WgpuConfiguration, WgpuSetupCreateNew, wgpu};
 
+use super::intake::{Event, IntakeRunner};
 use super::smoke::{self, RendererInfo, SmokeRun};
 use super::startup::StartupChecks;
 use super::state::{StartupEvent, StatusSnapshot, ThemeChoice, ViewState};
@@ -108,6 +109,7 @@ struct CoachApp {
     view: ViewState,
     events: Receiver<StartupEvent>,
     smoke: Option<SmokeRun>,
+    intake: IntakeRunner,
 }
 
 impl CoachApp {
@@ -121,6 +123,8 @@ impl CoachApp {
         appearance::apply(&context, ThemeChoice::System, 1.0);
         let waker = context.clone();
         let events = StartupChecks::native().spawn(move || waker.request_repaint());
+        let waker = context.clone();
+        let intake = IntakeRunner::spawn(move || waker.request_repaint());
         let renderer = creation
             .wgpu_render_state
             .as_ref()
@@ -130,16 +134,57 @@ impl CoachApp {
             view: ViewState::new(StatusSnapshot::starting()),
             events,
             smoke,
+            intake,
         }
     }
 }
 
 impl eframe::App for CoachApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        if !self.view.intake.busy {
+            for file in ui.ctx().input(|input| input.raw.dropped_files.clone()) {
+                let path = file.path();
+                if path
+                    .extension()
+                    .is_some_and(|extension| extension == "json")
+                {
+                    self.view.intake.lesson_file = path.to_string_lossy().into_owned();
+                } else {
+                    self.view.intake.audio = path.to_string_lossy().into_owned();
+                }
+            }
+        }
         while let Ok(event) = self.events.try_recv() {
             self.view.snapshot.apply(event);
         }
+        while let Ok(event) = self.intake.events.try_recv() {
+            match event {
+                Event::Status(status) => self.view.intake.status = status,
+                Event::Connected(server) => {
+                    self.view.intake.server = server;
+                    self.view.intake.connected = true;
+                    self.view.snapshot.server_configured = true;
+                }
+                Event::Draft(json) => self.view.draft = json,
+                Event::Published(url) => self.view.intake.practice = Some(url),
+                Event::Finished(result) => {
+                    self.view.intake.busy = false;
+                    if let Err(problem) = result {
+                        self.view.intake.status = problem;
+                    }
+                }
+            }
+        }
         view::show(ui, &mut self.view);
+        if let Some(command) = self.view.intake.command.take() {
+            match self.intake.commands.try_send(command) {
+                Ok(()) => self.view.intake.busy = true,
+                Err(_) => {
+                    self.view.intake.status =
+                        "Runner unavailable; pending Send remains retained".into();
+                }
+            }
+        }
         if let Some(smoke) = &mut self.smoke {
             smoke.on_frame(ui.ctx(), &self.view.snapshot);
         }

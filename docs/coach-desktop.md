@@ -6,11 +6,35 @@ Coach is not released. This page covers the development build, the platform fact
 
 | Task | Command |
 |---|---|
-| Run the status window from the checkout | `cargo run --package phrase-gym-coach --features desktop` |
+| Run the Coach window from the checkout | `cargo run --package phrase-gym-coach --features desktop` |
 | Build an unsigned development bundle | `cargo xtask coach-bundle [--out DIR]` |
 | Build, launch like a user and verify the bundle | `cargo xtask coach-smoke` |
 
 `coach-bundle` writes `Phrase Gym Coach.app` on macOS (the fake CLI used by the checks sits in `Contents/Resources`) and `Phrase Gym Coach\phrase-gym-coach.exe` with a `resources` folder on Windows. It is a development layout: unsigned, no icon, no installer.
+
+## Supplied-lesson local preview
+
+Coach can send one supplied prepared English phrase and one original reference clip to the existing Server inbox. This path transfers reviewed content; it does not call an agent or speech provider. The sample [prepared lesson](../fixtures/coach/supplied-lesson.json) contains the phrase “Let's get started.” and its situation/help. Supply a matching WAV clip of that phrase, at most 1 MB. The preservation silence fixture is suitable only for automated transfer checks, not listening acceptance.
+
+1. Build the client with `npm --prefix frontend run build`, then start Server with a disposable data directory: `cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview --credentials-file /absolute/path/server-credentials.json`. Provision separate `material_submit` and `worker` actors/tokens in that private credential file, plus a learner credential for browser login. Follow the [credential format](rust-preview.md); keep these private files outside Git.
+2. Build `cargo xtask coach-bundle`, then open `target/coach-bundle/Phrase Gym Coach.app` on macOS. Enter the loopback Server URL and its material-submit and worker tokens, then click **Connect**. Tokens are stored in Keychain under separate accounts for that Server URL; leave them blank to reuse saved tokens.
+3. Paste the sample JSON into **Material draft**, or enter/drop its absolute path into **Prepared lesson file** and click **Load prepared lesson**. Enter/drop the matching clip's absolute path into **Reference audio file**. Loading or dropping sends nothing.
+4. Click **Send supplied lesson**. Coach retains the exact bytes and submission identity before upload, then displays durable acceptance, preparation and publication phases. **Retry pending Send** retains that identity after a lost response or restart. Connect to the same original Server URL before retrying. One outstanding send is supported; other accepted inbox work may keep this lesson waiting.
+5. Click **Open browser practice**, sign in with the learner token if required, and use the existing reference card to hear/read, record, compare and replay. The browser card and stored media remain Server-owned when Coach exits.
+
+The temporary sender envelope is `pending-send.json` in Coach's per-user data directory. It contains supplied input/audio, never tokens, and is cleared after a confirmed publication. Preserve it if a write fails. This preview starts no background polling or automatic preparation; retry is explicit. Its connection accepts loopback HTTP only and follows no redirects. General source import, model generation and release recovery remain deferred.
+
+The retained headless probe uses the same transfer runner, with a private JSON object containing `material_submit` and `worker` token values:
+
+```bash
+cargo run --package phrase-gym-coach --example supplied_send -- \
+  http://127.0.0.1:8000 /absolute/path/coach-credentials.json \
+  fixtures/coach/supplied-lesson.json /absolute/path/reference.wav /absolute/path/pending-send.json
+```
+
+The automated process-boundary test builds and starts the production Server on disposable data, publishes through Coach and reconciles an identical sender envelope after Server restart. It uses synthetic silence and does not establish speech or physical microphone quality. The packaged interactive Send and attended feedback checks remain separate acceptance work.
+
+## Packaged startup smoke checks
 
 `coach-smoke` places the bundle under a path with spaces and non-ASCII characters and starts it the way a person does, with a rebuilt environment. On macOS that is LaunchServices (`open`) with only the variables launchd gives a Finder launch, because `open` forwards its own environment. On Windows it is PowerShell 7 (`pwsh`) starting Coach with only the machine and user environment variables, the same block `Start-Process -UseNewEnvironment` builds. Both launches add three variables to the app's own environment: `PHRASE_GYM_LAUNCH_CANARY` plus fake `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` values, passed with `open --env` on macOS and set on the .NET process start on Windows; `Start-Process -Environment` silently dropped them when combined with `-UseNewEnvironment`. The app then writes a report, and the smoke test fails unless all of these hold:
 

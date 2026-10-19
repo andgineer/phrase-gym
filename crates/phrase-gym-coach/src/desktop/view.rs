@@ -25,6 +25,7 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
             appearance_controls(ui, state);
             ui.separator();
             draft(ui, &mut state.draft);
+            super::intake_view::show(ui, &mut state.intake, &state.draft);
         });
     });
 }
@@ -102,7 +103,9 @@ fn draft(ui: &mut Ui, draft: &mut String) {
     let label = ui.label(RichText::new("Material draft").strong());
     ui.add(
         TextEdit::multiline(draft)
-            .hint_text("Paste or type learning material. Sending is not available in this build.")
+            .hint_text(
+                "Paste the supplied prepared single-phrase lesson JSON, or load its file below.",
+            )
             .desired_rows(4)
             .desired_width(f32::INFINITY),
     )

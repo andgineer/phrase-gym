@@ -3,3 +3,5 @@ pub mod adapter;
 pub mod desktop;
 pub mod platform;
 pub mod process;
+pub mod supplied;
+pub mod transfer;

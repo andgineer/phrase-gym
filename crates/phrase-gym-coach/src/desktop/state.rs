@@ -105,6 +105,7 @@ pub struct ViewState {
     pub theme: ThemeChoice,
     pub text_scale: f32,
     pub draft: String,
+    pub intake: super::intake::IntakeState,
 }
 
 impl ViewState {
@@ -114,6 +115,7 @@ impl ViewState {
             theme: ThemeChoice::System,
             text_scale: 1.0,
             draft: String::new(),
+            intake: super::intake::IntakeState::default(),
         }
     }
 }

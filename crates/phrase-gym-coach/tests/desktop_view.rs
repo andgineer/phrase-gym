@@ -106,6 +106,33 @@ fn the_draft_accepts_german_and_serbian_latin_and_cyrillic_text() {
 }
 
 #[test]
+fn prepared_draft_requires_an_explicit_send_and_emits_the_exact_selected_input() {
+    let mut state = starting();
+    state.draft = include_str!("../../../fixtures/coach/supplied-lesson.json").into();
+    state.intake.connected = true;
+    state.intake.audio = "/tmp/selected original.wav".into();
+    let mut harness = Harness::builder()
+        .with_size([560.0, 2000.0])
+        .with_context_setup(appearance::install)
+        .build_ui_state(view::show, state);
+    harness.run();
+    assert!(harness.state().intake.command.is_none());
+    harness.get_by_label("Send supplied lesson").click();
+    harness.run();
+    assert_eq!(
+        harness.state().intake.command,
+        Some(phrase_gym_coach::desktop::intake::Command::Send {
+            json: harness.state().draft.clone(),
+            audio: "/tmp/selected original.wav".into()
+        })
+    );
+    harness.state_mut().intake.command = None;
+    harness.state_mut().intake.busy = true;
+    harness.run();
+    assert!(harness.state().intake.command.is_none());
+}
+
+#[test]
 fn text_size_controls_scale_the_interface_within_bounds() {
     let mut harness = harness(starting());
     harness.run();
@@ -137,4 +164,43 @@ fn every_control_stays_named_at_the_minimum_window_size_on_high_dpi_in_both_them
         harness.get_by_role_and_label(Role::RadioButton, "System");
         harness.get_by_label("Material draft");
     }
+}
+
+#[test]
+fn changing_the_endpoint_and_reconnecting_revoke_send_authority() {
+    let mut state = starting();
+    state.draft = "prepared draft".into();
+    state.intake.audio = "/tmp/original.wav".into();
+    state.intake.connected = true;
+    let mut harness = Harness::builder()
+        .with_size([560.0, 2000.0])
+        .with_context_setup(appearance::install)
+        .build_ui_state(view::show, state);
+    harness.run();
+    harness.get_by_label("Local Server URL").click();
+    harness.run();
+    harness.get_by_label("Local Server URL").type_text("1");
+    harness.run();
+    assert!(!harness.state().intake.connected);
+    harness.get_by_label("Send supplied lesson").click();
+    harness.run();
+    assert!(harness.state().intake.command.is_none());
+    harness.state_mut().intake.connected = true;
+    harness.get_by_label("Connect").click();
+    harness.run();
+    assert!(!harness.state().intake.connected);
+    assert!(matches!(
+        harness.state().intake.command,
+        Some(phrase_gym_coach::desktop::intake::Command::Connect { .. })
+    ));
+    harness.state_mut().intake.command = None;
+    harness.state_mut().intake.busy = true;
+    let endpoint = harness.state().intake.server.clone();
+    harness.get_by_label("Local Server URL").click();
+    harness.run();
+    harness
+        .get_by_label("Local Server URL")
+        .type_text("old connection cannot race this edit");
+    harness.run();
+    assert_eq!(harness.state().intake.server, endpoint);
 }
