@@ -87,9 +87,9 @@ test('first lesson retains delivery identity and shows actual preparation and re
   await expect(page.getByText(/Ready for reference rehearsal only: 1/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeDisabled()
   await page.getByLabel('Learning language', { exact: true }).selectOption('sr')
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
-  await expect(page.getByText(/New lesson input currently supports English only/)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Submit lesson', exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Dodaj prvu lekciju', exact: true }).click()
+  await expect(page.getByText(/Unos novih lekcija trenutno podržava samo engleski/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pošalji lekciju', exact: true })).toHaveCount(0)
 })
 
 test('learner-only access retains unconfirmed input and explains unavailable intake', async ({

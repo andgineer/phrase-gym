@@ -49,7 +49,7 @@ for (const terminal of ['exhausted', 'cancelled']) {
     ).toBeVisible()
     if (terminal === 'exhausted') {
       await page.getByRole('button', { name: 'Retry preparation', exact: true }).click()
-      await expect(page.getByRole('alert')).toContainText('attempt limit')
+      await expect(page.getByRole('alert').filter({ hasText: 'attempt limit' })).toBeVisible()
     }
     const before = await (await request.get(statusPath)).json()
     await page.getByRole('button', { name: /Discard local saved input/ }).click()

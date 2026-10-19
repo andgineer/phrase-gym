@@ -102,7 +102,13 @@ test('native UI, bare fallback, invalid language and empty collection', async ({
   await expect(page.locator('h1')).toHaveText('Выберите изучаемый язык')
   await expect(page.locator('.phrase-list')).toHaveCount(0)
   await page.goto('/learn/de')
-  await expect(page.locator('.lookup')).toContainText('Пока нет фраз')
+  await expect(
+    page
+      .locator('.home')
+      .getByText('На этом языке пока нет опубликованных фраз. Выбор языка не добавляет урок.', {
+        exact: true,
+      }),
+  ).toBeVisible()
   await page.getByLabel('Найти фразу', { exact: true }).fill('something')
   await expect(page.locator('.phrase-list li')).toHaveCount(0)
 })
