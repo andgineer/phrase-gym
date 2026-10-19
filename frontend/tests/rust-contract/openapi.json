@@ -2833,6 +2833,16 @@
           "content": {
             "$ref": "#/components/schemas/TargetInput"
           },
+          "english": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PreparedEnglishPhrase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "format": "uuid"

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import type { APIRequestContext } from '@playwright/test'
 
-function tone() {
+export function tone() {
   const bytes = Buffer.alloc(44 + 16000 * 2)
   bytes.write('RIFF')
   bytes.writeUInt32LE(bytes.length - 8, 4)

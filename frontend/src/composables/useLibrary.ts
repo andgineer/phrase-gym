@@ -39,7 +39,15 @@ export function useLibrary() {
   const selectedLanguage = computed(() => currentLanguage.value ?? '')
   const explanation = computed(() => {
     const nativeLanguage = settings.value?.native_language
-    return nativeLanguage ? phrase.value?.content.explanations?.[nativeLanguage] : null
+    return phrase.value?.english?.help
+      ? {
+          meaning: phrase.value.english.help.meaning,
+          usage: phrase.value.english.help.usage ?? '',
+          breakdown: [],
+        }
+      : nativeLanguage
+        ? phrase.value?.content.explanations?.[nativeLanguage]
+        : null
   })
   const lessonTitle = ref('')
 
@@ -128,9 +136,9 @@ export function useLibrary() {
         const item = await api<Phrase>(`/phrases/${routeParts.value[3]}?${base}`)
         if (version !== requestVersion || firstLaunch.value || configuring.value) return true
         const nativeLanguage = settings.value?.native_language
-        const help = nativeLanguage
-          ? preparedExplanation(item.content.explanations?.[nativeLanguage])
-          : null
+        const help =
+          item.english?.help ??
+          (nativeLanguage ? preparedExplanation(item.content.explanations?.[nativeLanguage]) : null)
         if (previousExposure?.target_id === item.id && previousExposure.revision === item.revision)
           currentExposure.value = previousExposure
         else prepareExposure(item, lang, help ? 'explanation' : 'answer')

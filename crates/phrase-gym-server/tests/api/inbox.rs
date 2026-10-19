@@ -135,16 +135,7 @@ async fn fake_worker_publishes_through_production_routes_and_recovers_receipts_a
         get(&restarted, &status_path).await.json()["status"],
         "published"
     );
-    let phrases = get(
-        &restarted,
-        &format!(
-            "/api/v1/lessons/{}/phrases?language=en",
-            published["lesson_id"].as_str().unwrap()
-        ),
-    )
-    .await;
-    assert_eq!(phrases.status, StatusCode::OK);
-    assert_eq!(phrases.json()["items"].as_array().unwrap().len(), 1);
+    assert_library_projection(&restarted, &published, &output).await;
     assert_eq!(
         get(
             &restarted,
@@ -252,4 +243,28 @@ async fn expired_and_cancelled_http_workers_cannot_publish_or_read_unrelated_aud
         .status,
         StatusCode::CONFLICT
     );
+}
+
+async fn assert_library_projection(router: &Router, published: &Value, output: &Value) {
+    let phrases = get(
+        router,
+        &format!(
+            "/api/v1/lessons/{}/phrases?language=en",
+            published["lesson_id"].as_str().unwrap()
+        ),
+    )
+    .await;
+    assert_eq!(phrases.status, StatusCode::OK);
+    assert_eq!(phrases.json()["items"].as_array().unwrap().len(), 1);
+    let phrase = &phrases.json()["items"][0];
+    assert_eq!(phrase["english"], output["package"]["phrases"][0]);
+    let detail = get(
+        router,
+        &format!(
+            "/api/v1/phrases/{}?language=en",
+            published["target_ids"][0].as_str().unwrap()
+        ),
+    )
+    .await;
+    assert_eq!(detail.json(), *phrase);
 }

@@ -1,7 +1,7 @@
 use phrase_gym_contracts::base::Language;
 use phrase_gym_contracts::content::TargetInput;
 use phrase_gym_contracts::library::{AudioStatus, Lesson, Phrase};
-use rusqlite::Connection;
+use rusqlite::{Connection, OptionalExtension, params};
 use uuid::Uuid;
 
 use crate::content::{cues, records};
@@ -16,6 +16,7 @@ pub(crate) struct Draft {
     pub language: Language,
     pub content: TargetInput,
     pub lessons: Vec<Lesson>,
+    pub english: Option<phrase_gym_contracts::english::PreparedEnglishPhrase>,
 }
 
 pub(crate) fn media_ids(content: &TargetInput) -> impl Iterator<Item = Uuid> + '_ {
@@ -60,6 +61,7 @@ impl Draft {
             language: self.language,
             content: self.content,
             lessons: self.lessons,
+            english: self.english,
         }
     }
 }
@@ -77,6 +79,7 @@ pub(crate) fn draft(
         language,
         content,
         lessons: lessons::of_target(connection, id)?,
+        english: english(connection, id, revision)?,
     })
 }
 
@@ -130,4 +133,21 @@ pub(crate) fn matches(content: &TargetInput, search: &Search) -> bool {
         .collect::<Vec<_>>()
         .join(" ");
     search.matches(&haystack)
+}
+
+fn english(
+    connection: &Connection,
+    id: Uuid,
+    revision: i64,
+) -> Result<Option<phrase_gym_contracts::english::PreparedEnglishPhrase>, CoreError> {
+    let payload: Option<String> = connection
+        .query_row(
+            "SELECT payload FROM english_revision WHERE target_id = ?1 AND revision = ?2",
+            params![id.to_string(), revision],
+            |row| row.get(0),
+        )
+        .optional()?;
+    payload
+        .map(|payload| records::parse("English phrase", &payload))
+        .transpose()
 }

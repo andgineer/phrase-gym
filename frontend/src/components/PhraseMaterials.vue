@@ -28,7 +28,14 @@ const emit = defineEmits<{ retryExposure: [] }>()
   <article class="card phrase-card">
     <p class="eyebrow">{{ prepared ? t.materials : t.reference }}</p>
     <h1 :lang="language">{{ phrase.content.text }}</h1>
-    <p :lang="language" class="purpose">{{ phrase.content.purpose }}</p>
+    <p v-if="!phrase.english" :lang="language" class="purpose">{{ phrase.content.purpose }}</p>
+    <p
+      v-for="situation in phrase.english?.situations"
+      :key="situation.id"
+      :lang="situation.language"
+    >
+      {{ situation.text }}
+    </p>
     <LookupRecording
       :phrase="phrase"
       :exposure="currentExposure"
@@ -36,7 +43,11 @@ const emit = defineEmits<{ retryExposure: [] }>()
       :pt="pt"
     />
     <p v-if="phrase.audio_status !== 'ready'" class="muted">{{ t.missing }}</p>
-    <div class="explanation" v-if="prepared" :lang="nativeLanguage ?? undefined">
+    <div
+      class="explanation"
+      v-if="prepared"
+      :lang="phrase.english?.help?.language ?? nativeLanguage ?? undefined"
+    >
       <template v-if="prepared.meaning.trim()">
         <h2>{{ t.meaning }}</h2>
         <p>{{ prepared.meaning }}</p>
@@ -45,6 +56,7 @@ const emit = defineEmits<{ retryExposure: [] }>()
         <h2>{{ t.usage }}</h2>
         <p>{{ prepared.usage }}</p>
       </template>
+      <p v-if="phrase.english?.help?.translation">{{ phrase.english.help.translation }}</p>
       <ul v-if="prepared.breakdown?.length">
         <li v-for="chunk in prepared.breakdown" :key="chunk">{{ chunk }}</li>
       </ul>

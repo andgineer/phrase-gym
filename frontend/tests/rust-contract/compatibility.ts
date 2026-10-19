@@ -2,7 +2,12 @@ import type { paths as PythonPaths } from '../../src/api.generated'
 import type { paths as RustPaths } from './api.generated'
 
 // Mapping flattens aliases and intersections so only property names, optionality and types are compared.
-type Normalized<T> = T extends object ? { [Key in keyof T]: Normalized<T[Key]> } : T
+// English library payload is an intentional Rust-only addition, covered through real publication.
+type Normalized<T> = T extends { content: unknown; retrieval_ready: boolean }
+  ? { [Key in Exclude<keyof T, 'english'>]: Normalized<T[Key]> }
+  : T extends object
+    ? { [Key in keyof T]: Normalized<T[Key]> }
+    : T
 type Exact<A, B> =
   (<T>() => T extends Normalized<A> ? 1 : 2) extends <T>() => T extends Normalized<B> ? 1 : 2
     ? true

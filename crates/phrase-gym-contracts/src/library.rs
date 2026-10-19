@@ -33,6 +33,8 @@ pub struct Phrase {
     pub lessons: Vec<Lesson>,
     pub audio_status: AudioStatus,
     pub retrieval_ready: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub english: Option<crate::english::PreparedEnglishPhrase>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

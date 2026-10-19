@@ -862,6 +862,7 @@ export interface components {
         Phrase: {
             audio_status: components["schemas"]["AudioStatus"];
             content: components["schemas"]["TargetInput"];
+            english?: components["schemas"]["PreparedEnglishPhrase"] | null;
             /** Format: uuid */
             id: string;
             language: components["schemas"]["Language"];
