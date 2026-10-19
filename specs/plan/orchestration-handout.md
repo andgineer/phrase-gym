@@ -6,7 +6,7 @@ This handout lets a new Astra session take over orchestration of [the implementa
 
 The user asked: implement `specs/plan/implementation-plan.md`, working **as orchestrator only**:
 
-1. For each stage, run the implementation in a **fresh session** (Agent tool, `model: "GPT-6.1"`, which is Sol 6.1 with medium reasoning).
+1. For each stage, run the implementation in a **fresh session** (GPT-6.1 / Sol 6.1; Agent tool parameters `model: "gpt-6.1-sol"`, `reasoning_effort: "medium"`).
 2. Then run a review in a **fresh session**.
 3. Decide which findings to pass on, and run the fixes in a **fresh session**.
 4. Review again in a fresh session.
@@ -102,7 +102,7 @@ The remaining full-release work is:
 ### Mechanics
 
 - Select checks from the complete change under [AGENTS.md's done gate](../../AGENTS.md#done-gate). The implementation/review/fix prompt templates below describe implementation batches; prose-only planning stages use documentation checks and do not run application gates. A fresh review does not by itself change a prose-only stage into an implementation batch.
-- **Agent tool:** `model: "opus"`, background, and **one session at a time**. Gates use fixed ports for the browser suites, so two concurrent gate runs collide.
+- **Agent tool:** implementation sessions use `model: "gpt-6.1-sol"`, `reasoning_effort: "medium"`. Implementation, review, fixes and re-review each start in a fresh session, with the root acting only as orchestrator. Run in the background, **one session at a time**. Gates use fixed ports for the browser suites, so two concurrent gate runs collide.
   - Reviewers must work in a fresh `git clone` under the scratchpad, never in the main tree.
   - Implementers and fixers work in the main tree.
 - **Never read an agent's output JSONL file.** It overflows context. To check what an agent did (for example after a harness "security warning"), filter its tool calls with a short Python script. A previous warning turned out to be the agent deleting its own scratch folder.
@@ -143,8 +143,7 @@ The remaining full-release work is:
   - meaningful tests;
   - commit often;
   - run `inv pre` before each commit;
-  - the done gate before reporting;
-  - commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+  - the done gate before reporting.
 - **Final report:** commits, what each item has, gate results, deviations and risks, plan/spec edits. Keep it compact.
 
 ### Review prompt (essential parts)
