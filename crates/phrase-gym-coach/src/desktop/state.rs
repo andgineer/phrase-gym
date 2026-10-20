@@ -44,7 +44,7 @@ pub enum StartupEvent {
     Credentials(CredentialHealth),
 }
 
-// Every launch starts paused and unconnected; nothing is claimed until the user enables processing.
+// Claims begin only after the background runner confirms the saved Server connection.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StatusSnapshot {
     pub processing_enabled: bool,

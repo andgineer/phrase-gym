@@ -101,7 +101,7 @@ fn setup() -> (tempfile::TempDir, PathBuf, PathBuf, PathBuf) {
 fn accepted(client: &ServerClient, send: &mut pending::PendingSend) -> LessonReceipt {
     let media: MediaAsset = client.post("/api/v1/media", &send.upload, false).unwrap();
     send.submission = Some(
-        send.supplied
+        send.material
             .submission(send.submission_id, &media)
             .unwrap(),
     );
@@ -281,3 +281,9 @@ fn superseded_attempt_receipt_conflict_rotates_only_the_attempt_before_retry() {
     );
     assert!(!path.exists());
 }
+
+#[path = "support/generated_server.rs"]
+mod generated_server;
+
+#[path = "support/generated_recovery.rs"]
+mod generated_recovery;

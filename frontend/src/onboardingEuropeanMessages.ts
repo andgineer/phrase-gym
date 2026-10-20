@@ -7,7 +7,7 @@ export const sr = {
   empty: 'Još nema objavljenih fraza na ovom jeziku. Izbor jezika ne dodaje lekciju.',
   add: 'Dodaj prvu lekciju',
   supported:
-    'Trenutno možeš poslati jednu fiksnu englesku frazu sa originalnim referentnim zvukom. Coach mora raditi sa podešenom pripremom gotove lekcije. Automatska priprema sirovog teksta još nije dostupna.',
+    'Možeš poslati jednu fiksnu englesku frazu sa originalnim referentnim zvukom. Coach mora raditi i biti povezan sa podešenom ograničenom pripremom preko Claude. Tačan tekst i originalni zvuk se čuvaju.',
   unsupported:
     'Unos novih lekcija trenutno podržava samo engleski. Objavljeni materijal na drugim jezicima ostaje u biblioteci.',
   title: 'Naslov lekcije',
@@ -44,9 +44,9 @@ export const sr = {
   storage:
     'Unos nije sačuvan na ovom uređaju. Ništa nije poslato. Zadrži panel otvoren i omogući skladište pregledača pre novog pokušaja.',
   missingFields:
-    'Complete the lesson title, phrase, situation, performer and audio locale, then choose or drop the original audio again. Your input is retained.',
+    'Popuni naslov lekcije, frazu, situaciju, izvođača i jezičku varijantu zvuka, pa ponovo izaberi ili prevuci originalni zvuk. Tvoj unos je sačuvan.',
   automatic:
-    'Complete the text below, then choose, drop or paste the original audio. Delivery starts automatically.',
+    'Popuni tekst ispod, pa izaberi, prevuci ili nalepi originalni zvuk. Dostava počinje automatski.',
   retryStorage: 'Ponovo proveri lokalno skladište',
 }
 export const de = {
@@ -59,7 +59,7 @@ export const de = {
     'Noch keine veröffentlichten Phrasen in dieser Sprache. Die Sprachauswahl fügt keine Lektion hinzu.',
   add: 'Erste Lektion hinzufügen',
   supported:
-    'Du kannst derzeit eine feste englische Phrase mit ihrem ursprünglichen Referenzaudio senden. Coach muss mit eingerichteter Vorbereitung einer fertigen Lektion laufen. Automatische Vorbereitung von Rohtext ist noch nicht verfügbar.',
+    'Du kannst eine feste englische Phrase mit ihrem ursprünglichen Referenzaudio senden. Coach muss mit eingerichteter begrenzter Claude-Vorbereitung laufen und verbunden sein. Wortlaut und Originalaudio bleiben erhalten.',
   unsupported:
     'Neue Lektionen können derzeit nur auf Englisch eingegeben werden. Veröffentlichte Inhalte anderer Sprachen bleiben in ihrer Bibliothek.',
   title: 'Lektionstitel',
@@ -99,8 +99,8 @@ export const de = {
   storage:
     'Eingabe konnte lokal nicht gespeichert werden. Nichts wurde gesendet. Lass das Fenster offen und aktiviere den Browserspeicher vor einem neuen Versuch.',
   missingFields:
-    'Complete the lesson title, phrase, situation, performer and audio locale, then choose or drop the original audio again. Your input is retained.',
+    'Vervollständige Lektionstitel, Phrase, Situation, Sprecher und Sprachregion des Audios. Wähle oder ziehe dann das Originalaudio erneut hierher. Deine Eingabe bleibt erhalten.',
   automatic:
-    'Complete the text below, then choose, drop or paste the original audio. Delivery starts automatically.',
+    'Vervollständige den Text unten und wähle, ziehe oder füge dann das Originalaudio ein. Die Übermittlung startet automatisch.',
   retryStorage: 'Lokalen Speicher erneut prüfen',
 }

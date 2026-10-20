@@ -1,12 +1,12 @@
-import { randomUUID } from 'node:crypto'
 import { expect } from '@playwright/test'
 import { test } from './preview-server'
 import { fillLesson } from './lesson-intake-helpers'
-import { englishLesson, stageEnglishClaim } from './english-lesson'
+import { englishLesson } from './english-lesson'
+import { prepareWithNativeFakeCoach } from './native-coach'
 import { retainedAudio, syntheticCapture } from './synthetic-capture'
 import { expectComparison } from './native-playback'
 
-test('automatic supplied intake reaches normal Start, ungraded Next and retained replay', async ({
+test('automatic raw intake through native Coach reaches normal Start, ungraded Next and retained replay', async ({
   page,
   request,
   preview,
@@ -24,13 +24,12 @@ test('automatic supplied intake reaches normal Start, ungraded Next and retained
   await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
   await fillLesson(page)
   await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
-  const claim = await (
-    await request.post('/api/v1/preparation/claims', { data: { claim_id: randomUUID() } })
-  ).json()
-  await stageEnglishClaim(request, claim)
-  const publication = await (
-    await request.post('/api/v1/preparation/publish', { data: claim.fence })
-  ).json()
+  const publication = await prepareWithNativeFakeCoach(preview.url)
+  await expect(
+    page.getByText('Published. Open the lesson to see its supported practice options.', {
+      exact: true,
+    }),
+  ).toBeVisible({ timeout: 15000 })
   await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeEnabled()
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")

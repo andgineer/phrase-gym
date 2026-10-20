@@ -8,6 +8,7 @@ use serde::de::DeserializeOwned;
 
 pub struct ServerClient {
     pub server: String,
+    pub identity: uuid::Uuid,
     http: Client,
     submit: String,
     worker: String,
@@ -35,6 +36,11 @@ impl ServerClient {
             return Err("Configure separate material-submit and worker credentials".into());
         }
         Ok(Self {
+            identity: uuid::Uuid::new_v5(
+                &uuid::Uuid::NAMESPACE_OID,
+                &serde_json::to_vec(&(&server, &submit, &worker))
+                    .map_err(|_| "Cannot bind the Server account identity")?,
+            ),
             server,
             http: Client::builder()
                 .no_proxy()
@@ -99,5 +105,26 @@ impl ServerClient {
         }
         serde_json::from_slice(&bytes)
             .map_err(|_| "Invalid Server response; retry to reconcile".into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn connection_identity_preserves_credential_boundaries_and_normalized_origin() {
+        let first = ServerClient::new("http://127.0.0.1:8000", "alpha:beta".into(), "gamma".into())
+            .unwrap();
+        let other = ServerClient::new("http://127.0.0.1:8000", "alpha".into(), "beta:gamma".into())
+            .unwrap();
+        let repeated = ServerClient::new(
+            "http://127.0.0.1:8000/",
+            "alpha:beta".into(),
+            "gamma".into(),
+        )
+        .unwrap();
+        assert_ne!(first.identity, other.identity);
+        assert_eq!(first.identity, repeated.identity);
     }
 }

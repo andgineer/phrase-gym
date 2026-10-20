@@ -2,37 +2,46 @@ use egui::{TextEdit, Ui};
 
 use super::intake::{Command, IntakeState};
 
-pub fn show(ui: &mut Ui, state: &mut IntakeState, json: &str) {
+pub fn show(ui: &mut Ui, state: &mut IntakeState, _draft: &str) {
     ui.separator();
-    ui.label("Supplied lesson preview — explicit Send only");
+    ui.label("One English phrase and its original WAV reference (up to 1 MB)");
     ui.add_enabled_ui(!state.busy, |ui| {
-        field(ui, "Prepared lesson file", &mut state.lesson_file, false);
-        if ui.button("Load prepared lesson").clicked() {
-            state.command = Some(Command::Load(state.lesson_file.clone()));
+        if state.prepared.is_none() {
+            field(ui, "Lesson title (up to 200 bytes)", &mut state.title, false);
+            field(ui, "Situation or meaning (up to 800 bytes)", &mut state.situation, false);
+            field(ui, "Reference performer (up to 200 bytes)", &mut state.performer, false);
+            field(ui, "Audio locale", &mut state.locale, false);
         }
-        field(ui, "Reference audio file", &mut state.audio, false);
-        let changed = field(ui, "Local Server URL", &mut state.server, false)
-            | field(ui, "Material-submit token", &mut state.submit, true)
-            | field(ui, "Worker token", &mut state.worker, true);
-        if changed {
-            state.connected = false;
-            state.status = "Connection settings changed; Connect before sending".into();
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("Choose prepared lesson…").clicked() { state.command = Some(Command::ChooseLesson); }
+            if ui.button("Load supplied demo text").clicked() { state.command = Some(Command::Demo); }
+        });
+        if let Some(preview) = &state.preview {
+            ui.heading(&preview.title);
+            ui.label(&preview.phrase);
+            for situation in &preview.situations { ui.label(format!("Situation: {situation}")); }
+            if let Some(help) = &preview.help { ui.label(format!("Meaning: {help}")); }
+            ui.label(&preview.audio);
+            ui.label("Text validated locally. Choose its matching original audio to start automatic publication.");
+            if ui.button("Use raw English input instead").clicked() { state.prepared = None; state.preview = None; }
         }
-        ui.label("Tokens are kept in the OS credential store. Leave blank to reuse saved tokens for this Server.");
-        if ui.button("Connect").clicked() {
-            state.connected = false;
-            state.command = Some(Command::Connect {
-                server: state.server.clone(),
-                submit: std::mem::take(&mut state.submit),
-                worker: std::mem::take(&mut state.worker),
-            });
+        if ui.button("Choose original audio and add lesson…").clicked() { state.command = Some(Command::ChooseAudio); }
+        ui.label("Choosing or dropping audio starts delivery automatically. Opening a picker alone sends nothing.");
+        if !state.audio.is_empty() { ui.label(format!("Selected reference: {}", state.audio.rsplit(['/', '\\']).next().unwrap_or("audio"))); }
+        if !state.audio.is_empty() && ui.button("Preview selected original audio").clicked() { state.command = Some(Command::PreviewAudio(state.audio.clone())); }
+        if ui.button("Retry connection and retained input").clicked() {
+            state.command = Some(Command::Connect { server: state.server.clone(), submit: String::new(), worker: String::new() });
         }
-        ui.horizontal(|ui| {
-            if ui.add_enabled(state.connected && !json.trim().is_empty() && !state.audio.trim().is_empty(), egui::Button::new("Send supplied lesson")).clicked() {
-                state.command = Some(Command::Send { json: json.into(), audio: state.audio.clone() });
-            }
-            if ui.add_enabled(state.connected, egui::Button::new("Retry pending Send")).clicked() {
-                state.command = Some(Command::Retry);
+        if ui.button("Retry preparation after fixing the problem").clicked() { state.command = Some(Command::RetryPreparation); }
+        ui.collapsing("Development connection setup", |ui| {
+            let changed = field(ui, "Local Server URL", &mut state.server, false)
+                | field(ui, "Material-submit token", &mut state.submit, true)
+                | field(ui, "Worker token", &mut state.worker, true);
+            if changed { state.connected = false; state.status = "Connection settings changed; save the development setup to reconnect".into(); }
+            ui.label("Existing development access only. Tokens stay in the OS credential store; leave blank to reuse them.");
+            if ui.button("Save connection setup").clicked() {
+                state.connected = false;
+                state.command = Some(Command::Connect { server: state.server.clone(), submit: std::mem::take(&mut state.submit), worker: std::mem::take(&mut state.worker) });
             }
         });
     });

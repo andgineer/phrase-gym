@@ -12,19 +12,38 @@ Coach is not released. This page covers the development build, the platform fact
 
 `coach-bundle` writes `Phrase Gym Coach.app` on macOS (the fake CLI used by the checks sits in `Contents/Resources`) and `Phrase Gym Coach\phrase-gym-coach.exe` with a `resources` folder on Windows. It is a development layout: unsigned, no icon, no installer.
 
-## Supplied-lesson local preview
+## Local English lesson demo
 
-Coach can send one supplied prepared English phrase and one original reference clip to the existing Server inbox. This path transfers reviewed content; it does not call an agent or speech provider. The sample [prepared lesson](../fixtures/coach/supplied-lesson.json) contains the phrase “Let's get started.” and its situation/help. Supply a matching WAV clip of that phrase, at most 1 MB. The preservation silence fixture is suitable only for automated transfer checks, not listening acceptance.
+Build the client with `npm --prefix frontend run build`, then start Server with disposable data:
 
-1. Build the client with `npm --prefix frontend run build`, then start Server with a disposable data directory: `cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview --credentials-file /absolute/path/server-credentials.json`. Provision separate `material_submit` and `worker` actors/tokens in that private credential file, plus a learner credential for browser login. Follow the [credential format](rust-preview.md); keep these private files outside Git.
-2. Build `cargo xtask coach-bundle`, then open `target/coach-bundle/Phrase Gym Coach.app` on macOS. Enter the loopback Server URL and its material-submit and worker tokens, then click **Connect**. Tokens are stored in Keychain under separate accounts for that Server URL; leave them blank to reuse saved tokens.
-3. Paste the sample JSON into **Material draft**, or enter/drop its absolute path into **Prepared lesson file** and click **Load prepared lesson**. Enter/drop the matching clip's absolute path into **Reference audio file**. Loading or dropping sends nothing.
-4. Click **Send supplied lesson**. Coach retains the exact bytes and submission identity before upload, then displays durable acceptance, preparation and publication phases. **Retry pending Send** retains that identity after a lost response or restart. Connect to the same original Server URL before retrying. One outstanding send is supported; other accepted inbox work may keep this lesson waiting.
-5. Click **Open browser practice**, sign in with the learner token if required, and choose **Start session** for ungraded study to hear/read, record, compare and replay, then use **Next** without rating memory. The browser card and stored media remain Server-owned when Coach exits.
+```bash
+cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview --credentials-file /absolute/path/server-credentials.json
+cargo xtask coach-bundle
+```
 
-The temporary sender envelope is `pending-send.json` in Coach's per-user data directory. It contains supplied input/audio, never tokens, and is cleared after a confirmed publication. Preserve it if a write fails. This preview starts no background polling or automatic preparation; retry is explicit. Its connection accepts loopback HTTP only and follows no redirects. General source import, model generation and release recovery remain deferred.
+Provision separate `material_submit` and `worker` actors/tokens plus a learner browser credential in that private file using the [credential format](rust-preview.md). Open `target/coach-bundle/Phrase Gym Coach.app`. The existing **Development connection setup** accepts the loopback Server URL and scoped tokens once; **Save connection setup** stores tokens in Keychain and the versioned nonsecret Server URL atomically in Coach settings. Later normal launches connect automatically. A missing/locked credential store or unavailable Server shows a recovery action. Social sign-in remains later work.
 
-The retained headless probe uses the same transfer runner, with a private JSON object containing `material_submit` and `worker` token values:
+For raw preparation, paste one exact fixed English phrase in **Material draft**, complete its title, situation/meaning, original performer and English audio locale, then choose or drop its matching original WAV clip (at most 1 MB). That deliberate audio action starts durable delivery and Claude preparation automatically. It needs the verified native Claude build and subscription login below. No separate Connect/Send action is part of ordinary intake. Ordinary input supports one outstanding local submission and one new English phrase; no source fetch, TTS, existing-target matching or additional CLI selection is included.
+
+For deterministic supplied content without a model call, use **Choose prepared lesson…** and select the [sample prepared lesson](../fixtures/coach/supplied-lesson.json), or **Load supplied demo text**. Coach displays the phrase, situation, help and reference metadata. Loading validates locally and does not confirm publication. Choose or drop the matching original WAV to start automatic transfer/publication. **Preview selected original audio** plays the selected clip on macOS without publishing it. The fixture silence clip is only for software checks, never listening acceptance.
+
+The pending envelope retains the exact original bytes and submission identity in `pending-send.json` under Coach's per-user state folder before transfer. Connection failures retry automatically with the same identity; the envelope stays bound to the original Server connection/account. Confirmed publication clears it. Accepted work belongs to Server; local staging is never described as accepted. A failed model attempt requires fixing the stated problem and explicitly choosing **Retry preparation after fixing the problem** (or retrying accepted browser input from its status panel). Authentication/quota failures never switch CLI or use an API key. **Retry connection and retained input** resumes after a recoverable connection/tool problem.
+
+When Coach reports confirmed publication, open browser practice and choose **Start session** for ungraded study: read/hear, record, compare, replay and **Next** without rating memory. Browser reload and Server restart preserve published content, references and saved takes with Coach closed. Browser intake can submit the same bounded raw English form; the connected Coach polls accepted work automatically.
+
+The generated path pins native Claude Code 2.1.302 and `haiku` selection, its immutable generation/profile/guide and the committed phrase output schema. Native installs retaining that measured version use it even when the public CLI symlink updates; another version fails closed pending isolation acceptance. The runner stages prompt/input/schema in a protected directory outside the repository, starts only the verified Read-only invocation with null stdin, caps each stdout/stderr stream at 64 KiB and the process at 90 seconds, and renews its Server lease every 30 seconds. It needs at least 110 seconds left in the Server attempt deadline before starting. The Server separately enforces three attempts and twenty starts per UTC day. A validated private result is reused after restart; an interrupted attempt without validated output is not started twice under the same fence. Server receipts reconcile ambiguous publication acknowledgement before any new preparation.
+
+### No-spend measurement preparation
+
+This command only stages the concrete [raw English fixture](../fixtures/coach/raw-english.json), copied synthetic silence clip, pinned prompt/profile/guide/schema and argument vector, and checks version/subscription login. It has no model execution option:
+
+```bash
+cargo run --package phrase-gym-coach --example prepare_dry_run -- /tmp/phrase-gym-fresh-dry-run
+```
+
+Choose a fresh absolute directory outside repositories. The proposed first measurement is one `haiku` start, 90 seconds maximum and 64 KiB per stream, followed by inspection of every output and a fresh semantic reviewer. Real spending needs separate authorization. The silence clip establishes transfer only; a matching spoken reference, attended listening/recording and actual-device acceptance remain required before claiming the M2 demonstration. This does not establish unattended language quality.
+
+Headless deterministic transfer remains available:
 
 ```bash
 cargo run --package phrase-gym-coach --example supplied_send -- \
@@ -32,7 +51,7 @@ cargo run --package phrase-gym-coach --example supplied_send -- \
   fixtures/coach/supplied-lesson.json /absolute/path/reference.wav /absolute/path/pending-send.json
 ```
 
-The automated process-boundary test builds and starts the production Server on disposable data, publishes through Coach and reconciles an identical sender envelope after Server restart. It uses synthetic silence and does not establish speech or physical microphone quality. The packaged interactive Send and attended feedback checks remain separate acceptance work.
+The private credential JSON contains `material_submit` and `worker` values. Native fake-process tests and real-browser checks exercise production Coach/Server transfer and publication without provider calls. Packaged startup smoke exercises window/process/environment boundaries. These software checks do not establish attended native picker behavior, physical microphone/output, or language quality. Killed-Coach orphan recovery on macOS remains in the [remaining gaps](#remaining-gaps).
 
 ## Packaged startup smoke checks
 

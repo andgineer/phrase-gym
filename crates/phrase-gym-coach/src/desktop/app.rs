@@ -1,4 +1,3 @@
-use std::ffi::OsString;
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -16,35 +15,13 @@ use super::{appearance, failure};
 use crate::platform::instance::{InstanceError, InstanceGuard};
 use crate::platform::paths::CoachPaths;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct LaunchOptions {
-    pub smoke_report: Option<PathBuf>,
-}
-
-pub fn parse(arguments: impl IntoIterator<Item = OsString>) -> Result<LaunchOptions, String> {
-    let mut arguments = arguments.into_iter();
-    let mut options = LaunchOptions { smoke_report: None };
-    while let Some(argument) = arguments.next() {
-        // Older macOS versions append a process serial number when Finder launches an app.
-        if argument.to_string_lossy().starts_with("-psn_") {
-            continue;
-        }
-        if argument == "--smoke-test" {
-            let report = arguments.next().ok_or("--smoke-test needs a report path")?;
-            options.smoke_report = Some(PathBuf::from(report));
-        } else {
-            return Err(format!("unknown argument {}", argument.to_string_lossy()));
-        }
-    }
-    Ok(options)
-}
-
 pub fn main() -> ExitCode {
-    let options = match parse(std::env::args_os().skip(1)) {
+    let options = match super::launch::parse(std::env::args_os().skip(1)) {
         Ok(options) => options,
         Err(problem) => return refuse(None, &problem, smoke::EXIT_STARTUP),
     };
     let report = options.smoke_report;
+    let smoke_input = options.smoke_input;
     let guard = CoachPaths::for_current_user()
         .map_err(|error| error.to_string())
         .and_then(|paths| {
@@ -64,7 +41,14 @@ pub fn main() -> ExitCode {
     let result = eframe::run_native(
         TITLE,
         native_options(),
-        Box::new(move |creation| Ok(Box::new(CoachApp::new(creation, smoke_report, outcome)))),
+        Box::new(move |creation| {
+            Ok(Box::new(CoachApp::new(
+                creation,
+                smoke_report,
+                outcome,
+                smoke_input,
+            )))
+        }),
     );
     match (result, report) {
         (Err(error), report) => refuse(
@@ -117,6 +101,7 @@ impl CoachApp {
         creation: &eframe::CreationContext<'_>,
         smoke_report: Option<PathBuf>,
         passed: Arc<AtomicBool>,
+        smoke_input: Option<super::smoke_intake::SmokeInput>,
     ) -> Self {
         let context = creation.egui_ctx.clone();
         appearance::install(&context);
@@ -124,12 +109,18 @@ impl CoachApp {
         let waker = context.clone();
         let events = StartupChecks::native().spawn(move || waker.request_repaint());
         let waker = context.clone();
-        let intake = IntakeRunner::spawn(move || waker.request_repaint());
+        let intake_expected = smoke_input.is_some();
+        let intake = IntakeRunner::spawn(
+            move || waker.request_repaint(),
+            smoke_report.is_none(),
+            smoke_input,
+        );
         let renderer = creation
             .wgpu_render_state
             .as_ref()
             .map(|state| RendererInfo::from(&state.adapter.get_info()));
-        let smoke = smoke_report.map(|path| SmokeRun::start(path, renderer, context, passed));
+        let smoke = smoke_report
+            .map(|path| SmokeRun::start(path, renderer, context, passed, intake_expected));
         Self {
             view: ViewState::new(StatusSnapshot::starting()),
             events,
@@ -148,9 +139,13 @@ impl eframe::App for CoachApp {
                     .extension()
                     .is_some_and(|extension| extension == "json")
                 {
-                    self.view.intake.lesson_file = path.to_string_lossy().into_owned();
+                    self.view.intake.command = Some(super::intake::Command::Load(
+                        path.to_string_lossy().into_owned(),
+                    ));
                 } else {
-                    self.view.intake.audio = path.to_string_lossy().into_owned();
+                    self.view
+                        .intake
+                        .accept_audio(path.to_string_lossy().into_owned(), &self.view.draft);
                 }
             }
         }
@@ -160,14 +155,26 @@ impl eframe::App for CoachApp {
         while let Ok(event) = self.intake.events.try_recv() {
             match event {
                 Event::Status(status) => self.view.intake.status = status,
+                Event::SelectedClaude(path) => self.view.snapshot.apply(StartupEvent::Tool(
+                    crate::adapter::CliAdapter::Claude,
+                    super::state::ToolReadiness::Found(path),
+                )),
                 Event::Connected(server) => {
                     self.view.intake.server = server;
                     self.view.intake.connected = true;
                     self.view.snapshot.server_configured = true;
+                    self.view.snapshot.processing_enabled = true;
                 }
-                Event::Draft(json) => self.view.draft = json,
+                Event::Draft(json) => {
+                    self.view.intake.preview = super::preview::LessonPreview::parse(&json).ok();
+                    self.view.intake.prepared = Some(json);
+                }
+                Event::Audio(path) => self.view.intake.accept_audio(path, &self.view.draft),
                 Event::Published(url) => self.view.intake.practice = Some(url),
                 Event::Finished(result) => {
+                    if let Some(smoke) = &mut self.smoke {
+                        smoke.intake_finished(result.clone());
+                    }
                     self.view.intake.busy = false;
                     if let Err(problem) = result {
                         self.view.intake.status = problem;
@@ -188,26 +195,5 @@ impl eframe::App for CoachApp {
         if let Some(smoke) = &mut self.smoke {
             smoke.on_frame(ui.ctx(), &self.view.snapshot);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn accepts_only_the_smoke_test_option() {
-        assert_eq!(parse([]), Ok(LaunchOptions { smoke_report: None }));
-        let parsed = parse(["--smoke-test".into(), "/tmp/Ünï report.json".into()]).unwrap();
-        assert_eq!(
-            parsed.smoke_report,
-            Some(PathBuf::from("/tmp/Ünï report.json"))
-        );
-        assert!(parse(["--smoke-test".into()]).is_err());
-        assert_eq!(
-            parse(["-psn_0_12345".into()]),
-            Ok(LaunchOptions { smoke_report: None })
-        );
-        assert!(parse(["--verbose".into()]).is_err());
     }
 }

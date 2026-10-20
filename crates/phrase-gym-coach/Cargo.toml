@@ -21,12 +21,14 @@ desktop = ["dep:egui", "dep:eframe", "dep:wgpu", "dep:rfd"]
 
 [dependencies]
 base64.workspace = true
+chrono.workspace = true
 phrase-gym-contracts.workspace = true
 reqwest = { version = "0.12.28", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 directories = { version = "6.0.0", default-features = false }
 egui = { version = "0.37.0", default-features = false, features = ["default_fonts"], optional = true }
 keyring-core = { version = "1.0.1", default-features = false }
 serde.workspace = true
+sha2.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tokio = { workspace = true, features = ["fs", "io-util", "macros", "process", "rt", "time"] }
@@ -42,7 +44,7 @@ wgpu = { version = "30.0.1", default-features = false, features = ["dx12", "meta
 apple-native-keyring-store = { version = "1.0.2", default-features = false, features = ["keychain"] }
 
 [target.'cfg(unix)'.dependencies]
-rustix = { version = "1.1.5", default-features = false, features = ["process", "std"] }
+rustix = { version = "1.1.5", default-features = false, features = ["fs", "process", "std"] }
 signal-hook = { version = "0.4.5", default-features = false }
 
 [target.'cfg(windows)'.dependencies]

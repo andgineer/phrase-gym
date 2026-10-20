@@ -15,7 +15,7 @@ const en = {
   empty: 'No published phrases in this language yet. Choosing a language does not add a lesson.',
   add: 'Add a first lesson',
   supported:
-    'Currently, you can submit one fixed English phrase with its original reference audio. Coach must be running with supplied-lesson preparation configured. Automatic raw-text preparation is not available yet.',
+    'Submit one fixed English phrase with its original reference audio. Keep Coach running and connected with the bounded Claude preparation setup. Your exact wording and original audio are preserved.',
   unsupported:
     'New lesson input currently supports English only. Published material in other languages remains available in its library.',
   title: 'Lesson title',
@@ -55,6 +55,10 @@ const en = {
 export type OnboardingMessages = typeof en
 const ru: OnboardingMessages = {
   ...en,
+  missingFields:
+    'Заполните название урока, фразу, ситуацию, исполнителя и языковой вариант аудио, затем снова выберите или перетащите исходное аудио. Материал сохранён.',
+  automatic:
+    'Заполните текст ниже, затем выберите, перетащите или вставьте исходное аудио. Отправка начнётся автоматически.',
   conflict:
     'Сохранённая отправка изменилась в другой вкладке. Проверьте сохранённый урок перед повтором или удалением.',
   accepted: 'Принято сервером. Проверьте статус урока, чтобы узнать о подготовке.',
@@ -66,7 +70,7 @@ const ru: OnboardingMessages = {
   empty: 'На этом языке пока нет опубликованных фраз. Выбор языка не добавляет урок.',
   add: 'Добавить первый урок',
   supported:
-    'Сейчас можно отправить одну фиксированную английскую фразу с исходным аудио. Coach должен работать с настроенной подготовкой готового урока. Автоматическая подготовка сырого текста пока недоступна.',
+    'Можно отправить одну фиксированную английскую фразу с исходным аудио. Coach должен работать и быть подключён с настроенной ограниченной подготовкой через Claude. Точный текст и исходное аудио сохраняются.',
   unsupported:
     'Добавление уроков пока поддерживает только английский. Опубликованные материалы на других языках доступны в их библиотеке.',
   title: 'Название урока',

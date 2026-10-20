@@ -16,7 +16,7 @@ use crate::hashing::canonical_json;
 use crate::media::store::MediaStore;
 use crate::storage::Database;
 
-pub const GUIDE_VERSION: &str = "english-preview-v1";
+pub const GUIDE_VERSION: &str = "english-claude-demo-v1";
 
 pub struct Inbox {
     database: Arc<Database>,

@@ -2783,6 +2783,7 @@ version = "0.0.0"
 dependencies = [
  "apple-native-keyring-store",
  "base64 0.23.1",
+ "chrono",
  "directories",
  "eframe",
  "egui",
@@ -2796,6 +2797,7 @@ dependencies = [
  "rustix 1.1.5",
  "serde",
  "serde_json",
+ "sha2",
  "signal-hook",
  "tempfile",
  "thiserror 2.0.21",

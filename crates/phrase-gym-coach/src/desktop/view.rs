@@ -24,7 +24,9 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
             ui.separator();
             appearance_controls(ui, state);
             ui.separator();
-            draft(ui, &mut state.draft);
+            if state.intake.prepared.is_none() {
+                draft(ui, &mut state.draft);
+            }
             super::intake_view::show(ui, &mut state.intake, &state.draft);
         });
     });
@@ -103,9 +105,7 @@ fn draft(ui: &mut Ui, draft: &mut String) {
     let label = ui.label(RichText::new("Material draft").strong());
     ui.add(
         TextEdit::multiline(draft)
-            .hint_text(
-                "Paste the supplied prepared single-phrase lesson JSON, or load its file below.",
-            )
+            .hint_text("Paste one exact English phrase (up to 200 bytes).")
             .desired_rows(4)
             .desired_width(f32::INFINITY),
     )

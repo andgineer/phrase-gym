@@ -1,12 +1,9 @@
-use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 
-use crate::platform::credentials::CredentialStore;
-use crate::platform::paths::CoachPaths;
-use crate::transfer::{
-    client::{self, ServerClient},
-    pending, runner,
-};
+use super::preview::LessonPreview;
+use crate::transfer::material::RawLesson;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
@@ -19,14 +16,29 @@ pub enum Command {
         json: String,
         audio: String,
     },
+    Raw {
+        title: String,
+        phrase: String,
+        situation: String,
+        performer: String,
+        locale: String,
+        audio: String,
+    },
     Retry,
+    RetryPreparation,
     Load(String),
+    ChooseLesson,
+    ChooseAudio,
+    PreviewAudio(String),
+    Demo,
 }
 
 pub enum Event {
     Status(String),
     Connected(String),
+    SelectedClaude(std::path::PathBuf),
     Draft(String),
+    Audio(String),
     Published(String),
     Finished(Result<(), String>),
 }
@@ -43,6 +55,12 @@ pub struct IntakeState {
     pub busy: bool,
     pub practice: Option<String>,
     pub command: Option<Command>,
+    pub prepared: Option<String>,
+    pub preview: Option<LessonPreview>,
+    pub title: String,
+    pub situation: String,
+    pub performer: String,
+    pub locale: String,
 }
 
 impl Default for IntakeState {
@@ -53,153 +71,108 @@ impl Default for IntakeState {
             worker: String::new(),
             audio: String::new(),
             lesson_file: String::new(),
-            status: "Connect to the local Server to send a supplied prepared lesson".into(),
+            status: "Connecting automatically using saved Server access…".into(),
             connected: false,
             busy: false,
             practice: None,
             command: None,
+            prepared: None,
+            preview: None,
+            title: String::new(),
+            situation: String::new(),
+            performer: String::new(),
+            locale: "en-US".into(),
         }
+    }
+}
+
+impl IntakeState {
+    pub fn accept_audio(&mut self, path: String, phrase: &str) {
+        self.audio = path;
+        self.command = Some(if let Some(json) = &self.prepared {
+            Command::Send {
+                json: json.clone(),
+                audio: self.audio.clone(),
+            }
+        } else {
+            Command::Raw {
+                title: self.title.clone(),
+                phrase: phrase.into(),
+                situation: self.situation.clone(),
+                performer: self.performer.clone(),
+                locale: self.locale.clone(),
+                audio: self.audio.clone(),
+            }
+        });
+    }
+
+    pub fn raw(command: &Command) -> Option<RawLesson> {
+        let Command::Raw {
+            title,
+            phrase,
+            situation,
+            performer,
+            locale,
+            ..
+        } = command
+        else {
+            return None;
+        };
+        Some(RawLesson {
+            title: title.clone(),
+            phrase: phrase.clone(),
+            situation: situation.clone(),
+            performer: performer.clone(),
+            locale: locale.clone(),
+        })
     }
 }
 
 pub struct IntakeRunner {
     pub commands: SyncSender<Command>,
     pub events: Receiver<Event>,
+    shutdown: Arc<AtomicBool>,
+    thread: Option<std::thread::JoinHandle<()>>,
 }
 
 impl IntakeRunner {
-    pub fn spawn(wake: impl Fn() + Send + 'static) -> Self {
+    pub fn spawn(
+        wake: impl Fn() + Send + 'static,
+        processing: bool,
+        smoke: Option<super::smoke_intake::SmokeInput>,
+    ) -> Self {
         let (commands, receive) = sync_channel(2);
-        let (send, events) = sync_channel(8);
-        std::thread::spawn(move || {
+        let (send, events) = sync_channel(32);
+        let shutdown = Arc::new(AtomicBool::new(false));
+        let stop = Arc::clone(&shutdown);
+        let thread = std::thread::spawn(move || {
             let emit = |event| {
-                let _ = send.send(event);
+                // A closed/minimized UI must never block lease cleanup or shutdown.
+                let _ = send.try_send(event);
                 wake();
             };
-            let mut client = None;
-            for command in receive {
-                let result = handle(command, &mut client, &emit);
-                emit(Event::Finished(result));
+            if let Some(input) = smoke {
+                emit(Event::Finished(super::smoke_intake::run(
+                    &input, &emit, &stop,
+                )));
+            } else {
+                super::intake_runtime::run(&receive, &emit, &stop, processing);
             }
         });
-        Self { commands, events }
-    }
-}
-
-fn handle(
-    command: Command,
-    client: &mut Option<ServerClient>,
-    emit: &dyn Fn(Event),
-) -> Result<(), String> {
-    match command {
-        Command::Connect {
-            server,
-            submit,
-            worker,
-        } => {
-            *client = None;
-            let server = client::loopback(&server)?;
-            let store = CredentialStore::native().map_err(|e| e.to_string())?;
-            let credential = |role: &str, supplied: &str| -> Result<String, String> {
-                let account = format!("{role}:{server}");
-                if !supplied.is_empty() {
-                    store.write(&account, supplied).map_err(|e| e.to_string())?;
-                }
-                store
-                    .read(&account)
-                    .map_err(|e| e.to_string())?
-                    .ok_or_else(|| format!("Enter the {role} scoped credential"))
-            };
-            let connected = ServerClient::new(
-                &server,
-                credential("material-submit", &submit)?,
-                credential("worker", &worker)?,
-            )?;
-            // Reading a deliberately unknown inbox identity verifies connectivity and submit authority.
-            let probe = connected
-                .get::<serde_json::Value>(&format!("/api/v1/inbox/lessons/{}", uuid::Uuid::nil()));
-            if let Err(problem) = probe
-                && !problem.starts_with("Server 404")
-            {
-                return Err(problem);
-            }
-            *client = Some(connected);
-            emit(Event::Connected(server));
-            emit(Event::Status(
-                "Connected; supplied lessons only, no model generation".into(),
-            ));
-            Ok(())
-        }
-        Command::Load(file) => {
-            let bytes = pending::read_selected(&PathBuf::from(file), 8_000)?;
-            let json =
-                String::from_utf8(bytes).map_err(|_| "Prepared lesson must be UTF-8 JSON")?;
-            crate::supplied::SuppliedLesson::parse(&json)?;
-            emit(Event::Draft(json));
-            emit(Event::Status(
-                "Prepared text loaded locally; select its original audio and press Send".into(),
-            ));
-            Ok(())
-        }
-        command @ (Command::Send { .. } | Command::Retry) => {
-            let client = client.as_ref().ok_or("Connect to the Server first")?;
-            let paths = CoachPaths::for_current_user().map_err(|e| e.to_string())?;
-            paths.ensure().map_err(|e| e.to_string())?;
-            let path = paths.state.join("pending-send.json");
-            let mut retained = match (pending::load(&path)?, command) {
-                (Some(retained), Command::Retry) => retained,
-                (Some(_), _) => {
-                    return Err(
-                        "A pending Send is retained. Retry it before sending another lesson".into(),
-                    );
-                }
-                (None, Command::Send { json, audio }) => {
-                    runner::create(&client.server, &json, &PathBuf::from(audio))?
-                }
-                _ => return Err("There is no pending Send to retry".into()),
-            };
-            let publication = runner::deliver(client, &path, &mut retained, |s| {
-                emit(Event::Status(s.into()));
-            })?;
-            emit(Event::Published(format!(
-                "{}/learn/en/phrases/{}",
-                client.server,
-                publication
-                    .target_ids
-                    .first()
-                    .ok_or("Publication has no phrase")?
-            )));
-            emit(Event::Status(
-                "Published; lesson and original audio are stored in Server".into(),
-            ));
-            Ok(())
+        Self {
+            commands,
+            events,
+            shutdown,
+            thread: Some(thread),
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn failed_reconnect_revokes_the_previous_clients_authority() {
-        let mut client = Some(
-            ServerClient::new("http://127.0.0.1:8000", "submit".into(), "worker".into()).unwrap(),
-        );
-        let problem = handle(
-            Command::Connect {
-                server: "https://example.com".into(),
-                submit: String::new(),
-                worker: String::new(),
-            },
-            &mut client,
-            &|_| panic!("Failed connection must emit no success"),
-        );
-        assert!(problem.is_err());
-        assert!(client.is_none());
-        assert_eq!(
-            handle(Command::Retry, &mut client, &|_| {}),
-            Err("Connect to the Server first".into())
-        );
+impl Drop for IntakeRunner {
+    fn drop(&mut self) {
+        self.shutdown.store(true, Ordering::SeqCst);
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
     }
 }

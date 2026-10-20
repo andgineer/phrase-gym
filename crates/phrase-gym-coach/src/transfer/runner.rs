@@ -10,25 +10,38 @@ use phrase_gym_contracts::media::{MediaAsset, MediaUpload};
 use uuid::Uuid;
 
 use super::client::ServerClient;
+use super::material::Material;
 use super::pending::{self, PendingSend};
-use crate::supplied::{self, SuppliedLesson};
+use crate::supplied::SuppliedLesson;
 
 pub fn create(server: &str, json: &str, audio: &Path) -> Result<PendingSend, String> {
     let supplied = SuppliedLesson::parse(json)?;
-    let bytes = pending::read_selected(audio, pending::MAX_AUDIO)?;
+    create_material(server, Material::Supplied(Box::new(supplied)), audio)
+}
+
+pub fn create_material(
+    server: &str,
+    material: Material,
+    audio: &Path,
+) -> Result<PendingSend, String> {
+    let bytes = crate::platform::files::read_selected(audio, pending::MAX_AUDIO)?;
     if bytes.is_empty() {
         return Err("Select the supplied original reference clip".into());
     }
     Ok(PendingSend {
         server: server.to_owned(),
+        identity: None,
+        failure: None,
+        audio_sha256: pending::audio_hash(&bytes),
+        output: None,
         submission_id: Uuid::new_v4(),
         claim_id: Uuid::new_v4(),
         upload: MediaUpload {
-            metadata: supplied.metadata.clone(),
-            mime_type: supplied.mime_type,
+            metadata: material.metadata(),
+            mime_type: material.mime(),
             audio_base64: STANDARD.encode(bytes),
         },
-        supplied,
+        material,
         submission: None,
     })
 }
@@ -39,7 +52,17 @@ pub fn deliver(
     pending: &mut PendingSend,
     mut status: impl FnMut(&str),
 ) -> Result<PublicationReceipt, String> {
-    let result = attempt(client, path, pending, &mut status);
+    deliver_with(client, path, pending, &mut status, crate::supplied::output)
+}
+
+pub fn deliver_with(
+    client: &ServerClient,
+    path: &Path,
+    pending: &mut PendingSend,
+    mut status: impl FnMut(&str),
+    prepare: impl FnOnce(&JobClaim) -> Result<phrase_gym_contracts::inbox::LessonOutput, String>,
+) -> Result<PublicationReceipt, String> {
+    let result = attempt(client, path, pending, &mut status, prepare);
     if result
         .as_ref()
         .is_err_and(|problem| problem.starts_with("Server 409"))
@@ -51,6 +74,7 @@ pub fn deliver(
 
 fn reset_claim(path: &Path, pending: &mut PendingSend) -> Result<(), String> {
     pending.claim_id = Uuid::new_v4();
+    pending.output = None;
     pending::save(path, pending)
 }
 
@@ -59,15 +83,23 @@ fn attempt(
     path: &Path,
     pending: &mut PendingSend,
     status: &mut impl FnMut(&str),
+    prepare: impl FnOnce(&JobClaim) -> Result<phrase_gym_contracts::inbox::LessonOutput, String>,
 ) -> Result<PublicationReceipt, String> {
-    if pending.server != client.server {
-        return Err("Connect to the pending Send's original Server before Retry".into());
-    }
+    pending.verify(&client.server, client.identity)?;
+    pending.identity = Some(client.identity);
     pending::save(path, pending)?;
+    if let Some(reason) = &pending.failure {
+        return Err(format!(
+            "Accepted lesson needs attention: {reason}. Use Retry preparation after fixing it"
+        ));
+    }
     if pending.submission.is_none() {
         status("Connected; transferring supplied reference audio");
         let media: MediaAsset = client.post("/api/v1/media", &pending.upload, false)?;
-        pending.submission = Some(pending.supplied.submission(pending.submission_id, &media)?);
+        if media.sha256 != pending.audio_sha256 {
+            return Err("Server audio acknowledgement differs from the retained original hash; nothing was submitted".into());
+        }
+        pending.submission = Some(pending.material.submission(pending.submission_id, &media)?);
         pending::save(path, pending)?;
     }
     let input = pending
@@ -103,8 +135,39 @@ fn attempt(
     }
     status("Preparing supplied lesson under the Server lease");
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true)?;
-    let output = supplied::output(&claim)?;
-    client.post::<_, ()>("/api/v1/preparation/stage", &output, true)?;
+    if pending.output.is_none() {
+        pending.output = Some(match prepare(&claim) {
+            Ok(output) => output,
+            Err(reason) => {
+                pending.failure = Some(reason.clone());
+                pending::save(path, pending)?;
+                let failure = phrase_gym_contracts::inbox::JobFailure {
+                    fence: claim.fence,
+                    reason: reason.clone(),
+                };
+                client.post::<_, ()>("/api/v1/preparation/fail", &failure, true)?;
+                return Err(reason);
+            }
+        });
+        pending::save(path, pending)?;
+    }
+    if let Err(problem) = client.post::<_, ()>("/api/v1/preparation/stage", &pending.output, true) {
+        if problem.starts_with("Server 422") {
+            let reason = format!("Prepared lesson failed validation: {problem}");
+            pending.failure = Some(reason.clone());
+            pending::save(path, pending)?;
+            client.post::<_, ()>(
+                "/api/v1/preparation/fail",
+                &phrase_gym_contracts::inbox::JobFailure {
+                    fence: claim.fence,
+                    reason: reason.clone(),
+                },
+                true,
+            )?;
+            return Err(reason);
+        }
+        return Err(problem);
+    }
     status("Supplied lesson staged; reconciling atomic publication");
     let publication = match client.post("/api/v1/preparation/publish", &claim.fence, true) {
         Ok(publication) => publication,

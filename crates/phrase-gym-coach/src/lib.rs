@@ -2,6 +2,7 @@ pub mod adapter;
 #[cfg(feature = "desktop")]
 pub mod desktop;
 pub mod platform;
+pub mod preparation;
 pub mod process;
 pub mod supplied;
 pub mod transfer;

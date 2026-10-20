@@ -74,6 +74,18 @@ fn pending_send_retains_exact_identity_and_audio_across_reload_and_failed_connec
     let retry = pending::load(&path).unwrap().unwrap();
     assert_eq!(retry.submission_id, reloaded.submission_id);
     assert_eq!(retry.upload, reloaded.upload);
+    let mut tampered = retry.clone();
+    tampered.upload.audio_base64 = "dGFtcGVyZWQ=".into();
+    assert!(
+        tampered
+            .verify(&client.server, client.identity)
+            .unwrap_err()
+            .contains("hash")
+    );
+    assert_eq!(
+        pending::load(&path).unwrap().unwrap().upload,
+        reloaded.upload
+    );
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -104,5 +116,8 @@ fn unsafe_connection_and_unsupported_input_fail_before_transfer() {
     let mut value: serde_json::Value = serde_json::from_str(LESSON).unwrap();
     value["metadata"]["text"] = json!("Unrelated reference");
     assert!(SuppliedLesson::parse(&value.to_string()).is_err());
-    assert!(pending::read_selected(Path::new("/does-not-exist"), 100).is_err());
+    assert!(
+        phrase_gym_coach::platform::files::read_selected(Path::new("/does-not-exist"), 100)
+            .is_err()
+    );
 }

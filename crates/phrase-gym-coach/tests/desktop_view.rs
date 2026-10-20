@@ -106,30 +106,64 @@ fn the_draft_accepts_german_and_serbian_latin_and_cyrillic_text() {
 }
 
 #[test]
-fn prepared_draft_requires_an_explicit_send_and_emits_the_exact_selected_input() {
+fn prepared_file_shows_readable_text_and_audio_selection_initiates_delivery() {
     let mut state = starting();
-    state.draft = include_str!("../../../fixtures/coach/supplied-lesson.json").into();
-    state.intake.connected = true;
-    state.intake.audio = "/tmp/selected original.wav".into();
+    let json = include_str!("../../../fixtures/coach/supplied-lesson.json");
+    state.intake.prepared = Some(json.into());
+    state.intake.preview =
+        Some(phrase_gym_coach::desktop::preview::LessonPreview::parse(json).unwrap());
     let mut harness = Harness::builder()
         .with_size([560.0, 2000.0])
         .with_context_setup(appearance::install)
         .build_ui_state(view::show, state);
     harness.run();
+    harness.get_by_label("Let's get started.");
+    harness.get_by_label("Situation: Everyone has arrived. Open the meeting.");
+    assert!(harness.query_by_label("Material draft").is_none());
     assert!(harness.state().intake.command.is_none());
-    harness.get_by_label("Send supplied lesson").click();
+    harness
+        .get_by_label("Choose original audio and add lesson…")
+        .click();
     harness.run();
     assert_eq!(
         harness.state().intake.command,
+        Some(phrase_gym_coach::desktop::intake::Command::ChooseAudio)
+    );
+    harness
+        .state_mut()
+        .intake
+        .accept_audio("/tmp/selected original.wav".into(), "");
+    assert_eq!(
+        harness.state().intake.command,
         Some(phrase_gym_coach::desktop::intake::Command::Send {
-            json: harness.state().draft.clone(),
+            json: json.into(),
             audio: "/tmp/selected original.wav".into()
         })
     );
-    harness.state_mut().intake.command = None;
-    harness.state_mut().intake.busy = true;
-    harness.run();
-    assert!(harness.state().intake.command.is_none());
+}
+
+#[test]
+fn deliberate_audio_input_preserves_raw_fields_and_emits_one_automatic_submission() {
+    let mut state = starting();
+    state.draft = "Let's get started.".into();
+    state.intake.title = "Opening a meeting".into();
+    state.intake.situation = "Everyone has arrived. Open the meeting.".into();
+    state.intake.performer = "Synthetic".into();
+    state
+        .intake
+        .accept_audio("/tmp/original.wav".into(), &state.draft);
+    let Some(phrase_gym_coach::desktop::intake::Command::Raw {
+        title,
+        phrase,
+        audio,
+        ..
+    }) = state.intake.command
+    else {
+        panic!("Audio selection must begin raw intake");
+    };
+    assert_eq!(title, "Opening a meeting");
+    assert_eq!(phrase, state.draft);
+    assert_eq!(audio, "/tmp/original.wav");
 }
 
 #[test]
@@ -167,40 +201,26 @@ fn every_control_stays_named_at_the_minimum_window_size_on_high_dpi_in_both_them
 }
 
 #[test]
-fn changing_the_endpoint_and_reconnecting_revoke_send_authority() {
+fn connection_setup_is_explicit_and_editing_revokes_connection_authority() {
     let mut state = starting();
-    state.draft = "prepared draft".into();
-    state.intake.audio = "/tmp/original.wav".into();
     state.intake.connected = true;
     let mut harness = Harness::builder()
-        .with_size([560.0, 2000.0])
+        .with_size([560.0, 2200.0])
         .with_context_setup(appearance::install)
         .build_ui_state(view::show, state);
+    harness.run();
+    harness.get_by_label("Development connection setup").click();
     harness.run();
     harness.get_by_label("Local Server URL").click();
     harness.run();
     harness.get_by_label("Local Server URL").type_text("1");
     harness.run();
     assert!(!harness.state().intake.connected);
-    harness.get_by_label("Send supplied lesson").click();
-    harness.run();
     assert!(harness.state().intake.command.is_none());
-    harness.state_mut().intake.connected = true;
-    harness.get_by_label("Connect").click();
+    harness.get_by_label("Save connection setup").click();
     harness.run();
-    assert!(!harness.state().intake.connected);
     assert!(matches!(
         harness.state().intake.command,
         Some(phrase_gym_coach::desktop::intake::Command::Connect { .. })
     ));
-    harness.state_mut().intake.command = None;
-    harness.state_mut().intake.busy = true;
-    let endpoint = harness.state().intake.server.clone();
-    harness.get_by_label("Local Server URL").click();
-    harness.run();
-    harness
-        .get_by_label("Local Server URL")
-        .type_text("old connection cannot race this edit");
-    harness.run();
-    assert_eq!(harness.state().intake.server, endpoint);
 }

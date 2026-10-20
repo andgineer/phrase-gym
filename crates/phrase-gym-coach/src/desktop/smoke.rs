@@ -60,6 +60,7 @@ struct Report<'a> {
     credential_store: String,
     checks: Option<&'a ProcessChecks>,
     startup_error: Option<&'a str>,
+    intake: Option<&'a Result<(), String>>,
 }
 
 // Drives the real window through startup, an idle period and the bundled process checks, then
@@ -73,6 +74,8 @@ pub struct SmokeRun {
     frames: u64,
     idle_start: Option<(Instant, u64)>,
     done: bool,
+    intake_expected: bool,
+    intake: Option<Result<(), String>>,
 }
 
 impl SmokeRun {
@@ -81,6 +84,7 @@ impl SmokeRun {
         renderer: Option<RendererInfo>,
         context: egui::Context,
         passed: Arc<AtomicBool>,
+        intake_expected: bool,
     ) -> Self {
         let (sender, checks) = sync_channel(1);
         std::thread::spawn(move || {
@@ -97,6 +101,14 @@ impl SmokeRun {
             frames: 0,
             idle_start: None,
             done: false,
+            intake_expected,
+            intake: None,
+        }
+    }
+
+    pub fn intake_finished(&mut self, result: Result<(), String>) {
+        if self.intake_expected {
+            self.intake = Some(result);
         }
     }
 
@@ -105,7 +117,11 @@ impl SmokeRun {
         if let Ok(checks) = self.checks.try_recv() {
             self.finished_checks = Some(checks);
         }
-        if self.done || self.finished_checks.is_none() || !snapshot.settled() {
+        if self.done
+            || self.finished_checks.is_none()
+            || !snapshot.settled()
+            || (self.intake_expected && self.intake.is_none())
+        {
             return;
         }
         let Some((started, frames_at_start)) = self.idle_start else {
@@ -132,7 +148,8 @@ impl SmokeRun {
             && checks.is_some_and(ProcessChecks::passed)
             && idle_frames <= IDLE_FRAME_ALLOWANCE
             && folders_ready
-            && credentials_reported;
+            && credentials_reported
+            && self.intake.as_ref().is_none_or(Result::is_ok);
         let executable = std::env::current_exe().ok();
         let report = Report {
             passed,
@@ -158,6 +175,7 @@ impl SmokeRun {
             credential_store: text::credentials(&snapshot.credentials),
             checks,
             startup_error: None,
+            intake: self.intake.as_ref(),
         };
         write(&self.report, &report);
         self.passed.store(passed, Ordering::SeqCst);
@@ -183,6 +201,7 @@ pub fn write_failure(path: &Path, problem: &str) {
         credential_store: String::new(),
         checks: None,
         startup_error: Some(problem),
+        intake: None,
     };
     write(path, &report);
 }
