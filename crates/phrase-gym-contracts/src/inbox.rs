@@ -11,8 +11,8 @@ use crate::profiles::ProfileRevision;
 pub struct LessonPhraseInput {
     pub source_id: String,
     pub text: String,
-    pub reference_audio_id: Uuid,
-    pub audio_sha256: String,
+    pub reference_audio_id: Option<Uuid>,
+    pub audio_sha256: Option<String>,
     pub expected_revision: Option<i64>,
 }
 

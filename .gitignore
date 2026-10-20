@@ -30,3 +30,6 @@ src/phrase_gym/static/
 
 # Rust build output
 /target/
+
+# Private local Coach attempts and diagnostics
+.phrase-gym-coach/

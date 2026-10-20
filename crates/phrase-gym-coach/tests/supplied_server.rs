@@ -257,3 +257,6 @@ mod generated_recovery;
 
 #[path = "support/private_socket.rs"]
 mod private_socket;
+
+#[path = "support/text_server.rs"]
+mod text_server;

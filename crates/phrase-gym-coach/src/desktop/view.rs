@@ -24,8 +24,8 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
             ui.separator();
             appearance_controls(ui, state);
             ui.separator();
-            if state.intake.prepared.is_none() {
-                draft(ui, &mut state.draft);
+            if draft(ui, &mut state.draft) && !state.intake.busy {
+                state.intake.command = Some(super::intake::Command::Text(state.draft.clone()));
             }
             super::intake_view::show(ui, &mut state.intake, &state.draft);
         });
@@ -96,13 +96,21 @@ fn appearance_controls(ui: &mut Ui, state: &mut ViewState) {
     }
 }
 
-fn draft(ui: &mut Ui, draft: &mut String) {
+fn draft(ui: &mut Ui, draft: &mut String) -> bool {
+    let pasted = ui.ctx().input(|input| {
+        input
+            .events
+            .iter()
+            .any(|event| matches!(event, egui::Event::Paste(_)))
+    });
     let label = ui.label(RichText::new("Material draft").strong());
-    ui.add(
-        TextEdit::multiline(draft)
-            .hint_text("Paste one exact English phrase (up to 200 bytes).")
-            .desired_rows(4)
-            .desired_width(f32::INFINITY),
-    )
-    .labelled_by(label.id);
+    let response = ui
+        .add(
+            TextEdit::multiline(draft)
+                .hint_text("Paste one exact English phrase (up to 200 bytes).")
+                .desired_rows(4)
+                .desired_width(f32::INFINITY),
+        )
+        .labelled_by(label.id);
+    response.changed() && pasted
 }

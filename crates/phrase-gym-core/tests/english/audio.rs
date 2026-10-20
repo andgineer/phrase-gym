@@ -12,7 +12,6 @@ fn supplied_audio_requires_verified_bytes_and_exact_text_language_and_role() {
         json!({"language": "de", "locale": "de-DE"}),
         json!({"role": "cue"}),
         json!({"role": "partner"}),
-        json!({"origin": "generated", "engine": "fake", "voice": "fake", "speech_text": ANSWER}),
     ] {
         let mut changed = package.clone();
         changed.phrases[0].reference_audio_id = fixture.upload(&overrides).id;
@@ -59,4 +58,12 @@ fn situation_and_partner_audio_have_separate_exact_bindings() {
     let mut wrong = package.clone();
     wrong.phrases[0].situations[0].audio_id = Some(package.phrases[0].reference_audio_id);
     assert!(fixture.validator.validate(&wrong).is_err());
+}
+
+#[test]
+fn generated_reference_with_verified_bytes_and_provenance_is_accepted() {
+    let fixture = Fixture::new();
+    let mut package = fixture.package();
+    package.phrases[0].reference_audio_id = fixture.upload(&json!({"origin": "generated", "performer": null, "engine": "piper", "voice": "synthetic", "speech_text": ANSWER})).id;
+    assert!(fixture.validator.validate(&package).is_ok());
 }

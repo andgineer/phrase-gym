@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import DueOverview from './DueOverview.vue'
-import LessonIntake from './LessonIntake.vue'
 import { onboardingMessages } from '../onboardingMessages'
 import type { PracticeMessages } from '../practiceMessages'
 import type { RouteLocationRaw } from 'vue-router'
@@ -9,6 +8,7 @@ import type { Language, Lesson, Phrase } from '../api'
 import { languageNames } from '../i18n'
 import type { Messages } from '../i18n'
 defineProps<{
+  publication: number
   t: Messages
   pt: PracticeMessages
   locale: Language
@@ -28,7 +28,6 @@ defineProps<{
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const eligible = ref(false)
-const publication = ref(0)
 const emit = defineEmits<{
   published: []
   start: []
@@ -37,17 +36,12 @@ const emit = defineEmits<{
   moreLessons: []
   'update:selectedLesson': [string]
 }>()
-function published() {
-  publication.value++
-  emit('published')
-}
 </script>
 <template>
   <section class="home">
     <p class="eyebrow">{{ languageNames[language] }}</p>
     <h1>{{ t.home }}</h1>
     <p v-if="!loading && !failed && !hasCollection">{{ onboardingMessages(locale).empty }}</p>
-    <LessonIntake :language="language" :locale="locale" @published="published" />
     <div class="card session-entry">
       <label
         >{{ t.lessonScope

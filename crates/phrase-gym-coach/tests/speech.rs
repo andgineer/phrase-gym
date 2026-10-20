@@ -63,7 +63,7 @@ async fn stages_verified_bytes_and_returns_exact_pcm_as_wav() {
     assert_eq!(&wav[..4], b"RIFF");
     assert_eq!(&wav[8..16], b"WAVEfmt ");
     assert_eq!(&wav[24..28], &22050_u32.to_le_bytes());
-    assert_eq!(&wav[44..], &[1, 0, 2, 0]);
+    assert_eq!(&wav[44..], &[1, 0, 2, 0].repeat(2205));
 }
 
 #[tokio::test]

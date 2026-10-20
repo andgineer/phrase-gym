@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { expect } from '@playwright/test'
 import { test } from './preview-server'
-import { attachAudio, fillLesson } from './lesson-intake-helpers'
+import { sendPhrase, fillLesson } from './lesson-intake-helpers'
 
 for (const terminal of ['exhausted', 'cancelled']) {
   test(`accepted ${terminal} preparation can be left locally without changing Server work`, async ({
@@ -12,7 +12,7 @@ for (const terminal of ['exhausted', 'cancelled']) {
       data: { native_language: 'ru', ui_language_mode: 'learning' },
     })
     await page.goto('/learn/en')
-    await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+    await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
     const receiptResponse = page.waitForResponse(
       (r) => r.url().endsWith('/api/v1/inbox/lessons') && r.request().method() === 'POST',
     )
@@ -52,14 +52,12 @@ for (const terminal of ['exhausted', 'cancelled']) {
     }
     const before = await (await request.get(statusPath)).json()
     await page.getByRole('button', { name: /Discard local saved input/ }).click()
-    await expect(page.getByLabel('Lesson title', { exact: true })).toBeVisible()
+    await expect(page.getByLabel('Exact English phrase', { exact: true })).toBeVisible()
     await page.reload()
-    await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+    await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
     await fillLesson(page, 'Replacement lesson')
     await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
-    await expect(
-      page.getByRole('heading', { name: 'Replacement lesson', exact: true }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
     expect(await (await request.get(statusPath)).json()).toEqual(before)
     if (terminal === 'exhausted')
       expect((await request.post(`${statusPath}/retry`)).status()).toBe(409)
@@ -77,10 +75,10 @@ test('another open intake preserves a response-lost delivery through reload and 
   const other = await context.newPage()
   for (const tab of [page, other]) {
     await tab.goto('/learn/en')
-    await tab.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+    await tab.getByRole('button', { name: 'Add phrase', exact: true }).click()
     await fillLesson(tab, 'Opening a meeting', false)
   }
-  await other.getByLabel('Lesson title', { exact: true }).fill('Unsent second lesson')
+  await other.getByLabel('Exact English phrase', { exact: true }).fill('Unsent second lesson')
   const deliveries: unknown[] = []
   let lost = true
   await context.route('**/api/v1/inbox/lessons', async (route) => {
@@ -92,15 +90,15 @@ test('another open intake preserves a response-lost delivery through reload and 
       await route.abort()
     } else await route.fulfill({ response })
   })
-  await attachAudio(page)
+  await sendPhrase(page)
   await expect(page.getByTestId('connection-required')).toBeVisible()
-  await attachAudio(other)
+  await sendPhrase(other)
   await expect(other.getByRole('alert')).toContainText('changed in another tab')
-  await expect(other.getByRole('heading', { name: 'Opening a meeting', exact: true })).toBeVisible()
+  await expect(other.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
   expect(deliveries).toHaveLength(1)
   await page.close()
   await other.reload()
-  await other.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await other.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await expect(other.getByText(/Delivery is unconfirmed/)).toBeVisible()
   await other.getByRole('button', { name: 'Retry the same delivery', exact: true }).click()
   await expect(other.getByText(/Accepted — waiting for Coach/)).toBeVisible()

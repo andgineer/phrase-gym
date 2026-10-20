@@ -108,10 +108,13 @@ async fn normal_start_studies_english_without_inventing_memory_or_speech() {
         again.json()["manifest"]["targets"][0]["schedule_version"],
         0
     );
-    retained_schedule_stays_unresolved_by_study(&server, &again.json()).await;
+    provisional_schedule_does_not_block_first_independent_recall(&server, &again.json()).await;
 }
 
-async fn retained_schedule_stays_unresolved_by_study(server: &TestServer, current: &Value) {
+async fn provisional_schedule_does_not_block_first_independent_recall(
+    server: &TestServer,
+    current: &Value,
+) {
     let connection = rusqlite::Connection::open(&server.database_path).unwrap();
     let target = current["manifest"]["targets"][0]["phrase"]["id"]
         .as_str()
@@ -130,18 +133,34 @@ async fn retained_schedule_stays_unresolved_by_study(server: &TestServer, curren
     )
     .await;
     assert_eq!(study.status, StatusCode::OK, "{}", study.json());
-    assert_eq!(
-        study.json()["manifest"]["targets"][0]["eligibility"],
-        "study"
-    );
+    assert_eq!(study.json()["manifest"]["targets"][0]["eligibility"], "new");
+    let before: (i64, String, Option<String>) = connection
+        .query_row(
+            "SELECT version, due_at, memory_state FROM target_schedule WHERE target_id = ?1",
+            [target],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .unwrap();
+    assert_eq!(before, (7, due.into(), None));
     let path = format!("/api/v1/sessions/{id}/events");
     assert_eq!(
         post(&restarted, &path, &event(1, "present")).await.status,
         StatusCode::OK
     );
-    let finished = post(&restarted, &path, &event(2, "next")).await.json();
+    assert_eq!(
+        post(&restarted, &path, &event(2, "answer")).await.status,
+        StatusCode::OK
+    );
+    let mut rating = event(3, "rate");
+    rating["events"][0]["rating"] = "recalled".into();
+    let finished = post(&restarted, &path, &rating).await.json();
     assert_eq!(finished["session"]["status"], "completed");
-    assert_eq!(finished["receipts"][0]["schedule_changed"], false);
+    assert_eq!(
+        finished["session"]["attempts"][0]["original"]["supported"],
+        false
+    );
+    assert_eq!(finished["receipts"][0]["schedule_changed"], true);
+    assert_eq!(finished["receipts"][0]["eligibility_reason"], "eligible");
     let retained: (i64, String, Option<String>) = connection
         .query_row(
             "SELECT version, due_at, memory_state FROM target_schedule WHERE target_id = ?1",
@@ -149,5 +168,6 @@ async fn retained_schedule_stays_unresolved_by_study(server: &TestServer, curren
             |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
         )
         .unwrap();
-    assert_eq!(retained, (7, due.into(), None));
+    assert_eq!(retained.0, 8);
+    assert!(retained.2.is_some());
 }

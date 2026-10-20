@@ -19,5 +19,6 @@ mod schedules;
 pub mod sessions;
 pub mod settings;
 pub mod storage;
+mod study;
 pub mod timestamps;
 mod transfer;

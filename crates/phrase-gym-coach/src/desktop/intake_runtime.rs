@@ -7,10 +7,8 @@ use super::intake_actions::{handle, published};
 use super::{
     connection,
     intake::{Command, Event},
-    settings::Settings,
 };
-use crate::platform::paths::CoachPaths;
-use crate::preparation::{self, readiness::ClaudeTool};
+use crate::platform::{paths::CoachPaths, settings::Settings};
 use crate::transfer::{client::ServerClient, worker};
 
 pub fn run(
@@ -45,7 +43,6 @@ pub fn run(
     let mut last = Instant::now()
         .checked_sub(Duration::from_secs(10))
         .unwrap_or_else(Instant::now);
-    let mut worker_problem = None;
     while !stop.load(Ordering::SeqCst) {
         let command = match receive.recv_timeout(Duration::from_millis(100)) {
             Ok(command) => Some(command),
@@ -57,7 +54,6 @@ pub fn run(
                 Command::Connect { server: next } => {
                     client = None;
                     server = next;
-                    worker_problem = None;
                     connect(&server, &paths, &mut client, emit)
                 }
                 command => handle(command, &server, client.as_ref(), &paths, emit, stop),
@@ -77,6 +73,25 @@ pub fn run(
         let Some(client) = &client else {
             continue;
         };
+        let draft_path = paths.state.join("pending-text.json");
+        if draft_path.exists() {
+            let retained =
+                crate::platform::files::read_selected(&draft_path, 4096).and_then(|bytes| {
+                    serde_json::from_slice::<crate::transfer::text::TextDraft>(&bytes)
+                        .map_err(|_| "Retained text is unreadable".into())
+                });
+            match retained.and_then(|draft| {
+                crate::transfer::text::submit_raw(&paths, &server, &draft.phrase, client)
+            }) {
+                Ok(_) => emit(Event::Status(
+                    "Original text accepted durably by Server".into(),
+                )),
+                Err(problem) => {
+                    emit(Event::Status(problem));
+                    continue;
+                }
+            }
+        }
         let pending_path = paths.state.join("pending-send.json");
         if pending_path.exists() {
             if let Err(problem) = handle(Command::Retry, &server, Some(client), &paths, emit, stop)
@@ -85,31 +100,19 @@ pub fn run(
             }
             continue;
         }
-        if worker_problem.is_some() {
-            continue;
-        }
         let result = worker::tick(client, &paths.state.join("worker.json"), |claim| {
             if crate::supplied::SuppliedLesson::parse(&claim.input.context).is_ok() {
                 return crate::supplied::output(claim);
             }
             emit(Event::Status(
-                "Accepted by Server; preparing one English phrase with Claude…".into(),
+                "Accepted by Server; preparing one English phrase…".into(),
             ));
-            let check = preparation::attempt::private_directory(&paths)?;
-            let tool = ClaudeTool::check(&check)?;
-            emit(Event::SelectedClaude(tool.executable.clone()));
-            preparation::prepare(client, &paths, claim, &tool, stop)
+            super::selected::prepare(client, &paths, claim, stop)
         });
         match result {
             Ok(Some(receipt)) => published(client, &receipt, emit),
             Ok(None) => {}
             Err(problem) => {
-                if !problem.starts_with("Server unavailable")
-                    && !problem.contains("response")
-                    && !problem.starts_with("Expired preparation reconciled")
-                {
-                    worker_problem = Some(problem.clone());
-                }
                 emit(Event::Status(problem));
             }
         }
@@ -125,8 +128,7 @@ fn connect(
     let connected = connection::connect(server, paths)?;
     emit(Event::Connected(connected.server.clone()));
     emit(Event::Status(
-        "Connected automatically; ready for supplied or raw English input with original WAV audio"
-            .into(),
+        "Connected automatically; paste one English phrase to prepare with generated speech".into(),
     ));
     *client = Some(connected);
     Ok(())

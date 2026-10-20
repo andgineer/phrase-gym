@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePracticeEvents } from './usePracticeEvents'
 import { api, ApiError, requireServer, serverUnavailable, connectionRetrying } from '../api'
@@ -126,9 +126,18 @@ export function usePracticeSession() {
       }
       const current = await api<PracticeSession | null>('/sessions/current')
       const selected = id ? await api<PracticeSession>(`/sessions/${id}`) : current
+      const retainedCurrent = current ? await journalCheckpoint(current) : null
+      const retainedSelected = selected
+        ? selected.id === retainedCurrent?.id
+          ? retainedCurrent
+          : await journalCheckpoint(selected)
+        : null
       if (version !== loadingVersion) return false
-      openSession.value = current
-      session.value = selected ? await journalCheckpoint(selected) : null
+      openSession.value =
+        retainedCurrent?.status === 'active' || retainedCurrent?.status === 'paused'
+          ? retainedCurrent
+          : null
+      session.value = retainedSelected
       return true
     } catch (cause) {
       if (version === loadingVersion) error.value = String(cause)
@@ -137,6 +146,18 @@ export function usePracticeSession() {
       if (version === loadingVersion) restoring.value = false
     }
   }
+  function reconcileLibrary() {
+    if (!routeId.value && !restoring.value && !busy.value && document.visibilityState === 'visible')
+      void load()
+  }
+  onMounted(() => {
+    window.addEventListener('focus', reconcileLibrary)
+    document.addEventListener('visibilitychange', reconcileLibrary)
+  })
+  onUnmounted(() => {
+    window.removeEventListener('focus', reconcileLibrary)
+    document.removeEventListener('visibilitychange', reconcileLibrary)
+  })
   watch(routeId, load, { immediate: true })
   return {
     session,

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "scope": "Internal English fixed-phrase demo, not full MVP acceptance",
+  "synthetic": { "text": "Let's get started.", "meaning": "Begin a shared activity", "language": "en" },
+  "held_out": { "text": "Could you repeat that, please?", "meaning": "Politely request repetition", "language": "en" },
+  "review": ["Exact source wording", "Natural answer-free English retrieval situation", "Partial hint without a full answer", "English help without translation under pinned profile", "New familiarity", "Generated reference matches exact wording", "No inferred personal history"]
+}

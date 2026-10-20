@@ -2488,13 +2488,14 @@
         "type": "object",
         "required": [
           "source_id",
-          "text",
-          "reference_audio_id",
-          "audio_sha256"
+          "text"
         ],
         "properties": {
           "audio_sha256": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "expected_revision": {
             "type": [
@@ -2504,7 +2505,10 @@
             "format": "int64"
           },
           "reference_audio_id": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "source_id": {

@@ -2,41 +2,18 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 
-use super::preview::LessonPreview;
-use crate::transfer::material::RawLesson;
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
-    Connect {
-        server: String,
-    },
-    Send {
-        json: String,
-        audio: String,
-    },
-    Raw {
-        title: String,
-        phrase: String,
-        situation: String,
-        performer: String,
-        locale: String,
-        audio: String,
-    },
+    Connect { server: String },
+    Text(String),
     Retry,
     RetryPreparation,
-    Load(String),
-    ChooseLesson,
-    ChooseAudio,
-    PreviewAudio(String),
-    Demo,
 }
 
 pub enum Event {
     Status(String),
     Connected(String),
     SelectedClaude(std::path::PathBuf),
-    Draft(String),
-    Audio(String),
     Published(String),
     Finished(Result<(), String>),
 }
@@ -44,81 +21,23 @@ pub enum Event {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IntakeState {
     pub server: String,
-    pub audio: String,
-    pub lesson_file: String,
     pub status: String,
     pub connected: bool,
     pub busy: bool,
     pub practice: Option<String>,
     pub command: Option<Command>,
-    pub prepared: Option<String>,
-    pub preview: Option<LessonPreview>,
-    pub title: String,
-    pub situation: String,
-    pub performer: String,
-    pub locale: String,
 }
 
 impl Default for IntakeState {
     fn default() -> Self {
         Self {
             server: phrase_gym_contracts::connection::default_server_origin(),
-            audio: String::new(),
-            lesson_file: String::new(),
             status: "Connecting automatically using saved Server access…".into(),
             connected: false,
             busy: false,
             practice: None,
             command: None,
-            prepared: None,
-            preview: None,
-            title: String::new(),
-            situation: String::new(),
-            performer: String::new(),
-            locale: "en-US".into(),
         }
-    }
-}
-
-impl IntakeState {
-    pub fn accept_audio(&mut self, path: String, phrase: &str) {
-        self.audio = path;
-        self.command = Some(if let Some(json) = &self.prepared {
-            Command::Send {
-                json: json.clone(),
-                audio: self.audio.clone(),
-            }
-        } else {
-            Command::Raw {
-                title: self.title.clone(),
-                phrase: phrase.into(),
-                situation: self.situation.clone(),
-                performer: self.performer.clone(),
-                locale: self.locale.clone(),
-                audio: self.audio.clone(),
-            }
-        });
-    }
-
-    pub fn raw(command: &Command) -> Option<RawLesson> {
-        let Command::Raw {
-            title,
-            phrase,
-            situation,
-            performer,
-            locale,
-            ..
-        } = command
-        else {
-            return None;
-        };
-        Some(RawLesson {
-            title: title.clone(),
-            phrase: phrase.clone(),
-            situation: situation.clone(),
-            performer: performer.clone(),
-            locale: locale.clone(),
-        })
     }
 }
 

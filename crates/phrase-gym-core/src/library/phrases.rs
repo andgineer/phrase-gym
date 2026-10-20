@@ -27,7 +27,7 @@ pub(crate) fn media_ids(content: &TargetInput) -> impl Iterator<Item = Uuid> + '
         .chain(content.reference_audio_id)
 }
 
-pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex) -> bool {
+pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex, situation: bool) -> bool {
     let reference = content
         .reference_audio_id
         .is_some_and(|id| media.available(id));
@@ -40,7 +40,7 @@ pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex) -> bool
         && content
             .cues
             .iter()
-            .any(|cue| cues::has_visible_hint(content, cue))
+            .any(|cue| (situation && cue.reviewed) || cues::has_visible_hint(content, cue))
 }
 
 impl Draft {
@@ -50,7 +50,7 @@ impl Draft {
             .reference_audio_id
             .is_some_and(|id| media.available(id));
         Phrase {
-            retrieval_ready: retrieval_ready(&self.content, media),
+            retrieval_ready: retrieval_ready(&self.content, media, self.english.is_some()),
             audio_status: if reference {
                 AudioStatus::Ready
             } else {

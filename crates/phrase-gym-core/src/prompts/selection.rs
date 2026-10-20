@@ -41,6 +41,35 @@ pub(crate) fn select(
     Ok(choose(content, &eligible, &histories).cloned())
 }
 
+pub(crate) fn situation(
+    connection: &Connection,
+    target: Uuid,
+    revision: i64,
+    content: &TargetInput,
+) -> Result<Option<Cue>, CoreError> {
+    let reported = reports::reported_cues(connection, target, revision)?;
+    let mut statement = connection.prepare(
+        "SELECT json_extract(payload, '$.cue_id'), COUNT(*), MAX(json_extract(payload, '$.presented_at')) \
+         FROM practice_attempt WHERE target_id = ?1 AND revision = ?2 \
+         AND json_extract(payload, '$.eligibility_reason') = 'eligible' \
+         GROUP BY json_extract(payload, '$.cue_id')",
+    )?;
+    let histories = statement
+        .query_map(rusqlite::params![target.to_string(), revision], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                (row.get::<_, i64>(1)?, row.get::<_, String>(2)?),
+            ))
+        })?
+        .collect::<Result<HashMap<_, _>, _>>()?;
+    Ok(content
+        .cues
+        .iter()
+        .filter(|cue| cue.reviewed && !reported.contains(&cue.id))
+        .min_by_key(|cue| histories.get(&cue.id).cloned().unwrap_or_default())
+        .cloned())
+}
+
 type Priority<'a> = (i64, i64, Option<DateTime<Utc>>, &'a str);
 
 // Among cues hiding as many required chunks as the first, prefer the least mastered and least

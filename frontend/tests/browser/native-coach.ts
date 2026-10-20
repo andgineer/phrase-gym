@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { promisify } from 'node:util'
 
+import { prepareTextWithNativeFakes } from './text-intake'
 const execute = promisify(execFile)
 export async function prepareWithNativeFakeCoach(server: string) {
   const directory = await mkdtemp(join(tmpdir(), 'phrase-coach-browser-'))
@@ -44,26 +45,7 @@ export async function prepareWithNativeFakeCoach(server: string) {
         target_ids: string[]
       }
     }
-    await execute(
-      'cargo',
-      [
-        'build',
-        '--locked',
-        '--package',
-        'phrase-gym-coach',
-        '--example',
-        'fake_worker',
-        '--bin',
-        'phrase-gym-fake-child',
-      ],
-      { cwd: resolve('..'), timeout: 60000 },
-    )
-    const { stdout } = await execute(
-      resolve('../target/debug/examples/fake_worker'),
-      [server, directory],
-      { timeout: 15000 },
-    )
-    return JSON.parse(stdout) as { target_ids: string[] }
+    return (await prepareTextWithNativeFakes(server, true)).publication
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

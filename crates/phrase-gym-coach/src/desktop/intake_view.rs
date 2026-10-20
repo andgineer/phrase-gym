@@ -4,31 +4,9 @@ use super::intake::{Command, IntakeState};
 
 pub fn show(ui: &mut Ui, state: &mut IntakeState, _draft: &str) {
     ui.separator();
-    ui.label("One English phrase and its original WAV reference (up to 1 MB)");
+    ui.label("Paste one exact English phrase into Material draft to add it automatically with generated reference speech.");
+    ui.label("No title, situation or performer is required for text-only input. Ambiguous meaning and missing preferences fail inline.");
     ui.add_enabled_ui(!state.busy, |ui| {
-        if state.prepared.is_none() {
-            field(ui, "Lesson title (up to 200 bytes)", &mut state.title, false);
-            field(ui, "Situation or meaning (up to 800 bytes)", &mut state.situation, false);
-            field(ui, "Reference performer (up to 200 bytes)", &mut state.performer, false);
-            field(ui, "Audio locale", &mut state.locale, false);
-        }
-        ui.horizontal_wrapped(|ui| {
-            if ui.button("Choose prepared lesson…").clicked() { state.command = Some(Command::ChooseLesson); }
-            if ui.button("Load supplied demo text").clicked() { state.command = Some(Command::Demo); }
-        });
-        if let Some(preview) = &state.preview {
-            ui.heading(&preview.title);
-            ui.label(&preview.phrase);
-            for situation in &preview.situations { ui.label(format!("Situation: {situation}")); }
-            if let Some(help) = &preview.help { ui.label(format!("Meaning: {help}")); }
-            ui.label(&preview.audio);
-            ui.label("Text validated locally. Choose its matching original audio to start automatic publication.");
-            if ui.button("Use raw English input instead").clicked() { state.prepared = None; state.preview = None; }
-        }
-        if ui.button("Choose original audio and add lesson…").clicked() { state.command = Some(Command::ChooseAudio); }
-        ui.label("Choosing or dropping audio starts delivery automatically. Opening a picker alone sends nothing.");
-        if !state.audio.is_empty() { ui.label(format!("Selected reference: {}", state.audio.rsplit(['/', '\\']).next().unwrap_or("audio"))); }
-        if !state.audio.is_empty() && ui.button("Preview selected original audio").clicked() { state.command = Some(Command::PreviewAudio(state.audio.clone())); }
         if ui.button("Retry connection and retained input").clicked() {
             state.command = Some(Command::Connect { server: state.server.clone() });
         }

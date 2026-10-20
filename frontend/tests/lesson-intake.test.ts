@@ -22,11 +22,7 @@ afterEach(() => {
 async function intake() {
   const model = useLessonIntake(() => onboardingMessages('en'))
   await mounted.at(-1)!()
-  model.title.value = 'Opening a meeting'
   model.phrase.value = "Let's get started."
-  model.context.value = 'All participants are present.'
-  model.performer.value = 'Synthetic'
-  model.file.value = new File(['synthetic-bytes'], 'reference.wav')
   return model
 }
 
@@ -50,7 +46,7 @@ test('lost acknowledgement and reload retry the persisted payload without anothe
       expect(saved).toBeDefined()
       if (path.endsWith('/media')) {
         uploads++
-        return Response.json({ id: 'audio-id', sha256: (await inboxDraft())!.audio_sha256 })
+        return Response.json({ id: 'audio-id', sha256: 'not-used' })
       }
       if (options?.method === 'POST') {
         bodies.push(String(options.body))
@@ -65,13 +61,13 @@ test('lost acknowledgement and reload retry the persisted payload without anothe
   await first.submit()
   expect(first.error.value).toContain('Synthetic lost response')
   expect(first.draft.value?.receipt).toBeUndefined()
-  expect((await inboxDraft())?.submission.phrases[0]?.reference_audio_id).toBe('audio-id')
+  expect((await inboxDraft())?.submission.phrases[0]?.reference_audio_id).toBeNull()
   serverUnavailable.value = false
   const reloaded = await intake()
   await Promise.all([reloaded.submit(), reloaded.submit()])
   expect(bodies).toHaveLength(2)
   expect(bodies[1]).toBe(bodies[0])
-  expect(uploads).toBe(1)
+  expect(uploads).toBe(0)
   expect(reloaded.status.value?.status).toBe('waiting')
   expect((await inboxDraft())?.receipt).toEqual(receipt)
 })
@@ -89,7 +85,6 @@ test('local storage refusal preserves editable input and sends no request', asyn
   expect(fetch).not.toHaveBeenCalled()
   expect(model.draft.value).toBeUndefined()
   expect(model.phrase.value).toBe("Let's get started.")
-  expect(model.file.value?.name).toBe('reference.wav')
   expect(model.error.value).toContain('Could not save input on this device')
 })
 
@@ -106,8 +101,7 @@ function accepted(id: string) {
 }
 async function successfulFetch(path: string, options?: RequestInit) {
   if (path.includes('/inbox/submissions/')) return Response.json(null)
-  if (path.endsWith('/media'))
-    return Response.json({ id: 'audio-id', sha256: (await inboxDraft())!.audio_sha256 })
+  if (path.endsWith('/media')) return Response.json({ id: 'audio-id', sha256: 'not-used' })
   if (options?.method === 'POST') {
     return Response.json(accepted(JSON.parse(String(options.body)).submission_id))
   }
@@ -125,14 +119,11 @@ test('a stale empty instance cannot replace an unconfirmed delivery or send its 
   await first.submit()
   const original = await inboxDraft()
   serverUnavailable.value = false
-  stale.title.value = 'A different lesson'
-  stale.file.value = new File(['different-bytes'], 'different.wav')
   await stale.submit()
   expect(await inboxDraft()).toEqual(original)
-  expect(fetch).toHaveBeenCalledTimes(3)
+  expect(fetch).toHaveBeenCalledTimes(2)
   expect(stale.draft.value).toEqual(original)
   expect(stale.error.value).toContain('changed in another tab')
-  expect(stale.title.value).toBe('A different lesson')
   const reloaded = await intake()
   vi.stubGlobal(
     'fetch',
@@ -140,10 +131,10 @@ test('a stale empty instance cannot replace an unconfirmed delivery or send its 
   )
   await reloaded.submit()
   expect(reloaded.draft.value?.submission).toEqual(original?.submission)
-  expect(reloaded.draft.value?.upload).toEqual(original?.upload)
+  expect(reloaded.draft.value?.submission).toEqual(original?.submission)
 })
 
-test.each(['media', 'receipt'])(
+test.each(['receipt'])(
   'late %s cannot overwrite a replacement after explicit abandonment',
   async (phase) => {
     let release!: (response: Response) => void
@@ -161,7 +152,7 @@ test.each(['media', 'receipt'])(
         if (target && !delayed) {
           delayed = true
           oldId = (await inboxDraft())!.submission.submission_id
-          oldHash = (await inboxDraft())!.audio_sha256
+          oldHash = 'not-used'
           started()
           return new Promise<Response>((resolve) => {
             release = resolve
@@ -176,10 +167,7 @@ test.each(['media', 'receipt'])(
     const other = await intake()
     const stale = await intake()
     await other.clear()
-    other.title.value = 'Replacement'
     other.phrase.value = 'Another phrase.'
-    other.context.value = 'Another situation'
-    other.file.value = new File(['replacement-bytes'], 'replacement.wav')
     await other.submit()
     const replacement = await inboxDraft()
     expect(replacement?.submission.submission_id).not.toBe(oldId)
@@ -259,24 +247,40 @@ test('receipt reconciliation after lost acknowledgement avoids resending accepte
     }),
   )
   const model = await intake()
-  await model.acceptAudio(model.file.value)
+  await model.submit()
   expect(posts).toBe(1)
   const saved = await inboxDraft()
   serverUnavailable.value = false
   await model.submit()
   expect(posts).toBe(1)
   expect(model.status.value?.status).toBe('published')
-  expect(model.draft.value?.upload).toEqual(saved?.upload)
+  expect(model.draft.value?.submission).toEqual(saved?.submission)
   expect(model.draft.value?.receipt).toEqual(receipt)
 })
 
-test('deliberate audio input validates text before automatic transfer and keeps the file', async () => {
+test('empty phrase sends nothing and preserves optional note', async () => {
   const model = await intake()
-  model.context.value = ''
+  model.phrase.value = ''
+  model.note.value = 'Meaning clarification'
   const fetch = vi.fn()
   vi.stubGlobal('fetch', fetch)
-  await model.acceptAudio(model.file.value)
+  await model.submit()
   expect(fetch).not.toHaveBeenCalled()
-  expect(model.error.value).toContain('Complete the lesson title')
-  expect(model.file.value?.name).toBe('reference.wav')
+  expect(model.error.value).toContain('Paste or type a phrase')
+  expect(model.note.value).toBe('Meaning clarification')
+})
+
+test('offline Send retains raw text and note durably before requiring a connection', async () => {
+  const model = await intake()
+  model.note.value = 'A useful optional note'
+  serverUnavailable.value = true
+  const fetch = vi.fn()
+  vi.stubGlobal('fetch', fetch)
+  await model.submit()
+  expect(fetch).not.toHaveBeenCalled()
+  expect((await inboxDraft())?.submission).toMatchObject({
+    note: 'A useful optional note',
+    phrases: [{ text: "Let's get started.", reference_audio_id: null, audio_sha256: null }],
+  })
+  expect(model.error.value).toContain('Server connection required')
 })

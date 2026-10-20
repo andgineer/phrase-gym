@@ -65,6 +65,11 @@ pub(crate) fn process(
             "Study uses Next without a memory rating".to_owned(),
         ));
     }
+    if event.kind == PracticeKind::Rate && item.phrase.english.is_some() && !attempt.revealed {
+        return Err(CoreError::Conflict(
+            "Reveal or compare the answer before rating the original response".into(),
+        ));
+    }
     if event.kind == PracticeKind::Next && attempt.capture_pending {
         return Err(CoreError::Conflict(
             "Finish or cancel capture before Next".to_owned(),

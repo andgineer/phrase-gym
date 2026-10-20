@@ -6,21 +6,6 @@ beforeEach(() => vi.stubGlobal('indexedDB', new IDBFactory()))
 afterEach(() => vi.unstubAllGlobals())
 function input(id: string): InboxDraft {
   return {
-    audio_sha256: 'synthetic-hash',
-    upload: {
-      mime_type: 'audio/wav',
-      audio_base64: btoa(id),
-      metadata: {
-        language: 'en',
-        text: id,
-        role: 'reference',
-        origin: 'course',
-        performer: 'Synthetic',
-        source: 'test',
-        locale: 'en-US',
-        preparation_version: 'test',
-      },
-    },
     submission: {
       submission_id: id,
       item_id: id,
@@ -33,8 +18,8 @@ function input(id: string): InboxDraft {
         {
           source_id: 'phrase',
           text: id,
-          reference_audio_id: 'pending',
-          audio_sha256: '',
+          reference_audio_id: null,
+          audio_sha256: null,
           expected_revision: null,
         },
       ],
@@ -52,12 +37,10 @@ test('concurrent empty-slot claims retain exactly one complete identity and its 
   expect(await inboxDraft(input('C'))).toEqual(winner)
 })
 
-test('same-identity late updates preserve uploaded bindings and durable acknowledgement', async () => {
+test('same-identity late updates preserve exact original text and durable acknowledgement', async () => {
   const original = input('A')
   await inboxDraft(original)
   const uploaded = structuredClone(original)
-  uploaded.submission.phrases[0]!.reference_audio_id = 'verified-audio'
-  uploaded.submission.phrases[0]!.audio_sha256 = 'verified-hash'
   await inboxDraft(uploaded, 'A')
   const acknowledged = structuredClone(uploaded)
   acknowledged.receipt = {

@@ -17,15 +17,9 @@ const {
   busy,
   error,
   ready,
-  title,
   phrase,
-  context,
   note,
-  locale: audioLocale,
-  performer,
-  file,
   submit,
-  acceptAudio,
   refresh,
   retryPreparation,
   restore,
@@ -39,48 +33,77 @@ watch(
     if (id) emit('published')
   },
 )
+const interruptionReady = ref(true)
+let opening = 0
+let edits = 0
+function dropText(event: DragEvent) {
+  phrase.value = event.dataTransfer?.getData('text/plain') ?? phrase.value
+  edits++
+}
+function close() {
+  opening++
+  open.value = false
+}
 async function toggle() {
-  if (!open.value) await props.beforeOpen?.()
-  open.value = !open.value
+  if (open.value) {
+    close()
+    return
+  }
+  const version = ++opening
+  const previousEdits = edits
+  // Invoke inside the original click gesture, before capture interruption can await.
+  let clipboard: Promise<string>
+  try {
+    clipboard = navigator.clipboard?.readText().catch(() => '') ?? Promise.resolve('')
+  } catch {
+    clipboard = Promise.resolve('')
+  }
+  open.value = true
+  interruptionReady.value = false
+  const interruption = props.beforeOpen?.()
+  void clipboard.then((text) => {
+    if (open.value && opening === version && edits === previousEdits && !draft.value)
+      phrase.value = text
+  })
+  try {
+    await interruption
+    if (opening === version) interruptionReady.value = true
+  } catch (cause) {
+    if (opening === version) error.value = String(cause)
+  }
 }
 </script>
 <template>
-  <section class="card" :aria-label="messages.add">
-    <button @click="toggle" :aria-expanded="open">{{ messages.add }}</button>
-    <div v-if="open" class="lesson-input">
-      <h2 id="lesson-input-heading">{{ messages.add }}</h2>
-      <p>{{ language === 'en' ? messages.supported : messages.unsupported }}</p>
+  <section class="phrase-drop" aria-label="Add phrase">
+    <button @click="toggle" :aria-expanded="open" aria-label="Add phrase">+</button>
+    <div
+      v-if="open"
+      class="lesson-input phrase-drop-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lesson-input-heading"
+    >
+      <h2 id="lesson-input-heading">Add phrase</h2>
+      <p>
+        {{
+          language === 'en'
+            ? 'Review the phrase, then Send. Coach creates the practice material and reference speech.'
+            : messages.unsupported
+        }}
+      </p>
       <form
         v-if="language === 'en' && !draft"
-        @submit.prevent
+        @submit.prevent="submit"
         @dragover.prevent
-        @drop.prevent="acceptAudio($event.dataTransfer?.files[0])"
-        @paste="$event.clipboardData?.files.length && acceptAudio($event.clipboardData.files[0])"
+        @drop.prevent="dropText"
       >
-        <p>{{ messages.automatic }}</p>
-        <fieldset :disabled="busy || !ready">
-          <label>{{ messages.title }}<input v-model="title" required maxlength="300" /></label>
+        <fieldset :disabled="busy || !ready || !interruptionReady">
           <label
-            >{{ messages.phrase }}<input v-model="phrase" required maxlength="200" lang="en"
-          /></label>
-          <label
-            >{{ messages.context }}<textarea v-model="context" required maxlength="8000" />
+            >{{ messages.phrase
+            }}<textarea v-model="phrase" maxlength="200" lang="en" @input="edits++" />
           </label>
           <label>{{ messages.note }}<textarea v-model="note" maxlength="2000" /></label>
-          <label>{{ messages.performer }}<input v-model="performer" required /></label>
-          <label>{{ messages.locale }}<input v-model="audioLocale" required /></label>
-          <label
-            >{{ messages.audio
-            }}<input
-              type="file"
-              accept=".wav,.mp3,.ogg,.m4a,.mp4"
-              required
-              @change="acceptAudio(($event.target as HTMLInputElement).files?.[0])"
-          /></label>
-          <p v-if="file">{{ file.name }}</p>
-          <button v-if="file && error" type="button" @click="acceptAudio(file)">
-            {{ messages.retry }}
-          </button>
+          <button type="submit" :disabled="!phrase.trim()">Send</button>
         </fieldset>
       </form>
       <template v-if="draft">
@@ -95,6 +118,7 @@ async function toggle() {
         <p v-if="status?.reason" role="alert">{{ status.reason }}</p>
         <RouterLink
           v-if="status?.publication"
+          @click="close"
           :to="`/learn/en/lessons/${status.publication.lesson_id}`"
           >{{ messages.open }} →</RouterLink
         >
@@ -120,7 +144,26 @@ async function toggle() {
       <p v-if="busy" role="status">{{ messages.busy }}</p>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
       <button v-if="!ready" :disabled="busy" @click="restore">{{ messages.retryStorage }}</button>
-      <button @click="open = false">{{ messages.close }}</button>
+      <button @click="close">{{ messages.close }}</button>
     </div>
   </section>
 </template>
+
+<style scoped>
+.phrase-drop-panel {
+  position: fixed;
+  inset: 5vh max(1rem, calc((100vw - 38rem) / 2));
+  z-index: 20;
+  overflow: auto;
+  padding: 1.5rem;
+  background: var(--card, white);
+  color: var(--text, #222);
+  border: 1px solid #888;
+  border-radius: 1rem;
+  box-shadow: 0 0 0 100vmax #0008;
+}
+.phrase-drop-panel textarea {
+  width: 100%;
+  min-height: 5rem;
+}
+</style>

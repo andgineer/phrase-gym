@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use phrase_gym_contracts::base::Language;
 use phrase_gym_contracts::inbox::LessonSubmission;
-use phrase_gym_contracts::media::{MediaOrigin, MediaRole};
+use phrase_gym_contracts::media::MediaRole;
 use rusqlite::Connection;
 
 use crate::content::records;
@@ -54,12 +54,12 @@ pub(super) fn validate(
         || input.note.len() > 2_000
         || input.expected_generation.is_some_and(|n| n < 1)
     {
-        return Err(CoreError::Invalid("Submit one lesson of at most five fixed English phrases with supplied audio; words, dialogues, missing audio and bulk imports are unsupported".into()));
+        return Err(CoreError::Invalid("Submit one lesson of at most five fixed English phrases with optional reference audio; words, dialogues and bulk imports are unsupported".into()));
     }
     let index = MediaIndex::load(
         database,
         store,
-        input.phrases.iter().map(|p| p.reference_audio_id),
+        input.phrases.iter().filter_map(|p| p.reference_audio_id),
     )?;
     let mut ids = BTreeSet::new();
     for phrase in &input.phrases {
@@ -73,22 +73,30 @@ pub(super) fn validate(
         {
             return Err(CoreError::Invalid("Submit distinct short fixed phrases and extracted text; URL-only input and slots are unsupported".into()));
         }
+        let (audio_id, hash) = match (phrase.reference_audio_id, &phrase.audio_sha256) {
+            (None, None) => continue,
+            (Some(id), Some(hash)) => (id, hash),
+            _ => {
+                return Err(CoreError::Invalid(
+                    "Supply both reference audio identity and hash, or neither".into(),
+                ));
+            }
+        };
         let media = index
-            .record(phrase.reference_audio_id)
-            .filter(|_| index.available(phrase.reference_audio_id))
+            .record(audio_id)
+            .filter(|_| index.available(audio_id))
             .ok_or_else(|| {
                 CoreError::Invalid(
                     "Upload the complete original reference audio before Send".into(),
                 )
             })?;
-        if media.sha256 != phrase.audio_sha256
+        if &media.sha256 != hash
             || media.metadata.text != phrase.text
             || media.metadata.language != Language::En
             || media.metadata.role != MediaRole::Reference
-            || media.metadata.origin == MediaOrigin::Generated
         {
             return Err(CoreError::Invalid(
-                "Supplied audio must match its hash, exact English phrase and reference role"
+                "Reference audio must match its hash, exact English phrase and reference role"
                     .into(),
             ));
         }

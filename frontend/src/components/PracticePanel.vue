@@ -4,7 +4,6 @@ import { usePracticeActions } from '../composables/usePracticeActions'
 import type { Language } from '../api'
 import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
-import LessonIntake from './LessonIntake.vue'
 import { serverUnavailable, connectionRetrying } from '../api'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
@@ -43,6 +42,7 @@ const {
   beginDialogue,
   isolate,
 } = usePracticeActions(props.engine)
+defineExpose({ openIntake })
 </script>
 <template>
   <section v-if="session" class="practice-panel" :aria-busy="engine.restoring.value">
@@ -59,11 +59,6 @@ const {
       </button>
       <button @click="emit('leave')">{{ pt.back }}</button>
     </div>
-    <LessonIntake
-      :language="session.manifest.language"
-      :locale="locale"
-      :before-open="openIntake"
-    />
     <div v-if="session.status === 'completed' || session.status === 'superseded'" class="card">
       <h1 tabindex="-1">
         {{ session.status === 'completed' ? pt.complete : pt.results }}

@@ -20,6 +20,10 @@ use crate::supplied::SuppliedLesson;
 pub enum Material {
     Supplied(Box<SuppliedLesson>),
     Raw(RawLesson),
+    Generated {
+        phrase: String,
+        metadata: MediaMetadata,
+    },
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -63,6 +67,7 @@ impl Material {
     pub fn metadata(&self) -> MediaMetadata {
         match self {
             Self::Supplied(supplied) => supplied.metadata.clone(),
+            Self::Generated { metadata, .. } => metadata.clone(),
             Self::Raw(raw) => MediaMetadata {
                 language: Language::En,
                 text: raw.phrase.clone(),
@@ -84,7 +89,7 @@ impl Material {
     pub fn mime(&self) -> ReferenceMime {
         match self {
             Self::Supplied(s) => s.mime_type,
-            Self::Raw(_) => ReferenceMime::Wav,
+            Self::Raw(_) | Self::Generated { .. } => ReferenceMime::Wav,
         }
     }
 
@@ -92,8 +97,16 @@ impl Material {
         if let Self::Supplied(supplied) = self {
             return supplied.submission(id, media);
         }
-        let Self::Raw(raw) = self else { unreachable!() };
-        raw.validate()?;
+        let (title, phrase, context) = match self {
+            Self::Raw(raw) => {
+                raw.validate()?;
+                (raw.title.clone(), raw.phrase.clone(), raw.situation.clone())
+            }
+            Self::Generated { phrase, .. } => {
+                ("Inbox practice".into(), phrase.clone(), String::new())
+            }
+            Self::Supplied(_) => unreachable!(),
+        };
         if !media.available || media.metadata != self.metadata() {
             return Err("Server did not verify the exact original reference audio".into());
         }
@@ -102,14 +115,14 @@ impl Material {
             item_id: format!("coach-{id}"),
             expected_generation: None,
             language: Language::En,
-            title: raw.title.clone(),
-            context: raw.situation.clone(),
+            title,
+            context,
             note: String::new(),
             phrases: vec![LessonPhraseInput {
                 source_id: "phrase".into(),
-                text: raw.phrase.clone(),
-                reference_audio_id: media.id,
-                audio_sha256: media.sha256.clone(),
+                text: phrase,
+                reference_audio_id: Some(media.id),
+                audio_sha256: Some(media.sha256.clone()),
                 expected_revision: None,
             }],
         })

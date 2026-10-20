@@ -69,7 +69,9 @@ impl Inbox {
             tx.execute("UPDATE inbox_generation SET status = 'superseded', token = NULL WHERE actor = ?1 AND item_id = ?2 AND status != 'published'", params![actor, input.item_id])?;
             tx.execute("INSERT INTO inbox_generation (id, actor, item_id, generation, submission_id, request, receipt, profile_revision, guide_version, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'waiting')", params![receipt.generation_id.to_string(), actor, input.item_id, receipt.generation, input.submission_id.to_string(), request, canonical_json(&receipt), profile_revision, GUIDE_VERSION])?;
             for phrase in &input.phrases {
-                tx.execute("INSERT INTO inbox_attachment VALUES (?1, ?2, ?3)", params![receipt.generation_id.to_string(), phrase.source_id, phrase.reference_audio_id.to_string()])?;
+                if let Some(id) = phrase.reference_audio_id {
+                    tx.execute("INSERT INTO inbox_attachment VALUES (?1, ?2, ?3)", params![receipt.generation_id.to_string(), phrase.source_id, id.to_string()])?;
+                }
             }
             Ok(receipt)
         })

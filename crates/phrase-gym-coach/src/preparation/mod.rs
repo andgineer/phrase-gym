@@ -1,7 +1,10 @@
 pub mod attempt;
 pub mod readiness;
+mod reference;
 pub mod result;
 mod schema;
+pub mod selection;
+pub mod workspace;
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -21,19 +24,39 @@ pub fn prepare(
     tool: &readiness::ClaudeTool,
     shutdown: &Arc<AtomicBool>,
 ) -> Result<LessonOutput, String> {
+    prepare_selected(
+        client,
+        paths,
+        claim,
+        &selection::SelectedTool::claude(tool),
+        shutdown,
+    )
+}
+
+pub fn prepare_selected(
+    client: &ServerClient,
+    paths: &CoachPaths,
+    claim: &JobClaim,
+    tool: &selection::SelectedTool<'_>,
+    shutdown: &Arc<AtomicBool>,
+) -> Result<LessonOutput, String> {
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
-    let previous = paths.attempts().join(claim.fence.token.to_string());
+    let previous = tool.attempts(paths).join(claim.fence.token.to_string());
     if previous.exists() {
         let bytes = crate::platform::files::read_selected(&previous.join("validated.json"), 100_000)
-            .map_err(|_| "The previous Claude attempt was interrupted before validation. Reconcile the accepted lesson and explicitly retry preparation; it will not be started twice")?;
+            .map_err(|_| "The previous selected CLI attempt was interrupted before validation. Reconcile the accepted lesson and explicitly retry preparation; it will not be started twice")?;
         let output: LessonOutput = serde_json::from_slice(&bytes).map_err(|_| "Saved validated output is unreadable; preserve the private attempt before retrying")?;
         if output.fence != claim.fence {
             return Err("Saved output belongs to a different fenced attempt".into());
         }
         return Ok(output);
     }
-    let staged = attempt::stage(paths, claim, tool)?;
+    attempt::validate_input(claim)?;
+    let normalized = reference::complete(client, paths, claim, shutdown)?;
+    let claim = &normalized;
+    let staged = attempt::stage_selected(paths, claim, tool)?;
     let spec = staged.spec;
+    let started = Instant::now();
     let cancel = Arc::new(AtomicBool::new(false));
     let stop = Arc::clone(&cancel);
     let (send, receive) = mpsc::sync_channel(1);
@@ -74,6 +97,14 @@ pub fn prepare(
         return Err("Preparation cancelled; accepted input remains on Server".into());
     }
     let mut report = report?;
+    crate::platform::files::save(
+        &staged.directory.join("execution.json"),
+        &serde_json::json!({
+            "adapter": tool.identity(), "elapsed_ms": started.elapsed().as_millis(),
+            "ending": format!("{:?}", report.ending), "usage": null,
+            "stdout_bytes": report.stdout.bytes, "stderr_bytes": report.stderr.bytes
+        }),
+    )?;
     if report.stdout.truncated || report.stderr.truncated {
         report.ending = process::Ending::OutputLimitExceeded;
     }
@@ -82,10 +113,11 @@ pub fn prepare(
     }
     if !report.stdout.closed || !report.stderr.closed {
         return Err(
-            "Claude output streams did not close; no result can be validated or published".into(),
+            "selected CLI output streams did not close; no result can be validated or published"
+                .into(),
         );
     }
-    let output = result::read(&staged.directory, claim)?;
+    let output = result::read_selected(&staged.directory, claim, &tool.identity())?;
     // A successful process cannot authorize publication after a lost or replaced lease.
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     crate::platform::files::save(&previous.join("validated.json"), &output)?;

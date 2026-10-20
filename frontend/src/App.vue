@@ -17,6 +17,7 @@ import SetupForm from './components/SetupForm.vue'
 import PhraseMaterials from './components/PhraseMaterials.vue'
 import LessonView from './components/LessonView.vue'
 import LibraryHome from './components/LibraryHome.vue'
+import LessonIntake from './components/LessonIntake.vue'
 
 const {
   route,
@@ -59,6 +60,8 @@ const {
   loadingMoreLessons,
   loadRoute,
 } = useLibrary()
+const publication = ref(0)
+const practicePanel = ref<InstanceType<typeof PracticePanel> | null>(null)
 const practice = usePracticeSession()
 const transfers = useTakeJournal()
 async function retryTransfers() {
@@ -84,6 +87,13 @@ function startSession(lessonId?: string, dialogueId?: string) {
   if (currentLanguage.value)
     void launcher.value?.launch(currentLanguage.value, lessonId, dialogueId)
 }
+async function openIntake() {
+  await practicePanel.value?.openIntake()
+}
+function published() {
+  publication.value++
+  void loadRoute(true)
+}
 function leavePractice() {
   void router.push(`/learn/${practice.session.value?.manifest.language ?? currentLanguage.value}`)
 }
@@ -91,6 +101,12 @@ function leavePractice() {
 <template>
   <div class="shell">
     <header>
+      <LessonIntake
+        :language="currentLanguage ?? 'en'"
+        :locale="locale"
+        :before-open="openIntake"
+        @published="published"
+      />
       <RouterLink class="brand" :to="currentLanguage ? `/learn/${currentLanguage}` : '/'"
         >Phrase Gym<span>◌</span></RouterLink
       >
@@ -164,6 +180,7 @@ function leavePractice() {
           <template v-else>
             <SessionLauncher ref="launcher" :engine="practice" :pt="pt" />
             <PracticePanel
+              ref="practicePanel"
               :key="practice.session.value?.id"
               v-if="
                 kind === 'practice' &&
@@ -215,6 +232,7 @@ function leavePractice() {
               @start="startSession(route.path.split('/')[4])"
             />
             <LibraryHome
+              :publication="publication"
               v-else-if="kind === 'home'"
               :t="t"
               :language="currentLanguage"

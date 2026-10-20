@@ -10,7 +10,7 @@ use crate::platform::paths::CoachPaths;
 use crate::platform::tools::{self, Discovery};
 use crate::process::{Ending, Limits, ProcessSpec};
 
-pub const VERIFIED_VERSION: &str = "0.159.2";
+pub const VERIFIED_VERSION: &str = "0.163.0";
 pub const MODEL: &str = "gpt-5.6-luna";
 
 pub struct CodexReady {
@@ -19,7 +19,7 @@ pub struct CodexReady {
     pub host: HostEnvironment,
 }
 
-// This is setup readiness only; it neither starts a model nor certifies own-home isolation.
+// Readiness inspects the selected executable and subscription login without starting a model.
 pub fn check() -> Result<CodexReady, String> {
     let paths = CoachPaths::for_current_user().map_err(|e| e.to_string())?;
     let host = HostEnvironment::current();
@@ -53,58 +53,13 @@ impl Drop for Scratch {
     }
 }
 
-fn checked_home(paths: &CoachPaths, host: &HostEnvironment) -> Result<PathBuf, String> {
-    let home = paths.codex_home();
-    for path in [&paths.state, &home] {
-        let metadata = std::fs::symlink_metadata(path).map_err(|_| {
-            "Coach Codex home is missing; follow the attended Codex setup in docs/coach-desktop.md"
-        })?;
-        if metadata.file_type().is_symlink() || !metadata.is_dir() {
-            return Err("Coach state and Codex home must be real directories, not aliases".into());
-        }
-    }
-    let home = home
-        .canonicalize()
-        .map_err(|_| "Cannot resolve Coach Codex home")?;
-    for variable in ["HOME", "USERPROFILE"] {
-        if let Some(profile) = host.get(variable)
-            && Path::new(profile)
-                .join(".codex")
-                .canonicalize()
-                .is_ok_and(|p| p == home)
-        {
-            return Err("Coach cannot use the operator's Codex home".into());
-        }
-    }
-    for name in ["AGENTS.md", "AGENTS.override.md"] {
-        if std::fs::symlink_metadata(home.join(name)).is_ok() {
-            return Err(
-                "Remove user instructions from Coach's dedicated Codex home before measurement"
-                    .into(),
-            );
-        }
-    }
-    let skills = home.join("skills");
-    if std::fs::symlink_metadata(&skills).is_ok() {
-        if std::fs::symlink_metadata(&skills).is_ok_and(|m| m.file_type().is_symlink()) {
-            return Err("Coach Codex skills must not be a symlink".into());
-        }
-        for entry in std::fs::read_dir(&skills).map_err(|_| "Cannot inspect Coach Codex skills")? {
-            let entry = entry.map_err(|_| "Cannot inspect Coach Codex skills")?;
-            if entry.file_name() != ".system"
-                || entry
-                    .file_type()
-                    .map_err(|_| "Cannot inspect skill")?
-                    .is_symlink()
-            {
-                return Err(
-                    "Remove custom skills from Coach's dedicated Codex home before measurement"
-                        .into(),
-                );
-            }
-        }
-    }
-    Ok(home)
+fn checked_home(_paths: &CoachPaths, host: &HostEnvironment) -> Result<PathBuf, String> {
+    let profile = host
+        .get("HOME")
+        .or_else(|| host.get("USERPROFILE"))
+        .ok_or("The operating system user home is unavailable")?;
+    Path::new(profile).join(".codex").canonicalize()
+        .map_err(|_| "Sign in to Codex with your ChatGPT subscription outside Coach; normal Codex home is missing".into())
 }
 
 fn check_with(
@@ -138,8 +93,8 @@ fn check_with(
     }
     // Status inspection deliberately omits forced_login_method: an API login must be rejected,
     // never logged out or mutated by this no-spend check.
-    if inspect(&["--ignore-user-config", "login", "status"])?.trim() != "Logged in using ChatGPT" {
-        return Err("Coach's own ChatGPT subscription login is required; perform the attended Codex setup in docs/coach-desktop.md. No login was started".into());
+    if inspect(&["login", "status"])?.trim() != "Logged in using ChatGPT" {
+        return Err("ChatGPT subscription login in your normal Codex home is required; run codex login yourself outside Coach. No login was started".into());
     }
     Ok(())
 }
@@ -169,7 +124,7 @@ fn probe(spec: ProcessSpec) -> Result<String, String> {
         || !report.stderr.closed
     {
         return Err(
-            "Codex readiness check failed; inspect version/login status manually in Coach's home"
+            "Codex readiness check failed; inspect version/login status manually in your normal Codex home"
                 .into(),
         );
     }

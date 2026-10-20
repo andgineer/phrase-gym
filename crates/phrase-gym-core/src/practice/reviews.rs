@@ -11,7 +11,7 @@ use crate::scheduler::{POLICY_VERSION, ReviewPolicy};
 use crate::schedules::{self, Schedule};
 use crate::sessions::store::SessionRow;
 use crate::storage::StorageError;
-use crate::timestamps;
+use crate::{study, timestamps};
 
 const LEARNING_CHECK: TimeDelta = TimeDelta::days(1);
 
@@ -57,7 +57,10 @@ fn exclusion(
         "review_group_already_finalized"
     } else if schedule.map_or(0, |due| due.version) != item.schedule_version {
         "stale_schedule"
-    } else if schedule.is_some_and(|due| due.due_at > review.now) {
+    } else if schedule.is_some_and(|due| due.due_at > review.now)
+        && !(item.phrase.english.is_some()
+            && study::first_check(connection, target, revision, schedule)?)
+    {
         "early_practice"
     } else {
         return Ok(None);

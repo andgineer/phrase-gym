@@ -1,6 +1,6 @@
 use phrase_gym_contracts::base::Language;
 use phrase_gym_contracts::english::PreparedEnglishLesson;
-use phrase_gym_contracts::media::{MediaOrigin, MediaRole};
+use phrase_gym_contracts::media::MediaRole;
 use uuid::Uuid;
 
 use crate::error::CoreError;
@@ -25,7 +25,7 @@ pub(crate) fn references(package: &PreparedEnglishLesson) -> Vec<Uuid> {
         .collect()
 }
 
-fn supplied(index: &MediaIndex, id: Uuid, text: &str, role: MediaRole) -> Result<(), CoreError> {
+fn verified(index: &MediaIndex, id: Uuid, text: &str, role: MediaRole) -> Result<(), CoreError> {
     let record = index
         .record(id)
         .filter(|_| index.available(id))
@@ -35,12 +35,8 @@ fn supplied(index: &MediaIndex, id: Uuid, text: &str, role: MediaRole) -> Result
             ))
         })?;
     let metadata = &record.metadata;
-    if metadata.language != Language::En
-        || metadata.text != text
-        || metadata.role != role
-        || metadata.origin == MediaOrigin::Generated
-    {
-        return Err(CoreError::Invalid("Preview audio must be supplied and match the exact English text and reference, cue or partner role".into()));
+    if metadata.language != Language::En || metadata.text != text || metadata.role != role {
+        return Err(CoreError::Invalid("Preview audio must be verified and match the exact English text and reference, cue or partner role".into()));
     }
     Ok(())
 }
@@ -50,7 +46,7 @@ pub(super) fn validate(
     index: &MediaIndex,
 ) -> Result<(), CoreError> {
     for phrase in &package.phrases {
-        supplied(
+        verified(
             index,
             phrase.reference_audio_id,
             &phrase.text,
@@ -58,12 +54,12 @@ pub(super) fn validate(
         )?;
         for situation in &phrase.situations {
             if let Some(id) = situation.audio_id {
-                supplied(index, id, &situation.text, MediaRole::Cue)?;
+                verified(index, id, &situation.text, MediaRole::Cue)?;
             }
             if let Some(partner) = &situation.partner
                 && let Some(id) = partner.audio_id
             {
-                supplied(index, id, &partner.text, MediaRole::Partner)?;
+                verified(index, id, &partner.text, MediaRole::Partner)?;
             }
         }
     }

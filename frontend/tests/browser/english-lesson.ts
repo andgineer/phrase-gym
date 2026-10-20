@@ -3,7 +3,7 @@ import { expect, type APIRequestContext } from '@playwright/test'
 import { tone } from './seed-library'
 import type { components } from '../rust-contract/api.generated'
 
-export async function englishLesson(request: APIRequestContext) {
+export async function englishLesson(request: APIRequestContext, translation: string | null = null) {
   const media = await request.post('/api/v1/media', {
     data: {
       mime_type: 'audio/wav',
@@ -46,7 +46,7 @@ export async function englishLesson(request: APIRequestContext) {
   const claim = await (
     await request.post('/api/v1/preparation/claims', { data: { claim_id: randomUUID() } })
   ).json()
-  await stageEnglishClaim(request, claim)
+  await stageEnglishClaim(request, claim, translation)
   const publication = await request.post('/api/v1/preparation/publish', { data: claim.fence })
   expect(publication.ok()).toBe(true)
   return { publication: await publication.json(), asset }
@@ -55,7 +55,31 @@ export async function englishLesson(request: APIRequestContext) {
 export async function stageEnglishClaim(
   request: APIRequestContext,
   claim: components['schemas']['JobClaim'],
+  translation: string | null = null,
 ) {
+  let reference = claim.input.phrases[0].reference_audio_id
+  if (!reference) {
+    const uploaded = await request.post('/api/v1/media', {
+      data: {
+        mime_type: 'audio/wav',
+        audio_base64: tone(),
+        metadata: {
+          language: 'en',
+          text: claim.input.phrases[0].text,
+          role: 'reference',
+          origin: 'generated',
+          source: 'synthetic-test',
+          engine: 'fake',
+          voice: 'synthetic',
+          locale: 'en-US',
+          speech_text: claim.input.phrases[0].text,
+          preparation_version: 'fixture-v1',
+        },
+      },
+    })
+    expect(uploaded.ok(), await uploaded.text()).toBe(true)
+    reference = (await uploaded.json()).id
+  }
   const staged = await request.post('/api/v1/preparation/stage', {
     data: {
       fence: claim.fence,
@@ -96,10 +120,10 @@ export async function stageEnglishClaim(
               language: 'en',
               meaning: 'Begin a shared activity.',
               usage: null,
-              translation: null,
+              translation,
             },
             familiarity: { kind: 'new' },
-            reference_audio_id: claim.input.phrases[0].reference_audio_id,
+            reference_audio_id: reference,
             expected_revision: null,
           },
         ],

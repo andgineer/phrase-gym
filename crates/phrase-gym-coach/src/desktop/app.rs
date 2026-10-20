@@ -132,22 +132,10 @@ impl CoachApp {
 
 impl eframe::App for CoachApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        if !self.view.intake.busy {
-            for file in ui.ctx().input(|input| input.raw.dropped_files.clone()) {
-                let path = file.path();
-                if path
-                    .extension()
-                    .is_some_and(|extension| extension == "json")
-                {
-                    self.view.intake.command = Some(super::intake::Command::Load(
-                        path.to_string_lossy().into_owned(),
-                    ));
-                } else {
-                    self.view
-                        .intake
-                        .accept_audio(path.to_string_lossy().into_owned(), &self.view.draft);
-                }
-            }
+        if ui.ctx().input(|input| !input.raw.dropped_files.is_empty()) {
+            self.view.intake.status =
+                "Paste phrase text into the phrase area. Prepared packages use the external API."
+                    .into();
         }
         while let Ok(event) = self.events.try_recv() {
             self.view.snapshot.apply(event);
@@ -165,11 +153,6 @@ impl eframe::App for CoachApp {
                     self.view.snapshot.server_configured = true;
                     self.view.snapshot.processing_enabled = true;
                 }
-                Event::Draft(json) => {
-                    self.view.intake.preview = super::preview::LessonPreview::parse(&json).ok();
-                    self.view.intake.prepared = Some(json);
-                }
-                Event::Audio(path) => self.view.intake.accept_audio(path, &self.view.draft),
                 Event::Published(url) => self.view.intake.practice = Some(url),
                 Event::Finished(result) => {
                     if let Some(smoke) = &mut self.smoke {

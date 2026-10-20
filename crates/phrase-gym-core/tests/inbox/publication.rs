@@ -84,7 +84,7 @@ fn stale_workers_and_changed_pinned_input_cannot_publish() {
     output.package.profile_revision = claim.receipt.profile_revision;
     output.package.phrases[0].reference_audio_id = Uuid::new_v4();
     assert!(delivery.stage("worker", &output).is_err());
-    output.package.phrases[0].reference_audio_id = input.phrases[0].reference_audio_id;
+    output.package.phrases[0].reference_audio_id = input.phrases[0].reference_audio_id.unwrap();
     delivery.stage("worker", &output).unwrap();
     clock.advance(120);
     assert!(delivery.publish("worker", &claim.fence).is_err());
@@ -197,4 +197,42 @@ fn compatible_generations_keep_target_identity_and_expected_revisions_are_rechec
         .unwrap();
     assert!(delivery.publish("worker", &claim.fence).is_err());
     assert!(delivery.receipt("worker", &claim.fence).unwrap().is_none());
+}
+
+#[test]
+fn genuinely_missing_reference_requires_generated_provenance_without_rebinding_original_input() {
+    let f = Fixture::new();
+    let inbox = inbox(&f);
+    let mut raw = input(&f);
+    raw.phrases[0].reference_audio_id = None;
+    raw.phrases[0].audio_sha256 = None;
+    inbox.submit("sender", &raw).unwrap();
+    let clock = Arc::new(TestClock::new());
+    let jobs = Jobs::new(f.database.clone(), clock.clone());
+    let claim = jobs.claim("worker", Uuid::new_v4()).unwrap().unwrap();
+    let mut output = output(&f, &claim);
+    let delivery = Delivery::new(
+        f.database.clone(),
+        Arc::new(phrase_gym_core::english::EnglishPackages::new(
+            f.database.clone(),
+            Arc::new(phrase_gym_core::media::store::MediaStore::open(f.directory.path()).unwrap()),
+            f.profiles.clone(),
+        )),
+        clock,
+    );
+    assert!(
+        delivery.stage("worker", &output).is_err(),
+        "Course/actor media cannot masquerade as generated speech"
+    );
+    let generated = f.upload(&serde_json::json!({"origin":"generated", "performer":null, "engine":"synthetic", "voice":"synthetic", "speech_text":super::support::ANSWER}));
+    output.package.phrases[0].reference_audio_id = generated.id;
+    delivery.stage("worker", &output).unwrap();
+    delivery.publish("worker", &claim.fence).unwrap();
+    assert_eq!(
+        jobs.claim("worker", claim.fence.claim_id)
+            .unwrap()
+            .unwrap()
+            .input,
+        raw
+    );
 }

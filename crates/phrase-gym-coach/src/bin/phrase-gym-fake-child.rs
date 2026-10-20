@@ -13,6 +13,31 @@ fn main() -> ExitCode {
     let words: Vec<&str> = arguments.iter().map(String::as_str).collect();
     match words.as_slice() {
         ["-p", ..] => prepare(),
+        ["exec", ..] => {
+            let Some(task) = arguments
+                .last()
+                .and_then(|a| a.strip_prefix("Read your task from "))
+                .and_then(|a| a.strip_suffix(" and execute it."))
+            else {
+                return ExitCode::from(2);
+            };
+            let parent = Path::new(task).parent().unwrap();
+            std::fs::write(
+                parent.join("launch-arguments.json"),
+                serde_json::to_vec(&arguments).unwrap(),
+            )
+            .unwrap();
+            std::fs::write(
+                parent.join("launch-cwd.txt"),
+                std::env::current_dir()
+                    .unwrap()
+                    .to_string_lossy()
+                    .as_bytes(),
+            )
+            .unwrap();
+            std::env::set_current_dir(parent).unwrap();
+            prepare()
+        }
         ["-I", "-c", ..] => {
             let bad = std::env::current_exe().is_ok_and(|p| {
                 p.file_name()
@@ -198,9 +223,9 @@ fn fake_piper() -> ExitCode {
         return ExitCode::SUCCESS;
     }
     let bytes = if input == "silence" {
-        [0, 0, 0, 0]
+        vec![0; 8820]
     } else {
-        [1, 0, 2, 0]
+        [1, 0, 2, 0].repeat(2205)
     };
     match std::io::stdout().write_all(&bytes) {
         Ok(()) => ExitCode::SUCCESS,

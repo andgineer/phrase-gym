@@ -138,3 +138,13 @@ fn profile_revision_is_pinned_and_unresolved_serbian_does_not_block_english() {
     changed.profile_revision = 999;
     assert!(fixture.validator.validate(&changed).is_err());
 }
+
+#[test]
+fn a_hint_cannot_replace_a_source_word_with_its_stem() {
+    let fixture = Fixture::new();
+    let mut package = fixture.package();
+    package.phrases[0].hint = "start".into();
+    assert!(fixture.validator.validate(&package).is_err());
+    package.phrases[0].hint = "started".into();
+    assert!(fixture.validator.validate(&package).is_ok());
+}

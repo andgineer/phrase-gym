@@ -14,11 +14,10 @@ pub mod state;
 pub mod text;
 pub mod view;
 
-mod audio_preview;
 mod connection;
 mod intake_actions;
 mod intake_runtime;
 pub mod launch;
-pub mod preview;
-pub mod settings;
 pub mod smoke_intake;
+
+mod selected;

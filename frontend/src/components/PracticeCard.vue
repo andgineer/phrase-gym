@@ -22,11 +22,9 @@ watch(heading, (element) => element?.focus())
 const study = computed(() => props.item.eligibility === 'study')
 const english = computed(() => props.item.phrase.english)
 const cue = computed(() => props.item.phrase.content.cues?.find((c) => c.id === props.item.cue_id))
+const situation = computed(() => english.value?.situations.find((s) => s.id === props.item.cue_id))
 const prompt = computed(
-  () =>
-    english.value?.situations.find((s) => s.id === props.item.cue_id)?.text ||
-    cue.value?.prompt ||
-    props.item.phrase.content.purpose,
+  () => situation.value?.text || cue.value?.prompt || props.item.phrase.content.purpose,
 )
 const showPhrase = computed(
   () =>
@@ -34,8 +32,11 @@ const showPhrase = computed(
     props.item.phrase.content.chunks.some((chunk) => cue.value?.visible_chunks.includes(chunk.id)),
 )
 const explanation = computed(() =>
-  preparedExplanation(props.item.phrase.content.explanations?.[props.nativeLanguage]),
+  english.value?.help
+    ? { ...english.value.help, breakdown: [] }
+    : preparedExplanation(props.item.phrase.content.explanations?.[props.nativeLanguage]),
 )
+const helpLanguage = computed(() => english.value?.help?.language ?? props.nativeLanguage)
 const emit = defineEmits<{
   control: []
   mine: []
@@ -49,10 +50,10 @@ const emit = defineEmits<{
 <template>
   <article class="card practice-card">
     <p v-if="study" role="status">{{ pt.study }}. {{ pt.studyHelp }}</p>
-    <p class="practice-prompt" :lang="english?.situations[0]?.language || item.phrase.language">
+    <p class="practice-prompt" :lang="situation?.language || item.phrase.language">
       {{ prompt }}
     </p>
-    <p v-if="english?.situations[0]?.partner">{{ english.situations[0].partner.text }}</p>
+    <p v-if="situation?.partner">{{ situation.partner.text }}</p>
     <h1
       v-if="showPhrase"
       ref="heading"
@@ -117,9 +118,8 @@ const emit = defineEmits<{
     <div v-if="study && english?.help" :lang="english.help.language">
       <p>{{ english.help.meaning }}</p>
       <p v-if="english.help.usage">{{ english.help.usage }}</p>
-      <p v-if="english.help.translation">{{ english.help.translation }}</p>
     </div>
-    <div v-else-if="card.expanded && explanation" class="explanation" :lang="nativeLanguage">
+    <div v-else-if="card.expanded && explanation" class="explanation" :lang="helpLanguage">
       <p v-if="explanation.meaning.trim()">{{ explanation.meaning }}</p>
       <p v-if="explanation.usage?.trim()">{{ explanation.usage }}</p>
       <ul v-if="explanation.breakdown?.length">
@@ -128,6 +128,9 @@ const emit = defineEmits<{
         </li>
       </ul>
     </div>
+    <p v-if="card.revealed && english?.help?.translation" class="answer-translation">
+      {{ english.help.translation }}
+    </p>
     <template v-if="!study">
       <details>
         <summary>{{ pt.counts }}</summary>
@@ -150,21 +153,27 @@ const emit = defineEmits<{
       <div class="ratings">
         <button
           class="not-yet"
-          :disabled="capturing || requesting || processing || ratingBusy"
+          :disabled="
+            (english && !card.revealed) || capturing || requesting || processing || ratingBusy
+          "
           @click="emit('rate', 'not_yet')"
         >
           ↻ {{ pt.notYet }}
         </button>
         <button
           class="effort"
-          :disabled="capturing || requesting || processing || ratingBusy"
+          :disabled="
+            (english && !card.revealed) || capturing || requesting || processing || ratingBusy
+          "
           @click="emit('rate', 'with_effort')"
         >
           ◷ {{ pt.effort }}
         </button>
         <button
           class="recalled"
-          :disabled="capturing || requesting || processing || ratingBusy"
+          :disabled="
+            (english && !card.revealed) || capturing || requesting || processing || ratingBusy
+          "
           @click="emit('rate', 'recalled')"
         >
           ✓ {{ pt.recalled }}

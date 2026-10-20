@@ -15,15 +15,17 @@ fn run() -> Result<(), String> {
     };
     let destination = PathBuf::from(destination);
     if !destination.is_absolute() || destination.exists() {
-        return Err("Choose a fresh absolute directory outside repositories".into());
+        return Err("Choose a fresh absolute directory under the repository ignored .phrase-gym-coach folder".into());
     }
     let parent = destination
         .parent()
         .ok_or("Destination has no parent")?
         .canonicalize()
         .map_err(|_| "Destination parent must exist")?;
-    if parent.ancestors().any(|p| p.join(".git").exists()) {
-        return Err("Measurement staging must be outside repositories".into());
+    let workspace = std::env::current_dir().map_err(|_| "Cannot resolve repository workspace")?;
+    if !workspace.join(".git").exists() || !parent.starts_with(workspace.join(".phrase-gym-coach"))
+    {
+        return Err("Stage private measurements under this repository's ignored .phrase-gym-coach directory".into());
     }
     let ready = codex_readiness::check()?;
     std::fs::create_dir(&destination).map_err(|_| "Cannot create staging directory")?;
@@ -45,7 +47,7 @@ fn run() -> Result<(), String> {
         .map_err(|_| "Cannot stage synthetic prompt")?;
     let model = ModelSelection::new(codex_readiness::MODEL, Some(Effort::Low))
         .map_err(|e| e.to_string())?;
-    let invocation = CliAdapter::Codex
+    let mut invocation = CliAdapter::Codex
         .invocation(&LaunchContext {
             executable: &ready.executable,
             attempt: &attempt,
@@ -54,8 +56,9 @@ fn run() -> Result<(), String> {
             codex_home: &ready.home,
         })
         .map_err(|e| e.to_string())?;
+    invocation.cwd = workspace;
     let manifest = json!({
-        "model_started": false, "own_home_isolation_accepted": false,
+        "model_started": false, "normal_home_customizations_may_load": true,
         "version": codex_readiness::VERIFIED_VERSION, "model": codex_readiness::MODEL,
         "program": invocation.program, "arguments": invocation.arguments(),
         "cwd": invocation.cwd, "codex_home": ready.home,
@@ -68,7 +71,7 @@ fn run() -> Result<(), String> {
     )
     .map_err(|_| "Cannot stage manifest")?;
     println!(
-        "Coach-owned Codex setup ready; no model started. Inspect measurement.json. Real execution requires explicit run-budget authorization; own-home isolation remains unverified."
+        "Normal-home Codex setup ready; no model started. Inspect measurement.json. Real execution requires explicit run-budget authorization."
     );
     Ok(())
 }

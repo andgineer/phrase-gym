@@ -9,7 +9,7 @@ use super::invocation::{
 
 const PROFILE: &str = "coach_job";
 // --ignore-user-config skips config.toml (MCP servers, plugins, notify, model) but not the home's
-// AGENTS.md or skills, which is why Coach points CODEX_HOME at a home it owns.
+// AGENTS.md or skills. The local workflow deliberately uses the normal user home.
 const ISOLATION: &[&str] = &[
     "exec",
     "--skip-git-repo-check",
@@ -84,8 +84,8 @@ pub(super) fn invocation(context: &LaunchContext<'_>) -> Result<Invocation, Invo
     })
 }
 
-// Commands may read only platform runtime paths and Codex's own install directory, and may write
-// only the attempt directory; /tmp and $TMPDIR are closed explicitly because :minimal opens them.
+// Commands may read runtime/install paths and the configured writable workspace.
+// Shared temporary paths stay closed because :minimal would otherwise open them.
 fn permission_profile(executable_directory: &Path) -> Result<String, InvocationError> {
     let install = executable_directory
         .to_str()
@@ -93,7 +93,7 @@ fn permission_profile(executable_directory: &Path) -> Result<String, InvocationE
     Ok(format!(
         "permissions.{PROFILE}={{filesystem={{\":root\"=\"deny\", \":minimal\"=\"read\", \
          \":slash_tmp\"=\"deny\", \":tmpdir\"=\"deny\", {}=\"read\", \
-         \":workspace_roots\"={{\".\"=\"write\"}}}}, network={{enabled=false}}}}",
+         \":workspace_roots\"={{\".\"=\"write\", \".env\"=\"deny\"}}}}, network={{enabled=false}}}}",
         toml_string(install)
     ))
 }
@@ -122,9 +122,9 @@ mod tests {
     use super::*;
 
     #[cfg(unix)]
-    const EXECUTABLE: &str = "/opt/homebrew/Caskroom/codex/0.159.2 Ünï/bin/codex";
+    const EXECUTABLE: &str = "/opt/homebrew/Caskroom/codex/0.163.0 Ünï/bin/codex";
     #[cfg(unix)]
-    const INSTALL_READ: &str = r#""/opt/homebrew/Caskroom/codex/0.159.2 Ünï/bin"="read""#;
+    const INSTALL_READ: &str = r#""/opt/homebrew/Caskroom/codex/0.163.0 Ünï/bin"="read""#;
     #[cfg(unix)]
     const ATTEMPT: &str = "/Users/learner/Library/Caches/Coach Ünï/attempts/attempt Ђ";
     #[cfg(unix)]
@@ -175,7 +175,7 @@ mod tests {
             r#"permissions.coach_job={filesystem={":root"="deny", ":minimal"="read", "#,
             r#"":slash_tmp"="deny", ":tmpdir"="deny", "#,
             INSTALL_READ,
-            r#", ":workspace_roots"={"."="write"}}, network={enabled=false}}"#,
+            r#", ":workspace_roots"={"."="write", ".env"="deny"}}, network={enabled=false}}"#,
         ]
         .concat();
         let mut expected: Vec<String> = [
@@ -254,7 +254,7 @@ mod tests {
     }
 
     #[test]
-    fn adds_only_the_coach_codex_home_to_the_allowlisted_environment() {
+    fn adds_only_the_selected_codex_home_to_the_allowlisted_environment() {
         let env = build(Path::new(EXECUTABLE), Some(Effort::Low)).env;
         let mut expected = child_environment(&host(), Path::new(EXECUTABLE).parent().unwrap());
         expected.push((OsString::from("CODEX_HOME"), OsString::from(CODEX_HOME)));

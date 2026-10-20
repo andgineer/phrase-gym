@@ -76,13 +76,24 @@ fn binding(connection: &Connection, output: &LessonOutput) -> Result<(), CoreErr
                 CoreError::Invalid("Output must retain every supplied phrase identity".into())
             })?;
         if prepared.text != original.text
-            || prepared.reference_audio_id != original.reference_audio_id
+            || original
+                .reference_audio_id
+                .is_some_and(|id| prepared.reference_audio_id != id)
             || prepared.expected_revision != original.expected_revision
         {
             return Err(CoreError::Invalid(
                 "Output must retain exact supplied wording, original audio and expected revision"
                     .into(),
             ));
+        }
+        if original.reference_audio_id.is_none() {
+            let media = crate::media::records::find(connection, prepared.reference_audio_id)?
+                .ok_or_else(|| CoreError::Invalid("Generated reference is missing".into()))?;
+            if media.metadata.origin != phrase_gym_contracts::media::MediaOrigin::Generated {
+                return Err(CoreError::Invalid(
+                    "Missing input audio requires generated reference provenance".into(),
+                ));
+            }
         }
     }
     input::expected_revisions(connection, &input, &receipt.namespace)

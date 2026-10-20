@@ -780,11 +780,11 @@ export interface components {
             total: number;
         };
         LessonPhraseInput: {
-            audio_sha256: string;
+            audio_sha256?: string | null;
             /** Format: int64 */
             expected_revision?: number | null;
             /** Format: uuid */
-            reference_audio_id: string;
+            reference_audio_id?: string | null;
             source_id: string;
             text: string;
         };

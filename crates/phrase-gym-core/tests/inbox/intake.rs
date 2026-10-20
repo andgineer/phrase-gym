@@ -81,10 +81,10 @@ fn intake_rejects_unsupported_material_and_unverified_or_mismatched_audio() {
     let inbox = inbox(&f);
     let original = input(&f);
     let mut bad = original.clone();
-    bad.phrases[0].audio_sha256 = "0".repeat(64);
+    bad.phrases[0].audio_sha256 = Some("0".repeat(64));
     assert!(inbox.submit("sender", &bad).is_err());
     bad = original.clone();
-    bad.phrases[0].reference_audio_id = Uuid::new_v4();
+    bad.phrases[0].reference_audio_id = Some(Uuid::new_v4());
     assert!(inbox.submit("sender", &bad).is_err());
     bad = original.clone();
     bad.language = Language::De;
@@ -102,9 +102,34 @@ fn intake_rejects_unsupported_material_and_unverified_or_mismatched_audio() {
         f.directory
             .path()
             .join("media")
-            .join(&original.phrases[0].audio_sha256),
+            .join(original.phrases[0].audio_sha256.as_ref().unwrap()),
         b"truncated",
     )
     .unwrap();
     assert!(inbox.submit("sender", &original).is_err());
+}
+
+#[test]
+fn missing_audio_is_durable_original_input_but_partial_or_invalid_supplied_audio_is_rejected() {
+    let f = Fixture::new();
+    let inbox = inbox(&f);
+    let mut raw = input(&f);
+    raw.phrases[0].reference_audio_id = None;
+    assert!(inbox.submit("sender", &raw).is_err());
+    raw.phrases[0].audio_sha256 = None;
+    let receipt = inbox.submit("sender", &raw).unwrap();
+    let claim = phrase_gym_core::inbox::jobs::Jobs::new(f.database.clone(), Arc::new(SystemClock))
+        .claim("worker", Uuid::new_v4())
+        .unwrap()
+        .unwrap();
+    assert_eq!(claim.input, raw);
+    assert_eq!(claim.receipt, receipt);
+    let mut substituted = raw.clone();
+    substituted.phrases[0].reference_audio_id = Some(Uuid::new_v4());
+    substituted.phrases[0].audio_sha256 = Some("0".repeat(64));
+    assert!(inbox.submit("sender", &substituted).is_err());
+    assert_eq!(
+        inbox.receipt("sender", raw.submission_id).unwrap(),
+        Some(receipt)
+    );
 }

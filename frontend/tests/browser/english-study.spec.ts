@@ -21,7 +21,7 @@ test('automatic raw intake through native Coach reaches normal Start, ungraded N
       recordings.push(r.postDataJSON())
   })
   await page.goto('/learn/en')
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await fillLesson(page)
   await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
   const publication = await prepareWithNativeFakeCoach(preview.url)
@@ -30,6 +30,7 @@ test('automatic raw intake through native Coach reaches normal Start, ungraded N
       exact: true,
     }),
   ).toBeVisible({ timeout: 15000 })
+  await page.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeEnabled()
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
@@ -117,7 +118,7 @@ for (const phase of ['permission', 'recording', 'comparison'] as const) {
       }
     }
     const before = await (await request.get('/api/v1/sessions/current')).json()
-    await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+    await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeEnabled()
     const after = await (await request.get('/api/v1/sessions/current')).json()

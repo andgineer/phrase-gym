@@ -1,5 +1,5 @@
-use super::settings::Settings;
 use crate::platform::paths::CoachPaths;
+use crate::platform::settings::Settings;
 use crate::transfer::client::ServerClient;
 
 pub fn connect(server: &str, paths: &CoachPaths) -> Result<ServerClient, String> {

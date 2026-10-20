@@ -14,6 +14,12 @@ export const test = base.extend({
       serviceWorkers: 'block',
     })
     try {
+      await context.addInitScript(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: { readText: async () => '' },
+        })
+      })
       await observeNativePlayback(context)
       await use(context)
     } finally {

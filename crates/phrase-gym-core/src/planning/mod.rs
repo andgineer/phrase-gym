@@ -4,7 +4,7 @@ pub(crate) mod scope;
 use std::collections::BTreeSet;
 
 use chrono::{DateTime, Utc};
-use phrase_gym_contracts::library::{AudioStatus, Dialogue};
+use phrase_gym_contracts::library::Dialogue;
 use phrase_gym_contracts::sessions::{
     Eligibility, ManifestSchema, PlannedTarget, PlannerVersion, SessionManifest, SessionStart,
 };
@@ -16,7 +16,7 @@ use crate::library::phrases;
 use crate::media::index::MediaIndex;
 use crate::prompts::selection;
 use crate::scheduler::POLICY_VERSION;
-use crate::schedules;
+use crate::{schedules, study};
 
 use scope::Scope;
 
@@ -45,33 +45,35 @@ pub(crate) fn plan(
             candidate.content,
         )?
         .finish(media);
-        let study = dialogue.is_none() && phrase.english.is_some();
-        if !study && dialogue.is_none() && schedule.as_ref().is_some_and(|due| due.due_at > now) {
+        let completed_study =
+            phrase.english.is_some() && study::completed(connection, phrase.id, phrase.revision)?;
+        let study = dialogue.is_none() && phrase.english.is_some() && !completed_study;
+        let first_check = phrase.english.is_some()
+            && study::first_check(connection, phrase.id, phrase.revision, schedule.as_ref())?;
+        if !study
+            && !first_check
+            && dialogue.is_none()
+            && schedule.as_ref().is_some_and(|due| due.due_at > now)
+        {
             continue;
         }
-        if study && phrase.audio_status != AudioStatus::Ready {
+        if !phrase.retrieval_ready {
             continue;
         }
-        if !study && !phrase.retrieval_ready {
+        let cue = if phrase.english.is_some() {
+            selection::situation(connection, phrase.id, phrase.revision, &phrase.content)?
+        } else {
+            selection::select(connection, phrase.id, phrase.revision, &phrase.content)?
+        };
+        let Some(cue) = cue else {
             continue;
-        }
-        let (cue_id, hidden_chunks) =
-            if let Some(english) = phrase.english.as_ref().filter(|_| study) {
-                let Some(situation) = english.situations.first() else {
-                    continue;
-                };
-                (situation.id.clone(), Vec::new())
-            } else {
-                let Some(cue) =
-                    selection::select(connection, phrase.id, phrase.revision, &phrase.content)?
-                else {
-                    continue;
-                };
-                (
-                    cue.id.clone(),
-                    selection::hidden_chunks(&phrase.content, &cue),
-                )
-            };
+        };
+        let cue_id = cue.id.clone();
+        let hidden_chunks = if study {
+            Vec::new()
+        } else {
+            selection::hidden_chunks(&phrase.content, &cue)
+        };
         let planned = PlannedTarget {
             hidden_chunks,
             cue_id,
@@ -79,7 +81,7 @@ pub(crate) fn plan(
             schedule_version: schedule.as_ref().map_or(0, |due| due.version),
             eligibility: if study {
                 Eligibility::Study
-            } else if schedule.is_some() {
+            } else if schedule.is_some() && !first_check {
                 Eligibility::Due
             } else {
                 Eligibility::New
@@ -87,8 +89,8 @@ pub(crate) fn plan(
             phrase,
         };
         match schedule {
-            Some(schedule) => due.push((schedule.due_at, planned)),
-            None => new.push(planned),
+            Some(schedule) if !first_check => due.push((schedule.due_at, planned)),
+            _ => new.push(planned),
         }
     }
     due.sort_by_key(|(due_at, _)| *due_at);

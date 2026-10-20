@@ -108,64 +108,18 @@ fn the_draft_accepts_german_and_serbian_latin_and_cyrillic_text() {
 }
 
 #[test]
-fn prepared_file_shows_readable_text_and_audio_selection_initiates_delivery() {
-    let mut state = starting();
-    let json = include_str!("../../../fixtures/coach/supplied-lesson.json");
-    state.intake.prepared = Some(json.into());
-    state.intake.preview =
-        Some(phrase_gym_coach::desktop::preview::LessonPreview::parse(json).unwrap());
-    let mut harness = Harness::builder()
-        .with_size([560.0, 2000.0])
-        .with_context_setup(appearance::install)
-        .build_ui_state(view::show, state);
+fn ordinary_intake_has_no_manual_lesson_or_prepared_file_controls() {
+    let mut harness = harness(starting());
     harness.run();
-    harness.get_by_label("Let's get started.");
-    harness.get_by_label("Situation: Everyone has arrived. Open the meeting.");
-    assert!(harness.query_by_label("Material draft").is_none());
-    assert!(harness.state().intake.command.is_none());
-    harness
-        .get_by_label("Choose original audio and add lesson…")
-        .click();
-    harness.run();
-    assert_eq!(
-        harness.state().intake.command,
-        Some(phrase_gym_coach::desktop::intake::Command::ChooseAudio)
-    );
-    harness
-        .state_mut()
-        .intake
-        .accept_audio("/tmp/selected original.wav".into(), "");
-    assert_eq!(
-        harness.state().intake.command,
-        Some(phrase_gym_coach::desktop::intake::Command::Send {
-            json: json.into(),
-            audio: "/tmp/selected original.wav".into()
-        })
-    );
-}
-
-#[test]
-fn deliberate_audio_input_preserves_raw_fields_and_emits_one_automatic_submission() {
-    let mut state = starting();
-    state.draft = "Let's get started.".into();
-    state.intake.title = "Opening a meeting".into();
-    state.intake.situation = "Everyone has arrived. Open the meeting.".into();
-    state.intake.performer = "Synthetic".into();
-    state
-        .intake
-        .accept_audio("/tmp/original.wav".into(), &state.draft);
-    let Some(phrase_gym_coach::desktop::intake::Command::Raw {
-        title,
-        phrase,
-        audio,
-        ..
-    }) = state.intake.command
-    else {
-        panic!("Audio selection must begin raw intake");
-    };
-    assert_eq!(title, "Opening a meeting");
-    assert_eq!(phrase, state.draft);
-    assert_eq!(audio, "/tmp/original.wav");
+    for name in [
+        "Choose prepared lesson…",
+        "Load supplied demo text",
+        "Lesson title (up to 200 bytes)",
+        "Reference performer (up to 200 bytes)",
+    ] {
+        assert!(harness.query_by_label(name).is_none());
+    }
+    harness.get_by_label("Material draft");
 }
 
 #[test]
@@ -229,4 +183,24 @@ fn server_origin_setup_is_nonsecret_and_editing_requires_reconnection() {
         harness.state().intake.command,
         Some(phrase_gym_coach::desktop::intake::Command::Connect { .. })
     ));
+}
+
+#[test]
+fn deliberate_paste_submits_text_once_while_opening_and_typing_do_not() {
+    let mut harness = harness(starting());
+    harness.run();
+    assert!(harness.state().intake.command.is_none());
+    harness.get_by_label("Material draft").click();
+    harness.run();
+    harness.event(egui::Event::Paste("Let's get started.".into()));
+    harness.run();
+    assert_eq!(
+        harness.state().intake.command,
+        Some(phrase_gym_coach::desktop::intake::Command::Text(
+            "Let's get started.".into()
+        ))
+    );
+    harness.state_mut().intake.command = None;
+    harness.run();
+    assert!(harness.state().intake.command.is_none());
 }

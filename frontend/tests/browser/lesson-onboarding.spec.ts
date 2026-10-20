@@ -26,22 +26,24 @@ test('first lesson retains delivery identity and shows actual preparation and re
   await page.goto('/learn/en')
   await expect(page.getByText(/No published phrases in this language yet/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeDisabled()
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await page.getByRole('button', { name: 'Close', exact: true }).click()
   expect(deliveries).toHaveLength(0)
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await fillLesson(page)
   await expect(page.getByTestId('connection-required')).toBeVisible()
+  await page.getByRole('button', { name: 'Close', exact: true }).click()
   await page
     .getByTestId('connection-required')
     .getByRole('button', { name: 'Retry', exact: true })
     .click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await page.getByRole('button', { name: 'Retry the same delivery', exact: true }).click()
   await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
   expect(deliveries).toHaveLength(1)
   await preview.restart()
   await page.reload()
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
   const claim = await (
     await request.post('/api/v1/preparation/claims', { data: { claim_id: randomUUID() } })
@@ -85,7 +87,7 @@ test('first lesson retains delivery identity and shows actual preparation and re
   await expect(page.getByText(/Ready for ungraded study: 1/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeEnabled()
   await page.getByLabel('Learning language', { exact: true }).selectOption('sr')
-  await page.getByRole('button', { name: 'Dodaj prvu lekciju', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await expect(page.getByText(/Unos novih lekcija trenutno podržava samo engleski/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Pošalji lekciju', exact: true })).toHaveCount(0)
 })
@@ -97,7 +99,7 @@ test('private-network denial retains unconfirmed input and explains unavailable 
   await request.put('/api/v1/settings', {
     data: { native_language: 'ru', ui_language_mode: 'learning' },
   })
-  await page.route('**/api/v1/media', (route) =>
+  await page.route('**/api/v1/inbox/lessons', (route) =>
     route.fulfill({
       status: 403,
       contentType: 'application/json',
@@ -105,13 +107,13 @@ test('private-network denial retains unconfirmed input and explains unavailable 
     }),
   )
   await page.goto('/learn/en')
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await fillLesson(page)
   await expect(page.getByRole('alert')).toContainText('This connection cannot submit material')
   await expect(page.getByText(/Delivery is unconfirmed/)).toBeVisible()
   await page.reload()
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Opening a meeting', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Retry the same delivery', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('This connection cannot submit material')
   expect(
@@ -140,8 +142,8 @@ test('unavailable local storage blocks sending before any lesson delivery', asyn
     if (r.url().endsWith('/api/v1/inbox/lessons') && r.method() === 'POST') deliveries++
   })
   await page.goto('/learn/en')
-  await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Could not save input on this device')
-  await expect(page.getByLabel(/Original reference audio/)).toBeDisabled()
+  await expect(page.getByLabel('Exact English phrase', { exact: true })).toBeDisabled()
   expect(deliveries).toBe(0)
 })

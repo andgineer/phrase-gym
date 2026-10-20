@@ -65,8 +65,8 @@ impl SuppliedLesson {
             phrases: vec![LessonPhraseInput {
                 source_id: self.phrase.source_id.clone(),
                 text: self.phrase.text.clone(),
-                reference_audio_id: media.id,
-                audio_sha256: media.sha256.clone(),
+                reference_audio_id: Some(media.id),
+                audio_sha256: Some(media.sha256.clone()),
                 expected_revision: None,
             }],
         })
@@ -90,7 +90,9 @@ pub fn output(claim: &JobClaim) -> Result<LessonOutput, String> {
         );
     }
     let mut phrase = supplied.phrase;
-    phrase.reference_audio_id = input.reference_audio_id;
+    phrase.reference_audio_id = input
+        .reference_audio_id
+        .ok_or("Reference audio is missing")?;
     phrase.expected_revision = input.expected_revision;
     Ok(LessonOutput {
         fence: claim.fence.clone(),

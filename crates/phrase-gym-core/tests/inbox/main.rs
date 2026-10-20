@@ -1,7 +1,10 @@
 mod identity;
 mod intake;
 mod jobs;
+mod learning;
 mod publication;
+mod rotation;
+mod study;
 #[path = "../english/support.rs"]
 mod support;
 
@@ -35,8 +38,8 @@ fn input(f: &support::Fixture) -> LessonSubmission {
         phrases: vec![LessonPhraseInput {
             source_id: "open-meeting".into(),
             text: support::ANSWER.into(),
-            reference_audio_id: audio.id,
-            audio_sha256: audio.sha256,
+            reference_audio_id: Some(audio.id),
+            audio_sha256: Some(audio.sha256),
             expected_revision: None,
         }],
     }
