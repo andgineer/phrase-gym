@@ -1,0 +1,11 @@
+{
+  "version": "speech-cases-v1",
+  "purpose": "Synthetic listening development cases; no accepted reference or model result",
+  "cases": [
+    {"id": "en-first", "language": "en", "text": "Could you say that again, please?", "speech_text": "Could you say that again, please?", "review": "US English intonation, polite request, complete final word"},
+    {"id": "de-umlaut", "language": "de", "text": "Könnten Sie das bitte wiederholen?", "speech_text": "Könnten Sie das bitte wiederholen?", "review": "German umlaut, polite request, sentence stress"},
+    {"id": "sr-digraph", "language": "sr", "text": "Ljiljana i Njegoš čekaju džez koncert.", "speech_text": "Љиљана и Његош чекају џез концерт.", "review": "Serbian digraphs and proper names; preserve displayed Latin text"},
+    {"id": "sr-boundary", "language": "sr", "text": "Injekcija je zakazana za sutra.", "speech_text": "Инјекција је заказана за сутра.", "review": "Do not merge the morpheme-boundary n+j into њ"},
+    {"id": "sr-foreign", "language": "sr", "text": "Ana koristi Wi-Fi u Berlinu.", "speech_text": "Ана користи Wi-Fi у Берлину.", "review": "Foreign-word pronunciation requires listening; mixed script is intentional"}
+  ]
+}

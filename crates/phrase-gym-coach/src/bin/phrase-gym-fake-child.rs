@@ -13,6 +13,18 @@ fn main() -> ExitCode {
     let words: Vec<&str> = arguments.iter().map(String::as_str).collect();
     match words.as_slice() {
         ["-p", ..] => prepare(),
+        ["-I", "-c", ..] => {
+            let bad = std::env::current_exe().is_ok_and(|p| {
+                p.file_name()
+                    .is_some_and(|n| n.to_string_lossy().starts_with("wrong-runtime"))
+            });
+            println!(
+                "{}|1.31.0|synthetic-python",
+                if bad { "1.7.0" } else { "1.8.0" }
+            );
+            ExitCode::SUCCESS
+        }
+        ["-I", "-m", "piper", ..] => fake_piper(),
         ["report", path, rest @ ..] => report(Path::new(path), rest),
         ["flood", bytes] => flood(bytes.parse().unwrap_or(0)),
         ["sleep", millis] => pause(millis),
@@ -168,4 +180,30 @@ fn prepare() -> ExitCode {
         let _ = std::io::stdout().write_all(&vec![b' '; 200_000]);
     }
     ExitCode::SUCCESS
+}
+
+fn fake_piper() -> ExitCode {
+    let input = std::fs::read_to_string("input.txt").unwrap_or_default();
+    if input == "fail" {
+        return ExitCode::from(1);
+    }
+    if input == "flood" {
+        return flood(3_000_000);
+    }
+    if input == "wait" {
+        return pause("60000");
+    }
+    if input == "odd" {
+        print!("x");
+        return ExitCode::SUCCESS;
+    }
+    let bytes = if input == "silence" {
+        [0, 0, 0, 0]
+    } else {
+        [1, 0, 2, 0]
+    };
+    match std::io::stdout().write_all(&bytes) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(_) => ExitCode::from(1),
+    }
 }

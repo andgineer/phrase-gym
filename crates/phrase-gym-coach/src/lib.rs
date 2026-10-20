@@ -4,5 +4,6 @@ pub mod desktop;
 pub mod platform;
 pub mod preparation;
 pub mod process;
+pub mod speech;
 pub mod supplied;
 pub mod transfer;

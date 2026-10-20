@@ -1,0 +1,11 @@
+{
+  "version": "speech-cases-v1",
+  "purpose": "Frozen cases withheld from synthesis development and voice tuning; loading for a future measurement does not establish acceptance",
+  "cases": [
+    {"id": "en-held", "language": "en", "text": "I'd rather leave on Thursday morning.", "speech_text": "I'd rather leave on Thursday morning.", "review": "Contraction, voiced and unvoiced th, phrase stress"},
+    {"id": "de-held", "language": "de", "text": "Die nächste Straße führt zum Bahnhof.", "speech_text": "Die nächste Straße führt zum Bahnhof.", "review": "German umlauts, ß, consonant clusters and natural stress"},
+    {"id": "sr-held", "language": "sr", "text": "Tanja kaže da Marko dolazi u četvrtak.", "speech_text": "Тања каже да Марко долази у четвртак.", "review": "Names, nj digraph, affricates and word stress"},
+    {"id": "sr-boundary-held", "language": "sr", "text": "Konjugacija i nadživeti nisu jednostavni primeri.", "speech_text": "Конјугација и надживети нису једноставни примери.", "review": "Morpheme-boundary n+j and d+ž must not become њ or џ"},
+    {"id": "sr-foreign-held", "language": "sr", "text": "Milica koristi Bluetooth slušalice.", "speech_text": "Милица користи Bluetooth слушалице.", "review": "Foreign product term, name and Serbian surrounding speech"}
+  ]
+}

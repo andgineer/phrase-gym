@@ -1,7 +1,5 @@
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
-use sha2::Digest;
-use std::fmt::Write as FormatWrite;
 use std::path::Path;
 
 use phrase_gym_contracts::inbox::LessonSubmission;
@@ -43,15 +41,6 @@ pub fn save(path: &Path, pending: &PendingSend) -> Result<(), String> {
     crate::platform::files::save(path, pending)
 }
 
-pub fn audio_hash(bytes: &[u8]) -> String {
-    sha2::Sha256::digest(bytes)
-        .iter()
-        .fold(String::with_capacity(64), |mut text, byte| {
-            let _ = write!(text, "{byte:02x}");
-            text
-        })
-}
-
 impl PendingSend {
     pub fn verify(&self, server: &str, identity: Uuid) -> Result<(), String> {
         if self.server != server {
@@ -63,7 +52,9 @@ impl PendingSend {
         let original = STANDARD.decode(&self.upload.audio_base64).map_err(
             |_| "Retained original audio encoding is invalid; preserve the pending input",
         )?;
-        if original.len() as u64 > MAX_AUDIO || audio_hash(&original) != self.audio_sha256 {
+        if original.len() as u64 > MAX_AUDIO
+            || crate::platform::files::sha256(&original) != self.audio_sha256
+        {
             return Err(
             "Retained original audio hash does not match; preserve the pending input before repair"
                 .into(),

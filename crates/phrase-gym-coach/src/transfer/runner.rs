@@ -32,7 +32,7 @@ pub fn create_material(
         server: server.to_owned(),
         identity: None,
         failure: None,
-        audio_sha256: pending::audio_hash(&bytes),
+        audio_sha256: crate::platform::files::sha256(&bytes),
         output: None,
         submission_id: Uuid::new_v4(),
         claim_id: Uuid::new_v4(),

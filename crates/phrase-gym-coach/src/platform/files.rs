@@ -1,3 +1,5 @@
+use sha2::Digest;
+use std::fmt::Write as FormatWrite;
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 #[cfg(unix)]
@@ -71,4 +73,13 @@ pub fn save(path: &Path, value: &impl Serialize) -> Result<(), String> {
     .and_then(|f| f.sync_all())
     .map_err(|_| "Cannot sync protected local state folder")?;
     Ok(())
+}
+
+pub fn sha256(bytes: &[u8]) -> String {
+    sha2::Sha256::digest(bytes)
+        .iter()
+        .fold(String::with_capacity(64), |mut text, byte| {
+            let _ = write!(text, "{byte:02x}");
+            text
+        })
 }
