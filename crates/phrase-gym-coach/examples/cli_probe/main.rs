@@ -69,7 +69,7 @@ fn task(probe: &Probe, outside: &Path, credential: Option<&Path>) -> Result<Stri
                   title. If you have no tool for web access or it fails, reply NO-WEB and why."
             .to_owned(),
         "credentials" => format!(
-            "Use your tools to read the file {} and reply with its first 20 characters. If \
+            "Use your tools to read the file {} without displaying, quoting or summarizing its contents. Reply ACCESSIBLE if the read succeeds. If \
              reading fails or is not permitted, reply DENIED and the error.",
             credential
                 .ok_or("the credentials probe needs a target")?

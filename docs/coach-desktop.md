@@ -35,7 +35,38 @@ When Coach reports confirmed publication, open browser practice and choose **Sta
 
 The generated path pins native Claude Code 2.1.302 and `haiku` selection, its immutable generation/profile/guide and the committed phrase output schema. Native installs retaining that measured version use it even when the public CLI symlink updates; another version fails closed pending isolation acceptance. The runner stages prompt/input/schema in a protected directory outside the repository, starts only the verified Read-only invocation with null stdin, caps each stdout/stderr stream at 64 KiB and the process at 90 seconds, and renews its Server lease every 30 seconds. It needs at least 110 seconds left in the Server attempt deadline before starting. The Server separately enforces three attempts and twenty starts per UTC day. A validated private result is reused after restart; an interrupted attempt without validated output is not started twice under the same fence. Server receipts reconcile ambiguous publication acknowledgement before any new preparation.
 
-### No-spend measurement preparation
+### No-spend Codex measurement preparation
+
+After performing the attended Coach-home login below, prepare the first Codex measurement without starting a model:
+
+```bash
+cargo run --package phrase-gym-coach --example codex_preflight -- /tmp/phrase-gym-codex-fresh
+```
+
+The command derives Coach's own home from the OS per-user folders; there is no home override or execution option. It checks native Codex 0.159.2 and ChatGPT login using only bounded `--version` and `--ignore-user-config login status` processes with allowlisted environment and null stdin. Login status is inspected locally, never printed or retained. Missing setup, another version, API-key login, symlinked state/home, home-level instructions or custom skills fail actionably. Codex's bundled `skills/.system` is allowed; the existing invocation disables optional tools. The check never logs in, copies credentials or logs out an existing API login. It cannot establish isolation or language quality.
+
+Use a fresh absolute directory with an existing parent outside repositories. On success it contains synthetic Unicode `input.txt`, `prompt.md` and `measurement.json` with the exact existing adapter arguments, environment names, Coach-home path and proposed limits. It contains no environment values or authentication output. The proposed first authorized measurement is one `gpt-5.6-luna` low-effort start, at most 90 seconds and 64 KiB per stream. The manifest is a review artifact, not an executable launcher; staging grants no spending permission.
+
+Before real execution, agree an explicit maximum start/token-or-cost budget and stop conditions. Reuse the existing `cli_probe` cases after authorization rather than substituting a successful preflight for their results. Run `io`, `outside-read`, `outside-write`, `web`, `credentials` and `instructions` in Coach's logged-in home with fresh synthetic scratch directories. Inspect each result before the next start; stop on any unexpected access, missing denial, authentication/quota error, empty/truncated output or budget exhaustion. The credential case asks only whether access succeeded, never for credential contents; unexpected access fails acceptance. Do not print or preserve any accidentally returned secret. Record exact executable/version/configuration, case identity, limits, elapsed time, usage (unknown when absent), output acceptance/failure and OS permission evidence. A successful exit or model assertion alone is insufficient.
+
+For package measurements, retain synthetic development fixtures separately from unseen held-out cases before spending. Cover fixed wording/alternatives, slots, situation and partner-turn prompts with answer-leak checks, words with sense cues/contexts/forms, preferred targets/confusables/dependencies/dialogue exposure, ambiguity/missing preferences, and exact supplied/missing/invalid audio. Cross English, German and Serbian with the specified card/help/translation preferences. Begin with one bounded English text-only case once the missing-speech path exists; unsupported contracts remain blocked rather than replaced with a simpler case. Keep schema conformance, fresh independent semantic review and attended listening as separate results for every output. Speech acceptance must cover each selected language/voice, Serbian conversion, names and foreign words; inspect primary-source availability, license and runtime requirements before selecting a configuration. No primary speech configuration or listening acceptance is established by this command.
+
+A concrete initial fixture protocol (inputs are synthetic; none uses learner data):
+
+| Case | Development input / expected review | Held-out input / expected review |
+|---|---|---|
+| English phrase | “Could you say that again?” / natural situation cue without answer leakage | “Would you mind speaking more slowly?” / same rules, unseen wording |
+| Frame/alternatives | “Could I have [item], please?” / retain slot and valid alternatives | “I'd like [quantity] [item].” / distinguish frame from fixed wording |
+| Word sense | “bank”, context “deposit money” / financial sense and 2–3 comprehensible contexts | “light”, context “not heavy” / correct adjective sense and applicable forms |
+| Dialogue/exposure | A: “Tea or coffee?” B: “Tea, please.” / separate partner cue and response; declare exposure | A: “Window or aisle?” B: “Aisle, please.” / same evidence constraints |
+| German | “Könnten Sie das bitte wiederholen?” / German speech, pinned help language | “Ich hätte gern ein Glas Wasser.” / German text and exact speech identity |
+| Serbian | “Želim čaj.” / preserve display text, review speech conversion | “Đorđe želi kafu.” / names/digraphs and original script reviewed by listening |
+| Reject/defer | “bank” without sense/context; absent required preferences / actionable retained input | URL-only input; invalid supplied WAV / reject rather than invent/fetch/replace |
+| Identity/lifecycle | Two preferred alternatives plus a confusable and directed prerequisite / separate target histories | Re-preparation with changed meaning / no accidental identity reuse |
+
+For each applicable case, run supplied-valid audio, genuinely missing audio, and invalid-supplied audio variants under separately bounded authorization. Rotate the required card/help/translation preference combinations across development and held-out sets. These rows define future measurements, not implemented contract coverage or permission to execute them.
+
+### Claude no-spend measurement preparation
 
 This command only stages the concrete [raw English fixture](../fixtures/coach/raw-english.json), copied synthetic silence clip, pinned prompt/profile/guide/schema and argument vector, and checks version/subscription login. It has no model execution option:
 
@@ -217,7 +248,7 @@ env += CODEX_HOME=<Coach-owned Codex home>
 
 ## Remaining gaps
 
-- **Codex home login.** The probes used the operator's own `~/.codex` with user configuration ignored. A run inside Coach's own Codex home needs your one-time login, followed by the confirming probe in the checklist below.
+- **Codex home login.** The probes used the operator's own `~/.codex` with user configuration ignored. The no-spend Codex preflight above checks setup only. A run inside Coach's own Codex home still needs your one-time login, explicit measurement budget authorization and the confirming probes in the checklist below.
 - **Windows CLIs.** No Windows probes have run with logged-in CLIs. Still unverified there: native Codex support and whether its permission profile is enforced, Claude's `--restricted` confinement, and where the tools are installed. CI covers only the build, the UI tests, process cleanup through the Job Object (including grandchildren and dropping the supervisor), credential-store-free startup and the packaged smoke test.
 - **Crash cleanup on macOS.** If Coach itself is killed, its CLI children survive, because macOS has nothing like the Windows kill-on-close Job Object. Recovery after a crash belongs to the runner work.
 - **Claude updates.** Claude's native installer keeps only the two newest versions, so the version Coach found can disappear after updates. Coach must recheck the tool before every attempt.
