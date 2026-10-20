@@ -4,7 +4,7 @@ use axum::{Extension, Json, Router};
 use phrase_gym_contracts::inbox::{LessonReceipt, LessonStatus, LessonSubmission};
 use uuid::Uuid;
 
-use crate::authority::Credential;
+use crate::actor::Actor;
 use crate::error::ApiError;
 use crate::extract::{ApiJson, ApiPath};
 use crate::state::AppState;
@@ -19,7 +19,7 @@ pub(crate) fn routes() -> Router<AppState> {
 #[utoipa::path(post, path = "/api/v1/inbox/lessons", tag = "inbox", request_body = LessonSubmission, responses((status = 200, body = LessonReceipt)))]
 pub(crate) async fn submit(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<LessonSubmission>,
 ) -> Result<Json<LessonReceipt>, ApiError> {
     let inbox = state.inbox.clone();
@@ -33,7 +33,7 @@ pub(crate) async fn submit(
 #[utoipa::path(get, path = "/api/v1/inbox/lessons/{id}", tag = "inbox", params(("id" = Uuid, Path)), responses((status = 200, body = LessonStatus)))]
 pub(crate) async fn status(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiPath(id): ApiPath<Uuid>,
 ) -> Result<Json<LessonStatus>, ApiError> {
     let inbox = state.inbox.clone();
@@ -47,7 +47,7 @@ pub(crate) async fn status(
 #[utoipa::path(post, path = "/api/v1/inbox/lessons/{id}/cancel", tag = "inbox", params(("id" = Uuid, Path)), responses((status = 200, body = LessonStatus)))]
 pub(crate) async fn cancel(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiPath(id): ApiPath<Uuid>,
 ) -> Result<Json<LessonStatus>, ApiError> {
     let inbox = state.inbox.clone();
@@ -61,7 +61,7 @@ pub(crate) async fn cancel(
 #[utoipa::path(post, path = "/api/v1/inbox/lessons/{id}/retry", tag = "inbox", params(("id" = Uuid, Path)), responses((status = 200, body = LessonStatus)))]
 pub(crate) async fn retry(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiPath(id): ApiPath<Uuid>,
 ) -> Result<Json<LessonStatus>, ApiError> {
     let inbox = state.inbox.clone();
@@ -75,7 +75,7 @@ pub(crate) async fn retry(
 #[utoipa::path(get, path = "/api/v1/inbox/submissions/{id}", operation_id = "submission_receipt", tag = "inbox", params(("id" = Uuid, Path)), responses((status = 200, body = Option<LessonReceipt>)))]
 pub(crate) async fn receipt(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiPath(id): ApiPath<Uuid>,
 ) -> Result<Json<Option<LessonReceipt>>, ApiError> {
     let inbox = state.inbox.clone();

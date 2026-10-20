@@ -34,8 +34,7 @@ fn run() -> Result<(), String> {
         executable: fake,
         host: HostEnvironment::default(),
     };
-    let token = "synthetic-browser-00000000000000000000";
-    let client = ServerClient::new(server, token.into(), token.into())?;
+    let client = ServerClient::new(server)?;
     let receipt = worker::tick(&client, &paths.state.join("worker.json"), |claim| {
         preparation::prepare(
             &client,

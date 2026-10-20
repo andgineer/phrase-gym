@@ -1,20 +1,18 @@
 use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 
-use super::state::{CredentialHealth, FolderHealth, StartupEvent, ToolReadiness};
+use super::state::{FolderHealth, StartupEvent, ToolReadiness};
 use crate::adapter::CliAdapter;
 use crate::adapter::environment::HostEnvironment;
-use crate::platform::credentials::{CredentialError, CredentialStore, SERVER_ACCOUNT};
 use crate::platform::paths::CoachPaths;
 use crate::platform::tools;
 
 type Check<T> = Box<dyn FnOnce() -> T + Send>;
 
-// Checks that may block on the file system or an OS credential prompt run off the UI thread and
+// File-system and tool-discovery checks run off the UI thread and
 // report through a channel; `wake` asks the UI to repaint once per result instead of polling.
 pub struct StartupChecks {
     pub folders: Check<FolderHealth>,
     pub tool: Box<dyn Fn(CliAdapter) -> ToolReadiness + Send>,
-    pub credentials: Check<CredentialHealth>,
 }
 
 impl StartupChecks {
@@ -23,7 +21,6 @@ impl StartupChecks {
         Self {
             folders: Box::new(folders),
             tool: Box::new(move |adapter| tools::discover(adapter, &host).into()),
-            credentials: Box::new(credentials),
         }
     }
 
@@ -43,7 +40,6 @@ impl StartupChecks {
         for adapter in CliAdapter::ALL {
             send(StartupEvent::Tool(adapter, (self.tool)(adapter)));
         }
-        send(StartupEvent::Credentials((self.credentials)()));
     }
 }
 
@@ -52,17 +48,6 @@ fn folders() -> FolderHealth {
     match prepared {
         Ok(paths) => FolderHealth::Ready(paths),
         Err(error) => FolderHealth::Failed(error.to_string()),
-    }
-}
-
-// Only reads: probing never creates an item, so a launch cannot silently persist a secret.
-fn credentials() -> CredentialHealth {
-    match CredentialStore::native().and_then(|store| store.read(SERVER_ACCOUNT)) {
-        Ok(secret) => CredentialHealth::Ready {
-            server_credential: secret.is_some(),
-        },
-        Err(CredentialError::Denied(reason)) => CredentialHealth::Denied(reason),
-        Err(CredentialError::Failed(reason)) => CredentialHealth::Failed(reason),
     }
 }
 
@@ -82,7 +67,6 @@ mod tests {
                 CliAdapter::Codex => ToolReadiness::Found(PathBuf::from("/opt/codex")),
                 CliAdapter::Claude => ToolReadiness::Missing,
             }),
-            credentials: Box::new(|| CredentialHealth::Denied("keychain locked".to_owned())),
         };
         let wakes = Arc::new(AtomicUsize::new(0));
         let counter = Arc::clone(&wakes);
@@ -101,9 +85,8 @@ mod tests {
                     ToolReadiness::Found(PathBuf::from("/opt/codex"))
                 ),
                 StartupEvent::Tool(CliAdapter::Claude, ToolReadiness::Missing),
-                StartupEvent::Credentials(CredentialHealth::Denied("keychain locked".to_owned())),
             ]
         );
-        assert_eq!(wakes.load(Ordering::SeqCst), 4);
+        assert_eq!(wakes.load(Ordering::SeqCst), 3);
     }
 }

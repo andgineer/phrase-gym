@@ -8,9 +8,9 @@ use super::*;
 
 #[test]
 fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_publication() {
-    let (directory, binary, data, credentials) = setup();
-    let (server, url) = start(&binary, &data, &credentials, "0");
-    let client = ServerClient::new(&url, SUBMIT.into(), WORKER.into()).unwrap();
+    let (directory, binary, data) = setup();
+    let (server, url) = start(&binary, &data, "0");
+    let client = ServerClient::new(&url).unwrap();
     let paths = paths(directory.path());
     let mut send = raw(
         &client,
@@ -30,7 +30,7 @@ fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_p
     first.package.phrases[0].help.as_mut().unwrap().meaning =
         "Start an activity with other people.".into();
     client
-        .post::<_, ()>("/api/v1/preparation/stage", &first, true)
+        .post::<_, ()>("/api/v1/preparation/stage", &first)
         .unwrap();
     drop(server);
     rusqlite::Connection::open(data.join("phrase-gym.sqlite3"))
@@ -40,12 +40,7 @@ fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_p
             [receipt.generation_id.to_string()],
         )
         .unwrap();
-    let (_server, _) = start(
-        &binary,
-        &data,
-        &credentials,
-        url.rsplit(':').next().unwrap(),
-    );
+    let (_server, _) = start(&binary, &data, url.rsplit(':').next().unwrap());
     let replacement = claim_job(&client, Uuid::new_v4());
     let second = preparation::prepare(
         &client,
@@ -73,15 +68,15 @@ fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_p
     assert_eq!(std::fs::read_dir(paths.attempts()).unwrap().count(), 2);
     assert!(
         client
-            .post::<_, PublicationReceipt>("/api/v1/preparation/publish", &claim.fence, true)
+            .post::<_, PublicationReceipt>("/api/v1/preparation/publish", &claim.fence)
             .unwrap_err()
             .starts_with("Server 409")
     );
     client
-        .post::<_, ()>("/api/v1/preparation/stage", &second, true)
+        .post::<_, ()>("/api/v1/preparation/stage", &second)
         .unwrap();
     let publication: PublicationReceipt = client
-        .post("/api/v1/preparation/publish", &replacement.fence, true)
+        .post("/api/v1/preparation/publish", &replacement.fence)
         .unwrap();
     assert_eq!(publication.generation_id, receipt.generation_id);
     assert_eq!(publication.target_ids.len(), 1);
@@ -103,11 +98,7 @@ fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_p
 
 fn claim_job(client: &ServerClient, claim_id: Uuid) -> JobClaim {
     client
-        .post::<_, Option<JobClaim>>(
-            "/api/v1/preparation/claims",
-            &ClaimRequest { claim_id },
-            true,
-        )
+        .post::<_, Option<JobClaim>>("/api/v1/preparation/claims", &ClaimRequest { claim_id })
         .unwrap()
         .unwrap()
 }

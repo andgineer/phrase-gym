@@ -14,7 +14,7 @@ const DEPENDENCY_DIRECTION: &[(&str, &[&str])] = &[
     ("xtask", &[]),
 ];
 // GUI toolkits, agent/provider clients, model or speech engines, Coach's process-tree supervision and
-// OS credential stores belong to Coach, never to Server.
+// OS credential stores and provider libraries never belong to Server.
 const FORBIDDEN_SERVER_CRATES: &[&str] = &[
     "phrase-gym-coach",
     "eframe",

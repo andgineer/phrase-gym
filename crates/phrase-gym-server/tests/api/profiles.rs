@@ -41,7 +41,7 @@ async fn profile_api_preserves_authorized_revision_receipts_independently_of_dev
     let update = json!({"mutation_id": uuid::Uuid::new_v4(), "expected_revision": 1, "profile": profile, "reason": "Authorized learner request"});
     let second = put(&server, "/api/v1/profile", &update).await;
     assert_eq!(second.status, StatusCode::OK);
-    assert_eq!(second.json()["actor"], "synthetic-tests");
+    assert_eq!(second.json()["actor"], "private-operator");
     assert_eq!(second.json()["revision"], 2);
     assert_eq!(
         put(&server, "/api/v1/profile", &update).await.json(),

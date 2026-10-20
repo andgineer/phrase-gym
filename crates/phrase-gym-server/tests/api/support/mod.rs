@@ -14,29 +14,11 @@ use chrono::{DateTime, Utc};
 use phrase_gym_core::clock::ManualClock;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::storage::Database;
-use phrase_gym_server::{AppState, Authority, Capability, Credential, ServerSettings, router};
+use phrase_gym_server::{AppState, ServerSettings, router};
 use tempfile::TempDir;
 
-pub const TOKEN: &str = "synthetic-test-credential-000000000000000000";
-
 pub fn settings() -> ServerSettings {
-    ServerSettings {
-        authority: Arc::new(
-            Authority::new(vec![Credential {
-                actor: "synthetic-tests".into(),
-                token: TOKEN.into(),
-                capabilities: vec![
-                    Capability::Learner,
-                    Capability::Worker,
-                    Capability::MaterialSubmit,
-                    Capability::ProfileRead,
-                    Capability::ProfileUpdate,
-                ],
-            }])
-            .unwrap(),
-        ),
-        ..ServerSettings::loopback().with_hosts([HOST.to_owned()])
-    }
+    ServerSettings::loopback().with_hosts([HOST.to_owned()])
 }
 
 pub const HOST: &str = "testserver";
@@ -70,13 +52,7 @@ impl TestServer {
             .unwrap();
         let state = AppState::new(database, Arc::new(store), clock.clone());
         Self {
-            router: router(
-                state,
-                &ServerSettings {
-                    authority: self::settings().authority,
-                    ..settings.clone()
-                },
-            ),
+            router: router(state, settings),
             clock,
             data_dir: data_dir.path().to_owned(),
             database_path,

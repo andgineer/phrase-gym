@@ -24,7 +24,7 @@ impl Settings {
         if settings.version != 1 || settings.adapter != CliAdapter::Claude {
             return Err("Saved settings need a compatible Coach version".into());
         }
-        client::loopback(&settings.server)?;
+        client::server_origin(&settings.server)?;
         Ok(Some(settings))
     }
 
@@ -34,7 +34,7 @@ impl Settings {
             &Self {
                 version: 1,
                 adapter: CliAdapter::Claude,
-                server: client::loopback(server)?,
+                server: client::server_origin(server)?,
             },
         )
     }

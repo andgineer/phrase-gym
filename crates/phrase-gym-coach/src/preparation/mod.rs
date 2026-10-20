@@ -21,7 +21,7 @@ pub fn prepare(
     tool: &readiness::ClaudeTool,
     shutdown: &Arc<AtomicBool>,
 ) -> Result<LessonOutput, String> {
-    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true)?;
+    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     let previous = paths.attempts().join(claim.fence.token.to_string());
     if previous.exists() {
         let bytes = crate::platform::files::read_selected(&previous.join("validated.json"), 100_000)
@@ -55,7 +55,7 @@ pub fn prepare(
             cancel.store(true, Ordering::SeqCst);
         }
         if renewed.elapsed() >= Duration::from_secs(30) && lease_failure.is_none() {
-            match client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true) {
+            match client.post::<_, String>("/api/v1/preparation/renew", &claim.fence) {
                 Ok(_) => renewed = Instant::now(),
                 Err(problem) => {
                     lease_failure = Some(problem);
@@ -87,7 +87,7 @@ pub fn prepare(
     }
     let output = result::read(&staged.directory, claim)?;
     // A successful process cannot authorize publication after a lost or replaced lease.
-    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true)?;
+    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     crate::platform::files::save(&previous.join("validated.json"), &output)?;
     Ok(output)
 }

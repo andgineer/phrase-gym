@@ -30,18 +30,16 @@ pub fn show(ui: &mut Ui, state: &mut IntakeState, _draft: &str) {
         if !state.audio.is_empty() { ui.label(format!("Selected reference: {}", state.audio.rsplit(['/', '\\']).next().unwrap_or("audio"))); }
         if !state.audio.is_empty() && ui.button("Preview selected original audio").clicked() { state.command = Some(Command::PreviewAudio(state.audio.clone())); }
         if ui.button("Retry connection and retained input").clicked() {
-            state.command = Some(Command::Connect { server: state.server.clone(), submit: String::new(), worker: String::new() });
+            state.command = Some(Command::Connect { server: state.server.clone() });
         }
         if ui.button("Retry preparation after fixing the problem").clicked() { state.command = Some(Command::RetryPreparation); }
-        ui.collapsing("Development connection setup", |ui| {
-            let changed = field(ui, "Local Server URL", &mut state.server, false)
-                | field(ui, "Material-submit token", &mut state.submit, true)
-                | field(ui, "Worker token", &mut state.worker, true);
-            if changed { state.connected = false; state.status = "Connection settings changed; save the development setup to reconnect".into(); }
-            ui.label("Existing development access only. Tokens stay in the OS credential store; leave blank to reuse them.");
+        ui.collapsing("Server connection", |ui| {
+            let changed = field(ui, "Server URL (loopback or Tailscale HTTPS)", &mut state.server, false);
+            if changed { state.connected = false; state.status = "Connection settings changed; save the Server URL to reconnect".into(); }
+            ui.label("Connect through your existing Tailscale network; no application sign-in is needed.");
             if ui.button("Save connection setup").clicked() {
                 state.connected = false;
-                state.command = Some(Command::Connect { server: state.server.clone(), submit: std::mem::take(&mut state.submit), worker: std::mem::take(&mut state.worker) });
+                state.command = Some(Command::Connect { server: state.server.clone() });
             }
         });
     });

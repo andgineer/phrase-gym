@@ -141,7 +141,6 @@ fn retry_preparation(
     client.post::<_, phrase_gym_contracts::inbox::LessonStatus>(
         &format!("/api/v1/inbox/lessons/{}/retry", receipt.generation_id),
         &(),
-        false,
     )?;
     retained.claim_id = uuid::Uuid::new_v4();
     retained.output = None;

@@ -1,31 +1,13 @@
 import { spawn, type ChildProcess } from 'node:child_process'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { createServer } from 'node:net'
 import { test as base } from './capture-fixtures'
 
-const token = 'synthetic-browser-00000000000000000000'
 export const test = base.extend<{ preview: { url: string; restart: () => Promise<void> } }>({
   preview: async ({}, use) => {
     const directory = await mkdtemp(join(tmpdir(), 'phrase-gym-preview-'))
-    const credentials = join(directory, 'credentials.json')
-    await writeFile(
-      credentials,
-      JSON.stringify([
-        {
-          actor: 'synthetic-preview',
-          token,
-          capabilities: ['learner', 'worker', 'material_submit', 'profile_read', 'profile_update'],
-        },
-        {
-          actor: 'synthetic-denied',
-          token: 'synthetic-learner-00000000000000000000',
-          capabilities: ['learner'],
-        },
-      ]),
-      { mode: 0o600 },
-    )
     const allocator = createServer()
     await new Promise<void>((resolve) => allocator.listen(0, '127.0.0.1', resolve))
     const address = allocator.address()
@@ -49,17 +31,7 @@ export const test = base.extend<{ preview: { url: string; restart: () => Promise
     async function start() {
       process = spawn(
         resolve('../target/debug/phrase-gym-server'),
-        [
-          'serve',
-          '--credentials-file',
-          credentials,
-          '--data-dir',
-          directory,
-          '--client-dir',
-          resolve('dist'),
-          '--port',
-          String(port),
-        ],
+        ['serve', '--data-dir', directory, '--client-dir', resolve('dist'), '--port', String(port)],
         { stdio: ['ignore', 'pipe', 'pipe'] },
       )
       process.stderr?.on('data', (chunk) => {
@@ -72,7 +44,7 @@ export const test = base.extend<{ preview: { url: string; restart: () => Promise
       while (Date.now() < deadline) {
         if (process.exitCode !== null) throw new Error(`Preview Server exited: ${output}`)
         if (
-          await fetch(`${url}/api/v1/settings`, { headers: { Authorization: `Bearer ${token}` } })
+          await fetch(`${url}/api/v1/settings`)
             .then((r) => r.ok)
             .catch(() => false)
         )

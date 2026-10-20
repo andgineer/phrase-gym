@@ -27,7 +27,7 @@ pub fn parse(arguments: impl IntoIterator<Item = OsString>) -> Result<LaunchOpti
                 .ok_or("--smoke-input needs a Server URL")?
                 .into_string()
                 .map_err(|_| "Smoke Server URL must be Unicode")?;
-            let server = crate::transfer::client::loopback(&server)?;
+            let server = crate::transfer::client::server_origin(&server)?;
             let directory = PathBuf::from(
                 arguments
                     .next()

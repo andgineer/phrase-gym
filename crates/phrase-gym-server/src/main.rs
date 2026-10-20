@@ -8,7 +8,7 @@ use phrase_gym_core::clock::SystemClock;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::recovery;
 use phrase_gym_core::storage::Database;
-use phrase_gym_server::{AppState, Authority, Credential, ServerSettings, openapi, router};
+use phrase_gym_server::{AppState, ServerSettings, openapi, router};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -24,20 +24,14 @@ enum Command {
     Serve {
         #[arg(long)]
         data_dir: PathBuf,
-        /// Private JSON array of named, scoped credentials.
-        #[arg(long)]
-        credentials_file: PathBuf,
         #[arg(long, default_value_t = 8000)]
         port: u16,
         /// Built client directory containing index.html.
         #[arg(long)]
         client_dir: Option<PathBuf>,
-        /// Additional trusted Host name, such as a private HTTPS proxy name; repeatable.
-        #[arg(long = "allowed-host")]
-        allowed_hosts: Vec<String>,
-        /// Origin allowed to send mutations, such as `https://phrase-gym.example`; repeatable.
-        #[arg(long = "allowed-origin")]
-        allowed_origins: Vec<String>,
+        /// Exact HTTPS origin of an existing tailnet-only Tailscale Serve proxy to this listener.
+        #[arg(long)]
+        tailscale_origin: Option<String>,
     },
     /// Write the API schema without opening any database.
     ExportSchema { output: PathBuf },
@@ -66,23 +60,19 @@ fn main() -> anyhow::Result<()> {
     match Cli::parse().command {
         Command::Serve {
             data_dir,
-            credentials_file,
             port,
             client_dir,
-            allowed_hosts,
-            allowed_origins,
+            tailscale_origin,
         } => {
-            let credentials: Vec<Credential> =
-                serde_json::from_slice(&std::fs::read(credentials_file)?)
-                    .context("reading private scoped credentials")?;
-            let authority = Authority::new(credentials).map_err(anyhow::Error::msg)?;
-            let settings = ServerSettings {
-                authority: Arc::new(authority),
-                allowed_origins,
+            let mut settings = ServerSettings {
                 client_dir,
                 ..ServerSettings::loopback()
+            };
+            if let Some(origin) = tailscale_origin {
+                settings = settings
+                    .with_tailscale_origin(&origin)
+                    .map_err(anyhow::Error::msg)?;
             }
-            .with_hosts(allowed_hosts);
             serve(&data_dir, port, &settings)
         }
         Command::ExportSchema { output } => export_schema(&output),
@@ -139,12 +129,15 @@ fn serve(data_dir: &std::path::Path, port: u16, settings: &ServerSettings) -> an
             .await
             .with_context(|| format!("binding {address}"))?;
         tracing::info!("serving http://{}", listener.local_addr()?);
-        axum::serve(listener, router(state, settings))
-            .with_graceful_shutdown(async {
-                let _ = tokio::signal::ctrl_c().await;
-            })
-            .await
-            .context("serving HTTP")
+        axum::serve(
+            listener,
+            router(state, settings).into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .with_graceful_shutdown(async {
+            let _ = tokio::signal::ctrl_c().await;
+        })
+        .await
+        .context("serving HTTP")
     })
 }
 

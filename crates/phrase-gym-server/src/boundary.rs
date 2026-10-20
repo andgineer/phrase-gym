@@ -1,3 +1,5 @@
+use axum::extract::ConnectInfo;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::body::Body;
@@ -16,6 +18,7 @@ pub(crate) const MAX_REQUEST_BYTES: usize = 24 * 1024 * 1024;
 #[derive(Debug)]
 pub(crate) struct Boundary {
     allowed_hosts: Vec<String>,
+    tailscale_origin: Option<String>,
     allowed_origins: Vec<String>,
 }
 
@@ -23,6 +26,7 @@ impl Boundary {
     pub(crate) fn new(settings: &ServerSettings) -> Arc<Self> {
         Arc::new(Self {
             allowed_hosts: settings.allowed_hosts.clone(),
+            tailscale_origin: settings.tailscale_origin.clone(),
             allowed_origins: settings.allowed_origins.clone(),
         })
     }
@@ -43,13 +47,7 @@ impl Boundary {
 
     fn trusted_host(&self, request: &Request) -> bool {
         let name = Self::host(request).split(':').next().unwrap_or_default();
-        self.allowed_hosts.iter().any(|pattern| {
-            pattern == "*"
-                || pattern == name
-                || pattern
-                    .strip_prefix('*')
-                    .is_some_and(|suffix| name.ends_with(suffix))
-        })
+        self.allowed_hosts.iter().any(|host| host == name)
     }
 
     // Same-origin and allowlisted origins are not authentication; they only stop browsers from
@@ -77,7 +75,8 @@ impl Boundary {
         }
         let (scheme, rest) = origin.split_once("://").unwrap_or(("", origin));
         let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
-        let same_origin = scheme == "http" && authority == Self::host(request);
+        let same_origin = authority == Self::host(request)
+            && (scheme == "http" || self.tailscale_origin.as_deref() == Some(origin));
         !same_origin && !self.allowed_origins.iter().any(|allowed| allowed == origin)
     }
 }
@@ -103,6 +102,18 @@ pub(crate) async fn enforce(
     request: Request,
     next: Next,
 ) -> Response {
+    // The listener is always loopback. Never accept forwarded addresses as socket identity.
+    let local = request
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .is_some_and(|peer| peer.0.ip().is_loopback());
+    if !local || request.headers().contains_key("tailscale-funnel-request") {
+        return ApiError::new(
+            StatusCode::FORBIDDEN,
+            "Use the private local or Tailscale Serve connection",
+        )
+        .into_response();
+    }
     if !boundary.trusted_host(&request) {
         return (StatusCode::BAD_REQUEST, "Invalid host header").into_response();
     }

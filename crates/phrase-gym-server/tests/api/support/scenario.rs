@@ -137,7 +137,9 @@ fn http_request(request: ScenarioRequest) -> Request<Body> {
     let mut builder = Request::builder()
         .method(request.method.as_str())
         .uri(&request.path)
-        .header("authorization", format!("Bearer {}", super::TOKEN));
+        .extension(axum::extract::ConnectInfo(
+            "127.0.0.1:12345".parse::<std::net::SocketAddr>().unwrap(),
+        ));
     let named = |header: &str| {
         request
             .headers

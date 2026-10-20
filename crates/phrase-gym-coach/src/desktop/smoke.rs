@@ -8,7 +8,7 @@ use eframe::egui_wgpu::wgpu;
 use serde::Serialize;
 
 use super::smoke_checks::{self, ProcessChecks, TERMINAL_CANARY};
-use super::state::{CredentialHealth, FolderHealth, StatusSnapshot};
+use super::state::{FolderHealth, StatusSnapshot};
 use super::text;
 use crate::platform::paths::CoachPaths;
 use crate::platform::resources;
@@ -57,7 +57,6 @@ struct Report<'a> {
     total_frames: u64,
     folders: String,
     instance_lock: Option<PathBuf>,
-    credential_store: String,
     checks: Option<&'a ProcessChecks>,
     startup_error: Option<&'a str>,
     intake: Option<&'a Result<(), String>>,
@@ -143,12 +142,10 @@ impl SmokeRun {
         self.done = true;
         let checks = self.finished_checks.as_ref();
         let folders_ready = matches!(snapshot.folders, FolderHealth::Ready(_));
-        let credentials_reported = !matches!(snapshot.credentials, CredentialHealth::Checking);
         let passed = self.renderer.is_some()
             && checks.is_some_and(ProcessChecks::passed)
             && idle_frames <= IDLE_FRAME_ALLOWANCE
             && folders_ready
-            && credentials_reported
             && self.intake.as_ref().is_none_or(Result::is_ok);
         let executable = std::env::current_exe().ok();
         let report = Report {
@@ -172,7 +169,6 @@ impl SmokeRun {
             instance_lock: CoachPaths::for_current_user()
                 .ok()
                 .map(|paths| paths.instance_lock()),
-            credential_store: text::credentials(&snapshot.credentials),
             checks,
             startup_error: None,
             intake: self.intake.as_ref(),
@@ -198,7 +194,6 @@ pub fn write_failure(path: &Path, problem: &str) {
         total_frames: 0,
         folders: String::new(),
         instance_lock: None,
-        credential_store: String::new(),
         checks: None,
         startup_error: Some(problem),
         intake: None,

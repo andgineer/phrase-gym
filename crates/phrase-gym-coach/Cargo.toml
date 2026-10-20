@@ -26,7 +26,6 @@ phrase-gym-contracts.workspace = true
 reqwest = { version = "0.12.28", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 directories = { version = "6.0.0", default-features = false }
 egui = { version = "0.37.0", default-features = false, features = ["default_fonts"], optional = true }
-keyring-core = { version = "1.0.1", default-features = false }
 serde.workspace = true
 sha2.workspace = true
 serde_json.workspace = true
@@ -40,8 +39,6 @@ rfd = { version = "0.17.2", default-features = false, optional = true }
 # Only the native backends Coach supports; eframe's own wgpu feature would add Vulkan, GL and WebGPU.
 wgpu = { version = "30.0.1", default-features = false, features = ["dx12", "metal", "std", "wgsl"], optional = true }
 
-[target.'cfg(target_os = "macos")'.dependencies]
-apple-native-keyring-store = { version = "1.0.2", default-features = false, features = ["keychain"] }
 
 [target.'cfg(unix)'.dependencies]
 rustix = { version = "1.1.5", default-features = false, features = ["fs", "process", "std"] }
@@ -50,7 +47,6 @@ signal-hook = { version = "0.4.5", default-features = false }
 [target.'cfg(windows)'.dependencies]
 process-wrap = { version = "10.0.1", default-features = false, features = ["creation-flags", "job-object", "kill-on-drop", "tokio1"] }
 windows = { version = "0.62.2", default-features = false, features = ["Win32_System_Threading"] }
-windows-native-keyring-store = { version = "1.1.0", default-features = false }
 
 [dev-dependencies]
 rusqlite.workspace = true

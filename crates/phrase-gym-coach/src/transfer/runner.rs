@@ -95,7 +95,7 @@ fn attempt(
     }
     if pending.submission.is_none() {
         status("Connected; transferring supplied reference audio");
-        let media: MediaAsset = client.post("/api/v1/media", &pending.upload, false)?;
+        let media: MediaAsset = client.post("/api/v1/media", &pending.upload)?;
         if media.sha256 != pending.audio_sha256 {
             return Err("Server audio acknowledgement differs from the retained original hash; nothing was submitted".into());
         }
@@ -106,7 +106,7 @@ fn attempt(
         .submission
         .as_ref()
         .ok_or("Pending Send has no input")?;
-    let receipt: LessonReceipt = client.post("/api/v1/inbox/lessons", input, false)?;
+    let receipt: LessonReceipt = client.post("/api/v1/inbox/lessons", input)?;
     status("Accepted durably; waiting for supplied-lesson preparation");
     let current: LessonStatus =
         client.get(&format!("/api/v1/inbox/lessons/{}", receipt.generation_id))?;
@@ -118,7 +118,6 @@ fn attempt(
         &ClaimRequest {
             claim_id: pending.claim_id,
         },
-        true,
     )?;
     let Some(claim) = claim else {
         reset_claim(path, pending)?;
@@ -129,12 +128,12 @@ fn attempt(
         return Err("Accepted and waiting; an earlier inbox item needs its worker. No supplied output was published".into());
     }
     let committed: Option<PublicationReceipt> =
-        client.post("/api/v1/preparation/receipt", &claim.fence, true)?;
+        client.post("/api/v1/preparation/receipt", &claim.fence)?;
     if let Some(publication) = committed {
         return finish(path, publication);
     }
     status("Preparing supplied lesson under the Server lease");
-    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true)?;
+    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     if pending.output.is_none() {
         pending.output = Some(match prepare(&claim) {
             Ok(output) => output,
@@ -145,13 +144,13 @@ fn attempt(
                     fence: claim.fence,
                     reason: reason.clone(),
                 };
-                client.post::<_, ()>("/api/v1/preparation/fail", &failure, true)?;
+                client.post::<_, ()>("/api/v1/preparation/fail", &failure)?;
                 return Err(reason);
             }
         });
         pending::save(path, pending)?;
     }
-    if let Err(problem) = client.post::<_, ()>("/api/v1/preparation/stage", &pending.output, true) {
+    if let Err(problem) = client.post::<_, ()>("/api/v1/preparation/stage", &pending.output) {
         if problem.starts_with("Server 422") {
             let reason = format!("Prepared lesson failed validation: {problem}");
             pending.failure = Some(reason.clone());
@@ -162,21 +161,16 @@ fn attempt(
                     fence: claim.fence,
                     reason: reason.clone(),
                 },
-                true,
             )?;
             return Err(reason);
         }
         return Err(problem);
     }
     status("Supplied lesson staged; reconciling atomic publication");
-    let publication = match client.post("/api/v1/preparation/publish", &claim.fence, true) {
+    let publication = match client.post("/api/v1/preparation/publish", &claim.fence) {
         Ok(publication) => publication,
         Err(problem) => client
-            .post::<_, Option<PublicationReceipt>>(
-                "/api/v1/preparation/receipt",
-                &claim.fence,
-                true,
-            )?
+            .post::<_, Option<PublicationReceipt>>("/api/v1/preparation/receipt", &claim.fence)?
             .ok_or(problem)?,
     };
     finish(path, publication)

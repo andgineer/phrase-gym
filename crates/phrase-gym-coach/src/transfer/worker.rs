@@ -58,18 +58,17 @@ fn attempt(
         &ClaimRequest {
             claim_id: checkpoint.claim_id,
         },
-        true,
     )?;
     let Some(claim) = claim else {
         std::fs::remove_file(path).map_err(|_| "Cannot clear idle worker checkpoint")?;
         return Ok(None);
     };
     let receipt: Option<PublicationReceipt> =
-        client.post("/api/v1/preparation/receipt", &claim.fence, true)?;
+        client.post("/api/v1/preparation/receipt", &claim.fence)?;
     if let Some(receipt) = receipt {
         return finish(path, receipt).map(Some);
     }
-    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence, true)?;
+    client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     if checkpoint.output.is_none() {
         match prepare(&claim) {
             Ok(output) => {
@@ -85,16 +84,13 @@ fn attempt(
                         fence: claim.fence,
                         reason: reason.clone(),
                     },
-                    true,
                 )?;
                 std::fs::remove_file(path).map_err(|_| "Cannot clear failed worker checkpoint")?;
                 return Err(reason);
             }
         }
     }
-    if let Err(problem) =
-        client.post::<_, ()>("/api/v1/preparation/stage", &checkpoint.output, true)
-    {
+    if let Err(problem) = client.post::<_, ()>("/api/v1/preparation/stage", &checkpoint.output) {
         if problem.starts_with("Server 422") {
             let reason = format!("Prepared lesson failed validation: {problem}");
             client.post::<_, ()>(
@@ -103,21 +99,16 @@ fn attempt(
                     fence: claim.fence,
                     reason: reason.clone(),
                 },
-                true,
             )?;
             std::fs::remove_file(path).map_err(|_| "Cannot clear rejected output checkpoint")?;
             return Err(reason);
         }
         return Err(problem);
     }
-    let receipt = match client.post("/api/v1/preparation/publish", &claim.fence, true) {
+    let receipt = match client.post("/api/v1/preparation/publish", &claim.fence) {
         Ok(receipt) => receipt,
         Err(problem) => client
-            .post::<_, Option<PublicationReceipt>>(
-                "/api/v1/preparation/receipt",
-                &claim.fence,
-                true,
-            )?
+            .post::<_, Option<PublicationReceipt>>("/api/v1/preparation/receipt", &claim.fence)?
             .ok_or(problem)?,
     };
     finish(path, receipt).map(Some)

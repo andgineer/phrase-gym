@@ -1,9 +1,8 @@
-mod authority;
+mod actor;
 mod boundary;
 mod client;
 mod error;
 mod extract;
-mod login;
 pub mod openapi;
 mod range;
 mod routes;
@@ -19,7 +18,6 @@ use axum::http::header::CACHE_CONTROL;
 use axum::middleware;
 use axum::response::Response;
 
-pub use authority::{Authority, Capability, Credential};
 pub use settings::ServerSettings;
 pub use state::AppState;
 
@@ -34,27 +32,20 @@ async fn no_store(mut response: Response) -> Response {
 pub fn router(state: AppState, settings: &ServerSettings) -> Router {
     #[cfg(feature = "test-support")]
     let browser = state.browser.clone();
-    let api = routes::api(&settings.authority).with_state(state.clone());
+    let api = routes::api().with_state(state.clone());
     #[cfg(feature = "test-support")]
-    let api = api
-        .merge(test_support::routes().with_state(state).route_layer(
-            middleware::from_fn_with_state(
-                authority::Grant {
-                    authority: settings.authority.clone(),
-                    any: vec![authority::Capability::MaterialSubmit],
-                },
-                authority::enforce,
-            ),
-        ))
-        .layer(middleware::from_fn_with_state(
-            browser,
-            test_support::intercept,
-        ));
+    let api =
+        api.merge(test_support::routes().with_state(state))
+            .layer(middleware::from_fn_with_state(
+                browser,
+                test_support::intercept,
+            ));
     Router::new()
         .merge(api)
-        .merge(login::routes(settings))
         .merge(client::routes(settings.client_dir.as_deref()))
         .fallback(|| async { client::not_found() })
+        .layer(axum::Extension(actor::Actor::default()))
+        .layer(middleware::from_fn(boundary::bounded_body))
         .layer(DefaultBodyLimit::max(boundary::MAX_REQUEST_BYTES))
         .layer(middleware::from_fn_with_state(
             boundary::Boundary::new(settings),

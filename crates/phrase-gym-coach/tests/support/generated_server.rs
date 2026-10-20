@@ -44,9 +44,9 @@ pub(super) fn raw(client: &ServerClient, directory: &Path, context: &str) -> pen
 
 #[test]
 fn raw_input_runs_native_fake_claude_and_reconciles_committed_result_after_restart() {
-    let (directory, binary, data, credentials) = setup();
-    let (server, url) = start(&binary, &data, &credentials, "0");
-    let client = ServerClient::new(&url, SUBMIT.into(), WORKER.into()).unwrap();
+    let (directory, binary, data) = setup();
+    let (server, url) = start(&binary, &data, "0");
+    let client = ServerClient::new(&url).unwrap();
     let paths = paths(directory.path());
     let file = directory.path().join("raw-pending.json");
     let mut send = raw(
@@ -79,12 +79,7 @@ fn raw_input_runs_native_fake_claude_and_reconciles_committed_result_after_resta
     assert_eq!(std::fs::read_dir(paths.attempts()).unwrap().count(), 1);
     pending::save(&file, &send).unwrap();
     drop(server);
-    let (_server, _) = start(
-        &binary,
-        &data,
-        &credentials,
-        url.rsplit(':').next().unwrap(),
-    );
+    let (_server, _) = start(&binary, &data, url.rsplit(':').next().unwrap());
     let repeated = runner::deliver_with(
         &client,
         &file,
@@ -108,9 +103,9 @@ fn malformed_overflow_and_cancelled_processes_publish_nothing_and_preserve_origi
         ("fake-prefix-flood", "64 KiB", None),
         ("fake-wait", "cancelled", Some(Duration::from_millis(200))),
     ] {
-        let (directory, binary, data, credentials) = setup();
-        let (_server, url) = start(&binary, &data, &credentials, "0");
-        let client = ServerClient::new(&url, SUBMIT.into(), WORKER.into()).unwrap();
+        let (directory, binary, data) = setup();
+        let (_server, url) = start(&binary, &data, "0");
+        let client = ServerClient::new(&url).unwrap();
         let paths = paths(directory.path());
         let file = directory.path().join("raw-pending.json");
         let mut send = raw(&client, directory.path(), context);
@@ -161,10 +156,10 @@ fn malformed_overflow_and_cancelled_processes_publish_nothing_and_preserve_origi
 }
 
 #[test]
-fn a_pending_envelope_never_transfers_under_changed_actor_credentials() {
-    let (directory, binary, data, credentials) = setup();
-    let (_server, url) = start(&binary, &data, &credentials, "0");
-    let client = ServerClient::new(&url, SUBMIT.into(), WORKER.into()).unwrap();
+fn a_pending_envelope_never_transfers_under_changed_server_identity() {
+    let (directory, binary, data) = setup();
+    let (_server, url) = start(&binary, &data, "0");
+    let client = ServerClient::new(&url).unwrap();
     let mut send = raw(&client, directory.path(), "Open the meeting.");
     send.identity = Some(Uuid::new_v4());
     let path = directory.path().join("pending.json");
@@ -176,9 +171,9 @@ fn a_pending_envelope_never_transfers_under_changed_actor_credentials() {
 
 #[test]
 fn cancellation_after_native_start_fences_even_a_valid_zero_exit_result() {
-    let (directory, binary, data, credentials) = setup();
-    let (_server, url) = start(&binary, &data, &credentials, "0");
-    let client = ServerClient::new(&url, SUBMIT.into(), WORKER.into()).unwrap();
+    let (directory, binary, data) = setup();
+    let (_server, url) = start(&binary, &data, "0");
+    let client = ServerClient::new(&url).unwrap();
     let paths = paths(directory.path());
     let mut send = raw(&client, directory.path(), "fake-lease-loss");
     let accepted = accepted(&client, &mut send);
@@ -204,13 +199,9 @@ fn cancellation_after_native_start_fences_even_a_valid_zero_exit_result() {
             );
             std::thread::sleep(Duration::from_millis(10));
         };
-        let actor = ServerClient::new(&actor_url, SUBMIT.into(), WORKER.into()).unwrap();
+        let actor = ServerClient::new(&actor_url).unwrap();
         actor
-            .post::<_, LessonStatus>(
-                &format!("/api/v1/inbox/lessons/{generation}/cancel"),
-                &(),
-                false,
-            )
+            .post::<_, LessonStatus>(&format!("/api/v1/inbox/lessons/{generation}/cancel"), &())
             .unwrap();
         std::fs::write(directory.join("release.signal"), b"continue").unwrap();
     });

@@ -16,7 +16,7 @@ fn server() -> TestServer {
         allowed_origins: vec!["https://phrase-gym.example".to_owned()],
         ..ServerSettings::loopback()
     }
-    .with_hosts([HOST.to_owned(), "*.tailnet.example".to_owned()]);
+    .with_hosts([HOST.to_owned(), "phone.tailnet.example".to_owned()]);
     let server = TestServer::with_settings(
         DateTime::parse_from_rfc3339("2026-10-12T12:00:00Z")
             .unwrap()

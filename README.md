@@ -74,12 +74,12 @@ cargo xtask pre        # rustfmt, Clippy, architecture and hygiene checks, clien
 cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
 cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
 cargo xtask app-build  # build the client and release Rust binaries
-cargo xtask run --credentials-file /private/path/credentials.json  # Rust server on 127.0.0.1:8010 with synthetic data
+cargo xtask run  # Rust server on 127.0.0.1:8010 with synthetic data
 cargo xtask coach-bundle  # unsigned development bundle of the Coach desktop app (macOS or Windows)
 cargo xtask coach-smoke   # launch that bundle like a user and verify its window, process supervision and failure paths
 ```
 
-The Rust preview requires a private scoped credential file and learner login; follow [preview access and launch instructions](docs/rust-preview.md). The production [bounded English lesson inbox](docs/preview-inbox.md) supports durable supplied-audio intake and fake-worker publication; the Library’s **Add a first lesson** action accepts one English phrase with its original clip and shows durable delivery/preparation status. Choosing, dropping or pasting the original clip starts delivery automatically; normal **Start session** opens published English material as ungraded study with **Next**, reference playback and retained recordings. Claude preparation and native Coach integration remain preview work.
+The Rust preview connects locally or through Tailscale without application authentication; follow [preview access and launch instructions](docs/rust-preview.md). The production [bounded English lesson inbox](docs/preview-inbox.md) supports durable supplied-audio intake and fake-worker publication; the Library’s **Add a first lesson** action accepts one English phrase with its original clip and shows durable delivery/preparation status. Choosing, dropping or pasting the original clip starts delivery automatically; normal **Start session** opens published English material as ungraded study with **Next**, reference playback and retained recordings. Claude preparation and native Coach integration remain preview work.
 
 Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 

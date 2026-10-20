@@ -51,15 +51,11 @@ pub fn run(
         };
         if let Some(command) = command {
             let result = match command {
-                Command::Connect {
-                    server: next,
-                    submit,
-                    worker,
-                } => {
+                Command::Connect { server: next } => {
                     client = None;
                     server = next;
                     worker_problem = None;
-                    connect(&server, &submit, &worker, &paths, &mut client, emit)
+                    connect(&server, &paths, &mut client, emit)
                 }
                 command => handle(command, &server, client.as_ref(), &paths, emit, stop),
             };
@@ -70,7 +66,7 @@ pub fn run(
         }
         last = Instant::now();
         if client.is_none() {
-            if let Err(problem) = connect(&server, "", "", &paths, &mut client, emit) {
+            if let Err(problem) = connect(&server, &paths, &mut client, emit) {
                 emit(Event::Status(problem));
             }
             continue;
@@ -119,13 +115,11 @@ pub fn run(
 
 fn connect(
     server: &str,
-    submit: &str,
-    worker: &str,
     paths: &CoachPaths,
     client: &mut Option<ServerClient>,
     emit: &dyn Fn(Event),
 ) -> Result<(), String> {
-    let connected = connection::connect(server, submit, worker, paths)?;
+    let connected = connection::connect(server, paths)?;
     emit(Event::Connected(connected.server.clone()));
     emit(Event::Status(
         "Connected automatically; ready for supplied or raw English input with original WAV audio"

@@ -26,12 +26,9 @@ impl Reply {
 }
 
 pub async fn send(router: &Router, mut request: Request<Body>) -> Reply {
-    if !request.headers().contains_key("authorization") {
-        request.headers_mut().insert(
-            "authorization",
-            format!("Bearer {}", super::TOKEN).parse().unwrap(),
-        );
-    }
+    request.extensions_mut().insert(axum::extract::ConnectInfo(
+        "127.0.0.1:12345".parse::<std::net::SocketAddr>().unwrap(),
+    ));
     let response = router.clone().oneshot(request).await.unwrap();
     let status = response.status();
     let headers = response.headers().clone();

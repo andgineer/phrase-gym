@@ -8,8 +8,7 @@ use egui_kittest::kittest::Queryable;
 use phrase_gym_coach::adapter::CliAdapter;
 use phrase_gym_coach::desktop::appearance;
 use phrase_gym_coach::desktop::state::{
-    CredentialHealth, FolderHealth, StartupEvent, StatusSnapshot, ThemeChoice, ToolReadiness,
-    ViewState,
+    FolderHealth, StartupEvent, StatusSnapshot, ThemeChoice, ToolReadiness, ViewState,
 };
 use phrase_gym_coach::desktop::view;
 use phrase_gym_coach::platform::paths::CoachPaths;
@@ -32,7 +31,7 @@ fn startup_shows_a_paused_unconnected_status_through_accessible_names() {
     harness.get_by_label("Phrase Gym Coach");
     harness.get_by_label_contains("Paused");
     harness.get_by_label("Not configured");
-    assert_eq!(harness.get_all_by_label("Checking…").count(), 4);
+    assert_eq!(harness.get_all_by_label("Checking…").count(), 3);
     assert!(harness.ctx.global_style().interaction.selectable_labels);
 }
 
@@ -52,7 +51,6 @@ fn startup_events_replace_checking_rows_without_waiting() {
             ToolReadiness::Found(PathBuf::from("/opt/Tööls Ђ/codex")),
         ),
         StartupEvent::Tool(CliAdapter::Claude, ToolReadiness::Missing),
-        StartupEvent::Credentials(CredentialHealth::Denied("user canceled".to_owned())),
         StartupEvent::Folders(FolderHealth::Ready(paths)),
     ] {
         harness.state_mut().snapshot.apply(event);
@@ -61,7 +59,6 @@ fn startup_events_replace_checking_rows_without_waiting() {
     assert!(harness.query_by_label("Checking…").is_none());
     harness.get_by_label("Found at /opt/Tööls Ђ/codex");
     harness.get_by_label("Not found in its documented install locations");
-    harness.get_by_label_contains("Access denied (user canceled)");
     harness.get_by_label("/Users/učenik/Library/Logs/Phrase Gym Coach");
 }
 
@@ -201,7 +198,7 @@ fn every_control_stays_named_at_the_minimum_window_size_on_high_dpi_in_both_them
 }
 
 #[test]
-fn connection_setup_is_explicit_and_editing_revokes_connection_authority() {
+fn server_origin_setup_is_nonsecret_and_editing_requires_reconnection() {
     let mut state = starting();
     state.intake.connected = true;
     let mut harness = Harness::builder()
@@ -209,11 +206,15 @@ fn connection_setup_is_explicit_and_editing_revokes_connection_authority() {
         .with_context_setup(appearance::install)
         .build_ui_state(view::show, state);
     harness.run();
-    harness.get_by_label("Development connection setup").click();
+    harness.get_by_label("Server connection").click();
     harness.run();
-    harness.get_by_label("Local Server URL").click();
+    harness
+        .get_by_label("Server URL (loopback or Tailscale HTTPS)")
+        .click();
     harness.run();
-    harness.get_by_label("Local Server URL").type_text("1");
+    harness
+        .get_by_label("Server URL (loopback or Tailscale HTTPS)")
+        .type_text("1");
     harness.run();
     assert!(!harness.state().intake.connected);
     assert!(harness.state().intake.command.is_none());

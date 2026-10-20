@@ -44,11 +44,19 @@ use crate::routes;
         title = "Phrase Gym Server",
         description = "Rust server API during the migration"
     ),
-    security(("bearerAuth" = []), ("learnerCookie" = [])),
     paths(
-        routes::inbox::receipt, routes::inbox::submit, routes::inbox::status, routes::inbox::cancel, routes::inbox::retry,
+        routes::inbox::receipt,
+        routes::inbox::submit,
+        routes::inbox::status,
+        routes::inbox::cancel,
+        routes::inbox::retry,
         routes::jobs::audio,
-        routes::jobs::claim, routes::jobs::renew, routes::jobs::fail, routes::jobs::stage, routes::jobs::publish, routes::jobs::receipt,
+        routes::jobs::claim,
+        routes::jobs::renew,
+        routes::jobs::fail,
+        routes::jobs::stage,
+        routes::jobs::publish,
+        routes::jobs::receipt,
         routes::profiles::current,
         routes::profiles::revision,
         routes::profiles::update,
@@ -78,9 +86,30 @@ use crate::routes;
         routes::settings::replace,
     ),
     components(schemas(
-        JobMediaRequest, LessonPhraseInput, LessonSubmission, LessonReceipt, PublicationReceipt, DeliveryStatus, LessonStatus, ClaimRequest, JobFence, JobClaim, LessonOutput, JobFailure,
-        EnglishPackageVersion, PartnerPrompt, PhraseSituation, PhraseHelp, PhraseFamiliarity, PreparedEnglishPhrase, PreparedEnglishLesson,
-        PersonalProfile, LanguagePreferences, ProfileRevision, ProfileUpdate, ProfileRestore,
+        JobMediaRequest,
+        LessonPhraseInput,
+        LessonSubmission,
+        LessonReceipt,
+        PublicationReceipt,
+        DeliveryStatus,
+        LessonStatus,
+        ClaimRequest,
+        JobFence,
+        JobClaim,
+        LessonOutput,
+        JobFailure,
+        EnglishPackageVersion,
+        PartnerPrompt,
+        PhraseSituation,
+        PhraseHelp,
+        PhraseFamiliarity,
+        PreparedEnglishPhrase,
+        PreparedEnglishLesson,
+        PersonalProfile,
+        LanguagePreferences,
+        ProfileRevision,
+        ProfileUpdate,
+        ProfileRestore,
         AttemptEvidence,
         AudioStatus,
         Chunk,
@@ -138,18 +167,7 @@ use crate::routes;
 struct ApiDoc;
 
 pub fn document() -> utoipa::openapi::OpenApi {
-    let mut document = ApiDoc::openapi();
-    let components = document.components.as_mut().expect("API schema components");
-    components.add_security_scheme(
-        "bearerAuth",
-        utoipa::openapi::security::SecurityScheme::Http(
-            utoipa::openapi::security::HttpBuilder::new()
-                .scheme(utoipa::openapi::security::HttpAuthScheme::Bearer)
-                .build(),
-        ),
-    );
-    components.add_security_scheme("learnerCookie", utoipa::openapi::security::SecurityScheme::ApiKey(utoipa::openapi::security::ApiKey::Cookie(utoipa::openapi::security::ApiKeyValue::with_description("phrase_gym_learner", "Learner-only HttpOnly cookie. Profile updates and material APIs require separately scoped Bearer credentials."))));
-    document
+    ApiDoc::openapi()
 }
 
 pub fn document_json() -> String {

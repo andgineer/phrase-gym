@@ -64,12 +64,7 @@ fn pending_send_retains_exact_identity_and_audio_across_reload_and_failed_connec
     let reloaded = pending::load(&path).unwrap().unwrap();
     assert_eq!(created.submission_id, reloaded.submission_id);
     assert_eq!(created.upload, reloaded.upload);
-    let client = client::ServerClient::new(
-        "http://127.0.0.1:1",
-        "synthetic-submit".into(),
-        "synthetic-worker".into(),
-    )
-    .unwrap();
+    let client = client::ServerClient::new("http://127.0.0.1:1").unwrap();
     assert!(runner::deliver(&client, &path, &mut created, |_| {}).is_err());
     let retry = pending::load(&path).unwrap().unwrap();
     assert_eq!(retry.submission_id, reloaded.submission_id);
@@ -105,10 +100,10 @@ fn unsafe_connection_and_unsupported_input_fail_before_transfer() {
         "http://127.0.0.1/path",
         "http://127.0.0.1?token=secret",
     ] {
-        assert!(client::loopback(url).is_err(), "{url}");
+        assert!(client::server_origin(url).is_err(), "{url}");
     }
     assert_eq!(
-        client::loopback("http://127.0.0.1:8000/").unwrap(),
+        client::server_origin("http://127.0.0.1:8000/").unwrap(),
         "http://127.0.0.1:8000"
     );
     assert!(SuppliedLesson::parse("Raw English text").is_err());

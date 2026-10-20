@@ -16,65 +16,32 @@ pub(crate) mod settings;
 use axum::Router;
 use axum::routing::{get, post};
 
-use crate::authority::{Authority, Capability, Grant};
 use crate::state::AppState;
-use axum::middleware;
-use std::sync::Arc;
 
-pub(crate) fn api(authority: &Arc<Authority>) -> Router<AppState> {
-    let protect = |any| {
-        middleware::from_fn_with_state(
-            Grant {
-                authority: authority.clone(),
-                any,
-            },
-            crate::authority::enforce,
-        )
-    };
+pub(crate) fn api() -> Router<AppState> {
     let routes = Router::new()
-        .merge(inbox::routes().route_layer(protect(vec![Capability::MaterialSubmit])))
-        .merge(
-            Router::new()
-                .route("/api/v1/inbox/lessons/{id}", get(inbox::status))
-                .route("/api/v1/inbox/submissions/{id}", get(inbox::receipt))
-                .route_layer(protect(vec![
-                    Capability::Learner,
-                    Capability::MaterialSubmit,
-                ])),
+        .merge(inbox::routes())
+        .route("/api/v1/inbox/lessons/{id}", get(inbox::status))
+        .route("/api/v1/inbox/submissions/{id}", get(inbox::receipt))
+        .merge(jobs::routes())
+        .merge(learner())
+        .merge(material())
+        .route(
+            "/api/v1/profile",
+            get(profiles::current).put(profiles::update),
         )
-        .merge(jobs::routes().route_layer(protect(vec![Capability::Worker])))
-        .merge(learner().route_layer(protect(vec![Capability::Learner])))
-        .merge(material().route_layer(protect(vec![
-            Capability::MaterialSubmit,
-            Capability::Worker,
-        ])))
-        .merge(
-            Router::new()
-                .route("/api/v1/profile", get(profiles::current))
-                .route(
-                    "/api/v1/profile/revisions/{revision}",
-                    get(profiles::revision),
-                )
-                .route_layer(protect(vec![
-                    Capability::ProfileRead,
-                    Capability::Worker,
-                    Capability::Learner,
-                ])),
+        .route(
+            "/api/v1/profile/revisions/{revision}",
+            get(profiles::revision),
         )
-        .merge(
-            Router::new()
-                .route("/api/v1/profile", axum::routing::put(profiles::update))
-                .route("/api/v1/profile/restore", post(profiles::restore))
-                .route_layer(protect(vec![Capability::ProfileUpdate])),
-        );
+        .route("/api/v1/profile/restore", post(profiles::restore));
     #[cfg(feature = "test-support")]
-    let routes =
-        routes.merge(seed::routes().route_layer(protect(vec![Capability::MaterialSubmit])));
+    let routes = routes.merge(seed::routes());
     routes
 }
 
 // What the practising learner's browser uses, including learner recordings. Reference-media
-// publication belongs to material routes, which Coach and external material credentials will reach;
+// publication belongs to material routes used by Coach and external senders;
 // learner recordings must never be added there.
 fn learner() -> Router<AppState> {
     Router::new()

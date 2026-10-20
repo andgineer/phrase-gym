@@ -9,8 +9,6 @@ use crate::transfer::material::RawLesson;
 pub enum Command {
     Connect {
         server: String,
-        submit: String,
-        worker: String,
     },
     Send {
         json: String,
@@ -46,8 +44,6 @@ pub enum Event {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IntakeState {
     pub server: String,
-    pub submit: String,
-    pub worker: String,
     pub audio: String,
     pub lesson_file: String,
     pub status: String,
@@ -67,8 +63,6 @@ impl Default for IntakeState {
     fn default() -> Self {
         Self {
             server: "http://127.0.0.1:8000".into(),
-            submit: String::new(),
-            worker: String::new(),
             audio: String::new(),
             lesson_file: String::new(),
             status: "Connecting automatically using saved Server access…".into(),

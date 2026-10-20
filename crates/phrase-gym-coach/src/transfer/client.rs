@@ -10,37 +10,32 @@ pub struct ServerClient {
     pub server: String,
     pub identity: uuid::Uuid,
     http: Client,
-    submit: String,
-    worker: String,
 }
 
-pub fn loopback(value: &str) -> Result<String, String> {
-    let url = Url::parse(value).map_err(|_| "Enter a loopback Server URL")?;
-    if url.scheme() != "http"
-        || !matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost"))
+pub fn server_origin(value: &str) -> Result<String, String> {
+    let url = Url::parse(value).map_err(|_| "Enter the local or Tailscale Server URL")?;
+    if !((url.scheme() == "http"
+        && matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost")))
+        || (url.scheme() == "https"
+            && url.host_str().is_some_and(|host| host.ends_with(".ts.net"))))
         || url.path() != "/"
         || url.query().is_some()
         || url.fragment().is_some()
         || !url.username().is_empty()
         || url.password().is_some()
     {
-        return Err("This attended preview requires http://127.0.0.1:PORT with no path or credentials in the URL".into());
+        return Err(
+            "Use loopback HTTP or Tailscale HTTPS with no path, query or user information".into(),
+        );
     }
     Ok(url.as_str().trim_end_matches('/').to_owned())
 }
 
 impl ServerClient {
-    pub fn new(server: &str, submit: String, worker: String) -> Result<Self, String> {
-        let server = loopback(server)?;
-        if submit.is_empty() || worker.is_empty() {
-            return Err("Configure separate material-submit and worker credentials".into());
-        }
+    pub fn new(server: &str) -> Result<Self, String> {
+        let server = server_origin(server)?;
         Ok(Self {
-            identity: uuid::Uuid::new_v5(
-                &uuid::Uuid::NAMESPACE_OID,
-                &serde_json::to_vec(&(&server, &submit, &worker))
-                    .map_err(|_| "Cannot bind the Server account identity")?,
-            ),
+            identity: uuid::Uuid::new_v5(&uuid::Uuid::NAMESPACE_OID, server.as_bytes()),
             server,
             http: Client::builder()
                 .no_proxy()
@@ -48,8 +43,6 @@ impl ServerClient {
                 .timeout(Duration::from_secs(15))
                 .build()
                 .map_err(|_| "Cannot initialize the Server connection")?,
-            submit,
-            worker,
         })
     }
 
@@ -57,13 +50,12 @@ impl ServerClient {
         &self,
         path: &str,
         value: &T,
-        worker: bool,
     ) -> Result<R, String> {
-        self.request(Method::POST, path, Some(value), worker)
+        self.request(Method::POST, path, Some(value))
     }
 
     pub fn get<R: DeserializeOwned>(&self, path: &str) -> Result<R, String> {
-        self.request::<(), R>(Method::GET, path, None, false)
+        self.request::<(), R>(Method::GET, path, None)
     }
 
     fn request<T: Serialize, R: DeserializeOwned>(
@@ -71,12 +63,8 @@ impl ServerClient {
         method: Method,
         path: &str,
         value: Option<&T>,
-        worker: bool,
     ) -> Result<R, String> {
-        let mut request = self
-            .http
-            .request(method, format!("{}{path}", self.server))
-            .bearer_auth(if worker { &self.worker } else { &self.submit });
+        let mut request = self.http.request(method, format!("{}{path}", self.server));
         if let Some(value) = value {
             request = request.json(value);
         }
@@ -100,7 +88,7 @@ impl ServerClient {
                 "Server {status}: {}",
                 reason
                     .as_deref()
-                    .unwrap_or("check scoped credentials, supplied content and Server status")
+                    .unwrap_or("check Tailscale connectivity, supplied content and Server status")
             ));
         }
         serde_json::from_slice(&bytes)
@@ -113,18 +101,32 @@ mod tests {
     use super::*;
 
     #[test]
-    fn connection_identity_preserves_credential_boundaries_and_normalized_origin() {
-        let first = ServerClient::new("http://127.0.0.1:8000", "alpha:beta".into(), "gamma".into())
-            .unwrap();
-        let other = ServerClient::new("http://127.0.0.1:8000", "alpha".into(), "beta:gamma".into())
-            .unwrap();
-        let repeated = ServerClient::new(
-            "http://127.0.0.1:8000/",
-            "alpha:beta".into(),
-            "gamma".into(),
-        )
-        .unwrap();
-        assert_ne!(first.identity, other.identity);
+    fn normalized_origin_defines_stable_nonsecret_connection_identity() {
+        let first = ServerClient::new("http://127.0.0.1:8000").unwrap();
+        let repeated = ServerClient::new("http://127.0.0.1:8000/").unwrap();
+        let other = ServerClient::new("https://gym.example.ts.net").unwrap();
         assert_eq!(first.identity, repeated.identity);
+        assert_ne!(first.identity, other.identity);
+    }
+
+    #[test]
+    fn only_local_http_or_tailnet_https_origins_are_accepted() {
+        for url in [
+            "https://gym.example.ts.net",
+            "http://127.0.0.1:8000",
+            "http://localhost:8000",
+        ] {
+            assert!(server_origin(url).is_ok(), "{url}");
+        }
+        for url in [
+            "http://gym.example.ts.net",
+            "https://example.com",
+            "http://192.168.1.2",
+            "https://gym.example.ts.net/path",
+            "https://user:secret@gym.example.ts.net",
+            "https://gym.example.ts.net?token=x",
+        ] {
+            assert!(server_origin(url).is_err(), "{url}");
+        }
     }
 }

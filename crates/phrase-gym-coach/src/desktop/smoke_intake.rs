@@ -34,8 +34,7 @@ pub fn run(input: &SmokeInput, emit: &dyn Fn(Event), stop: &Arc<AtomicBool>) -> 
         executable: fake,
         host: HostEnvironment::default(),
     };
-    let token = "synthetic-browser-00000000000000000000";
-    let client = ServerClient::new(&input.server, token.into(), token.into())?;
+    let client = ServerClient::new(&input.server)?;
     emit(Event::Connected(client.server.clone()));
     let receipt = worker::tick(&client, &paths.state.join("worker.json"), |claim| {
         preparation::prepare(&client, &paths, claim, &tool, stop)

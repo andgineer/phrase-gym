@@ -23,14 +23,6 @@ impl From<Discovery> for ToolReadiness {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum CredentialHealth {
-    Checking,
-    Ready { server_credential: bool },
-    Denied(String),
-    Failed(String),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FolderHealth {
     Checking,
     Ready(CoachPaths),
@@ -41,7 +33,6 @@ pub enum FolderHealth {
 pub enum StartupEvent {
     Folders(FolderHealth),
     Tool(CliAdapter, ToolReadiness),
-    Credentials(CredentialHealth),
 }
 
 // Claims begin only after the background runner confirms the saved Server connection.
@@ -50,7 +41,6 @@ pub struct StatusSnapshot {
     pub processing_enabled: bool,
     pub server_configured: bool,
     pub tools: Vec<(CliAdapter, ToolReadiness)>,
-    pub credentials: CredentialHealth,
     pub folders: FolderHealth,
 }
 
@@ -63,7 +53,6 @@ impl StatusSnapshot {
                 .iter()
                 .map(|adapter| (*adapter, ToolReadiness::Checking))
                 .collect(),
-            credentials: CredentialHealth::Checking,
             folders: FolderHealth::Checking,
         }
     }
@@ -71,7 +60,6 @@ impl StatusSnapshot {
     pub fn apply(&mut self, event: StartupEvent) {
         match event {
             StartupEvent::Folders(health) => self.folders = health,
-            StartupEvent::Credentials(health) => self.credentials = health,
             StartupEvent::Tool(adapter, readiness) => {
                 for (known, state) in &mut self.tools {
                     if *known == adapter {
@@ -83,8 +71,7 @@ impl StatusSnapshot {
     }
 
     pub fn settled(&self) -> bool {
-        self.credentials != CredentialHealth::Checking
-            && self.folders != FolderHealth::Checking
+        self.folders != FolderHealth::Checking
             && self
                 .tools
                 .iter()
@@ -137,9 +124,6 @@ mod tests {
             CliAdapter::Claude,
             ToolReadiness::Missing,
         ));
-        snapshot.apply(StartupEvent::Credentials(CredentialHealth::Denied(
-            "locked".to_owned(),
-        )));
         assert!(!snapshot.settled());
         snapshot.apply(StartupEvent::Folders(FolderHealth::Failed(
             "disk".to_owned(),

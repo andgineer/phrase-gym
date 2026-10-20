@@ -17,17 +17,17 @@ Coach is not released. This page covers the development build, the platform fact
 Build the client with `npm --prefix frontend run build`, then start Server with disposable data:
 
 ```bash
-cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview --credentials-file /absolute/path/server-credentials.json
+cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview
 cargo xtask coach-bundle
 ```
 
-Provision separate `material_submit` and `worker` actors/tokens plus a learner browser credential in that private file using the [credential format](rust-preview.md). Open `target/coach-bundle/Phrase Gym Coach.app`. The existing **Development connection setup** accepts the loopback Server URL and scoped tokens once; **Save connection setup** stores tokens in Keychain and the versioned nonsecret Server URL atomically in Coach settings. Later normal launches connect automatically. A missing/locked credential store or unavailable Server shows a recovery action. Social sign-in remains later work.
+Open `target/coach-bundle/Phrase Gym Coach.app`. Coach connects automatically to `http://127.0.0.1:8000`; no application authentication, token setup or Keychain access is used. For an existing Tailscale Serve connection, save its exact HTTPS URL under **Server connection**, following the [private connection instructions](rust-preview.md). Only the nonsecret Server URL is saved. An unavailable Server shows a recovery action. Social sign-in remains later work.
 
 For raw preparation, paste one exact fixed English phrase in **Material draft**, complete its title, situation/meaning, original performer and English audio locale, then choose or drop its matching original WAV clip (at most 1 MB). That deliberate audio action starts durable delivery and Claude preparation automatically. It needs the verified native Claude build and subscription login below. No separate Connect/Send action is part of ordinary intake. Ordinary input supports one outstanding local submission and one new English phrase; no source fetch, TTS, existing-target matching or additional CLI selection is included.
 
 For deterministic supplied content without a model call, use **Choose prepared lesson…** and select the [sample prepared lesson](../fixtures/coach/supplied-lesson.json), or **Load supplied demo text**. Coach displays the phrase, situation, help and reference metadata. Loading validates locally and does not confirm publication. Choose or drop the matching original WAV to start automatic transfer/publication. **Preview selected original audio** plays the selected clip on macOS without publishing it. The fixture silence clip is only for software checks, never listening acceptance.
 
-The pending envelope retains the exact original bytes and submission identity in `pending-send.json` under Coach's per-user state folder before transfer. Connection failures retry automatically with the same identity; the envelope stays bound to the original Server connection/account. Confirmed publication clears it. Accepted work belongs to Server; local staging is never described as accepted. A failed model attempt requires fixing the stated problem and explicitly choosing **Retry preparation after fixing the problem** (or retrying accepted browser input from its status panel). Authentication/quota failures never switch CLI or use an API key. **Retry connection and retained input** resumes after a recoverable connection/tool problem.
+The pending envelope retains the exact original bytes and submission identity in `pending-send.json` under Coach's per-user state folder before transfer. Connection failures retry automatically with the same identity; the envelope stays bound to the original Server origin. Confirmed publication clears it. Accepted work belongs to Server; local staging is never described as accepted. A failed model attempt requires fixing the stated problem and explicitly choosing **Retry preparation after fixing the problem** (or retrying accepted browser input from its status panel). Authentication/quota failures never switch CLI or use an API key. **Retry connection and retained input** resumes after a recoverable connection/tool problem.
 
 When Coach reports confirmed publication, open browser practice and choose **Start session** for ungraded study: read/hear, record, compare, replay and **Next** without rating memory. Browser reload and Server restart preserve published content, references and saved takes with Coach closed. Browser intake can submit the same bounded raw English form; the connected Coach polls accepted work automatically.
 
@@ -47,11 +47,11 @@ Headless deterministic transfer remains available:
 
 ```bash
 cargo run --package phrase-gym-coach --example supplied_send -- \
-  http://127.0.0.1:8000 /absolute/path/coach-credentials.json \
+  http://127.0.0.1:8000 \
   fixtures/coach/supplied-lesson.json /absolute/path/reference.wav /absolute/path/pending-send.json
 ```
 
-The private credential JSON contains `material_submit` and `worker` values. Native fake-process tests and real-browser checks exercise production Coach/Server transfer and publication without provider calls. Packaged startup smoke exercises window/process/environment boundaries. These software checks do not establish attended native picker behavior, physical microphone/output, or language quality. Killed-Coach orphan recovery on macOS remains in the [remaining gaps](#remaining-gaps).
+Native fake-process tests and real-browser checks exercise production Coach/Server transfer and publication without provider calls. Packaged startup smoke exercises window/process/environment boundaries. These software checks do not establish attended native picker behavior, physical microphone/output, or language quality. Killed-Coach orphan recovery on macOS remains in the [remaining gaps](#remaining-gaps).
 
 ## Packaged startup smoke checks
 
@@ -61,7 +61,7 @@ The private credential JSON contains `material_submit` and `worker` values. Nati
 - at most 2 frames were drawn during a 3-second idle period;
 - the app received all three injected variables, and the bundled fake CLI it started saw none of them;
 - the bundled fake CLI received Unicode arguments and its working directory, was cut off at the 64 KiB output limit and left no grandchild running;
-- the per-user folders exist and the credential store answered a read-only probe.
+- the per-user folders exist; startup performs no credential-store probe.
 
 Keeping the launching terminal's variables away from the app is a property of the launcher itself, not of Coach. On Windows the PowerShell that starts Coach carries `PHRASE_GYM_TERMINAL_CANARY`, and the smoke test fails if the app sees it, which only confirms the environment was rebuilt; on macOS this is not tested. Real Finder and Start-menu launches are in the manual checklist.
 
@@ -99,7 +99,7 @@ The packaged smoke test, including the injected-variable checks, passed in CI ru
 
 Renderer fallback: none was added. Direct3D 12 starts even without a GPU through the Windows software rasterizer, and Metal starts in the macOS virtual machines. If the renderer cannot start, a native dialog explains the next step: update the graphics driver, or enable graphics acceleration in a Remote Desktop or virtual machine session.
 
-## Per-user folders and credentials
+## Per-user folders
 
 | Purpose | macOS | Windows |
 |---|---|---|
@@ -108,7 +108,7 @@ Renderer fallback: none was added. Direct3D 12 starts even without a GPU through
 | Logs | `~/Library/Logs/Phrase Gym Coach` | `%LOCALAPPDATA%\andgineer\Phrase Gym Coach\data\logs` |
 | Coach's own Codex home | `~/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/codex-home` | `%LOCALAPPDATA%\andgineer\Phrase Gym Coach\data\codex-home` |
 
-Secrets go only to the login Keychain or Windows Credential Manager, under the service `io.github.andgineer.phrase-gym-coach`. At startup Coach only reads that store. If access is denied, the status window says so, and Coach never saves the secret anywhere else. A second Coach for the same user refuses to start and says one is already running.
+Coach stores only nonsecret Server settings and never calls an OS credential store. A second Coach for the same user refuses to start and says one is already running.
 
 ## Agent CLI setup
 
@@ -228,7 +228,7 @@ Run these with the bundle from `cargo xtask coach-bundle`. Record the OS version
 2. **VoiceOver.** Turn it on with Cmd+F5. The heading, every status row, the theme radio buttons, the three text-size buttons and the "Material draft" field are announced by name. Typing German and Serbian Latin and Cyrillic text into the draft is read back correctly.
 3. **Keyboard.** Tab reaches every control with a visible focus ring, Space selects a theme, and Cmd+plus and Cmd+minus resize the text.
 4. **Display.** Light, Dark and System themes stay readable. The window can be resized down to its minimum without clipped controls, and it stays crisp on Retina and external displays.
-5. **Credential-store denial.** Lock the login keychain (`security lock-keychain`), start Coach and cancel the unlock prompt. The status shows the credential store as unavailable or denied. Nothing is written to the settings folder.
+5. **Private connection.** With an already configured Tailscale Serve connection, verify automatic connection and recovery after Server outage. Confirm a non-tailnet machine cannot reach it. Coach must never display an application login or OS credential-store prompt.
 6. **Windows.** Start the portable build from a Start-menu or desktop shortcut and repeat steps 1 to 4, using Narrator (Ctrl+Win+Enter) instead of VoiceOver and checking 150% and 200% display scaling. Then start it inside a Remote Desktop session and on a machine without Direct3D 12: it either opens or shows the renderer dialog.
 7. **Intel Mac.** Repeat steps 1 and 2 on an Intel Mac.
 8. **Oldest versions.** Repeat steps 1 to 3 on macOS 13 and on Windows 10 version 1809.

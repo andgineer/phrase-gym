@@ -13,7 +13,7 @@ const THEMES: [(ThemeChoice, &str); 3] = [
 ];
 
 // Renders the snapshot and edits only view-local state; it performs no I/O, so a slow disk,
-// credential prompt or child process can never stall a frame.
+// tool discovery or child process can never stall a frame.
 pub fn show(ui: &mut Ui, state: &mut ViewState) {
     state.text_scale = ui.ctx().zoom_factor();
     egui::Frame::central_panel(ui.style()).show(ui, |ui| {
@@ -48,11 +48,6 @@ fn status(ui: &mut Ui, snapshot: &StatusSnapshot) {
             for (adapter, readiness) in &snapshot.tools {
                 row(ui, adapter.display_name(), &text::tool(readiness));
             }
-            row(
-                ui,
-                "Credential store",
-                &text::credentials(&snapshot.credentials),
-            );
             for (name, value) in text::folders(&snapshot.folders) {
                 row(ui, name, &value);
             }

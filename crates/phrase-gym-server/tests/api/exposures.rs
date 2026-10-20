@@ -33,8 +33,10 @@ fn exposure(id: &str, kind: &str) -> Value {
 
 async fn post(router: Router, body: Vec<u8>) -> (StatusCode, Value) {
     let request = Request::post("/api/v1/exposures")
+        .extension(axum::extract::ConnectInfo(
+            "127.0.0.1:12345".parse::<std::net::SocketAddr>().unwrap(),
+        ))
         .header("host", HOST)
-        .header("authorization", format!("Bearer {}", crate::support::TOKEN))
         .header("content-type", "application/json")
         .body(Body::from(body))
         .unwrap();

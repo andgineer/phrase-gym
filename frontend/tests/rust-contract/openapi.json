@@ -3958,26 +3958,6 @@
           "learning"
         ]
       }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      },
-      "learnerCookie": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "phrase_gym_learner",
-        "description": "Learner-only HttpOnly cookie. Profile updates and material APIs require separately scoped Bearer credentials."
-      }
     }
-  },
-  "security": [
-    {
-      "bearerAuth": []
-    },
-    {
-      "learnerCookie": []
-    }
-  ]
+  }
 }

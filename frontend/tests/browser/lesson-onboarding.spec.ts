@@ -90,14 +90,20 @@ test('first lesson retains delivery identity and shows actual preparation and re
   await expect(page.getByRole('button', { name: 'Pošalji lekciju', exact: true })).toHaveCount(0)
 })
 
-test('learner-only access retains unconfirmed input and explains unavailable intake', async ({
+test('private-network denial retains unconfirmed input and explains unavailable intake', async ({
   page,
   request,
 }) => {
   await request.put('/api/v1/settings', {
     data: { native_language: 'ru', ui_language_mode: 'learning' },
   })
-  await page.setExtraHTTPHeaders({ Authorization: 'Bearer synthetic-learner-00000000000000000000' })
+  await page.route('**/api/v1/media', (route) =>
+    route.fulfill({
+      status: 403,
+      contentType: 'application/json',
+      body: JSON.stringify({ detail: 'Use the private connection' }),
+    }),
+  )
   await page.goto('/learn/en')
   await page.getByRole('button', { name: 'Add a first lesson', exact: true }).click()
   await fillLesson(page)

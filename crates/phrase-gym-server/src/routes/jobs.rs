@@ -8,7 +8,7 @@ use phrase_gym_contracts::inbox::{
     ClaimRequest, JobClaim, JobFailure, JobFence, LessonOutput, PublicationReceipt,
 };
 
-use crate::authority::Credential;
+use crate::actor::Actor;
 use crate::error::ApiError;
 use crate::extract::ApiJson;
 use crate::state::AppState;
@@ -27,7 +27,7 @@ pub(crate) fn routes() -> Router<AppState> {
 #[utoipa::path(post, path = "/api/v1/preparation/claims", tag = "preparation", request_body = ClaimRequest, responses((status = 200, body = Option<JobClaim>)))]
 pub(crate) async fn claim(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<ClaimRequest>,
 ) -> Result<Json<Option<JobClaim>>, ApiError> {
     let jobs = state.jobs.clone();
@@ -41,7 +41,7 @@ pub(crate) async fn claim(
 #[utoipa::path(post, path = "/api/v1/preparation/renew", tag = "preparation", request_body = JobFence, responses((status = 200, body = String)))]
 pub(crate) async fn renew(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<JobFence>,
 ) -> Result<Json<String>, ApiError> {
     let jobs = state.jobs.clone();
@@ -55,7 +55,7 @@ pub(crate) async fn renew(
 #[utoipa::path(post, path = "/api/v1/preparation/fail", tag = "preparation", request_body = JobFailure, responses((status = 200)))]
 pub(crate) async fn fail(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<JobFailure>,
 ) -> Result<Json<()>, ApiError> {
     let jobs = state.jobs.clone();
@@ -68,7 +68,7 @@ pub(crate) async fn fail(
 #[utoipa::path(post, path = "/api/v1/preparation/stage", tag = "preparation", request_body = LessonOutput, responses((status = 200)))]
 pub(crate) async fn stage(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<LessonOutput>,
 ) -> Result<Json<()>, ApiError> {
     let delivery = state.delivery.clone();
@@ -81,7 +81,7 @@ pub(crate) async fn stage(
 #[utoipa::path(post, path = "/api/v1/preparation/publish", tag = "preparation", request_body = JobFence, responses((status = 200, body = PublicationReceipt)))]
 pub(crate) async fn publish(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<JobFence>,
 ) -> Result<Json<PublicationReceipt>, ApiError> {
     let delivery = state.delivery.clone();
@@ -95,7 +95,7 @@ pub(crate) async fn publish(
 #[utoipa::path(post, path = "/api/v1/preparation/receipt", tag = "preparation", request_body = JobFence, responses((status = 200, body = Option<PublicationReceipt>)))]
 pub(crate) async fn receipt(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     ApiJson(input): ApiJson<JobFence>,
 ) -> Result<Json<Option<PublicationReceipt>>, ApiError> {
     let delivery = state.delivery.clone();
@@ -109,7 +109,7 @@ pub(crate) async fn receipt(
 #[utoipa::path(post, path = "/api/v1/preparation/audio", tag = "preparation", request_body = JobMediaRequest, responses((status = 200, description = "Original audio bytes for this active job")))]
 pub(crate) async fn audio(
     State(state): State<AppState>,
-    Extension(actor): Extension<Credential>,
+    Extension(actor): Extension<Actor>,
     headers: HeaderMap,
     ApiJson(input): ApiJson<JobMediaRequest>,
 ) -> Result<Response, ApiError> {
