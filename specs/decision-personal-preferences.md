@@ -2,7 +2,7 @@
 
 Personal preferences used by Phrase Gym Coach belong to the inbox domain and are stored in Phrase Gym Server's single database, alongside inbox work and learning data. The learner describes preferences to an external agent, which reads and updates them through the inbox preferences API hosted by the core. No language-specific choice is hardcoded as a universal product rule, and ordinary material preparation never edits preferences.
 
-The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language, translation-with-answer choice and durable preparation guidance. Card and help languages are independent. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent resolves them with the learner and writes the answer through the API.
+The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language, translation-with-answer choice and durable preparation guidance. Card and help languages are independent. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent asks the learner directly outside ordinary preparation jobs and writes the authorized answer through the API.
 
 For the current learner, the initial profile is:
 

@@ -10,10 +10,10 @@ Take the first remaining stage from the implementation plan. Select a bounded co
 
 1. Delegate implementation to a fresh session.
 2. Delegate independent review to another fresh session.
-3. Triage findings and delegate accepted fixes to a fresh session.
-4. Delegate re-review to another fresh session.
+3. Triage findings and return accepted fixes to the original implementer.
+4. Ask the independent reviewer for targeted re-review of substantive findings and their regressions.
 
-Use GPT-6.1 / Sol 6.1 medium: `model: "gpt-6.1-sol"`, `reasoning_effort: "medium"`, `fork_turns: "none"`. Supply enough context for agents with no prior conversation. Do not delegate further subagents. Implementers and fixers work on `main`; reviewers use a fresh scratch clone and do not modify the main tree.
+Use one implementer and one independent reviewer per coherent deliverable, reusing them for fixes and targeted re-review. Use GPT-6.1 / Sol 6.1 medium: `model: "gpt-6.1-sol"`, `reasoning_effort: "medium"`, `fork_turns: "none"`. Supply enough context for agents with no prior conversation. Do not delegate further subagents. Implementers and fixers work on `main`; reviewers use a fresh scratch clone and do not modify the main tree.
 
 Run one session at a time; avoid competing writes and concurrent gates. After interruption, inspect agent status, Git state and outstanding checks, then resume existing work instead of duplicating it. Do not claim a running gate passed or substitute a different model after a usage limit.
 
@@ -23,7 +23,7 @@ State the observed branch, HEAD and working-tree changes, exact plan slice, acce
 
 Require concrete findings with severity, file/line, governing rule, failure scenario and minimal fix. Review coverage, correctness, architecture and gate honesty; reject speculative additions or scope expansion. Send accepted findings in full to the fixer, with any narrowing explained. Re-review fixes and regressions, then the stage for blockers and majors; unrelated minors count only if introduced by the fixes.
 
-Convergence requires a review round with no new blocker or major. If reviews fail to converge, stop, explain the cause and propose one concrete requirement or invariant to simplify or remove. **Wait for the user's confirmation** before changing it. Bring product choices to the user with visible consequences and one recommendation.
+Completion requires an independent review with no unresolved blocker or major; ordinary fixes do not require a chain of fresh implementers and reviewers. Fresh semantic review of actual model-result measurements remains required by AGENTS.md. If reviews fail to converge, stop, explain the cause and propose one concrete requirement or invariant to simplify or remove. **Wait for the user's confirmation** before changing it. Bring product choices to the user with visible consequences and one recommendation.
 
 ## Completion and boundaries
 

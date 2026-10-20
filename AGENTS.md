@@ -53,7 +53,7 @@ Choose the gate from the complete change, including staged and unstaged files.
 1. `uv run inv pre`: every hook passes, including the Rust hook, and pyrefly reports zero errors.
 2. `uv run inv test`: the full Python, Rust, client and browser suites pass; frontend checks must run rather than skip.
 
-Run `inv pre` after each discrete implementation batch; use the documentation-only gate for prose-only batches. If a hook rewrites files, rerun until it converges. A previous run or a narrow test subset does not satisfy the implementation gate. Never bypass commit hooks with `--no-verify`.
+Use focused checks during iteration. Run the full ordered gate once per coherent implementation deliverable before commit or delivery, rather than after every internal edit. Rerun relevant checks for review fixes and the full gate after substantive changes; a narrow subset cannot replace it. Use the documentation-only gate for prose-only changes. If a hook rewrites files, rerun until it converges. Never bypass commit hooks with `--no-verify`.
 
 Fix findings even when they appear pre-existing. Deferral requires evidence that the same failure exists on the committed baseline and the user's agreement in the current turn. Never silently report a failing tree as passing. If execution or approval infrastructure blocks a check, describe that block explicitly and do not claim the gate passed.
 
@@ -62,6 +62,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 - New modules/functions ship meaningful behavioral coverage in the same commit. Keep tests with the responsibility they verify; do not grow one catch-all test file.
 - Behavior that only exists in the browser needs a real-browser test against the real server and built client. Assert provisional/error states deterministically; do not race an artificial delay.
 - For implementation changes, iterate with subsets if useful, then verify the full suite. Documentation-only changes use the done gate above.
+- Never launch system dialogs or native popup paths automatically. If setup, login, permission or a native check needs attended interaction, ask the user directly and report the unresolved acceptance instead of opening it.
 - Before a full browser suite in a restricted environment, run one existing test per browser engine with `--max-failures=1` to verify startup. Stop immediately if browser launch is denied or crashes; do not let the suite repeatedly launch failing browsers and flood the desktop with crash dialogs. Report the environment block and leave the full gate incomplete until it is resolved. Do not rerun browser checks after the user asks to stop them.
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.

@@ -1,6 +1,6 @@
 # Phrase Gym Coach desktop: development setup
 
-Coach is not released. This page covers the development build, the platform facts measured so far, how to prepare the agent CLIs and what still has to be checked by a person. Product behavior lives in the [Coach decision](../specs/decision-external-preparation-agent.md); remaining work lives in the [Coach plan](../specs/plan/implementation-plan.md#coach-desktop-workstream).
+Coach is not released. This page covers the development build, the platform facts measured so far, how to prepare the agent CLIs and what still has to be checked by a person. Product behavior lives in the [Coach decision](../specs/decision-external-preparation-agent.md); remaining work lives in the [Coach plan](../specs/plan/implementation-plan.md#4-integrate-the-minimal-coach-desktop-workstream).
 
 ## Build, run and smoke-test
 
@@ -11,6 +11,8 @@ Coach is not released. This page covers the development build, the platform fact
 | Build, launch like a user and verify the bundle | `cargo xtask coach-smoke` |
 
 `coach-bundle` writes `Phrase Gym Coach.app` on macOS (the fake CLI used by the checks sits in `Contents/Resources`) and `Phrase Gym Coach\phrase-gym-coach.exe` with a `resources` folder on Windows. It is a development layout: unsigned, no icon, no installer.
+
+The [functional MVP plan](../specs/plan/implementation-plan.md#functional-mvp-scope) selects Codex on one MacBook with full learning content and loop. The current bounded Claude path below is implemented development behavior, not that MVP. Wider platform and Claude qualification are future release work. Login commands below are explicit operator setup instructions; agents must ask the user to perform missing setup rather than automatically open login or credential-store dialogs.
 
 ## Local English lesson demo
 
@@ -41,7 +43,7 @@ This command only stages the concrete [raw English fixture](../fixtures/coach/ra
 cargo run --package phrase-gym-coach --example prepare_dry_run -- /tmp/phrase-gym-fresh-dry-run
 ```
 
-Choose a fresh absolute directory outside repositories. The proposed first measurement is one `haiku` start, 90 seconds maximum and 64 KiB per stream, followed by inspection of every output and a fresh semantic reviewer. Real spending needs separate authorization. The silence clip establishes transfer only; a matching spoken reference, attended listening/recording and actual-device acceptance remain required before claiming the M2 demonstration. This does not establish unattended language quality.
+Choose a fresh absolute directory outside repositories. The proposed first measurement is one `haiku` start, 90 seconds maximum and 64 KiB per stream, followed by inspection of every output and a fresh semantic reviewer. Real spending needs separate authorization. The silence clip establishes transfer only; a matching spoken reference, attended listening/recording and actual-device acceptance remain required before claiming a real generated-lesson demonstration. This does not establish unattended language quality.
 
 Headless deterministic transfer remains available:
 
@@ -67,16 +69,16 @@ Keeping the launching terminal's variables away from the app is a property of th
 
 The report also lists the Codex and Claude executables found without the shell's PATH, whether each is a native build, and the `--version` output of the native ones. Two failure paths are checked as well: a launch with no usable renderer (`WGPU_BACKEND=gl`) must exit with code 2 and an actionable message, and a launch while Coach's instance lock is held must exit with code 3. CI runs the smoke test on macOS Apple Silicon, macOS Intel and Windows x64.
 
-## Supported platforms
+## Platform targets and measured builds
 
 | Component | macOS | Windows |
 |---|---|---|
 | Coach runtime: Rust 1.96, eframe/winit, wgpu with Metal or Direct3D 12 | 11+ on Apple Silicon (Rust target minimum); Metal needs 10.13+ on Intel | 10+ x64 (Rust target minimum, Direct3D 12) |
 | [Claude Code](https://code.claude.com/docs/en/setup) | 13.0+ | 10 version 1809+ or Server 2019+ |
 | [Codex CLI](https://github.com/openai/codex/blob/main/docs/install.md) | 12+ | officially Windows 11 via WSL2; a native PowerShell installer also exists |
-| **Coach claims** | **13.0+ on Apple Silicon and Intel** (`LSMinimumSystemVersion` 13.0) | **10 version 1809+ x64**, with the Codex gap below |
+| **Build targets** | **13.0+ on Apple Silicon and Intel** (`LSMinimumSystemVersion` 13.0) | **10 version 1809+ x64**, with the Codex gap below |
 
-A supported release needs both CLI adapters, so the macOS floor follows Claude Code. Native Windows Codex is unverified: its own documentation names WSL2, and Coach launches native executables only. Tested so far: macOS 27.0.1 on Apple Silicon by hand, plus the CI images listed below. The oldest claimed versions, macOS 13 and Windows 10 1809, are untested.
+These build targets do not establish release support. The functional MVP requires Codex on the actual MacBook; a future release selects and qualifies its adapter/platform matrix. The table retains current build minimums; it does not make Claude a Codex MVP dependency. Native Windows Codex is unverified: its own documentation names WSL2, and Coach launches native executables only. Tested so far: macOS 27.0.1 on Apple Silicon by hand, plus the CI images listed below. The oldest claimed versions, macOS 13 and Windows 10 1809, are untested.
 
 ## Toolkit and measurements
 
@@ -114,7 +116,7 @@ Coach stores only nonsecret Server settings and never calls an OS credential sto
 
 Verified with Claude Code 2.1.302 and codex-cli 0.159.2 on macOS 27.0.1 (Apple Silicon) on 2026-10-17. The exact invocation and the evidence behind each flag are in [Verified CLI invocation](#verified-cli-invocation) below.
 
-**Supported installs.** Only native builds are verified: Claude Code from its native installer (`~/.local/bin/claude`) and Codex from the Homebrew cask (`brew install --cask codex`). Coach starts a CLI with a PATH of only the executable's folder and the system folders, so an install that is a Node script fails inside an attempt with `env: node: No such file or directory` (exit 127). That covers `npm install -g @openai/codex` (which runs `bin/codex.js`), `npm install -g @anthropic-ai/claude-code` (which runs `cli.js`) and the older `~/.claude/local/claude` wrapper. The status window reports such an install as unsupported rather than found, and Coach does not look in `~/.claude/local`. Script installs stay unsupported until the C3 settings in the [Coach plan](../specs/plan/implementation-plan.md#c3-implement-the-minimal-v1-surface) add an explicit runtime.
+**Supported installs.** Only native builds are verified: Claude Code from its native installer (`~/.local/bin/claude`) and Codex from the Homebrew cask (`brew install --cask codex`). Coach starts a CLI with a PATH of only the executable's folder and the system folders, so an install that is a Node script fails inside an attempt with `env: node: No such file or directory` (exit 127). That covers `npm install -g @openai/codex` (which runs `bin/codex.js`), `npm install -g @anthropic-ai/claude-code` (which runs `cli.js`) and the older `~/.claude/local/claude` wrapper. The status window reports such an install as unsupported rather than found, and Coach does not look in `~/.claude/local`. Script installs remain unsupported; adding an explicit runtime is future adapter work, not a prerequisite for the native Codex MVP.
 
 **Claude CLI** uses the existing subscription login. Check it without using the model: `claude auth status` must report `"loggedIn": true` and `"authMethod": "claude.ai"`. Coach strips `ANTHROPIC_API_KEY` and similar variables, so an exported key never takes over.
 
@@ -170,7 +172,7 @@ The argument and environment builders in `crates/phrase-gym-coach/src/adapter/` 
 - **Recorded failure outputs.** Claude without a login prints `Not logged in · Please run /login` to stdout and exits 1. Codex without a login retries five times, then prints `unexpected status 401 Unauthorized`. Codex refusing an API-key login prints `ChatGPT login is required, but an API key is currently being used. Logging out.` Codex pointed at a missing home prints `CODEX_HOME points to "…", but that path does not exist` and exits 1.
 - **Quota and rate limits.** Reuse the `news-recap` patterns over both stderr and stdout: `rate.?limit`, `too many requests`, `\b(status|code|http)\b\W{0,10}429`, `credit balance`, `Individual quota reached|upgrade your subscription` and `overloaded`. Never match a bare `429`: it also matches PIDs and trace ids.
 - **Classifying a failure.** Use structured status where the CLI provides it (the exit status, Claude's JSON `is_error`, Codex's `--json` events) and bounded, adapter-specific matching of the recorded outputs above otherwise. Startup noise is not a final failure: with null stdin Codex prints `Reading additional input from stdin...`, it warns on stderr about unknown `-c` keys, and without a login it retries five times before the final 401 recorded above. `news-recap` likewise ignores an early "not logged in" line once a later line reports successful authentication. Report a quota reset time only when the CLI prints one; never invent or estimate it.
-- **Structured output.** Claude `--output-format json` adds `result`, `is_error`, `permission_denials` and usage, and is the candidate for normalising results in C4; Claude's text mode reports no usage. Codex prints `tokens used\n<total>` to stderr; `--json` adds per-turn input, cached, output and reasoning tokens; `--output-last-message <file>` only duplicates the final stdout message.
+- **Structured output.** Claude `--output-format json` adds `result`, `is_error`, `permission_denials` and usage, and is the candidate for normalising results in the remaining integration work; Claude's text mode reports no usage. Codex prints `tokens used\n<total>` to stderr; `--json` adds per-turn input, cached, output and reasoning tokens; `--output-last-message <file>` only duplicates the final stdout message.
 
 **Sources.** The `news-recap` evidence is read-only under `../news-recap/`: `src/news_recap/recap/agents/{ai_agent,subprocess,routing}.py`, `recap/contracts.py`, the command defaults in `src/news_recap/config.py`, `tests/recap/agents/`, `spec/agents.md` and `spec/plan-agent-sandboxing.md`. Its code and tests are the evidence, not its specs: they describe running in the project root, while the code runs in a temporary directory and adds Codex's non-repository flag. The code also copies the parent environment, its command defaults grant broad tools and network access, and termination reaches only the immediate child; Coach adopts none of these. A prompt asking an agent to stay inside its folder is not enforcement; only the CLI permission checks recorded here count.
 
@@ -216,13 +218,13 @@ env += CODEX_HOME=<Coach-owned Codex home>
 ## Remaining gaps
 
 - **Codex home login.** The probes used the operator's own `~/.codex` with user configuration ignored. A run inside Coach's own Codex home needs your one-time login, followed by the confirming probe in the checklist below.
-- **Windows CLIs.** No Windows probes have run with logged-in CLIs. Still unverified there: native Codex support and whether its permission profile is enforced, Claude's `--restricted` confinement, and where the tools are installed. CI covers only the build, the UI tests, process cleanup through the Job Object (including grandchildren and dropping the supervisor), Windows Credential Manager and the packaged smoke test.
+- **Windows CLIs.** No Windows probes have run with logged-in CLIs. Still unverified there: native Codex support and whether its permission profile is enforced, Claude's `--restricted` confinement, and where the tools are installed. CI covers only the build, the UI tests, process cleanup through the Job Object (including grandchildren and dropping the supervisor), credential-store-free startup and the packaged smoke test.
 - **Crash cleanup on macOS.** If Coach itself is killed, its CLI children survive, because macOS has nothing like the Windows kill-on-close Job Object. Recovery after a crash belongs to the runner work.
 - **Claude updates.** Claude's native installer keeps only the two newest versions, so the version Coach found can disappear after updates. Coach must recheck the tool before every attempt.
 
 ## Manual acceptance checklist
 
-Run these with the bundle from `cargo xtask coach-bundle`. Record the OS version and the result of each step.
+These are attended operator checks, not instructions to launch prompts automatically. Run applicable checks with the bundle from `cargo xtask coach-bundle` and record OS/version/results. The functional MVP requires the actual MacBook/Codex workflow; Windows, Intel, oldest-version and Claude checks are deferred release qualification.
 
 1. **Finder launch (macOS).** Double-click `target/coach-bundle/Phrase Gym Coach.app`. The window opens and every status row stops saying "Checking…" within a few seconds. Codex and Claude show the paths found. A second double-click shows the "already running" dialog.
 2. **VoiceOver.** Turn it on with Cmd+F5. The heading, every status row, the theme radio buttons, the three text-size buttons and the "Material draft" field are announced by name. Typing German and Serbian Latin and Cyrillic text into the draft is read back correctly.
