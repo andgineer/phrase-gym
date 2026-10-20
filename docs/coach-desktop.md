@@ -14,14 +14,14 @@ Coach is not released. This page covers the development build, the platform fact
 
 ## Local English lesson demo
 
-Build the client with `npm --prefix frontend run build`, then start Server with disposable data:
+Build once with `npm --prefix frontend run build` and `cargo xtask coach-bundle`. Then use these two commands in separate terminals on macOS:
 
 ```bash
-cargo xtask run --port 8000 --data-dir /tmp/phrase-gym-preview
-cargo xtask coach-bundle
+cargo xtask run --data-dir /tmp/phrase-gym-preview
+open "target/coach-bundle/Phrase Gym Coach.app"
 ```
 
-Open `target/coach-bundle/Phrase Gym Coach.app`. Coach connects automatically to `http://127.0.0.1:8000`; no application authentication, token setup or Keychain access is used. For an existing Tailscale Serve connection, save its exact HTTPS URL under **Server connection**, following the [private connection instructions](rust-preview.md). Only the nonsecret Server URL is saved. An unavailable Server shows a recovery action. Social sign-in remains later work.
+Server and Coach connect directly on the same MacBook at `http://127.0.0.1:8000` by default; no connection setup, application authentication, token setup or Keychain access is used. An unavailable Server shows a recovery action. An optional local port override is described in the [local connection instructions](rust-preview.md). Remote operation and social sign-in remain later work.
 
 For raw preparation, paste one exact fixed English phrase in **Material draft**, complete its title, situation/meaning, original performer and English audio locale, then choose or drop its matching original WAV clip (at most 1 MB). That deliberate audio action starts durable delivery and Claude preparation automatically. It needs the verified native Claude build and subscription login below. No separate Connect/Send action is part of ordinary intake. Ordinary input supports one outstanding local submission and one new English phrase; no source fetch, TTS, existing-target matching or additional CLI selection is included.
 
@@ -228,7 +228,7 @@ Run these with the bundle from `cargo xtask coach-bundle`. Record the OS version
 2. **VoiceOver.** Turn it on with Cmd+F5. The heading, every status row, the theme radio buttons, the three text-size buttons and the "Material draft" field are announced by name. Typing German and Serbian Latin and Cyrillic text into the draft is read back correctly.
 3. **Keyboard.** Tab reaches every control with a visible focus ring, Space selects a theme, and Cmd+plus and Cmd+minus resize the text.
 4. **Display.** Light, Dark and System themes stay readable. The window can be resized down to its minimum without clipped controls, and it stays crisp on Retina and external displays.
-5. **Private connection.** With an already configured Tailscale Serve connection, verify automatic connection and recovery after Server outage. Confirm a non-tailnet machine cannot reach it. Coach must never display an application login or OS credential-store prompt.
+5. **Local connection.** With Server and Coach on the same MacBook using their default port, verify automatic connection and recovery after Server outage. Coach must never display an application login or OS credential-store prompt.
 6. **Windows.** Start the portable build from a Start-menu or desktop shortcut and repeat steps 1 to 4, using Narrator (Ctrl+Win+Enter) instead of VoiceOver and checking 150% and 200% display scaling. Then start it inside a Remote Desktop session and on a machine without Direct3D 12: it either opens or shows the renderer dialog.
 7. **Intel Mac.** Repeat steps 1 and 2 on an Intel Mac.
 8. **Oldest versions.** Repeat steps 1 to 3 on macOS 13 and on Windows 10 version 1809.

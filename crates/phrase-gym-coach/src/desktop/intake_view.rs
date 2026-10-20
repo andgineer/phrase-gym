@@ -34,9 +34,9 @@ pub fn show(ui: &mut Ui, state: &mut IntakeState, _draft: &str) {
         }
         if ui.button("Retry preparation after fixing the problem").clicked() { state.command = Some(Command::RetryPreparation); }
         ui.collapsing("Server connection", |ui| {
-            let changed = field(ui, "Server URL (loopback or Tailscale HTTPS)", &mut state.server, false);
+            let changed = field(ui, "Local Server URL (optional port override)", &mut state.server, false);
             if changed { state.connected = false; state.status = "Connection settings changed; save the Server URL to reconnect".into(); }
-            ui.label("Connect through your existing Tailscale network; no application sign-in is needed.");
+            ui.label("Server and Coach connect directly on this computer. The default port needs no setup.");
             if ui.button("Save connection setup").clicked() {
                 state.connected = false;
                 state.command = Some(Command::Connect { server: state.server.clone() });

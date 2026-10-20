@@ -103,8 +103,7 @@ fn coach_bundle(workspace: &Workspace, options: &[String]) -> Result<(), Failure
 
 fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
     let mut data_dir = workspace.root.join(".data/rust-server");
-    let mut port = String::from("8010");
-    let mut tailscale_origin = None;
+    let mut port = None;
     let mut remaining = options.iter();
     while let Some(option) = remaining.next() {
         let value = remaining
@@ -112,8 +111,7 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
             .ok_or_else(|| Failure::new(format!("{option} needs a value; {USAGE}")))?;
         match option.as_str() {
             "--data-dir" => data_dir = PathBuf::from(value),
-            "--port" => port.clone_from(value),
-            "--tailscale-origin" => tailscale_origin = Some(value.as_str()),
+            "--port" => port = Some(value.as_str()),
             _ => return Err(Failure::new(USAGE)),
         }
     }
@@ -129,11 +127,9 @@ fn run(workspace: &Workspace, options: &[String]) -> Result<(), Failure> {
         "serve",
         "--data-dir",
         &data_dir,
-        "--port",
-        &port,
     ];
-    if let Some(origin) = tailscale_origin {
-        arguments.extend(["--tailscale-origin", origin]);
+    if let Some(port) = port {
+        arguments.extend(["--port", port]);
     }
     if workspace.frontend().join("dist/index.html").is_file() {
         arguments.extend(["--client-dir", &client_dir]);

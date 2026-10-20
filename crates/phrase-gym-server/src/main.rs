@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use clap::{Parser, Subcommand};
+use phrase_gym_contracts::connection::DEFAULT_SERVER_PORT;
 use phrase_gym_core::clock::SystemClock;
 use phrase_gym_core::media::store::MediaStore;
 use phrase_gym_core::recovery;
@@ -24,14 +25,11 @@ enum Command {
     Serve {
         #[arg(long)]
         data_dir: PathBuf,
-        #[arg(long, default_value_t = 8000)]
+        #[arg(long, default_value_t = DEFAULT_SERVER_PORT)]
         port: u16,
         /// Built client directory containing index.html.
         #[arg(long)]
         client_dir: Option<PathBuf>,
-        /// Exact HTTPS origin of an existing tailnet-only Tailscale Serve proxy to this listener.
-        #[arg(long)]
-        tailscale_origin: Option<String>,
     },
     /// Write the API schema without opening any database.
     ExportSchema { output: PathBuf },
@@ -62,17 +60,11 @@ fn main() -> anyhow::Result<()> {
             data_dir,
             port,
             client_dir,
-            tailscale_origin,
         } => {
-            let mut settings = ServerSettings {
+            let settings = ServerSettings {
                 client_dir,
                 ..ServerSettings::loopback()
             };
-            if let Some(origin) = tailscale_origin {
-                settings = settings
-                    .with_tailscale_origin(&origin)
-                    .map_err(anyhow::Error::msg)?;
-            }
             serve(&data_dir, port, &settings)
         }
         Command::ExportSchema { output } => export_schema(&output),
@@ -150,4 +142,36 @@ fn export_schema(output: &std::path::Path) -> anyhow::Result<()> {
     }
     std::fs::write(output, openapi::document_json())
         .with_context(|| format!("writing {}", output.display()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn local_launch_uses_the_shared_default_and_only_an_explicit_port_override() {
+        for (options, expected) in [
+            (vec![], DEFAULT_SERVER_PORT),
+            (vec!["--port", "8181"], 8181),
+        ] {
+            let mut arguments = vec!["phrase-gym-server", "serve", "--data-dir", "/tmp/synthetic"];
+            arguments.extend(options);
+            let Command::Serve { port, .. } = Cli::try_parse_from(arguments).unwrap().command
+            else {
+                panic!("Expected local serve command");
+            };
+            assert_eq!(port, expected);
+        }
+        assert!(
+            Cli::try_parse_from([
+                "phrase-gym-server",
+                "serve",
+                "--data-dir",
+                "/tmp/synthetic",
+                "--tailscale-origin",
+                "https://gym.example.ts.net"
+            ])
+            .is_err()
+        );
+    }
 }

@@ -13,11 +13,8 @@ pub struct ServerClient {
 }
 
 pub fn server_origin(value: &str) -> Result<String, String> {
-    let url = Url::parse(value).map_err(|_| "Enter the local or Tailscale Server URL")?;
-    if !((url.scheme() == "http"
-        && matches!(url.host_str(), Some("127.0.0.1" | "[::1]" | "localhost")))
-        || (url.scheme() == "https"
-            && url.host_str().is_some_and(|host| host.ends_with(".ts.net"))))
+    let url = Url::parse(value).map_err(|_| "Enter the local Server URL")?;
+    if !(url.scheme() == "http" && matches!(url.host_str(), Some("127.0.0.1" | "localhost")))
         || url.path() != "/"
         || url.query().is_some()
         || url.fragment().is_some()
@@ -25,7 +22,8 @@ pub fn server_origin(value: &str) -> Result<String, String> {
         || url.password().is_some()
     {
         return Err(
-            "Use loopback HTTP or Tailscale HTTPS with no path, query or user information".into(),
+            "Use local HTTP (127.0.0.1 or localhost) with no path, query or user information"
+                .into(),
         );
     }
     Ok(url.as_str().trim_end_matches('/').to_owned())
@@ -88,7 +86,7 @@ impl ServerClient {
                 "Server {status}: {}",
                 reason
                     .as_deref()
-                    .unwrap_or("check Tailscale connectivity, supplied content and Server status")
+                    .unwrap_or("check the local Server and supplied content")
             ));
         }
         serde_json::from_slice(&bytes)
@@ -104,21 +102,19 @@ mod tests {
     fn normalized_origin_defines_stable_nonsecret_connection_identity() {
         let first = ServerClient::new("http://127.0.0.1:8000").unwrap();
         let repeated = ServerClient::new("http://127.0.0.1:8000/").unwrap();
-        let other = ServerClient::new("https://gym.example.ts.net").unwrap();
+        let other = ServerClient::new("http://127.0.0.1:8181").unwrap();
         assert_eq!(first.identity, repeated.identity);
         assert_ne!(first.identity, other.identity);
     }
 
     #[test]
-    fn only_local_http_or_tailnet_https_origins_are_accepted() {
-        for url in [
-            "https://gym.example.ts.net",
-            "http://127.0.0.1:8000",
-            "http://localhost:8000",
-        ] {
+    fn only_direct_local_http_origins_are_accepted() {
+        for url in ["http://127.0.0.1:8000", "http://localhost:8000"] {
             assert!(server_origin(url).is_ok(), "{url}");
         }
         for url in [
+            "https://gym.example.ts.net",
+            "http://[::1]:8000",
             "http://gym.example.ts.net",
             "https://example.com",
             "http://192.168.1.2",

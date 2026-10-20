@@ -32,7 +32,10 @@ pub fn run(
         return;
     };
     let mut server = match Settings::load(&paths.config.join("settings.json")) {
-        Ok(settings) => settings.map_or_else(|| "http://127.0.0.1:8000".into(), |s| s.server),
+        Ok(settings) => settings.map_or_else(
+            phrase_gym_contracts::connection::default_server_origin,
+            |s| s.server,
+        ),
         Err(problem) => {
             emit(Event::Status(problem));
             return;

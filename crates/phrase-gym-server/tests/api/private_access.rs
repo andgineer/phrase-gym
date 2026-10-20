@@ -3,7 +3,6 @@ use axum::body::Body;
 use axum::extract::ConnectInfo;
 use axum::http::{Request, StatusCode};
 use chrono::Utc;
-use phrase_gym_server::ServerSettings;
 use tower::ServiceExt;
 
 #[tokio::test]
@@ -25,10 +24,7 @@ async fn local_operator_needs_no_application_credentials_or_cookie() {
 
 #[tokio::test]
 async fn remote_peers_cannot_spoof_a_trusted_network_connection() {
-    let settings = ServerSettings::loopback()
-        .with_tailscale_origin("https://gym.example.ts.net")
-        .unwrap();
-    let server = TestServer::with_settings(Utc::now(), &settings);
+    let server = TestServer::start(Utc::now());
     for peer in [
         None,
         Some("192.168.1.50:1234"),
@@ -36,8 +32,7 @@ async fn remote_peers_cannot_spoof_a_trusted_network_connection() {
         Some("203.0.113.1:1234"),
     ] {
         let mut builder = Request::get("/api/v1/settings")
-            .header("host", "gym.example.ts.net")
-            .header("tailscale-user-login", "forged@example.com")
+            .header("host", "localhost")
             .header("x-forwarded-for", "127.0.0.1")
             .header("x-forwarded-proto", "https");
         if let Some(peer) = peer {
@@ -54,47 +49,17 @@ async fn remote_peers_cannot_spoof_a_trusted_network_connection() {
 }
 
 #[tokio::test]
-async fn explicit_serve_proxy_accepts_tagged_nodes_and_rejects_funnel() {
-    let settings = ServerSettings::loopback()
-        .with_tailscale_origin("https://gym.example.ts.net")
-        .unwrap();
-    let server = TestServer::with_settings(Utc::now(), &settings);
-    for (funnel, expected) in [(false, StatusCode::OK), (true, StatusCode::FORBIDDEN)] {
-        let mut builder = Request::get("/api/v1/settings")
-            .header("host", "gym.example.ts.net")
+async fn remote_hosts_are_rejected_even_from_a_local_proxy() {
+    let server = TestServer::start(Utc::now());
+    for host in ["gym.example.ts.net", "public.example", "192.168.1.2"] {
+        let request = Request::get("/api/v1/settings")
+            .header("host", host)
             .extension(ConnectInfo(
                 "127.0.0.1:1234".parse::<std::net::SocketAddr>().unwrap(),
-            ));
-        if funnel {
-            builder = builder
-                .header("tailscale-funnel-request", "?1")
-                .header("tailscale-user-login", "forged@example.com");
-        }
-        let response = server
-            .router
-            .clone()
-            .oneshot(builder.body(Body::empty()).unwrap())
-            .await
+            ))
+            .body(Body::empty())
             .unwrap();
-        assert_eq!(response.status(), expected);
-    }
-}
-
-#[test]
-fn serve_configuration_rejects_public_origins_wildcards_and_user_information() {
-    for origin in [
-        "http://gym.example.ts.net",
-        "https://public.example",
-        "https://*.ts.net",
-        "https://user@gym.example.ts.net",
-        "https://gym.example.ts.net/path",
-        "https://.ts.net",
-    ] {
-        assert!(
-            ServerSettings::loopback()
-                .with_tailscale_origin(origin)
-                .is_err(),
-            "{origin}"
-        );
+        let response = server.router.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
     }
 }

@@ -22,14 +22,6 @@ uv run phrase-gym --data-dir .data serve --client-dir frontend/dist
 
 Open [the local app](http://127.0.0.1:8000/learn/en). Choose your native language on first launch. English, Serbian, German and Russian UI locales are available; explanations stay in the native language. The database starts without content. `/learn/en` and `/learn/sr` can be bookmarked independently.
 
-With Tailscale installed, signed in and MagicDNS enabled, run the built client on a free loopback port other than 8000 and share it within your tailnet on standard HTTPS port 443:
-
-```bash
-uv run inv run --data-dir .data
-```
-
-The command prints both URLs, allows the device's exact Tailscale DNS hostname and HTTPS origin, and keeps the server and `tailscale serve --https=443` in the foreground. Ctrl+C stops both. Omit `--data-dir` to use the normal application data directory or `PHRASE_GYM_DATA_DIR`; add `--build` to rebuild `frontend/dist` before serving, or use `--client-dir` for another client build. Tailscale Serve provisions the certificate; if tailnet HTTPS is disabled, follow its authorization prompt. The trusted HTTPS URL supports remote-device microphone capture.
-
 For sample content, validate and stage a package:
 
 ```bash
@@ -74,12 +66,12 @@ cargo xtask pre        # rustfmt, Clippy, architecture and hygiene checks, clien
 cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
 cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
 cargo xtask app-build  # build the client and release Rust binaries
-cargo xtask run  # Rust server on 127.0.0.1:8010 with synthetic data
+cargo xtask run  # Rust server on 127.0.0.1:8000 with synthetic data
 cargo xtask coach-bundle  # unsigned development bundle of the Coach desktop app (macOS or Windows)
 cargo xtask coach-smoke   # launch that bundle like a user and verify its window, process supervision and failure paths
 ```
 
-The Rust preview connects locally or through Tailscale without application authentication; follow [preview access and launch instructions](docs/rust-preview.md). The production [bounded English lesson inbox](docs/preview-inbox.md) supports durable supplied-audio intake and fake-worker publication; the Library’s **Add a first lesson** action accepts one English phrase with its original clip and shows durable delivery/preparation status. Choosing, dropping or pasting the original clip starts delivery automatically; normal **Start session** opens published English material as ungraded study with **Next**, reference playback and retained recordings. Claude preparation and native Coach integration remain preview work.
+The Rust demo runs Server and Coach directly on the same MacBook at `http://127.0.0.1:8000`, without connection setup or application authentication; follow [preview access and launch instructions](docs/rust-preview.md). The production [bounded English lesson inbox](docs/preview-inbox.md) supports durable supplied-audio intake and fake-worker publication; the Library’s **Add a first lesson** action accepts one English phrase with its original clip and shows durable delivery/preparation status. Choosing, dropping or pasting the original clip starts delivery automatically; normal **Start session** opens published English material as ungraded study with **Next**, reference playback and retained recordings. Claude preparation and native Coach integration remain preview work.
 
 Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
 

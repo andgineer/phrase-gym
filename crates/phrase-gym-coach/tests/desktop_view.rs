@@ -27,6 +27,11 @@ fn starting() -> ViewState {
 #[test]
 fn startup_shows_a_paused_unconnected_status_through_accessible_names() {
     let mut harness = harness(starting());
+    assert_eq!(
+        harness.state().intake.server,
+        phrase_gym_contracts::connection::default_server_origin()
+    );
+    assert!(harness.state().intake.command.is_none());
     harness.run();
     harness.get_by_label("Phrase Gym Coach");
     harness.get_by_label_contains("Paused");
@@ -209,11 +214,11 @@ fn server_origin_setup_is_nonsecret_and_editing_requires_reconnection() {
     harness.get_by_label("Server connection").click();
     harness.run();
     harness
-        .get_by_label("Server URL (loopback or Tailscale HTTPS)")
+        .get_by_label("Local Server URL (optional port override)")
         .click();
     harness.run();
     harness
-        .get_by_label("Server URL (loopback or Tailscale HTTPS)")
+        .get_by_label("Local Server URL (optional port override)")
         .type_text("1");
     harness.run();
     assert!(!harness.state().intake.connected);

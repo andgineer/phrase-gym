@@ -18,7 +18,6 @@ pub(crate) const MAX_REQUEST_BYTES: usize = 24 * 1024 * 1024;
 #[derive(Debug)]
 pub(crate) struct Boundary {
     allowed_hosts: Vec<String>,
-    tailscale_origin: Option<String>,
     allowed_origins: Vec<String>,
 }
 
@@ -26,7 +25,6 @@ impl Boundary {
     pub(crate) fn new(settings: &ServerSettings) -> Arc<Self> {
         Arc::new(Self {
             allowed_hosts: settings.allowed_hosts.clone(),
-            tailscale_origin: settings.tailscale_origin.clone(),
             allowed_origins: settings.allowed_origins.clone(),
         })
     }
@@ -75,8 +73,7 @@ impl Boundary {
         }
         let (scheme, rest) = origin.split_once("://").unwrap_or(("", origin));
         let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
-        let same_origin = authority == Self::host(request)
-            && (scheme == "http" || self.tailscale_origin.as_deref() == Some(origin));
+        let same_origin = authority == Self::host(request) && scheme == "http";
         !same_origin && !self.allowed_origins.iter().any(|allowed| allowed == origin)
     }
 }
@@ -107,10 +104,10 @@ pub(crate) async fn enforce(
         .extensions()
         .get::<ConnectInfo<SocketAddr>>()
         .is_some_and(|peer| peer.0.ip().is_loopback());
-    if !local || request.headers().contains_key("tailscale-funnel-request") {
+    if !local {
         return ApiError::new(
             StatusCode::FORBIDDEN,
-            "Use the private local or Tailscale Serve connection",
+            "Use the direct local Server connection",
         )
         .into_response();
     }

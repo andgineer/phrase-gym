@@ -62,7 +62,7 @@ pub struct IntakeState {
 impl Default for IntakeState {
     fn default() -> Self {
         Self {
-            server: "http://127.0.0.1:8000".into(),
+            server: phrase_gym_contracts::connection::default_server_origin(),
             audio: String::new(),
             lesson_file: String::new(),
             status: "Connecting automatically using saved Server access…".into(),
