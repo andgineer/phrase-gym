@@ -2,6 +2,10 @@ import type { Language } from './api'
 import { sr, de } from './onboardingEuropeanMessages'
 
 const en = {
+  missingFields:
+    'Complete the lesson title, phrase, situation, performer and audio locale, then choose or drop the original audio again. Your input is retained.',
+  automatic:
+    'Complete the text below, then choose, drop or paste the original audio. Delivery starts automatically.',
   retryStorage: 'Retry local storage',
   conflict:
     'Saved delivery changed in another tab. Review the saved lesson before retrying or discarding.',
@@ -39,8 +43,8 @@ const en = {
   retryPreparation: 'Retry preparation',
   open: 'Open published lesson',
   referenceOnly:
-    'Ready for reference rehearsal. Open a phrase to listen, record and compare. Scheduled retrieval is not supported for this material yet.',
-  referenceCount: 'Ready for reference rehearsal only',
+    'Ready for ungraded study. Start a session to read, listen, record and compare. Memory ratings are not part of this study.',
+  referenceCount: 'Ready for ungraded study',
   awaiting: 'Awaiting preparation or repair',
   permission:
     'This connection cannot submit material. Ask the Server operator to enable supported intake; your input is retained. No lesson has been confirmed accepted.',

@@ -15,7 +15,23 @@ fn durable_receipt_is_scoped_retry_safe_and_generations_are_immutable() {
     let f = Fixture::new();
     let inbox = inbox(&f);
     let original = input(&f);
+    assert!(
+        inbox
+            .receipt("sender", original.submission_id)
+            .unwrap()
+            .is_none()
+    );
     let first = inbox.submit("sender", &original).unwrap();
+    assert_eq!(
+        inbox.receipt("sender", original.submission_id).unwrap(),
+        Some(first.clone())
+    );
+    assert!(
+        inbox
+            .receipt("other", original.submission_id)
+            .unwrap()
+            .is_none()
+    );
     assert_eq!(
         first.profile_revision,
         f.profiles.get(None).unwrap().revision
@@ -40,6 +56,10 @@ fn durable_receipt_is_scoped_retry_safe_and_generations_are_immutable() {
         Arc::new(Database::open(f.directory.path()).unwrap()),
         Arc::new(MediaStore::open(f.directory.path()).unwrap()),
         Arc::new(SystemClock),
+    );
+    assert_eq!(
+        reopened.receipt("sender", original.submission_id).unwrap(),
+        Some(first.clone())
     );
     assert_eq!(first, reopened.submit("sender", &original).unwrap());
     assert_eq!(

@@ -116,6 +116,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inbox/submissions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["submission_receipt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/lessons": {
         parameters: {
             query?: never;
@@ -646,7 +662,7 @@ export interface components {
             reference_only_count: number;
         };
         /** @enum {string} */
-        Eligibility: "new" | "due";
+        Eligibility: "study" | "new" | "due";
         /** @enum {string} */
         EnglishPackageVersion: "english_phrases_v1";
         ErrorBody: {
@@ -937,7 +953,7 @@ export interface components {
             step: number;
         };
         /** @enum {string} */
-        PracticeKind: "present" | "respond" | "capture_complete" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
+        PracticeKind: "next" | "present" | "respond" | "capture_complete" | "answer" | "explain" | "reference" | "rate" | "failure" | "report" | "detour" | "dialogue_exposure" | "dialogue_begin";
         PracticeSession: {
             attempts: components["schemas"]["AttemptEvidence"][];
             /** Format: date-time */
@@ -1348,6 +1364,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LessonStatus"];
+                };
+            };
+        };
+    };
+    submission_receipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonReceipt"] | null;
                 };
             };
         };

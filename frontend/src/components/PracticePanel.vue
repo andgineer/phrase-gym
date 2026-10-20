@@ -4,10 +4,12 @@ import { usePracticeActions } from '../composables/usePracticeActions'
 import type { Language } from '../api'
 import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
+import LessonIntake from './LessonIntake.vue'
 import { serverUnavailable, connectionRetrying } from '../api'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
   pt: PracticeMessages
+  locale: Language
   nativeLanguage: Language
 }>()
 const emit = defineEmits<{ leave: [] }>()
@@ -34,6 +36,8 @@ const {
   ratingBusy,
   help,
   rate,
+  next,
+  openIntake,
   pause,
   retry,
   beginDialogue,
@@ -55,6 +59,11 @@ const {
       </button>
       <button @click="emit('leave')">{{ pt.back }}</button>
     </div>
+    <LessonIntake
+      :language="session.manifest.language"
+      :locale="locale"
+      :before-open="openIntake"
+    />
     <div v-if="session.status === 'completed' || session.status === 'superseded'" class="card">
       <h1 tabindex="-1">
         {{ session.status === 'completed' ? pt.complete : pt.results }}
@@ -79,7 +88,9 @@ const {
                 ? pt.effort
                 : attempt.rating === 'not_yet'
                   ? pt.notYet
-                  : pt.reported
+                  : attempt.eligibility_reason === 'ungraded_study'
+                    ? pt.study
+                    : pt.reported
           }}
           <span v-if="attempt.original?.supported"> · {{ pt.supported }}</span>
         </li>
@@ -183,6 +194,7 @@ const {
         @answer="help('answer')"
         @explain="help('explain')"
         @rate="rate"
+        @next="next"
       />
     </template>
     <p v-if="engine.busy.value" role="status">{{ pt.syncing }}</p>

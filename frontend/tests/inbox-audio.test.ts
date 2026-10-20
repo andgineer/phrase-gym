@@ -6,6 +6,7 @@ test('supplied audio preserves exact bytes and normalizes supported file extensi
   expect(await audioInput(new File([bytes], 'Reference.WAV'))).toEqual({
     mime: 'audio/wav',
     base64: 'AID/QQ==',
+    sha256: '78a11bc94dd1062333933e91f3d90051ceecef81bf2172116e0f6a305699000c',
   })
   expect((await audioInput(new File([bytes], 'Reference.m4a'))).mime).toBe('audio/mp4')
 })

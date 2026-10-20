@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { CardState } from '../practiceState'
 import type { PlannedTarget, RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
@@ -18,9 +18,16 @@ const props = defineProps<{
   hasTake: boolean
 }>()
 const heading = ref<HTMLElement | null>(null)
-onMounted(() => heading.value?.focus())
+watch(heading, (element) => element?.focus())
+const study = computed(() => props.item.eligibility === 'study')
+const english = computed(() => props.item.phrase.english)
 const cue = computed(() => props.item.phrase.content.cues?.find((c) => c.id === props.item.cue_id))
-const prompt = computed(() => cue.value?.prompt || props.item.phrase.content.purpose)
+const prompt = computed(
+  () =>
+    english.value?.situations.find((s) => s.id === props.item.cue_id)?.text ||
+    cue.value?.prompt ||
+    props.item.phrase.content.purpose,
+)
 const showPhrase = computed(
   () =>
     props.card.revealed ||
@@ -35,14 +42,17 @@ const emit = defineEmits<{
   reference: []
   answer: []
   explain: []
+  next: []
   rate: [RecallRating]
 }>()
 </script>
 <template>
   <article class="card practice-card">
-    <p class="practice-prompt" :lang="item.phrase.language">
+    <p v-if="study" role="status">{{ pt.study }}. {{ pt.studyHelp }}</p>
+    <p class="practice-prompt" :lang="english?.situations[0]?.language || item.phrase.language">
       {{ prompt }}
     </p>
+    <p v-if="english?.situations[0]?.partner">{{ english.situations[0].partner.text }}</p>
     <h1
       v-if="showPhrase"
       ref="heading"
@@ -104,7 +114,12 @@ const emit = defineEmits<{
         📖 {{ pt.explain }}
       </button>
     </div>
-    <div v-if="card.expanded && explanation" class="explanation" :lang="nativeLanguage">
+    <div v-if="study && english?.help" :lang="english.help.language">
+      <p>{{ english.help.meaning }}</p>
+      <p v-if="english.help.usage">{{ english.help.usage }}</p>
+      <p v-if="english.help.translation">{{ english.help.translation }}</p>
+    </div>
+    <div v-else-if="card.expanded && explanation" class="explanation" :lang="nativeLanguage">
       <p v-if="explanation.meaning.trim()">{{ explanation.meaning }}</p>
       <p v-if="explanation.usage?.trim()">{{ explanation.usage }}</p>
       <ul v-if="explanation.breakdown?.length">
@@ -113,47 +128,57 @@ const emit = defineEmits<{
         </li>
       </ul>
     </div>
-    <details>
-      <summary>{{ pt.counts }}</summary>
-      <p>{{ pt.criteria }}</p>
-      <ul v-if="card.revealed">
-        <li v-for="variant in item.phrase.content.acceptable_equivalents" :key="variant">
-          {{ variant }}
-        </li>
-      </ul>
-    </details>
-    <p>{{ pt.rating }}</p>
-    <p
-      v-if="
-        card.originalResponse?.supported || (!card.originalResponse && card.exposedBeforeResponse)
-      "
-      role="status"
+    <template v-if="!study">
+      <details>
+        <summary>{{ pt.counts }}</summary>
+        <p>{{ pt.criteria }}</p>
+        <ul v-if="card.revealed">
+          <li v-for="variant in item.phrase.content.acceptable_equivalents" :key="variant">
+            {{ variant }}
+          </li>
+        </ul>
+      </details>
+      <p>{{ pt.rating }}</p>
+      <p
+        v-if="
+          card.originalResponse?.supported || (!card.originalResponse && card.exposedBeforeResponse)
+        "
+        role="status"
+      >
+        {{ pt.supported }}
+      </p>
+      <div class="ratings">
+        <button
+          class="not-yet"
+          :disabled="capturing || requesting || processing || ratingBusy"
+          @click="emit('rate', 'not_yet')"
+        >
+          ↻ {{ pt.notYet }}
+        </button>
+        <button
+          class="effort"
+          :disabled="capturing || requesting || processing || ratingBusy"
+          @click="emit('rate', 'with_effort')"
+        >
+          ◷ {{ pt.effort }}
+        </button>
+        <button
+          class="recalled"
+          :disabled="capturing || requesting || processing || ratingBusy"
+          @click="emit('rate', 'recalled')"
+        >
+          ✓ {{ pt.recalled }}
+        </button>
+      </div>
+    </template>
+    <button
+      v-else
+      class="primary"
+      :disabled="capturing || requesting || processing || ratingBusy"
+      @click="emit('next')"
     >
-      {{ pt.supported }}
-    </p>
-    <div class="ratings">
-      <button
-        class="not-yet"
-        :disabled="capturing || requesting || processing || ratingBusy"
-        @click="emit('rate', 'not_yet')"
-      >
-        ↻ {{ pt.notYet }}
-      </button>
-      <button
-        class="effort"
-        :disabled="capturing || requesting || processing || ratingBusy"
-        @click="emit('rate', 'with_effort')"
-      >
-        ◷ {{ pt.effort }}
-      </button>
-      <button
-        class="recalled"
-        :disabled="capturing || requesting || processing || ratingBusy"
-        @click="emit('rate', 'recalled')"
-      >
-        ✓ {{ pt.recalled }}
-      </button>
-    </div>
+      {{ pt.next }}
+    </button>
     <nav class="lesson-links">
       <RouterLink
         v-for="lesson in item.phrase.lessons"

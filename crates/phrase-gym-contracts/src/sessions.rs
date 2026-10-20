@@ -85,6 +85,7 @@ pub struct SessionTransition {
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[serde(rename_all = "lowercase")]
 pub enum Eligibility {
+    Study,
     New,
     Due,
 }

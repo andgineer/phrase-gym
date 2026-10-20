@@ -28,20 +28,26 @@ defineProps<{
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const eligible = ref(false)
+const publication = ref(0)
 const emit = defineEmits<{
+  published: []
   start: []
   query: ['q' | 'lessonQ', Event]
   more: []
   moreLessons: []
   'update:selectedLesson': [string]
 }>()
+function published() {
+  publication.value++
+  emit('published')
+}
 </script>
 <template>
   <section class="home">
     <p class="eyebrow">{{ languageNames[language] }}</p>
     <h1>{{ t.home }}</h1>
     <p v-if="!loading && !failed && !hasCollection">{{ onboardingMessages(locale).empty }}</p>
-    <LessonIntake :language="language" :locale="locale" />
+    <LessonIntake :language="language" :locale="locale" @published="published" />
     <div class="card session-entry">
       <label
         >{{ t.lessonScope
@@ -81,6 +87,7 @@ const emit = defineEmits<{
       </button>
     </div>
     <DueOverview
+      :key="publication"
       :language="language"
       :lesson-id="selectedLesson"
       :pt="pt"

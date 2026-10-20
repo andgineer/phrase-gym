@@ -4,7 +4,7 @@ pub(crate) mod scope;
 use std::collections::BTreeSet;
 
 use chrono::{DateTime, Utc};
-use phrase_gym_contracts::library::Dialogue;
+use phrase_gym_contracts::library::{AudioStatus, Dialogue};
 use phrase_gym_contracts::sessions::{
     Eligibility, ManifestSchema, PlannedTarget, PlannerVersion, SessionManifest, SessionStart,
 };
@@ -37,9 +37,6 @@ pub(crate) fn plan(
     let mut new = Vec::new();
     for candidate in scope.targets {
         let schedule = schedules::find(connection, candidate.id)?;
-        if dialogue.is_none() && schedule.as_ref().is_some_and(|due| due.due_at > now) {
-            continue;
-        }
         let phrase = phrases::draft(
             connection,
             candidate.id,
@@ -48,19 +45,41 @@ pub(crate) fn plan(
             candidate.content,
         )?
         .finish(media);
-        if !phrase.retrieval_ready {
+        let study = dialogue.is_none() && phrase.english.is_some();
+        if !study && dialogue.is_none() && schedule.as_ref().is_some_and(|due| due.due_at > now) {
             continue;
         }
-        let Some(cue) = selection::select(connection, phrase.id, phrase.revision, &phrase.content)?
-        else {
+        if study && phrase.audio_status != AudioStatus::Ready {
             continue;
-        };
+        }
+        if !study && !phrase.retrieval_ready {
+            continue;
+        }
+        let (cue_id, hidden_chunks) =
+            if let Some(english) = phrase.english.as_ref().filter(|_| study) {
+                let Some(situation) = english.situations.first() else {
+                    continue;
+                };
+                (situation.id.clone(), Vec::new())
+            } else {
+                let Some(cue) =
+                    selection::select(connection, phrase.id, phrase.revision, &phrase.content)?
+                else {
+                    continue;
+                };
+                (
+                    cue.id.clone(),
+                    selection::hidden_chunks(&phrase.content, &cue),
+                )
+            };
         let planned = PlannedTarget {
-            hidden_chunks: selection::hidden_chunks(&phrase.content, &cue),
-            cue_id: cue.id,
+            hidden_chunks,
+            cue_id,
             review_group_id: Uuid::new_v4(),
             schedule_version: schedule.as_ref().map_or(0, |due| due.version),
-            eligibility: if schedule.is_some() {
+            eligibility: if study {
+                Eligibility::Study
+            } else if schedule.is_some() {
                 Eligibility::Due
             } else {
                 Eligibility::New

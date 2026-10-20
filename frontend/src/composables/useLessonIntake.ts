@@ -39,7 +39,6 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
     if (!draft.value?.receipt || busy.value) return
     busy.value = true
     error.value = ''
-    status.value = undefined
     try {
       status.value = await api<Schemas['LessonStatus']>(
         `/inbox/lessons/${draft.value.receipt.generation_id}`,
@@ -49,6 +48,19 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
     } finally {
       busy.value = false
     }
+  }
+  async function acceptAudio(selected?: File) {
+    if (busy.value || draft.value || !selected) return
+    file.value = selected
+    if (
+      ![title.value, phrase.value, context.value, performer.value, locale.value].every((s) =>
+        s.trim(),
+      )
+    ) {
+      error.value = messages().missingFields
+      return
+    }
+    await submit()
   }
   async function submit() {
     if (busy.value || !ready.value) return
@@ -66,6 +78,7 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
         }
         const id = crypto.randomUUID()
         const input: InboxDraft = {
+          audio_sha256: audio.sha256,
           upload: {
             mime_type: audio.mime,
             audio_base64: audio.base64,
@@ -111,11 +124,24 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
         draft.value!.submission.submission_id,
       )
       if (!input.receipt) {
+        const receipt = await api<Schemas['LessonReceipt'] | null>(
+          `/inbox/submissions/${input.submission.submission_id}`,
+        )
+        if (receipt) {
+          input.receipt = receipt
+          input = await save(input, input.submission.submission_id)
+        }
+      }
+      if (!input.receipt) {
         if (!input.submission.phrases[0]!.audio_sha256) {
           const asset = await api<Schemas['MediaAsset']>('/media', {
             method: 'POST',
             body: JSON.stringify(input.upload),
           })
+          if (asset.sha256 !== input.audio_sha256)
+            throw new Error(
+              'Uploaded reference hash does not match the retained original. Retry without changing the saved input.',
+            )
           input.submission.phrases[0]!.reference_audio_id = asset.id
           input.submission.phrases[0]!.audio_sha256 = asset.sha256
           input = await save(input, input.submission.submission_id)
@@ -194,6 +220,7 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
     performer,
     file,
     submit,
+    acceptAudio,
     refresh,
     retryPreparation,
     restore,

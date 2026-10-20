@@ -173,6 +173,7 @@ function leavePractice() {
               :engine="practice"
               :pt="pt"
               :native-language="settings.native_language as Language"
+              :locale="locale"
               @leave="leavePractice"
             />
             <button
@@ -236,6 +237,7 @@ function leavePractice() {
               @more="loadMore"
               @start="startSession(selectedLesson)"
               @more-lessons="loadMoreLessons"
+              @published="loadRoute()"
             />
             <DialogueLibrary
               v-if="kind === 'home'"

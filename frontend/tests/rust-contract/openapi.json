@@ -312,6 +312,43 @@
         }
       }
     },
+    "/api/v1/inbox/submissions/{id}": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "submission_receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LessonReceipt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/lessons": {
       "get": {
         "tags": [
@@ -2017,6 +2054,7 @@
       "Eligibility": {
         "type": "string",
         "enum": [
+          "study",
           "new",
           "due"
         ]
@@ -3126,6 +3164,7 @@
       "PracticeKind": {
         "type": "string",
         "enum": [
+          "next",
           "present",
           "respond",
           "capture_complete",

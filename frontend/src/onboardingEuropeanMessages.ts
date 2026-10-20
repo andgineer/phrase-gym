@@ -43,6 +43,10 @@ export const sr = {
   invalidAudio: 'Izaberi podržanu, nepraznu zvučnu datoteku do 2 MB.',
   storage:
     'Unos nije sačuvan na ovom uređaju. Ništa nije poslato. Zadrži panel otvoren i omogući skladište pregledača pre novog pokušaja.',
+  missingFields:
+    'Complete the lesson title, phrase, situation, performer and audio locale, then choose or drop the original audio again. Your input is retained.',
+  automatic:
+    'Complete the text below, then choose, drop or paste the original audio. Delivery starts automatically.',
   retryStorage: 'Ponovo proveri lokalno skladište',
 }
 export const de = {
@@ -94,5 +98,9 @@ export const de = {
   invalidAudio: 'Wähle eine unterstützte, nicht leere Audiodatei bis 2 MB.',
   storage:
     'Eingabe konnte lokal nicht gespeichert werden. Nichts wurde gesendet. Lass das Fenster offen und aktiviere den Browserspeicher vor einem neuen Versuch.',
+  missingFields:
+    'Complete the lesson title, phrase, situation, performer and audio locale, then choose or drop the original audio again. Your input is retained.',
+  automatic:
+    'Complete the text below, then choose, drop or paste the original audio. Delivery starts automatically.',
   retryStorage: 'Lokalen Speicher erneut prüfen',
 }

@@ -7,7 +7,7 @@ pub(crate) mod recovery;
 use std::sync::Arc;
 
 use phrase_gym_contracts::inbox::{LessonReceipt, LessonStatus, LessonSubmission};
-use rusqlite::params;
+use rusqlite::{OptionalExtension, params};
 use uuid::Uuid;
 
 use crate::clock::Clock;
@@ -72,6 +72,25 @@ impl Inbox {
                 tx.execute("INSERT INTO inbox_attachment VALUES (?1, ?2, ?3)", params![receipt.generation_id.to_string(), phrase.source_id, phrase.reference_audio_id.to_string()])?;
             }
             Ok(receipt)
+        })
+    }
+
+    pub fn receipt(
+        &self,
+        actor: &str,
+        submission: Uuid,
+    ) -> Result<Option<LessonReceipt>, CoreError> {
+        self.database.read(|tx| {
+            let receipt: Option<String> = tx
+                .query_row(
+                    "SELECT receipt FROM inbox_generation WHERE actor = ?1 AND submission_id = ?2",
+                    params![actor, submission.to_string()],
+                    |row| row.get(0),
+                )
+                .optional()?;
+            receipt
+                .map(|receipt| crate::content::records::parse("input receipt", &receipt))
+                .transpose()
         })
     }
 

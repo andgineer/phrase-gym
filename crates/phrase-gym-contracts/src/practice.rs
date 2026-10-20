@@ -24,6 +24,7 @@ pub enum Modality {
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum PracticeKind {
+    Next,
     Present,
     Respond,
     CaptureComplete,
@@ -41,6 +42,7 @@ pub enum PracticeKind {
 impl PracticeKind {
     pub fn code(self) -> &'static str {
         match self {
+            Self::Next => "next",
             Self::Present => "present",
             Self::Respond => "respond",
             Self::CaptureComplete => "capture_complete",

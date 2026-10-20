@@ -127,6 +127,22 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
       ratingBusy.value = false
     }
   }
+  async function next() {
+    if (ratingBusy.value) return
+    ratingBusy.value = true
+    media.audio.stop()
+    try {
+      await action('next')
+      void media.takes.flush()
+    } catch {
+    } finally {
+      ratingBusy.value = false
+    }
+  }
+  async function openIntake() {
+    if (requesting.value) await media.control()
+    await media.release()
+  }
   async function pause() {
     await media.release()
     await transition('paused')
@@ -180,6 +196,8 @@ export function usePracticeActions(engine: ReturnType<typeof usePracticeSession>
     ratingBusy,
     help,
     rate,
+    next,
+    openIntake,
     pause,
     retry,
     beginDialogue,

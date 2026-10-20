@@ -2,6 +2,7 @@ import type { components } from '../tests/rust-contract/api.generated'
 
 type Schemas = components['schemas']
 export type InboxDraft = {
+  audio_sha256: string
   upload: Schemas['MediaUpload']
   submission: Schemas['LessonSubmission']
   receipt?: Schemas['LessonReceipt']
@@ -56,7 +57,7 @@ export async function inboxDraft(
 
 export async function audioInput(
   file: File,
-): Promise<{ mime: Schemas['ReferenceMime']; base64: string }> {
+): Promise<{ mime: Schemas['ReferenceMime']; base64: string; sha256: string }> {
   const formats: Record<string, Schemas['ReferenceMime']> = {
     wav: 'audio/wav',
     mp3: 'audio/mpeg',
@@ -69,5 +70,7 @@ export async function audioInput(
   const bytes = new Uint8Array(await file.arrayBuffer())
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
-  return { mime, base64: btoa(binary) }
+  const hash = await crypto.subtle.digest('SHA-256', bytes)
+  const sha256 = Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('')
+  return { mime, base64: btoa(binary), sha256 }
 }

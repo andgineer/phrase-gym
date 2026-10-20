@@ -36,6 +36,7 @@ pub(crate) fn api(authority: &Arc<Authority>) -> Router<AppState> {
         .merge(
             Router::new()
                 .route("/api/v1/inbox/lessons/{id}", get(inbox::status))
+                .route("/api/v1/inbox/submissions/{id}", get(inbox::receipt))
                 .route_layer(protect(vec![
                     Capability::Learner,
                     Capability::MaterialSubmit,

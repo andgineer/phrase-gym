@@ -11,7 +11,7 @@ use crate::support::content::get;
 use crate::support::http::{Reply, send};
 use crate::support::{HOST, TestServer};
 
-async fn post(app: &Router, path: &str, payload: &Value) -> Reply {
+pub(super) async fn post(app: &Router, path: &str, payload: &Value) -> Reply {
     send(
         app,
         Request::post(path)
@@ -23,7 +23,7 @@ async fn post(app: &Router, path: &str, payload: &Value) -> Reply {
     .await
 }
 
-async fn lesson(server: &TestServer) -> (Value, Value) {
+pub(super) async fn lesson(server: &TestServer) -> (Value, Value) {
     let media = post(&server.router, "/api/v1/media", &json!({
         "mime_type": "audio/wav", "audio_base64": base64(include_bytes!("../../../../fixtures/preservation/media/silence-100ms.wav")),
         "metadata": {"language": "en", "text": "Let's get started.", "role": "reference", "origin": "course", "source": "synthetic", "performer": "Synthetic", "locale": "en-US", "preparation_version": "synthetic-v1"}
@@ -34,7 +34,7 @@ async fn lesson(server: &TestServer) -> (Value, Value) {
     (input, media)
 }
 
-fn output(claim: &Value) -> Value {
+pub(super) fn output(claim: &Value) -> Value {
     json!({"fence": claim["fence"], "publication_id": Uuid::new_v4(), "adapter": "synthetic-fake-worker-v1", "package": {
         "schema_version": "english_phrases_v1", "namespace": claim["receipt"]["namespace"], "source_revision": claim["receipt"]["generation"].to_string(), "language": "en", "profile_revision": claim["receipt"]["profile_revision"], "guide_version": claim["receipt"]["guide_version"], "assessment_version": "situation-v1",
         "lesson": {"source_id": "meeting", "title": "Opening a meeting", "target_source_ids": ["open"]},

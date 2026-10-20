@@ -71,3 +71,17 @@ pub(crate) async fn retry(
             .await??,
     ))
 }
+
+#[utoipa::path(get, path = "/api/v1/inbox/submissions/{id}", operation_id = "submission_receipt", tag = "inbox", params(("id" = Uuid, Path)), responses((status = 200, body = Option<LessonReceipt>)))]
+pub(crate) async fn receipt(
+    State(state): State<AppState>,
+    Extension(actor): Extension<Credential>,
+    ApiPath(id): ApiPath<Uuid>,
+) -> Result<Json<Option<LessonReceipt>>, ApiError> {
+    let inbox = state.inbox.clone();
+    Ok(Json(
+        state
+            .blocking(move || inbox.receipt(&actor.actor, id))
+            .await??,
+    ))
+}

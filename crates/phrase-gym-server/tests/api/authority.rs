@@ -320,3 +320,43 @@ async fn inbox_status_is_learner_readable_but_submission_and_status_remain_scope
         StatusCode::FORBIDDEN
     );
 }
+
+#[tokio::test]
+async fn submission_receipts_are_read_only_scoped_and_require_learner_or_submit_authority() {
+    let directory = tempfile::tempdir().unwrap();
+    let app = app(directory.path());
+    let submission = uuid::Uuid::new_v4();
+    let receipt = serde_json::json!({"generation_id": uuid::Uuid::new_v4(), "submission_id": submission,
+        "generation": 1, "namespace": "synthetic", "profile_revision": 1, "guide_version": "english-preview-v1",
+        "received_at": "2026-10-19T10:00:00Z"});
+    let database = Database::open(directory.path()).unwrap();
+    rusqlite::Connection::open(database.path()).unwrap().execute(
+        "INSERT INTO inbox_generation (id, actor, item_id, generation, submission_id, request, receipt, profile_revision, guide_version, status) VALUES (?1, 'learner', 'synthetic', 1, ?2, '{}', ?3, 1, 'english-preview-v1', 'published')",
+        rusqlite::params![receipt["generation_id"].as_str().unwrap(), submission.to_string(), receipt.to_string()],
+    ).unwrap();
+    let path = format!("/api/v1/inbox/submissions/{submission}");
+    assert_eq!(
+        status(&app, None, "GET", &path).await,
+        StatusCode::UNAUTHORIZED
+    );
+    for actor in ["worker", "reader", "editor"] {
+        assert_eq!(
+            status(&app, Some(actor), "GET", &path).await,
+            StatusCode::FORBIDDEN
+        );
+    }
+    for (actor, expected) in [("learner", receipt), ("material", serde_json::Value::Null)] {
+        let request = Request::get(&path)
+            .header("host", "localhost")
+            .header("authorization", format!("Bearer {}", token(actor)))
+            .body(Body::empty())
+            .unwrap();
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&body).unwrap(),
+            expected
+        );
+    }
+}

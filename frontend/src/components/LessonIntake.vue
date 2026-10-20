@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Language } from '../api'
 import { onboardingMessages } from '../onboardingMessages'
+import { useIntakeStatusPolling } from '../composables/useIntakeStatusPolling'
 import { useLessonIntake } from '../composables/useLessonIntake'
-const props = defineProps<{ language: Language; locale: Language }>()
+const props = defineProps<{
+  language: Language
+  locale: Language
+  beforeOpen?: () => Promise<void>
+}>()
 const messages = computed(() => onboardingMessages(props.locale))
 const open = ref(false)
 const {
@@ -20,19 +25,39 @@ const {
   performer,
   file,
   submit,
+  acceptAudio,
   refresh,
   retryPreparation,
   restore,
   clear,
 } = useLessonIntake(() => messages.value)
+const emit = defineEmits<{ published: [] }>()
+useIntakeStatusPolling(() => draft.value?.receipt?.generation_id, status, refresh)
+watch(
+  () => status.value?.publication?.publication_id,
+  (id) => {
+    if (id) emit('published')
+  },
+)
+async function toggle() {
+  if (!open.value) await props.beforeOpen?.()
+  open.value = !open.value
+}
 </script>
 <template>
   <section class="card" :aria-label="messages.add">
-    <button @click="open = !open" :aria-expanded="open">{{ messages.add }}</button>
+    <button @click="toggle" :aria-expanded="open">{{ messages.add }}</button>
     <div v-if="open" class="lesson-input">
       <h2 id="lesson-input-heading">{{ messages.add }}</h2>
       <p>{{ language === 'en' ? messages.supported : messages.unsupported }}</p>
-      <form v-if="language === 'en' && !draft" @submit.prevent="submit">
+      <form
+        v-if="language === 'en' && !draft"
+        @submit.prevent
+        @dragover.prevent
+        @drop.prevent="acceptAudio($event.dataTransfer?.files[0])"
+        @paste="$event.clipboardData?.files.length && acceptAudio($event.clipboardData.files[0])"
+      >
+        <p>{{ messages.automatic }}</p>
         <fieldset :disabled="busy || !ready">
           <label>{{ messages.title }}<input v-model="title" required maxlength="300" /></label>
           <label
@@ -50,9 +75,12 @@ const {
               type="file"
               accept=".wav,.mp3,.ogg,.m4a,.mp4"
               required
-              @change="file = ($event.target as HTMLInputElement).files?.[0]"
+              @change="acceptAudio(($event.target as HTMLInputElement).files?.[0])"
           /></label>
-          <button class="primary" type="submit">{{ messages.submit }}</button>
+          <p v-if="file">{{ file.name }}</p>
+          <button v-if="file && error" type="button" @click="acceptAudio(file)">
+            {{ messages.retry }}
+          </button>
         </fieldset>
       </form>
       <template v-if="draft">

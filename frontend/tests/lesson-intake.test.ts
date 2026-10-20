@@ -45,11 +45,12 @@ test('lost acknowledgement and reload retry the persisted payload without anothe
   vi.stubGlobal(
     'fetch',
     vi.fn(async (path: string, options: RequestInit) => {
+      if (path.includes('/inbox/submissions/')) return Response.json(null)
       const saved = await inboxDraft()
       expect(saved).toBeDefined()
       if (path.endsWith('/media')) {
         uploads++
-        return Response.json({ id: 'audio-id', sha256: 'audio-sha256' })
+        return Response.json({ id: 'audio-id', sha256: (await inboxDraft())!.audio_sha256 })
       }
       if (options?.method === 'POST') {
         bodies.push(String(options.body))
@@ -103,8 +104,10 @@ function accepted(id: string) {
     received_at: '2026-10-19T10:00:00Z',
   }
 }
-function successfulFetch(path: string, options?: RequestInit) {
-  if (path.endsWith('/media')) return Response.json({ id: 'audio-id', sha256: 'audio-sha256' })
+async function successfulFetch(path: string, options?: RequestInit) {
+  if (path.includes('/inbox/submissions/')) return Response.json(null)
+  if (path.endsWith('/media'))
+    return Response.json({ id: 'audio-id', sha256: (await inboxDraft())!.audio_sha256 })
   if (options?.method === 'POST') {
     return Response.json(accepted(JSON.parse(String(options.body)).submission_id))
   }
@@ -126,7 +129,7 @@ test('a stale empty instance cannot replace an unconfirmed delivery or send its 
   stale.file.value = new File(['different-bytes'], 'different.wav')
   await stale.submit()
   expect(await inboxDraft()).toEqual(original)
-  expect(fetch).toHaveBeenCalledTimes(2)
+  expect(fetch).toHaveBeenCalledTimes(3)
   expect(stale.draft.value).toEqual(original)
   expect(stale.error.value).toContain('changed in another tab')
   expect(stale.title.value).toBe('A different lesson')
@@ -150,6 +153,7 @@ test.each(['media', 'receipt'])(
     })
     let delayed = false
     let oldId = ''
+    let oldHash = ''
     vi.stubGlobal(
       'fetch',
       vi.fn(async (path: string, options?: RequestInit) => {
@@ -157,6 +161,7 @@ test.each(['media', 'receipt'])(
         if (target && !delayed) {
           delayed = true
           oldId = (await inboxDraft())!.submission.submission_id
+          oldHash = (await inboxDraft())!.audio_sha256
           started()
           return new Promise<Response>((resolve) => {
             release = resolve
@@ -181,7 +186,7 @@ test.each(['media', 'receipt'])(
     expect(replacement?.receipt).toBeDefined()
     release(
       phase === 'media'
-        ? Response.json({ id: 'late-media', sha256: 'late-sha' })
+        ? Response.json({ id: 'late-media', sha256: oldHash })
         : Response.json(accepted(oldId)),
     )
     await sending
@@ -199,6 +204,7 @@ test.each(['failed', 'cancelled', 'superseded'])(
   'local abandonment of accepted %s work permits new intake without mutating it',
   async (state) => {
     const fetch = vi.fn(async (path: string, options?: RequestInit) => {
+      if (path.includes('/inbox/submissions/')) return Response.json(null)
       if (path.endsWith('/retry'))
         return Response.json(
           { detail: 'Only failed jobs below the attempt limit may retry' },
@@ -235,3 +241,42 @@ test.each(['failed', 'cancelled', 'superseded'])(
     expect(reloaded.draft.value?.receipt).toBeDefined()
   },
 )
+
+test('receipt reconciliation after lost acknowledgement avoids resending accepted bytes', async () => {
+  let receipt: ReturnType<typeof accepted> | null = null
+  let posts = 0
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (path: string, options?: RequestInit) => {
+      if (path.includes('/inbox/submissions/')) return Response.json(receipt)
+      if (path.endsWith('/media')) return successfulFetch(path, options)
+      if (options?.method === 'POST') {
+        posts++
+        receipt = accepted(JSON.parse(String(options.body)).submission_id)
+        throw new Error('Synthetic ambiguous acknowledgement')
+      }
+      return Response.json({ receipt, status: 'published', publication: { lesson_id: 'lesson' } })
+    }),
+  )
+  const model = await intake()
+  await model.acceptAudio(model.file.value)
+  expect(posts).toBe(1)
+  const saved = await inboxDraft()
+  serverUnavailable.value = false
+  await model.submit()
+  expect(posts).toBe(1)
+  expect(model.status.value?.status).toBe('published')
+  expect(model.draft.value?.upload).toEqual(saved?.upload)
+  expect(model.draft.value?.receipt).toEqual(receipt)
+})
+
+test('deliberate audio input validates text before automatic transfer and keeps the file', async () => {
+  const model = await intake()
+  model.context.value = ''
+  const fetch = vi.fn()
+  vi.stubGlobal('fetch', fetch)
+  await model.acceptAudio(model.file.value)
+  expect(fetch).not.toHaveBeenCalled()
+  expect(model.error.value).toContain('Complete the lesson title')
+  expect(model.file.value?.name).toBe('reference.wav')
+})

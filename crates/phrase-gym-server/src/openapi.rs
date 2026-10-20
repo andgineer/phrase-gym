@@ -46,7 +46,7 @@ use crate::routes;
     ),
     security(("bearerAuth" = []), ("learnerCookie" = [])),
     paths(
-        routes::inbox::submit, routes::inbox::status, routes::inbox::cancel, routes::inbox::retry,
+        routes::inbox::receipt, routes::inbox::submit, routes::inbox::status, routes::inbox::cancel, routes::inbox::retry,
         routes::jobs::audio,
         routes::jobs::claim, routes::jobs::renew, routes::jobs::fail, routes::jobs::stage, routes::jobs::publish, routes::jobs::receipt,
         routes::profiles::current,

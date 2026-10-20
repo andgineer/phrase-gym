@@ -1,5 +1,9 @@
 import type { Language } from './api'
 const en = {
+  next: 'Next',
+  study: 'Ungraded study',
+  studyHelp:
+    'Read and listen, then say it with the reference. Recording is optional. Next finishes study without grading memory.',
   connectionRequired: 'Connection required',
   connectionRetry: 'Reconnect and retry. Pending changes and recordings are retained for retry.',
   stopOrCancel: 'Stop or cancel audio',
@@ -45,6 +49,10 @@ const en = {
 }
 export type PracticeMessages = typeof en
 const ru: PracticeMessages = {
+  next: 'Далее',
+  study: 'Изучение без оценки',
+  studyHelp:
+    'Прочитайте и послушайте, затем произнесите с образцом. Запись необязательна. Далее завершает изучение без оценки памяти.',
   connectionRequired: 'Нужно подключение к серверу',
   connectionRetry: 'Подключитесь и повторите. Изменения и записи сохранены для повторной отправки.',
   stopOrCancel: 'Остановить или отменить аудио',
@@ -89,6 +97,10 @@ const ru: PracticeMessages = {
   recording: 'Запись…',
 }
 const sr: PracticeMessages = {
+  next: 'Dalje',
+  study: 'Učenje bez ocene',
+  studyHelp:
+    'Pročitaj i poslušaj, zatim izgovori uz primer. Snimanje nije obavezno. Dalje završava učenje bez ocene pamćenja.',
   connectionRequired: 'Potrebna je veza sa serverom',
   connectionRetry: 'Povežite se i pokušajte ponovo. Izmene i snimci se čuvaju za ponovni pokušaj.',
   stopOrCancel: 'Zaustavi ili otkaži zvuk',
@@ -133,6 +145,10 @@ const sr: PracticeMessages = {
   recording: 'Snimanje…',
 }
 const de: PracticeMessages = {
+  next: 'Weiter',
+  study: 'Lernen ohne Bewertung',
+  studyHelp:
+    'Lies und höre die Phrase, dann sprich mit der Referenz. Die Aufnahme ist freiwillig. Weiter beendet das Lernen ohne Gedächtnisbewertung.',
   connectionRequired: 'Serververbindung erforderlich',
   connectionRetry:
     'Verbinden und erneut versuchen. Änderungen und Aufnahmen bleiben für den erneuten Versuch erhalten.',

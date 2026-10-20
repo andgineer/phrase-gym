@@ -5,7 +5,7 @@ use phrase_gym_contracts::practice::PracticeKind::{
 use phrase_gym_contracts::practice::{
     AttemptEvidence, EventReceipt, OriginalResponse, PracticeInput, PracticeKind,
 };
-use phrase_gym_contracts::sessions::{PlannedTarget, SessionStep};
+use phrase_gym_contracts::sessions::{Eligibility, PlannedTarget, SessionStep};
 use rusqlite::Connection;
 
 use crate::error::CoreError;
@@ -31,10 +31,11 @@ pub(crate) fn create(
         cue_id: item.cue_id.clone(),
         review_group_id: item.review_group_id,
         repair: step.repair,
-        supported: support::recent(connection, item.phrase.id, now)?,
+        supported: item.eligibility == Eligibility::Study
+            || support::recent(connection, item.phrase.id, now)?,
         original: None,
-        revealed: false,
-        expanded: false,
+        revealed: item.eligibility == Eligibility::Study,
+        expanded: item.eligibility == Eligibility::Study,
         technical_failure: false,
         capture_pending: false,
         rating: None,

@@ -6,6 +6,7 @@ beforeEach(() => vi.stubGlobal('indexedDB', new IDBFactory()))
 afterEach(() => vi.unstubAllGlobals())
 function input(id: string): InboxDraft {
   return {
+    audio_sha256: 'synthetic-hash',
     upload: {
       mime_type: 'audio/wav',
       audio_base64: btoa(id),

@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use phrase_gym_contracts::practice::{AttemptEvidence, EventReceipt, PracticeInput, PracticeKind};
-use phrase_gym_contracts::sessions::PlannedTarget;
+use phrase_gym_contracts::sessions::{Eligibility, PlannedTarget};
 use rusqlite::Connection;
 
 use crate::error::CoreError;
@@ -58,9 +58,26 @@ pub(crate) fn process(
             ));
         }
     };
+    if (event.kind == PracticeKind::Next) != (item.eligibility == Eligibility::Study)
+        && matches!(event.kind, PracticeKind::Next | PracticeKind::Rate)
+    {
+        return Err(CoreError::Conflict(
+            "Study uses Next without a memory rating".to_owned(),
+        ));
+    }
+    if event.kind == PracticeKind::Next && attempt.capture_pending {
+        return Err(CoreError::Conflict(
+            "Finish or cancel capture before Next".to_owned(),
+        ));
+    }
     evidence::refresh_support(connection, &mut attempt, event.kind, receipt, now)?;
     evidence::observe(&mut attempt, event, now);
     match event.kind {
+        PracticeKind::Next => {
+            attempt.eligibility_reason = Some("ungraded_study".to_owned());
+            attempt.finalized_at = Some(timestamps::isoformat(now));
+            receipt.eligibility_reason = attempt.eligibility_reason.clone();
+        }
         PracticeKind::Rate => {
             if attempt.rating.is_some() {
                 return Err(CoreError::Conflict("Attempt already finalized".to_owned()));
@@ -78,7 +95,10 @@ pub(crate) fn process(
         _ => {}
     }
     attempts::save(connection, &attempt)?;
-    if matches!(event.kind, PracticeKind::Rate | PracticeKind::Report) {
+    if matches!(
+        event.kind,
+        PracticeKind::Rate | PracticeKind::Report | PracticeKind::Next
+    ) {
         repairs::advance(connection, session, &attempt, now)?;
     }
     Ok(())
