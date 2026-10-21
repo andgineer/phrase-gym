@@ -1,3 +1,4 @@
+import { createSilentContext } from './silent-playback'
 import { expect } from '@playwright/test'
 import { test } from './fixtures'
 
@@ -72,7 +73,7 @@ test('bare routes restore only on this device; explicit tabs remain independent'
   await expect(page).toHaveURL(/\/learn\/en$/)
   await page.goto('/')
   await expect(page).toHaveURL(/\/learn\/en$/)
-  const otherDevice = await browser.newContext({ baseURL: new URL(page.url()).origin })
+  const otherDevice = await createSilentContext(browser, { baseURL: new URL(page.url()).origin })
   try {
     const other = await otherDevice.newPage()
     await other.goto('/')

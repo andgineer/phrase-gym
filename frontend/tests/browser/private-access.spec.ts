@@ -1,10 +1,12 @@
-import { expect, test } from '@playwright/test'
+import { createSilentContext } from './silent-playback'
+import { expect } from '@playwright/test'
+import { test } from './fixtures'
 
 test('local practice starts without application sign-in or cookies', async ({
   browser,
   baseURL,
 }) => {
-  const context = await browser.newContext({ baseURL })
+  const context = await createSilentContext(browser, { baseURL })
   try {
     const page = await context.newPage()
     expect((await context.request.get('/api/v1/settings')).status()).toBe(200)

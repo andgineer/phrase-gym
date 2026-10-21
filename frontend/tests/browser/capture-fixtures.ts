@@ -1,3 +1,4 @@
+import { silencePlayback } from './silent-playback'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -14,6 +15,7 @@ export const test = base.extend({
       serviceWorkers: 'block',
     })
     try {
+      await silencePlayback(context)
       await context.addInitScript(() => {
         Object.defineProperty(navigator, 'clipboard', {
           configurable: true,

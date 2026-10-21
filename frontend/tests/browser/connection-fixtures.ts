@@ -1,3 +1,4 @@
+import { silencePlayback } from './silent-playback'
 import { createServer, request } from 'node:http'
 import type { ServerResponse } from 'node:http'
 import type { Socket } from 'node:net'
@@ -130,6 +131,7 @@ export const test = base.extend<{ connection: Connection; journalDiagnostics: vo
       serviceWorkers: 'allow',
     })
     try {
+      await silencePlayback(context)
       await use(context)
     } finally {
       await context.close()
