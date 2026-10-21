@@ -1,6 +1,7 @@
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 pub mod app;
 pub mod appearance;
+mod dropped_text;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 mod failure;
 pub mod intake;

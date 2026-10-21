@@ -10,8 +10,10 @@ const props = defineProps<{
   lessonId?: string
   pt: PracticeMessages
   locale: Language
+  completed?: boolean
+  disabled?: boolean
 }>()
-const emit = defineEmits<{ eligible: [boolean] }>()
+const emit = defineEmits<{ eligible: [boolean]; practice: [] }>()
 const summary = ref<components['schemas']['DueSummary'] | null>(null)
 const error = ref('')
 let generation = 0
@@ -50,6 +52,12 @@ watch([() => props.language, () => props.lessonId], load, { immediate: true })
     <p v-if="summary && !summary.due_count && !summary.new_count && !summary.reference_only_count">
       {{ pt.noDue }}
     </p>
+    <template v-if="summary && (completed || (!summary.due_count && !summary.new_count))">
+      <button v-if="summary.practice_ready_count" :disabled="disabled" @click="emit('practice')">
+        {{ pt.practiceNow }}
+      </button>
+      <p v-else>{{ pt.noPractice }}</p>
+    </template>
     <p v-if="nextDue">{{ pt.nextDue }}: {{ nextDue }}</p>
     <p v-if="error" class="error" role="alert">
       {{ error }} <button @click="load">{{ pt.retry }}</button>

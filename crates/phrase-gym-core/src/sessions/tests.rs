@@ -68,6 +68,7 @@ fn a_start_never_plans_with_media_it_did_not_check() {
     published(&database, &store, &clock);
     let sessions = Sessions::new(database.clone(), store, clock);
     let start = SessionStart {
+        voluntary: false,
         id: Uuid::new_v4(),
         language: Language::En,
         lesson_id: None,

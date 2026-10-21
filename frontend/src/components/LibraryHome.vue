@@ -31,6 +31,7 @@ const eligible = ref(false)
 const emit = defineEmits<{
   published: []
   start: []
+  practice: []
   query: ['q' | 'lessonQ', Event]
   more: []
   moreLessons: []
@@ -87,6 +88,7 @@ const emit = defineEmits<{
       :pt="pt"
       :locale="locale"
       @eligible="eligible = $event"
+      @practice="emit('practice')"
     />
     <section class="lookup">
       <label

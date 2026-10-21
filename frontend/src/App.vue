@@ -87,6 +87,10 @@ function startSession(lessonId?: string, dialogueId?: string) {
   if (currentLanguage.value)
     void launcher.value?.launch(currentLanguage.value, lessonId, dialogueId)
 }
+function practiceNow(lessonId?: string) {
+  if (currentLanguage.value)
+    void launcher.value?.launch(currentLanguage.value, lessonId, undefined, true)
+}
 async function openIntake() {
   await practicePanel.value?.openIntake()
 }
@@ -192,6 +196,7 @@ function leavePractice() {
               :native-language="settings.native_language as Language"
               :locale="locale"
               @leave="leavePractice"
+              @practice="practiceNow(practice.session.value?.manifest.lesson_id ?? undefined)"
             />
             <button
               v-if="phrase || kind === 'lessons'"
@@ -230,6 +235,7 @@ function leavePractice() {
               :loading-more="loadingMore"
               @more="loadMore"
               @start="startSession(route.path.split('/')[4])"
+              @practice="practiceNow(route.path.split('/')[4])"
             />
             <LibraryHome
               :publication="publication"
@@ -254,6 +260,7 @@ function leavePractice() {
               @query="updateQuery"
               @more="loadMore"
               @start="startSession(selectedLesson)"
+              @practice="practiceNow(selectedLesson)"
               @more-lessons="loadMoreLessons"
               @published="loadRoute()"
             />

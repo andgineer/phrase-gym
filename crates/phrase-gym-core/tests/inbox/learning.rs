@@ -57,6 +57,7 @@ impl Learning {
     ) -> phrase_gym_contracts::sessions::PracticeSession {
         self.sessions
             .start(&SessionStart {
+                voluntary: false,
                 id: Uuid::new_v4(),
                 language: Language::En,
                 lesson_id: Some(self.publication.lesson_id),

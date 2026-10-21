@@ -7,6 +7,7 @@ mod rotation;
 mod study;
 #[path = "../english/support.rs"]
 mod support;
+mod voluntary;
 
 use std::sync::Arc;
 

@@ -53,6 +53,7 @@ pub(crate) fn plan(
         if !study
             && !first_check
             && dialogue.is_none()
+            && !start.voluntary
             && schedule.as_ref().is_some_and(|due| due.due_at > now)
         {
             continue;
@@ -95,8 +96,11 @@ pub(crate) fn plan(
     }
     due.sort_by_key(|(due_at, _)| *due_at);
     let mut targets: Vec<PlannedTarget> = due.into_iter().map(|(_, planned)| planned).collect();
-    if dialogue.is_some() {
+    if dialogue.is_some() || start.voluntary {
         targets.extend(new);
+        if start.voluntary {
+            targets.truncate(MAX_SESSION_TARGETS);
+        }
     } else {
         targets.truncate(MAX_SESSION_TARGETS);
         let budget = MAX_NEW_TARGETS.min(MAX_SESSION_TARGETS - targets.len());
@@ -104,6 +108,7 @@ pub(crate) fn plan(
     }
     let required_media_ids = required_media(&targets, dialogue.as_ref(), media)?;
     Ok(SessionManifest {
+        voluntary: start.voluntary,
         schema_version: ManifestSchema,
         planner_version: PlannerVersion::DueNewV3Online,
         policy_version: POLICY_VERSION.to_owned(),

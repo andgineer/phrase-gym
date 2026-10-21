@@ -13,6 +13,14 @@ pub(super) fn handle(
     emit: &dyn Fn(Event),
     stop: &Arc<AtomicBool>,
 ) -> Result<(), String> {
+    let command = match command {
+        Command::DropText(path) => {
+            let text = super::dropped_text::read(&path)?;
+            emit(Event::Draft(text.clone()));
+            Command::Text(text)
+        }
+        command => command,
+    };
     if let Command::Text(phrase) = &command {
         crate::transfer::text::TextDraft::retain(
             &paths.state.join("pending-text.json"),

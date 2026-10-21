@@ -60,6 +60,7 @@ export function usePracticeSession() {
     lessonId?: string,
     dialogueId?: string,
     takeover = false,
+    voluntary = false,
   ) {
     if (busy.value) return
     requireServer()
@@ -69,6 +70,7 @@ export function usePracticeSession() {
       await flush()
       const payload = candidate.value ?? {
         id: crypto.randomUUID(),
+        voluntary,
         language,
         lesson_id: lessonId || null,
         dialogue_id: dialogueId || null,

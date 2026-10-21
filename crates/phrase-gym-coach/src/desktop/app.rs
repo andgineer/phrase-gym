@@ -132,16 +132,23 @@ impl CoachApp {
 
 impl eframe::App for CoachApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        if ui.ctx().input(|input| !input.raw.dropped_files.is_empty()) {
-            self.view.intake.status =
-                "Paste phrase text into the phrase area. Prepared packages use the external API."
-                    .into();
+        let dropped = ui.ctx().input(|input| input.raw.dropped_files.clone());
+        if !dropped.is_empty() {
+            if self.view.intake.busy || dropped.len() != 1 {
+                self.view.intake.status =
+                    "Wait for current input, then drop one plain text file".into();
+            } else {
+                self.view.intake.command = Some(super::intake::Command::DropText(
+                    dropped[0].path().to_path_buf(),
+                ));
+            }
         }
         while let Ok(event) = self.events.try_recv() {
             self.view.snapshot.apply(event);
         }
         while let Ok(event) = self.intake.events.try_recv() {
             match event {
+                Event::Draft(text) => self.view.draft = text,
                 Event::Status(status) => self.view.intake.status = status,
                 Event::SelectedClaude(path) => self.view.snapshot.apply(StartupEvent::Tool(
                     crate::adapter::CliAdapter::Claude,

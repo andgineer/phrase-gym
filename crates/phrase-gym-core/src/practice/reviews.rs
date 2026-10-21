@@ -39,7 +39,9 @@ fn exclusion(
     let item = review.item;
     let (target, revision) = (item.phrase.id, item.phrase.revision);
     let current = records::target(connection, target)?.map(|row| row.current_revision);
-    let reason = if review.session.manifest.policy_version != POLICY_VERSION {
+    let reason = if review.session.manifest.voluntary {
+        "voluntary_practice"
+    } else if review.session.manifest.policy_version != POLICY_VERSION {
         "stale_policy"
     } else if !review.session.status.is_open() {
         "closed_session"

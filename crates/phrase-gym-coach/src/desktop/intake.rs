@@ -6,12 +6,14 @@ use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 pub enum Command {
     Connect { server: String },
     Text(String),
+    DropText(std::path::PathBuf),
     Retry,
     RetryPreparation,
 }
 
 pub enum Event {
     Status(String),
+    Draft(String),
     Connected(String),
     SelectedClaude(std::path::PathBuf),
     Published(String),

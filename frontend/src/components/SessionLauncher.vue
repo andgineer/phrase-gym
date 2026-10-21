@@ -7,7 +7,12 @@ import type { usePracticeSession } from '../composables/usePracticeSession'
 import { languageNames } from '../i18n'
 const props = defineProps<{ engine: ReturnType<typeof usePracticeSession>; pt: PracticeMessages }>()
 const router = useRouter()
-const requested = ref<{ language: Language; lessonId?: string; dialogueId?: string } | null>(null)
+const requested = ref<{
+  language: Language
+  lessonId?: string
+  dialogueId?: string
+  voluntary?: boolean
+} | null>(null)
 const { openSession: session, busy, error } = props.engine
 const open = computed(
   () => session.value?.status === 'active' || session.value?.status === 'paused',
@@ -21,15 +26,24 @@ async function resume() {
   requested.value = null
   await navigate()
 }
-async function launch(language: Language, lessonId?: string, dialogueId?: string) {
+async function launch(
+  language: Language,
+  lessonId?: string,
+  dialogueId?: string,
+  voluntary = false,
+) {
   if (busy.value) return
-  requested.value = { language, lessonId, dialogueId }
+  if (voluntary && open.value) {
+    await resume()
+    return
+  }
+  requested.value = { language, lessonId, dialogueId, voluntary }
   await create()
 }
 async function create() {
   if (!requested.value) return
-  const { language, lessonId, dialogueId } = requested.value
-  await props.engine.start(language, lessonId, dialogueId, open.value)
+  const { language, lessonId, dialogueId, voluntary } = requested.value
+  await props.engine.start(language, lessonId, dialogueId, open.value, voluntary)
   if (!error.value) {
     requested.value = null
     await navigate()

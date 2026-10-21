@@ -126,6 +126,11 @@ impl Sessions {
             return replay(transaction, &existing, payload).map(session_started);
         }
         let current = store::open(transaction)?;
+        if start.voluntary && current.is_some() {
+            return Err(CoreError::Conflict(
+                "Resume the unfinished session before starting Practice now".to_owned(),
+            ));
+        }
         if start.takeover_session_id != current.as_ref().map(|row| row.id) {
             return Err(CoreError::Conflict(
                 "Resume the open session or explicitly take over its current ID".to_owned(),
@@ -140,7 +145,7 @@ impl Sessions {
         let manifest = planning::plan(transaction, start, scope, now, media)?;
         if manifest.targets.is_empty() {
             return Err(CoreError::Conflict(
-                "No due/new targets with ready reference audio and reviewed cues".to_owned(),
+                "No practice-ready targets in this scope; reference audio and valid cues are required".to_owned(),
             ));
         }
         let queue = queue::initial(&manifest)?;

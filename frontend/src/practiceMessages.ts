@@ -1,5 +1,9 @@
 import type { Language } from './api'
 const en = {
+  practiceNow: 'Practice now',
+  voluntary: 'Voluntary practice · ratings do not change your schedule.',
+  noPractice:
+    'No practice-ready material in this scope. Add material or wait for valid cues and reference audio.',
   next: 'Next',
   study: 'Ungraded study',
   studyHelp:
@@ -49,6 +53,10 @@ const en = {
 }
 export type PracticeMessages = typeof en
 const ru: PracticeMessages = {
+  practiceNow: 'Практиковаться сейчас',
+  voluntary: 'Добровольная практика · оценки не меняют расписание.',
+  noPractice:
+    'В этой подборке нет готового материала. Добавьте материал или дождитесь подготовки заданий и аудио.',
   next: 'Далее',
   study: 'Изучение без оценки',
   studyHelp:
@@ -97,6 +105,10 @@ const ru: PracticeMessages = {
   recording: 'Запись…',
 }
 const sr: PracticeMessages = {
+  practiceNow: 'Vežbaj sada',
+  voluntary: 'Dobrovoljna vežba · ocene ne menjaju raspored.',
+  noPractice:
+    'Nema spremnog materijala u ovom izboru. Dodajte materijal ili sačekajte pripremu zadataka i zvuka.',
   next: 'Dalje',
   study: 'Učenje bez ocene',
   studyHelp:
@@ -145,6 +157,10 @@ const sr: PracticeMessages = {
   recording: 'Snimanje…',
 }
 const de: PracticeMessages = {
+  practiceNow: 'Jetzt üben',
+  voluntary: 'Freiwillige Übung · Bewertungen ändern den Zeitplan nicht.',
+  noPractice:
+    'Kein übungsbereites Material in dieser Auswahl. Füge Material hinzu oder warte auf Aufgaben und Referenzaufnahmen.',
   next: 'Weiter',
   study: 'Lernen ohne Bewertung',
   studyHelp:

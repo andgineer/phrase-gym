@@ -64,6 +64,7 @@ impl Readiness {
         let media = MediaIndex::load(&self.database, &self.store, ids)?;
         let now = self.clock.now();
         let mut summary = DueSummary {
+            practice_ready_count: 0,
             due_count: 0,
             new_count: 0,
             preparing_count: 0,
@@ -76,6 +77,7 @@ impl Readiness {
                 summary.preparing_count += 1;
                 continue;
             }
+            summary.practice_ready_count += 1;
             if needs_study {
                 summary.reference_only_count += 1;
                 continue;

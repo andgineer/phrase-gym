@@ -18,7 +18,7 @@ defineProps<{
   link: (kind: 'phrases' | 'lessons', id: string) => RouteLocationRaw
 }>()
 const eligible = ref(false)
-const emit = defineEmits<{ more: []; start: [] }>()
+const emit = defineEmits<{ more: []; start: []; practice: [] }>()
 </script>
 <template>
   <section class="card">
@@ -30,6 +30,7 @@ const emit = defineEmits<{ more: []; start: [] }>()
       :pt="pt"
       :locale="locale"
       @eligible="eligible = $event"
+      @practice="emit('practice')"
     />
     <button class="primary" :disabled="!eligible" @click="emit('start')">
       {{ t.lessonDrill }}

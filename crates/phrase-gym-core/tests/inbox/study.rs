@@ -90,6 +90,7 @@ fn completed_study_enables_later_session_recall_without_inventing_memory() {
         learning
             .sessions
             .start(&SessionStart {
+                voluntary: false,
                 id: Uuid::new_v4(),
                 language: Language::En,
                 lesson_id: Some(learning.publication.lesson_id),

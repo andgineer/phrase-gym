@@ -2020,6 +2020,7 @@
       "DueSummary": {
         "type": "object",
         "required": [
+          "practice_ready_count",
           "due_count",
           "new_count",
           "preparing_count",
@@ -2040,6 +2041,10 @@
               "string",
               "null"
             ]
+          },
+          "practice_ready_count": {
+            "type": "integer",
+            "format": "int64"
           },
           "preparing_count": {
             "type": "integer",
@@ -3705,6 +3710,9 @@
             "items": {
               "$ref": "#/components/schemas/PlannedTarget"
             }
+          },
+          "voluntary": {
+            "type": "boolean"
           }
         }
       },
@@ -3742,6 +3750,9 @@
               "null"
             ],
             "format": "uuid"
+          },
+          "voluntary": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

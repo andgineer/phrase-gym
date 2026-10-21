@@ -4,6 +4,7 @@ import { usePracticeActions } from '../composables/usePracticeActions'
 import type { Language } from '../api'
 import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
+import DueOverview from './DueOverview.vue'
 import { serverUnavailable, connectionRetrying } from '../api'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
@@ -11,7 +12,7 @@ const props = defineProps<{
   locale: Language
   nativeLanguage: Language
 }>()
-const emit = defineEmits<{ leave: [] }>()
+const emit = defineEmits<{ leave: []; practice: [] }>()
 const {
   session,
   item,
@@ -46,6 +47,7 @@ defineExpose({ openIntake })
 </script>
 <template>
   <section v-if="session" class="practice-panel" :aria-busy="engine.restoring.value">
+    <p v-if="session.manifest.voluntary" role="status">{{ pt.voluntary }}</p>
     <div class="session-toolbar">
       <span
         >{{ Math.min(session.cursor + 1, session.queue.length) }} / {{ session.queue.length }}</span
@@ -68,6 +70,18 @@ defineExpose({ openIntake })
           <strong>{{ turn.speaker }}:</strong> {{ turn.text }}
         </p>
       </div>
+      <DueOverview
+        v-if="session.status === 'completed' && !session.manifest.dialogue"
+        :language="session.manifest.language"
+        :lesson-id="session.manifest.lesson_id ?? undefined"
+        :pt="pt"
+        :locale="locale"
+        completed
+        :disabled="
+          engine.busy.value || engine.restoring.value || serverUnavailable || connectionRetrying
+        "
+        @practice="emit('practice')"
+      />
       <h2>{{ pt.results }}</h2>
       <ul>
         <li v-for="attempt in session.attempts" :key="attempt.id">

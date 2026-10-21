@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct DueSummary {
+    pub practice_ready_count: i64,
     pub due_count: i64,
     pub new_count: i64,
     pub preparing_count: i64,

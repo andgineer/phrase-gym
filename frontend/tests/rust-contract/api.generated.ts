@@ -657,6 +657,8 @@ export interface components {
             new_count: number;
             next_due_at: string | null;
             /** Format: int64 */
+            practice_ready_count: number;
+            /** Format: int64 */
             preparing_count: number;
             /** Format: int64 */
             reference_only_count: number;
@@ -1095,6 +1097,7 @@ export interface components {
             /** @enum {integer} */
             schema_version: 1;
             targets: components["schemas"]["PlannedTarget"][];
+            voluntary?: boolean;
         };
         SessionStart: {
             /** Format: uuid */
@@ -1106,6 +1109,7 @@ export interface components {
             lesson_id?: string | null;
             /** Format: uuid */
             takeover_session_id?: string | null;
+            voluntary?: boolean;
         };
         /** @enum {string} */
         SessionStatus: "active" | "paused" | "superseded" | "completed";

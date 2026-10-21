@@ -62,6 +62,8 @@ impl From<OpenStatus> for SessionStatus {
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[serde(deny_unknown_fields)]
 pub struct SessionStart {
+    #[serde(default)]
+    pub voluntary: bool,
     pub id: Uuid,
     pub language: Language,
     #[serde(default)]
@@ -146,6 +148,8 @@ pub enum PlannerVersion {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct SessionManifest {
+    #[serde(default)]
+    pub voluntary: bool,
     #[cfg_attr(feature = "openapi", schema(inline))]
     pub schema_version: ManifestSchema,
     pub planner_version: PlannerVersion,
