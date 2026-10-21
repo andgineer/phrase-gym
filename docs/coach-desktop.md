@@ -15,13 +15,13 @@ The unsigned macOS bundle is `target/coach-bundle/Phrase Gym Coach.app`. `cargo 
 
 ## Local English lesson demo
 
-Start a fresh synthetic Server with the built client, without importing any prepared lesson:
+Run the matching Server with the built client and the existing standard Server data directory. If a Server already owns the port, stop it gracefully before starting the matching build; preserve its database and media. Do not create an isolated demo data copy or import a prepared lesson:
 
 ```bash
 target/release/phrase-gym-server serve --data-dir "$HOME/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/demo-server" --client-dir frontend/dist --port 18487
 ```
 
-Configure the licensed English voice below and use your normal `codex login` subscription. Run from this repository:
+Follow the [standing local English demo authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo). Reuse the existing Codex subscription login and installed local Piper configuration; no new budget, workspace or authentication setup is needed for routine demo runs. Piper needs no authentication. The setup sections below apply only when an actual missing prerequisite is reported. Run from this repository:
 
 ```bash
 cargo run -p phrase-gym-coach --bin phrase-gym-add-text -- "Let's get started." http://127.0.0.1:18487
@@ -58,9 +58,9 @@ Download the model and adjacent JSON configuration from that exact Hugging Face 
 
 The interpreter uses isolated mode. The speech runner verifies package versions, hashes, locale and speaker count, stages immutable bytes outside repositories, supervises a maximum 60-second process with bounded output, then validates nonempty PCM and returns WAV. Exact text, speech input, voice, runtime identity, model/config hashes and settings accompany generated media. A failed synthesis retains text and publishes nothing. These checks establish byte/provenance conformance, not pronunciation or listening quality. German and Serbian voices remain unaccepted.
 
-### No-spend Codex measurement preparation
+### Measurement preparation
 
-Freeze synthetic development and held-out cases before any real provider calls. [The bounded English fixture](../fixtures/coach/text-demo.json) specifies the internal demo and semantic checks. Capability/version/login inspection is not execution authorization. Real model/speech measurements need an explicit current run budget, including timeout/output bounds and maximum starts; count failures and inspect each concrete result before another start. No automatic paid API fallback or unbounded retries are permitted.
+Freeze synthetic development and held-out cases before real provider calls. [The bounded English fixture](../fixtures/coach/text-demo.json) specifies the internal demo and semantic checks. Routine local English demo runs use the [standing authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo) without per-session or per-run budget approval. Existing timeout, output/media, retry and daily-start limits remain engineering guardrails; count failures and inspect each concrete result before retrying. Separate authorization applies to broader unrequested experiments, different providers and paid API execution. No automatic paid API fallback or unbounded retries are permitted.
 
 Keep the full matrix in the implementation plan: fixed phrases, alternatives, slots, words/senses/forms, dialogue/exposure, preferred/confusable/dependency behavior, ambiguity, absent preferences, and supplied/missing/invalid speech across English, German and Serbian. Freeze unseen held-out wording separately. Record exact executable/model/configuration, fixture identity, elapsed time, unknown usage where unavailable, accepted/failed outputs, and separate fresh semantic review and attended listening. A successful English result does not establish the matrix.
 
@@ -74,11 +74,11 @@ Keep the full matrix in the implementation plan: fixed phrases, alternatives, sl
 | Codex login and customizations | normal `~/.codex` | normal `%USERPROFILE%\.codex` |
 | Private Codex attempt files | configured repository's ignored `.phrase-gym-coach/attempts/` | same workspace-relative path |
 
-Settings contain no application credentials and Coach never calls an OS credential store. Authentication tokens are neither copied nor included in job files. Repository attempts are ignored; never commit private logs or learner input. Keep Server data, including recordings, outside the permitted repository workspace. The demo uses the per-user `demo-server` directory beside Coach settings. A second local instance is refused.
+Settings contain no application credentials and Coach never calls an OS credential store. Authentication tokens are neither copied nor included in job files. Repository attempts are ignored; never commit private logs or learner input. Keep Server data, including recordings, outside the permitted repository workspace. The demo reuses the existing per-user `demo-server` directory beside Coach settings. This standard Server storage and ignored repository attempt files are runtime storage, not separate temporary demo workspaces, profiles or authentication setups. A second local instance is refused.
 
 ## Agent CLI setup
 
-Use native Codex 0.163.0 (Homebrew cask on macOS). Coach resolves its canonical executable without shell initialization. Node-script CLI installs are unsupported. Sign in yourself with `codex login`, then verify `codex login status` says `Logged in using ChatGPT`. Coach inspects status without forcing a login-method change before launching a subscription-only attempt. It never launches login or copies credentials. API-key logins fail readiness, and exported API keys/proxies/parent agent sessions are excluded from the child environment.
+Use native Codex 0.163.0 (Homebrew cask on macOS). Coach resolves its canonical executable without shell initialization. Node-script CLI installs are unsupported. Reuse the existing login and verify `codex login status` says `Logged in using ChatGPT`. Only when that login is actually absent does first-time setup require the learner to run `codex login`. Coach inspects status without forcing a login-method change before launching a subscription-only attempt. It never launches login or copies credentials. API-key logins fail readiness, and exported API keys/proxies/parent agent sessions are excluded from the child environment.
 
 At the learner's explicit direction, local Coach uses the normal Codex home and this repository as its working directory. Normal-home and repository instructions and skills may load; this configuration does not claim isolation from them. `--ignore-user-config` excludes config.toml settings, and `--ignore-rules` excludes execpolicy .rules loading, while the explicit preparation prompt remains authoritative for its task. Existing Claude code is retained with its own measured invocation; Claude is not the selected English text-demo provider.
 

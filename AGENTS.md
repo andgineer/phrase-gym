@@ -89,7 +89,9 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 - Local Coach uses the normal Codex user home and the configured Phrase Gym repository as its working directory, as requested by the learner. Never copy login tokens. Keep private attempt files ignored under `.phrase-gym-coach/`; retain subscription-only login, bounded supervision and allowlisted child environment. Deny repository `.env` reads and keep Server stores/recordings outside the permitted repository workspace. Normal-home instructions/skills may load; do not claim customization isolation.
 
-When changing prompts, provider payloads or interpretation of real model answers, mocks alone cannot establish model behavior. Plan representative fixtures and real-provider measurements before spending budget; inspect availability and every concrete result. Record semantic review separately from automated conformance. A fresh reviewer is required for those model-result measurements, not for ordinary refactors. Do not create learner effectiveness experiments or unrequested general review loops.
+Follow the [standing local English demo authorization](specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo): routine demo runs and continuations require no separate budget, temporary workspace or authentication approval. Existing runtime bounds remain engineering guardrails, and standard Server storage plus ignored attempt files retain their normal roles.
+
+When changing prompts, provider payloads or interpretation of real model answers, mocks alone cannot establish model behavior. Plan representative fixtures and real-provider measurements before execution; inspect availability and every concrete result. Record semantic review separately from automated conformance. A fresh reviewer is required for those model-result measurements, not for ordinary refactors. Do not create learner effectiveness experiments or unrequested general review loops.
 
 ## Git, secrets and deployment
 
