@@ -200,6 +200,28 @@ mod tests {
     use serde_json::json;
 
     #[test]
+    fn truncated_word_references_fail_before_speech_but_explicit_cues_are_valid() {
+        let mut phrase: PreparedEnglishPhrase = serde_json::from_value(json!({
+            "source_id":"one", "meaning_key":"clarify", "intention_key":"clarify", "text":"Please clarify the deadline.", "accepted_variants":[],
+            "situations":[{"id":"a", "text":"Please _____ the deadline. | Make it clear.", "language":"en", "audio_id":null, "partner":null, "exposed_target_source_ids":[]}, {"id":"b", "text":"Can you _____ this point?", "language":"en", "audio_id":null, "partner":null, "exposed_target_source_ids":[]}],
+            "hint":"cl", "help":null, "familiarity":{"kind":"new"}, "reference_audio_id":Uuid::nil(), "expected_revision":null,
+            "task":{"kind":"word_sense", "word":"clarify", "sense":"make clear", "contexts":[{"situation_id":"a", "answer":"Please clarify the deadline.", "reference_audio_id":Uuid::nil()}, {"situation_id":"b", "answer":"Can you clarify this point?", "reference_audio_id":Uuid::nil()}]}
+        })).unwrap();
+        validate_task_shape(&phrase).unwrap();
+        for truncated in ["Can you clarify", "Can you clar"] {
+            let Some(EnglishTask::WordSense { contexts, .. }) = &mut phrase.task else {
+                unreachable!()
+            };
+            contexts[1].answer = truncated.into();
+            assert!(
+                validate_task_shape(&phrase)
+                    .unwrap_err()
+                    .contains("nothing was synthesized")
+            );
+        }
+    }
+
+    #[test]
     fn punctuation_only_variants_fail_before_speech_without_rewriting_model_output() {
         let mut phrase: PreparedEnglishPhrase = serde_json::from_value(json!({
             "source_id":"one", "meaning_key":"repeat", "intention_key":"repeat", "text":"Could you repeat that, please?", "accepted_variants":["Could you repeat that please?"],

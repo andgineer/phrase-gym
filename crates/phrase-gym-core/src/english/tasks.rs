@@ -118,7 +118,6 @@ pub(crate) fn validate(phrase: &PreparedEnglishPhrase) -> Result<(), CoreError> 
                 {
                     return Err(CoreError::Invalid("Word contexts need distinct matching gaps, target forms and verified reference audio".into()));
                 }
-                // Any sense cue follows the sentence, so the filled sentence must be its prefix.
                 if !phrase_gym_contracts::english_source::word_gap_matches(
                     &situation.text,
                     &context.answer,

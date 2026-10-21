@@ -116,7 +116,7 @@ fn prepare_item(output: &mut serde_json::Value, index: usize) {
     output["text"] = text.into();
     output["hint"] = hint.into();
     output["help"]["meaning"] = help.into();
-    output["situations"] = json!(prompts.iter().enumerate().map(|(i, text)| json!({"id": format!("context-{i}"), "text": text, "language":"en", "audio_id": null, "partner": null, "exposed_target_source_ids": []})).collect::<Vec<_>>());
+    output["situations"] = json!(prompts.iter().enumerate().map(|(i, text)| json!({"id": format!("context-{i}"), "text": if index == 4 {format!("{text} | Make it clear.")} else {(*text).into()}, "language":"en", "audio_id": null, "partner": null, "exposed_target_source_ids": []})).collect::<Vec<_>>());
     if index == 3 {
         if let Some(source) = output["source_text"]
             .as_str()

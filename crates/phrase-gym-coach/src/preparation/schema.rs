@@ -62,6 +62,9 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
     situation["properties"]["partner"] = json!({"type":"null"});
     if english_source::word_form(text).is_some() {
         situation["properties"]["text"]["pattern"] = json!("^[^_]*_____[^_]*$");
+        situation["properties"]["text"]["description"] = json!(
+            "Complete gapped answer sentence, optionally followed by ' | ' and a brief cue. The reference answer fills the entire sentence before that explicit separator, never a prefix."
+        );
     }
     let phrase = definitions
         .get_mut("PreparedEnglishPhrase")

@@ -66,15 +66,24 @@ pub fn frame_example_matches(
         && examples.iter().any(|example| example == answer)
 }
 
+pub const WORD_SENSE_CUE_SEPARATOR: &str = " | ";
+
 pub fn word_gap_matches(prompt: &str, answer: &str, word: &str) -> bool {
-    prompt.matches("_____").count() == 1
+    let sentence = match prompt.split_once(WORD_SENSE_CUE_SEPARATOR) {
+        Some((sentence, cue)) => {
+            if cue.is_empty() || cue.trim() != cue || cue.contains(WORD_SENSE_CUE_SEPARATOR) {
+                return false;
+            }
+            sentence
+        }
+        None => prompt,
+    };
+    sentence.matches("_____").count() == 1
+        && prompt.matches("_____").count() == 1
         && !prompt
             .split(|c: char| !c.is_alphanumeric())
             .any(|part| part.eq_ignore_ascii_case(word))
-        && prompt
-            .replace("_____", word)
-            .get(..answer.len())
-            .is_some_and(|filled| filled.eq_ignore_ascii_case(answer))
+        && sentence.replace("_____", word).eq_ignore_ascii_case(answer)
 }
 
 #[cfg(test)]
@@ -107,17 +116,22 @@ mod tests {
     #[test]
     fn word_prompt_fills_only_the_selected_word_and_never_leaks_it_in_a_cue() {
         assert!(word_gap_matches(
+            "That makes _____. | A reasonable meaning.",
+            "That makes sense.",
+            "sense"
+        ));
+        assert!(word_gap_matches(
             "_____ this point.",
             "Clarify this point.",
             "clarify"
         ));
         assert!(word_gap_matches(
-            "Please _____ this point. Make it clear.",
+            "Please _____ this point. | Make it clear.",
             "Please clarify this point.",
             "clarify"
         ));
         assert!(!word_gap_matches(
-            "Please _____ this point. Use clarify.",
+            "Please _____ this point. | Use clarify.",
             "Please clarify this point.",
             "clarify"
         ));
@@ -131,6 +145,47 @@ mod tests {
             "Please clarify this point.",
             "clarify"
         ));
+    }
+
+    #[test]
+    fn word_reference_must_include_the_entire_gap_sentence_before_an_explicit_cue() {
+        assert!(!word_gap_matches(
+            "Please act. | _____",
+            "Please act.",
+            "clarify"
+        ));
+        for prompt in [
+            "Please _____ the deadline.",
+            "Please _____ the deadline. | Make it clear.",
+        ] {
+            assert!(word_gap_matches(
+                prompt,
+                "Please clarify the deadline.",
+                "clarify"
+            ));
+            for truncated in [
+                "Please clar",
+                "Please clarify",
+                "Please clarify the",
+                "Please clarify the deadline",
+            ] {
+                assert!(
+                    !word_gap_matches(prompt, truncated, "clarify"),
+                    "{prompt}: {truncated}"
+                );
+            }
+        }
+        for prompt in [
+            "Please _____ the deadline. Make it clear.",
+            "Please _____ the deadline. | ",
+            "Please _____ the deadline. | Make it clear. | Explain.",
+        ] {
+            assert!(!word_gap_matches(
+                prompt,
+                "Please clarify the deadline.",
+                "clarify"
+            ));
+        }
     }
 
     #[test]

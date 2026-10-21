@@ -34,6 +34,8 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
     for change in [
         "leak",
         "wrong-answer",
+        "truncated-answer",
+        "truncated-inside-word",
         "wrong-audio",
         "missing-audio",
         "missing-context",
@@ -47,6 +49,16 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
         match change {
             "leak" => phrase.situations[0].text.push_str(" Use clarify."),
             "wrong-answer" => contexts[1].answer = "A different sentence with clarify.".into(),
+            "truncated-answer" | "truncated-inside-word" => {
+                contexts[1].answer = if change == "truncated-answer" {
+                    "Can you clarify"
+                } else {
+                    "Can you clar"
+                }
+                .into();
+                contexts[1].reference_audio_id =
+                    fixture.upload(&json!({"text":contexts[1].answer})).id;
+            }
             "wrong-audio" => contexts[1].reference_audio_id = contexts[0].reference_audio_id,
             "missing-audio" => contexts[1].reference_audio_id = uuid::Uuid::new_v4(),
             "missing-context" => {
@@ -57,6 +69,18 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
         }
         assert!(fixture.validator.validate(&invalid).is_err(), "{change}");
     }
+}
+
+#[test]
+fn an_explicit_trailing_sense_cue_is_outside_the_complete_spoken_answer() {
+    let fixture = Fixture::new();
+    let mut package = word(&fixture);
+    package.phrases[0].situations[0]
+        .text
+        .push_str(" | Make it clear.");
+    fixture.validator.validate(&package).unwrap();
+    package.phrases[0].situations[0].text = "Please _____ the deadline. Make it clear.".into();
+    assert!(fixture.validator.validate(&package).is_err());
 }
 
 #[test]

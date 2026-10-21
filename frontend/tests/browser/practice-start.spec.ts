@@ -120,6 +120,11 @@ test('Start session waits for an outstanding answer receipt before replacing the
   })
   let held = false
   let starts = 0
+  const operations: string[] = []
+  await page.route('**/api/v1/sessions/current', async (route) => {
+    operations.push('current')
+    await route.continue()
+  })
   await page.route('**/api/v1/sessions/*/events', async (route) => {
     if (route.request().postDataJSON().events[0].kind !== 'answer') return route.continue()
     const response = await route.fetch()
@@ -128,7 +133,10 @@ test('Start session waits for an outstanding answer receipt before replacing the
     await route.fulfill({ response })
   })
   await page.route('**/api/v1/sessions', async (route) => {
-    if (route.request().method() === 'POST') starts += 1
+    if (route.request().method() === 'POST') {
+      starts += 1
+      operations.push('start')
+    }
     await route.continue()
   })
   await page.getByRole('button', { name: 'Show answer', exact: true }).click()
@@ -141,6 +149,7 @@ test('Start session waits for an outstanding answer receipt before replacing the
   } finally {
     release()
   }
+  await expect.poll(() => operations[0]).toBe('start')
   await expect(page).toHaveURL(/\/learn\/en\/practice\//)
   await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled()
   const retained = await (await request.get(`/api/v1/sessions/${previousId}`)).json()

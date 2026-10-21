@@ -40,6 +40,10 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
   const firstId = session.id
   for (let index = 0; index < 5; index++) {
     await expect(page.getByTestId('practice-phrase')).toBeVisible()
+    if (session.manifest.targets[index].phrase.content.kind === 'word_sense') {
+      await expect(page.locator('.word-sense-cue')).toHaveText('Make it clear.')
+      await expect(page.locator('.practice-prompt')).not.toContainText('|')
+    }
     await expect(page.getByRole('button', { name: /Recalled$/ })).toHaveCount(0)
     await page.getByRole('button', { name: 'Next', exact: true }).click()
   }
@@ -61,6 +65,8 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
     await expect(page.locator('.target-task')).toHaveCount(0)
     const item = session.manifest.targets[index]
     if (item.phrase.content.kind === 'word_sense') {
+      await expect(page.locator('.word-sense-cue')).toHaveText('Make it clear.')
+      await expect(page.locator('.practice-prompt')).not.toContainText('|')
       const context = item.phrase.english.task.contexts.find(
         (context: any) => context.situation_id === item.cue_id,
       )

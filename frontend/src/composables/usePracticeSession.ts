@@ -64,6 +64,9 @@ export function usePracticeSession() {
   ) {
     if (busy.value) return
     requireServer()
+    // Explicit start owns the next selection; an older library load must not replace it.
+    loadingVersion += 1
+    restoring.value = false
     busy.value = true
     error.value = ''
     try {
@@ -116,6 +119,7 @@ export function usePracticeSession() {
       } catch (cause) {
         if (pending.value.length) throw cause
       }
+      if (version !== loadingVersion) return false
       await lifecycle.recover()
       if (candidate.value && !busy.value) {
         const created = await api<PracticeSession>('/sessions', {

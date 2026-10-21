@@ -26,6 +26,13 @@ const situation = computed(() => english.value?.situations.find((s) => s.id === 
 const prompt = computed(
   () => situation.value?.text || cue.value?.prompt || props.item.phrase.content.purpose,
 )
+const presentedPrompt = computed(() => {
+  if (english.value?.task?.kind !== 'word_sense') return { sentence: prompt.value, cue: '' }
+  const boundary = prompt.value.indexOf(' | ')
+  return boundary < 0
+    ? { sentence: prompt.value, cue: '' }
+    : { sentence: prompt.value.slice(0, boundary), cue: prompt.value.slice(boundary + 3) }
+})
 const showPhrase = computed(
   () =>
     props.card.revealed ||
@@ -51,7 +58,10 @@ const emit = defineEmits<{
   <article class="card practice-card">
     <p v-if="study" role="status">{{ pt.study }}. {{ pt.studyHelp }}</p>
     <p class="practice-prompt" :lang="situation?.language || item.phrase.language">
-      {{ prompt }}
+      {{ presentedPrompt.sentence }}
+    </p>
+    <p v-if="presentedPrompt.cue" class="word-sense-cue" :lang="situation?.language">
+      {{ presentedPrompt.cue }}
     </p>
     <p v-if="situation?.partner">{{ situation.partner.text }}</p>
     <h1
