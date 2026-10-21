@@ -1,4 +1,6 @@
-use phrase_gym_coach::transfer::{material::RawLesson, pending};
+use phrase_gym_coach::transfer::material::RawLesson;
+#[cfg(unix)]
+use phrase_gym_coach::transfer::pending;
 
 #[test]
 fn raw_material_rejects_missing_meaning_urls_untrimmed_text_and_unsupported_locale() {

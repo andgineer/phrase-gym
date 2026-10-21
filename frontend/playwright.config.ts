@@ -8,7 +8,8 @@ const preparation = 'preparation-lifecycle.spec.ts'
 export default defineConfig({
   testDir: './tests/browser',
   fullyParallel: false,
-  workers: 1,
+  // Projects have separate Server data; each project serializes its own mutations.
+  workers: 2,
   use: { baseURL: chromiumURL, trace: 'retain-on-failure' },
   webServer: [0, 1, 2, 3].map((offset) => ({
     command:
@@ -23,6 +24,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      workers: 1,
       testIgnore: preparation,
       use: {
         ...devices['Desktop Chrome'],
@@ -33,6 +35,7 @@ export default defineConfig({
     },
     {
       name: 'webkit',
+      workers: 1,
       testIgnore: preparation,
       use: {
         ...devices['Desktop Safari'],
@@ -41,6 +44,7 @@ export default defineConfig({
     },
     ...(['chromium', 'webkit'] as const).map((browserName, index) => ({
       name: `${browserName}-python-preparation`,
+      workers: 1,
       testMatch: preparation,
       use: {
         browserName,

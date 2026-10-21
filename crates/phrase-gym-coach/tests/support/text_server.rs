@@ -68,8 +68,9 @@ fn text_only_fake_codex_and_speech_publish_atomically_and_survive_server_restart
         .unwrap()
         .path();
     assert_eq!(
-        std::fs::read_to_string(attempts.join("launch-cwd.txt")).unwrap(),
-        workspace.canonicalize().unwrap().to_string_lossy()
+        std::fs::canonicalize(std::fs::read_to_string(attempts.join("launch-cwd.txt")).unwrap(),)
+            .unwrap(),
+        workspace.canonicalize().unwrap()
     );
     let arguments: Vec<String> =
         serde_json::from_slice(&std::fs::read(attempts.join("launch-arguments.json")).unwrap())
