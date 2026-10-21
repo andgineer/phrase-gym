@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/v1/coach/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["coach_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dialogues": {
         parameters: {
             query?: never;
@@ -604,6 +620,18 @@ export interface components {
             /** Format: uuid */
             claim_id: string;
         };
+        CoachSummary: {
+            /** Format: int64 */
+            awaiting_audio: number;
+            /** Format: int64 */
+            lessons: number;
+            /** Format: int64 */
+            ready: number;
+            /** Format: int64 */
+            study_only: number;
+            /** Format: int64 */
+            targets: number;
+        };
         Cue: {
             /** Format: uuid */
             audio_id?: string | null;
@@ -667,6 +695,18 @@ export interface components {
         Eligibility: "study" | "new" | "due";
         /** @enum {string} */
         EnglishPackageVersion: "english_phrases_v1";
+        EnglishTask: {
+            /** @enum {string} */
+            kind: "frame";
+            pattern: string;
+            slots: components["schemas"]["FrameSlot"][];
+        } | {
+            contexts: components["schemas"]["WordContext"][];
+            /** @enum {string} */
+            kind: "word_sense";
+            sense: string;
+            word: string;
+        };
         ErrorBody: {
             detail: string;
         };
@@ -714,6 +754,10 @@ export interface components {
             /** Format: uuid */
             id: string;
             received_at: string;
+        };
+        FrameSlot: {
+            name: string;
+            values: string[];
         };
         JobClaim: {
             deadline: string;
@@ -999,6 +1043,8 @@ export interface components {
             reference_audio_id: string;
             situations: components["schemas"]["PhraseSituation"][];
             source_id: string;
+            source_text?: string | null;
+            task?: components["schemas"]["EnglishTask"] | null;
             text: string;
         };
         ProfileRestore: {
@@ -1138,6 +1184,7 @@ export interface components {
             acceptable_equivalents?: string[];
             chunks: components["schemas"]["Chunk"][];
             concepts?: string[];
+            context_audio_ids?: string[];
             cues?: components["schemas"]["Cue"][];
             explanations?: {
                 [key: string]: components["schemas"]["Explanation"];
@@ -1159,6 +1206,12 @@ export interface components {
         TargetKind: "fixed_phrase" | "word_sense" | "frame";
         /** @enum {string} */
         UiLanguageMode: "native" | "learning";
+        WordContext: {
+            answer: string;
+            /** Format: uuid */
+            reference_audio_id: string;
+            situation_id: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1168,6 +1221,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    coach_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Scoped English database counts without learner history or recordings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoachSummary"];
+                };
+            };
+        };
+    };
     list_dialogues: {
         parameters: {
             query: {

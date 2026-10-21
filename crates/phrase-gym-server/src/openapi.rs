@@ -69,6 +69,7 @@ use crate::routes;
         routes::library::dialogues,
         routes::library::dialogue,
         routes::readiness::readiness,
+        routes::readiness::coach_summary,
         routes::media::upload,
         routes::media::metadata,
         routes::media::play,

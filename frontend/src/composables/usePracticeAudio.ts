@@ -14,6 +14,7 @@ export function usePracticeAudio() {
     sequence++
     audio?.pause()
     if (audio) {
+      audio.onpause = null
       audio.onended = null
       audio.onerror = null
       audio.src = ''
@@ -45,6 +46,12 @@ export function usePracticeAudio() {
     playback.onended = () => {
       if (token === sequence) resolvePlayback?.()
     }
+    playback.onpause = () => {
+      if (token === sequence && playback.paused && !playback.ended) {
+        successful = false
+        resolvePlayback?.()
+      }
+    }
     playback.onerror = () => {
       if (token === sequence) {
         successful = false
@@ -55,9 +62,10 @@ export function usePracticeAudio() {
     try {
       await playback.play()
       await ended
-    } catch {
+    } catch (cause) {
       successful = false
-      if (token === sequence) error.value = 'Audio could not play. Try again.'
+      if (token === sequence && !(cause instanceof DOMException && cause.name === 'AbortError'))
+        error.value = 'Audio could not play. Try again.'
     }
     if (token !== sequence) return false
     stop()

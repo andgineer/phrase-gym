@@ -73,15 +73,16 @@ pub(super) fn published(
     receipt: &phrase_gym_contracts::inbox::PublicationReceipt,
     emit: &dyn Fn(Event),
 ) {
-    if let Some(id) = receipt.target_ids.first() {
+    if !receipt.target_ids.is_empty() {
         emit(Event::Published(format!(
-            "{}/learn/en/phrases/{id}",
-            client.server
+            "{}/learn/en/lessons/{}",
+            client.server, receipt.lesson_id
         )));
     }
-    emit(Event::Status(
-        "Published and confirmed by Server. Open browser practice and choose Start session".into(),
-    ));
+    emit(Event::Status(format!(
+        "Added {} targets, confirmed by Server. Open browser practice and choose Start session.",
+        receipt.target_ids.len()
+    )));
 }
 
 fn retry_preparation(

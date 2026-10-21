@@ -2,6 +2,7 @@ pub mod base;
 pub mod connection;
 pub mod content;
 pub mod english;
+pub mod english_source;
 pub mod errors;
 pub mod exposures;
 pub mod imports;

@@ -4,7 +4,6 @@ use super::intake::{Command, IntakeState};
 
 pub fn show(ui: &mut Ui, state: &mut IntakeState, _draft: &str) {
     ui.separator();
-    ui.label("Paste one exact English phrase into Material draft, or drop one plain .txt file, to add it automatically with generated reference speech.");
     ui.label("No title, situation or performer is required for text-only input. Ambiguous meaning and missing preferences fail inline.");
     ui.add_enabled_ui(!state.busy, |ui| {
         if ui.button("Retry connection and retained input").clicked() {

@@ -24,20 +24,7 @@ pub struct TextDraft {
 
 impl TextDraft {
     pub fn new(server: &str, phrase: &str) -> Result<Self, String> {
-        let phrase = phrase.trim();
-        if phrase.is_empty()
-            || phrase.len() > 200
-            || phrase.chars().any(char::is_control)
-            || phrase.contains("http://")
-            || phrase.contains("https://")
-        {
-            return Err("Paste one English fixed phrase of up to 200 bytes, without URLs or line breaks. Add meaning/context for ambiguous wording; this demo cannot infer unknown meanings".into());
-        }
-        if !(2..=30).contains(&phrase.split_whitespace().count())
-            || phrase.contains(['{', '}', '_'])
-        {
-            return Err("This demo supports one multiword fixed English phrase; single words, slots and bulk input need the remaining full-content preparation workflow".into());
-        }
+        entries(phrase)?;
         Ok(Self {
             server: super::client::server_origin(server)?,
             phrase: phrase.into(),
@@ -49,9 +36,9 @@ impl TextDraft {
     pub fn retain(path: &Path, server: &str, phrase: &str) -> Result<Self, String> {
         let server = super::client::server_origin(server)?;
         if path.exists() {
-            let saved: Self = serde_json::from_slice(&files::read_selected(path, 4096)?)
+            let saved: Self = serde_json::from_slice(&files::read_selected(path, 8192)?)
                 .map_err(|_| "Saved text input is unreadable; preserve it before repair")?;
-            if saved.server != server || saved.phrase != phrase.trim() {
+            if saved.server != server || saved.phrase != phrase {
                 return Err(
                     "A different text input is retained; retry it before adding another phrase"
                         .into(),
@@ -152,7 +139,7 @@ pub fn retry_preparation(
     )?)
     .map_err(|_| "No readable accepted text receipt; use the browser status panel")?;
     if accepted.draft.server != client.server
-        || phrase.is_some_and(|phrase| phrase.trim() != accepted.draft.phrase)
+        || phrase.is_some_and(|phrase| phrase != accepted.draft.phrase)
     {
         return Err(
             "Restore the accepted text's original Server and exact phrase before retrying".into(),
@@ -179,21 +166,49 @@ pub fn submit_raw(
     }
     let path = paths.state.join("pending-text.json");
     let draft = TextDraft::retain(&path, server, phrase)?;
+    let accepted_path = paths.state.join("text-receipt.json");
+    if accepted_path.exists() {
+        let accepted: AcceptedText =
+            serde_json::from_slice(&files::read_selected(&accepted_path, 8192)?)
+                .map_err(|_| "Saved receipt is unreadable; open Settings for recovery")?;
+        if accepted.draft.server == client.server && accepted.draft.phrase == phrase {
+            let status: phrase_gym_contracts::inbox::LessonStatus = client.get(&format!(
+                "/api/v1/inbox/lessons/{}",
+                accepted.receipt.generation_id
+            ))?;
+            if status.status == phrase_gym_contracts::inbox::DeliveryStatus::Failed {
+                retry_preparation(paths, client, Some(phrase))?;
+                std::fs::remove_file(&path)
+                    .map_err(|_| "Retry accepted; cannot clear retained local text")?;
+                return Ok(accepted.receipt);
+            }
+        }
+    }
     let input = phrase_gym_contracts::inbox::LessonSubmission {
         submission_id: draft.submission_id,
         item_id: format!("coach-{}", draft.submission_id),
         expected_generation: None,
         language: Language::En,
         title: "Inbox practice".into(),
-        context: String::new(),
+        context: draft.phrase.clone(),
         note: String::new(),
-        phrases: vec![phrase_gym_contracts::inbox::LessonPhraseInput {
-            source_id: "phrase".into(),
-            text: draft.phrase.clone(),
-            reference_audio_id: None,
-            audio_sha256: None,
-            expected_revision: None,
-        }],
+        phrases: entries(&draft.phrase)?
+            .into_iter()
+            .enumerate()
+            .map(
+                |(index, text)| phrase_gym_contracts::inbox::LessonPhraseInput {
+                    source_id: if draft.phrase.lines().count() == 1 {
+                        "phrase".into()
+                    } else {
+                        format!("item-{}", index + 1)
+                    },
+                    text: text.into(),
+                    reference_audio_id: None,
+                    audio_sha256: None,
+                    expected_revision: None,
+                },
+            )
+            .collect(),
     };
     let receipt: phrase_gym_contracts::inbox::LessonReceipt =
         client.post("/api/v1/inbox/lessons", &input)?;
@@ -207,4 +222,24 @@ pub fn submit_raw(
     // The Server now owns the exact original text; local removal follows its durable receipt.
     std::fs::remove_file(path).map_err(|_| "Accepted by Server; retry to reconcile local text")?;
     Ok(receipt)
+}
+
+pub fn entries(text: &str) -> Result<Vec<&str>, String> {
+    let entries: Vec<_> = text
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .collect();
+    if !(1..=5).contains(&entries.len())
+        || text.len() > 4000
+        || entries.iter().any(|entry| {
+            entry.len() > 800
+                || entry.chars().any(char::is_control)
+                || entry.contains("http://")
+                || entry.contains("https://")
+        })
+    {
+        return Err("Add up to five short words or phrases at a time, without URLs".into());
+    }
+    Ok(entries)
 }

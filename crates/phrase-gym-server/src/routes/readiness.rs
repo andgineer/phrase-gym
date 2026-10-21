@@ -28,3 +28,14 @@ pub(crate) async fn readiness(
         .await??;
     Ok(Json(summary))
 }
+
+#[utoipa::path(get, path = "/api/v1/coach/summary", operation_id = "coach_summary", tag = "coach",
+    responses((status = 200, description = "Scoped English database counts without learner history or recordings", body = phrase_gym_contracts::readiness::CoachSummary)))]
+pub(crate) async fn coach_summary(
+    State(state): State<AppState>,
+) -> Result<Json<phrase_gym_contracts::readiness::CoachSummary>, ApiError> {
+    let library = state.library.clone();
+    Ok(Json(
+        state.blocking(move || library.coach_summary()).await??,
+    ))
+}

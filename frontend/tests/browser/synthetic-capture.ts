@@ -64,3 +64,20 @@ export async function recordingPeak(page: Page, id: string): Promise<number> {
     return peak
   }, id)
 }
+
+export async function recordingSegments(page: Page, id: string) {
+  return page.evaluate(async (id) => {
+    const context = new OfflineAudioContext(1, 1, 48000)
+    const response = await fetch(`/api/v1/recordings/${id}`)
+    const decoded = await context.decodeAudioData(await response.arrayBuffer())
+    const signal = decoded.getChannelData(0)
+    const peaks = [0, 0, 0]
+    for (let segment = 0; segment < 3; segment++) {
+      const start = Math.floor((signal.length * segment) / 3)
+      const end = Math.floor((signal.length * (segment + 1)) / 3)
+      for (let index = start; index < end; index++)
+        peaks[segment] = Math.max(peaks[segment]!, Math.abs(signal[index]!))
+    }
+    return { duration: decoded.duration, peaks }
+  }, id)
+}

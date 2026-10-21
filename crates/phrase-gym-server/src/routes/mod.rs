@@ -24,6 +24,7 @@ pub(crate) fn api() -> Router<AppState> {
         .route("/api/v1/inbox/lessons/{id}", get(inbox::status))
         .route("/api/v1/inbox/submissions/{id}", get(inbox::receipt))
         .merge(jobs::routes())
+        .route("/api/v1/coach/summary", get(readiness::coach_summary))
         .merge(learner())
         .merge(material())
         .route(

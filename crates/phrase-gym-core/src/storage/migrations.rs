@@ -30,6 +30,10 @@ pub const MIGRATIONS: &[Migration] = &[
         revision: 5,
         sql: include_str!("../../migrations/0005_preparation_guide.sql"),
     },
+    Migration {
+        revision: 6,
+        sql: include_str!("../../migrations/0006_working_set_guide.sql"),
+    },
 ];
 
 // Marks the file as a Phrase Gym database so a foreign SQLite file is never mistaken for an empty one.

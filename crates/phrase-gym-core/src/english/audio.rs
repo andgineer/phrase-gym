@@ -11,16 +11,16 @@ pub(crate) fn references(package: &PreparedEnglishLesson) -> Vec<Uuid> {
         .phrases
         .iter()
         .flat_map(|phrase| {
-            std::iter::once(phrase.reference_audio_id).chain(phrase.situations.iter().flat_map(
-                |situation| {
+            std::iter::once(phrase.reference_audio_id)
+                .chain(super::tasks::context_audio(phrase))
+                .chain(phrase.situations.iter().flat_map(|situation| {
                     situation.audio_id.into_iter().chain(
                         situation
                             .partner
                             .as_ref()
                             .and_then(|partner| partner.audio_id),
                     )
-                },
-            ))
+                }))
         })
         .collect()
 }
@@ -52,6 +52,18 @@ pub(super) fn validate(
             &phrase.text,
             MediaRole::Reference,
         )?;
+        if let Some(phrase_gym_contracts::english::EnglishTask::WordSense { contexts, .. }) =
+            &phrase.task
+        {
+            for context in contexts {
+                verified(
+                    index,
+                    context.reference_audio_id,
+                    &context.answer,
+                    MediaRole::Reference,
+                )?;
+            }
+        }
         for situation in &phrase.situations {
             if let Some(id) = situation.audio_id {
                 verified(index, id, &situation.text, MediaRole::Cue)?;

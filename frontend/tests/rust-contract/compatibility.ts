@@ -2,7 +2,7 @@ import type { paths as PythonPaths } from '../../src/api.generated'
 import type { paths as RustPaths } from './api.generated'
 
 // Mapping flattens aliases and intersections so only property names, optionality and types are compared.
-// English library payload, voluntary intent and readiness counts are intentional Rust-only additions.
+// English library payload, word-context references, voluntary intent and readiness counts are intentional Rust-only additions.
 type Normalized<T> = T extends 'study' | 'next'
   ? never
   : T extends { content: unknown; retrieval_ready: boolean }
@@ -15,9 +15,11 @@ type Normalized<T> = T extends 'study' | 'next'
         }
       : T extends { voluntary?: boolean }
         ? { [Key in keyof T as Key extends 'voluntary' ? never : Key]: Normalized<T[Key]> }
-        : T extends object
-          ? { [Key in keyof T]: Normalized<T[Key]> }
-          : T
+        : T extends { required_chunks: string[]; reference_audio_id?: unknown }
+          ? { [Key in Exclude<keyof T, 'context_audio_ids'>]: Normalized<T[Key]> }
+          : T extends object
+            ? { [Key in keyof T]: Normalized<T[Key]> }
+            : T
 type Exact<A, B> =
   (<T>() => T extends Normalized<A> ? 1 : 2) extends <T>() => T extends Normalized<B> ? 1 : 2
     ? true

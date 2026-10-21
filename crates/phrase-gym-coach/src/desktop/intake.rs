@@ -14,7 +14,9 @@ pub enum Command {
 pub enum Event {
     Status(String),
     Draft(String),
+    Summary(String),
     Connected(String),
+    Configured(String),
     SelectedClaude(std::path::PathBuf),
     Published(String),
     Finished(Result<(), String>),
@@ -24,6 +26,7 @@ pub enum Event {
 pub struct IntakeState {
     pub server: String,
     pub status: String,
+    pub summary: Option<String>,
     pub connected: bool,
     pub busy: bool,
     pub practice: Option<String>,
@@ -34,7 +37,8 @@ impl Default for IntakeState {
     fn default() -> Self {
         Self {
             server: phrase_gym_contracts::connection::default_server_origin(),
-            status: "Connecting automatically using saved Server access…".into(),
+            summary: None,
+            status: String::new(),
             connected: false,
             busy: false,
             practice: None,

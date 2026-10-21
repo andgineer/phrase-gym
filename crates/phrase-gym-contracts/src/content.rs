@@ -82,6 +82,8 @@ pub struct TargetInput {
     pub slots: BTreeMap<String, Vec<String>>,
     #[serde(default)]
     pub reference_audio_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub context_audio_ids: Vec<Uuid>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

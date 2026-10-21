@@ -67,7 +67,7 @@ impl ServerClient {
             request = request.json(value);
         }
         let response = request.send().map_err(
-            |_| "Server unavailable or response lost; Retry preserves the same submission",
+            |_| "Server unavailable or response lost; retained input reconciles automatically when the connection returns",
         )?;
         let status = response.status();
         let mut bytes = Vec::new();

@@ -51,8 +51,44 @@ pub enum PhraseFamiliarity {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum EnglishTask {
+    Frame {
+        pattern: String,
+        slots: Vec<FrameSlot>,
+    },
+    WordSense {
+        word: String,
+        sense: String,
+        contexts: Vec<WordContext>,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[serde(deny_unknown_fields)]
+pub struct FrameSlot {
+    pub name: String,
+    pub values: Vec<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[serde(deny_unknown_fields)]
+pub struct WordContext {
+    pub situation_id: String,
+    pub answer: String,
+    pub reference_audio_id: Uuid,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[serde(deny_unknown_fields)]
 pub struct PreparedEnglishPhrase {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task: Option<EnglishTask>,
     pub source_id: String,
     pub meaning_key: String,
     pub intention_key: String,

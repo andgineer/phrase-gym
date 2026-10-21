@@ -37,7 +37,7 @@ pub(crate) fn plan(
     let mut new = Vec::new();
     for candidate in scope.targets {
         let schedule = schedules::find(connection, candidate.id)?;
-        let phrase = phrases::draft(
+        let mut phrase = phrases::draft(
             connection,
             candidate.id,
             start.language,
@@ -70,6 +70,14 @@ pub(crate) fn plan(
             continue;
         };
         let cue_id = cue.id.clone();
+        if let Some(phrase_gym_contracts::english::EnglishTask::WordSense { contexts, .. }) =
+            phrase.english.as_ref().and_then(|p| p.task.as_ref())
+            && let Some(context) = contexts.iter().find(|c| c.situation_id == cue_id)
+        {
+            phrase.content.text.clone_from(&context.answer);
+            phrase.content.chunks[0].text.clone_from(&context.answer);
+            phrase.content.reference_audio_id = Some(context.reference_audio_id);
+        }
         let hidden_chunks = if study {
             Vec::new()
         } else {

@@ -110,3 +110,53 @@ fn text_only_fake_codex_and_speech_publish_atomically_and_survive_server_restart
     assert!(!reference.to_string().is_empty());
     text::TextDraft::retain(&draft_path, &url, "Could you repeat that, please?").unwrap();
 }
+
+#[test]
+fn exact_raw_text_with_whitespace_retries_its_failed_generation_without_rewriting_original_input() {
+    let (directory, binary, data) = setup();
+    let (_server, url) = start(&binary, &data, "0");
+    let client = ServerClient::new(&url).unwrap();
+    let paths = super::generated_server::paths(directory.path());
+    let original = "  Let's get started. \n";
+    let receipt = text::submit_raw(&paths, &url, original, &client).unwrap();
+    let claim: JobClaim = client
+        .post::<_, Option<JobClaim>>(
+            "/api/v1/preparation/claims",
+            &ClaimRequest {
+                claim_id: Uuid::new_v4(),
+            },
+        )
+        .unwrap()
+        .unwrap();
+    assert_eq!(claim.input.context, original);
+    assert_eq!(claim.input.phrases[0].text, original.trim());
+    client
+        .post::<_, ()>(
+            "/api/v1/preparation/fail",
+            &phrase_gym_contracts::inbox::JobFailure {
+                fence: claim.fence,
+                reason: "Synthetic speech setup failure".into(),
+            },
+        )
+        .unwrap();
+    let retried = text::submit_raw(&paths, &url, original, &client).unwrap();
+    assert_eq!(retried.generation_id, receipt.generation_id);
+    assert_eq!(retried.submission_id, receipt.submission_id);
+    let next: JobClaim = client
+        .post::<_, Option<JobClaim>>(
+            "/api/v1/preparation/claims",
+            &ClaimRequest {
+                claim_id: Uuid::new_v4(),
+            },
+        )
+        .unwrap()
+        .unwrap();
+    assert_eq!(next.receipt.generation_id, receipt.generation_id);
+    assert_eq!(next.receipt.submission_id, receipt.submission_id);
+    assert_eq!(next.input.context, original);
+    assert!(
+        text::retry_preparation(&paths, &client, Some(original.trim()))
+            .unwrap_err()
+            .contains("exact phrase")
+    );
+}

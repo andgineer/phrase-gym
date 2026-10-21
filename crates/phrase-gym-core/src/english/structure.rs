@@ -30,6 +30,11 @@ pub(super) fn words(value: &str) -> Vec<String> {
 
 fn leaks(prompt: &str, phrase: &PreparedEnglishPhrase) -> bool {
     let prompt = words(prompt);
+    if let Some(phrase_gym_contracts::english::EnglishTask::WordSense { word, .. }) = &phrase.task
+        && prompt.contains(&word.to_lowercase())
+    {
+        return true;
+    }
     std::iter::once(&phrase.text)
         .chain(&phrase.accepted_variants)
         .any(|answer| {
@@ -43,32 +48,52 @@ fn phrase(phrase: &PreparedEnglishPhrase, source_ids: &BTreeSet<&str>) -> Result
         ("phrase source ID", &phrase.source_id, 200),
         ("meaning key", &phrase.meaning_key, 200),
         ("intention key", &phrase.intention_key, 200),
-        ("fixed English wording", &phrase.text, 200),
+        ("English reference wording", &phrase.text, 200),
         ("hint", &phrase.hint, 100),
     ] {
         text(value, name, limit)?;
     }
+    super::tasks::validate(phrase)?;
+    let word = matches!(
+        phrase.task,
+        Some(phrase_gym_contracts::english::EnglishTask::WordSense { .. })
+    );
     if phrase.text.split_whitespace().count() > 30
         || phrase.text.contains(['{', '}', '_'])
         || phrase.reference_audio_id.is_nil()
         || phrase
             .expected_revision
             .is_some_and(|revision| revision < 1)
-        || !(1..=2).contains(&phrase.situations.len())
+        || !(1..=if word { 3 } else { 2 }).contains(&phrase.situations.len())
         || phrase.accepted_variants.len() > 4
     {
-        return Err(CoreError::Invalid("Preview phrases require short fixed wording, supplied audio, one or two situations and at most four accepted variants; slots and other target kinds are unsupported".into()));
+        return Err(CoreError::Invalid("Preview phrases require short wording, verified audio, matching situations and at most four accepted variants".into()));
     }
     let answer = words(&phrase.text);
     let hint = words(&phrase.hint);
-    if hint.is_empty()
-        || hint.len() >= answer.len()
-        || !answer.windows(hint.len()).any(|window| window == hint)
-        || leaks(&phrase.hint, phrase)
+    if !word
+        && (hint.is_empty()
+            || hint.len() >= answer.len()
+            || !answer.windows(hint.len()).any(|window| window == hint)
+            || leaks(&phrase.hint, phrase))
     {
         return Err(CoreError::Invalid(
             "Hint must be one partial contiguous cue from the fixed phrase".into(),
         ));
+    }
+    if word {
+        let phrase_gym_contracts::english::EnglishTask::WordSense { word, .. } =
+            phrase.task.as_ref().unwrap()
+        else {
+            unreachable!()
+        };
+        if phrase.hint.len() >= word.len()
+            || !word.to_lowercase().starts_with(&phrase.hint.to_lowercase())
+        {
+            return Err(CoreError::Invalid(
+                "Word hint must be a partial initial form".into(),
+            ));
+        }
     }
     let mut variants = BTreeSet::from([answer]);
     for variant in &phrase.accepted_variants {
@@ -91,7 +116,8 @@ fn phrase(phrase: &PreparedEnglishPhrase, source_ids: &BTreeSet<&str>) -> Result
         if situation.language != Language::En
             || !situations.insert(&situation.id)
             || !situation_texts.insert(words(&situation.text))
-            || situation.text.contains(['{', '}', '_'])
+            || situation.text.contains(['{', '}'])
+            || (!word && situation.text.contains('_'))
             || leaks(&situation.text, phrase)
             || situation.exposed_target_source_ids.len() > 4
             || situation
@@ -110,6 +136,10 @@ fn phrase(phrase: &PreparedEnglishPhrase, source_ids: &BTreeSet<&str>) -> Result
             }
         }
     }
+    help_and_familiarity(phrase)
+}
+
+fn help_and_familiarity(phrase: &PreparedEnglishPhrase) -> Result<(), CoreError> {
     if let PhraseFamiliarity::Studied { provenance } = &phrase.familiarity {
         text(provenance, "studied familiarity provenance", 2_000)?;
     }
@@ -140,7 +170,9 @@ pub(super) fn validate(package: &PreparedEnglishLesson) -> Result<(), CoreError>
         || package.profile_revision < 1
         || !(1..=5).contains(&package.phrases.len())
     {
-        return Err(CoreError::Invalid("Preview supports one lesson of one to five fixed English phrases with a pinned profile".into()));
+        return Err(CoreError::Invalid(
+            "Prepare one lesson of one to five English targets with a pinned profile".into(),
+        ));
     }
     let ids: BTreeSet<_> = package
         .phrases

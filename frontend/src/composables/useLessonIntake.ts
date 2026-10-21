@@ -59,17 +59,19 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
             expected_generation: null,
             language: 'en',
             title: 'Inbox practice',
-            context: '',
+            context: phrase.value,
             note: note.value.trim(),
-            phrases: [
-              {
-                source_id: 'phrase',
-                text: phrase.value.trim(),
+            phrases: phrase.value
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((text, index, entries) => ({
+                source_id: entries.length === 1 ? 'phrase' : `item-${index + 1}`,
+                text,
                 reference_audio_id: null,
                 audio_sha256: null,
                 expected_revision: null,
-              },
-            ],
+              })),
           },
         }
         try {

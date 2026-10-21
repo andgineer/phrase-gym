@@ -22,3 +22,6 @@ pub mod launch;
 pub mod smoke_intake;
 
 mod selected;
+
+#[cfg(target_os = "macos")]
+mod menu;

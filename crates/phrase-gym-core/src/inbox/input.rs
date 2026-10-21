@@ -54,7 +54,7 @@ pub(super) fn validate(
         || input.note.len() > 2_000
         || input.expected_generation.is_some_and(|n| n < 1)
     {
-        return Err(CoreError::Invalid("Submit one lesson of at most five fixed English phrases with optional reference audio; words, dialogues and bulk imports are unsupported".into()));
+        return Err(CoreError::Invalid("Submit one lesson of at most five English items with optional reference audio; larger imports and dialogues are unsupported".into()));
     }
     let index = MediaIndex::load(
         database,
@@ -64,14 +64,13 @@ pub(super) fn validate(
     let mut ids = BTreeSet::new();
     for phrase in &input.phrases {
         text(&phrase.source_id, "Phrase identity", 200)?;
-        text(&phrase.text, "Fixed phrase", 200)?;
+        text(&phrase.text, "English item", 800)?;
         if !ids.insert(&phrase.source_id)
-            || phrase.text.split_whitespace().count() > 30
-            || phrase.text.contains(['{', '}', '_'])
+            || phrase.text.split_whitespace().count() > 100
             || (phrase.text.starts_with("https://") || phrase.text.starts_with("http://"))
             || phrase.expected_revision.is_some_and(|n| n < 1)
         {
-            return Err(CoreError::Invalid("Submit distinct short fixed phrases and extracted text; URL-only input and slots are unsupported".into()));
+            return Err(CoreError::Invalid("Submit distinct short English items and extracted text; URL-only input is unsupported".into()));
         }
         let (audio_id, hash) = match (phrase.reference_audio_id, &phrase.audio_sha256) {
             (None, None) => continue,

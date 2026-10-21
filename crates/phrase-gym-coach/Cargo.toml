@@ -17,7 +17,7 @@ name = "cli_probe"
 test = true
 
 [features]
-desktop = ["dep:egui", "dep:eframe", "dep:wgpu", "dep:rfd"]
+desktop = ["dep:egui", "dep:eframe", "dep:wgpu", "dep:rfd", "dep:muda"]
 
 [dependencies]
 base64.workspace = true
@@ -47,6 +47,9 @@ signal-hook = { version = "0.4.5", default-features = false }
 [target.'cfg(windows)'.dependencies]
 process-wrap = { version = "10.0.1", default-features = false, features = ["creation-flags", "job-object", "kill-on-drop", "tokio1"] }
 windows = { version = "0.62.2", default-features = false, features = ["Win32_System_Threading"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+muda = { version = "0.20.0", default-features = false, optional = true }
 
 [dev-dependencies]
 rusqlite.workspace = true

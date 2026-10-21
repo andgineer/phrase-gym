@@ -18,16 +18,27 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
     state.text_scale = ui.ctx().zoom_factor();
     egui::Frame::central_panel(ui.style()).show(ui, |ui| {
         ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
-            ui.heading(TITLE);
-            ui.add_space(4.0);
-            status(ui, &state.snapshot);
-            ui.separator();
-            appearance_controls(ui, state);
-            ui.separator();
-            if draft(ui, &mut state.draft) && !state.intake.busy {
+            ui.add_space(24.0);
+            ui.heading("Your next working set");
+            ui.add_space(24.0);
+            if draft(ui, &mut state.draft, !state.settings_open) && !state.intake.busy {
                 state.intake.command = Some(super::intake::Command::Text(state.draft.clone()));
             }
-            super::intake_view::show(ui, &mut state.intake, &state.draft);
+            ui.add_space(16.0);
+            if state.intake.busy {
+                ui.horizontal(|ui| {
+                    ui.spinner();
+                    ui.label("Preparing your material…");
+                });
+            } else if let Some(message) = text::intake_status(&state.intake.status) {
+                ui.label(message);
+            }
+            if let Some(summary) = &state.intake.summary {
+                ui.label(summary);
+            }
+            if let Some(url) = &state.intake.practice {
+                ui.hyperlink_to("Open browser practice", url);
+            }
         });
     });
 }
@@ -96,21 +107,35 @@ fn appearance_controls(ui: &mut Ui, state: &mut ViewState) {
     }
 }
 
-fn draft(ui: &mut Ui, draft: &mut String) -> bool {
+fn draft(ui: &mut Ui, draft: &mut String, focus: bool) -> bool {
     let pasted = ui.ctx().input(|input| {
         input
             .events
             .iter()
             .any(|event| matches!(event, egui::Event::Paste(_)))
     });
-    let label = ui.label(RichText::new("Material draft").strong());
+    let label = ui.label(RichText::new("English material").strong());
     let response = ui
         .add(
             TextEdit::multiline(draft)
-                .hint_text("Paste one exact English phrase (up to 200 bytes).")
-                .desired_rows(4)
+                .hint_text("Drop or paste words and phrases")
+                .desired_rows(10)
                 .desired_width(f32::INFINITY),
         )
         .labelled_by(label.id);
+    if focus && ui.memory(|memory| memory.focused().is_none()) {
+        response.request_focus();
+    }
     response.changed() && pasted
+}
+
+pub fn settings(ui: &mut Ui, state: &mut ViewState) {
+    ScrollArea::vertical().show(ui, |ui| {
+        ui.heading("Settings");
+        appearance_controls(ui, state);
+        ui.separator();
+        super::intake_view::show(ui, &mut state.intake, &state.draft);
+        ui.separator();
+        status(ui, &state.snapshot);
+    });
 }

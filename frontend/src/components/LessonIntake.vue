@@ -87,7 +87,7 @@ async function toggle() {
       <p>
         {{
           language === 'en'
-            ? 'Review the phrase, then Send. Coach creates the practice material and reference speech.'
+            ? 'Review one to five English items, one per line, then Send. Coach creates the practice material and reference speech.'
             : messages.unsupported
         }}
       </p>
@@ -100,7 +100,7 @@ async function toggle() {
         <fieldset :disabled="busy || !ready || !interruptionReady">
           <label
             >{{ messages.phrase
-            }}<textarea v-model="phrase" maxlength="200" lang="en" @input="edits++" />
+            }}<textarea v-model="phrase" maxlength="4000" lang="en" @input="edits++" />
           </label>
           <label>{{ messages.note }}<textarea v-model="note" maxlength="2000" /></label>
           <button type="submit" :disabled="!phrase.trim()">Send</button>
@@ -108,7 +108,9 @@ async function toggle() {
       </form>
       <template v-if="draft">
         <h3>{{ draft.submission.title }}</h3>
-        <p lang="en">{{ draft.submission.phrases[0]?.text }}</p>
+        <p v-for="item in draft.submission.phrases" :key="item.source_id" lang="en">
+          {{ item.text }}
+        </p>
         <p>{{ draft.submission.context }}</p>
         <p role="status">
           {{

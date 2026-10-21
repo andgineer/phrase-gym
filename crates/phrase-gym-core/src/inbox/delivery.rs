@@ -75,7 +75,9 @@ fn binding(connection: &Connection, output: &LessonOutput) -> Result<(), CoreErr
             .ok_or_else(|| {
                 CoreError::Invalid("Output must retain every supplied phrase identity".into())
             })?;
-        if prepared.text != original.text
+        if prepared.source_text.as_ref().unwrap_or(&prepared.text) != &original.text
+            || ((original.reference_audio_id.is_some() || prepared.task.is_none())
+                && prepared.text != original.text)
             || original
                 .reference_audio_id
                 .is_some_and(|id| prepared.reference_audio_id != id)

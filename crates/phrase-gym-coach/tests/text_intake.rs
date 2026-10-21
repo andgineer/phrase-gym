@@ -57,14 +57,7 @@ fn generated_media_keeps_exact_text_identity_and_never_claims_a_supplied_perform
 
 #[test]
 fn unsupported_raw_inputs_fail_without_creating_a_draft() {
-    for phrase in [
-        "",
-        "https://example.com",
-        "one\ntwo",
-        "two\twords",
-        "bank",
-        "I want {item}",
-    ] {
+    for phrase in ["", "https://example.com", "two\twords"] {
         assert!(TextDraft::new("http://127.0.0.1:8000", phrase).is_err());
     }
 }
@@ -100,4 +93,18 @@ fn missing_speech_setup_preserves_retained_original_text_before_synthesis() {
         serde_json::from_slice(&std::fs::read(paths.state.join("pending-text.json")).unwrap())
             .unwrap();
     assert_eq!(saved["phrase"], "Let's get started.");
+}
+
+#[test]
+fn a_working_set_retains_frames_words_and_every_item_in_order() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("../../../fixtures/coach/working-set.json")).unwrap();
+    let input = fixture["input"].as_str().unwrap();
+    let draft = TextDraft::new("http://127.0.0.1:8000", input).unwrap();
+    assert_eq!(draft.phrase, input);
+    let entries = phrase_gym_coach::transfer::text::entries(input).unwrap();
+    assert_eq!(entries.len(), 5);
+    assert_eq!(entries[3], "Could we move the meeting to Friday?");
+    assert!(entries[4].starts_with("clarify"));
+    assert!(phrase_gym_coach::transfer::text::entries(&format!("{input}\nA sixth item.")).is_err());
 }

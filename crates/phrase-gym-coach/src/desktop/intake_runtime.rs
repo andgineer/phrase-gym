@@ -20,13 +20,7 @@ pub fn run(
     if !processing {
         return;
     }
-    let Ok(paths) = CoachPaths::for_current_user().and_then(|paths| {
-        paths.ensure()?;
-        Ok(paths)
-    }) else {
-        emit(Event::Status(
-            "Cannot initialize protected Coach folders; restore disk access and restart".into(),
-        ));
+    let Some(paths) = initialize(emit) else {
         return;
     };
     let mut server = match Settings::load(&paths.config.join("settings.json")) {
@@ -39,6 +33,7 @@ pub fn run(
             return;
         }
     };
+    emit(Event::Configured(server.clone()));
     let mut client = None;
     let mut last = Instant::now()
         .checked_sub(Duration::from_secs(10))
@@ -73,10 +68,11 @@ pub fn run(
         let Some(client) = &client else {
             continue;
         };
+        summary(client, emit);
         let draft_path = paths.state.join("pending-text.json");
         if draft_path.exists() {
             let retained =
-                crate::platform::files::read_selected(&draft_path, 4096).and_then(|bytes| {
+                crate::platform::files::read_selected(&draft_path, 8192).and_then(|bytes| {
                     serde_json::from_slice::<crate::transfer::text::TextDraft>(&bytes)
                         .map_err(|_| "Retained text is unreadable".into())
                 });
@@ -105,7 +101,7 @@ pub fn run(
                 return crate::supplied::output(claim);
             }
             emit(Event::Status(
-                "Accepted by Server; preparing one English phrase…".into(),
+                "Accepted by Server; preparing your English working set…".into(),
             ));
             super::selected::prepare(client, &paths, claim, stop)
         });
@@ -127,9 +123,32 @@ fn connect(
 ) -> Result<(), String> {
     let connected = connection::connect(server, paths)?;
     emit(Event::Connected(connected.server.clone()));
-    emit(Event::Status(
-        "Connected automatically; paste one English phrase to prepare with generated speech".into(),
-    ));
+    emit(Event::Status(String::new()));
     *client = Some(connected);
     Ok(())
+}
+
+fn summary(client: &ServerClient, emit: &dyn Fn(Event)) {
+    match client.get::<phrase_gym_contracts::readiness::CoachSummary>("/api/v1/coach/summary") {
+        Ok(summary) => emit(Event::Summary(format!(
+            "{} lessons · {} phrases · {} ready · {} awaiting audio",
+            summary.lessons, summary.targets, summary.ready, summary.awaiting_audio
+        ))),
+        Err(_) => emit(Event::Summary(
+            "Library counts unavailable · last update is stale".into(),
+        )),
+    }
+}
+
+fn initialize(emit: &dyn Fn(Event)) -> Option<CoachPaths> {
+    let Ok(paths) = CoachPaths::for_current_user().and_then(|paths| {
+        paths.ensure()?;
+        Ok(paths)
+    }) else {
+        emit(Event::Status(
+            "Cannot initialize protected Coach folders; restore disk access and restart".into(),
+        ));
+        return None;
+    };
+    Some(paths)
 }

@@ -25,6 +25,7 @@ pub(crate) fn media_ids(content: &TargetInput) -> impl Iterator<Item = Uuid> + '
         .iter()
         .filter_map(|cue| cue.audio_id)
         .chain(content.reference_audio_id)
+        .chain(content.context_audio_ids.iter().copied())
 }
 
 pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex, situation: bool) -> bool {
@@ -36,6 +37,10 @@ pub(crate) fn retrieval_ready(content: &TargetInput, media: &MediaIndex, situati
         .iter()
         .all(|cue| cue.audio_id.is_none_or(|id| media.available(id)));
     reference
+        && content
+            .context_audio_ids
+            .iter()
+            .all(|id| media.available(*id))
         && cue_audio
         && content
             .cues

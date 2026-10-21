@@ -1,5 +1,7 @@
 // A stand-in for agent CLIs in supervision tests and packaged smoke checks; a native executable so
 // the same scenarios run on Windows, where POSIX scripts do not.
+mod support;
+
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, ExitCode};
@@ -12,7 +14,7 @@ fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let words: Vec<&str> = arguments.iter().map(String::as_str).collect();
     match words.as_slice() {
-        ["-p", ..] => prepare(),
+        ["-p", ..] => support::prepare(),
         ["exec", ..] => {
             let Some(task) = arguments
                 .last()
@@ -36,7 +38,7 @@ fn main() -> ExitCode {
             )
             .unwrap();
             std::env::set_current_dir(parent).unwrap();
-            prepare()
+            support::prepare()
         }
         ["-I", "-c", ..] => {
             let bad = std::env::args_os().next().is_some_and(|p| {
@@ -156,54 +158,6 @@ fn heartbeat(path: &Path) -> ExitCode {
         beat += 1;
         let _ = std::fs::write(path, beat.to_string());
         std::thread::sleep(Duration::from_millis(20));
-    }
-    ExitCode::SUCCESS
-}
-
-fn prepare() -> ExitCode {
-    let input: serde_json::Value =
-        serde_json::from_slice(&std::fs::read("input.json").unwrap()).unwrap();
-    let context = input["input"]["context"].as_str().unwrap_or("");
-    if context == "fake-lease-loss" {
-        std::fs::write("running.marker", b"started").unwrap();
-        let started = Instant::now();
-        while !Path::new("release.signal").exists() && started.elapsed() < Duration::from_secs(5) {
-            std::thread::sleep(Duration::from_millis(10));
-        }
-    }
-    if context == "fake-auth" {
-        println!("Not logged in · Please run /login");
-        return ExitCode::from(1);
-    }
-    if context == "fake-quota" {
-        eprintln!("Individual quota reached");
-        return ExitCode::from(1);
-    }
-    if context == "fake-malformed" {
-        println!("not JSON");
-        return ExitCode::SUCCESS;
-    }
-    if context == "fake-flood" {
-        return flood(200_000);
-    }
-    if context == "fake-wait" {
-        return pause("20000");
-    }
-    let mut output: serde_json::Value =
-        serde_json::from_slice(&std::fs::read("output-shape.json").unwrap()).unwrap();
-    output["meaning_key"] = "begin-activity".into();
-    output["intention_key"] = "open-meeting".into();
-    output["situations"][0]["text"] = "Everyone has arrived. Open the meeting.".into();
-    output["hint"] = if context == "fake-invalid-hint" {
-        "unrelated"
-    } else {
-        "started"
-    }
-    .into();
-    output["help"]["meaning"] = "Begin a shared activity.".into();
-    println!("{output}");
-    if context == "fake-prefix-flood" {
-        let _ = std::io::stdout().write_all(&vec![b' '; 200_000]);
     }
     ExitCode::SUCCESS
 }

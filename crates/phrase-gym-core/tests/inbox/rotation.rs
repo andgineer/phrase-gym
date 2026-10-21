@@ -65,3 +65,48 @@ fn independent_situations_rotate_after_due_reviews_and_restart_without_changing_
     let next = learning.start(None);
     assert_ne!(next.manifest.targets[0].cue_id, cue);
 }
+
+#[test]
+fn word_contexts_rotate_matching_answers_and_references_on_one_schedule_across_due_return() {
+    let learning = Learning::contextual_word();
+    let study = learning.start(None);
+    learning.event(study.id, 1, PracticeKind::Present).unwrap();
+    learning.event(study.id, 2, PracticeKind::Next).unwrap();
+    let target = study.manifest.targets[0].phrase.id;
+    for expected in ["context-0", "context-1", "context-2", "context-0"] {
+        let recall = learning.start(None);
+        let item = &recall.manifest.targets[0];
+        assert_eq!(item.phrase.id, target);
+        assert_eq!(item.cue_id, expected);
+        let phrase_gym_contracts::english::EnglishTask::WordSense { contexts, .. } =
+            item.phrase.english.as_ref().unwrap().task.as_ref().unwrap()
+        else {
+            panic!("Expected word task")
+        };
+        let context = contexts
+            .iter()
+            .find(|context| context.situation_id == expected)
+            .unwrap();
+        assert_eq!(item.phrase.content.text, context.answer);
+        assert_eq!(item.phrase.content.chunks[0].text, context.answer);
+        assert_eq!(
+            item.phrase.content.reference_audio_id,
+            Some(context.reference_audio_id)
+        );
+        assert!(
+            recall
+                .manifest
+                .required_media_ids
+                .contains(&context.reference_audio_id)
+        );
+        learning.event(recall.id, 1, PracticeKind::Present).unwrap();
+        learning.event(recall.id, 2, PracticeKind::Answer).unwrap();
+        let rated = learning.event(recall.id, 3, PracticeKind::Rate).unwrap();
+        assert!(rated.receipts[0].schedule_changed);
+        assert_eq!(learning.schedule_count(), 1);
+        let due = timestamps::parse(rated.receipts[0].due_at.as_ref().unwrap()).unwrap();
+        learning
+            .clock
+            .advance((due - learning.clock.now()).num_seconds() + 1);
+    }
+}

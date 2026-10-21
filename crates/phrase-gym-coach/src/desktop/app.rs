@@ -94,6 +94,8 @@ struct CoachApp {
     events: Receiver<StartupEvent>,
     smoke: Option<SmokeRun>,
     intake: IntakeRunner,
+    #[cfg(target_os = "macos")]
+    menu: Option<super::menu::ApplicationMenu>,
 }
 
 impl CoachApp {
@@ -126,6 +128,8 @@ impl CoachApp {
             events,
             smoke,
             intake,
+            #[cfg(target_os = "macos")]
+            menu: super::menu::ApplicationMenu::install(creation.egui_ctx.clone()).ok(),
         }
     }
 }
@@ -148,12 +152,17 @@ impl eframe::App for CoachApp {
         }
         while let Ok(event) = self.intake.events.try_recv() {
             match event {
+                Event::Summary(summary) => self.view.intake.summary = Some(summary),
                 Event::Draft(text) => self.view.draft = text,
                 Event::Status(status) => self.view.intake.status = status,
                 Event::SelectedClaude(path) => self.view.snapshot.apply(StartupEvent::Tool(
                     crate::adapter::CliAdapter::Claude,
                     super::state::ToolReadiness::Found(path),
                 )),
+                Event::Configured(server) => {
+                    self.view.intake.server = server;
+                    self.view.snapshot.server_configured = true;
+                }
                 Event::Connected(server) => {
                     self.view.intake.server = server;
                     self.view.intake.connected = true;
@@ -172,7 +181,36 @@ impl eframe::App for CoachApp {
                 }
             }
         }
+        #[cfg(target_os = "macos")]
+        if self
+            .menu
+            .as_ref()
+            .is_some_and(super::menu::ApplicationMenu::take_settings)
+        {
+            self.view.settings_open = true;
+        }
+        if ui
+            .ctx()
+            .input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::Comma))
+        {
+            self.view.settings_open = true;
+        }
         view::show(ui, &mut self.view);
+        if self.view.settings_open {
+            ui.ctx().show_viewport_immediate(
+                egui::ViewportId::from_hash_of("coach-settings"),
+                egui::ViewportBuilder::default()
+                    .with_title("Phrase Gym Coach Settings")
+                    .with_inner_size([560.0, 640.0]),
+                |context, _| {
+                    if context.input(|input| input.viewport().close_requested()) {
+                        self.view.settings_open = false;
+                    }
+                    egui::CentralPanel::default()
+                        .show(context, |ui| view::settings(ui, &mut self.view));
+                },
+            );
+        }
         if let Some(command) = self.view.intake.command.take() {
             match self.intake.commands.try_send(command) {
                 Ok(()) => self.view.intake.busy = true,

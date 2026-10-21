@@ -11,7 +11,7 @@ pub(super) fn read(path: &Path) -> Result<String, String> {
             "Drop one plain .txt file containing one English phrase, or paste phrase text".into(),
         );
     }
-    let bytes = files::read_selected(path, 200)?;
+    let bytes = files::read_selected(path, 4000)?;
     let phrase = String::from_utf8(bytes).map_err(|_| "The dropped phrase must be UTF-8 text")?;
     if phrase.trim().is_empty() {
         return Err("The dropped text is empty; paste or drop one English phrase".into());
@@ -29,7 +29,7 @@ mod tests {
         let path = directory.path().join("phrase.txt");
         std::fs::write(&path, "  Let's get started.\n").unwrap();
         assert_eq!(read(&path).unwrap(), "  Let's get started.\n");
-        for bytes in [vec![b'x'; 201], vec![255], b" \n".to_vec()] {
+        for bytes in [vec![b'x'; 4001], vec![255], b" \n".to_vec()] {
             std::fs::write(&path, bytes).unwrap();
             assert!(read(&path).is_err());
         }

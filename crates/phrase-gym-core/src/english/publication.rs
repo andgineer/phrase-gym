@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use phrase_gym_contracts::content::{Chunk, Cue, Explanation, TargetInput, TargetKind};
+use phrase_gym_contracts::content::{Chunk, Cue, Explanation, TargetInput};
 use phrase_gym_contracts::english::{PreparedEnglishLesson, PreparedEnglishPhrase};
 use phrase_gym_contracts::inbox::PublicationReceipt;
 use rusqlite::{Transaction, params};
@@ -12,7 +12,8 @@ use crate::hashing::{canonical_json, fingerprint};
 fn projection(phrase: &PreparedEnglishPhrase) -> TargetInput {
     TargetInput {
         source_id: phrase.source_id.clone(),
-        kind: TargetKind::FixedPhrase,
+        context_audio_ids: super::tasks::context_audio(phrase),
+        kind: super::tasks::kind(phrase),
         meaning_key: phrase.meaning_key.clone(),
         recall_expression: phrase.intention_key.clone(),
         text: phrase.text.clone(),
@@ -49,7 +50,7 @@ fn projection(phrase: &PreparedEnglishPhrase) -> TargetInput {
             .unwrap_or_default(),
         concepts: Vec::new(),
         acceptable_equivalents: phrase.accepted_variants.clone(),
-        slots: BTreeMap::new(),
+        slots: super::tasks::slots(phrase),
         reference_audio_id: Some(phrase.reference_audio_id),
     }
 }
@@ -80,7 +81,7 @@ pub(crate) fn publish(
         let id = ids[&phrase.source_id];
         let revision = phrase.expected_revision.unwrap_or(0) + 1;
         let content = projection(phrase);
-        tx.execute("INSERT INTO target (id, language, kind, meaning_key, recall_expression, current_revision) VALUES (?1, 'en', 'fixed_phrase', ?2, ?3, ?4) ON CONFLICT (id) DO UPDATE SET current_revision = excluded.current_revision", params![id.to_string(), phrase.meaning_key, phrase.intention_key, revision])?;
+        tx.execute("INSERT INTO target (id, language, kind, meaning_key, recall_expression, current_revision) VALUES (?1, 'en', ?2, ?3, ?4, ?5) ON CONFLICT (id) DO UPDATE SET current_revision = excluded.current_revision", params![id.to_string(), content.kind.code(), phrase.meaning_key, phrase.intention_key, revision])?;
         tx.execute("INSERT INTO source_item (namespace, source_id, target_id, source_revision) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (namespace, source_id) DO UPDATE SET source_revision = excluded.source_revision", params![package.namespace, phrase.source_id, id.to_string(), package.source_revision])?;
         tx.execute(
             "INSERT INTO target_revision VALUES (?1, ?2, ?3, ?4, ?5)",

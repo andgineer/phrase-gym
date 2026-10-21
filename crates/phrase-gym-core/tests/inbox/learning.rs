@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use phrase_gym_contracts::base::Language;
+use phrase_gym_contracts::english::{EnglishTask, WordContext};
 use phrase_gym_contracts::inbox::PublicationReceipt;
 use phrase_gym_contracts::practice::{
     EventBatch, Modality, PracticeInput, PracticeKind, RecallRating,
@@ -29,18 +30,22 @@ pub(super) struct Learning {
 
 impl Learning {
     pub(super) fn new() -> Self {
-        Self::create(false)
+        Self::create(false, false)
     }
 
     pub(super) fn varied() -> Self {
-        Self::create(true)
+        Self::create(true, false)
     }
 
-    fn create(varied: bool) -> Self {
+    pub(super) fn contextual_word() -> Self {
+        Self::create(false, true)
+    }
+
+    fn create(varied: bool, word: bool) -> Self {
         let fixture = Fixture::new();
         let clock = Arc::new(TestClock::new());
         let store = Arc::new(MediaStore::open(fixture.directory.path()).unwrap());
-        let publication = publish(&fixture, &clock, &store, false, varied);
+        let publication = publish_form(&fixture, &clock, &store, false, varied, word);
         Self {
             sessions: Sessions::new(fixture.database.clone(), store.clone(), clock.clone()),
             practice: Practice::new(fixture.database.clone(), clock.clone()),
@@ -105,16 +110,73 @@ pub(super) fn publish(
     replacement: bool,
     varied: bool,
 ) -> PublicationReceipt {
+    publish_form(f, clock, store, replacement, varied, false)
+}
+
+fn publish_form(
+    f: &Fixture,
+    clock: &Arc<TestClock>,
+    store: &Arc<MediaStore>,
+    replacement: bool,
+    varied: bool,
+    word: bool,
+) -> PublicationReceipt {
     let inbox = Inbox::new(f.database.clone(), store.clone(), clock.clone());
     let mut submission = input(f);
     if replacement {
         submission.expected_generation = Some(1);
         submission.phrases[0].expected_revision = Some(1);
     }
+    if word {
+        submission.phrases[0].text = "Please clarify the deadline.".into();
+        let media = f.upload(&serde_json::json!({"text": submission.phrases[0].text}));
+        submission.phrases[0].reference_audio_id = Some(media.id);
+        submission.phrases[0].audio_sha256 = Some(media.sha256);
+    }
     inbox.submit("sender", &submission).unwrap();
     let jobs = Jobs::new(f.database.clone(), clock.clone());
     let claim = jobs.claim("worker", Uuid::new_v4()).unwrap().unwrap();
     let mut lesson = output(f, &claim);
+    if word {
+        let phrase = &mut lesson.package.phrases[0];
+        phrase.text.clone_from(&submission.phrases[0].text);
+        phrase.reference_audio_id = submission.phrases[0].reference_audio_id.unwrap();
+        phrase.accepted_variants.clear();
+        phrase.hint = "cl".into();
+        let mut contexts = Vec::new();
+        phrase.situations = [
+            "Please _____ the deadline.",
+            "Can you _____ this point?",
+            "We need to _____ the plan.",
+        ]
+        .iter()
+        .enumerate()
+        .map(|(index, prompt)| {
+            let mut situation = phrase_gym_contracts::english::PhraseSituation {
+                id: format!("context-{index}"),
+                text: (*prompt).into(),
+                language: Language::En,
+                audio_id: None,
+                partner: None,
+                exposed_target_source_ids: Vec::new(),
+            };
+            let answer = prompt.replace("_____", "clarify");
+            let reference = f.upload(&serde_json::json!({"text": answer}));
+            contexts.push(WordContext {
+                situation_id: situation.id.clone(),
+                answer,
+                reference_audio_id: reference.id,
+            });
+            situation.text = (*prompt).into();
+            situation
+        })
+        .collect();
+        phrase.task = Some(EnglishTask::WordSense {
+            word: "clarify".into(),
+            sense: "Make clearer".into(),
+            contexts,
+        });
+    }
     if varied {
         let mut second = lesson.package.phrases[0].situations[0].clone();
         second.id = "room".into();

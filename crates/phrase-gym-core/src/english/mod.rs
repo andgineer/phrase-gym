@@ -1,6 +1,7 @@
 pub(crate) mod audio;
 pub(crate) mod publication;
 mod structure;
+pub(crate) mod tasks;
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -90,7 +91,7 @@ pub(crate) fn bindings(
                 records::sourced_target(transaction, &package.namespace, &phrase.source_id)?;
             let id = if let Some(existing) = existing {
                 if existing.language != "en"
-                    || existing.kind != "fixed_phrase"
+                    || existing.kind != tasks::kind(phrase).code()
                     || existing.meaning_key != phrase.meaning_key
                 {
                     return Err(CoreError::Invalid(

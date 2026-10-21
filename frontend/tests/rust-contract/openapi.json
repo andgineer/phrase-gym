@@ -10,6 +10,26 @@
     "version": "0.0.0"
   },
   "paths": {
+    "/api/v1/coach/summary": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "operationId": "coach_summary",
+        "responses": {
+          "200": {
+            "description": "Scoped English database counts without learner history or recordings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dialogues": {
       "get": {
         "tags": [
@@ -1843,6 +1863,38 @@
         },
         "additionalProperties": false
       },
+      "CoachSummary": {
+        "type": "object",
+        "required": [
+          "lessons",
+          "targets",
+          "ready",
+          "study_only",
+          "awaiting_audio"
+        ],
+        "properties": {
+          "awaiting_audio": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lessons": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "study_only": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targets": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "Cue": {
         "type": "object",
         "required": [
@@ -2070,6 +2122,64 @@
           "english_phrases_v1"
         ]
       },
+      "EnglishTask": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "pattern",
+              "slots",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "frame"
+                ]
+              },
+              "pattern": {
+                "type": "string"
+              },
+              "slots": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FrameSlot"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "word",
+              "sense",
+              "contexts",
+              "kind"
+            ],
+            "properties": {
+              "contexts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WordContext"
+                }
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "word_sense"
+                ]
+              },
+              "sense": {
+                "type": "string"
+              },
+              "word": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
       "ErrorBody": {
         "type": "object",
         "required": [
@@ -2243,6 +2353,25 @@
             "type": "string"
           }
         }
+      },
+      "FrameSlot": {
+        "type": "object",
+        "required": [
+          "name",
+          "values"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
       },
       "JobClaim": {
         "type": "object",
@@ -3358,6 +3487,22 @@
           "source_id": {
             "type": "string"
           },
+          "source_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "task": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EnglishTask"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "text": {
             "type": "string"
           }
@@ -3897,6 +4042,13 @@
               "type": "string"
             }
           },
+          "context_audio_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           "cues": {
             "type": "array",
             "items": {
@@ -3972,6 +4124,27 @@
           "native",
           "learning"
         ]
+      },
+      "WordContext": {
+        "type": "object",
+        "required": [
+          "situation_id",
+          "answer",
+          "reference_audio_id"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "situation_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       }
     }
   }

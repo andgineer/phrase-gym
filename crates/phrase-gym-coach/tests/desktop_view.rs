@@ -17,7 +17,16 @@ fn harness(state: ViewState) -> Harness<'static, ViewState> {
     Harness::builder()
         .with_size([560.0, 640.0])
         .with_context_setup(appearance::install)
-        .build_ui_state(view::show, state)
+        .build_ui_state(
+            |ui, state| {
+                if state.settings_open {
+                    view::settings(ui, state);
+                } else {
+                    view::show(ui, state);
+                }
+            },
+            state,
+        )
 }
 
 fn starting() -> ViewState {
@@ -33,16 +42,30 @@ fn startup_shows_a_paused_unconnected_status_through_accessible_names() {
     );
     assert!(harness.state().intake.command.is_none());
     harness.run();
-    harness.get_by_label("Phrase Gym Coach");
-    harness.get_by_label_contains("Paused");
-    harness.get_by_label("Not configured");
-    assert_eq!(harness.get_all_by_label("Checking…").count(), 3);
+    harness.get_by_label("Your next working set");
+    harness.get_by_label("English material");
+    assert!(harness.query_by_role(Role::Button).is_none());
+    assert!(harness.query_by_label("Status").is_none());
+    assert!(
+        harness
+            .query_by_label(
+                "Paste English material or drop a text file. Coach prepares it automatically."
+            )
+            .is_none()
+    );
+    assert!(
+        harness
+            .query_by_label("Connecting automatically using saved Server access…")
+            .is_none()
+    );
     assert!(harness.ctx.global_style().interaction.selectable_labels);
 }
 
 #[test]
 fn startup_events_replace_checking_rows_without_waiting() {
-    let mut harness = harness(starting());
+    let mut state = starting();
+    state.settings_open = true;
+    let mut harness = harness(state);
     harness.run();
     let paths = CoachPaths {
         config: PathBuf::from("/Users/učenik/Library/Application Support/Coach"),
@@ -69,7 +92,9 @@ fn startup_events_replace_checking_rows_without_waiting() {
 
 #[test]
 fn keyboard_focus_reaches_the_theme_choice_and_space_selects_it() {
-    let mut harness = harness(starting());
+    let mut state = starting();
+    state.settings_open = true;
+    let mut harness = harness(state);
     harness.run();
     let mut reached = false;
     for _ in 0..30 {
@@ -96,13 +121,13 @@ fn the_draft_accepts_german_and_serbian_latin_and_cyrillic_text() {
     harness.run();
     let text =
         "Grüße aus Köln, Straße. Ćao, đače! Čuješ li šum žita? Ћао, ђаче! Чујеш ли шум жита?";
-    harness.get_by_label("Material draft").click();
+    harness.get_by_label("English material").click();
     harness.run();
-    harness.get_by_label("Material draft").type_text(text);
+    harness.get_by_label("English material").type_text(text);
     harness.run();
     assert_eq!(harness.state().draft, text);
     assert_eq!(
-        harness.get_by_label("Material draft").value().as_deref(),
+        harness.get_by_label("English material").value().as_deref(),
         Some(text)
     );
 }
@@ -119,12 +144,14 @@ fn ordinary_intake_has_no_manual_lesson_or_prepared_file_controls() {
     ] {
         assert!(harness.query_by_label(name).is_none());
     }
-    harness.get_by_label("Material draft");
+    harness.get_by_label("English material");
 }
 
 #[test]
 fn text_size_controls_scale_the_interface_within_bounds() {
-    let mut harness = harness(starting());
+    let mut state = starting();
+    state.settings_open = true;
+    let mut harness = harness(state);
     harness.run();
     harness.get_by_label("Larger text").click();
     harness.run();
@@ -151,8 +178,12 @@ fn every_control_stays_named_at_the_minimum_window_size_on_high_dpi_in_both_them
             .build_ui_state(view::show, starting());
         harness.run();
         harness.check_accessibility();
-        harness.get_by_role_and_label(Role::RadioButton, "System");
-        harness.get_by_label("Material draft");
+        assert!(
+            harness
+                .query_by_role_and_label(Role::RadioButton, "System")
+                .is_none()
+        );
+        harness.get_by_label("English material");
     }
 }
 
@@ -160,10 +191,20 @@ fn every_control_stays_named_at_the_minimum_window_size_on_high_dpi_in_both_them
 fn server_origin_setup_is_nonsecret_and_editing_requires_reconnection() {
     let mut state = starting();
     state.intake.connected = true;
+    state.settings_open = true;
     let mut harness = Harness::builder()
         .with_size([560.0, 2200.0])
         .with_context_setup(appearance::install)
-        .build_ui_state(view::show, state);
+        .build_ui_state(
+            |ui, state| {
+                if state.settings_open {
+                    view::settings(ui, state);
+                } else {
+                    view::show(ui, state);
+                }
+            },
+            state,
+        );
     harness.run();
     harness.get_by_label("Server connection").click();
     harness.run();
@@ -190,8 +231,6 @@ fn deliberate_paste_submits_text_once_while_opening_and_typing_do_not() {
     let mut harness = harness(starting());
     harness.run();
     assert!(harness.state().intake.command.is_none());
-    harness.get_by_label("Material draft").click();
-    harness.run();
     harness.event(egui::Event::Paste("Let's get started.".into()));
     harness.run();
     assert_eq!(
@@ -203,4 +242,14 @@ fn deliberate_paste_submits_text_once_while_opening_and_typing_do_not() {
     harness.state_mut().intake.command = None;
     harness.run();
     assert!(harness.state().intake.command.is_none());
+}
+
+#[test]
+fn submitted_input_shows_preparing_before_any_background_result() {
+    let mut state = starting();
+    state.intake.busy = true;
+    let mut harness = harness(state);
+    harness.run_steps(3);
+    harness.get_by_label("Preparing your material…");
+    assert!(harness.query_by_role(Role::Button).is_none());
 }

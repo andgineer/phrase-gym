@@ -1,0 +1,19 @@
+{
+  "purpose": "Frozen English development measurement and fake-boundary fixture; never learner acceptance or a seeded lesson",
+  "input": "Let's get started.\nCould you repeat that, please?\nI'll send the notes.\nCould we move the meeting to Friday?\nclarify",
+  "semantic_checks": [
+    "All five original items preserved under one durable receipt and atomic publication",
+    "Three fixed phrases retain exact wording, defensible situations, real help and justified alternatives only",
+    "Reusable frame declares item/day slots, complete reference example, variable response objective and answer-free prompts",
+    "Clarify means make clearer: two or three familiar gapped contexts, matched whole-sentence answers and exact spoken references",
+    "No invented prior study, preference changes, candidate matches or cross-target answer leakage",
+    "One target and schedule per meaning, not per context; first study ungraded, later recall varies contexts",
+    "Fresh semantic review and attended reference listening are separate from structural checks"
+  ],
+  "execution": {
+    "provider": "existing Codex subscription",
+    "speech": "existing local Piper",
+    "bounds": "existing attempt, output, lease and daily-start limits; no automatic model retries or paid API fallback"
+  },
+  "held_out_fixture": "working-set-held-out.json"
+}

@@ -66,6 +66,29 @@ const emit = defineEmits<{
         <span v-else class="gap" aria-label="…">_____ </span>
       </template>
     </h1>
+    <p v-if="english?.task?.kind === 'word_sense'">
+      Say the whole short sentence. Rate the missing word and sense; an unrelated slip does not fail
+      the word.
+    </p>
+    <p v-if="english?.task?.kind === 'frame'">
+      Use your practiced construction; its variable slots may change.
+    </p>
+    <div v-if="card.revealed && english?.task" class="target-task">
+      <template v-if="english.task.kind === 'frame'">
+        <p>{{ english.task.pattern }}</p>
+        <p v-for="slot in english.task.slots" :key="slot.name">
+          {{ slot.name }}: {{ slot.values.join(' / ') }}
+        </p>
+        <p>Use this construction; the named slots may vary.</p>
+      </template>
+      <template v-else>
+        <p>{{ english.task.word }} — {{ english.task.sense }}</p>
+        <p>
+          Say the whole sentence. Rate the selected word and sense; an unrelated slip does not fail
+          the word.
+        </p>
+      </template>
+    </div>
     <div class="audio-controls">
       <button
         class="microphone"

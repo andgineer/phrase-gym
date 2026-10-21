@@ -52,8 +52,6 @@ pub fn prepare_selected(
         return Ok(output);
     }
     attempt::validate_input(claim)?;
-    let normalized = reference::complete(client, paths, claim, shutdown)?;
-    let claim = &normalized;
     let staged = attempt::stage_selected(paths, claim, tool)?;
     let spec = staged.spec;
     let started = Instant::now();
@@ -117,7 +115,8 @@ pub fn prepare_selected(
                 .into(),
         );
     }
-    let output = result::read_selected(&staged.directory, claim, &tool.identity())?;
+    let mut output = result::read_selected(&staged.directory, claim, &tool.identity())?;
+    reference::complete(client, paths, claim, &mut output, shutdown)?;
     // A successful process cannot authorize publication after a lost or replaced lease.
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
     crate::platform::files::save(&previous.join("validated.json"), &output)?;

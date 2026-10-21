@@ -2,6 +2,7 @@ pub(crate) mod dialogues;
 pub(crate) mod lessons;
 pub(crate) mod phrases;
 mod search;
+mod summary;
 
 use std::sync::Arc;
 
