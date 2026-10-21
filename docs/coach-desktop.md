@@ -11,6 +11,8 @@ cargo xtask app-build
 cargo xtask coach-bundle
 ```
 
+Automated browser checks mute every context while retaining native decoding, playback clocks and media events. Their silence is intentional and does not establish listening quality. Live Reference playback, recording and microphone permission paths require attended learner interaction; do not trigger them during unattended verification.
+
 The unsigned macOS bundle is `target/coach-bundle/Phrase Gym Coach.app`. `cargo xtask coach-smoke` launches the packaged smoke checks; these native checks require attended authorization. Never trigger native dialogs or login automatically. Windows builds retain their platform tests; actual Windows CLI qualification remains pending.
 
 ## Local English lesson demo
@@ -117,3 +119,13 @@ Run attended checks only after authorization: Finder launch, keyboard and VoiceO
 On 2026-10-20, the frozen English development input “Let's get started.” traveled through the actual text-intake workflow with native Codex 0.163.0 (`gpt-5.6-luna`, low effort), the normal user Codex home and repository cwd, Piper 1.8.0/ONNX Runtime 1.31.0 and the pinned LJSpeech model above. Authorization bounded the run to at most three Codex starts (90 seconds/64 KiB per stream) and three local speech starts (60 seconds/2 MB output); two Codex starts and one synthesis were used. No paid API or automatic provider retry was used.
 
 The first model output was rejected as malformed JSON (16.385 seconds; CLI reported 18,360 total tokens). Fresh semantic review also identified a stem hint and weak action wording. After enforcing the staged schema, whole-source-word hint choices and explicit situation intent, an explicitly requested retry reused the same generated WAV. The second result validated and published atomically (13.383 seconds; CLI reported 19,184 total tokens), with hint “started”, two natural action prompts, English help, no translation and new familiarity. A fresh reviewer accepted that result separately from structural checks. The 54,828-byte generated reference retained its exact identity through the retry. Normal built-client Start displayed the published phrase, prompt, help and reference action. Listening and actual microphone/output acceptance were not performed; this single English measurement establishes neither multilingual quality nor the full MVP.
+
+### Held-out local checkpoint
+
+On 2026-10-21, the held-out phrase “Could you repeat that, please?” and note “Politely ask someone to say something again.” passed through the built client's clipboard preview and explicit Send to the running packaged Coach. Native Codex 0.163.0 (`gpt-5.6-luna`, low effort), using the existing subscription login, normal home and repository cwd, prepared and published on its first attempt. The model process took 11.791 seconds and exited zero; the CLI trailer reported 20,330 tokens, while structured runner usage remained unknown. Local Piper synthesized from the exact phrase text, producing an 81,964-byte English reference bound to the pinned configuration above; input and provenance were verified, not pronunciation. Speech elapsed time was not retained.
+
+Fresh semantic review separately accepted the answer-free café/quiet-meeting situations, source-word hint “repeat”, English help without translation, new familiarity and unchanged source/reference binding. Structural validation and committed publication were verified independently of that semantic acceptance. Reference SHA-256 was `894542d975cfc2d5e650092e6c5aeb0f0ecdcac3c3e65ccc936e4a734941b688`.
+
+A scripted browser exercise completed ungraded study, a later eligible silent self-check and an explicit scoped voluntary round. Its voluntary Not yet rating retained schedule version 2 and due time `2026-10-23T06:49:08.348Z` unchanged. Browser reload and a same-data release Server restart retained the lesson, exact reference bytes and all four study/supported/eligible/voluntary session snapshots. This was a software demonstration, not evidence of actual learner recall or effectiveness.
+
+Native Coach paste with the learner's own new phrase, attended reference listening, physical recording/output, saved-take replay and live Coach-closed use remain unaccepted. One live Reference playback was invoked; it did not receive listening acceptance. Subsequent verification was silent. Automated retained-take checks do not close these attended gaps.
