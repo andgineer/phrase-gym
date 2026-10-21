@@ -27,6 +27,8 @@ Completion requires an independent review with no unresolved blocker or major; o
 
 ## Completion and boundaries
 
+Every demo delivery states the observable new benefit to the learner and proves that workflow live with matching runnable components. Testing, refactoring, CI repairs or other internal checkpoints alone are not a demo. Preserve the full MVP scope while making each bounded demo a useful increment; report unverified content, listening and device acceptance explicitly.
+
 Delegate verification under the complete-change [done gate](../../AGENTS.md#done-gate), including the full prescribed gates for implementation/mixed changes and documentation checks for prose-only changes. Inspect complete results before reporting completion; keep model/content, native and actual-device acceptance separate from software conformance.
 
 Require implementers to delete completed stage entries from the implementation plan, preserve unresolved acceptance and keep lasting decisions in focused specs. Keep this handout stable and compact. Do not add completed-stage logs, implementation inventories, commit histories, test-count audits, incident narratives or temporary runtime details to specs; Git preserves history.

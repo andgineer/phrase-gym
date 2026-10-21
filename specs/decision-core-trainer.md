@@ -4,7 +4,15 @@ Use evidence-informed defaults and ordinary self-ratings; the learner is not ask
 
 ## Scheduling choices
 
-All lessons and selected lessons use due/new eligibility in the selected language. Prioritize oldest due targets, with up to 20 targets per session and at most five new targets filling remaining capacity. A due backlog may consume the whole budget. This limits new work without forcing early repetitions of every lesson phrase. Retired, suspended and nonpreferred alternatives are excluded from scheduled practice.
+Scheduled practice, for all lessons or selected lessons, uses due/new eligibility in the selected language. Prioritize oldest due targets, with up to 20 targets per session and at most five new targets filling remaining capacity. A due backlog may consume the whole budget. This limits new work without forcing early repetitions of every lesson phrase. Retired, suspended and nonpreferred alternatives are excluded from scheduled practice.
+
+### Voluntary practice
+
+When Due and New are both zero, show **Practice now** if the current language and lesson scope contains practice-ready material. Also offer it after a completed round. This explicit choice starts a new voluntary session in that same scope; it never automatically repeats a completed round or replaces an unfinished session. Retired, suspended, nonpreferred and audio-unready targets remain excluded; introduction prerequisites and content-validity exclusions still apply. If no practice-ready material exists, explain why rather than offer an empty session. No schedule reset or additional queue configuration is needed.
+
+Voluntary sessions are manual early practice or rehearsal, distinct from scheduled practice. Preserve the learner's ratings, original response/support evidence and recordings, but voluntary ratings never count as independent recall or update FSRS, due timestamps or existing due obligations, including after a hint or failure. They cannot promote assessed targets into early scheduled reviews. First meetings still use ungraded study; record genuine study completion so a later first independent check can become eligible under the existing spacing and support rules below, without fabricating familiarity or recall. Keep scheduled Start and voluntary Practice now visibly distinct so repetition is available without implying anything is due.
+
+### Scheduler and independent reviews
 
 Use FSRS-6 with population parameters and desired retention 0.90; the arithmetic of the locked py-fsrs 6.3.2 release is the reference. Not yet maps to Again, With effort to Hard, and Recalled to Good. With effort means correct retrieval with difficulty, never partial recall or recognition after reveal. No Easy button is needed. Disable short steps and fuzzing because the app owns its repair queue. Let elapsed time and memory history determine intervals and lapse adjustments; there is no fixed ladder, universal one-day reset or interval ceiling.
 
