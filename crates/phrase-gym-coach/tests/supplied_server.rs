@@ -1,6 +1,7 @@
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
+use std::sync::OnceLock;
 
 use phrase_gym_coach::supplied;
 use phrase_gym_coach::transfer::{client::ServerClient, pending, runner};
@@ -33,7 +34,7 @@ fn start(binary: &Path, data: &Path, port: &str) -> (Server, String) {
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
             .spawn()
-            .unwrap(),
+            .unwrap_or_else(|error| panic!("Could not launch {}: {error}", binary.display())),
     );
     let mut line = String::new();
     BufReader::new(server.0.stdout.take().unwrap())
@@ -49,7 +50,13 @@ fn start(binary: &Path, data: &Path, port: &str) -> (Server, String) {
     (server, format!("http://{url}"))
 }
 
-fn setup() -> (tempfile::TempDir, PathBuf, PathBuf) {
+fn server_binary() -> &'static PathBuf {
+    static BINARY: OnceLock<PathBuf> = OnceLock::new();
+    // Rebuilding a shared executable while another test launches it can remove it mid-spawn.
+    BINARY.get_or_init(build_server)
+}
+
+fn build_server() -> PathBuf {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     // This process boundary keeps Server and Coach out of each other's dependency graphs.
     assert!(
@@ -66,13 +73,17 @@ fn setup() -> (tempfile::TempDir, PathBuf, PathBuf) {
             .unwrap()
             .success()
     );
-    let binary = std::env::current_exe()
+    std::env::current_exe()
         .unwrap()
         .parent()
         .unwrap()
         .parent()
         .unwrap()
-        .join(format!("phrase-gym-server{}", std::env::consts::EXE_SUFFIX));
+        .join(format!("phrase-gym-server{}", std::env::consts::EXE_SUFFIX))
+}
+
+fn setup() -> (tempfile::TempDir, PathBuf, PathBuf) {
+    let binary = server_binary().clone();
     let directory = tempfile::tempdir().unwrap();
     let data = directory.path().join("server");
     let audio = directory.path().join("original.wav");

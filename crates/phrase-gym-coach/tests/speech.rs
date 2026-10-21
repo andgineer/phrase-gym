@@ -9,6 +9,9 @@ use phrase_gym_contracts::base::Language;
 use phrase_gym_contracts::media::MediaRole;
 use tempfile::TempDir;
 
+#[path = "support/executable.rs"]
+mod executable;
+
 fn fixture(root: &Path) -> (PiperVoice, SpeechRequest) {
     let model = b"fake model, never inference";
     let config = br#"{"language":{"code":"en_US"},"num_speakers":1,"audio":{"sample_rate":22050}}"#;
@@ -152,7 +155,7 @@ async fn rejects_actual_runtime_mismatch_and_configuration_mismatch() {
     let wrong = root
         .path()
         .join(format!("wrong-runtime{}", std::env::consts::EXE_SUFFIX));
-    std::fs::copy(&voice.executable, &wrong).unwrap();
+    executable::alias(&voice.executable, &wrong);
     voice.executable = wrong;
     assert!(
         stage(root.path(), &voice, &request)

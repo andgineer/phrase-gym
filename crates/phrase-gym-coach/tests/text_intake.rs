@@ -25,12 +25,13 @@ fn text_is_retained_before_speech_and_retries_keep_identity_without_accepting_ch
 
 #[test]
 fn generated_media_keeps_exact_text_identity_and_never_claims_a_supplied_performer() {
+    let root = tempfile::tempdir().unwrap();
     let draft = TextDraft::new("http://127.0.0.1:8000", "Let's get started.").unwrap();
     let voice = phrase_gym_coach::speech::PiperVoice {
-        executable: "/synthetic/python".into(),
+        executable: root.path().join("synthetic python"),
         runtime_version: "1.8.0".into(),
-        model: "/synthetic/model".into(),
-        config: "/synthetic/config".into(),
+        model: root.path().join("synthetic model"),
+        config: root.path().join("synthetic config"),
         model_sha256: "a".repeat(64),
         config_sha256: "b".repeat(64),
         voice: "ljspeech-medium".into(),

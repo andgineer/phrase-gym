@@ -7,6 +7,9 @@ use phrase_gym_coach::adapter::environment::{HostEnvironment, child_environment}
 use phrase_gym_coach::process::{Ending, Limits, ProcessError, ProcessSpec, run};
 use tempfile::TempDir;
 
+#[path = "support/executable.rs"]
+mod executable;
+
 const FAKE: &str = env!("CARGO_BIN_EXE_phrase-gym-fake-child");
 
 struct Sandbox {
@@ -15,7 +18,7 @@ struct Sandbox {
     attempt: PathBuf,
 }
 
-// Copies the fake CLI under a path with spaces and non-ASCII characters, as a Finder or Start-menu
+// Places the fake CLI under a path with spaces and non-ASCII characters, as a Finder or Start-menu
 // install location might have, and gives each run its own attempt directory.
 fn sandbox() -> Sandbox {
     let root = tempfile::tempdir().unwrap();
@@ -24,7 +27,7 @@ fn sandbox() -> Sandbox {
     std::fs::create_dir_all(&tools).unwrap();
     std::fs::create_dir_all(&attempt).unwrap();
     let program = tools.join(format!("fake cli{}", std::env::consts::EXE_SUFFIX));
-    std::fs::copy(FAKE, &program).unwrap();
+    executable::alias(Path::new(FAKE), &program);
     Sandbox {
         root,
         program,
@@ -88,6 +91,33 @@ async fn assert_stopped(heartbeat: &Path) {
 
 async fn cancel_when(path: PathBuf, needle: &'static str) {
     appears(&path, needle).await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn concurrent_fixture_creation_and_launch_keeps_executables_immutable() {
+    let mut tasks = tokio::task::JoinSet::new();
+    for _ in 0..8 {
+        tasks.spawn(async {
+            for _ in 0..8 {
+                let sandbox = sandbox();
+                #[cfg(unix)]
+                assert!(
+                    std::fs::symlink_metadata(&sandbox.program)
+                        .unwrap()
+                        .is_symlink()
+                );
+                let outcome = run(sandbox.spec(&["sleep", "0"], limits()), pending())
+                    .await
+                    .unwrap();
+                assert_eq!(outcome.ending, Ending::Exited(Some(0)));
+                assert!(outcome.stdout.closed);
+                assert!(outcome.stderr.closed);
+            }
+        });
+    }
+    while let Some(result) = tasks.join_next().await {
+        result.unwrap();
+    }
 }
 
 #[tokio::test]

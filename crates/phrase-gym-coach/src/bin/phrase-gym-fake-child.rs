@@ -39,8 +39,9 @@ fn main() -> ExitCode {
             prepare()
         }
         ["-I", "-c", ..] => {
-            let bad = std::env::current_exe().is_ok_and(|p| {
-                p.file_name()
+            let bad = std::env::args_os().next().is_some_and(|p| {
+                Path::new(&p)
+                    .file_name()
                     .is_some_and(|n| n.to_string_lossy().starts_with("wrong-runtime"))
             });
             println!(
