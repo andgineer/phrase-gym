@@ -1,6 +1,11 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { captureOwner, holdCapture, releaseCapture } from '../captureOwners'
-import { retainMicrophone, setAudioSession } from '../audioSession'
+import {
+  microphoneConstraints,
+  retainMicrophone,
+  retainsMicrophoneBetweenTakes,
+  setAudioSession,
+} from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 
 type TakeContext = Pick<
@@ -58,16 +63,20 @@ export function useCapture(options: CaptureOptions) {
         throw new Error('Recording is unavailable in this browser. You can still use self-check.')
       const context = await options.context()
       if (token !== generation) return
-      discardStream()
-      setAudioSession('auto')
-      // Native defaults avoid iOS capture failures when audio processing is forced off.
-      const acquired = await navigator.mediaDevices.getUserMedia({ audio: true })
-      if (token !== generation) {
-        acquired.getTracks().forEach((track) => track.stop())
-        return
+      const reusable =
+        retainsMicrophoneBetweenTakes() &&
+        stream?.getAudioTracks().some((track) => track.readyState === 'live' && !track.muted)
+      if (!reusable || !stream) {
+        discardStream()
+        setAudioSession('auto')
+        const acquired = await navigator.mediaDevices.getUserMedia(microphoneConstraints())
+        if (token !== generation) {
+          acquired.getTracks().forEach((track) => track.stop())
+          return
+        }
+        stream = acquired
+        relinquishMicrophone = retainMicrophone(acquired)
       }
-      stream = acquired
-      relinquishMicrophone = retainMicrophone(acquired)
       const formats = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus']
       const format = formats.find((type) => MediaRecorder.isTypeSupported(type))
       const capture = new MediaRecorder(stream, format ? { mimeType: format } : undefined)
@@ -140,9 +149,11 @@ export function useCapture(options: CaptureOptions) {
       capture.onstop = async () => {
         capturing.value = false
         processing.value = true
-        // The final data event precedes stop; release the input before routing playback.
-        discardStream()
-        setAudioSession('auto')
+        // The final data event precedes stop; iOS releases the input before routing playback.
+        if (!retainsMicrophoneBetweenTakes()) {
+          discardStream()
+          setAudioSession('auto')
+        }
         try {
           await writes
           take.audio = await new Blob(chunks, { type: take.mime_type }).arrayBuffer()
@@ -171,6 +182,7 @@ export function useCapture(options: CaptureOptions) {
       }
       stream.getAudioTracks().forEach((track) => {
         track.onended = () => {
+          if (recorder !== capture) return discardStream()
           void stop(true)
           void options.failure()
         }

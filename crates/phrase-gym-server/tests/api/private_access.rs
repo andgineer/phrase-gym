@@ -3,6 +3,7 @@ use axum::body::Body;
 use axum::extract::ConnectInfo;
 use axum::http::{Request, StatusCode};
 use chrono::Utc;
+use phrase_gym_server::ServerSettings;
 use tower::ServiceExt;
 
 #[tokio::test]
@@ -61,5 +62,63 @@ async fn remote_hosts_are_rejected_even_from_a_local_proxy() {
             .unwrap();
         let response = server.router.clone().oneshot(request).await.unwrap();
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    }
+}
+
+#[tokio::test]
+async fn explicit_serve_proxy_accepts_only_its_origin_and_never_funnel() {
+    let settings = ServerSettings::loopback()
+        .with_tailscale_origin("https://gym.example.ts.net:8443")
+        .unwrap();
+    let server = TestServer::with_settings(Utc::now(), &settings);
+    for (funnel, origin, allowed) in [
+        (false, "https://gym.example.ts.net:8443", true),
+        (true, "https://gym.example.ts.net:8443", false),
+        (false, "https://other.example.ts.net", false),
+    ] {
+        let mut builder = Request::post("/api/v1/sessions")
+            .header("host", "gym.example.ts.net:8443")
+            .header("origin", origin)
+            .header("content-type", "application/json")
+            .extension(ConnectInfo(
+                "127.0.0.1:1234".parse::<std::net::SocketAddr>().unwrap(),
+            ));
+        if funnel {
+            builder = builder.header("tailscale-funnel-request", "?1");
+        }
+        let response = server
+            .router
+            .clone()
+            .oneshot(builder.body(Body::from("{}")).unwrap())
+            .await
+            .unwrap();
+        let status = response.status();
+        assert_eq!(
+            status != StatusCode::FORBIDDEN,
+            allowed,
+            "{origin} funnel={funnel}"
+        );
+        assert_ne!(status, StatusCode::BAD_REQUEST, "{origin} funnel={funnel}");
+    }
+}
+
+#[test]
+fn serve_configuration_rejects_public_origins_wildcards_and_user_information() {
+    for origin in [
+        "http://gym.example.ts.net",
+        "https://public.example",
+        "https://*.ts.net",
+        "https://user@gym.example.ts.net",
+        "https://gym.example.ts.net/path",
+        "https://gym.example.ts.net:http",
+        "https://gym.example.ts.net:0443",
+        "https://.ts.net",
+    ] {
+        assert!(
+            ServerSettings::loopback()
+                .with_tailscale_origin(origin)
+                .is_err(),
+            "{origin}"
+        );
     }
 }

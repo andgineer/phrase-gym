@@ -104,10 +104,11 @@ pub(crate) async fn enforce(
         .extensions()
         .get::<ConnectInfo<SocketAddr>>()
         .is_some_and(|peer| peer.0.ip().is_loopback());
-    if !local {
+    // Tailscale Funnel would forward public internet traffic through the same local proxy.
+    if !local || request.headers().contains_key("tailscale-funnel-request") {
         return ApiError::new(
             StatusCode::FORBIDDEN,
-            "Use the direct local Server connection",
+            "Use the direct local or private Tailscale Serve connection",
         )
         .into_response();
     }

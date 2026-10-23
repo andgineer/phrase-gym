@@ -1,7 +1,16 @@
 import { afterEach, expect, test, vi } from 'vitest'
-import { retainMicrophone, setAudioSession } from '../src/audioSession'
+import { microphoneConstraints, retainMicrophone, setAudioSession } from '../src/audioSession'
 
 afterEach(() => vi.unstubAllGlobals())
+
+test('desktop capture turns voice processing off while touch devices keep native defaults', () => {
+  vi.stubGlobal('navigator', { maxTouchPoints: 0 })
+  expect(microphoneConstraints()).toEqual({
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+  })
+  vi.stubGlobal('navigator', { maxTouchPoints: 5 })
+  expect(microphoneConstraints()).toEqual({ audio: true })
+})
 
 test('playback and auto preserve live microphones until every owner releases them', () => {
   const session = { type: 'auto' }

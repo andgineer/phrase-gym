@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from './capture-fixtures'
 import { expectComparison } from './native-playback'
-import { retainedAudio, syntheticCapture } from './synthetic-capture'
+import { emulateTouchDevice, retainedAudio, syntheticCapture } from './synthetic-capture'
 
 test.beforeEach(async ({ request }) => {
   await request.put('/api/v1/settings', {
@@ -9,10 +9,11 @@ test.beforeEach(async ({ request }) => {
   })
 })
 
-test('each take releases the microphone before comparison switches to an exclusive playback session', async ({
+test('on touch devices each take releases the microphone before comparison switches to an exclusive playback session', async ({
   page,
   request,
 }) => {
+  await emulateTouchDevice(page)
   await syntheticCapture(page)
   await page.addInitScript(() => {
     const acquire = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices)
@@ -186,7 +187,8 @@ test('an empty second take reports failure and a third take still saves', async 
     await page.evaluate(
       () => (window as unknown as { __captureRequests: number }).__captureRequests,
     ),
-  ).toBe(3)
+    // Desktop keeps its first input and reacquires only after the empty take.
+  ).toBe(2)
 })
 
 test('an interrupted microphone retains partial audio and the next take acquires a fresh input', async ({

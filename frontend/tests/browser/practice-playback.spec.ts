@@ -77,7 +77,9 @@ test('a deferred recorder MIME preserves audible bytes and compares through one 
   expect(probe.sources[0]).toMatch(/^blob:/)
   expect(probe.sources[1]).toContain('/api/v1/media/')
   expect(probe.sessionTypes).toContain('auto')
-  expect(probe.sessionTypes).toContain('playback')
+  // The retained desktop input keeps play-and-record; playback-only routing could end its track.
+  expect(probe.sessionTypes).toContain('play-and-record')
+  expect(probe.sessionTypes).not.toContain('playback')
   const session = await (
     await request.get(`/api/v1/sessions/${page.url().split('/').pop()}`)
   ).json()

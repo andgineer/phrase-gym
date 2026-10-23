@@ -13,7 +13,16 @@ Open `http://127.0.0.1:8000/learn/en`. Server and Coach share port 8000 by defau
 
 If port 8000 is occupied, use `cargo xtask run --port 8181 --data-dir /private/tmp/phrase-gym-preview` and save `http://127.0.0.1:8181` under Coach's **Server connection** settings. This optional nonsecret override is only for another local port. Pending input retains its original Server identity when settings change.
 
-Server always listens on `127.0.0.1` and rejects non-loopback actual socket peers. Host and mutation-Origin checks defend browser requests; forwarded headers never establish socket identity. The host machine and local processes are trusted. Do not expose this unauthenticated demo through a proxy, public listener or port forward. It needs no network service or remote access setup.
+Server always listens on `127.0.0.1` and rejects non-loopback actual socket peers. Host and mutation-Origin checks defend browser requests; forwarded headers never establish socket identity. The host machine and local processes are trusted. Do not expose this unauthenticated demo through Funnel, a public listener, another proxy or a port forward.
+
+To practise on your own iPhone, serve the Server privately on your tailnet and pass that exact origin; the local address keeps working at the same time:
+
+```sh
+tailscale serve --bg --https=443 http://127.0.0.1:18487
+phrase-gym-server serve --data-dir "$DATA_DIR" --client-dir frontend/dist --port 18487 --tailscale-origin https://machine.tailnet.ts.net
+```
+
+Open `https://machine.tailnet.ts.net` on the iPhone with Tailscale connected. Server refuses Funnel requests and any other host or origin.
 
 The initial profile records the [specified learner preferences](../specs/decision-personal-preferences.md). Profile mutation/restore remains an explicit operator workflow using stable mutation IDs and expected revisions. Preparation stages bounded input/profile/guide files and disables command network access. The selected normal Codex home and repository may also supply instructions; keep Server stores and recordings outside the permitted workspace, and deny the repository `.env` to commands as described in Coach setup. Local trusted operator API clients share access; fine-grained application identity is deferred with social sign-in.
 

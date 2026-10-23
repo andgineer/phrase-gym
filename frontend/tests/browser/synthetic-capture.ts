@@ -1,5 +1,12 @@
 import type { Page } from '@playwright/test'
 
+// Desktop WebKit ignores hasTouch emulation for maxTouchPoints; an iPhone reports five.
+export async function emulateTouchDevice(page: Page) {
+  await page.addInitScript(() =>
+    Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 5 }),
+  )
+}
+
 export async function syntheticCapture(page: Page, holdPermission = false) {
   await page.addInitScript((holdPermission) => {
     const context = new AudioContext()

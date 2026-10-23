@@ -18,6 +18,24 @@ impl ServerSettings {
         }
     }
 
+    pub fn with_tailscale_origin(mut self, origin: &str) -> Result<Self, String> {
+        let authority = origin.strip_prefix("https://").unwrap_or_default();
+        let (host, port) = authority.split_once(':').unwrap_or((authority, "443"));
+        let valid_host = host.ends_with(".ts.net")
+            && !host.starts_with('.')
+            && host
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b".-".contains(&byte));
+        if !valid_host || port.parse::<u16>().is_err() || port.starts_with('0') {
+            return Err(
+                "Use the exact https://machine.tailnet.ts.net[:port] Tailscale Serve origin".into(),
+            );
+        }
+        self.allowed_hosts.push(host.to_owned());
+        self.allowed_origins.push(origin.to_owned());
+        Ok(self)
+    }
+
     #[must_use]
     pub fn with_hosts(mut self, hosts: impl IntoIterator<Item = String>) -> Self {
         for host in hosts {

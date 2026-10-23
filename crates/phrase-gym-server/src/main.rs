@@ -30,6 +30,9 @@ enum Command {
         /// Built client directory containing index.html.
         #[arg(long)]
         client_dir: Option<PathBuf>,
+        /// Exact HTTPS origin of an existing tailnet-only Tailscale Serve proxy to this listener.
+        #[arg(long)]
+        tailscale_origin: Option<String>,
     },
     /// Write the API schema without opening any database.
     ExportSchema { output: PathBuf },
@@ -60,11 +63,17 @@ fn main() -> anyhow::Result<()> {
             data_dir,
             port,
             client_dir,
+            tailscale_origin,
         } => {
-            let settings = ServerSettings {
+            let mut settings = ServerSettings {
                 client_dir,
                 ..ServerSettings::loopback()
             };
+            if let Some(origin) = tailscale_origin {
+                settings = settings
+                    .with_tailscale_origin(&origin)
+                    .map_err(anyhow::Error::msg)?;
+            }
             serve(&data_dir, port, &settings)
         }
         Command::ExportSchema { output } => export_schema(&output),
@@ -162,16 +171,24 @@ mod tests {
             };
             assert_eq!(port, expected);
         }
-        assert!(
-            Cli::try_parse_from([
-                "phrase-gym-server",
-                "serve",
-                "--data-dir",
-                "/tmp/synthetic",
-                "--tailscale-origin",
-                "https://gym.example.ts.net"
-            ])
-            .is_err()
+        let Command::Serve {
+            tailscale_origin, ..
+        } = Cli::try_parse_from([
+            "phrase-gym-server",
+            "serve",
+            "--data-dir",
+            "/tmp/synthetic",
+            "--tailscale-origin",
+            "https://gym.example.ts.net",
+        ])
+        .unwrap()
+        .command
+        else {
+            panic!("Expected local serve command");
+        };
+        assert_eq!(
+            tailscale_origin.as_deref(),
+            Some("https://gym.example.ts.net")
         );
     }
 }

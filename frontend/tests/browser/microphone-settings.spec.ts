@@ -1,12 +1,14 @@
-import { expect } from '@playwright/test'
+import { expect, type APIRequestContext, type Page } from '@playwright/test'
 import { test } from './capture-fixtures'
 import { expectComparison } from './native-playback'
-import { retainedAudio, recordingPeak, syntheticCapture } from './synthetic-capture'
+import {
+  emulateTouchDevice,
+  retainedAudio,
+  recordingPeak,
+  syntheticCapture,
+} from './synthetic-capture'
 
-test('recording uses native microphone defaults and successive takes contain an audio signal', async ({
-  page,
-  request,
-}) => {
+async function recordThreeTakes(page: Page, request: APIRequestContext) {
   await request.put('/api/v1/settings', {
     data: { native_language: 'ru', ui_language_mode: 'learning' },
   })
@@ -18,10 +20,12 @@ test('recording uses native microphone defaults and successive takes contain an 
     navigator.mediaDevices.getUserMedia = async (constraints) => {
       requests.push(constraints ?? {})
       const stream = await acquire(constraints)
-      // Model encoded silence, which still has bytes, with processing forced off.
+      // Model iOS encoded silence, which still has bytes, with processing forced off.
       const gain = (window as unknown as { __captureGain: GainNode }).__captureGain
       gain.gain.value =
-        typeof constraints?.audio === 'object' && constraints.audio.echoCancellation === false
+        navigator.maxTouchPoints > 0 &&
+        typeof constraints?.audio === 'object' &&
+        constraints.audio.echoCancellation === false
           ? 0
           : 1
       return stream
@@ -45,11 +49,32 @@ test('recording uses native microphone defaults and successive takes contain an 
     expect(await recordingPeak(page, rows[index].id)).toBeGreaterThan(0.1)
     await expectComparison(page, index + 1)
   }
-  expect(
-    await page.evaluate(
-      () =>
-        (window as unknown as { __microphoneConstraints: MediaStreamConstraints[] })
-          .__microphoneConstraints,
-    ),
-  ).toEqual([{ audio: true }, { audio: true }, { audio: true }])
+  return page.evaluate(
+    () =>
+      (window as unknown as { __microphoneConstraints: MediaStreamConstraints[] })
+        .__microphoneConstraints,
+  )
+}
+
+test('desktop recording keeps one unprocessed input open and successive takes contain a signal', async ({
+  page,
+  request,
+}) => {
+  expect(await recordThreeTakes(page, request)).toEqual([
+    { audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } },
+  ])
+})
+
+test.describe('touch devices', () => {
+  test('recording uses native microphone defaults and successive takes contain a signal', async ({
+    page,
+    request,
+  }) => {
+    await emulateTouchDevice(page)
+    expect(await recordThreeTakes(page, request)).toEqual([
+      { audio: true },
+      { audio: true },
+      { audio: true },
+    ])
+  })
 })
