@@ -86,9 +86,33 @@ pub enum ThemeChoice {
     Dark,
 }
 
+// The preparation tool shown in Settings; a pick becomes a command for the background writer.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ToolChoice {
+    pub selected: Option<CliAdapter>,
+    pub status: String,
+    pub command: Option<CliAdapter>,
+}
+
+impl ToolChoice {
+    pub fn apply(&mut self, event: super::tool_choice::ChoiceEvent) {
+        use super::tool_choice::ChoiceEvent;
+        match event {
+            ChoiceEvent::Loaded(adapter) => self.selected = Some(adapter),
+            ChoiceEvent::Saved(adapter) => {
+                self.status = format!("{} prepares your next material.", adapter.display_name());
+            }
+            ChoiceEvent::Failed(problem) => {
+                self.status = format!("Coach couldn’t save the preparation tool: {problem}");
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct ViewState {
     pub snapshot: StatusSnapshot,
+    pub tool: ToolChoice,
     pub theme: ThemeChoice,
     pub text_scale: f32,
     pub draft: String,
@@ -100,6 +124,7 @@ impl ViewState {
     pub fn new(snapshot: StatusSnapshot) -> Self {
         Self {
             snapshot,
+            tool: ToolChoice::default(),
             theme: ThemeChoice::System,
             text_scale: 1.0,
             draft: String::new(),
@@ -142,6 +167,19 @@ mod tests {
             ]
         );
         assert!(!snapshot.processing_enabled);
+    }
+
+    #[test]
+    fn the_tool_choice_follows_the_saved_setting_and_reports_each_save() {
+        use super::super::tool_choice::ChoiceEvent;
+        let mut choice = ToolChoice::default();
+        assert_eq!(choice.selected, None);
+        choice.apply(ChoiceEvent::Loaded(CliAdapter::Claude));
+        assert_eq!(choice.selected, Some(CliAdapter::Claude));
+        choice.apply(ChoiceEvent::Saved(CliAdapter::Claude));
+        assert_eq!(choice.status, "Claude CLI prepares your next material.");
+        choice.apply(ChoiceEvent::Failed("disk full".into()));
+        assert!(choice.status.ends_with("disk full"));
     }
 
     #[test]

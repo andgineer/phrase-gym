@@ -52,7 +52,7 @@ impl Fixture {
         serde_json::from_value(json!({
             "schema_version": "english_phrases_v1", "namespace": "synthetic-lesson", "source_revision": "1", "language": "en", "profile_revision": 1, "guide_version": "fixture-guide-v1", "assessment_version": "situation-v1",
             "lesson": { "source_id": "meeting", "title": "Opening a meeting", "target_source_ids": ["open-meeting"] },
-            "phrases": [{ "source_id": "open-meeting", "meaning_key": "begin-meeting", "intention_key": "open-meeting", "text": ANSWER, "accepted_variants": ["Shall we begin?"], "situations": [{ "id": "call", "text": "Everyone has joined the call. Open the meeting.", "language": "en", "audio_id": null, "partner": null, "exposed_target_source_ids": [] }], "hint": "started", "help": { "language": "en", "meaning": "A way to begin a shared activity.", "usage": null, "translation": null }, "familiarity": { "kind": "new" }, "reference_audio_id": audio.id, "expected_revision": null }]
+            "phrases": [{ "source_id": "open-meeting", "meaning_key": "begin-meeting", "intention_key": "open-meeting", "text": ANSWER, "accepted_variants": ["Shall we begin?"], "situations": [{ "id": "call", "text": "Everyone has joined the call. Open the meeting.", "language": "en", "audio_id": null, "partner": null, "exposed_target_source_ids": [] }], "hint": "started", "help": { "language": "en", "meaning": "A way to begin a shared activity.", "usage": null }, "details": { "language": "ru", "meaning": "Фраза, которой начинают совместное дело.", "translation": "Давайте начнём.", "usage": "Нейтральная фраза для начала встречи или урока.", "forms": null }, "familiarity": { "kind": "new" }, "reference_audio_id": audio.id, "expected_revision": null }]
         })).unwrap()
     }
 }

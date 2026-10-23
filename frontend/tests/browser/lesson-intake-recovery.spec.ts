@@ -57,7 +57,9 @@ for (const terminal of ['exhausted', 'cancelled']) {
     await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
     await fillLesson(page, 'Replacement lesson')
     await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: "Let's get started.", exact: true }),
+    ).toBeVisible()
     expect(await (await request.get(statusPath)).json()).toEqual(before)
     if (terminal === 'exhausted')
       expect((await request.post(`${statusPath}/retry`)).status()).toBe(409)
@@ -94,7 +96,9 @@ test('another open intake preserves a response-lost delivery through reload and 
   await expect(page.getByTestId('connection-required')).toBeVisible()
   await sendPhrase(other)
   await expect(other.getByRole('alert')).toContainText('changed in another tab')
-  await expect(other.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
+  await expect(
+    other.getByRole('heading', { name: "Let's get started.", exact: true }),
+  ).toBeVisible()
   expect(deliveries).toHaveLength(1)
   await page.close()
   await other.reload()

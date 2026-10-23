@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-export async function fillLesson(page: Page, _title = 'Inbox practice', send = true) {
+export async function fillLesson(page: Page, _title = '', send = true) {
   await page.getByLabel('Exact English phrase', { exact: true }).fill("Let's get started.")
   if (send) await sendPhrase(page)
 }

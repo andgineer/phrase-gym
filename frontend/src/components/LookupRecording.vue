@@ -8,6 +8,7 @@ const props = defineProps<{
   exposure: ExposureInput | null
   pt: PracticeMessages
   saveExposure: () => Promise<void>
+  examples?: { text: string; audio: string }[]
 }>()
 const media = useCardAudio(
   async () => {
@@ -87,6 +88,18 @@ watch(
         ▶ {{ pt.mine }}
       </button>
     </div>
+    <ul v-if="examples?.length" class="examples" :lang="phrase.language">
+      <li v-for="example in examples" :key="example.audio + example.text">
+        <span>{{ example.text }}</span>
+        <button
+          :aria-label="`${pt.reference}: ${example.text}`"
+          :disabled="capturing || requesting"
+          @click="media.audio.play(`/api/v1/media/${example.audio}`)"
+        >
+          ▶
+        </button>
+      </li>
+    </ul>
     <p v-if="capturing">{{ pt.stopHint }}</p>
     <p v-if="pendingTakes">{{ pt.pending }} ({{ pendingTakes }})</p>
     <p v-if="error || audioError || takeError" role="alert" class="error">

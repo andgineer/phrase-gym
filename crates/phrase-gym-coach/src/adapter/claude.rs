@@ -29,6 +29,40 @@ const ENVIRONMENT: &[(&str, &str)] = &[
     ("ENABLE_CLAUDEAI_MCP_SERVERS", "false"),
 ];
 
+// Flags whose behavior was measured; a build that no longer lists one is not trusted to isolate.
+const STRUCTURED_OUTPUT: [&str; 2] = ["--output-format", "--json-schema"];
+
+pub fn missing_flags(help: &str) -> Vec<&'static str> {
+    let listed: std::collections::BTreeSet<&str> = help
+        .split(|character: char| character.is_whitespace() || character == ',')
+        .collect();
+    ["-p", "--model", "--effort"]
+        .into_iter()
+        .chain(STRUCTURED_OUTPUT)
+        .chain(
+            ISOLATION
+                .iter()
+                .copied()
+                .filter(|flag| flag.starts_with('-')),
+        )
+        .filter(|flag| !listed.contains(flag))
+        .collect()
+}
+
+// The answer arrives as a JSON result envelope whose structured output the CLI validated against
+// the staged schema; the variadic --allowed-tools list still ends at the "--" separator.
+pub(super) fn require_schema(invocation: &mut Invocation, schema: &str) {
+    let separator = invocation
+        .args
+        .iter()
+        .position(|argument| argument == "--")
+        .unwrap_or(invocation.args.len());
+    invocation.args.splice(
+        separator..separator,
+        arguments(&[STRUCTURED_OUTPUT[0], "json", STRUCTURED_OUTPUT[1], schema]),
+    );
+}
+
 pub(super) fn invocation(context: &LaunchContext<'_>) -> Result<Invocation, InvocationError> {
     let executable = checked_executable(context)?;
     let mut args = arguments(&["-p", "--model", context.model.model()]);
@@ -156,6 +190,46 @@ mod tests {
                 "--",
                 BOOTSTRAP,
             ]
+        );
+    }
+
+    #[test]
+    fn a_required_schema_requests_a_validated_json_envelope_before_the_bootstrap() {
+        let mut invocation = build(&ModelSelection::new("sonnet", Some(Effort::Low)).unwrap());
+        require_schema(&mut invocation, r#"{"type":"object"}"#);
+        let arguments = invocation.arguments();
+        let separator = arguments.iter().position(|a| a == "--").unwrap();
+        assert_eq!(
+            arguments[separator - 4..],
+            [
+                "--output-format",
+                "json",
+                "--json-schema",
+                r#"{"type":"object"}"#,
+                "--",
+                BOOTSTRAP
+            ]
+        );
+        assert_eq!(
+            arguments[..5],
+            ["-p", "--model", "sonnet", "--effort", "low"]
+        );
+    }
+
+    #[test]
+    fn every_measured_flag_must_still_be_listed_by_the_installed_build() {
+        let help = "Options:\n  -p, --print  Print\n  --model <model>\n  --effort <level>\n  \
+            --output-format <format>\n  --json-schema <schema>\n  --safe-mode\n  --restricted\n  \
+            --strict-mcp-config\n  --tools <tools...>\n  --allowedTools, --allowed-tools <tools...>\n  \
+            --permission-prompts <target>\n  --no-session-persistence\n  --disable-slash-commands";
+        assert!(missing_flags(help).is_empty());
+        let without = help
+            .replace("--restricted", "--relaxed")
+            .replace("--tools <", "--toolset <");
+        assert_eq!(missing_flags(&without), ["--restricted", "--tools"]);
+        assert_eq!(
+            missing_flags("--allowed-tools-extra --safe-mode-x").len(),
+            13
         );
     }
 

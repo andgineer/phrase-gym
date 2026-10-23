@@ -102,9 +102,11 @@ fn a_working_set_retains_frames_words_and_every_item_in_order() {
     let input = fixture["input"].as_str().unwrap();
     let draft = TextDraft::new("http://127.0.0.1:8000", input).unwrap();
     assert_eq!(draft.phrase, input);
-    let entries = phrase_gym_coach::transfer::text::entries(input).unwrap();
+    let entries = phrase_gym_coach::transfer::items::entries(input).unwrap();
     assert_eq!(entries.len(), 5);
     assert_eq!(entries[3], "Could we move the meeting to Friday?");
     assert!(entries[4].starts_with("clarify"));
-    assert!(phrase_gym_coach::transfer::text::entries(&format!("{input}\nA sixth item.")).is_err());
+    assert!(
+        phrase_gym_coach::transfer::items::entries(&format!("{input}\nA sixth item.")).is_err()
+    );
 }

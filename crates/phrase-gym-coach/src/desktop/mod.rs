@@ -13,6 +13,7 @@ mod smoke_checks;
 pub mod startup;
 pub mod state;
 pub mod text;
+pub mod tool_choice;
 pub mod view;
 
 mod connection;

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use phrase_gym_coach::platform::paths::CoachPaths;
 use phrase_gym_coach::preparation::{
     attempt,
-    readiness::{ClaudeTool, MODEL, VERIFIED_VERSION},
+    readiness::{ClaudeTool, MODEL},
 };
 use phrase_gym_coach::transfer::material::{Material, RawLesson};
 use phrase_gym_contracts::inbox::JobClaim;
@@ -50,7 +50,7 @@ fn run() -> Result<(), String> {
         "lease_until": "2026-10-20T12:02:00Z", "deadline": (chrono::Utc::now() + chrono::Duration::minutes(10)).to_rfc3339(),
         "receipt": {"generation_id": Uuid::from_u128(3), "submission_id": input.submission_id, "generation": 1, "namespace": "synthetic-dry-run", "profile_revision": 1, "guide_version": "english-claude-demo-v1", "received_at": "2026-10-20T12:00:00Z"},
         "input": input,
-        "profile": {"revision": 1, "profile": {"native_language": "ru", "learning_timezone": "Europe/Belgrade", "languages": {"en": {"proficiency": "B2", "card_language": "en", "help_language": "en", "translation_with_answer": false, "preparation_guidance": ""}}}, "mutation_id": null, "actor": "synthetic", "reason": "dry-run", "created_at": "2026-10-20T12:00:00Z", "restored_from": null},
+        "profile": {"revision": 1, "profile": {"native_language": "ru", "learning_timezone": "Europe/Belgrade", "languages": {"en": {"proficiency": "B2", "card_language": "en", "help_language": "en", "preparation_guidance": ""}}}, "mutation_id": null, "actor": "synthetic", "reason": "dry-run", "created_at": "2026-10-20T12:00:00Z", "restored_from": null},
         "guide": include_str!("../../phrase-gym-core/migrations/0005_preparation_guide.sql").split("', '").nth(1).ok_or("Missing guide")?.trim_end().trim_end_matches("');")
     })).map_err(|_| "Invalid synthetic pinned claim")?;
     let staged = attempt::stage(&paths, &claim, &tool)?;
@@ -61,7 +61,8 @@ fn run() -> Result<(), String> {
     .map_err(|_| "Cannot stage synthetic clip")?;
     phrase_gym_coach::platform::files::save(&destination.join("claim.json"), &claim)?;
     println!(
-        "Claude subscription login ready; verified version {VERIFIED_VERSION}; model {MODEL}; no model started"
+        "Claude subscription login ready; version {}; model {MODEL}; no model started",
+        tool.version
     );
     println!("Executable: {}", tool.executable.display());
     println!("Attempt: {}", staged.directory.display());

@@ -2,15 +2,15 @@
 
 Personal preferences used by Phrase Gym Coach belong to the inbox domain and are stored in Phrase Gym Server's single database, alongside inbox work and learning data. The learner describes preferences to an external agent, which reads and updates them through the inbox preferences API hosted by the core. No language-specific choice is hardcoded as a universal product rule, and ordinary material preparation never edits preferences.
 
-The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language, translation-with-answer choice and durable preparation guidance. Card and help languages are independent. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent asks the learner directly outside ordinary preparation jobs and writes the authorized answer through the API.
+The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language and durable preparation guidance. Card and help languages are independent. The help language selects the language of the short explanation on the back of the card; it reflects how well the learner knows that language. The detailed explanation behind Show & explain is always in the native language, so it needs no per-language choice. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent asks the learner directly outside ordinary preparation jobs and writes the authorized answer through the API.
 
 For the current learner, the initial profile is:
 
-| Learning language | Stated proficiency | Card language | Help language | Translation with answer |
+| Learning language | Stated proficiency | Card language | Short explanation (help language) | Detailed explanation |
 |---|---|---|---|---|
-| English | B2 | English | English | Off |
-| German | A1 | Russian | Russian | On |
-| Serbian | Not yet stated | Serbian | Not yet chosen; no Russian | Not yet chosen |
+| English | B2 | English | English | Russian |
+| German | A1 | Russian | Russian | Russian |
+| Serbian | Not yet stated | Serbian | Not yet chosen; no Russian | Russian |
 
 The learner's native language is Russian and learning timezone is Europe/Belgrade. These are personal initial values, not defaults imposed on other learners. Serbian help and proficiency are resolved through the external agent before preparing material that depends on them; Serbian prompts remain Serbian for this learner.
 

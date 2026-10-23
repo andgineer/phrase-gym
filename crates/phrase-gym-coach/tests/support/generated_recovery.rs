@@ -55,6 +55,7 @@ fn replacement_attempt_can_stage_changed_output_without_reusing_or_duplicating_p
     let unavailable = preparation::readiness::ClaudeTool {
         executable: directory.path().join("missing-tool"),
         host: phrase_gym_coach::adapter::environment::HostEnvironment::default(),
+        version: "2.1.309".into(),
     };
     let recovered = preparation::prepare(
         &client,

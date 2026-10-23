@@ -1,8 +1,12 @@
-mod claude;
+pub mod claude;
+pub mod claude_output;
 mod codex;
 pub mod codex_readiness;
 pub mod environment;
 pub mod invocation;
+
+use std::ffi::OsString;
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -26,6 +30,13 @@ impl CliAdapter {
         }
     }
 
+    pub fn short_name(self) -> &'static str {
+        match self {
+            Self::Codex => "Codex",
+            Self::Claude => "Claude",
+        }
+    }
+
     pub fn display_name(self) -> &'static str {
         match self {
             Self::Codex => "Codex CLI",
@@ -37,6 +48,30 @@ impl CliAdapter {
         match self {
             Self::Codex => codex::invocation(context),
             Self::Claude => claude::invocation(context),
+        }
+    }
+
+    // Each CLI enforces the staged output schema with its own flags.
+    pub fn require_schema(self, invocation: &mut Invocation, path: &Path, schema: &str) {
+        match self {
+            Self::Codex => {
+                let at = invocation.args.len().saturating_sub(1);
+                invocation.args.splice(
+                    at..at,
+                    [OsString::from("--output-schema"), path.as_os_str().into()],
+                );
+            }
+            Self::Claude => claude::require_schema(invocation, schema),
+        }
+    }
+
+    pub fn answer(self, stdout: &[u8]) -> Result<serde_json::Value, String> {
+        match self {
+            Self::Codex => serde_json::from_slice(stdout).map_err(|_| {
+                "Selected CLI returned empty or malformed output; inspect the private attempt"
+                    .into()
+            }),
+            Self::Claude => claude_output::answer(stdout),
         }
     }
 }

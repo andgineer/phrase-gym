@@ -1,4 +1,5 @@
 pub mod attempt;
+mod prompt;
 pub mod readiness;
 mod reference;
 pub mod result;
@@ -95,11 +96,18 @@ pub fn prepare_selected(
         return Err("Preparation cancelled; accepted input remains on Server".into());
     }
     let mut report = report?;
+    let usage = match tool.adapter {
+        crate::adapter::CliAdapter::Claude => crate::adapter::claude_output::usage(
+            &crate::platform::files::read_selected(&staged.directory.join("stdout.log"), 64 * 1024)
+                .unwrap_or_default(),
+        ),
+        crate::adapter::CliAdapter::Codex => serde_json::Value::Null,
+    };
     crate::platform::files::save(
         &staged.directory.join("execution.json"),
         &serde_json::json!({
             "adapter": tool.identity(), "elapsed_ms": started.elapsed().as_millis(),
-            "ending": format!("{:?}", report.ending), "usage": null,
+            "ending": format!("{:?}", report.ending), "usage": usage,
             "stdout_bytes": report.stdout.bytes, "stderr_bytes": report.stderr.bytes
         }),
     )?;
@@ -115,7 +123,8 @@ pub fn prepare_selected(
                 .into(),
         );
     }
-    let mut output = result::read_selected(&staged.directory, claim, &tool.identity())?;
+    let mut output =
+        result::read_selected(&staged.directory, claim, tool.adapter, &tool.identity())?;
     reference::complete(client, paths, claim, &mut output, shutdown)?;
     // A successful process cannot authorize publication after a lost or replaced lease.
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;

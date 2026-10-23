@@ -14,7 +14,7 @@ fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let words: Vec<&str> = arguments.iter().map(String::as_str).collect();
     match words.as_slice() {
-        ["-p", ..] => support::prepare(),
+        ["-p", ..] => support::prepare(words.contains(&"--json-schema")),
         ["exec", ..] => {
             let Some(task) = arguments
                 .last()
@@ -38,7 +38,7 @@ fn main() -> ExitCode {
             )
             .unwrap();
             std::env::set_current_dir(parent).unwrap();
-            support::prepare()
+            support::prepare(false)
         }
         ["-I", "-c", ..] => {
             let bad = std::env::args_os().next().is_some_and(|p| {

@@ -5,7 +5,8 @@ use std::path::Path;
 use std::process::ExitCode;
 use std::time::{Duration, Instant};
 
-pub(super) fn prepare() -> ExitCode {
+// Claude answers with a result envelope around the schema-validated object; Codex prints it bare.
+pub(super) fn prepare(envelope: bool) -> ExitCode {
     let input: serde_json::Value =
         serde_json::from_slice(&std::fs::read("input.json").unwrap()).unwrap();
     let context = input["input"]["context"].as_str().unwrap_or("");
@@ -57,7 +58,16 @@ pub(super) fn prepare() -> ExitCode {
         .into();
         output["help"]["meaning"] = "Begin a shared activity.".into();
     }
-    println!("{output}");
+    if envelope {
+        println!(
+            "{}",
+            json!({"type": "result", "subtype": "success", "is_error": false, "num_turns": 3,
+                   "result": output.to_string(), "structured_output": output,
+                   "usage": {"input_tokens": 12, "output_tokens": 345}})
+        );
+    } else {
+        println!("{output}");
+    }
     if context == "fake-prefix-flood" {
         let _ = std::io::stdout().write_all(&vec![b' '; 200_000]);
     }

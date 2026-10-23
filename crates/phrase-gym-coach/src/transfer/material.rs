@@ -102,9 +102,11 @@ impl Material {
                 raw.validate()?;
                 (raw.title.clone(), raw.phrase.clone(), raw.situation.clone())
             }
-            Self::Generated { phrase, .. } => {
-                ("Inbox practice".into(), phrase.clone(), String::new())
-            }
+            Self::Generated { phrase, .. } => (
+                super::items::lesson_title(&[phrase.trim()]),
+                phrase.clone(),
+                String::new(),
+            ),
             Self::Supplied(_) => unreachable!(),
         };
         if !media.available || media.metadata != self.metadata() {

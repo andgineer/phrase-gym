@@ -24,6 +24,7 @@ pub(super) fn tool() -> ClaudeTool {
     ClaudeTool {
         executable: PathBuf::from(env!("CARGO_BIN_EXE_phrase-gym-fake-child")),
         host: HostEnvironment::default(),
+        version: "2.1.309".into(),
     }
 }
 

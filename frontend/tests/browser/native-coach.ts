@@ -43,6 +43,7 @@ export async function prepareWithNativeFakeCoach(server: string) {
       )
       return JSON.parse(await readFile(join(input, 'state', 'publication.json'), 'utf8')) as {
         target_ids: string[]
+        lesson_id: string
       }
     }
     return (await prepareTextWithNativeFakes(server, true)).publication

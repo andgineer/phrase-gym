@@ -12,7 +12,6 @@ pub struct LanguagePreferences {
     pub proficiency: Option<String>,
     pub card_language: Language,
     pub help_language: Option<Language>,
-    pub translation_with_answer: Option<bool>,
     pub preparation_guidance: String,
 }
 

@@ -33,6 +33,7 @@ fn run() -> Result<(), String> {
     let tool = ClaudeTool {
         executable: fake,
         host: HostEnvironment::default(),
+        version: "2.1.309".into(),
     };
     let client = ServerClient::new(server)?;
     let receipt = worker::tick(&client, &paths.state.join("worker.json"), |claim| {

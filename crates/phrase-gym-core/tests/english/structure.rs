@@ -29,9 +29,6 @@ fn the_bounded_english_contract_rejects_unsupported_material_and_structural_leak
         ("too many situations", |package| {
             package.phrases[0].situations = vec![package.phrases[0].situations[0].clone(); 3];
         }),
-        ("lesson title", |package| {
-            package.lesson.title = ANSWER.into();
-        }),
         ("full answer", |package| {
             package.phrases[0].situations[0].text = format!("Say {ANSWER}");
         }),
@@ -59,8 +56,19 @@ fn the_bounded_english_contract_rejects_unsupported_material_and_structural_leak
         ("wrong help language", |package| {
             package.phrases[0].help.as_mut().unwrap().language = Language::Ru;
         }),
-        ("translation off", |package| {
-            package.phrases[0].help.as_mut().unwrap().translation = Some("Начнём".into());
+        ("details not in the native language", |package| {
+            package.phrases[0].details.as_mut().unwrap().language = Language::En;
+        }),
+        ("empty translation", |package| {
+            package.phrases[0]
+                .details
+                .as_mut()
+                .unwrap()
+                .translation
+                .clear();
+        }),
+        ("oversized forms", |package| {
+            package.phrases[0].details.as_mut().unwrap().forms = Some("x".repeat(401));
         }),
         ("unknown exposure", |package| {
             package.phrases[0].situations[0]
@@ -116,7 +124,7 @@ fn profile_revision_is_pinned_and_unresolved_serbian_does_not_block_english() {
         .languages
         .get_mut(&Language::En)
         .unwrap()
-        .translation_with_answer = Some(true);
+        .help_language = Some(Language::Ru);
     fixture
         .profiles
         .update(
@@ -125,7 +133,7 @@ fn profile_revision_is_pinned_and_unresolved_serbian_does_not_block_english() {
                 mutation_id: uuid::Uuid::new_v4(),
                 expected_revision: 1,
                 profile,
-                reason: "Learner requests translation".into(),
+                reason: "Learner wants short explanations in Russian".into(),
             },
         )
         .unwrap();
@@ -133,10 +141,18 @@ fn profile_revision_is_pinned_and_unresolved_serbian_does_not_block_english() {
     let mut changed = package.clone();
     changed.profile_revision = 2;
     assert!(fixture.validator.validate(&changed).is_err());
-    changed.phrases[0].help.as_mut().unwrap().translation = Some("Начнём".into());
+    changed.phrases[0].help.as_mut().unwrap().language = Language::Ru;
     assert!(fixture.validator.validate(&changed).is_ok());
     changed.profile_revision = 999;
     assert!(fixture.validator.validate(&changed).is_err());
+}
+
+#[test]
+fn a_content_named_lesson_may_repeat_its_answers() {
+    let fixture = Fixture::new();
+    let mut package = fixture.package();
+    package.lesson.title = format!("{ANSWER} · impediment");
+    assert!(fixture.validator.validate(&package).is_ok());
 }
 
 #[test]

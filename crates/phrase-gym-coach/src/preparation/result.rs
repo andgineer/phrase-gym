@@ -6,26 +6,17 @@ use phrase_gym_contracts::english::{
 use phrase_gym_contracts::inbox::{JobClaim, LessonOutput};
 use uuid::Uuid;
 
-use super::readiness::{MODEL, VERIFIED_VERSION};
+use crate::adapter::CliAdapter;
 use crate::process::Ending;
-
-pub fn read(directory: &Path, claim: &JobClaim) -> Result<LessonOutput, String> {
-    read_selected(
-        directory,
-        claim,
-        &format!("claude-{VERIFIED_VERSION}-{MODEL}-demo-v1"),
-    )
-}
 
 pub fn read_selected(
     directory: &Path,
     claim: &JobClaim,
+    adapter: CliAdapter,
     identity: &str,
 ) -> Result<LessonOutput, String> {
     let bytes = crate::platform::files::read_selected(&directory.join("stdout.log"), 64 * 1024)?;
-    let value: serde_json::Value = serde_json::from_slice(&bytes).map_err(
-        |_| "Selected CLI returned empty or malformed output; inspect the private attempt",
-    )?;
+    let value = adapter.answer(&bytes)?;
     let phrases: Vec<PreparedEnglishPhrase> = if claim.input.phrases.len() == 1 {
         vec![
             serde_json::from_value(value)
@@ -59,6 +50,7 @@ pub fn read_selected(
             return Err("Selected CLI changed the requested fixed phrase, declared frame or word sense; nothing was synthesized or published".into());
         }
         validate_exposures(phrase, claim)?;
+        validate_help_layers(phrase, claim)?;
         validate_variants(phrase)?;
         validate_task_shape(phrase)?;
         if phrase.source_id != input.source_id
@@ -69,7 +61,6 @@ pub fn read_selected(
                 || (!input.text.contains('{')
                     && phrase_gym_contracts::english_source::word_form(&input.text).is_none()))
                 && phrase.text != input.text)
-            || phrase.help.is_none()
         {
             return Err("Selected CLI output changed accepted source identity or supplied audio; nothing was published".into());
         }
@@ -163,6 +154,20 @@ fn validate_exposures(phrase: &PreparedEnglishPhrase, claim: &JobClaim) -> Resul
             "Selected CLI declared invalid target exposure; nothing was synthesized or published"
                 .into(),
         );
+    }
+    Ok(())
+}
+
+fn validate_help_layers(phrase: &PreparedEnglishPhrase, claim: &JobClaim) -> Result<(), String> {
+    let profile = &claim.profile.profile;
+    let help = profile
+        .languages
+        .get(&claim.input.language)
+        .and_then(|preferences| preferences.help_language);
+    let short = phrase.help.as_ref().map(|help| help.language);
+    let details = phrase.details.as_ref().map(|details| details.language);
+    if short.is_none() || short != help || details != Some(profile.native_language) {
+        return Err("Selected CLI omitted the short explanation or the native-language details, or used the wrong language; nothing was synthesized or published".into());
     }
     Ok(())
 }

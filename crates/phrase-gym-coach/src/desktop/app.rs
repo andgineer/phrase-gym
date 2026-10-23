@@ -10,10 +10,12 @@ use super::intake::{Event, IntakeRunner};
 use super::smoke::{self, RendererInfo, SmokeRun};
 use super::startup::StartupChecks;
 use super::state::{StartupEvent, StatusSnapshot, ThemeChoice, ViewState};
+use super::tool_choice::ToolChoiceWriter;
 use super::view::{self, TITLE};
 use super::{appearance, failure};
 use crate::platform::instance::{InstanceError, InstanceGuard};
 use crate::platform::paths::CoachPaths;
+use crate::transfer::input_problem::InputProblem;
 
 pub fn main() -> ExitCode {
     let options = match super::launch::parse(std::env::args_os().skip(1)) {
@@ -94,6 +96,7 @@ struct CoachApp {
     events: Receiver<StartupEvent>,
     smoke: Option<SmokeRun>,
     intake: IntakeRunner,
+    tools: ToolChoiceWriter,
     #[cfg(target_os = "macos")]
     menu: Option<super::menu::ApplicationMenu>,
 }
@@ -121,6 +124,12 @@ impl CoachApp {
             .wgpu_render_state
             .as_ref()
             .map(|state| RendererInfo::from(&state.adapter.get_info()));
+        // main() refuses to start without per-user folders, so they resolve here as well.
+        let settings = CoachPaths::for_current_user()
+            .map(|paths| paths.config.join("settings.json"))
+            .unwrap_or_default();
+        let waker = context.clone();
+        let tools = ToolChoiceWriter::spawn(settings, move || waker.request_repaint());
         let smoke = smoke_report
             .map(|path| SmokeRun::start(path, renderer, context, passed, intake_expected));
         Self {
@@ -128,6 +137,7 @@ impl CoachApp {
             events,
             smoke,
             intake,
+            tools,
             #[cfg(target_os = "macos")]
             menu: super::menu::ApplicationMenu::install(creation.egui_ctx.clone()).ok(),
         }
@@ -137,15 +147,18 @@ impl CoachApp {
 impl eframe::App for CoachApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let dropped = ui.ctx().input(|input| input.raw.dropped_files.clone());
-        if !dropped.is_empty() {
-            if self.view.intake.busy || dropped.len() != 1 {
-                self.view.intake.status =
-                    "Wait for current input, then drop one plain text file".into();
-            } else {
-                self.view.intake.command = Some(super::intake::Command::DropText(
-                    dropped[0].path().to_path_buf(),
-                ));
+        // One input is outstanding at a time, so a drop during intake is refused, not queued.
+        match (dropped.as_slice(), self.view.intake.busy) {
+            ([], _) => {}
+            (_, true) => self.view.intake.status = InputProblem::Busy.into(),
+            ([file], false) => {
+                self.view.intake.command =
+                    Some(super::intake::Command::DropText(file.path().to_path_buf()));
             }
+            (_, false) => self.view.intake.status = InputProblem::SeveralFiles.into(),
+        }
+        while let Ok(event) = self.tools.events.try_recv() {
+            self.view.tool.apply(event);
         }
         while let Ok(event) = self.events.try_recv() {
             self.view.snapshot.apply(event);
@@ -155,10 +168,6 @@ impl eframe::App for CoachApp {
                 Event::Summary(summary) => self.view.intake.summary = Some(summary),
                 Event::Draft(text) => self.view.draft = text,
                 Event::Status(status) => self.view.intake.status = status,
-                Event::SelectedClaude(path) => self.view.snapshot.apply(StartupEvent::Tool(
-                    crate::adapter::CliAdapter::Claude,
-                    super::state::ToolReadiness::Found(path),
-                )),
                 Event::Configured(server) => {
                     self.view.intake.server = server;
                     self.view.snapshot.server_configured = true;
@@ -210,6 +219,11 @@ impl eframe::App for CoachApp {
                         .show(context, |ui| view::settings(ui, &mut self.view));
                 },
             );
+        }
+        if let Some(adapter) = self.view.tool.command.take()
+            && let Err(problem) = self.tools.select(adapter)
+        {
+            self.view.tool.status = problem;
         }
         if let Some(command) = self.view.intake.command.take() {
             match self.intake.commands.try_send(command) {

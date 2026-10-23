@@ -107,7 +107,8 @@ fn text_only_fake_codex_and_speech_publish_atomically_and_survive_server_restart
             publication.target_ids[0]
         ))
         .unwrap();
-    assert!(!reference.to_string().is_empty());
+    assert_eq!(reference["lessons"][0]["title"], "Let's get started.");
+    assert_eq!(reference["english"]["details"]["language"], "ru");
     text::TextDraft::retain(&draft_path, &url, "Could you repeat that, please?").unwrap();
 }
 

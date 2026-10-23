@@ -113,7 +113,7 @@ test('private-network denial retains unconfirmed input and explains unavailable 
   await expect(page.getByText(/Delivery is unconfirmed/)).toBeVisible()
   await page.reload()
   await page.getByRole('button', { name: 'Add phrase', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Inbox practice', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: "Let's get started.", exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Retry the same delivery', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('This connection cannot submit material')
   expect(

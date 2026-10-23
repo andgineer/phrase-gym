@@ -23,9 +23,7 @@ pub(super) fn validate(profile: &PersonalProfile) -> Result<(), CoreError> {
             .is_some_and(|value| !matches!(value.as_str(), "A1" | "A2" | "B1" | "B2" | "C1" | "C2"))
             || preferences.preparation_guidance.len() > 8_000
             || (*language != Language::Sr
-                && (preferences.proficiency.is_none()
-                    || preferences.help_language.is_none()
-                    || preferences.translation_with_answer.is_none()))
+                && (preferences.proficiency.is_none() || preferences.help_language.is_none()))
         {
             return Err(CoreError::Invalid(
                 "Invalid or unresolved required language preferences".into(),

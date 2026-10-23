@@ -46,8 +46,9 @@ fn bounded_schema_includes_phrase_dependencies_without_learner_or_access_contrac
             .as_array()
             .unwrap()
             .len(),
-        4
+        3
     );
+    assert!(schema["$defs"]["PhraseDetails"].is_object());
     assert_eq!(
         schema["$defs"]["PhraseFamiliarity"]["anyOf"][0]["additionalProperties"],
         false
@@ -86,4 +87,40 @@ fn generated_frame_slot_names_use_bounded_ascii_identifiers_for_plain_or_declare
         assert_eq!(name["minLength"], 1);
         assert_eq!(name["maxLength"], english_source::FRAME_SLOT_NAME_MAX_BYTES);
     }
+}
+
+#[test]
+fn both_help_layers_are_required_in_their_pinned_languages() {
+    use phrase_gym_contracts::base::Language;
+    let input = |source: &str| {
+        serde_json::from_value(json!({"source_id":source,"text":"Let's get started.","reference_audio_id":null,"audio_sha256":null,"expected_revision":null})).unwrap()
+    };
+    let mut schema = batch_schema(&[input("one"), input("two")]).unwrap();
+    pin_help_languages(&mut schema, Language::En, Language::Ru);
+    assert_eq!(
+        schema["$defs"]["PhraseHelp"]["properties"]["language"]["enum"],
+        json!(["en"])
+    );
+    assert_eq!(
+        schema["$defs"]["PhraseDetails"]["properties"]["language"]["enum"],
+        json!(["ru"])
+    );
+    for item in schema["properties"]["phrases"]["items"]["anyOf"]
+        .as_array()
+        .unwrap()
+    {
+        assert_eq!(
+            item["properties"]["help"],
+            json!({"$ref": "#/$defs/PhraseHelp"})
+        );
+        assert_eq!(
+            item["properties"]["details"],
+            json!({"$ref": "#/$defs/PhraseDetails"})
+        );
+        let required = item["required"].as_array().unwrap();
+        assert!(required.contains(&json!("help")) && required.contains(&json!("details")));
+    }
+    let details = &schema["$defs"]["PhraseDetails"];
+    assert_eq!(details["additionalProperties"], json!(false));
+    assert_eq!(details["required"].as_array().unwrap().len(), 5);
 }

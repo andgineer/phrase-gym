@@ -81,6 +81,9 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
         .ok_or("Missing phrase schema")?;
     phrase["properties"]["task"] = task;
     phrase["properties"]["situations"]["items"] = situation;
+    // Both help layers are required of the model, even though published cards may lack them.
+    phrase["properties"]["help"] = json!({"$ref": "#/$defs/PhraseHelp"});
+    phrase["properties"]["details"] = json!({"$ref": "#/$defs/PhraseDetails"});
     if english_source::word_form(text).is_some() {
         phrase["properties"]["situations"]["minItems"] = json!(2);
         phrase["properties"]["situations"]["maxItems"] = json!(3);
@@ -187,6 +190,18 @@ pub fn batch_schema(
     Ok(
         json!({"type": "object", "properties": {"phrases": {"type": "array", "items": {"anyOf": alternatives}, "minItems": inputs.len(), "maxItems": inputs.len()}}, "required": ["phrases"], "additionalProperties": false, "$defs": definitions}),
     )
+}
+
+// The short help follows the pinned help language; the detailed explanation is always native.
+pub fn pin_help_languages(
+    schema: &mut Value,
+    help: phrase_gym_contracts::base::Language,
+    native: phrase_gym_contracts::base::Language,
+) {
+    for (definition, language) in [("PhraseHelp", help), ("PhraseDetails", native)] {
+        schema["$defs"][definition]["properties"]["language"] =
+            json!({"type": "string", "enum": [language]});
+    }
 }
 
 fn bind_exposures(

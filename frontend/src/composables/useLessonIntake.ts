@@ -2,6 +2,7 @@ import { onMounted, ref } from 'vue'
 import { api, ApiError, requireServer } from '../api'
 import type { components } from '../../tests/rust-contract/api.generated'
 import { inboxDraft, type InboxDraft } from '../inboxDraft'
+import { lessonTitle } from '../lessonTitle'
 import type { OnboardingMessages } from '../onboardingMessages'
 
 type Schemas = components['schemas']
@@ -52,26 +53,26 @@ export function useLessonIntake(messages: () => OnboardingMessages) {
       if (!draft.value) {
         if (!phrase.value.trim()) throw new Error('Paste or type a phrase before sending.')
         const id = crypto.randomUUID()
+        const items = phrase.value
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
         const input: InboxDraft = {
           submission: {
             submission_id: id,
             item_id: id,
             expected_generation: null,
             language: 'en',
-            title: 'Inbox practice',
+            title: lessonTitle(items),
             context: phrase.value,
             note: note.value.trim(),
-            phrases: phrase.value
-              .split(/\r?\n/)
-              .map((line) => line.trim())
-              .filter(Boolean)
-              .map((text, index, entries) => ({
-                source_id: entries.length === 1 ? 'phrase' : `item-${index + 1}`,
-                text,
-                reference_audio_id: null,
-                audio_sha256: null,
-                expected_revision: null,
-              })),
+            phrases: items.map((text, index, entries) => ({
+              source_id: entries.length === 1 ? 'phrase' : `item-${index + 1}`,
+              text,
+              reference_audio_id: null,
+              audio_sha256: null,
+              expected_revision: null,
+            })),
           },
         }
         try {

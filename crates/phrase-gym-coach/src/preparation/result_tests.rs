@@ -63,7 +63,7 @@ fn reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_f
         "receipt":{"generation_id":generation,"submission_id":Uuid::new_v4(),"generation":1,"namespace":"synthetic","profile_revision":1,"guide_version":"test","received_at":"2026-10-23T11:58:00Z"},
         "input":{"submission_id":Uuid::new_v4(),"item_id":"batch","title":"Synthetic","language":"en","context":"synthetic","note":"","expected_generation":null,
             "phrases":[{"source_id":"one","text":"Let's get started.","reference_audio_id":null,"audio_sha256":null,"expected_revision":null},{"source_id":"other","text":"Let's get started.","reference_audio_id":null,"audio_sha256":null,"expected_revision":null}]},
-        "profile":{"revision":1,"profile":{"native_language":"ru","learning_timezone":"Europe/Belgrade","languages":{}},"mutation_id":null,"actor":"synthetic","reason":"test","created_at":"2026-10-23T11:00:00Z","restored_from":null},"guide":"Synthetic guide"
+        "profile":{"revision":1,"profile":{"native_language":"ru","learning_timezone":"Europe/Belgrade","languages":{"en":{"proficiency":"B2","card_language":"en","help_language":"en","preparation_guidance":""}}},"mutation_id":null,"actor":"synthetic","reason":"test","created_at":"2026-10-23T11:00:00Z","restored_from":null},"guide":"Synthetic guide"
     })).unwrap();
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../../../fixtures/coach/supplied-lesson.json"
@@ -78,7 +78,7 @@ fn reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_f
         first["situations"][0]["exposed_target_source_ids"] = json!([source]);
         let output = json!({"phrases":[second, first]});
         std::fs::write(directory.path().join("stdout.log"), output.to_string()).unwrap();
-        let result = read_selected(directory.path(), &claim, "synthetic");
+        let result = read_selected(directory.path(), &claim, CliAdapter::Codex, "synthetic");
         if valid {
             let phrases = result.unwrap().package.phrases;
             assert_eq!(
@@ -104,6 +104,41 @@ fn reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_f
             "Never repair model-authored exposures silently"
         );
     }
+}
+
+#[test]
+fn both_help_layers_must_exist_in_their_pinned_languages_before_speech() {
+    let claim: JobClaim = serde_json::from_value(json!({
+        "fence":{"generation_id":Uuid::nil(),"claim_id":Uuid::nil(),"token":Uuid::nil(),"fence":1},
+        "lease_until":"2026-10-23T12:00:00Z","deadline":"2026-10-23T12:08:00Z",
+        "receipt":{"generation_id":Uuid::nil(),"submission_id":Uuid::nil(),"generation":1,"namespace":"synthetic","profile_revision":1,"guide_version":"test","received_at":"2026-10-23T11:58:00Z"},
+        "input":{"submission_id":Uuid::nil(),"item_id":"batch","title":"Synthetic","language":"en","context":"synthetic","note":"","expected_generation":null,
+            "phrases":[{"source_id":"one","text":"Let's get started.","reference_audio_id":null,"audio_sha256":null,"expected_revision":null}]},
+        "profile":{"revision":1,"profile":{"native_language":"ru","learning_timezone":"Europe/Belgrade","languages":{"en":{"proficiency":"B2","card_language":"en","help_language":"en","preparation_guidance":""}}},"mutation_id":null,"actor":"synthetic","reason":"test","created_at":"2026-10-23T11:00:00Z","restored_from":null},"guide":"Synthetic guide"
+    })).unwrap();
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../../fixtures/coach/supplied-lesson.json"
+    ))
+    .unwrap();
+    let mut phrase: PreparedEnglishPhrase =
+        serde_json::from_value(fixture["phrase"].clone()).unwrap();
+    validate_help_layers(&phrase, &claim).unwrap();
+    let complete = phrase.clone();
+    phrase.details.as_mut().unwrap().language = phrase_gym_contracts::base::Language::En;
+    assert!(
+        validate_help_layers(&phrase, &claim)
+            .unwrap_err()
+            .contains("native-language details")
+    );
+    phrase = complete.clone();
+    phrase.details = None;
+    assert!(validate_help_layers(&phrase, &claim).is_err());
+    phrase = complete.clone();
+    phrase.help.as_mut().unwrap().language = phrase_gym_contracts::base::Language::Ru;
+    assert!(validate_help_layers(&phrase, &claim).is_err());
+    phrase = complete;
+    phrase.help = None;
+    assert!(validate_help_layers(&phrase, &claim).is_err());
 }
 
 #[test]

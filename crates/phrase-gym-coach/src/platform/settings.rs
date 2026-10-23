@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 
@@ -12,6 +13,10 @@ pub struct Settings {
     pub server: String,
     pub adapter: CliAdapter,
 }
+
+// Connection and tool choice are saved from different threads; each read-modify-write must not
+// overwrite the other's newer field.
+static WRITES: Mutex<()> = Mutex::new(());
 
 impl Settings {
     pub fn load(path: &Path) -> Result<Option<Self>, String> {
@@ -29,11 +34,32 @@ impl Settings {
     }
 
     pub fn save(path: &Path, server: &str) -> Result<(), String> {
+        let _writing = WRITES
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let adapter = Self::load(path)?.map_or(CliAdapter::Codex, |settings| settings.adapter);
-        Self::save_selected(path, server, adapter)
+        Self::write(path, server, adapter)
+    }
+
+    pub fn select_adapter(path: &Path, adapter: CliAdapter) -> Result<(), String> {
+        let _writing = WRITES
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let server = Self::load(path)?.map_or_else(
+            phrase_gym_contracts::connection::default_server_origin,
+            |settings| settings.server,
+        );
+        Self::write(path, &server, adapter)
     }
 
     pub fn save_selected(path: &Path, server: &str, adapter: CliAdapter) -> Result<(), String> {
+        let _writing = WRITES
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        Self::write(path, server, adapter)
+    }
+
+    fn write(path: &Path, server: &str, adapter: CliAdapter) -> Result<(), String> {
         crate::platform::files::save(
             path,
             &Self {
@@ -69,5 +95,38 @@ mod tests {
         assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 1);
         std::fs::write(&path, r#"{"version":2,"server":"http://127.0.0.1:8181"}"#).unwrap();
         assert!(Settings::load(&path).is_err());
+    }
+
+    #[test]
+    fn choosing_a_tool_keeps_the_saved_server_and_concurrent_saves_lose_neither_field() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("settings.json");
+        Settings::select_adapter(&path, CliAdapter::Claude).unwrap();
+        let fresh = Settings::load(&path).unwrap().unwrap();
+        assert_eq!(
+            fresh.server,
+            phrase_gym_contracts::connection::default_server_origin()
+        );
+        assert_eq!(fresh.adapter, CliAdapter::Claude);
+        Settings::save(&path, "http://127.0.0.1:18487").unwrap();
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                for _ in 0..50 {
+                    Settings::save(&path, "http://127.0.0.1:18487").unwrap();
+                }
+            });
+            scope.spawn(|| {
+                for _ in 0..50 {
+                    Settings::select_adapter(&path, CliAdapter::Codex).unwrap();
+                }
+            });
+        });
+        let settings = Settings::load(&path).unwrap().unwrap();
+        assert_eq!(settings.server, "http://127.0.0.1:18487");
+        assert_eq!(settings.adapter, CliAdapter::Codex);
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            r#"{"version":1,"server":"http://127.0.0.1:18487","adapter":"codex"}"#
+        );
     }
 }

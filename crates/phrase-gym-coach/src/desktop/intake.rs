@@ -17,7 +17,6 @@ pub enum Event {
     Summary(String),
     Connected(String),
     Configured(String),
-    SelectedClaude(std::path::PathBuf),
     Published(String),
     Finished(Result<(), String>),
 }

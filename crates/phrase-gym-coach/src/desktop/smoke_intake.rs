@@ -33,6 +33,7 @@ pub fn run(input: &SmokeInput, emit: &dyn Fn(Event), stop: &Arc<AtomicBool>) -> 
     let tool = ClaudeTool {
         executable: fake,
         host: HostEnvironment::default(),
+        version: "2.1.309".into(),
     };
     let client = ServerClient::new(&input.server)?;
     emit(Event::Connected(client.server.clone()));

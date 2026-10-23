@@ -5,6 +5,7 @@ import type { PlannedTarget, RecallRating } from '../practiceTypes'
 import type { PracticeMessages } from '../practiceMessages'
 import type { Language } from '../api'
 import { preparedExplanation } from '../explanation'
+import PhraseDetails from './PhraseDetails.vue'
 const props = defineProps<{
   item: PlannedTarget
   card: CardState
@@ -38,12 +39,25 @@ const showPhrase = computed(
     props.card.revealed ||
     props.item.phrase.content.chunks.some((chunk) => cue.value?.visible_chunks.includes(chunk.id)),
 )
-const explanation = computed(() =>
-  english.value?.help
-    ? { ...english.value.help, breakdown: [] }
+// Study cards start expanded, but native details still wait for the learner's own request.
+const detailsRequested = ref(false)
+watch(
+  () => `${props.item.phrase.id}:${props.item.cue_id}`,
+  () => (detailsRequested.value = false),
+)
+const showDetails = computed(
+  () =>
+    !!english.value?.details && (detailsRequested.value || (props.card.expanded && !study.value)),
+)
+function explain() {
+  detailsRequested.value = true
+  emit('explain')
+}
+const legacyExplanation = computed(() =>
+  english.value
+    ? null
     : preparedExplanation(props.item.phrase.content.explanations?.[props.nativeLanguage]),
 )
-const helpLanguage = computed(() => english.value?.help?.language ?? props.nativeLanguage)
 const emit = defineEmits<{
   control: []
   mine: []
@@ -140,30 +154,32 @@ const emit = defineEmits<{
         {{ pt.answer }}
       </button>
       <button
-        v-if="explanation"
+        v-if="english?.details || legacyExplanation"
         class="explain-link"
         :disabled="capturing || requesting || processing || ratingBusy"
-        @click="emit('explain')"
+        @click="explain"
       >
         📖 {{ pt.explain }}
       </button>
     </div>
-    <div v-if="study && english?.help" :lang="english.help.language">
+    <div
+      v-if="(study || card.revealed) && english?.help"
+      class="answer-help"
+      :lang="english.help.language"
+    >
       <p>{{ english.help.meaning }}</p>
       <p v-if="english.help.usage">{{ english.help.usage }}</p>
     </div>
-    <div v-else-if="card.expanded && explanation" class="explanation" :lang="helpLanguage">
-      <p v-if="explanation.meaning.trim()">{{ explanation.meaning }}</p>
-      <p v-if="explanation.usage?.trim()">{{ explanation.usage }}</p>
-      <ul v-if="explanation.breakdown?.length">
-        <li v-for="chunk in explanation.breakdown" :key="chunk">
+    <PhraseDetails v-if="showDetails" :phrase="item.phrase" />
+    <div v-else-if="card.expanded && legacyExplanation" class="explanation" :lang="nativeLanguage">
+      <p v-if="legacyExplanation.meaning.trim()">{{ legacyExplanation.meaning }}</p>
+      <p v-if="legacyExplanation.usage?.trim()">{{ legacyExplanation.usage }}</p>
+      <ul v-if="legacyExplanation.breakdown?.length">
+        <li v-for="chunk in legacyExplanation.breakdown" :key="chunk">
           {{ chunk }}
         </li>
       </ul>
     </div>
-    <p v-if="card.revealed && english?.help?.translation" class="answer-translation">
-      {{ english.help.translation }}
-    </p>
     <template v-if="!study">
       <details>
         <summary>{{ pt.counts }}</summary>
@@ -221,7 +237,7 @@ const emit = defineEmits<{
     >
       {{ pt.next }}
     </button>
-    <nav class="lesson-links">
+    <nav v-if="study || card.revealed" class="lesson-links">
       <RouterLink
         v-for="lesson in item.phrase.lessons"
         :key="lesson.id"

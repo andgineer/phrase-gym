@@ -1,10 +1,17 @@
-use egui::{Grid, Label, RichText, ScrollArea, TextEdit, Ui};
+use egui::{Grid, Key, Label, Modifiers, RichText, ScrollArea, TextEdit, Ui};
 
 use super::appearance::{self, MAX_TEXT_SCALE, MIN_TEXT_SCALE};
-use super::state::{StatusSnapshot, ThemeChoice, ViewState};
+use super::intake::Command;
+use super::state::{StatusSnapshot, ThemeChoice, ToolChoice, ViewState};
 use super::text;
+use crate::adapter::CliAdapter;
+use crate::transfer::input_problem::InputProblem;
 
 pub const TITLE: &str = "Phrase Gym Coach";
+#[cfg(target_os = "macos")]
+pub const SEND_HINT: &str = "Paste, drop a text file, or type and press Command-Return";
+#[cfg(not(target_os = "macos"))]
+pub const SEND_HINT: &str = "Paste, drop a text file, or type and press Ctrl+Enter";
 const TEXT_STEP: f32 = 0.25;
 const THEMES: [(ThemeChoice, &str); 3] = [
     (ThemeChoice::System, "System"),
@@ -21,8 +28,15 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
             ui.add_space(24.0);
             ui.heading("Your next working set");
             ui.add_space(24.0);
-            if draft(ui, &mut state.draft, !state.settings_open) && !state.intake.busy {
-                state.intake.command = Some(super::intake::Command::Text(state.draft.clone()));
+            if draft(ui, &mut state.draft, !state.settings_open) {
+                state.intake.status = String::new();
+                if state.intake.busy {
+                    state.intake.status = InputProblem::Busy.into();
+                } else if state.draft.trim().is_empty() {
+                    state.intake.status = InputProblem::Empty.into();
+                } else {
+                    state.intake.command = Some(Command::Text(state.draft.clone()));
+                }
             }
             ui.add_space(16.0);
             if state.intake.busy {
@@ -30,7 +44,9 @@ pub fn show(ui: &mut Ui, state: &mut ViewState) {
                     ui.spinner();
                     ui.label("Preparing your material…");
                 });
-            } else if let Some(message) = text::intake_status(&state.intake.status) {
+            } else if let Some(message) =
+                text::intake_status(&state.intake.status, state.tool.selected)
+            {
                 ui.label(message);
             }
             if let Some(summary) = &state.intake.summary {
@@ -107,7 +123,10 @@ fn appearance_controls(ui: &mut Ui, state: &mut ViewState) {
     }
 }
 
+// A paste, or the send shortcut for typed text, is the deliberate gesture; typing alone is not.
 fn draft(ui: &mut Ui, draft: &mut String, focus: bool) -> bool {
+    // Consumed before the text box runs, so the shortcut never also inserts a line break.
+    let send = ui.input_mut(|input| input.consume_key(Modifiers::COMMAND, Key::Enter));
     let pasted = ui.ctx().input(|input| {
         input
             .events
@@ -123,15 +142,42 @@ fn draft(ui: &mut Ui, draft: &mut String, focus: bool) -> bool {
                 .desired_width(f32::INFINITY),
         )
         .labelled_by(label.id);
+    ui.label(RichText::new(SEND_HINT).small());
     if focus && ui.memory(|memory| memory.focused().is_none()) {
         response.request_focus();
     }
-    response.changed() && pasted
+    (response.changed() && pasted) || send
+}
+
+fn tool_controls(ui: &mut Ui, choice: &mut ToolChoice) {
+    ui.label(RichText::new("Preparation tool").strong());
+    ui.horizontal_wrapped(|ui| {
+        for adapter in CliAdapter::ALL {
+            let selected = choice.selected == Some(adapter);
+            let enabled = choice.selected.is_some();
+            if ui
+                .add_enabled(
+                    enabled,
+                    egui::RadioButton::new(selected, adapter.display_name()),
+                )
+                .clicked()
+                && !selected
+            {
+                choice.selected = Some(adapter);
+                choice.command = Some(adapter);
+            }
+        }
+    });
+    if !choice.status.is_empty() {
+        ui.label(&choice.status);
+    }
 }
 
 pub fn settings(ui: &mut Ui, state: &mut ViewState) {
     ScrollArea::vertical().show(ui, |ui| {
         ui.heading("Settings");
+        tool_controls(ui, &mut state.tool);
+        ui.separator();
         appearance_controls(ui, state);
         ui.separator();
         super::intake_view::show(ui, &mut state.intake, &state.draft);

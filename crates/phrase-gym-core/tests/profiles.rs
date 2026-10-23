@@ -25,18 +25,15 @@ fn revisions_validate_atomically_recover_receipts_and_restore_without_rewriting_
         Some("B2")
     );
     assert_eq!(
-        initial.profile.languages[&Language::En].translation_with_answer,
-        Some(false)
+        initial.profile.languages[&Language::En].help_language,
+        Some(Language::En)
     );
     assert_eq!(
         initial.profile.languages[&Language::De].help_language,
         Some(Language::Ru)
     );
     assert_eq!(initial.profile.languages[&Language::Sr].help_language, None);
-    assert_eq!(
-        initial.profile.languages[&Language::Sr].translation_with_answer,
-        None
-    );
+    assert_eq!(initial.profile.languages[&Language::Sr].proficiency, None);
     let mut update = ProfileUpdate {
         mutation_id: Uuid::new_v4(),
         expected_revision: 1,

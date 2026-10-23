@@ -15,7 +15,7 @@ pub(super) fn handle(
 ) -> Result<(), String> {
     let command = match command {
         Command::DropText(path) => {
-            let text = super::dropped_text::read(&path)?;
+            let text = super::dropped_text::read(&path).map_err(String::from)?;
             emit(Event::Draft(text.clone()));
             Command::Text(text)
         }
@@ -47,22 +47,27 @@ pub(super) fn handle(
             };
             pending::save(&path, &retained)?;
             let client = client.ok_or("Input saved locally, acceptance unconfirmed. Restore the Server connection; delivery retries automatically")?;
+            let mut prepared = None;
             let receipt = runner::deliver_with(
                 client,
                 &path,
                 &mut retained,
                 |s| emit(Event::Status(s.into())),
                 |claim| {
-                    if crate::supplied::SuppliedLesson::parse(&claim.input.context).is_ok() {
-                        return crate::supplied::output(claim);
-                    }
-                    emit(Event::Status(
-                        "Accepted durably; preparing with the selected CLI…".into(),
-                    ));
-                    super::selected::prepare(client, paths, claim, stop)
+                    let output =
+                        if crate::supplied::SuppliedLesson::parse(&claim.input.context).is_ok() {
+                            crate::supplied::output(claim)
+                        } else {
+                            emit(Event::Status(
+                                "Accepted durably; preparing with the selected CLI…".into(),
+                            ));
+                            super::selected::prepare(client, paths, claim, stop)
+                        }?;
+                    prepared = Some(output.clone());
+                    Ok(output)
                 },
             )?;
-            published(client, &receipt, emit);
+            published(client, &receipt, prepared.as_ref(), emit);
             Ok(())
         }
     }
@@ -71,6 +76,7 @@ pub(super) fn handle(
 pub(super) fn published(
     client: &ServerClient,
     receipt: &phrase_gym_contracts::inbox::PublicationReceipt,
+    output: Option<&phrase_gym_contracts::inbox::LessonOutput>,
     emit: &dyn Fn(Event),
 ) {
     if !receipt.target_ids.is_empty() {
@@ -79,9 +85,9 @@ pub(super) fn published(
             client.server, receipt.lesson_id
         )));
     }
-    emit(Event::Status(format!(
-        "Added {} targets, confirmed by Server. Open browser practice and choose Start session.",
-        receipt.target_ids.len()
+    emit(Event::Status(super::text::confirmed_additions(
+        output,
+        receipt.target_ids.len(),
     )));
 }
 

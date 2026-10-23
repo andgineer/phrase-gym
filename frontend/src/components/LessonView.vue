@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { targetLabel } from '../targetLabel'
 import DueOverview from './DueOverview.vue'
 import type { PracticeMessages } from '../practiceMessages'
 import type { RouteLocationRaw } from 'vue-router'
@@ -38,7 +39,7 @@ const emit = defineEmits<{ more: []; start: []; practice: [] }>()
     <ul class="phrase-list">
       <li v-for="item in results" :key="item.id">
         <RouterLink :to="link('phrases', item.id)" :lang="language"
-          >{{ item.content.text }} <span>↗</span></RouterLink
+          >{{ targetLabel(item) }} <span>↗</span></RouterLink
         >
       </li>
     </ul>

@@ -50,26 +50,22 @@ impl EnglishPackages {
         let preferences = profile.languages.get(&Language::En).ok_or_else(|| {
             CoreError::Invalid("Pinned profile has no English preferences".into())
         })?;
-        if preferences.card_language != Language::En
-            || preferences.help_language.is_none()
-            || preferences.translation_with_answer.is_none()
-        {
+        if preferences.card_language != Language::En || preferences.help_language.is_none() {
             return Err(CoreError::Invalid(
                 "English preview needs resolved English card/help preferences".into(),
             ));
         }
         for phrase in &package.phrases {
-            if let Some(help) = &phrase.help {
-                if Some(help.language) != preferences.help_language
-                    || help.translation.is_some()
-                        != (preferences.translation_with_answer == Some(true))
-                {
-                    return Err(CoreError::Invalid("Help language and answer translation must match the pinned personal profile".into()));
-                }
-            } else if preferences.translation_with_answer == Some(true) {
-                return Err(CoreError::Invalid(
-                    "Pinned profile requires translation with the answer".into(),
-                ));
+            if phrase
+                .help
+                .as_ref()
+                .is_some_and(|help| Some(help.language) != preferences.help_language)
+                || phrase
+                    .details
+                    .as_ref()
+                    .is_some_and(|details| details.language != profile.native_language)
+            {
+                return Err(CoreError::Invalid("The short explanation must use the pinned help language and the detailed explanation the native language".into()));
             }
         }
         let media = MediaIndex::load(&self.database, &self.store, audio::references(package))?;

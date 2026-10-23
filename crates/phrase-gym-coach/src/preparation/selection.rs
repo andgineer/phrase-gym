@@ -23,9 +23,9 @@ impl<'a> SelectedTool<'a> {
             host: &tool.host,
             home: None,
             model: super::readiness::MODEL,
-            version: super::readiness::VERIFIED_VERSION,
+            version: &tool.version,
             workspace: None,
-            effort: None,
+            effort: Some(Effort::Low),
         }
     }
 

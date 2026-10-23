@@ -1,0 +1,18 @@
+{
+  "purpose": "Frozen everyday English demo batch (visiting friends) filled through ordinary intake; not learner acceptance",
+  "input": "Thanks for having me.\nMake yourself at home.\nIt was nice catching up.\nWould you like some more tea?\ncozy",
+  "semantic_checks": [
+    "All five original items preserved under one durable receipt and atomic publication",
+    "Fixed phrases retain exact wording with defensible answer-free situations and justified alternatives only",
+    "The reusable construction declares its variable slots with defensible values and a complete spoken reference example",
+    "The bare word gets one familiar sense with two or three comprehensible gapped contexts and matched whole-sentence answers",
+    "Every item has a short English explanation and a detailed Russian explanation with translation and usage; the word also has its forms",
+    "No invented prior study, preference changes, candidate matches or cross-target answer leakage",
+    "Fresh semantic review and attended reference listening are separate from structural checks"
+  ],
+  "execution": {
+    "provider": "Claude subscription selected in Coach Settings (sonnet alias, low effort)",
+    "speech": "existing local Piper",
+    "bounds": "existing attempt, output, lease and daily-start limits; one run per batch, at most one rerun after a concrete general fix; no automatic model retries or paid API fallback"
+  }
+}

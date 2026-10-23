@@ -5,7 +5,8 @@
     "text": "Let's get started.", "accepted_variants": [],
     "situations": [{"id": "call", "text": "Everyone has arrived. Open the meeting.", "language": "en", "audio_id": null, "partner": null, "exposed_target_source_ids": []}],
     "hint": "started",
-    "help": {"language": "en", "meaning": "Begin a shared activity.", "usage": null, "translation": null},
+    "help": {"language": "en", "meaning": "Begin a shared activity.", "usage": null},
+    "details": {"language": "ru", "meaning": "Так предлагают начать совместное дело: встречу, урок или работу.", "translation": "Давайте начнём.", "usage": "Нейтральная фраза ведущего, когда все собрались; подходит для звонков и встреч.", "forms": null},
     "familiarity": {"kind": "new"},
     "reference_audio_id": "00000000-0000-0000-0000-000000000000", "expected_revision": null
   },

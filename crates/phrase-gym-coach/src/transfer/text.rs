@@ -24,7 +24,7 @@ pub struct TextDraft {
 
 impl TextDraft {
     pub fn new(server: &str, phrase: &str) -> Result<Self, String> {
-        entries(phrase)?;
+        super::items::entries(phrase)?;
         Ok(Self {
             server: super::client::server_origin(server)?,
             phrase: phrase.into(),
@@ -39,10 +39,7 @@ impl TextDraft {
             let saved: Self = serde_json::from_slice(&files::read_selected(path, 8192)?)
                 .map_err(|_| "Saved text input is unreadable; preserve it before repair")?;
             if saved.server != server || saved.phrase != phrase {
-                return Err(
-                    "A different text input is retained; retry it before adding another phrase"
-                        .into(),
-                );
+                return Err(super::input_problem::InputProblem::PreviousPending.into());
             }
             return Ok(saved);
         }
@@ -184,15 +181,16 @@ pub fn submit_raw(
             }
         }
     }
+    let items = super::items::entries(&draft.phrase)?;
     let input = phrase_gym_contracts::inbox::LessonSubmission {
         submission_id: draft.submission_id,
         item_id: format!("coach-{}", draft.submission_id),
         expected_generation: None,
         language: Language::En,
-        title: "Inbox practice".into(),
+        title: super::items::lesson_title(&items),
         context: draft.phrase.clone(),
         note: String::new(),
-        phrases: entries(&draft.phrase)?
+        phrases: items
             .into_iter()
             .enumerate()
             .map(
@@ -222,24 +220,4 @@ pub fn submit_raw(
     // The Server now owns the exact original text; local removal follows its durable receipt.
     std::fs::remove_file(path).map_err(|_| "Accepted by Server; retry to reconcile local text")?;
     Ok(receipt)
-}
-
-pub fn entries(text: &str) -> Result<Vec<&str>, String> {
-    let entries: Vec<_> = text
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty())
-        .collect();
-    if !(1..=5).contains(&entries.len())
-        || text.len() > 4000
-        || entries.iter().any(|entry| {
-            entry.len() > 800
-                || entry.chars().any(char::is_control)
-                || entry.contains("http://")
-                || entry.contains("https://")
-        })
-    {
-        return Err("Add up to five short words or phrases at a time, without URLs".into());
-    }
-    Ok(entries)
 }

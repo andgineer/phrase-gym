@@ -35,6 +35,7 @@ pub fn run(
     };
     emit(Event::Configured(server.clone()));
     let mut client = None;
+    let mut last_summary = None;
     let mut last = Instant::now()
         .checked_sub(Duration::from_secs(10))
         .unwrap_or_else(Instant::now);
@@ -68,7 +69,7 @@ pub fn run(
         let Some(client) = &client else {
             continue;
         };
-        summary(client, emit);
+        summary(client, &mut last_summary, emit);
         let draft_path = paths.state.join("pending-text.json");
         if draft_path.exists() {
             let retained =
@@ -96,22 +97,33 @@ pub fn run(
             }
             continue;
         }
-        let result = worker::tick(client, &paths.state.join("worker.json"), |claim| {
-            if crate::supplied::SuppliedLesson::parse(&claim.input.context).is_ok() {
-                return crate::supplied::output(claim);
-            }
+        prepare_waiting(client, &paths, emit, stop);
+    }
+}
+
+fn prepare_waiting(
+    client: &ServerClient,
+    paths: &CoachPaths,
+    emit: &dyn Fn(Event),
+    stop: &Arc<AtomicBool>,
+) {
+    let mut prepared = None;
+    let result = worker::tick(client, &paths.state.join("worker.json"), |claim| {
+        let output = if crate::supplied::SuppliedLesson::parse(&claim.input.context).is_ok() {
+            crate::supplied::output(claim)
+        } else {
             emit(Event::Status(
                 "Accepted by Server; preparing your English working set…".into(),
             ));
-            super::selected::prepare(client, &paths, claim, stop)
-        });
-        match result {
-            Ok(Some(receipt)) => published(client, &receipt, emit),
-            Ok(None) => {}
-            Err(problem) => {
-                emit(Event::Status(problem));
-            }
-        }
+            super::selected::prepare(client, paths, claim, stop)
+        }?;
+        prepared = Some(output.clone());
+        Ok(output)
+    });
+    match result {
+        Ok(Some(receipt)) => published(client, &receipt, prepared.as_ref(), emit),
+        Ok(None) => {}
+        Err(problem) => emit(Event::Status(problem)),
     }
 }
 
@@ -128,15 +140,20 @@ fn connect(
     Ok(())
 }
 
-fn summary(client: &ServerClient, emit: &dyn Fn(Event)) {
-    match client.get::<phrase_gym_contracts::readiness::CoachSummary>("/api/v1/coach/summary") {
-        Ok(summary) => emit(Event::Summary(format!(
+// Unchanged counts wake nobody: an idle window repaints only when something it shows changes.
+fn summary(client: &ServerClient, last: &mut Option<String>, emit: &dyn Fn(Event)) {
+    let text = match client
+        .get::<phrase_gym_contracts::readiness::CoachSummary>("/api/v1/coach/summary")
+    {
+        Ok(summary) => format!(
             "{} lessons · {} phrases · {} ready · {} awaiting audio",
             summary.lessons, summary.targets, summary.ready, summary.awaiting_audio
-        ))),
-        Err(_) => emit(Event::Summary(
-            "Library counts unavailable · last update is stale".into(),
-        )),
+        ),
+        Err(_) => "Library counts unavailable · last update is stale".into(),
+    };
+    if last.as_ref() != Some(&text) {
+        *last = Some(text.clone());
+        emit(Event::Summary(text));
     }
 }
 

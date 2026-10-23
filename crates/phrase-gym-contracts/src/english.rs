@@ -38,7 +38,18 @@ pub struct PhraseHelp {
     pub language: Language,
     pub meaning: String,
     pub usage: Option<String>,
-    pub translation: Option<String>,
+}
+
+// The on-demand explanation behind Show & explain, always in the learner's native language.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[serde(deny_unknown_fields)]
+pub struct PhraseDetails {
+    pub language: Language,
+    pub meaning: String,
+    pub translation: String,
+    pub usage: String,
+    pub forms: Option<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -97,6 +108,7 @@ pub struct PreparedEnglishPhrase {
     pub situations: Vec<PhraseSituation>,
     pub hint: String,
     pub help: Option<PhraseHelp>,
+    pub details: Option<PhraseDetails>,
     pub familiarity: PhraseFamiliarity,
     pub reference_audio_id: Uuid,
     pub expected_revision: Option<i64>,

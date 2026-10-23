@@ -3,7 +3,7 @@ import { expect, type APIRequestContext } from '@playwright/test'
 import { tone } from './seed-library'
 import type { components } from '../rust-contract/api.generated'
 
-export async function englishLesson(request: APIRequestContext, translation: string | null = null) {
+export async function englishLesson(request: APIRequestContext, details = true) {
   const media = await request.post('/api/v1/media', {
     data: {
       mime_type: 'audio/wav',
@@ -46,7 +46,7 @@ export async function englishLesson(request: APIRequestContext, translation: str
   const claim = await (
     await request.post('/api/v1/preparation/claims', { data: { claim_id: randomUUID() } })
   ).json()
-  await stageEnglishClaim(request, claim, translation)
+  await stageEnglishClaim(request, claim, details)
   const publication = await request.post('/api/v1/preparation/publish', { data: claim.fence })
   expect(publication.ok()).toBe(true)
   return { publication: await publication.json(), asset }
@@ -55,7 +55,7 @@ export async function englishLesson(request: APIRequestContext, translation: str
 export async function stageEnglishClaim(
   request: APIRequestContext,
   claim: components['schemas']['JobClaim'],
-  translation: string | null = null,
+  details = true,
 ) {
   let reference = claim.input.phrases[0].reference_audio_id
   if (!reference) {
@@ -120,8 +120,16 @@ export async function stageEnglishClaim(
               language: 'en',
               meaning: 'Begin a shared activity.',
               usage: null,
-              translation,
             },
+            details: details
+              ? {
+                  language: 'ru',
+                  meaning: 'Так предлагают начать общее дело, когда все собрались.',
+                  translation: 'Давайте начнём.',
+                  usage: 'Нейтрально; так говорит ведущий в начале встречи или урока.',
+                  forms: null,
+                }
+              : null,
             familiarity: { kind: 'new' },
             reference_audio_id: reference,
             expected_revision: null,

@@ -150,8 +150,17 @@ fn help_and_familiarity(phrase: &PreparedEnglishPhrase) -> Result<(), CoreError>
         if let Some(usage) = &help.usage {
             text(usage, "help usage", 2_000)?;
         }
-        if let Some(translation) = &help.translation {
-            text(translation, "answer translation", 2_000)?;
+    }
+    if let Some(details) = &phrase.details {
+        for (name, value, limit) in [
+            ("detailed meaning", &details.meaning, 2_000),
+            ("translation", &details.translation, 800),
+            ("detailed usage", &details.usage, 2_000),
+        ] {
+            text(value, name, limit)?;
+        }
+        if let Some(forms) = &details.forms {
+            text(forms, "word forms", 400)?;
         }
     }
     Ok(())
@@ -196,11 +205,6 @@ pub(super) fn validate(package: &PreparedEnglishLesson) -> Result<(), CoreError>
         ));
     }
     for item in &package.phrases {
-        if leaks(&package.lesson.title, item) {
-            return Err(CoreError::Invalid(
-                "Lesson title must not reveal answer wording".into(),
-            ));
-        }
         phrase(item, &ids)?;
     }
     Ok(())

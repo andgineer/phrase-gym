@@ -2506,12 +2506,6 @@
               "string",
               "null"
             ]
-          },
-          "translation_with_answer": {
-            "type": [
-              "boolean",
-              "null"
-            ]
           }
         },
         "additionalProperties": false
@@ -3046,6 +3040,36 @@
           }
         }
       },
+      "PhraseDetails": {
+        "type": "object",
+        "required": [
+          "language",
+          "meaning",
+          "translation",
+          "usage"
+        ],
+        "properties": {
+          "forms": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "translation": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "PhraseFamiliarity": {
         "oneOf": [
           {
@@ -3094,12 +3118,6 @@
           },
           "meaning": {
             "type": "string"
-          },
-          "translation": {
-            "type": [
-              "string",
-              "null"
-            ]
           },
           "usage": {
             "type": [
@@ -3444,6 +3462,16 @@
             "items": {
               "type": "string"
             }
+          },
+          "details": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhraseDetails"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "expected_revision": {
             "type": [

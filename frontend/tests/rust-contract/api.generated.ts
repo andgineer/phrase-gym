@@ -794,7 +794,6 @@ export interface components {
             help_language?: components["schemas"]["Language"] | null;
             preparation_guidance: string;
             proficiency?: string | null;
-            translation_with_answer?: boolean | null;
         };
         Lesson: {
             /** Format: uuid */
@@ -935,6 +934,13 @@ export interface components {
             /** Format: int64 */
             revision: number;
         };
+        PhraseDetails: {
+            forms?: string | null;
+            language: components["schemas"]["Language"];
+            meaning: string;
+            translation: string;
+            usage: string;
+        };
         PhraseFamiliarity: {
             /** @enum {string} */
             kind: "new";
@@ -946,7 +952,6 @@ export interface components {
         PhraseHelp: {
             language: components["schemas"]["Language"];
             meaning: string;
-            translation?: string | null;
             usage?: string | null;
         };
         PhrasePage: {
@@ -1032,6 +1037,7 @@ export interface components {
         };
         PreparedEnglishPhrase: {
             accepted_variants: string[];
+            details?: components["schemas"]["PhraseDetails"] | null;
             /** Format: int64 */
             expected_revision?: number | null;
             familiarity: components["schemas"]["PhraseFamiliarity"];

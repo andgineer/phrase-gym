@@ -4,41 +4,36 @@ import { englishLesson } from './english-lesson'
 import { syntheticCapture, retainedAudio } from './synthetic-capture'
 import { expectComparison } from './native-playback'
 
+const short = 'Begin a shared activity.'
+const translation = 'Давайте начнём.'
+
 for (const reveal of ['explain', 'answer', 'reference', 'comparison'] as const) {
-  test(`pinned translation follows ${reveal} reveal independently of expanded English help`, async ({
+  test(`the short explanation follows the ${reveal} reveal and native details only follow Show & explain`, async ({
     page,
     request,
   }) => {
     await request.put('/api/v1/settings', {
       data: { native_language: 'ru', ui_language_mode: 'learning' },
     })
-    const profile = await (await request.get('/api/v1/profile')).json()
-    profile.profile.languages.en.translation_with_answer = true
-    const changed = await request.put('/api/v1/profile', {
-      data: {
-        mutation_id: crypto.randomUUID(),
-        expected_revision: profile.revision,
-        profile: profile.profile,
-        reason: 'Synthetic translation preference test',
-      },
-    })
-    expect(changed.ok(), await changed.text()).toBe(true)
-    await englishLesson(request, 'Давайте начнём.')
+    await englishLesson(request)
     if (reveal === 'comparison') await syntheticCapture(page)
     await page.goto('/learn/en')
     await page.getByRole('button', { name: 'Start session', exact: true }).click()
-    await expect(page.getByText('Begin a shared activity.', { exact: true })).toBeVisible()
-    await expect(
-      page.getByText('Begin a shared activity.', { exact: true }).locator('..'),
-    ).toHaveAttribute('lang', 'en')
-    await expect(page.getByText('Давайте начнём.', { exact: true })).toHaveCount(1)
-    await expect(page.getByText('Давайте начнём.', { exact: true })).toBeVisible()
+    await expect(page.locator('.answer-help')).toHaveText(short)
+    await expect(page.locator('.answer-help')).toHaveAttribute('lang', 'en')
+    await expect(page.getByText(translation, { exact: true })).toHaveCount(0)
+    await expect(page.locator('.lesson-links')).toContainText('Opening a meeting')
+    if (reveal === 'explain') {
+      await page.getByRole('button', { name: /Show & explain/ }).click()
+      await expect(page.locator('.phrase-details')).toContainText(translation)
+    }
     await page.getByRole('button', { name: 'Next', exact: true }).click()
     await page.getByRole('button', { name: 'Library', exact: true }).click()
     await page.getByRole('button', { name: 'Start session', exact: true }).click()
     await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-    await expect(page.getByText('Begin a shared activity.', { exact: true })).toHaveCount(0)
-    await expect(page.getByText('Давайте начнём.', { exact: true })).toHaveCount(0)
+    await expect(page.getByText(short, { exact: true })).toHaveCount(0)
+    await expect(page.getByText(translation, { exact: true })).toHaveCount(0)
+    await expect(page.locator('.lesson-links')).toHaveCount(0)
     await expect
       .poll(
         async () =>
@@ -65,17 +60,22 @@ for (const reveal of ['explain', 'answer', 'reference', 'comparison'] as const) 
         .click()
     }
     await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
-    await expect(page.locator('.answer-translation')).toHaveText('Давайте начнём.')
-    await expect(page.getByText('Давайте начнём.', { exact: true })).toHaveCount(1)
+    await expect(page.locator('.answer-help')).toHaveText(short)
+    await expect(page.locator('.lesson-links')).toContainText('Opening a meeting')
+    const details = page.locator('.phrase-details')
     if (reveal === 'explain') {
-      await expect(page.locator('.explanation')).toHaveAttribute('lang', 'en')
-      await expect(page.locator('.explanation')).toContainText('Begin a shared activity.')
+      await expect(details).toHaveAttribute('lang', 'ru')
+      await expect(details).toContainText(translation)
+      await expect(details).toContainText('Нейтрально; так говорит ведущий')
+      await expect(details.getByRole('heading', { name: 'Перевод' })).toBeVisible()
     } else {
-      await expect(page.locator('.explanation')).toHaveCount(0)
+      await expect(details).toHaveCount(0)
+      await expect(page.getByText(translation, { exact: true })).toHaveCount(0)
     }
     await expect(page.getByRole('button', { name: /Recalled$/ })).toBeEnabled()
     await page.reload()
-    await expect(page.locator('.answer-translation')).toHaveText('Давайте начнём.')
+    await expect(page.locator('.answer-help')).toHaveText(short)
+    await expect(page.locator('.phrase-details')).toHaveCount(reveal === 'explain' ? 1 : 0)
     await page.getByRole('button', { name: /Recalled$/ }).click()
     await expect(page.getByRole('heading', { name: 'Session complete', exact: true })).toBeVisible()
     const after = await (await request.get(`/api/v1/sessions/${before.id}`)).json()
@@ -87,3 +87,17 @@ for (const reveal of ['explain', 'answer', 'reference', 'comparison'] as const) 
     expect(receipts.at(-1).eligibility_reason).toBe(reason)
   })
 }
+
+test('a card without native details offers no Show & explain and still shows its short help', async ({
+  page,
+  request,
+}) => {
+  await request.put('/api/v1/settings', {
+    data: { native_language: 'ru', ui_language_mode: 'learning' },
+  })
+  await englishLesson(request, false)
+  await page.goto('/learn/en')
+  await page.getByRole('button', { name: 'Start session', exact: true }).click()
+  await expect(page.locator('.answer-help')).toHaveText(short)
+  await expect(page.getByRole('button', { name: /Show & explain/ })).toHaveCount(0)
+})
