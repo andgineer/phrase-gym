@@ -80,7 +80,7 @@ Settings contain no application credentials and Coach never calls an OS credenti
 
 Use native Codex 0.163.0 (Homebrew cask on macOS). Coach resolves its canonical executable without shell initialization. Node-script CLI installs are unsupported. Reuse the existing login and verify `codex login status` says `Logged in using ChatGPT`. Only when that login is actually absent does first-time setup require the learner to run `codex login`. Coach inspects status without forcing a login-method change before launching a subscription-only attempt. It never launches login or copies credentials. API-key logins fail readiness, and exported API keys/proxies/parent agent sessions are excluded from the child environment.
 
-At the learner's explicit direction, local Coach uses the normal Codex home and this repository as its working directory. Normal-home and repository instructions and skills may load; this configuration does not claim isolation from them. `--ignore-user-config` excludes config.toml settings, and `--ignore-rules` excludes execpolicy .rules loading, while the explicit preparation prompt remains authoritative for its task. Existing Claude code is retained with its own measured invocation; Claude is not the selected English text-demo provider.
+At the learner's explicit direction, local Coach uses the normal Codex home and this repository as its working directory. Normal-home customizations and skills may load; automatic repository instruction loading is disabled for preparation with `project_doc_max_bytes=0`; this configuration does not claim isolation from them. `--ignore-user-config` excludes config.toml settings, and `--ignore-rules` excludes execpolicy .rules loading, while the explicit preparation prompt remains authoritative for its task. Existing Claude code is retained with its own measured invocation; Claude is not the selected English text-demo provider.
 
 ## Verified CLI invocation
 
@@ -94,7 +94,7 @@ Codex checks exact native version and ChatGPT status before execution. Authentic
 
 ### Codex
 
-The argument builder pins `exec --skip-git-repo-check --ignore-user-config --ignore-rules --ephemeral`, model `gpt-5.6-luna`, low effort, `forced_login_method="chatgpt"`, approval `never`, web search disabled and no persisted history. Apps, browser/computer/image tools, goals, hooks, plugins, multi-agent execution and image reading are disabled. The environment is allowlisted and `CODEX_HOME` points directly at the normal home.
+The argument builder pins `exec --skip-git-repo-check --ignore-user-config --ignore-rules --ephemeral`, model `gpt-5.6-luna`, low effort, `forced_login_method="chatgpt"`, approval `never`, web search disabled and no persisted history. Automatic project instruction loading is disabled so development orchestration does not steer preparation. Apps, browser/computer/image tools, goals, hooks, plugins, multi-agent execution and image reading are disabled. The environment is allowlisted and `CODEX_HOME` points directly at the normal home.
 
 The staged generated-contract schema is passed through `--output-schema`, with closed objects, required nullable fields and typed frame/word tasks; malformed output is never repaired by the runner.
 

@@ -43,6 +43,8 @@ pub(super) fn prepare() -> ExitCode {
         for (index, phrase) in phrases.iter_mut().enumerate() {
             prepare_item(phrase, index);
         }
+        // Real models do not always keep the submitted item order.
+        phrases.reverse();
     } else {
         output["meaning_key"] = "begin-activity".into();
         output["intention_key"] = "open-meeting".into();

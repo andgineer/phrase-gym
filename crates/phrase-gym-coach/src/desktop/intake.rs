@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
+use std::sync::mpsc::{SyncSender, sync_channel};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
@@ -49,7 +49,7 @@ impl Default for IntakeState {
 
 pub struct IntakeRunner {
     pub commands: SyncSender<Command>,
-    pub events: Receiver<Event>,
+    pub events: super::intake_events::Events,
     shutdown: Arc<AtomicBool>,
     thread: Option<std::thread::JoinHandle<()>>,
 }
@@ -61,13 +61,13 @@ impl IntakeRunner {
         smoke: Option<super::smoke_intake::SmokeInput>,
     ) -> Self {
         let (commands, receive) = sync_channel(2);
-        let (send, events) = sync_channel(32);
+        let events = super::intake_events::Events::default();
+        let send = events.clone();
         let shutdown = Arc::new(AtomicBool::new(false));
         let stop = Arc::clone(&shutdown);
         let thread = std::thread::spawn(move || {
             let emit = |event| {
-                // A closed/minimized UI must never block lease cleanup or shutdown.
-                let _ = send.try_send(event);
+                send.push(event);
                 wake();
             };
             if let Some(input) = smoke {

@@ -3,6 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use phrase_gym_contracts::english_source;
 use serde_json::{Value, json};
 
+const WORD_SITUATION: &str = r"^[^_.!?|]*_____[^_.!?|]*[.!?]( \| [^_|]+)?$";
+
 // Generate the model's bounded output schema from the same committed contract checked by xtask.
 // No model-authored field can change the outer generation, profile, guide or publication fence.
 pub fn phrase_schema(text: &str) -> Result<Value, String> {
@@ -61,9 +63,10 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
     let mut situation = definitions["PhraseSituation"].clone();
     situation["properties"]["partner"] = json!({"type":"null"});
     if english_source::word_form(text).is_some() {
-        situation["properties"]["text"]["pattern"] = json!("^[^_]*_____[^_]*$");
+        // One gapped sentence, then an optional cue: scenario narration cannot precede the gap.
+        situation["properties"]["text"]["pattern"] = json!(WORD_SITUATION);
         situation["properties"]["text"]["description"] = json!(
-            "Complete gapped answer sentence, optionally followed by ' | ' and a brief cue. The reference answer fills the entire sentence before that explicit separator, never a prefix."
+            "Only the short gapped answer sentence, optionally followed by ' | ' and a brief cue; no scenario narration. The reference answer fills the entire sentence before that explicit separator, never a prefix."
         );
     }
     let phrase = definitions
@@ -78,7 +81,9 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
     let first = cues[0];
     let word = english_source::word_form(text).is_some();
     let hints: Vec<String> = if word {
-        (1..first.chars().count())
+        let letters = first.chars().count();
+        (1..=(letters / 2).max(1))
+            .filter(|length| *length < letters)
             .map(|length| first.chars().take(length).collect())
             .collect()
     } else {
@@ -153,6 +158,7 @@ pub fn batch_schema(
 ) -> Result<Value, String> {
     let mut phrase = phrase_schema(&inputs.first().ok_or("Empty material")?.text)?;
     if inputs.len() == 1 {
+        bind_exposures(&mut phrase, &inputs[0].source_id, inputs);
         return Ok(phrase);
     }
     let definitions = phrase
@@ -168,6 +174,7 @@ pub fn batch_schema(
             .ok_or("Missing phrase schema")?
             .remove("$defs");
         schema["properties"]["source_id"] = json!({"type":"string", "enum":[input.source_id]});
+        bind_exposures(&mut schema, &input.source_id, inputs);
         alternatives.push(schema);
     }
     Ok(
@@ -175,63 +182,25 @@ pub fn batch_schema(
     )
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a_plain_word_requires_contextual_word_retrieval_and_a_partial_hint() {
-        let schema = phrase_schema("clarify").unwrap();
-        assert_eq!(
-            schema["properties"]["task"]["properties"]["kind"]["enum"],
-            json!(["word_sense"])
-        );
-        assert_eq!(
-            schema["properties"]["hint"]["enum"],
-            json!(["c", "cl", "cla", "clar", "clari", "clarif"])
-        );
-        assert_eq!(
-            schema["properties"]["situations"]["items"]["properties"]["text"]["pattern"],
-            "^[^_]*_____[^_]*$"
-        );
-        assert_eq!(
-            schema["properties"]["situations"]["items"]["properties"]["partner"]["type"],
-            "null"
-        );
-        let frame = phrase_schema("Could we move {item} to {day}?").unwrap();
-        assert_eq!(
-            frame["properties"]["task"]["properties"]["kind"]["enum"],
-            json!(["frame"])
-        );
-    }
-
-    #[test]
-    fn bounded_schema_includes_phrase_dependencies_without_learner_or_access_contracts() {
-        let schema = phrase_schema("Let's get started.").unwrap();
-        assert!(
-            schema["$defs"]["PreparedEnglishPhrase"]["properties"]["reference_audio_id"]
-                .is_object()
-        );
-        assert!(schema["$defs"]["PhraseSituation"].is_object());
-        assert!(schema["$defs"]["PhraseHelp"].is_object());
-        assert!(schema["$defs"]["RecordingUpload"].is_null());
-        assert_eq!(schema["type"], "object");
-        assert_eq!(
-            schema["properties"]["hint"]["enum"],
-            json!(["Let's", "get", "started"])
-        );
-        assert!(!schema.to_string().contains("oneOf"));
-        assert_eq!(
-            schema["$defs"]["PhraseHelp"]["required"]
-                .as_array()
-                .unwrap()
-                .len(),
-            4
-        );
-        assert_eq!(
-            schema["$defs"]["PhraseFamiliarity"]["anyOf"][0]["additionalProperties"],
-            false
-        );
-        assert!(!schema.to_string().contains("#/components/"));
-    }
+fn bind_exposures(
+    schema: &mut Value,
+    source_id: &str,
+    inputs: &[phrase_gym_contracts::inbox::LessonPhraseInput],
+) {
+    let others: Vec<_> = inputs
+        .iter()
+        .filter(|input| input.source_id != source_id)
+        .map(|input| &input.source_id)
+        .collect();
+    let items = if others.is_empty() {
+        json!({"type":"string"})
+    } else {
+        json!({"type":"string", "enum":others})
+    };
+    schema["properties"]["situations"]["items"]["properties"]["exposed_target_source_ids"] =
+        json!({"type":"array", "items":items, "maxItems":others.len()});
 }
+
+#[cfg(test)]
+#[path = "schema_tests.rs"]
+mod tests;

@@ -6,6 +6,7 @@ mod content_validation;
 mod exposures;
 mod inbox;
 mod inbox_study;
+mod media_delivery;
 mod practice_capture_recovery;
 mod practice_dialogues;
 mod practice_events;

@@ -17,6 +17,7 @@ pub mod view;
 
 mod connection;
 mod intake_actions;
+mod intake_events;
 mod intake_runtime;
 pub mod launch;
 pub mod smoke_intake;

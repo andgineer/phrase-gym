@@ -43,6 +43,8 @@ const SETTINGS: &[&str] = &[
     "web_search=\"disabled\"",
     "history.persistence=\"none\"",
     "check_for_update_on_startup=false",
+    // The repository AGENTS.md directs development agents; it must not steer preparation attempts.
+    "project_doc_max_bytes=0",
 ];
 
 pub(super) fn invocation(context: &LaunchContext<'_>) -> Result<Invocation, InvocationError> {
@@ -198,6 +200,8 @@ mod tests {
             r#"history.persistence="none""#,
             "-c",
             "check_for_update_on_startup=false",
+            "-c",
+            "project_doc_max_bytes=0",
             "--disable",
             "apps",
             "--disable",

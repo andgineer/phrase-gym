@@ -150,7 +150,7 @@ impl eframe::App for CoachApp {
         while let Ok(event) = self.events.try_recv() {
             self.view.snapshot.apply(event);
         }
-        while let Ok(event) = self.intake.events.try_recv() {
+        while let Some(event) = self.intake.events.pop() {
             match event {
                 Event::Summary(summary) => self.view.intake.summary = Some(summary),
                 Event::Draft(text) => self.view.draft = text,
