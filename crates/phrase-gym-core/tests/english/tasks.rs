@@ -114,3 +114,28 @@ fn a_frame_is_a_declared_variable_construction_with_a_complete_verified_example(
         assert!(fixture.validator.validate(&invalid).is_err(), "{change}");
     }
 }
+
+#[test]
+fn frame_slot_names_preserve_unicode_and_reject_spaces_empty_and_overlong_names() {
+    let fixture = Fixture::new();
+    let mut package = fixture.package();
+    let phrase = &mut package.phrases[0];
+    phrase.text = "Could you give me a moment?".into();
+    phrase.hint = "moment".into();
+    phrase.reference_audio_id = fixture.upload(&json!({"text": phrase.text})).id;
+    for name in [
+        "short-wait-period",
+        "время",
+        "short wait period",
+        "",
+        &"a".repeat(41),
+        &"é".repeat(21),
+    ] {
+        package.phrases[0].task = Some(serde_json::from_value(json!({"kind":"frame", "pattern":format!("Could you give me {{{name}}}?"), "slots":[{"name":name,"values":["a moment","a minute","a second"]}]})).unwrap());
+        assert_eq!(
+            fixture.validator.validate(&package).is_ok(),
+            matches!(name, "short-wait-period" | "время"),
+            "{name}"
+        );
+    }
+}

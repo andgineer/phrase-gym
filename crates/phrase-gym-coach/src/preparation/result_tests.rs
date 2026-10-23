@@ -105,3 +105,30 @@ fn reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_f
         );
     }
 }
+
+#[test]
+fn exact_model_frame_with_a_spaced_slot_name_fails_before_speech_without_repair() {
+    let mut phrase: PreparedEnglishPhrase = serde_json::from_value(json!({
+        "source_id":"item-1", "meaning_key":"wait", "intention_key":"wait", "source_text":"Could you give me a moment?", "text":"Could you give me a moment?", "accepted_variants":[], "situations":[], "hint":"Could", "help":null, "familiarity":{"kind":"new"}, "reference_audio_id":Uuid::nil(), "expected_revision":null,
+        "task":{"kind":"frame", "pattern":"Could you give me {short wait period}?", "slots":[{"name":"short wait period", "values":["a moment", "a minute", "a second"]}]}
+    })).unwrap();
+    let unchanged = phrase.clone();
+    assert!(
+        validate_task_shape(&phrase)
+            .unwrap_err()
+            .contains("nothing was synthesized or published")
+    );
+    assert_eq!(phrase, unchanged);
+    for name in ["short-wait-period", "время", "", &"a".repeat(41)] {
+        let Some(EnglishTask::Frame { pattern, slots }) = &mut phrase.task else {
+            unreachable!()
+        };
+        *pattern = format!("Could you give me {{{name}}}?");
+        slots[0].name = name.into();
+        assert_eq!(
+            validate_task_shape(&phrase).is_ok(),
+            matches!(name, "short-wait-period" | "время"),
+            "{name}"
+        );
+    }
+}

@@ -73,3 +73,17 @@ fn exposure_schema_allows_only_other_accepted_sources_and_none_for_single_items(
         0
     );
 }
+
+#[test]
+fn generated_frame_slot_names_use_bounded_ascii_identifiers_for_plain_or_declared_frames() {
+    for input in [
+        "Could you give me a moment?",
+        "Could you give me {short-wait-period}?",
+    ] {
+        let schema = phrase_schema(input).unwrap();
+        let name = &schema["$defs"]["FrameSlot"]["properties"]["name"];
+        assert_eq!(name["pattern"], "^[A-Za-z0-9-]+$");
+        assert_eq!(name["minLength"], 1);
+        assert_eq!(name["maxLength"], english_source::FRAME_SLOT_NAME_MAX_BYTES);
+    }
+}

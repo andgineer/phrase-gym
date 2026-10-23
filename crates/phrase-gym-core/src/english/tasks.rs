@@ -59,9 +59,13 @@ pub(crate) fn validate(phrase: &PreparedEnglishPhrase) -> Result<(), CoreError> 
                         "Frame slot names must be distinct".into(),
                     ));
                 }
-                text(name, "slot name", 40)?;
+                text(
+                    name,
+                    "slot name",
+                    phrase_gym_contracts::english_source::FRAME_SLOT_NAME_MAX_BYTES,
+                )?;
                 let marker = format!("{{{name}}}");
-                if !name.chars().all(|c| c.is_alphanumeric() || c == '-')
+                if !phrase_gym_contracts::english_source::frame_slot_name_valid(name)
                     || pattern.matches(&marker).count() != 1
                     || !(2..=5).contains(&values.len())
                 {

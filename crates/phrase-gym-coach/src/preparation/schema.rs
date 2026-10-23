@@ -28,6 +28,13 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
         references(&mut schema, &mut required);
         definitions.insert(name, schema);
     }
+    definitions
+        .get_mut("FrameSlot")
+        .ok_or("Missing frame slot schema")?["properties"]["name"] = json!({
+        "type":"string", "minLength":1, "maxLength":english_source::FRAME_SLOT_NAME_MAX_BYTES,
+        "pattern":"^[A-Za-z0-9-]+$",
+        "description":"Use a short ASCII identifier such as short-wait-period; no spaces or underscores."
+    });
     let cues: Vec<_> = text
         .split_whitespace()
         .map(|word| word.trim_matches(|c: char| !c.is_alphanumeric()))

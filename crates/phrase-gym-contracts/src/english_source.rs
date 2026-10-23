@@ -35,6 +35,16 @@ pub fn matches_task(source: &str, task: Option<&EnglishTask>) -> bool {
     }
 }
 
+pub const FRAME_SLOT_NAME_MAX_BYTES: usize = 40;
+
+pub fn frame_slot_name_valid(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= FRAME_SLOT_NAME_MAX_BYTES
+        && name
+            .chars()
+            .all(|character| character.is_alphanumeric() || character == '-')
+}
+
 pub fn frame_example_matches(
     pattern: &str,
     slots: &[crate::english::FrameSlot],
@@ -43,7 +53,7 @@ pub fn frame_example_matches(
     if !(1..=3).contains(&slots.len())
         || slots
             .iter()
-            .any(|slot| !(2..=5).contains(&slot.values.len()))
+            .any(|slot| !frame_slot_name_valid(&slot.name) || !(2..=5).contains(&slot.values.len()))
     {
         return false;
     }
@@ -89,6 +99,24 @@ pub fn word_gap_matches(prompt: &str, answer: &str, word: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn slot_names_keep_existing_unicode_grammar_and_utf8_byte_limit() {
+        for name in ["short-wait-period", "время", "---", &"é".repeat(20)] {
+            assert!(frame_slot_name_valid(name), "{name}");
+        }
+        for name in [
+            "",
+            "short wait period",
+            "short_wait_period",
+            " wait",
+            "wait\n",
+            &"a".repeat(41),
+            &"é".repeat(21),
+        ] {
+            assert!(!frame_slot_name_valid(name), "{name}");
+        }
+    }
 
     #[test]
     fn frame_substitution_does_not_duplicate_articles_and_bounds_expansion() {
