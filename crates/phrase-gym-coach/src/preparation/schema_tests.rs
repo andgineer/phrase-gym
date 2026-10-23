@@ -77,8 +77,8 @@ fn exposure_schema_allows_only_other_accepted_sources_and_none_for_single_items(
 #[test]
 fn generated_frame_slot_names_use_bounded_ascii_identifiers_for_plain_or_declared_frames() {
     for input in [
-        "Could you give me a moment?",
-        "Could you give me {short-wait-period}?",
+        "Could you send me the report?",
+        "Could you send me {shared-document}?",
     ] {
         let schema = phrase_schema(input).unwrap();
         let name = &schema["$defs"]["FrameSlot"]["properties"]["name"];

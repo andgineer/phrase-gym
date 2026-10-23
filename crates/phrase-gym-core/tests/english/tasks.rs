@@ -31,6 +31,9 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
     wrong_task.phrases[0].task = None;
     assert!(fixture.validator.validate(&wrong_task).is_err());
     fixture.validator.validate(&package).unwrap();
+    let mut longest_hint = package.clone();
+    longest_hint.phrases[0].hint = "cla".into();
+    fixture.validator.validate(&longest_hint).unwrap();
     for change in [
         "leak",
         "wrong-answer",
@@ -40,6 +43,7 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
         "missing-audio",
         "missing-context",
         "full-hint",
+        "nearly-full-hint",
     ] {
         let mut invalid = package.clone();
         let phrase = &mut invalid.phrases[0];
@@ -65,6 +69,7 @@ fn word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_l
                 contexts.pop();
             }
             "full-hint" => phrase.hint = "clarify".into(),
+            "nearly-full-hint" => phrase.hint = "clar".into(),
             _ => unreachable!(),
         }
         assert!(fixture.validator.validate(&invalid).is_err(), "{change}");
@@ -120,21 +125,21 @@ fn frame_slot_names_preserve_unicode_and_reject_spaces_empty_and_overlong_names(
     let fixture = Fixture::new();
     let mut package = fixture.package();
     let phrase = &mut package.phrases[0];
-    phrase.text = "Could you give me a moment?".into();
-    phrase.hint = "moment".into();
+    phrase.text = "Could you send me the report?".into();
+    phrase.hint = "report".into();
     phrase.reference_audio_id = fixture.upload(&json!({"text": phrase.text})).id;
     for name in [
-        "short-wait-period",
+        "shared-document",
         "время",
-        "short wait period",
+        "shared document",
         "",
         &"a".repeat(41),
         &"é".repeat(21),
     ] {
-        package.phrases[0].task = Some(serde_json::from_value(json!({"kind":"frame", "pattern":format!("Could you give me {{{name}}}?"), "slots":[{"name":name,"values":["a moment","a minute","a second"]}]})).unwrap());
+        package.phrases[0].task = Some(serde_json::from_value(json!({"kind":"frame", "pattern":format!("Could you send me {{{name}}}?"), "slots":[{"name":name,"values":["the report","the invoice","the slides"]}]})).unwrap());
         assert_eq!(
             fixture.validator.validate(&package).is_ok(),
-            matches!(name, "short-wait-period" | "время"),
+            matches!(name, "shared-document" | "время"),
             "{name}"
         );
     }

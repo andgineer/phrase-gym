@@ -33,7 +33,7 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
         .ok_or("Missing frame slot schema")?["properties"]["name"] = json!({
         "type":"string", "minLength":1, "maxLength":english_source::FRAME_SLOT_NAME_MAX_BYTES,
         "pattern":"^[A-Za-z0-9-]+$",
-        "description":"Use a short ASCII identifier such as short-wait-period; no spaces or underscores."
+        "description":"Use a short ASCII identifier such as shared-document; no spaces or underscores."
     });
     let cues: Vec<_> = text
         .split_whitespace()
@@ -89,7 +89,7 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
     let word = english_source::word_form(text).is_some();
     let hints: Vec<String> = if word {
         let letters = first.chars().count();
-        (1..=(letters / 2).max(1))
+        (1..=english_source::word_hint_max_chars(first))
             .filter(|length| *length < letters)
             .map(|length| first.chars().take(length).collect())
             .collect()

@@ -88,10 +88,12 @@ fn phrase(phrase: &PreparedEnglishPhrase, source_ids: &BTreeSet<&str>) -> Result
             unreachable!()
         };
         if phrase.hint.len() >= word.len()
+            || phrase.hint.chars().count()
+                > phrase_gym_contracts::english_source::word_hint_max_chars(word)
             || !word.to_lowercase().starts_with(&phrase.hint.to_lowercase())
         {
             return Err(CoreError::Invalid(
-                "Word hint must be a partial initial form".into(),
+                "Word hint must be an initial part of at most half the word".into(),
             ));
         }
     }

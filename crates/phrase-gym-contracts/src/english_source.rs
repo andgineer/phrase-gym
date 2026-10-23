@@ -35,6 +35,10 @@ pub fn matches_task(source: &str, task: Option<&EnglishTask>) -> bool {
     }
 }
 
+pub fn word_hint_max_chars(word: &str) -> usize {
+    (word.chars().count() / 2).max(1)
+}
+
 pub const FRAME_SLOT_NAME_MAX_BYTES: usize = 40;
 
 pub fn frame_slot_name_valid(name: &str) -> bool {
@@ -102,15 +106,15 @@ mod tests {
 
     #[test]
     fn slot_names_keep_existing_unicode_grammar_and_utf8_byte_limit() {
-        for name in ["short-wait-period", "время", "---", &"é".repeat(20)] {
+        for name in ["shared-document", "время", "---", &"é".repeat(20)] {
             assert!(frame_slot_name_valid(name), "{name}");
         }
         for name in [
             "",
-            "short wait period",
-            "short_wait_period",
-            " wait",
-            "wait\n",
+            "shared document",
+            "shared_document",
+            " slot",
+            "slot\n",
             &"a".repeat(41),
             &"é".repeat(21),
         ] {
