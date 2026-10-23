@@ -9,6 +9,8 @@ pub const MAX_TEXT_SCALE: f32 = 2.0;
 // readable in both themes, so body text is pushed close to black or white.
 pub fn visuals(theme: Theme) -> Visuals {
     let mut visuals = theme.default_visuals();
+    // The material box keeps focus; a blinking caret would wake an idle window twice a second.
+    visuals.text_cursor.blink = false;
     visuals.override_text_color = Some(match theme {
         Theme::Dark => Color32::from_gray(235),
         Theme::Light => Color32::from_gray(15),
