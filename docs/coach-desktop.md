@@ -121,6 +121,18 @@ Measured on 2026-10-23 with Claude Code 2.1.309 (macOS 27, Apple Silicon, Pro su
 - A synthetic probe with all flags above listed only the `Read` and `StructuredOutput` tools; reading a canary outside the attempt folder was denied with "--restricted confines the file tools to the working directory" and recorded as a permission denial; the structured answer arrived in the envelope. 8.6 s.
 - `examples/claude_working_set.rs` submitted the frozen development batch through the ordinary durable intake of a disposable Server with disposable Coach folders: the CLI took 34.2 s (5 turns, 6,008 output tokens, 349 thinking tokens, 17.5 KB envelope, 13 KB inline schema), and validation, Piper speech and atomic publication of all five targets finished in 47.6 s, within the 90 s attempt limit.
 
+On 2026-10-24 the packaged Coach, with Claude selected in Settings, filled the reset demo Server from browser Send, one run per batch:
+
+| Batch | Claude | CLI time | Turns | Output tokens | Result |
+|---|---|---|---|---|---|
+| Development | 2.1.309 | 35.3 s | 5 | 5,995 | 5 published |
+| Held-out (second freeze) | 2.1.309 | 0.2 s | 0 | 0 | refused: repeated hint word made the schema invalid; fixed |
+| Held-out rerun | 2.1.310 | 39.9 s | 6 | 6,508 | 5 published |
+| Shopping | 2.1.310 | 22.6 s | 5 | 3,289 | 5 published |
+| Visiting | 2.1.310 | 37.6 s | 6 | 6,543 | 5 published |
+
+Claude updated itself from 2.1.309 to 2.1.310 between runs and passed the version and flag checks. Every published card has an English short explanation, Russian details and verified reference speech. The shopping and visiting batches kept their intended reusable construction as a fixed phrase. Semantic review and listening are separate.
+
 Run the measurement by hand only, against a disposable Server: `target/debug/examples/claude_working_set http://127.0.0.1:<port> <fresh absolute folder> <piper-voice.json> fixtures/coach/working-set.json`.
 
 ## Remaining gaps
