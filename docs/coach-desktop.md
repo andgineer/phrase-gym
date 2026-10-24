@@ -60,7 +60,7 @@ The interpreter uses isolated mode. The speech runner verifies package versions,
 
 ### Measurement preparation
 
-Freeze synthetic development and held-out cases before real provider calls. The [development fixture](../fixtures/coach/working-set.json), the [third held-out freeze](../fixtures/coach/working-set-held-out-3.json) (spent, like the [second](../fixtures/coach/working-set-held-out-2.json)) and the everyday [shopping](../fixtures/coach/everyday-shopping.json) and [visiting](../fixtures/coach/everyday-visiting.json) batches freeze English material and semantic checks before their measurements. Routine local English demo runs use the [standing authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo) without per-session or per-run budget approval. Existing timeout, output/media, retry and daily-start limits remain engineering guardrails; count failures and inspect each concrete result before retrying. Separate authorization applies to broader unrequested experiments, different providers and paid API execution. No automatic paid API fallback or unbounded retries are permitted.
+Freeze synthetic development and held-out cases before real provider calls. The [development fixture](../fixtures/coach/working-set.json), the [fourth held-out freeze](../fixtures/coach/working-set-held-out-4.json) (spent, like the [third](../fixtures/coach/working-set-held-out-3.json) and [second](../fixtures/coach/working-set-held-out-2.json)) and the everyday [shopping](../fixtures/coach/everyday-shopping.json) and [visiting](../fixtures/coach/everyday-visiting.json) batches freeze English material and semantic checks before their measurements. Routine local English demo runs use the [standing authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo) without per-session or per-run budget approval. Existing timeout, output/media, retry and daily-start limits remain engineering guardrails; count failures and inspect each concrete result before retrying. Separate authorization applies to broader unrequested experiments, different providers and paid API execution. No automatic paid API fallback or unbounded retries are permitted.
 
 Keep the full matrix in the implementation plan: fixed phrases, alternatives, slots, words/senses/forms, dialogue/exposure, preferred/confusable/dependency behavior, ambiguity, absent preferences, and supplied/missing/invalid speech across English, German and Serbian. Freeze unseen held-out wording separately. Record exact executable/model/configuration, fixture identity, elapsed time, unknown usage where unavailable, accepted/failed outputs, and separate fresh semantic review and attended listening. A successful English result does not establish the matrix.
 
@@ -144,6 +144,18 @@ Later on 2026-10-24, after the answer-free-situation guide (v3), the demo Server
 | Visiting | 2.1.310 | 30.0 s | 5 | 4,214 | 5 published |
 
 All 20 targets have both help layers and verified speech; every batch has a reusable frame (8 frames, 8 fixed phrases, 4 words), and no fixed-phrase or frame situation reuses a content word of its answer. Some situations became stilted to avoid answer words, and some frame situations paraphrase the slot value instead of naming it.
+
+On 2026-10-24, after the plain-frame-value guide (v4), the demo Server was reset and refilled once more, and Codex was measured once on a disposable Server:
+
+| Batch | Tool | CLI time | Turns | Output tokens | Result |
+|---|---|---|---|---|---|
+| Development | Codex 0.163.0, gpt-5.6-luna, low effort | 90.0 s | – | – | timed out with no output; no retry |
+| Development | Claude 2.1.310 | 30.6 s | 5 | 4,235 | 5 published |
+| Held-out (fourth freeze) | Claude 2.1.310 | 32.3 s | 5 | 4,235 | 5 published |
+| Shopping | Claude 2.1.310 | 34.2 s | 5 | 4,742 | 5 published |
+| Visiting | Claude 2.1.310 | 45.5 s | 5 | 7,447 | 5 published |
+
+All 20 Claude targets have both help layers and verified speech (7 frames, 9 fixed phrases, 4 words); frame situations name their values plainly and no situation reuses a content word of its own answer. One word cue ("Explain them better." for clarify) contains a word that fits the gap, and one situation repeats another lesson's answer wording. Codex logged no tool call or output before the deadline, so its failure is unexplained rather than a known defect.
 
 Run the measurement by hand only, from this repository and against a disposable Server: `target/debug/examples/working_set_measurement http://127.0.0.1:<port> <fresh absolute folder> <piper-voice.json> fixtures/coach/working-set.json [claude|codex]`.
 
