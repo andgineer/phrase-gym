@@ -1,0 +1,3847 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Andrey Sorokin">
+      
+      
+        <link rel="canonical" href="https://andgineer.github.io/phrase-gym/reference/">
+      
+      
+      
+      
+        
+          <link rel="alternate" href="/phrase-gym/" hreflang="en">
+        
+          <link rel="alternate" href="/phrase-gym/ru/" hreflang="ru">
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.52">
+    
+    
+      
+        <title>Reference - phrase_gym</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.8b3b5a67.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phrase_gym" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="phrase_gym" class="md-header__button md-logo" aria-label="phrase_gym" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            phrase_gym
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-languages" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="/phrase-gym/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="/phrase-gym/ru/" hreflang="ru" class="md-select__link">
+              Русский
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/andgineer/phrase-gym" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    phrase_gym
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="phrase_gym" class="md-nav__button md-logo" aria-label="phrase_gym" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    phrase_gym
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/andgineer/phrase-gym" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    phrase_gym
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Phrase Gym
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Run the current source build
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#phrase_gym" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        phrase_gym
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="phrase_gym">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.api" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        api
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="api">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.api.boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        boundary
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="boundary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.api.boundary.LocalBoundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        LocalBoundary
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        config
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.content" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        content
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="content">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.content.source_identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        source_identity
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        contracts
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="contracts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.contracts.base" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        base
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.contracts.handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        handoff
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.contracts.preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        preparation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.contracts.vault" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        vault
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        integrations
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="integrations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cli
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="cli">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.cli.existing_export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        existing_export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.cli.vault_export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        vault_export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        handoff
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.legacy_notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        legacy_notes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.integrations.vault" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        vault
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        main
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="main">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.export_schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        export_schema
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.import_package" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        import_package
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.phrase_gym" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        phrase_gym
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.publish" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        publish
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.reconcile_media" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        reconcile_media
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.serve" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        serve
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.main.upload_reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        upload_reference
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.media" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        media
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="media">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.media.service" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        service
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        migrations
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="migrations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.env" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        env
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        versions
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="versions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions.0001_foundation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0001_foundation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions.0002_device_language" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0002_device_language
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions.0003_sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0003_sessions
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions.0004_practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0004_practice
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.migrations.versions.0005_preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0005_preparation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        preparation
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="preparation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.bindings" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        bindings
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.chunks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        chunks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cli
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="cli">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli.preparation_cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        preparation_cli
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli.providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        providers
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli.publish" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        publish
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli.revise" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        revise
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.cli.work" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        work
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        config
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        jobs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        prompts
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        providers
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        publication
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.revisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        revisions
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.speech" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        speech
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        tables
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        validation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        versions
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.preparation.worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        worker
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        storage
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phrase_gym.tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        tables
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+  <h1 id="__skip">Reference</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="phrase_gym" class="doc doc-heading">
+            <code>phrase_gym</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>A language trainer for guided phrase recall and prepared dialogue drills.</p>
+<p>The file is mandatory for build system to find the package.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.api" class="doc doc-heading">
+            <code>api</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.api.boundary" class="doc doc-heading">
+            <code>boundary</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h5 id="phrase_gym.api.boundary.LocalBoundary" class="doc doc-heading">
+            <code>LocalBoundary</code>
+
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Reject cross-site mutations and bound memory before JSON parsing.</p>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/phrase_gym/api/boundary.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LocalBoundary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject cross-site mutations and bound memory before JSON parsing."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">allowed_origins</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_origins</span> <span class="o">=</span> <span class="n">allowed_origins</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cross_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"method"</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"HEAD"</span><span class="p">,</span> <span class="s2">"OPTIONS"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">b</span><span class="s2">"origin"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="n">origin_url</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span>
+        <span class="n">same_origin</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">origin_url</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">b</span><span class="s2">"host"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="n">origin_url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"scheme"</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">cross_site</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">b</span><span class="s2">"sec-fetch-site"</span><span class="p">)</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"cross-site"</span>
+        <span class="k">return</span> <span class="n">cross_site</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span>
+            <span class="n">origin</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">same_origin</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_origins</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">too_large</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">b</span><span class="s2">"content-length"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"0"</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">MAX_REQUEST_BYTES</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">send</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">scope</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"http"</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">send</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"headers"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_origin</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">headers</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Cross-origin mutations are not allowed"</span><span class="p">},</span> <span class="mi">403</span><span class="p">)(</span>
+                <span class="n">scope</span><span class="p">,</span>
+                <span class="n">receive</span><span class="p">,</span>
+                <span class="n">send</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">too_large</span><span class="p">(</span><span class="n">headers</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Request exceeds 24 MiB"</span><span class="p">},</span> <span class="mi">413</span><span class="p">)(</span><span class="n">scope</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">send</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="n">receive</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="s2">"type"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"http.disconnect"</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">body</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"body"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">""</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_REQUEST_BYTES</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Request exceeds 24 MiB"</span><span class="p">},</span> <span class="mi">413</span><span class="p">)(</span><span class="n">scope</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">send</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"more_body"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="n">consumed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">replay</span><span class="p">():</span>
+            <span class="k">nonlocal</span> <span class="n">consumed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">consumed</span><span class="p">:</span>
+                <span class="n">consumed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"http.request"</span><span class="p">,</span> <span class="s2">"body"</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">body</span><span class="p">),</span> <span class="s2">"more_body"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">receive</span><span class="p">()</span>
+
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span> <span class="n">send</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.config" class="doc doc-heading">
+            <code>config</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Explicit local runtime configuration; never expose provider environment variables.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.content" class="doc doc-heading">
+            <code>content</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.content.source_identity" class="doc doc-heading">
+            <code>source_identity</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Dry-run source edits and objective conflicts before provider work.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.contracts" class="doc doc-heading">
+            <code>contracts</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.contracts.base" class="doc doc-heading">
+            <code>base</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Version-one HTTP and manual-package contracts.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.contracts.handoff" class="doc doc-heading">
+            <code>handoff</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Portable selected-sense envelope; audio travels through verified upload IDs.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.contracts.preparation" class="doc doc-heading">
+            <code>preparation</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Source intent and withheld preparation drafts, independent of publication.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.contracts.vault" class="doc doc-heading">
+            <code>vault</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Explicit selected-note mappings live outside the read-only source vault.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.integrations" class="doc doc-heading">
+            <code>integrations</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Read-only source adapters and explicit durable handoffs.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.integrations.cli" class="doc doc-heading">
+            <code>cli</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Read-only vault export and conversion of existing content into source intent.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.integrations.cli.existing_export" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">existing_export</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">native_language</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Prepare/regenerate existing target content without touching progress or recordings.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/integrations/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"export-existing"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"namespace"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"native_language"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">"en"</span><span class="p">,</span> <span class="s2">"ru"</span><span class="p">,</span> <span class="s2">"sr"</span><span class="p">,</span> <span class="s2">"de"</span><span class="p">]))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">existing_export</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">native_language</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Prepare/regenerate existing target content without touching progress or recordings."""</span>
+    <span class="k">with</span> <span class="n">runtime</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">_media</span><span class="p">),</span> <span class="n">jobs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">as</span> <span class="n">transaction</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span>
+            <span class="n">select</span><span class="p">(</span><span class="n">SourceItem</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">SourceItem</span><span class="o">.</span><span class="n">namespace</span> <span class="o">==</span> <span class="n">namespace</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">phrases</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">language</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">target_sources</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">target_id</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">language</span>
+            <span class="n">revision</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">TargetRevision</span><span class="p">,</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">current_revision</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">revision</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">TargetInput</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">revision</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">target_sources</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">source_id</span>
+            <span class="n">phrases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">SourcePhrase</span><span class="p">(</span>
+                    <span class="n">source_id</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">source_id</span><span class="p">,</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+                    <span class="n">meaning_key</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">meaning_key</span><span class="p">,</span>
+                    <span class="n">recall_expression</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">recall_expression</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                    <span class="n">purpose</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">purpose</span><span class="p">,</span>
+                    <span class="n">reference_audio_id</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">reference_audio_id</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="n">lessons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lesson</span> <span class="ow">in</span> <span class="n">transaction</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span>
+            <span class="n">select</span><span class="p">(</span><span class="n">LessonRow</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">LessonRow</span><span class="o">.</span><span class="n">namespace</span> <span class="o">==</span> <span class="n">namespace</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">members</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span>
+                <span class="n">select</span><span class="p">(</span><span class="n">Membership</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Membership</span><span class="o">.</span><span class="n">lesson_id</span> <span class="o">==</span> <span class="n">lesson</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Membership</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="n">lessons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">LessonInput</span><span class="p">(</span>
+                    <span class="n">source_id</span><span class="o">=</span><span class="n">lesson</span><span class="o">.</span><span class="n">source_id</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">lesson</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                    <span class="n">target_source_ids</span><span class="o">=</span><span class="p">[</span><span class="n">target_sources</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">target_id</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">members</span><span class="p">],</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">phrases</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"No source targets in this namespace"</span><span class="p">)</span>
+        <span class="n">dialogues</span> <span class="o">=</span> <span class="n">latest_dialogues</span><span class="p">(</span><span class="n">transaction</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="n">SourcePackage</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"namespace"</span><span class="p">:</span> <span class="n">namespace</span><span class="p">,</span>
+                <span class="s2">"language"</span><span class="p">:</span> <span class="n">language</span><span class="p">,</span>
+                <span class="s2">"native_language"</span><span class="p">:</span> <span class="n">native_language</span><span class="p">,</span>
+                <span class="s2">"source_revision"</span><span class="p">:</span> <span class="s2">"preparation-export-1"</span><span class="p">,</span>
+                <span class="s2">"phrases"</span><span class="p">:</span> <span class="n">phrases</span><span class="p">,</span>
+                <span class="s2">"lessons"</span><span class="p">:</span> <span class="n">lessons</span><span class="p">,</span>
+                <span class="s2">"dialogues"</span><span class="p">:</span> <span class="n">dialogues</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.integrations.cli.vault_export" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">vault_export</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">vault_root</span><span class="p">,</span> <span class="n">manifest_path</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">upload_assets</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Dry-run selected stable blocks by default; write export only outside the vault.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/integrations/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"export-vault"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"vault_root"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">file_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"manifest_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--output"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--upload-assets"</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vault_export</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+    <span class="n">vault_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">manifest_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">upload_assets</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Dry-run selected stable blocks by default; write export only outside the vault."""</span>
+    <span class="n">resolved_vault</span> <span class="o">=</span> <span class="n">vault_root</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">within_vault</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">resolved_vault</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"Runtime data directory must stay outside the read-only vault"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">output</span> <span class="ow">and</span> <span class="n">within_vault</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">resolved_vault</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"Export output must stay outside the read-only vault"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">runtime</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">media</span><span class="p">):</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">VaultManifest</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">manifest_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">package</span><span class="p">,</span> <span class="n">report</span> <span class="o">=</span> <span class="n">export_vault</span><span class="p">(</span><span class="n">vault_root</span><span class="p">,</span> <span class="n">manifest</span><span class="p">,</span> <span class="n">media</span> <span class="k">if</span> <span class="n">upload_assets</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">jobs</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">as</span> <span class="n">transaction</span><span class="p">:</span>
+                <span class="n">report</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">source_changes</span><span class="p">(</span><span class="n">transaction</span><span class="p">,</span> <span class="n">package</span><span class="p">))</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"identity_errors"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"Vault export rejected"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">report</span><span class="p">[</span><span class="s2">"assets_not_uploaded"</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
+                    <span class="s2">"Use --upload-assets before writing an importable audio-bound export"</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.integrations.handoff" class="doc doc-heading">
+            <code>handoff</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Receipt and preparation enqueue share one transaction, preserving export identity.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.integrations.legacy_notes" class="doc doc-heading">
+            <code>legacy_notes</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>The existing selected vault lesson syntax, without its historical hint rules.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.integrations.vault" class="doc doc-heading">
+            <code>vault</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Read selected Markdown blocks and exact assets without writing source files.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.main" class="doc doc-heading">
+            <code>main</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Local tools share the publication boundary with HTTP requests.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.export_schema" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">export_schema</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Export OpenAPI without starting the app or accessing learner data.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"export-schema"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"output_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_schema</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Export OpenAPI without starting the app or accessing learner data."""</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">()</span><span class="o">.</span><span class="n">openapi</span><span class="p">()</span>
+    <span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">output_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.import_package" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">import_package</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">package_path</span><span class="p">,</span> <span class="n">stage</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Dry-run a manual JSON package by default; no automatic publication.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"import-package"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"package_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">"--stage"</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Persist the validated package for explicit publication."</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">import_package</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">package_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Dry-run a manual JSON package by default; no automatic publication."""</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">migrate</span><span class="p">()</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="n">MediaService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">ImportService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">PackageValidator</span><span class="p">(</span><span class="n">media</span><span class="o">.</span><span class="n">available</span><span class="p">))</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="n">ManualPackage</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">package_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">stage</span><span class="p">(</span><span class="n">package</span><span class="p">)</span> <span class="k">if</span> <span class="n">stage</span> <span class="k">else</span> <span class="n">content</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"Package rejected; resolve the reported errors"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">DomainError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.phrase_gym" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">phrase_gym</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run the local trainer foundation and import reviewed content.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">version_option</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">__version__</span><span class="p">,</span> <span class="n">prog_name</span><span class="o">=</span><span class="s2">"phrase-gym"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">"--data-dir"</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Private database/media directory."</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phrase_gym</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run the local trainer foundation and import reviewed content."""</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">Config</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">data_dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">data_dir</span> <span class="k">else</span> <span class="n">runtime</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.publish" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">publish</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">import_id</span><span class="p">,</span> <span class="n">reviewed</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Publish a staged package after reviewing its report and learning material.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"import_id"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--reviewed"</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Confirm linguistic/cue review."</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">import_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reviewed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Publish a staged package after reviewing its report and learning material."""</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">reviewed</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="s2">"Publication requires --reviewed"</span><span class="p">)</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">migrate</span><span class="p">()</span>
+        <span class="n">media</span> <span class="o">=</span> <span class="n">MediaService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="n">ImportService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">PackageValidator</span><span class="p">(</span><span class="n">media</span><span class="o">.</span><span class="n">available</span><span class="p">))</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">UUID</span><span class="p">(</span><span class="n">import_id</span><span class="p">))</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">DomainError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.reconcile_media" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">reconcile_media</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Report missing/orphan media; remove only old interrupted staging files.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"reconcile-media"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reconcile_media</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report missing/orphan media; remove only old interrupted staging files."""</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">migrate</span><span class="p">()</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">MediaService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span><span class="o">.</span><span class="n">reconcile</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.serve" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">serve</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">client_dir</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Serve the API and built client on loopback. HTTPS/private hosting comes later.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--port"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">IntRange</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">65535</span><span class="p">),</span> <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--client-dir"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">file_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">serve</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">client_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Serve the API and built client on loopback. HTTPS/private hosting comes later."""</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">client_dir</span><span class="o">=</span><span class="n">client_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">client_dir</span> <span class="k">else</span> <span class="n">config</span>
+    <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">create_app</span><span class="p">(</span><span class="n">runtime</span><span class="p">),</span> <span class="n">host</span><span class="o">=</span><span class="s2">"127.0.0.1"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">proxy_headers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="phrase_gym.main.upload_reference" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">upload_reference</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">,</span> <span class="n">metadata_path</span><span class="p">,</span> <span class="n">mime_type</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Preserve an original clip and exact text/language/provenance; returns its asset ID.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@phrase_gym</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"upload-reference"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"audio_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"metadata_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">"--mime-type"</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">"audio/wav"</span><span class="p">,</span> <span class="s2">"audio/mpeg"</span><span class="p">,</span> <span class="s2">"audio/ogg"</span><span class="p">,</span> <span class="s2">"audio/mp4"</span><span class="p">]),</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">upload_reference</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+    <span class="n">audio_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">metadata_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">mime_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Preserve an original clip and exact text/language/provenance; returns its asset ID."""</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">migrate</span><span class="p">()</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">MediaMetadata</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">metadata_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="n">upload</span> <span class="o">=</span> <span class="n">MediaUpload</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">"metadata"</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+                <span class="s2">"mime_type"</span><span class="p">:</span> <span class="n">mime_type</span><span class="p">,</span>
+                <span class="s2">"audio_base64"</span><span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">audio_path</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
+            <span class="n">MediaService</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">upload</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">DomainError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">database</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.media" class="doc doc-heading">
+            <code>media</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.media.service" class="doc doc-heading">
+            <code>service</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Original reference bytes, verified hash identities and crash reconciliation.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.migrations" class="doc doc-heading">
+            <code>migrations</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.migrations.env" class="doc doc-heading">
+            <code>env</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Migrations use the application's configured SQLite connection.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.migrations.versions" class="doc doc-heading">
+            <code>versions</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h5 id="phrase_gym.migrations.versions.0001_foundation" class="doc doc-heading">
+            <code>0001_foundation</code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+        <p>Initial content, settings, imports, reference media and exposure schema.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h5 id="phrase_gym.migrations.versions.0002_device_language" class="doc doc-heading">
+            <code>0002_device_language</code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+        <p>Remove the obsolete server learning-language convenience preference.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h5 id="phrase_gym.migrations.versions.0003_sessions" class="doc doc-heading">
+            <code>0003_sessions</code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+        <p>Pinned sessions and one shared due/version record per target.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h5 id="phrase_gym.migrations.versions.0004_practice" class="doc doc-heading">
+            <code>0004_practice</code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+        <p>Ordered evidence, FSRS state, retained takes and repair checkpoints.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h5 id="phrase_gym.migrations.versions.0005_preparation" class="doc doc-heading">
+            <code>0005_preparation</code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+        <p>Durable leased preparation and source-delivery receipts.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.preparation" class="doc doc-heading">
+            <code>preparation</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Durable intake-time preparation; practice never calls providers.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.bindings" class="doc doc-heading">
+            <code>bindings</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Fence every published package identity against its intake-time state.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.chunks" class="doc doc-heading">
+            <code>chunks</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Reconcile stored chunk identities without relabelling retained recall evidence.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.cli" class="doc doc-heading">
+            <code>cli</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Operator preparation tools; no background provider calls from serving practice.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.preparation.cli.preparation_cli" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">preparation_cli</span><span class="p">()</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Queue, inspect, retry and explicitly review preparation drafts.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/preparation/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"prepare"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">preparation_cli</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Queue, inspect, retry and explicitly review preparation drafts."""</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.preparation.cli.providers" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">providers</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config_path</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Inspect key availability/model state without printing secret material.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/preparation/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@preparation_cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"providers"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"config_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">providers</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Inspect key availability/model state without printing secret material."""</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">inspect</span><span class="p">():</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">BrokerProvider</span><span class="p">(</span><span class="n">settings</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span><span class="o">.</span><span class="n">provider</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s2">"llmbroker"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">availability</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inspect</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.preparation.cli.publish" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">publish</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">review_path</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply a hash-bound human review, including actual reference listening approval.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/preparation/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@preparation_cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"publish"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"job_id"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">UUID</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"review_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">publish</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">job_id</span><span class="p">:</span> <span class="n">UUID</span><span class="p">,</span> <span class="n">review_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Apply a hash-bound human review, including actual reference listening approval."""</span>
+    <span class="k">with</span> <span class="n">runtime</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">media</span><span class="p">):</span>
+        <span class="n">review</span> <span class="o">=</span> <span class="n">HumanReview</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">review_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">imports</span> <span class="o">=</span> <span class="n">ImportService</span><span class="p">(</span><span class="n">jobs</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">PackageValidator</span><span class="p">(</span><span class="n">media</span><span class="o">.</span><span class="n">available</span><span class="p">))</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">publish_reviewed</span><span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">imports</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">review</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.preparation.cli.revise" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">revise</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">draft_path</span><span class="p">,</span> <span class="n">reviewer</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Correct a withheld draft; preserve raw answers and require a new approval hash.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/preparation/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@preparation_cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"revise"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"job_id"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">UUID</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"draft_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--reviewer"</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--notes"</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">revise</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">job_id</span><span class="p">:</span> <span class="n">UUID</span><span class="p">,</span> <span class="n">draft_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reviewer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Correct a withheld draft; preserve raw answers and require a new approval hash."""</span>
+    <span class="k">with</span> <span class="n">runtime</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">_media</span><span class="p">):</span>
+        <span class="n">draft</span> <span class="o">=</span> <span class="n">PreparationDraft</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">draft_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">revise_draft</span><span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">reviewer</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="phrase_gym.preparation.cli.work" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">work</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span></code>
+
+</h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Run a bounded number of leased jobs with this exact operator configuration.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/phrase_gym/preparation/cli.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@preparation_cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">"work"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"config_path"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"--limit"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">IntRange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_obj</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">work</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run a bounded number of leased jobs with this exact operator configuration."""</span>
+    <span class="k">with</span> <span class="n">runtime</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">media</span><span class="p">):</span>
+        <span class="n">configured</span> <span class="o">=</span> <span class="n">settings</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_worker</span><span class="p">(</span><span class="n">jobs</span><span class="p">,</span> <span class="n">media</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">configured</span><span class="p">,</span> <span class="n">limit</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.config" class="doc doc-heading">
+            <code>config</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Operator-owned provider configuration, separate from the served client.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.jobs" class="doc doc-heading">
+            <code>jobs</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Short transactions own leases; provider calls run outside database locks.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.prompts" class="doc doc-heading">
+            <code>prompts</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Versioned generation and adversarial review prompts.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.providers" class="doc doc-heading">
+            <code>providers</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Explicit llmbroker pool/direct configuration with no implicit paid escalation.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.publication" class="doc doc-heading">
+            <code>publication</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Hash-bound operator approval and atomic content/job publication.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.revisions" class="doc doc-heading">
+            <code>revisions</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Operator corrections retain model evidence and invalidate the previous review hash.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.speech" class="doc doc-heading">
+            <code>speech</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Whole-phrase speech, explicit language/accent voices and Serbian speech script.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.tables" class="doc doc-heading">
+            <code>tables</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Preparation leases and durable source handoff receipts.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.validation" class="doc doc-heading">
+            <code>validation</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Deterministic draft conformance and reviewed publication assembly.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.versions" class="doc doc-heading">
+            <code>versions</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>Preparation revisions shared by durable job identity and provider boundaries.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="phrase_gym.preparation.worker" class="doc doc-heading">
+            <code>worker</code>
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+        <p>One bounded worker step, retaining concrete answers before validation/audio.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.storage" class="doc doc-heading">
+            <code>storage</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Durable SQLite tables and short, serialized write transactions.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h3 id="phrase_gym.tables" class="doc doc-heading">
+            <code>tables</code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+        <p>Foundation content and session persistence models.</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":[],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.ed145cee.min.js"></script>
+      
+    
+  </body>
+</html>

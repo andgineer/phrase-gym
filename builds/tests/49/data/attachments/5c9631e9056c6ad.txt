@@ -1,0 +1,5 @@
+Local app: http://127.0.0.1:47267/learn/en
+Tailscale app: https://trainer.example.ts.net/learn/en
+INFO:     127.0.0.1:43262 - "GET /api/v1/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43268 - "PUT /api/v1/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43270 - "GET /api/v1/settings HTTP/1.1" 400 Bad Request
