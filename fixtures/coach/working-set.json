@@ -15,5 +15,5 @@
     "speech": "existing local Piper",
     "bounds": "existing attempt, output, lease and daily-start limits; no automatic model retries or paid API fallback"
   },
-  "held_out_fixture": "working-set-held-out-2.json"
+  "held_out_fixture": "working-set-held-out-3.json"
 }
