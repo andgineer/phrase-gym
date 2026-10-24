@@ -41,11 +41,24 @@ One input can be outstanding locally. Browser storage and Coach's `pending-text.
 
 The English demo candidate is `en_US-ljspeech-medium`, Piper 1.8.0, ONNX Runtime 1.x, one speaker, 22,050 Hz. The [model card](https://huggingface.co/rhasspy/piper-voices/blob/c10ece1aade47bb51c153c893d14e5bf8e5b7117/en/en_US/ljspeech/medium/MODEL_CARD) identifies scratch training on [LJ Speech](https://keithito.com/LJ-Speech-Dataset/), whose author declares the dataset public domain without use restrictions. The voices repository declares MIT in its [README metadata](https://huggingface.co/rhasspy/piper-voices/blob/c10ece1aade47bb51c153c893d14e5bf8e5b7117/README.md). This choice avoids assuming acceptance of Lessac's research-data terms. Primary voice quality still requires attended listening.
 
+Piper is a separately installed speech tool: Phrase Gym neither bundles nor builds it, and Coach only runs it as a child process. Piper 1.8.0 is GPL-3.0-or-later and ONNX Runtime is MIT. Install it into its own Python virtual environment outside any repository with exactly these versions; the learner's macOS runtime uses Homebrew CPython 3.13 and lives in Coach's settings folder:
+
+```bash
+PIPER="$HOME/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/piper-1.8.0"
+python3.13 -m venv "$PIPER"
+"$PIPER/bin/python" -I -m pip install --no-deps --only-binary=:all: \
+  piper-tts==1.8.0 onnxruntime==1.31.0 flatbuffers==25.12.19 numpy==2.5.4 \
+  packaging==25.0 pathvalidate==3.3.1 protobuf==7.36.2
+"$PIPER/bin/python" -I -m pip check
+```
+
+The full pinned list with `--no-deps` keeps the runtime reproducible, and `pip check` confirms it is complete. The runtime identity recorded with each reference includes the interpreter's hash and version, so replacing the interpreter changes cache identity.
+
 Download the model and adjacent JSON configuration from that exact Hugging Face revision into an external cache. Configure `piper-voice.json` in Coach's settings directory, using absolute paths:
 
 ```json
 {
-  "executable": "/absolute/path/to/python-with-piper-1.8.0",
+  "executable": "/absolute/path/to/piper-1.8.0/bin/python",
   "runtime_version": "1.8.0",
   "model": "/absolute/path/to/en_US-ljspeech-medium.onnx",
   "model_sha256": "6f52a751e2349abe7a76735eb09dc1875298c77ea2342ffd2fef79ff81b87f22",
@@ -57,6 +70,8 @@ Download the model and adjacent JSON configuration from that exact Hugging Face 
 ```
 
 The interpreter uses isolated mode. The speech runner verifies package versions, hashes, locale and speaker count, stages immutable bytes outside repositories, supervises a maximum 60-second process with bounded output, then validates nonempty PCM and returns WAV. Exact text, speech input, voice, runtime identity, model/config hashes and settings accompany generated media. A failed synthesis retains text and publishes nothing. These checks establish byte/provenance conformance, not pronunciation or listening quality. German and Serbian voices remain unaccepted.
+
+To check a runtime with one real synthesis that writes a WAV and plays nothing, put the `piper-voice.json` contents under `voice` and a request such as `{"language": "en", "text": "Let's get started.", "speech_text": "Let's get started.", "source": "runtime-check", "role": "reference"}` under `request` in one JSON file, then run `cargo run --locked --package phrase-gym-coach --example piper_probe -- --authorized-local-synthesis <that file> <absolute staging folder outside repositories>`.
 
 ### Measurement preparation
 
