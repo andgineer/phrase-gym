@@ -124,3 +124,34 @@ fn both_help_layers_are_required_in_their_pinned_languages() {
     assert_eq!(details["additionalProperties"], json!(false));
     assert_eq!(details["required"].as_array().unwrap().len(), 5);
 }
+
+#[test]
+fn repeated_words_appear_once_among_the_allowed_hints() {
+    let schema = phrase_schema("Could you send me the agenda before the call?").unwrap();
+    assert_eq!(
+        schema["properties"]["hint"]["enum"],
+        json!([
+            "Could", "you", "send", "me", "the", "agenda", "before", "call"
+        ])
+    );
+    let mut inputs = Vec::new();
+    for (source, text) in [
+        ("one", "That's that, isn't it? That's all."),
+        ("two", "reluctant"),
+    ] {
+        inputs.push(
+            serde_json::from_value(json!({"source_id":source,"text":text,"reference_audio_id":null,"audio_sha256":null,"expected_revision":null}))
+                .unwrap(),
+        );
+    }
+    let batch = batch_schema(&inputs).unwrap();
+    for item in batch["properties"]["phrases"]["items"]["anyOf"]
+        .as_array()
+        .unwrap()
+    {
+        let hints = item["properties"]["hint"]["enum"].as_array().unwrap();
+        let distinct: std::collections::BTreeSet<_> =
+            hints.iter().map(ToString::to_string).collect();
+        assert_eq!(distinct.len(), hints.len(), "{hints:?}");
+    }
+}

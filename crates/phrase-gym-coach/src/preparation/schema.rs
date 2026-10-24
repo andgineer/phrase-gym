@@ -88,8 +88,15 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
         phrase["properties"]["situations"]["minItems"] = json!(2);
         phrase["properties"]["situations"]["maxItems"] = json!(3);
     }
+    phrase["properties"]["hint"] = hint(&cues, english_source::word_form(text).is_some());
+    let mut root = phrase.clone();
+    root["$defs"] = json!(definitions);
+    strict(&mut root);
+    Ok(root)
+}
+
+fn hint(cues: &[&str], word: bool) -> Value {
     let first = cues[0];
-    let word = english_source::word_form(text).is_some();
     let hints: Vec<String> = if word {
         let letters = first.chars().count();
         (1..=english_source::word_hint_max_chars(first))
@@ -97,17 +104,18 @@ pub fn phrase_schema(text: &str) -> Result<Value, String> {
             .map(|length| first.chars().take(length).collect())
             .collect()
     } else {
-        cues.iter().map(|cue| (*cue).to_owned()).collect()
+        // A JSON Schema enum must list distinct values; strict validators refuse repeated words.
+        let mut seen = BTreeSet::new();
+        cues.iter()
+            .filter(|cue| seen.insert(**cue))
+            .map(|cue| (*cue).to_owned())
+            .collect()
     };
-    phrase["properties"]["hint"] = if hints.is_empty() {
+    if hints.is_empty() {
         json!({"type":"string", "minLength":1, "maxLength":100})
     } else {
         json!({"type": "string", "enum": hints, "description": "Fixed/frame cues are unchanged whole source words; word cues are partial initial forms."})
-    };
-    let mut root = phrase.clone();
-    root["$defs"] = json!(definitions);
-    strict(&mut root);
-    Ok(root)
+    }
 }
 
 fn strict(value: &mut Value) {
