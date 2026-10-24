@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from './preview-server'
 import { englishLesson } from './english-lesson'
-import { expectComparison } from './native-playback'
+import { allowPlayback, expectComparison, PLAYBACK_BUDGET } from './native-playback'
 import { recordingSegments, syntheticCapture } from './synthetic-capture'
 
 test('a longer take finishes both native comparison playbacks before recording again', async ({
@@ -92,6 +92,7 @@ test('a longer take finishes both native comparison playbacks before recording a
       )
       expect((await recordingSegments(page, take.id)).peaks.every((peak) => peak > 0.1)).toBe(true)
     }
+    allowPlayback()
     await page.getByRole('button', { name: /My recording$/ }).click()
     await expect
       .poll(
@@ -104,7 +105,7 @@ test('a longer take finishes both native comparison playbacks before recording a
                 }
               ).__nativePlaybacks[0],
           ),
-        { timeout: 45000 },
+        { timeout: PLAYBACK_BUDGET },
       )
       .toMatchObject({
         source: expect.stringContaining(`/recordings/${latest.id}`),
