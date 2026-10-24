@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use super::tool_choice::ChoiceEvent;
 use crate::adapter::CliAdapter;
 use crate::platform::paths::CoachPaths;
 use crate::platform::tools::Discovery;
@@ -95,8 +96,7 @@ pub struct ToolChoice {
 }
 
 impl ToolChoice {
-    pub fn apply(&mut self, event: super::tool_choice::ChoiceEvent) {
-        use super::tool_choice::ChoiceEvent;
+    pub fn apply(&mut self, event: ChoiceEvent) {
         match event {
             ChoiceEvent::Loaded(adapter) => self.selected = Some(adapter),
             ChoiceEvent::Saved(adapter) => {
@@ -171,7 +171,6 @@ mod tests {
 
     #[test]
     fn the_tool_choice_follows_the_saved_setting_and_reports_each_save() {
-        use super::super::tool_choice::ChoiceEvent;
         let mut choice = ToolChoice::default();
         assert_eq!(choice.selected, None);
         choice.apply(ChoiceEvent::Loaded(CliAdapter::Claude));

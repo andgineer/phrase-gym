@@ -6,6 +6,7 @@ import type { PracticeMessages } from '../practiceMessages'
 import PracticeCard from './PracticeCard.vue'
 import DueOverview from './DueOverview.vue'
 import { serverUnavailable, connectionRetrying } from '../api'
+import { targetLabel } from '../targetLabel'
 const props = defineProps<{
   engine: ReturnType<typeof usePracticeSession>
   pt: PracticeMessages
@@ -44,6 +45,10 @@ const {
   isolate,
 } = usePracticeActions(props.engine)
 defineExpose({ openIntake })
+function resultLabel(targetId: string) {
+  const target = session.value?.manifest.targets.find((t) => t.phrase.id === targetId)
+  return target ? targetLabel(target.phrase) : ''
+}
 </script>
 <template>
   <section v-if="session" class="practice-panel" :aria-busy="engine.restoring.value">
@@ -85,10 +90,7 @@ defineExpose({ openIntake })
       <h2>{{ pt.results }}</h2>
       <ul>
         <li v-for="attempt in session.attempts" :key="attempt.id">
-          {{
-            session.manifest.targets.find((t) => t.phrase.id === attempt.target_id)?.phrase.content
-              .text
-          }}
+          {{ resultLabel(attempt.target_id) }}
           —
           {{
             attempt.rating === 'recalled'

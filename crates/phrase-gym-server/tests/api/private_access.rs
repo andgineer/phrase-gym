@@ -112,6 +112,7 @@ fn serve_configuration_rejects_public_origins_wildcards_and_user_information() {
         "https://gym.example.ts.net/path",
         "https://gym.example.ts.net:http",
         "https://gym.example.ts.net:0443",
+        "https://gym.example.ts.net:443",
         "https://.ts.net",
     ] {
         assert!(

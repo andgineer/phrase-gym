@@ -22,7 +22,7 @@ for (const reveal of ['explain', 'answer', 'reference', 'comparison'] as const) 
     await expect(page.locator('.answer-help')).toHaveText(short)
     await expect(page.locator('.answer-help')).toHaveAttribute('lang', 'en')
     await expect(page.getByText(translation, { exact: true })).toHaveCount(0)
-    await expect(page.locator('.lesson-links')).toContainText('Opening a meeting')
+    await expect(page.locator('.lesson-links')).toHaveText('Open lesson →')
     if (reveal === 'explain') {
       await page.getByRole('button', { name: /Show & explain/ }).click()
       await expect(page.locator('.phrase-details')).toContainText(translation)
@@ -61,7 +61,7 @@ for (const reveal of ['explain', 'answer', 'reference', 'comparison'] as const) 
     }
     await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
     await expect(page.locator('.answer-help')).toHaveText(short)
-    await expect(page.locator('.lesson-links')).toContainText('Opening a meeting')
+    await expect(page.locator('.lesson-links')).toHaveText('Open lesson →')
     const details = page.locator('.phrase-details')
     if (reveal === 'explain') {
       await expect(details).toHaveAttribute('lang', 'ru')

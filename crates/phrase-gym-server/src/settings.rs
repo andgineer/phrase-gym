@@ -20,15 +20,21 @@ impl ServerSettings {
 
     pub fn with_tailscale_origin(mut self, origin: &str) -> Result<Self, String> {
         let authority = origin.strip_prefix("https://").unwrap_or_default();
-        let (host, port) = authority.split_once(':').unwrap_or((authority, "443"));
+        let (host, port) = authority
+            .split_once(':')
+            .map_or((authority, None), |(host, port)| (host, Some(port)));
         let valid_host = host.ends_with(".ts.net")
             && !host.starts_with('.')
             && host
                 .bytes()
                 .all(|byte| byte.is_ascii_alphanumeric() || b".-".contains(&byte));
-        if !valid_host || port.parse::<u16>().is_err() || port.starts_with('0') {
+        // Browsers omit the default port from Origin, so an explicit :443 could never match.
+        let valid_port = port.is_none_or(|port| {
+            port != "443" && !port.starts_with('0') && port.parse::<u16>().is_ok()
+        });
+        if !valid_host || !valid_port {
             return Err(
-                "Use the exact https://machine.tailnet.ts.net[:port] Tailscale Serve origin".into(),
+                "Use the exact https://machine.tailnet.ts.net[:port] Tailscale Serve origin, without the default :443".into(),
             );
         }
         self.allowed_hosts.push(host.to_owned());

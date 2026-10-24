@@ -28,6 +28,17 @@ pub fn private_directory(paths: &CoachPaths) -> Result<PathBuf, String> {
     Ok(directory)
 }
 
+// Readiness probes delete their own transcripts; the probe folder itself must not accumulate.
+pub fn with_probe_directory<T>(
+    paths: &CoachPaths,
+    probe: impl FnOnce(&Path) -> Result<T, String>,
+) -> Result<T, String> {
+    let directory = private_directory(paths)?;
+    let result = probe(&directory);
+    let _ = fs::remove_dir_all(&directory);
+    result
+}
+
 pub fn stage(
     paths: &CoachPaths,
     claim: &JobClaim,
@@ -154,4 +165,31 @@ pub(super) fn validate_input(claim: &JobClaim) -> Result<(), String> {
         return Err("This bounded demo needs English card language and an explicit help language; update the personal profile through its authorized API".into());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn readiness_probe_folders_are_removed_whatever_the_outcome() {
+        let root = tempfile::tempdir().unwrap();
+        let paths = CoachPaths {
+            config: root.path().join("config"),
+            cache: root.path().join("cache"),
+            logs: root.path().join("logs"),
+            state: root.path().join("state"),
+        };
+        paths.ensure().unwrap();
+        let ready = with_probe_directory(&paths, |directory| {
+            fs::write(directory.join("version.stdout"), "2.1.309 (Claude Code)").unwrap();
+            Ok(directory.to_path_buf())
+        })
+        .unwrap();
+        assert!(!ready.exists());
+        let refused: Result<(), String> =
+            with_probe_directory(&paths, |_| Err("Claude login required".into()));
+        assert_eq!(refused.unwrap_err(), "Claude login required");
+        assert_eq!(fs::read_dir(paths.attempts()).unwrap().count(), 0);
+    }
 }

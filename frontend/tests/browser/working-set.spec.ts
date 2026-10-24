@@ -1,7 +1,21 @@
-import { expect } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { test } from './preview-server'
 import { prepareWithNativeFakeCoach } from './native-coach'
+
+// A batch's lesson is named after its items, so a card must show no sibling target's answer.
+async function expectNoOtherAnswers(page: Page, targets: any[], previous: string) {
+  const heading = page.getByTestId('practice-phrase')
+  if (previous) await expect(heading).not.toHaveText(previous)
+  const shownText = (await heading.innerText()).trim()
+  const shown = targets.find((target) => target.phrase.content.text === shownText)
+  expect(shown, shownText).toBeTruthy()
+  const card = await page.locator('.practice-card').innerText()
+  for (const target of targets.filter((target) => target.phrase.id !== shown.phrase.id))
+    for (const answer of [target.phrase.content.text, target.phrase.english?.task?.word])
+      if (answer) expect(card, `${answer} leaked onto another card`).not.toContain(answer)
+  return shownText
+}
 
 test('ordinary five-item intake publishes fixed, frame and contextual word study then independent recall with durable matching references', async ({
   page,
@@ -38,6 +52,7 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
   expect(word.phrase.english.task.contexts).toHaveLength(3)
   expect(frame.phrase.content.slots.item).toEqual(['the call', 'the meeting'])
   const firstId = session.id
+  let shown = ''
   for (let index = 0; index < 5; index++) {
     await expect(page.getByTestId('practice-phrase')).toBeVisible()
     if (session.manifest.targets[index].phrase.content.kind === 'word_sense') {
@@ -45,6 +60,8 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
       await expect(page.locator('.practice-prompt')).not.toContainText('|')
     }
     await expect(page.getByRole('button', { name: /Recalled$/ })).toHaveCount(0)
+    await expect(page.locator('.lesson-links')).toHaveText('Open lesson →')
+    shown = await expectNoOtherAnswers(page, session.manifest.targets, shown)
     await page.getByRole('button', { name: 'Next', exact: true }).click()
   }
   await expect(page.getByRole('heading', { name: 'Session complete', exact: true })).toBeVisible()
@@ -60,6 +77,7 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeVisible()
   session = await (await request.get('/api/v1/sessions/current')).json()
+  shown = ''
   for (let index = 0; index < 5; index++) {
     await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
     await expect(page.locator('.target-task')).toHaveCount(0)
@@ -75,6 +93,8 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
     }
     await page.getByRole('button', { name: 'Show answer', exact: true }).click()
     await expect(page.getByTestId('practice-phrase')).toHaveText(item.phrase.content.text)
+    await expect(page.locator('.lesson-links')).toHaveText('Open lesson →')
+    shown = await expectNoOtherAnswers(page, session.manifest.targets, shown)
     await page.getByRole('button', { name: /Recalled$/ }).click()
   }
   await expect(page.getByRole('heading', { name: 'Session complete', exact: true })).toBeVisible()

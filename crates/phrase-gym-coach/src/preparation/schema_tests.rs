@@ -1,4 +1,5 @@
 use super::*;
+use phrase_gym_contracts::base::Language;
 
 #[test]
 fn a_plain_word_requires_contextual_word_retrieval_and_a_partial_hint() {
@@ -91,7 +92,6 @@ fn generated_frame_slot_names_use_bounded_ascii_identifiers_for_plain_or_declare
 
 #[test]
 fn both_help_layers_are_required_in_their_pinned_languages() {
-    use phrase_gym_contracts::base::Language;
     let input = |source: &str| {
         serde_json::from_value(json!({"source_id":source,"text":"Let's get started.","reference_audio_id":null,"audio_sha256":null,"expected_revision":null})).unwrap()
     };

@@ -237,12 +237,14 @@ const emit = defineEmits<{
     >
       {{ pt.next }}
     </button>
+    <!-- Lesson names repeat the batch's answers, so a session never shows them. -->
     <nav v-if="study || card.revealed" class="lesson-links">
       <RouterLink
-        v-for="lesson in item.phrase.lessons"
+        v-for="(lesson, index) in item.phrase.lessons"
         :key="lesson.id"
         :to="`/learn/${item.phrase.language}/lessons/${lesson.id}`"
-        >{{ lesson.title }} →</RouterLink
+        >{{ pt.openLesson
+        }}{{ item.phrase.lessons.length > 1 ? ` ${index + 1}` : '' }} →</RouterLink
       >
     </nav>
   </article>

@@ -42,8 +42,7 @@ pub fn prepare_selected(
     shutdown: &Arc<AtomicBool>,
 ) -> Result<LessonOutput, String> {
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
-    let previous = tool.attempts(paths).join(claim.fence.token.to_string());
-    if previous.exists() {
+    if let Some(previous) = tool.started_attempt(paths, &claim.fence.token.to_string()) {
         let bytes = crate::platform::files::read_selected(&previous.join("validated.json"), 100_000)
             .map_err(|_| "The previous selected CLI attempt was interrupted before validation. Reconcile the accepted lesson and explicitly retry preparation; it will not be started twice")?;
         let output: LessonOutput = serde_json::from_slice(&bytes).map_err(|_| "Saved validated output is unreadable; preserve the private attempt before retrying")?;
@@ -128,6 +127,6 @@ pub fn prepare_selected(
     reference::complete(client, paths, claim, &mut output, shutdown)?;
     // A successful process cannot authorize publication after a lost or replaced lease.
     client.post::<_, String>("/api/v1/preparation/renew", &claim.fence)?;
-    crate::platform::files::save(&previous.join("validated.json"), &output)?;
+    crate::platform::files::save(&staged.directory.join("validated.json"), &output)?;
     Ok(output)
 }

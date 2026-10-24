@@ -29,8 +29,7 @@ pub(super) fn prepare(
             )
         }
         CliAdapter::Claude => {
-            let check = preparation::attempt::private_directory(paths)?;
-            let tool = ClaudeTool::check(&check)?;
+            let tool = preparation::attempt::with_probe_directory(paths, ClaudeTool::check)?;
             preparation::prepare(client, paths, claim, &tool, stop)
         }
     }

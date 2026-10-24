@@ -39,7 +39,7 @@ fn run() -> Result<(), String> {
     )?)
     .map_err(|_| "Invalid fixture")?;
     let input = fixture["input"].as_str().ok_or("Fixture has no input")?;
-    let tool = ClaudeTool::check(&attempt::private_directory(&paths)?)?;
+    let tool = attempt::with_probe_directory(&paths, ClaudeTool::check)?;
     let client = ServerClient::new(server)?;
     let accepted = text::submit_raw(&paths, &client.server, input, &client)?;
     let stop = Arc::new(AtomicBool::new(false));
