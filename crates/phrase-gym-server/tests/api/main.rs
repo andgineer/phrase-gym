@@ -1,6 +1,7 @@
 mod boundary;
 mod browser_controls;
 mod client_delivery;
+mod command_line;
 mod content_publication;
 mod content_validation;
 mod exposures;

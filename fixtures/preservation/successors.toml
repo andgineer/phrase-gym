@@ -240,16 +240,27 @@ successors = ["scenario:settings", "rust:crates/phrase-gym-server/tests/api/sett
 [[module]]
 path = "tests/integration/test_cue_hints.py"
 responsibility = "Cues need phrase-specific text; legacy situation-only cues stay readable but cannot start new sessions."
-status = "pending"
-stage = 3
-successors = []
+status = "superseded"
+decision = "specs/decision-targeted-drilling.md"
+replacement = "Answer-free situations are the retrieval prompt for English targets and start sessions; gapped cues and gapped situations without visible phrase-specific text are still rejected at publication. No situation-only cue from a Python-era database is ever opened."
+stage = 7
+successors = [
+    "rust:crates/phrase-gym-server/tests/api/content_validation.rs",
+    "rust:crates/phrase-gym-core/tests/english/structure.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/rotation.rs",
+]
+tests = [
+    "cues_without_phrase_specific_visible_text_are_rejected",
+    "the_bounded_english_contract_rejects_unsupported_material_and_structural_leakage",
+    "independent_situations_rotate_after_due_reviews_and_restart_without_changing_pinned_attempts",
+]
 
 [[module]]
 path = "tests/integration/test_explanations.py"
 responsibility = "Native meaning accepts a translation-only or a useful explanation."
-status = "pending"
-stage = 3
-successors = []
+status = "covered"
+successors = ["rust:crates/phrase-gym-server/tests/api/content_publication.rs"]
+tests = ["a_native_explanation_may_be_a_translation_alone_or_add_usage"]
 
 [[module]]
 path = "tests/integration/test_delayed_support.py"
@@ -299,44 +310,119 @@ stage = 4
 [[module]]
 path = "tests/preparation/test_jobs.py"
 responsibility = "Job deduplication, restart lease fencing, retry limits and manual retry."
-status = "pending"
-stage = 4
-successors = []
+status = "covered"
+successors = [
+    "rust:crates/phrase-gym-core/tests/inbox/jobs.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/intake.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/identity.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/publication.rs",
+]
+tests = [
+    "claims_are_scoped_idempotent_fenced_and_bounded",
+    "lease_renewal_cannot_extend_attempt_deadline_and_cancel_or_replacement_fences_workers",
+    "concurrent_claims_have_one_winner_and_daily_budget_survives_new_service",
+    "durable_receipt_is_scoped_retry_safe_and_generations_are_immutable",
+    "publication_identity_retains_its_payload_across_claim_replacement",
+    "isolated_restore_preserves_input_staged_media_guides_and_fences_captured_leases",
+]
 
 [[module]]
 path = "tests/preparation/test_package_bindings.py"
 responsibility = "Pending packages fence every publication identity and lesson revision they bind."
-status = "pending"
-stage = 4
-successors = []
+status = "covered"
+successors = [
+    "scenario:publication",
+    "rust:crates/phrase-gym-server/tests/api/content_publication.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/publication.rs",
+]
+tests = [
+    "a_staged_package_conflicts_after_any_change_to_its_namespace_identities",
+    "a_stale_lesson_edit_conflicts_without_writing",
+    "a_stale_dialogue_edit_conflicts_without_writing",
+    "compatible_generations_keep_target_identity_and_expected_revisions_are_rechecked",
+    "stale_workers_and_changed_pinned_input_cannot_publish",
+]
 
 [[module]]
 path = "tests/preparation/test_publication.py"
 responsibility = "Hash-gated atomic publication keeps schedules, rejects stale sources and pins generated masks."
-status = "pending"
-stage = 4
-successors = ["scenario:publication"]
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "No human approval or draft hash gates publication: a fenced Coach lease stages one publication identity that publishes atomically against expected target revisions. Compatible revisions keep the target and its schedule, and each session pins the prompt it selected. Correcting a stored draft has no successor; a defective card is suspended and recreated instead."
+stage = 7
+successors = [
+    "scenario:publication",
+    "rust:crates/phrase-gym-core/tests/inbox/publication.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/identity.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/study.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/rotation.rs",
+]
+tests = [
+    "staged_publication_is_atomic_and_committed_receipts_recover_after_expiry",
+    "stale_workers_and_changed_pinned_input_cannot_publish",
+    "compatible_generations_keep_target_identity_and_expected_revisions_are_rechecked",
+    "publication_identity_retains_its_payload_across_claim_replacement",
+    "completed_study_does_not_silently_cover_a_recreated_revision",
+    "independent_situations_rotate_after_due_reviews_and_restart_without_changing_pinned_attempts",
+]
 
 [[module]]
 path = "tests/preparation/test_chunk_identity.py"
 responsibility = "Generated chunk IDs keep matching material only; changed material gets distinct history."
-status = "pending"
-stage = 3
-successors = []
+status = "superseded"
+decision = "specs/decision-targeted-drilling.md"
+replacement = "Prompts are answer-free situations and word contexts, not masks over model-generated chunks: the Server derives one whole-answer chunk per target, so no generated chunk identity needs reconciling. Rotation follows situation presentation history, and re-preparation of the same meaning keeps the target identity."
+stage = 7
+successors = [
+    "rust:crates/phrase-gym-core/tests/inbox/rotation.rs",
+    "rust:crates/phrase-gym-core/tests/inbox/publication.rs",
+    "rust:crates/phrase-gym-core/tests/english/identity.rs",
+]
+tests = [
+    "independent_situations_rotate_after_due_reviews_and_restart_without_changing_pinned_attempts",
+    "word_contexts_rotate_matching_answers_and_references_on_one_schedule_across_due_return",
+    "compatible_generations_keep_target_identity_and_expected_revisions_are_rechecked",
+    "identity_is_stable_across_grouping_and_editorial_changes_but_meanings_cannot_be_reused",
+]
 
 [[module]]
 path = "tests/preparation/test_chunk_conformance.py"
 responsibility = "Invalid chunk references fail before identity remapping and keep the original draft."
-status = "pending"
-stage = 3
-successors = []
+status = "superseded"
+decision = "specs/decision-targeted-drilling.md"
+replacement = "Model output carries no chunk references. Its own references (word-context answers, exposed sources and frame slots) fail before speech or publication without rewriting the model output, and the accepted inbox input stays retained for retry."
+stage = 7
+successors = [
+    "rust:crates/phrase-gym-coach/src/preparation/result_tests.rs",
+    "rust:crates/phrase-gym-core/tests/english/structure.rs",
+    "rust:crates/phrase-gym-core/tests/english/tasks.rs",
+]
+tests = [
+    "truncated_word_references_fail_before_speech_but_explicit_cues_are_valid",
+    "reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_foreign_before_speech",
+    "exact_model_frame_with_a_spaced_slot_name_fails_before_speech_without_repair",
+    "the_bounded_english_contract_rejects_unsupported_material_and_structural_leakage",
+    "frame_slot_names_preserve_unicode_and_reject_spaces_empty_and_overlong_names",
+]
 
 [[module]]
 path = "tests/preparation/test_validation.py"
 responsibility = "Package validation rejects answer leaks and unreachable masks."
-status = "pending"
-stage = 3
-successors = []
+status = "superseded"
+decision = "specs/decision-targeted-drilling.md"
+replacement = "Answer leaks are rejected in situations, partner turns, hints and word contexts. Mask reachability no longer applies because a situation hides the whole answer."
+stage = 7
+successors = [
+    "rust:crates/phrase-gym-core/tests/english/structure.rs",
+    "rust:crates/phrase-gym-core/tests/english/tasks.rs",
+    "rust:crates/phrase-gym-server/tests/api/content_validation.rs",
+]
+tests = [
+    "the_bounded_english_contract_rejects_unsupported_material_and_structural_leakage",
+    "hints_must_not_reveal_any_complete_accepted_answer",
+    "word_contexts_bind_distinct_gap_answers_and_exact_references_without_answer_leaks",
+    "cues_without_phrase_specific_visible_text_are_rejected",
+]
 
 [[module]]
 path = "tests/preparation/test_source_report.py"
@@ -453,27 +539,52 @@ stage = 7
 [[module]]
 path = "tests/test_phrase_gym.py"
 responsibility = "The package reports its version."
-status = "pending"
-stage = 7
-successors = []
+status = "covered"
+successors = ["rust:crates/phrase-gym-server/tests/api/command_line.rs"]
+tests = ["the_server_reports_its_package_version"]
 
 [[module]]
 path = "tests/test_run_local.py"
 responsibility = "Local run serves the built client over Tailscale HTTPS with explicit directories and child cleanup."
-status = "pending"
+status = "superseded"
+decision = "specs/architecture.md"
+replacement = "No wrapper starts Tailscale or owns its process: the learner configures a tailnet-only Tailscale Serve proxy separately and passes its exact origin to the Server, which accepts only that origin and never Funnel. The Server serves the built client from an explicit data directory and port."
 stage = 7
-successors = []
+successors = [
+    "rust:crates/phrase-gym-server/tests/api/private_access.rs",
+    "rust:crates/phrase-gym-server/tests/api/client_delivery.rs",
+    "client:frontend/tests/browser/private-access.spec.ts",
+]
+tests = [
+    "explicit_serve_proxy_accepts_only_its_origin_and_never_funnel",
+    "serve_configuration_rejects_public_origins_wildcards_and_user_information",
+    "remote_hosts_are_rejected_even_from_a_local_proxy",
+    "the_built_client_is_served_same_origin_without_caching_or_offline_assets",
+]
 
 [[module]]
 path = "tests/browser_preparation_server.py"
 responsibility = "Temporary real-browser Python preparation server and synthetic seed data; general practice/failure controls now run on Rust."
-status = "pending"
-stage = 6
-successors = ["rust:crates/phrase-gym-server/tests/api/browser_controls.rs", "client:frontend/tests/browser/connection-retry.spec.ts", "client:frontend/tests/browser/take-recovery-races.spec.ts"]
+status = "covered"
+successors = [
+    "client:frontend/tests/browser-server.mjs",
+    "client:frontend/tests/browser/seed-library.ts",
+    "rust:crates/phrase-gym-server/tests/api/browser_controls.rs",
+    "client:frontend/tests/browser/connection-retry.spec.ts",
+    "client:frontend/tests/browser/take-recovery-races.spec.ts",
+]
 
 [[module]]
 path = "tests/browser_preparation.py"
 responsibility = "Browser harness that drives a generated-draft preparation lifecycle with fake provider and speech."
-status = "pending"
-stage = 6
-successors = []
+status = "superseded"
+decision = "specs/decision-external-preparation-agent.md"
+replacement = "The provider draft and human review lifecycle is replaced by ordinary inbox intake that the packaged Coach prepares with fake provider and speech processes; real-browser tests drive it from Send to study and later recall. Prompt rotation is covered in Rust, and real-browser tests keep the pinned prompt across reload and retain a replaced session's manifest."
+stage = 7
+successors = [
+    "client:frontend/tests/browser/working-set.spec.ts",
+    "client:frontend/tests/browser/english-study.spec.ts",
+    "client:frontend/tests/browser/practice-presentation.spec.ts",
+    "client:frontend/tests/browser/practice-start.spec.ts",
+    "rust:crates/phrase-gym-core/tests/inbox/rotation.rs",
+]

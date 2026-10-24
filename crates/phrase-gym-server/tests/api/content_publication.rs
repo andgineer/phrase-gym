@@ -306,3 +306,54 @@ async fn concurrent_publication_consumes_a_staged_package_once() {
     assert_eq!(count(&server, "target"), 3);
     assert_eq!(count(&server, "target_revision"), 3);
 }
+
+#[tokio::test]
+async fn a_staged_package_conflicts_after_any_change_to_its_namespace_identities() {
+    for change in [
+        "lesson member",
+        "created lesson",
+        "created dialogue",
+        "other target revision",
+    ] {
+        let server = server();
+        let mut initial = package();
+        match change {
+            "created lesson" => {
+                initial["lessons"].as_array_mut().unwrap().pop();
+            }
+            "created dialogue" => initial["dialogues"] = json!([]),
+            _ => {}
+        }
+        publish(&server.router, &initial).await;
+        let mut pending = package();
+        pending["targets"][0]["purpose"] = json!("A pending editorial purpose.");
+        let staged = stage(&server.router, &pending).await.json();
+        assert_eq!(staged["status"], "staged", "{change}: {staged}");
+        let mut elsewhere = package();
+        match change {
+            "lesson member" => elsewhere["lessons"][0]["target_source_ids"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!("rather")),
+            "other target revision" => {
+                elsewhere["targets"][2]["purpose"] = json!("An edit published elsewhere.");
+            }
+            _ => {}
+        }
+        publish(&server.router, &elsewhere).await;
+        let id = staged["id"].as_str().unwrap();
+        let reply = post(
+            &server.router,
+            &format!("/api/v1/imports/{id}/publish"),
+            &json!({}),
+        )
+        .await;
+        assert_eq!(reply.status, StatusCode::CONFLICT, "{change}");
+        let day = &phrases(&server.router, "en", "greetings").await[0];
+        assert_eq!(day["revision"], 1, "{change}");
+        let after = get(&server.router, &format!("/api/v1/imports/{id}"))
+            .await
+            .json();
+        assert_eq!(after["status"], "staged", "{change}");
+    }
+}

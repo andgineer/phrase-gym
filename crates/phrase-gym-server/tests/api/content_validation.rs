@@ -251,3 +251,27 @@ async fn cues_without_phrase_specific_visible_text_are_rejected() {
     );
     assert!(phrases(&server.router, "en", "").await.is_empty());
 }
+
+#[tokio::test]
+async fn a_native_explanation_may_be_a_translation_alone_or_add_usage() {
+    for usage in [None, Some("Use to ask about the day so far.")] {
+        let server = server();
+        let mut content = package();
+        let mut native = json!({"meaning": "Как проходит твой день?"});
+        if let Some(usage) = usage {
+            native["usage"] = json!(usage);
+        }
+        content["targets"][0]["explanations"]["ru"] = native;
+        publish(&server.router, &content).await;
+        let day = phrases(&server.router, "en", "")
+            .await
+            .into_iter()
+            .find(|item| item["content"]["source_id"] == "day")
+            .unwrap();
+        let explanations = &day["content"]["explanations"];
+        assert_eq!(explanations["ru"]["meaning"], "Как проходит твой день?");
+        assert_eq!(explanations["ru"]["usage"], json!(usage));
+        assert_eq!(explanations["ru"]["breakdown"], json!([]));
+        assert!(explanations["en"]["usage"].is_string(), "{explanations}");
+    }
+}
