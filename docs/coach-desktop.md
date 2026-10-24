@@ -60,7 +60,7 @@ The interpreter uses isolated mode. The speech runner verifies package versions,
 
 ### Measurement preparation
 
-Freeze synthetic development and held-out cases before real provider calls. The [development fixture](../fixtures/coach/working-set.json), the separate [held-out fixture](../fixtures/coach/working-set-held-out-3.json) (the earlier [second freeze](../fixtures/coach/working-set-held-out-2.json) is spent) and the everyday [shopping](../fixtures/coach/everyday-shopping.json) and [visiting](../fixtures/coach/everyday-visiting.json) batches freeze English material and semantic checks before their measurements. Routine local English demo runs use the [standing authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo) without per-session or per-run budget approval. Existing timeout, output/media, retry and daily-start limits remain engineering guardrails; count failures and inspect each concrete result before retrying. Separate authorization applies to broader unrequested experiments, different providers and paid API execution. No automatic paid API fallback or unbounded retries are permitted.
+Freeze synthetic development and held-out cases before real provider calls. The [development fixture](../fixtures/coach/working-set.json), the [third held-out freeze](../fixtures/coach/working-set-held-out-3.json) (spent, like the [second](../fixtures/coach/working-set-held-out-2.json)) and the everyday [shopping](../fixtures/coach/everyday-shopping.json) and [visiting](../fixtures/coach/everyday-visiting.json) batches freeze English material and semantic checks before their measurements. Routine local English demo runs use the [standing authorization](../specs/plan/implementation-plan.md#standing-authorization-for-the-local-english-demo) without per-session or per-run budget approval. Existing timeout, output/media, retry and daily-start limits remain engineering guardrails; count failures and inspect each concrete result before retrying. Separate authorization applies to broader unrequested experiments, different providers and paid API execution. No automatic paid API fallback or unbounded retries are permitted.
 
 Keep the full matrix in the implementation plan: fixed phrases, alternatives, slots, words/senses/forms, dialogue/exposure, preferred/confusable/dependency behavior, ambiguity, absent preferences, and supplied/missing/invalid speech across English, German and Serbian. Freeze unseen held-out wording separately. Record exact executable/model/configuration, fixture identity, elapsed time, unknown usage where unavailable, accepted/failed outputs, and separate fresh semantic review and attended listening. A successful English result does not establish the matrix.
 
@@ -132,6 +132,18 @@ On 2026-10-24 the packaged Coach, with Claude selected in Settings, filled the r
 | Visiting | 2.1.310 | 37.6 s | 6 | 6,543 | 5 published |
 
 Claude updated itself from 2.1.309 to 2.1.310 between runs and passed the version and flag checks. Every published card has an English short explanation, Russian details and verified reference speech. The shopping and visiting batches kept their intended reusable construction as a fixed phrase. Semantic review and listening are separate.
+
+Later on 2026-10-24, after the answer-free-situation guide (v3), the demo Server was reset and refilled the same way:
+
+| Batch | Claude | CLI time | Turns | Output tokens | Result |
+|---|---|---|---|---|---|
+| Development | 2.1.310 | 0.5 s | 1 | 0 | stopped: subscription session limit (429); retried its generation after the reset |
+| Development retry | 2.1.310 | 29.2 s | 5 | 4,234 | 5 published |
+| Held-out (third freeze) | 2.1.310 | 32.0 s | 5 | 4,455 | 5 published |
+| Shopping | 2.1.310 | 32.5 s | 5 | 4,523 | 5 published |
+| Visiting | 2.1.310 | 30.0 s | 5 | 4,214 | 5 published |
+
+All 20 targets have both help layers and verified speech; every batch has a reusable frame (8 frames, 8 fixed phrases, 4 words), and no fixed-phrase or frame situation reuses a content word of its answer. Some situations became stilted to avoid answer words, and some frame situations paraphrase the slot value instead of naming it.
 
 Run the measurement by hand only, against a disposable Server: `target/debug/examples/claude_working_set http://127.0.0.1:<port> <fresh absolute folder> <piper-voice.json> fixtures/coach/working-set.json`.
 
