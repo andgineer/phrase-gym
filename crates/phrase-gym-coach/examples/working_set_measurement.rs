@@ -1,4 +1,4 @@
-// Bounded real-Claude measurement: submits one frozen working set through the ordinary durable
+// Bounded real-provider measurement: submits one frozen working set through the ordinary durable
 // intake of a disposable Server with disposable Coach folders, prepares it once and reports.
 // It spends real subscription usage, so it is never run by tests.
 use std::path::PathBuf;
@@ -6,16 +6,23 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::time::Instant;
 
+use phrase_gym_coach::adapter::codex_readiness;
 use phrase_gym_coach::platform::{files, paths::CoachPaths};
 use phrase_gym_coach::preparation::{
     self, attempt, readiness::ClaudeTool, selection::SelectedTool,
 };
 use phrase_gym_coach::transfer::{client::ServerClient, text, worker};
 
+const USAGE: &str = "Usage: working_set_measurement LOOPBACK_SERVER FRESH_DIRECTORY PIPER_VOICE_JSON FIXTURE_JSON [claude|codex]";
+
 fn run() -> Result<(), String> {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
-    let [server, directory, voice, fixture] = arguments.as_slice() else {
-        return Err("Usage: claude_working_set LOOPBACK_SERVER FRESH_DIRECTORY PIPER_VOICE_JSON FIXTURE_JSON".into());
+    let (server, directory, voice, fixture, tool) = match arguments.as_slice() {
+        [server, directory, voice, fixture] => (server, directory, voice, fixture, "claude"),
+        [server, directory, voice, fixture, tool] => {
+            (server, directory, voice, fixture, tool.as_str())
+        }
+        _ => return Err(USAGE.into()),
     };
     let directory = PathBuf::from(directory);
     if !directory.is_absolute() || directory.exists() {
@@ -39,20 +46,34 @@ fn run() -> Result<(), String> {
     )?)
     .map_err(|_| "Invalid fixture")?;
     let input = fixture["input"].as_str().ok_or("Fixture has no input")?;
-    let tool = attempt::with_probe_directory(&paths, ClaudeTool::check)?;
+    // Codex works in this repository with the normal Codex home; Claude in Coach's cache.
+    let workspace = std::env::current_dir().map_err(|_| "Cannot resolve the repository")?;
+    let (claude, codex) = match tool {
+        "claude" => (
+            Some(attempt::with_probe_directory(&paths, ClaudeTool::check)?),
+            None,
+        ),
+        "codex" => (None, Some(codex_readiness::check()?)),
+        _ => return Err(USAGE.into()),
+    };
+    let selected = match (&claude, &codex) {
+        (Some(claude), _) => SelectedTool::claude(claude),
+        (_, Some(codex)) => SelectedTool::codex(codex, &workspace),
+        _ => unreachable!("one tool was checked"),
+    };
     let client = ServerClient::new(server)?;
     let accepted = text::submit_raw(&paths, &client.server, input, &client)?;
     let stop = Arc::new(AtomicBool::new(false));
     let started = Instant::now();
     let outcome = worker::tick(&client, &paths.state.join("worker.json"), |claim| {
-        preparation::prepare_selected(&client, &paths, claim, &SelectedTool::claude(&tool), &stop)
+        preparation::prepare_selected(&client, &paths, claim, &selected, &stop)
     });
     println!(
         "{}",
         serde_json::json!({
-            "claude": tool.version, "model": preparation::readiness::MODEL,
+            "tool": selected.identity(),
             "generation": accepted.generation_id, "elapsed_ms": started.elapsed().as_millis(),
-            "attempts": paths.attempts(),
+            "attempts": selected.attempts(&paths),
             "outcome": match &outcome { Ok(receipt) => serde_json::json!({"published": receipt}), Err(problem) => serde_json::json!({"failed": problem}) },
         })
     );

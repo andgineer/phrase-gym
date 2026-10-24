@@ -2076,7 +2076,6 @@
           "due_count",
           "new_count",
           "preparing_count",
-          "reference_only_count",
           "next_due_at"
         ],
         "properties": {
@@ -2099,10 +2098,6 @@
             "format": "int64"
           },
           "preparing_count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reference_only_count": {
             "type": "integer",
             "format": "int64"
           }

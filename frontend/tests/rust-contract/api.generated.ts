@@ -688,8 +688,6 @@ export interface components {
             practice_ready_count: number;
             /** Format: int64 */
             preparing_count: number;
-            /** Format: int64 */
-            reference_only_count: number;
         };
         /** @enum {string} */
         Eligibility: "study" | "new" | "due";

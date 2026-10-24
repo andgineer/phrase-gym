@@ -139,10 +139,10 @@ async fn fake_worker_publishes_through_production_routes_and_recovers_receipts_a
     let readiness = get(&restarted, "/api/v1/sessions/readiness?language=en")
         .await
         .json();
-    assert_eq!(readiness["reference_only_count"], 1);
+    assert!(readiness.get("reference_only_count").is_none());
     assert_eq!(readiness["preparing_count"], 0);
     assert_eq!(readiness["due_count"], 0);
-    assert_eq!(readiness["new_count"], 0);
+    assert_eq!(readiness["new_count"], 1);
     assert_eq!(
         get(
             &restarted,

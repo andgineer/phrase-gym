@@ -103,15 +103,8 @@ const emit = defineEmits<{
         <p v-for="slot in english.task.slots" :key="slot.name">
           {{ slot.name }}: {{ slot.values.join(' / ') }}
         </p>
-        <p>Use this construction; the named slots may vary.</p>
       </template>
-      <template v-else>
-        <p>{{ english.task.word }} — {{ english.task.sense }}</p>
-        <p>
-          Say the whole sentence. Rate the selected word and sense; an unrelated slip does not fail
-          the word.
-        </p>
-      </template>
+      <p v-else>{{ english.task.word }} — {{ english.task.sense }}</p>
     </div>
     <div class="audio-controls">
       <button

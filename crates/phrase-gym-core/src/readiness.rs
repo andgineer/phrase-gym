@@ -68,7 +68,6 @@ impl Readiness {
             due_count: 0,
             new_count: 0,
             preparing_count: 0,
-            reference_only_count: 0,
             next_due_at: None,
         };
         let mut next: Option<DateTime<Utc>> = None;
@@ -78,11 +77,8 @@ impl Readiness {
                 continue;
             }
             summary.practice_ready_count += 1;
-            if needs_study {
-                summary.reference_only_count += 1;
-                continue;
-            }
-            if first_check {
+            // New means what the planner introduces: first study or a first independent check.
+            if needs_study || first_check {
                 summary.new_count += 1;
                 continue;
             }

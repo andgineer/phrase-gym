@@ -104,12 +104,10 @@ pub(crate) fn plan(
     }
     due.sort_by_key(|(due_at, _)| *due_at);
     let mut targets: Vec<PlannedTarget> = due.into_iter().map(|(_, planned)| planned).collect();
-    if dialogue.is_some() || start.voluntary {
+    if dialogue.is_some() {
         targets.extend(new);
-        if start.voluntary {
-            targets.truncate(MAX_SESSION_TARGETS);
-        }
     } else {
+        // Voluntary rounds keep the same five-new limit, so they never flood first meetings.
         targets.truncate(MAX_SESSION_TARGETS);
         let budget = MAX_NEW_TARGETS.min(MAX_SESSION_TARGETS - targets.len());
         targets.extend(new.into_iter().take(budget));

@@ -42,9 +42,6 @@ const en = {
   superseded: 'This input was replaced by a newer version.',
   retryPreparation: 'Retry preparation',
   open: 'Open published lesson',
-  referenceOnly:
-    'Ready for ungraded study. Start a session to read, listen, record and compare. Memory ratings are not part of this study.',
-  referenceCount: 'Ready for ungraded study',
   awaiting: 'Awaiting preparation or repair',
   permission:
     'This connection cannot submit material. Ask the Server operator to enable supported intake; your input is retained. No lesson has been confirmed accepted.',
@@ -96,9 +93,6 @@ const ru: OnboardingMessages = {
   superseded: 'Этот материал заменён новой версией.',
   retryPreparation: 'Повторить подготовку',
   open: 'Открыть опубликованный урок',
-  referenceOnly:
-    'Готово для репетиции по образцу. Откройте фразу: слушайте, записывайте и сравнивайте. Плановая проверка вспоминания для этих материалов пока не поддерживается.',
-  referenceCount: 'Готово только для репетиции по образцу',
   awaiting: 'Ожидает подготовки или исправления',
   permission:
     'Это подключение не может отправлять материал. Попросите оператора сервера настроить приём; материал сохранён. Приём урока не подтверждён.',

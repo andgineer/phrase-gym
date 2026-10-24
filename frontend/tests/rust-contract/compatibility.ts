@@ -7,12 +7,8 @@ type Normalized<T> = T extends 'study' | 'next'
   ? never
   : T extends { content: unknown; retrieval_ready: boolean }
     ? { [Key in Exclude<keyof T, 'english'>]: Normalized<T[Key]> }
-    : T extends { due_count: number; reference_only_count: number }
-      ? {
-          [Key in Exclude<keyof T, 'reference_only_count' | 'practice_ready_count'>]: Normalized<
-            T[Key]
-          >
-        }
+    : T extends { due_count: number; practice_ready_count: number }
+      ? { [Key in Exclude<keyof T, 'practice_ready_count'>]: Normalized<T[Key]> }
       : T extends { voluntary?: boolean }
         ? { [Key in keyof T as Key extends 'voluntary' ? never : Key]: Normalized<T[Key]> }
         : T extends { required_chunks: string[]; reference_audio_id?: unknown }

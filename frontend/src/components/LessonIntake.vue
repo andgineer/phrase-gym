@@ -8,6 +8,7 @@ const props = defineProps<{
   language: Language
   locale: Language
   beforeOpen?: () => Promise<void>
+  practicing?: boolean
 }>()
 const messages = computed(() => onboardingMessages(props.locale))
 const open = ref(false)
@@ -107,11 +108,14 @@ async function toggle() {
         </fieldset>
       </form>
       <template v-if="draft">
-        <h3>{{ draft.submission.title }}</h3>
-        <p v-for="item in draft.submission.phrases" :key="item.source_id" lang="en">
-          {{ item.text }}
-        </p>
-        <p>{{ draft.submission.context }}</p>
+        <!-- During a session the last batch's items could reveal answers still to be recalled. -->
+        <template v-if="!practicing">
+          <h3>{{ draft.submission.title }}</h3>
+          <p v-for="item in draft.submission.phrases" :key="item.source_id" lang="en">
+            {{ item.text }}
+          </p>
+          <p>{{ draft.submission.context }}</p>
+        </template>
         <p role="status">
           {{
             status ? messages[status.status] : draft.receipt ? messages.accepted : messages.unsent

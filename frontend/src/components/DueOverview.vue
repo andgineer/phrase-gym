@@ -31,7 +31,7 @@ async function load() {
     )
     if (token === generation) {
       summary.value = result
-      emit('eligible', result.due_count + result.new_count > 0 || result.reference_only_count > 0)
+      emit('eligible', result.due_count + result.new_count > 0)
     }
   } catch (cause) {
     if (token === generation) error.value = String(cause)
@@ -45,11 +45,7 @@ watch([() => props.language, () => props.lessonId], load, { immediate: true })
       {{ pt.due }}: {{ summary.due_count }} · {{ pt.newTargets }}: {{ summary.new_count }} ·
       {{ onboardingMessages(locale).awaiting }}: {{ summary.preparing_count }}
     </p>
-    <p v-if="summary?.reference_only_count">
-      {{ onboardingMessages(locale).referenceCount }}: {{ summary.reference_only_count }}.
-      {{ onboardingMessages(locale).referenceOnly }}
-    </p>
-    <p v-if="summary && !summary.due_count && !summary.new_count && !summary.reference_only_count">
+    <p v-if="summary && !summary.due_count && !summary.new_count">
       {{ pt.noDue }}
     </p>
     <template v-if="summary && (completed || (!summary.due_count && !summary.new_count))">

@@ -34,9 +34,6 @@ export const sr = {
   superseded: 'Ovaj unos je zamenjen novijom verzijom.',
   retryPreparation: 'Ponovi pripremu',
   open: 'Otvori objavljenu lekciju',
-  referenceOnly:
-    'Spremno za vežbu uz primer. Otvori frazu da slušaš, snimaš i porediš. Zakazano prisećanje za ovaj materijal još nije podržano.',
-  referenceCount: 'Spremno samo za vežbu uz primer',
   awaiting: 'Čeka pripremu ili popravku',
   permission:
     'Ova veza ne može slati materijal. Zatraži od operatera servera da omogući podržani unos; tvoj unos je sačuvan. Prijem lekcije nije potvrđen.',
@@ -89,9 +86,6 @@ export const de = {
   superseded: 'Diese Eingabe wurde durch eine neuere Version ersetzt.',
   retryPreparation: 'Vorbereitung wiederholen',
   open: 'Veröffentlichte Lektion öffnen',
-  referenceOnly:
-    'Bereit zum Üben mit Referenz. Öffne eine Phrase zum Hören, Aufnehmen und Vergleichen. Geplantes Abrufen wird für dieses Material noch nicht unterstützt.',
-  referenceCount: 'Nur zum Üben mit Referenz bereit',
   awaiting: 'Wartet auf Vorbereitung oder Korrektur',
   permission:
     'Diese Verbindung kann kein Material senden. Bitte den Serverbetreiber um Einrichtung der unterstützten Eingabe; deine Eingabe bleibt gespeichert. Die Annahme der Lektion ist unbestätigt.',

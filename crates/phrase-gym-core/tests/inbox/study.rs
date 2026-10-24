@@ -14,14 +14,8 @@ use super::learning::{Learning, publish};
 #[test]
 fn completed_study_enables_later_session_recall_without_inventing_memory() {
     let learning = Learning::new();
-    assert_eq!(
-        learning
-            .readiness
-            .summary(Language::En, None)
-            .unwrap()
-            .reference_only_count,
-        1
-    );
+    let before = learning.readiness.summary(Language::En, None).unwrap();
+    assert_eq!((before.new_count, before.due_count), (1, 0));
     let first = learning.start(None);
     learning.event(first.id, 1, PracticeKind::Present).unwrap();
     let unfinished = learning.sessions.get(first.id).unwrap();

@@ -37,6 +37,8 @@ A prompt gives what a real conversation gives: a short situation in the card lan
 
 The learner's task is to say their preferred phrase for that intention. A genuinely ambiguous prompt is recreated without grading memory; choosing another valid drilled expression is not successful retrieval of the selected target. Preference changes can retain alternatives for lookup. Accepted wording and variable slots are clear with the answer.
 
+A situation avoids every content word of the answer and its hint, in any form, while staying plain and natural. A frame situation names the value the learner must say in plain words (for example "in cash" or "at noon") and avoids only the fixed words of the construction. The preparation guide and semantic review enforce this rule. The Server refuses only a situation containing the complete answer wording: a word check without stemming would both miss inflected forms and refuse legitimate topic words, and in all-or-nothing batch publication each false refusal would fail every item of the batch.
+
 Preparation supplies up to two genuinely different natural situations where the same response fits, using one when a second cannot be defended. Do not manufacture differences or obscure cues to force an exact string. Rotate prompts across independent reviews and pin their modality and revision in each attempt. The learner does not approve prompts before use; a bad card is suspended and recreated from practice.
 
 Evidence:

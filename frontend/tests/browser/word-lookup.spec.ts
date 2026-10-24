@@ -19,6 +19,11 @@ test('a word is listed by its word, its page leads with the word and native deta
   await expect(page.getByText(/Accepted — waiting for Coach/)).toBeVisible()
   const publication = await prepareWithNativeFakeCoach(preview.url)
   await page.goto('/learn/en')
+  // Five cards awaiting first study are New, so Start leads and Practice now is not offered.
+  await expect(page.locator('.due-overview')).toContainText('Due: 0 · New: 5 ·')
+  await expect(page.getByRole('button', { name: 'Start session', exact: true })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Practice now', exact: true })).toHaveCount(0)
+  await expect(page.getByText(/ungraded study/)).toHaveCount(0)
   const title = "Let's get started. · Could you repeat that, please? · …"
   await expect(page.getByRole('option', { name: title, exact: true })).toHaveCount(1)
   const sense = 'Make something clearer or easier to understand.'

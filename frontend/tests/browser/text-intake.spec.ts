@@ -17,7 +17,7 @@ test('ordinary text intake generates verified reference bytes and normal Start s
   const bytes = await referenceResponse.body()
   expect(bytes.subarray(0, 4).toString()).toBe('RIFF')
   await page.goto('/learn/en')
-  await expect(page.getByText(/Ready for ungraded study: 1/)).toBeVisible()
+  await expect(page.getByText(/Due: 0 · New: 1 ·/)).toBeVisible()
   await page.getByLabel('Lesson to drill', { exact: true }).selectOption(publication.lesson_id)
   await page.getByRole('button', { name: 'Start session', exact: true }).click()
   await expect(page).toHaveURL(/\/learn\/en\/practice\//)

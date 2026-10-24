@@ -109,6 +109,9 @@ function leavePractice() {
         :language="currentLanguage ?? 'en'"
         :locale="locale"
         :before-open="openIntake"
+        :practicing="
+          kind === 'practice' && ['active', 'paused'].includes(practice.session.value?.status ?? '')
+        "
         @published="published"
       />
       <RouterLink class="brand" :to="currentLanguage ? `/learn/${currentLanguage}` : '/'"

@@ -119,7 +119,7 @@ Version rule: Coach requires Claude Code 2.1.309 or newer and refuses any build 
 Measured on 2026-10-23 with Claude Code 2.1.309 (macOS 27, Apple Silicon, Pro subscription, model alias `sonnet` resolving to claude-sonnet-5-5, low effort):
 
 - A synthetic probe with all flags above listed only the `Read` and `StructuredOutput` tools; reading a canary outside the attempt folder was denied with "--restricted confines the file tools to the working directory" and recorded as a permission denial; the structured answer arrived in the envelope. 8.6 s.
-- `examples/claude_working_set.rs` submitted the frozen development batch through the ordinary durable intake of a disposable Server with disposable Coach folders: the CLI took 34.2 s (5 turns, 6,008 output tokens, 349 thinking tokens, 17.5 KB envelope, 13 KB inline schema), and validation, Piper speech and atomic publication of all five targets finished in 47.6 s, within the 90 s attempt limit.
+- `examples/working_set_measurement.rs` submitted the frozen development batch through the ordinary durable intake of a disposable Server with disposable Coach folders: the CLI took 34.2 s (5 turns, 6,008 output tokens, 349 thinking tokens, 17.5 KB envelope, 13 KB inline schema), and validation, Piper speech and atomic publication of all five targets finished in 47.6 s, within the 90 s attempt limit.
 
 On 2026-10-24 the packaged Coach, with Claude selected in Settings, filled the reset demo Server from browser Send, one run per batch:
 
@@ -145,7 +145,7 @@ Later on 2026-10-24, after the answer-free-situation guide (v3), the demo Server
 
 All 20 targets have both help layers and verified speech; every batch has a reusable frame (8 frames, 8 fixed phrases, 4 words), and no fixed-phrase or frame situation reuses a content word of its answer. Some situations became stilted to avoid answer words, and some frame situations paraphrase the slot value instead of naming it.
 
-Run the measurement by hand only, against a disposable Server: `target/debug/examples/claude_working_set http://127.0.0.1:<port> <fresh absolute folder> <piper-voice.json> fixtures/coach/working-set.json`.
+Run the measurement by hand only, from this repository and against a disposable Server: `target/debug/examples/working_set_measurement http://127.0.0.1:<port> <fresh absolute folder> <piper-voice.json> fixtures/coach/working-set.json [claude|codex]`.
 
 ## Remaining gaps
 

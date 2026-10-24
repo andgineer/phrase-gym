@@ -105,7 +105,6 @@ test('ordinary five-item intake publishes fixed, frame and contextual word study
     practice_ready_count: 5,
     due_count: 0,
     new_count: 0,
-    reference_only_count: 0,
   })
   expect(Date.parse(readiness.next_due_at)).toBeGreaterThan(Date.now())
 })
