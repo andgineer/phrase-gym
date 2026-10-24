@@ -126,6 +126,9 @@ pub fn failure(directory: &Path, ending: Ending) -> String {
         "too many requests",
         "credit balance",
         "usage limit",
+        "session limit",
+        // Claude's JSON result envelope; a bare 429 would also match process and trace ids.
+        "\"api_error_status\":429",
         "quota",
         "overloaded",
         "upgrade your subscription",

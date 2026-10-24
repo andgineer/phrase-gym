@@ -54,6 +54,30 @@ fn a_subscription_usage_limit_stops_as_quota_rather_than_a_generic_failure() {
 }
 
 #[test]
+fn a_claude_session_limit_envelope_stops_as_quota() {
+    let attempt = tempfile::tempdir().unwrap();
+    std::fs::write(attempt.path().join("stderr.log"), b"").unwrap();
+    for (envelope, quota) in [
+        (
+            json!({"type":"result","is_error":true,"api_error_status":429,"result":"You've hit your session limit · resets 11:30am (Europe/Belgrade)"}),
+            true,
+        ),
+        (
+            json!({"type":"result","is_error":true,"api_error_status":429,"result":"Request rejected"}),
+            true,
+        ),
+        (
+            json!({"type":"result","is_error":true,"api_error_status":500,"result":"pid 4291 exited"}),
+            false,
+        ),
+    ] {
+        std::fs::write(attempt.path().join("stdout.log"), envelope.to_string()).unwrap();
+        let problem = failure(attempt.path(), Ending::Exited(Some(1)));
+        assert_eq!(problem.contains("quota"), quota, "{envelope}");
+    }
+}
+
+#[test]
 fn reordered_output_preserves_valid_cross_target_exposures_and_rejects_self_or_foreign_before_speech()
  {
     let generation = Uuid::new_v4();
