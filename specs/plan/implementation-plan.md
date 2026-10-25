@@ -26,20 +26,30 @@ At the start of MVP implementation, reassign local `main` to [scaffold commit `5
 
 This is an implementation starting action, not a separate foundation milestone. Complete the learner path below on that scaffold.
 
-### Complete learner path
+### 1a. Import, study and saved replay
 
-Implement one complete vertical path:
+This is the first implementation checkpoint. Include the scaffold starting action above and deliver one usable vertical path:
 
 - Recover only useful Python components, use a pinned dependency environment and retain Vue's working audio. Serve the built client and a small generated API contract from one local application. Adapt the retained client where necessary; do not recreate every Rust endpoint.
 - Document the JSON package schema and a concise external-agent preparation instruction with an example. Accept fixed complete English phrases, short English explanations, one or two natural cues and optional accepted variants. Include clear source/item identity. Test 5–10 items as a normal batch, not a one-phrase developer seed.
 - Provide Add material in Vue with paste/file import and readable preparing/added/error results. Generate and save English reference audio through Piper. Validate and commit the whole batch, handle duplicate retry, and offer explicit retry after failure. There is no internal LLM call in this intake.
-- Implement the [learning loop](../decision-core-trainer.md): ungraded first study, later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.
-- Preserve optional recording, all takes, final encoder data, simple saved replay and session continuity across reload/restart. Add basic due/new counts, library lookup, Suspend/Restore and the minimal English language/timezone choices. Corrected imports can replace a suspended card without rewriting its history.
-- Provide one documented launch command and a manual stopped-app backup/restore procedure. A terminal launch is acceptable; a desktop wrapper, installer, service and auto-update system are not prerequisites.
+- Implement ungraded first study under the [learning loop](../decision-core-trainer.md), with complete wording, meaning/use help, reference playback and Next. Save study completion without inventing a successful recall or a scheduled return before scheduling exists.
+- Preserve optional recording, all takes, final encoder data, comparison, simple saved replay and session continuity across reload/restart. Keep saved takes associated with their card and attempt.
+- Provide one documented launch command. A terminal launch is acceptable; a desktop wrapper, installer, service and auto-update system are not prerequisites.
 - Update tests, generated contracts, check commands and hooks for the new Python runtime in the same deliverable. Retain meaningful Vue tests and real-backend browser coverage. Replace obsolete tests only where the new spec intentionally changes behavior; do not carry the old migration gate or numerical-port equivalence forward as a product requirement. The Rust application remains available through the recovery reference, not in the new runtime tree.
 - Keep stable card/source and attempt identities, explicit support history and a versioned import format under the [growth boundary](../architecture.md#growth-after-the-mvp). Test the actual MVP behavior; do not implement future activity engines, reward systems or placeholder schemas.
 
-Start with import → study → record/replay as an internal checkpoint, then complete later recall and scheduling in the same MVP. Do not create separate foundation, framework or parity projects. Hand the working study path to the learner as soon as it is usable; a delayed real-clock check need not block independent implementation work.
+**Exit:** import a 5–10-phrase batch through the ordinary UI, study it without grades, record twice and replay both complete saved takes after reload and application restart. Malformed imports, duplicate retry and preparation failure have the observable behavior in the table below. The app launches with the documented command. Complete independent review and the applicable checks below, then hand the runnable checkpoint to the learner with a short walkthrough and explicit content/listening/device acceptance gaps.
+
+When asked to implement stage 1a, stop here. Leave stage 1b and full-MVP acceptance in the plan; do not label the whole MVP complete. This checkpoint is a learner workflow, not a separate foundation or parity project.
+
+### 1b. Later recall, scheduling and MVP completion
+
+- Complete the [learning loop](../decision-core-trainer.md): later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.
+- Add basic due/new counts, library lookup, Suspend/Restore and the minimal English language/timezone choices. Corrected imports can replace a suspended card without rewriting its history.
+- Provide and verify the manual stopped-app backup/restore procedure. Preserve the cards, study history and recordings created in stage 1a.
+
+**Exit:** satisfy the complete MVP acceptance table and checks below. A later real-clock return remains pending until observed; it need not block independent implementation work. A request for the whole first MVP covers both 1a and 1b.
 
 ### Observable acceptance
 

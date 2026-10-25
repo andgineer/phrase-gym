@@ -6,7 +6,7 @@ Read [AGENTS.md](../../AGENTS.md), [START-HERE](../START-HERE.md) and the whole 
 
 The root session orchestrates only: write prompts, read reports, triage findings, perform light verification and talk to the user. Delegate production code, tests and spec/plan edits.
 
-Take the first remaining stage from the implementation plan. Select a bounded coherent slice under its acceptance criteria. Reuse proven code and tests selectively; neither prototype defines feature parity. Build the smallest complete learner workflow rather than an infrastructure foundation. For each slice:
+Implement the stage or checkpoint named by the user. If none is named, take the first remaining checkpoint in the implementation plan, or the first remaining stage when it has no checkpoints. The plan owns scope, acceptance and stopping boundaries; a user prompt only needs to name the work and plan. Reuse proven code and tests selectively; neither prototype defines feature parity. Build the smallest complete learner workflow rather than an infrastructure foundation. For each coherent deliverable:
 
 1. Delegate implementation to a fresh session.
 2. Delegate independent review to another fresh session.
@@ -17,9 +17,11 @@ Use one implementer and one independent reviewer per coherent deliverable, reusi
 
 Run one session at a time; avoid competing writes and concurrent gates. After interruption, inspect agent status, Git state and outstanding checks, then resume existing work instead of duplicating it. Do not claim a running gate passed or substitute a different model after a usage limit.
 
+Continue through implementation, review, fixes and verification without asking the user to restate these rules. Stop at the selected work's delivery boundary and report remaining acceptance; do not expand a checkpoint request into the whole MVP or later stages.
+
 ## Prompts and review
 
-State the observed branch, HEAD and working-tree changes, exact plan slice, acceptance criteria, required reading and applicable permissions. Preserve unrelated changes. Give reviewers the delivered commit range and requirements as they stood before implementation, obtainable with `git show <base>:specs/plan/implementation-plan.md`.
+In delegated prompts, state the observed branch, HEAD and working-tree changes, exact plan slice, acceptance criteria, required reading and applicable permissions. Preserve unrelated changes. Give reviewers the delivered commit range and requirements as they stood before implementation, obtainable with `git show <base>:specs/plan/implementation-plan.md`.
 
 Require concrete findings with severity, file/line, governing rule, failure scenario and minimal fix. Review coverage, correctness, architecture and gate honesty; reject speculative additions or scope expansion. Send accepted findings in full to the fixer, with any narrowing explained. Re-review fixes and regressions, then the stage for blockers and majors; unrelated minors count only if introduced by the fixes.
 
