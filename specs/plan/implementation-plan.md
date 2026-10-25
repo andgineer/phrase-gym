@@ -96,6 +96,7 @@ When asked to implement stage 1a, stop here. Leave stage 1b and full-MVP accepta
 
 **Learner outcome:** paste words with their source contexts or import a supplied echo-words export and receive useful word-sense cards without manually authoring them.
 
+- At the start of Coach/internal preparation implementation, resolve the [Coach interface question](../open-problems.md): check whether Python with the existing web UI covers the required workflows without a native desktop GUI.
 - Reuse the import, speech and practice path. Add a single selected subscription-CLI adapter, bounded execution and clear errors; retain the source material for explicit retry.
 - Prepare one sense at a time, a comprehensible definition and two or three contexts under the [word rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp). Ask briefly when meaning is genuinely ambiguous. Do not infer a sense from a bare homograph.
 - Distinguish pending, ready and failed material. No distributed queue or second desktop application. Existing ready practice stays usable during generation.
