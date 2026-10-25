@@ -1,531 +1,28 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Phrase Gym",
-    "version": "1.0.0"
+    "title": "Phrase Gym Server",
+    "description": "Rust server API during the migration",
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    },
+    "version": "0.0.0"
   },
   "paths": {
-    "/api/v1/settings": {
+    "/api/v1/coach/summary": {
       "get": {
-        "summary": "Get Settings",
-        "operationId": "get_settings_api_v1_settings_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Settings"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Put Settings",
-        "operationId": "put_settings_api_v1_settings_put",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SettingsUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Settings"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/imports/validate": {
-      "post": {
-        "summary": "Validate Import",
-        "operationId": "validate_import_api_v1_imports_validate_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ManualPackage"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportReport"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/imports": {
-      "post": {
-        "summary": "Stage Import",
-        "operationId": "stage_import_api_v1_imports_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ManualPackage"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportReport"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/imports/{import_id}": {
-      "get": {
-        "summary": "Get Import",
-        "operationId": "get_import_api_v1_imports__import_id__get",
-        "parameters": [
-          {
-            "name": "import_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Import Id"
-            }
-          }
+        "tags": [
+          "coach"
         ],
+        "operationId": "coach_summary",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Scoped English database counts without learner history or recordings",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ImportReport"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/imports/{import_id}/publish": {
-      "post": {
-        "summary": "Publish Import",
-        "operationId": "publish_import_api_v1_imports__import_id__publish_post",
-        "parameters": [
-          {
-            "name": "import_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Import Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportReport"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/lessons": {
-      "get": {
-        "summary": "Lessons",
-        "operationId": "lessons_api_v1_lessons_get",
-        "parameters": [
-          {
-            "name": "language",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
-            }
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 200,
-              "default": "",
-              "title": "Q"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LessonPage"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/phrases/search": {
-      "get": {
-        "summary": "Phrases",
-        "operationId": "phrases_api_v1_phrases_search_get",
-        "parameters": [
-          {
-            "name": "language",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
-            }
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "maxLength": 200,
-              "default": "",
-              "title": "Q"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhrasePage"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/lessons/{lesson_id}/phrases": {
-      "get": {
-        "summary": "Lesson Phrases",
-        "operationId": "lesson_phrases_api_v1_lessons__lesson_id__phrases_get",
-        "parameters": [
-          {
-            "name": "lesson_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Lesson Id"
-            }
-          },
-          {
-            "name": "language",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhrasePage"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/phrases/{target_id}": {
-      "get": {
-        "summary": "Phrase",
-        "operationId": "phrase_api_v1_phrases__target_id__get",
-        "parameters": [
-          {
-            "name": "target_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Target Id"
-            }
-          },
-          {
-            "name": "language",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
-            }
-          },
-          {
-            "name": "revision",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Revision"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Phrase"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/CoachSummary"
                 }
               }
             }
@@ -535,22 +32,17 @@
     },
     "/api/v1/dialogues": {
       "get": {
-        "summary": "Dialogues",
-        "operationId": "dialogues_api_v1_dialogues_get",
+        "tags": [
+          "library"
+        ],
+        "operationId": "list_dialogues",
         "parameters": [
           {
             "name": "language",
             "in": "query",
             "required": true,
             "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
+              "$ref": "#/components/schemas/Language"
             }
           },
           {
@@ -559,9 +51,8 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Offset"
+              "format": "int64",
+              "minimum": 0
             }
           },
           {
@@ -570,16 +61,15 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "format": "int64",
               "maximum": 100,
-              "minimum": 1,
-              "default": 50,
-              "title": "Limit"
+              "minimum": 1
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Current dialogue revisions",
             "content": {
               "application/json": {
                 "schema": {
@@ -589,11 +79,11 @@
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid query",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -603,8 +93,10 @@
     },
     "/api/v1/dialogues/{dialogue_id}": {
       "get": {
-        "summary": "Dialogue",
-        "operationId": "dialogue_api_v1_dialogues__dialogue_id__get",
+        "tags": [
+          "library"
+        ],
+        "operationId": "read_dialogue",
         "parameters": [
           {
             "name": "dialogue_id",
@@ -612,8 +104,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "title": "Dialogue Id"
+              "format": "uuid"
             }
           },
           {
@@ -621,14 +112,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
+              "$ref": "#/components/schemas/Language"
             }
           },
           {
@@ -636,22 +120,18 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                {
-                  "type": "null"
-                }
+              "type": [
+                "integer",
+                "null"
               ],
-              "title": "Revision"
+              "format": "int64",
+              "minimum": 1
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Dialogue at its current or requested revision",
             "content": {
               "application/json": {
                 "schema": {
@@ -660,12 +140,22 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
+            "description": "Dialogue not found in this learning language",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -675,8 +165,10 @@
     },
     "/api/v1/exposures": {
       "post": {
-        "summary": "Exposure",
-        "operationId": "exposure_api_v1_exposures_post",
+        "tags": [
+          "exposures"
+        ],
+        "operationId": "record_exposure",
         "requestBody": {
           "content": {
             "application/json": {
@@ -689,7 +181,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Recorded or previously recorded exposure",
             "content": {
               "application/json": {
                 "schema": {
@@ -698,12 +190,328 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "409": {
+            "description": "Exposure ID already used with a different payload",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid payload or unknown phrase revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "submit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}/cancel": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/lessons/{id}/retry": {
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "retry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inbox/submissions/{id}": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "operationId": "submission_receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LessonReceipt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lessons": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "list_lessons",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lessons in the learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lessons/{lesson_id}/phrases": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "lesson_phrases",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lesson members in lesson order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhrasePage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -713,8 +521,10 @@
     },
     "/api/v1/media": {
       "post": {
-        "summary": "Upload Media",
-        "operationId": "upload_media_api_v1_media_post",
+        "tags": [
+          "media"
+        ],
+        "operationId": "upload_reference_media",
         "requestBody": {
           "content": {
             "application/json": {
@@ -727,7 +537,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Stored or previously stored reference media",
             "content": {
               "application/json": {
                 "schema": {
@@ -737,89 +547,11 @@
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid provenance, base64 or audio container",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/media/{media_id}/metadata": {
-      "get": {
-        "summary": "Media Metadata",
-        "operationId": "media_metadata_api_v1_media__media_id__metadata_get",
-        "parameters": [
-          {
-            "name": "media_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Media Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MediaAsset"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/media/{media_id}": {
-      "get": {
-        "summary": "Audio",
-        "operationId": "audio_api_v1_media__media_id__get",
-        "parameters": [
-          {
-            "name": "media_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Media Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -829,11 +561,13 @@
     },
     "/api/v1/media/reconcile": {
       "post": {
-        "summary": "Reconcile",
-        "operationId": "reconcile_api_v1_media_reconcile_post",
+        "tags": [
+          "media"
+        ],
+        "operationId": "reconcile_reference_media",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Missing and orphaned originals; nothing is deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -845,15 +579,314 @@
         }
       }
     },
-    "/api/v1/sessions": {
+    "/api/v1/media/{media_id}": {
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "play_reference_media",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original reference bytes"
+          },
+          "206": {
+            "description": "Requested byte range of the original"
+          },
+          "404": {
+            "description": "Reference media not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Unsatisfiable byte range"
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Original is missing or damaged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/{media_id}/metadata": {
+      "get": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "reference_media_metadata",
+        "parameters": [
+          {
+            "name": "media_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reference media provenance and availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAsset"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reference media not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/search": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "search_phrases",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching phrases in the learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhrasePage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/{target_id}": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "operationId": "read_phrase",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phrase at its current or requested revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Phrase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Phrase or revision not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/phrases/{target_id}/recordings": {
+      "get": {
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "list_learner_takes",
+        "parameters": [
+          {
+            "name": "target_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every take of the phrase in capture order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecordingReceipt"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/audio": {
       "post": {
-        "summary": "Start",
-        "operationId": "start_api_v1_sessions_post",
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "audio",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SessionStart"
+                "$ref": "#/components/schemas/JobMediaRequest"
               }
             }
           },
@@ -861,47 +894,40 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PracticeSession"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
+            "description": "Original audio bytes for this active job"
           }
         }
       }
     },
-    "/api/v1/sessions/current": {
-      "get": {
-        "summary": "Current",
-        "operationId": "current_api_v1_sessions_current_get",
+    "/api/v1/preparation/claims": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "claim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
-            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
-                      "$ref": "#/components/schemas/PracticeSession"
+                      "$ref": "#/components/schemas/JobClaim"
                     },
                     {
                       "type": "null"
                     }
-                  ],
-                  "title": "Response Current Api V1 Sessions Current Get"
+                  ]
                 }
               }
             }
@@ -909,241 +935,240 @@
         }
       }
     },
-    "/api/v1/sessions/readiness": {
-      "get": {
-        "summary": "Readiness",
-        "operationId": "readiness_api_v1_sessions_readiness_get",
-        "parameters": [
-          {
-            "name": "language",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ],
-              "type": "string",
-              "title": "Language"
-            }
-          },
-          {
-            "name": "lesson_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Lesson Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DueSummary"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sessions/{session_id}": {
-      "get": {
-        "summary": "Session",
-        "operationId": "session_api_v1_sessions__session_id__get",
-        "parameters": [
-          {
-            "name": "session_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PracticeSession"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Transition",
-        "operationId": "transition_api_v1_sessions__session_id__patch",
-        "parameters": [
-          {
-            "name": "session_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionTransition"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PracticeSession"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sessions/{session_id}/events": {
+    "/api/v1/preparation/fail": {
       "post": {
-        "summary": "Events",
-        "operationId": "events_api_v1_sessions__session_id__events_post",
-        "parameters": [
-          {
-            "name": "session_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Session Id"
-            }
-          }
+        "tags": [
+          "preparation"
         ],
+        "operationId": "fail",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EventBatch"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PracticeBatchReceipt"
-                }
+                "$ref": "#/components/schemas/JobFailure"
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "required": true
+        },
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/api/v1/preparation/publish": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "publish",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/PublicationReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/receipt": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "receipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PublicationReceipt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/renew": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "renew",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobFence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preparation/stage": {
+      "post": {
+        "tags": [
+          "preparation"
+        ],
+        "operationId": "stage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonOutput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/api/v1/profile": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "current",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
                 }
               }
             }
           }
         }
       },
+      "put": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile/restore": {
+      "post": {
+        "tags": [
+          "profile"
+        ],
+        "operationId": "restore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRestore"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileRevision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile/revisions/{revision}": {
       "get": {
-        "summary": "Receipts",
-        "operationId": "receipts_api_v1_sessions__session_id__events_get",
+        "tags": [
+          "profile"
+        ],
+        "operationId": "revision",
         "parameters": [
           {
-            "name": "session_id",
+            "name": "revision",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Session Id"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventReceipt"
-                  },
-                  "title": "Response Receipts Api V1 Sessions  Session Id  Events Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ProfileRevision"
                 }
               }
             }
@@ -1153,8 +1178,10 @@
     },
     "/api/v1/recordings": {
       "post": {
-        "summary": "Recording",
-        "operationId": "recording_api_v1_recordings_post",
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "store_learner_take",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1167,7 +1194,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Stored take, or the take already stored with this ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -1176,56 +1203,22 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "409": {
+            "description": "Take ID reused with other audio or metadata, or its attempt or capture event is not persisted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/phrases/{target_id}/recordings": {
-      "get": {
-        "summary": "Recordings",
-        "operationId": "recordings_api_v1_phrases__target_id__recordings_get",
-        "parameters": [
-          {
-            "name": "target_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Target Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RecordingReceipt"
-                  },
-                  "title": "Response Recordings Api V1 Phrases  Target Id  Recordings Get"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid transfer, MIME type, size or context",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1235,8 +1228,10 @@
     },
     "/api/v1/recordings/{recording_id}": {
       "get": {
-        "summary": "Play Recording",
-        "operationId": "play_recording_api_v1_recordings__recording_id__get",
+        "tags": [
+          "recordings"
+        ],
+        "operationId": "play_learner_take",
         "parameters": [
           {
             "name": "recording_id",
@@ -1244,26 +1239,36 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "title": "Recording Id"
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "description": "Original take bytes"
           },
-          "422": {
-            "description": "Validation Error",
+          "206": {
+            "description": "Requested byte range of the original take"
+          },
+          "404": {
+            "description": "Take not found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Unsatisfiable byte range"
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1271,15 +1276,17 @@
         }
       }
     },
-    "/api/v1/preparation": {
+    "/api/v1/sessions": {
       "post": {
-        "summary": "Enqueue",
-        "operationId": "enqueue_api_v1_preparation_post",
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "start_session",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SourcePackage"
+                "$ref": "#/components/schemas/SessionStart"
               }
             }
           },
@@ -1287,21 +1294,41 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Started session, or the session already started with this ID",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PreparationJob"
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson or dialogue not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another session is open, the ID has other parameters or nothing is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid start parameters",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1309,39 +1336,26 @@
         }
       }
     },
-    "/api/v1/preparation/{job_id}": {
+    "/api/v1/sessions/current": {
       "get": {
-        "summary": "Job Status",
-        "operationId": "job_status_api_v1_preparation__job_id__get",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Job Id"
-            }
-          }
+        "tags": [
+          "sessions"
         ],
+        "operationId": "current_session",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "The open session, or null when none is open",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PreparationJob"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PracticeSession"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               }
             }
@@ -1349,39 +1363,61 @@
         }
       }
     },
-    "/api/v1/preparation/{job_id}/retry": {
-      "post": {
-        "summary": "Retry",
-        "operationId": "retry_api_v1_preparation__job_id__retry_post",
+    "/api/v1/sessions/readiness": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "practice_readiness",
         "parameters": [
           {
-            "name": "job_id",
-            "in": "path",
+            "name": "language",
+            "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Job Id"
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Due, new and preparing counts without starting a session",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PreparationJob"
+                  "$ref": "#/components/schemas/DueSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Lesson not found in this learning language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid query",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1389,15 +1425,77 @@
         }
       }
     },
-    "/api/v1/handoffs": {
-      "post": {
-        "summary": "Receive",
-        "operationId": "receive_api_v1_handoffs_post",
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "read_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session with its immutable manifest, position and attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "sessions"
+        ],
+        "operationId": "transition_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/HandoffEnvelope"
+                "$ref": "#/components/schemas/SessionTransition"
               }
             }
           },
@@ -1405,21 +1503,41 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Paused or resumed session",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HandoffReceipt"
+                  "$ref": "#/components/schemas/PracticeSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Closed session or stale expected version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid transition",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1427,39 +1545,180 @@
         }
       }
     },
-    "/api/v1/handoffs/{export_id}": {
+    "/api/v1/sessions/{session_id}/events": {
       "get": {
-        "summary": "Handoff Status",
-        "operationId": "handoff_status_api_v1_handoffs__export_id__get",
+        "tags": [
+          "practice"
+        ],
+        "operationId": "practice_event_receipts",
         "parameters": [
           {
-            "name": "export_id",
+            "name": "session_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "title": "Export Id"
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Receipts in event order",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HandoffReceipt"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventReceipt"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Invalid identifier",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "practice"
+        ],
+        "operationId": "submit_practice_events",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Receipts for every event, including retried ones, and the session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeBatchReceipt"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Out-of-order event, stale step or event ID reused with another payload; nothing in the batch is kept",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "operationId": "read_device_settings",
+        "responses": {
+          "200": {
+            "description": "Device and interface settings, with defaults before the first save",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "operationId": "replace_device_settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The complete replacement settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid or unknown settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -1471,122 +1730,6 @@
   "components": {
     "schemas": {
       "AttemptEvidence": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "step": {
-            "type": "integer",
-            "title": "Step"
-          },
-          "target_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Target Id"
-          },
-          "revision": {
-            "type": "integer",
-            "title": "Revision"
-          },
-          "cue_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Cue Id"
-          },
-          "review_group_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Review Group Id"
-          },
-          "repair": {
-            "type": "boolean",
-            "title": "Repair"
-          },
-          "supported": {
-            "type": "boolean",
-            "title": "Supported",
-            "default": false
-          },
-          "original": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/OriginalResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "revealed": {
-            "type": "boolean",
-            "title": "Revealed",
-            "default": false
-          },
-          "expanded": {
-            "type": "boolean",
-            "title": "Expanded",
-            "default": false
-          },
-          "technical_failure": {
-            "type": "boolean",
-            "title": "Technical Failure",
-            "default": false
-          },
-          "capture_pending": {
-            "type": "boolean",
-            "title": "Capture Pending",
-            "default": false
-          },
-          "rating": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "not_yet",
-                  "with_effort",
-                  "recalled"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rating"
-          },
-          "presented_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Presented At"
-          },
-          "finalized_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Finalized At"
-          },
-          "eligibility_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Eligibility Reason"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
@@ -1596,127 +1739,209 @@
           "cue_id",
           "review_group_id",
           "repair",
+          "supported",
+          "revealed",
+          "expanded",
+          "technical_failure",
+          "capture_pending",
           "presented_at"
         ],
-        "title": "AttemptEvidence"
-      },
-      "Chunk": {
         "properties": {
+          "capture_pending": {
+            "type": "boolean"
+          },
+          "cue_id": {
+            "type": "string"
+          },
+          "eligibility_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expanded": {
+            "type": "boolean"
+          },
+          "finalized_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
           "id": {
             "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Id"
+            "format": "uuid"
           },
-          "text": {
+          "original": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OriginalResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "presented_at": {
             "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Text"
+            "format": "date-time"
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecallRating"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair": {
+            "type": "boolean"
+          },
+          "revealed": {
+            "type": "boolean"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "step": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "technical_failure": {
+            "type": "boolean"
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "AudioStatus": {
+        "type": "string",
+        "enum": [
+          "ready",
+          "missing"
+        ]
+      },
+      "Chunk": {
         "type": "object",
         "required": [
           "id",
           "text"
         ],
-        "title": "Chunk"
-      },
-      "Cue": {
         "properties": {
           "id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Id"
+            "type": "string"
           },
-          "prompt": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Prompt"
-          },
-          "visible_chunks": {
-            "items": {
-              "type": "string",
-              "maxLength": 160,
-              "minLength": 1,
-              "pattern": "^[\\w.:-]+$"
-            },
-            "type": "array",
-            "title": "Visible Chunks"
-          },
-          "reviewed": {
-            "type": "boolean",
-            "title": "Reviewed",
-            "default": false
-          },
-          "audio_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Audio Id"
+          "text": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "ClaimRequest": {
+        "type": "object",
+        "required": [
+          "claim_id"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoachSummary": {
+        "type": "object",
+        "required": [
+          "lessons",
+          "targets",
+          "ready",
+          "study_only",
+          "awaiting_audio"
+        ],
+        "properties": {
+          "awaiting_audio": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lessons": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "study_only": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targets": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Cue": {
         "type": "object",
         "required": [
           "id",
           "prompt",
           "visible_chunks"
         ],
-        "title": "Cue"
-      },
-      "Dialogue": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "revision": {
-            "type": "integer",
-            "title": "Revision"
-          },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Language"
+            "format": "uuid"
           },
-          "content": {
-            "$ref": "#/components/schemas/DialogueInput"
+          "id": {
+            "type": "string"
           },
-          "target_ids": {
-            "additionalProperties": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "object",
-            "title": "Target Ids"
+          "prompt": {
+            "type": "string"
           },
-          "target_revisions": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "type": "object",
-            "title": "Target Revisions"
+          "reviewed": {
+            "type": "boolean",
+            "default": false
+          },
+          "visible_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "waiting",
+          "preparing",
+          "failed",
+          "pending_delivery",
+          "published",
+          "cancelled",
+          "superseded"
+        ]
+      },
+      "Dialogue": {
         "type": "object",
         "required": [
           "id",
@@ -1726,65 +1951,67 @@
           "target_ids",
           "target_revisions"
         ],
-        "title": "Dialogue"
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/DialogueInput"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "target_ids": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "target_revisions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          }
+        }
       },
       "DialogueInput": {
-        "properties": {
-          "source_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Source Id"
-          },
-          "title": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Title"
-          },
-          "turns": {
-            "items": {
-              "$ref": "#/components/schemas/DialogueTurn"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 2,
-            "title": "Turns"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "source_id",
           "title",
           "turns"
         ],
-        "title": "DialogueInput"
-      },
-      "DialoguePage": {
         "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/Dialogue"
-            },
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "turns": {
             "type": "array",
-            "title": "Items"
-          },
-          "total": {
-            "type": "integer",
-            "title": "Total"
-          },
-          "offset": {
-            "type": "integer",
-            "title": "Offset"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
+            "items": {
+              "$ref": "#/components/schemas/DialogueTurn"
+            }
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "DialoguePage": {
         "type": "object",
         "required": [
           "items",
@@ -1792,195 +2019,191 @@
           "offset",
           "limit"
         ],
-        "title": "DialoguePage"
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dialogue"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
       },
       "DialogueTurn": {
-        "properties": {
-          "speaker": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Speaker"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Text"
-          },
-          "target_source_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 160,
-                "minLength": 1,
-                "pattern": "^[\\w.:-]+$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Source Id"
-          },
-          "audio_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Audio Id"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "speaker",
           "text"
         ],
-        "title": "DialogueTurn"
-      },
-      "DueSummary": {
         "properties": {
-          "due_count": {
-            "type": "integer",
-            "title": "Due Count"
-          },
-          "new_count": {
-            "type": "integer",
-            "title": "New Count"
-          },
-          "preparing_count": {
-            "type": "integer",
-            "title": "Preparing Count"
-          },
-          "next_due_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Next Due At"
+            "format": "uuid"
+          },
+          "speaker": {
+            "type": "string"
+          },
+          "target_source_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "DueSummary": {
         "type": "object",
         "required": [
+          "practice_ready_count",
           "due_count",
           "new_count",
           "preparing_count",
           "next_due_at"
         ],
-        "title": "DueSummary"
+        "properties": {
+          "due_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "new_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "next_due_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "practice_ready_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "preparing_count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Eligibility": {
+        "type": "string",
+        "enum": [
+          "study",
+          "new",
+          "due"
+        ]
+      },
+      "EnglishPackageVersion": {
+        "type": "string",
+        "enum": [
+          "english_phrases_v1"
+        ]
+      },
+      "EnglishTask": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "pattern",
+              "slots",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "frame"
+                ]
+              },
+              "pattern": {
+                "type": "string"
+              },
+              "slots": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FrameSlot"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "word",
+              "sense",
+              "contexts",
+              "kind"
+            ],
+            "properties": {
+              "contexts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WordContext"
+                }
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "word_sense"
+                ]
+              },
+              "sense": {
+                "type": "string"
+              },
+              "word": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ErrorBody": {
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        }
       },
       "EventBatch": {
-        "properties": {
-          "events": {
-            "items": {
-              "$ref": "#/components/schemas/PracticeInput"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Events"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "events"
         ],
-        "title": "EventBatch"
-      },
-      "EventReceipt": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "sequence": {
-            "type": "integer",
-            "title": "Sequence"
-          },
-          "attempt_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Attempt Id"
-          },
-          "received_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Received At"
-          },
-          "occurred_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Occurred At"
-          },
-          "clock_adjusted": {
-            "type": "boolean",
-            "title": "Clock Adjusted"
-          },
-          "capture_supported": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Capture Supported"
-          },
-          "schedule_changed": {
-            "type": "boolean",
-            "title": "Schedule Changed",
-            "default": false
-          },
-          "schedule_version": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Schedule Version"
-          },
-          "due_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Due At"
-          },
-          "eligibility_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Eligibility Reason"
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeInput"
+            },
+            "maxItems": 100,
+            "minItems": 1
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "EventReceipt": {
         "type": "object",
         "required": [
           "id",
@@ -1988,85 +2211,89 @@
           "attempt_id",
           "received_at",
           "occurred_at",
-          "clock_adjusted"
+          "clock_adjusted",
+          "schedule_changed"
         ],
-        "title": "EventReceipt"
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "capture_supported": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "clock_adjusted": {
+            "type": "boolean"
+          },
+          "due_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "eligibility_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "schedule_changed": {
+            "type": "boolean"
+          },
+          "schedule_version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
       },
       "Explanation": {
-        "properties": {
-          "meaning": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Meaning"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 10000,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
-          },
-          "breakdown": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "maxItems": 50,
-            "title": "Breakdown"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "meaning"
         ],
-        "title": "Explanation"
-      },
-      "ExposureInput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
-          "target_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Target Id"
+          "meaning": {
+            "type": "string"
           },
-          "revision": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Revision"
-          },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "answer",
-              "explanation",
-              "reference"
-            ],
-            "title": "Kind"
+          "usage": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "ExposureInput": {
         "type": "object",
         "required": [
           "id",
@@ -2075,254 +2302,210 @@
           "language",
           "kind"
         ],
-        "title": "ExposureInput"
-      },
-      "ExposureReceipt": {
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "format": "uuid"
           },
-          "received_at": {
+          "kind": {
+            "$ref": "#/components/schemas/ExposureKind"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "target_id": {
             "type": "string",
-            "title": "Received At"
+            "format": "uuid"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "ExposureKind": {
+        "type": "string",
+        "enum": [
+          "answer",
+          "explanation",
+          "reference"
+        ]
+      },
+      "ExposureReceipt": {
         "type": "object",
         "required": [
           "id",
           "received_at"
         ],
-        "title": "ExposureReceipt"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
-      },
-      "HandoffEnvelope": {
-        "properties": {
-          "schema_version": {
-            "type": "integer",
-            "const": 1,
-            "title": "Schema Version",
-            "default": 1
-          },
-          "export_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Export Id"
-          },
-          "sender": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Sender"
-          },
-          "selected_sense_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Selected Sense Id"
-          },
-          "selected_sense": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Selected Sense"
-          },
-          "package": {
-            "$ref": "#/components/schemas/SourcePackage"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "export_id",
-          "sender",
-          "selected_sense_id",
-          "selected_sense",
-          "package"
-        ],
-        "title": "HandoffEnvelope"
-      },
-      "HandoffReceipt": {
-        "properties": {
-          "export_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Export Id"
-          },
-          "preparation_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Preparation Id"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "received",
-              "preparing",
-              "ready",
-              "failed"
-            ],
-            "title": "Status"
-          },
-          "durable": {
-            "type": "boolean",
-            "const": true,
-            "title": "Durable",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "export_id",
-          "preparation_id",
-          "status"
-        ],
-        "title": "HandoffReceipt"
-      },
-      "ImportChange": {
-        "properties": {
-          "source_id": {
-            "type": "string",
-            "title": "Source Id"
-          },
-          "action": {
-            "type": "string",
-            "enum": [
-              "create",
-              "update",
-              "unchanged"
-            ],
-            "title": "Action"
-          },
-          "target_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Id"
-          },
-          "base_revision": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Base Revision"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "source_id",
-          "action"
-        ],
-        "title": "ImportChange"
-      },
-      "ImportReport": {
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id"
-          },
-          "status": {
             "type": "string",
-            "enum": [
-              "validated",
-              "staged",
-              "published",
-              "rejected"
-            ],
-            "title": "Status"
+            "format": "uuid"
           },
-          "changes": {
-            "items": {
-              "$ref": "#/components/schemas/ImportChange"
-            },
+          "received_at": {
+            "type": "string"
+          }
+        }
+      },
+      "FrameSlot": {
+        "type": "object",
+        "required": [
+          "name",
+          "values"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "values": {
             "type": "array",
-            "title": "Changes"
-          },
-          "errors": {
             "items": {
               "type": "string"
-            },
-            "type": "array",
-            "title": "Errors"
-          },
-          "base_content_version": {
-            "type": "string",
-            "title": "Base Content Version"
+            }
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "JobClaim": {
         "type": "object",
         "required": [
-          "status",
-          "changes",
-          "errors",
-          "base_content_version"
+          "fence",
+          "lease_until",
+          "deadline",
+          "receipt",
+          "input",
+          "profile",
+          "guide"
         ],
-        "title": "ImportReport"
-      },
-      "Lesson": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "deadline": {
+            "type": "string"
           },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
           },
-          "title": {
-            "type": "string",
-            "title": "Title"
+          "guide": {
+            "type": "string"
           },
-          "phrase_count": {
-            "type": "integer",
-            "title": "Phrase Count"
+          "input": {
+            "$ref": "#/components/schemas/LessonSubmission"
+          },
+          "lease_until": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileRevision"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/LessonReceipt"
+          }
+        }
+      },
+      "JobFailure": {
+        "type": "object",
+        "required": [
+          "fence",
+          "reason"
+        ],
+        "properties": {
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "reason": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "JobFence": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "claim_id",
+          "token",
+          "fence"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JobMediaRequest": {
+        "type": "object",
+        "required": [
+          "fence",
+          "media_id"
+        ],
+        "properties": {
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "media_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "ru",
+          "sr",
+          "de"
+        ]
+      },
+      "LanguagePreferences": {
+        "type": "object",
+        "required": [
+          "card_language",
+          "preparation_guidance"
+        ],
+        "properties": {
+          "card_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "help_language": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Language"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preparation_guidance": {
+            "type": "string"
+          },
+          "proficiency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "Lesson": {
         "type": "object",
         "required": [
           "id",
@@ -2330,68 +2513,72 @@
           "title",
           "phrase_count"
         ],
-        "title": "Lesson"
-      },
-      "LessonInput": {
         "properties": {
-          "source_id": {
+          "id": {
             "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Source Id"
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "phrase_count": {
+            "type": "integer",
+            "format": "int64"
           },
           "title": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Title"
-          },
-          "target_source_ids": {
-            "items": {
-              "type": "string",
-              "maxLength": 160,
-              "minLength": 1,
-              "pattern": "^[\\w.:-]+$"
-            },
-            "type": "array",
-            "maxItems": 1000,
-            "minItems": 1,
-            "title": "Target Source Ids"
+            "type": "string"
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "LessonInput": {
         "type": "object",
         "required": [
           "source_id",
           "title",
           "target_source_ids"
         ],
-        "title": "LessonInput"
-      },
-      "LessonPage": {
         "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/Lesson"
-            },
+          "source_id": {
+            "type": "string"
+          },
+          "target_source_ids": {
             "type": "array",
-            "title": "Items"
+            "items": {
+              "type": "string"
+            }
           },
-          "total": {
-            "type": "integer",
-            "title": "Total"
-          },
-          "offset": {
-            "type": "integer",
-            "title": "Offset"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
+          "title": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "LessonOutput": {
+        "type": "object",
+        "required": [
+          "fence",
+          "publication_id",
+          "adapter",
+          "package"
+        ],
+        "properties": {
+          "adapter": {
+            "type": "string"
+          },
+          "fence": {
+            "$ref": "#/components/schemas/JobFence"
+          },
+          "package": {
+            "$ref": "#/components/schemas/PreparedEnglishLesson"
+          },
+          "publication_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LessonPage": {
         "type": "object",
         "required": [
           "items",
@@ -2399,103 +2586,181 @@
           "offset",
           "limit"
         ],
-        "title": "LessonPage"
-      },
-      "ManualPackage": {
         "properties": {
-          "schema_version": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lesson"
+            }
+          },
+          "limit": {
             "type": "integer",
-            "const": 1,
-            "title": "Schema Version",
-            "default": 1
+            "format": "int64"
           },
-          "namespace": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Namespace"
+          "offset": {
+            "type": "integer",
+            "format": "int64"
           },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
-          },
-          "source_revision": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Source Revision"
-          },
-          "targets": {
-            "items": {
-              "$ref": "#/components/schemas/TargetInput"
-            },
-            "type": "array",
-            "maxItems": 1000,
-            "minItems": 1,
-            "title": "Targets"
-          },
-          "lessons": {
-            "items": {
-              "$ref": "#/components/schemas/LessonInput"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Lessons"
-          },
-          "dialogues": {
-            "items": {
-              "$ref": "#/components/schemas/DialogueInput"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Dialogues"
+          "total": {
+            "type": "integer",
+            "format": "int64"
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "LessonPhraseInput": {
         "type": "object",
         "required": [
-          "namespace",
-          "language",
-          "source_revision",
-          "targets"
+          "source_id",
+          "text"
         ],
-        "title": "ManualPackage"
-      },
-      "MediaAsset": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "audio_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "sha256": {
-            "type": "string",
-            "title": "Sha256"
+          "expected_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
           },
-          "byte_length": {
-            "type": "integer",
-            "title": "Byte Length"
+          "reference_audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           },
-          "mime_type": {
-            "type": "string",
-            "title": "Mime Type"
+          "source_id": {
+            "type": "string"
           },
-          "metadata": {
-            "$ref": "#/components/schemas/MediaMetadata"
-          },
-          "available": {
-            "type": "boolean",
-            "title": "Available"
+          "text": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "LessonReceipt": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "submission_id",
+          "generation",
+          "namespace",
+          "profile_revision",
+          "guide_version",
+          "received_at"
+        ],
+        "properties": {
+          "generation": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guide_version": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "profile_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "received_at": {
+            "type": "string"
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "LessonStatus": {
+        "type": "object",
+        "required": [
+          "receipt",
+          "status"
+        ],
+        "properties": {
+          "publication": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PublicationReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/LessonReceipt"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeliveryStatus"
+          }
+        }
+      },
+      "LessonSubmission": {
+        "type": "object",
+        "required": [
+          "submission_id",
+          "item_id",
+          "language",
+          "title",
+          "context",
+          "note",
+          "phrases"
+        ],
+        "properties": {
+          "context": {
+            "type": "string"
+          },
+          "expected_generation": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "item_id": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "note": {
+            "type": "string"
+          },
+          "phrases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LessonPhraseInput"
+            }
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediaAsset": {
         "type": "object",
         "required": [
           "id",
@@ -2505,136 +2770,30 @@
           "metadata",
           "available"
         ],
-        "title": "MediaAsset"
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "byte_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MediaMetadata"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
       },
       "MediaMetadata": {
-        "properties": {
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Text"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "reference",
-              "cue",
-              "partner"
-            ],
-            "title": "Role"
-          },
-          "origin": {
-            "type": "string",
-            "enum": [
-              "actor",
-              "course",
-              "generated",
-              "test"
-            ],
-            "title": "Origin"
-          },
-          "source": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Source"
-          },
-          "performer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Performer"
-          },
-          "engine": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Engine"
-          },
-          "voice": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Voice"
-          },
-          "locale": {
-            "type": "string",
-            "title": "Locale"
-          },
-          "accent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accent"
-          },
-          "speech_text": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Speech Text"
-          },
-          "preparation_version": {
-            "type": "string",
-            "title": "Preparation Version"
-          },
-          "settings": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Settings"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "language",
@@ -2645,114 +2804,188 @@
           "locale",
           "preparation_version"
         ],
-        "title": "MediaMetadata"
-      },
-      "MediaUpload": {
         "properties": {
-          "metadata": {
-            "$ref": "#/components/schemas/MediaMetadata"
+          "accent": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "mime_type": {
-            "type": "string",
-            "enum": [
-              "audio/wav",
-              "audio/mpeg",
-              "audio/ogg",
-              "audio/mp4"
-            ],
-            "title": "Mime Type"
+          "engine": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "audio_base64": {
-            "type": "string",
-            "maxLength": 17000000,
-            "minLength": 1,
-            "title": "Audio Base64"
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/MediaOrigin"
+          },
+          "performer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preparation_version": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/MediaRole"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SettingValue"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string"
+          },
+          "speech_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "voice": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "MediaOrigin": {
+        "type": "string",
+        "enum": [
+          "actor",
+          "course",
+          "generated",
+          "test"
+        ]
+      },
+      "MediaRole": {
+        "type": "string",
+        "enum": [
+          "reference",
+          "cue",
+          "partner"
+        ]
+      },
+      "MediaUpload": {
         "type": "object",
         "required": [
           "metadata",
           "mime_type",
           "audio_base64"
         ],
-        "title": "MediaUpload"
-      },
-      "OriginalResponse": {
         "properties": {
-          "modality": {
-            "type": "string",
-            "enum": [
-              "self_report",
-              "recorded",
-              "unrecorded"
-            ],
-            "title": "Modality"
+          "audio_base64": {
+            "type": "string"
           },
-          "supported": {
-            "type": "boolean",
-            "title": "Supported"
+          "metadata": {
+            "$ref": "#/components/schemas/MediaMetadata"
           },
-          "occurred_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Occurred At"
+          "mime_type": {
+            "$ref": "#/components/schemas/ReferenceMime"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "Modality": {
+        "type": "string",
+        "enum": [
+          "self_report",
+          "recorded",
+          "unrecorded"
+        ]
+      },
+      "OpenStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "paused"
+        ]
+      },
+      "OriginalResponse": {
         "type": "object",
         "required": [
           "modality",
           "supported",
           "occurred_at"
         ],
-        "title": "OriginalResponse"
-      },
-      "Phrase": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "modality": {
+            "$ref": "#/components/schemas/Modality"
           },
-          "revision": {
-            "type": "integer",
-            "title": "Revision"
-          },
-          "language": {
+          "occurred_at": {
             "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
+            "format": "date-time"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PartnerPrompt": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Language"
+            "format": "uuid"
           },
-          "content": {
-            "$ref": "#/components/schemas/TargetInput"
-          },
-          "lessons": {
-            "items": {
-              "$ref": "#/components/schemas/Lesson"
-            },
-            "type": "array",
-            "title": "Lessons"
-          },
-          "audio_status": {
-            "type": "string",
-            "enum": [
-              "ready",
-              "missing"
-            ],
-            "title": "Audio Status"
-          },
-          "retrieval_ready": {
-            "type": "boolean",
-            "title": "Retrieval Ready"
+          "text": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "PersonalProfile": {
+        "type": "object",
+        "required": [
+          "native_language",
+          "learning_timezone",
+          "languages"
+        ],
+        "properties": {
+          "languages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LanguagePreferences"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "learning_timezone": {
+            "type": "string"
+          },
+          "native_language": {
+            "$ref": "#/components/schemas/Language"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Phrase": {
         "type": "object",
         "required": [
           "id",
@@ -2763,31 +2996,134 @@
           "audio_status",
           "retrieval_ready"
         ],
-        "title": "Phrase"
-      },
-      "PhrasePage": {
         "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/Phrase"
-            },
+          "audio_status": {
+            "$ref": "#/components/schemas/AudioStatus"
+          },
+          "content": {
+            "$ref": "#/components/schemas/TargetInput"
+          },
+          "english": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PreparedEnglishPhrase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lessons": {
             "type": "array",
-            "title": "Items"
+            "items": {
+              "$ref": "#/components/schemas/Lesson"
+            }
           },
-          "total": {
-            "type": "integer",
-            "title": "Total"
+          "retrieval_ready": {
+            "type": "boolean"
           },
-          "offset": {
+          "revision": {
             "type": "integer",
-            "title": "Offset"
+            "format": "int64"
+          }
+        }
+      },
+      "PhraseDetails": {
+        "type": "object",
+        "required": [
+          "language",
+          "meaning",
+          "translation",
+          "usage"
+        ],
+        "properties": {
+          "forms": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "translation": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "PhraseFamiliarity": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "new"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "provenance",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "studied"
+                ]
+              },
+              "provenance": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PhraseHelp": {
+        "type": "object",
+        "required": [
+          "language",
+          "meaning"
+        ],
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "meaning": {
+            "type": "string"
+          },
+          "usage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "PhrasePage": {
         "type": "object",
         "required": [
           "items",
@@ -2795,50 +3131,72 @@
           "offset",
           "limit"
         ],
-        "title": "PhrasePage"
-      },
-      "PlannedTarget": {
         "properties": {
-          "phrase": {
-            "$ref": "#/components/schemas/Phrase"
-          },
-          "cue_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Cue Id"
-          },
-          "hidden_chunks": {
-            "items": {
-              "type": "string",
-              "maxLength": 160,
-              "minLength": 1,
-              "pattern": "^[\\w.:-]+$"
-            },
+          "items": {
             "type": "array",
-            "title": "Hidden Chunks"
+            "items": {
+              "$ref": "#/components/schemas/Phrase"
+            }
           },
-          "review_group_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Review Group Id"
-          },
-          "schedule_version": {
+          "limit": {
             "type": "integer",
-            "minimum": 0.0,
-            "title": "Schedule Version"
+            "format": "int64"
           },
-          "eligibility": {
-            "type": "string",
-            "enum": [
-              "new",
-              "due"
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PhraseSituation": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "language",
+          "exposed_target_source_ids"
+        ],
+        "properties": {
+          "audio_id": {
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Eligibility"
+            "format": "uuid"
+          },
+          "exposed_target_source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "partner": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PartnerPrompt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "PlannedTarget": {
         "type": "object",
         "required": [
           "phrase",
@@ -2848,109 +3206,58 @@
           "schedule_version",
           "eligibility"
         ],
-        "title": "PlannedTarget"
+        "properties": {
+          "cue_id": {
+            "type": "string"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/Eligibility"
+          },
+          "hidden_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phrase": {
+            "$ref": "#/components/schemas/Phrase"
+          },
+          "review_group_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schedule_version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "PlannerVersion": {
+        "type": "string",
+        "enum": [
+          "due-new-v3-online"
+        ]
       },
       "PracticeBatchReceipt": {
-        "properties": {
-          "receipts": {
-            "items": {
-              "$ref": "#/components/schemas/EventReceipt"
-            },
-            "type": "array",
-            "title": "Receipts"
-          },
-          "session": {
-            "$ref": "#/components/schemas/PracticeSession"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "receipts",
           "session"
         ],
-        "title": "PracticeBatchReceipt"
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventReceipt"
+            }
+          },
+          "session": {
+            "$ref": "#/components/schemas/PracticeSession"
+          }
+        }
       },
       "PracticeInput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "sequence": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Sequence"
-          },
-          "step": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Step"
-          },
-          "occurred_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Occurred At"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "present",
-              "respond",
-              "capture_complete",
-              "answer",
-              "explain",
-              "reference",
-              "rate",
-              "failure",
-              "report",
-              "detour",
-              "dialogue_exposure",
-              "dialogue_begin"
-            ],
-            "title": "Kind"
-          },
-          "modality": {
-            "type": "string",
-            "enum": [
-              "self_report",
-              "recorded",
-              "unrecorded"
-            ],
-            "title": "Modality",
-            "default": "self_report"
-          },
-          "rating": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "not_yet",
-                  "with_effort",
-                  "recalled"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rating"
-          },
-          "reason": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 1000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
@@ -2959,67 +3266,71 @@
           "occurred_at",
           "kind"
         ],
-        "title": "PracticeInput"
-      },
-      "PracticeSession": {
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "format": "uuid"
           },
-          "status": {
+          "kind": {
+            "$ref": "#/components/schemas/PracticeKind"
+          },
+          "modality": {
+            "$ref": "#/components/schemas/Modality",
+            "default": "self_report"
+          },
+          "occurred_at": {
             "type": "string",
-            "enum": [
-              "active",
-              "paused",
-              "superseded",
-              "completed"
+            "format": "date-time"
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecallRating"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Status"
+            "maxLength": 1000
           },
-          "version": {
+          "sequence": {
             "type": "integer",
-            "minimum": 1.0,
-            "title": "Version"
+            "format": "int64",
+            "minimum": 1
           },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
-          "manifest": {
-            "$ref": "#/components/schemas/SessionManifest"
-          },
-          "cursor": {
+          "step": {
             "type": "integer",
-            "title": "Cursor"
-          },
-          "last_sequence": {
-            "type": "integer",
-            "title": "Last Sequence"
-          },
-          "queue": {
-            "items": {
-              "$ref": "#/components/schemas/SessionStep"
-            },
-            "type": "array",
-            "title": "Queue"
-          },
-          "attempts": {
-            "items": {
-              "$ref": "#/components/schemas/AttemptEvidence"
-            },
-            "type": "array",
-            "title": "Attempts"
+            "format": "int64",
+            "minimum": 0
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "PracticeKind": {
+        "type": "string",
+        "enum": [
+          "next",
+          "present",
+          "respond",
+          "capture_complete",
+          "answer",
+          "explain",
+          "reference",
+          "rate",
+          "failure",
+          "report",
+          "detour",
+          "dialogue_exposure",
+          "dialogue_begin"
+        ]
+      },
+      "PracticeSession": {
         "type": "object",
         "required": [
           "id",
@@ -3033,237 +3344,359 @@
           "queue",
           "attempts"
         ],
-        "title": "PracticeSession"
-      },
-      "PreparationJob": {
         "properties": {
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptEvidence"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cursor": {
+            "type": "integer",
+            "format": "int64"
+          },
           "id": {
             "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "format": "uuid"
+          },
+          "last_sequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/SessionManifest"
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionStep"
+            }
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "queued",
-              "leased",
-              "failed",
-              "awaiting_review",
-              "ready"
-            ],
-            "title": "Status"
+            "$ref": "#/components/schemas/SessionStatus"
           },
-          "input_hash": {
+          "updated_at": {
             "type": "string",
-            "title": "Input Hash"
+            "format": "date-time"
           },
-          "attempts": {
+          "version": {
             "type": "integer",
-            "title": "Attempts"
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error"
-          },
-          "result": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result"
-          },
-          "published_import_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Published Import Id"
+            "format": "int64",
+            "minimum": 1
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "PreparedEnglishLesson": {
         "type": "object",
         "required": [
-          "id",
-          "status",
-          "input_hash",
-          "attempts",
-          "error",
-          "result",
-          "published_import_id"
+          "schema_version",
+          "namespace",
+          "source_revision",
+          "language",
+          "profile_revision",
+          "guide_version",
+          "assessment_version",
+          "lesson",
+          "phrases"
         ],
-        "title": "PreparationJob"
-      },
-      "PublishRequest": {
         "properties": {
-          "reviewed": {
-            "type": "boolean",
-            "const": true,
-            "title": "Reviewed"
+          "assessment_version": {
+            "type": "string"
+          },
+          "guide_version": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lesson": {
+            "$ref": "#/components/schemas/LessonInput"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "phrases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreparedEnglishPhrase"
+            }
+          },
+          "profile_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "schema_version": {
+            "$ref": "#/components/schemas/EnglishPackageVersion"
+          },
+          "source_revision": {
+            "type": "string"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "PreparedEnglishPhrase": {
         "type": "object",
         "required": [
-          "reviewed"
+          "source_id",
+          "meaning_key",
+          "intention_key",
+          "text",
+          "accepted_variants",
+          "situations",
+          "hint",
+          "familiarity",
+          "reference_audio_id"
         ],
-        "title": "PublishRequest"
-      },
-      "Reconciliation": {
         "properties": {
-          "missing_ids": {
+          "accepted_variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "details": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhraseDetails"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expected_revision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "familiarity": {
+            "$ref": "#/components/schemas/PhraseFamiliarity"
+          },
+          "help": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhraseHelp"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "type": "string"
+          },
+          "intention_key": {
+            "type": "string"
+          },
+          "meaning_key": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "situations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhraseSituation"
+            }
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "source_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "task": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EnglishTask"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileRestore": {
+        "type": "object",
+        "required": [
+          "mutation_id",
+          "expected_revision",
+          "restore_revision",
+          "reason"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mutation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "restore_revision": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileRevision": {
+        "type": "object",
+        "required": [
+          "revision",
+          "profile",
+          "actor",
+          "reason",
+          "created_at"
+        ],
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "mutation_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/PersonalProfile"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "restored_from": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "required": [
+          "mutation_id",
+          "expected_revision",
+          "profile",
+          "reason"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mutation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/PersonalProfile"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicationReceipt": {
+        "type": "object",
+        "required": [
+          "generation_id",
+          "publication_id",
+          "lesson_id",
+          "target_ids",
+          "published_at"
+        ],
+        "properties": {
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publication_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string"
+          },
+          "target_ids": {
+            "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
-            },
-            "type": "array",
-            "title": "Missing Ids"
-          },
-          "orphan_hashes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Orphan Hashes"
-          },
-          "removed_staging_files": {
-            "type": "integer",
-            "title": "Removed Staging Files"
+            }
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "RecallRating": {
+        "type": "string",
+        "enum": [
+          "not_yet",
+          "with_effort",
+          "recalled"
+        ]
+      },
+      "Reconciliation": {
         "type": "object",
         "required": [
           "missing_ids",
           "orphan_hashes",
           "removed_staging_files"
         ],
-        "title": "Reconciliation"
+        "properties": {
+          "missing_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "orphan_hashes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removed_staging_files": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
       },
       "RecordingInput": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "target_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Target Id"
-          },
-          "revision": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Revision"
-          },
-          "attempt_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attempt Id"
-          },
-          "exposure_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exposure Id"
-          },
-          "capture_event_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Capture Event Id"
-          },
-          "captured_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Captured At"
-          },
-          "mime_type": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Mime Type"
-          },
-          "duration_ms": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Ms"
-          },
-          "complete": {
-            "type": "boolean",
-            "title": "Complete"
-          },
-          "capture_settings": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Capture Settings"
-          },
-          "audio_base64": {
-            "type": "string",
-            "maxLength": 17000000,
-            "minLength": 1,
-            "title": "Audio Base64"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
@@ -3274,39 +3707,79 @@
           "complete",
           "audio_base64"
         ],
-        "title": "RecordingInput"
-      },
-      "RecordingReceipt": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "attempt_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           },
-          "sha256": {
+          "audio_base64": {
             "type": "string",
-            "title": "Sha256"
+            "maxLength": 17000000,
+            "minLength": 1
           },
-          "byte_length": {
-            "type": "integer",
-            "title": "Byte Length"
+          "capture_event_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "capture_settings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SettingValue"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "captured_at": {
             "type": "string",
-            "format": "date-time",
-            "title": "Captured At"
-          },
-          "received_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Received At"
+            "format": "date-time"
           },
           "complete": {
-            "type": "boolean",
-            "title": "Complete"
+            "type": "boolean"
+          },
+          "duration_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "exposure_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid"
           }
         },
-        "additionalProperties": false,
+        "additionalProperties": false
+      },
+      "RecordingReceipt": {
         "type": "object",
         "required": [
           "id",
@@ -3316,66 +3789,53 @@
           "received_at",
           "complete"
         ],
-        "title": "RecordingReceipt"
+        "properties": {
+          "byte_length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
+      },
+      "ReferenceMime": {
+        "type": "string",
+        "enum": [
+          "audio/wav",
+          "audio/mpeg",
+          "audio/ogg",
+          "audio/mp4"
+        ]
       },
       "SessionManifest": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "planner_version",
+          "policy_version",
+          "language",
+          "targets",
+          "required_media_ids"
+        ],
         "properties": {
-          "schema_version": {
-            "type": "integer",
-            "const": 1,
-            "title": "Schema Version",
-            "default": 1
-          },
-          "planner_version": {
-            "type": "string",
-            "const": "due-new-v3-online",
-            "title": "Planner Version",
-            "default": "due-new-v3-online"
-          },
-          "policy_version": {
-            "type": "string",
-            "title": "Policy Version",
-            "default": "fsrs-6.3.2-retention90-v1"
-          },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
-          },
-          "lesson_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lesson Id"
-          },
-          "targets": {
-            "items": {
-              "$ref": "#/components/schemas/PlannedTarget"
-            },
-            "type": "array",
-            "title": "Targets"
-          },
-          "required_media_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Required Media Ids"
-          },
           "dialogue": {
-            "anyOf": [
+            "oneOf": [
               {
                 "$ref": "#/components/schemas/Dialogue"
               },
@@ -3383,513 +3843,198 @@
                 "type": "null"
               }
             ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "language",
-          "targets",
-          "required_media_ids"
-        ],
-        "title": "SessionManifest"
-      },
-      "SessionStart": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
           },
           "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
+            "$ref": "#/components/schemas/Language"
           },
           "lesson_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
+            "type": [
+              "string",
+              "null"
             ],
-            "title": "Lesson Id"
+            "format": "uuid"
           },
-          "dialogue_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dialogue Id"
+          "planner_version": {
+            "$ref": "#/components/schemas/PlannerVersion"
           },
-          "takeover_session_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Takeover Session Id"
+          "policy_version": {
+            "type": "string"
+          },
+          "required_media_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "schema_version": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedTarget"
+            }
+          },
+          "voluntary": {
+            "type": "boolean"
           }
-        },
-        "additionalProperties": false,
+        }
+      },
+      "SessionStart": {
         "type": "object",
         "required": [
           "id",
           "language"
         ],
-        "title": "SessionStart"
+        "properties": {
+          "dialogue_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "lesson_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "takeover_session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "voluntary": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SessionStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "paused",
+          "superseded",
+          "completed"
+        ]
       },
       "SessionStep": {
-        "properties": {
-          "target_index": {
-            "type": "integer",
-            "title": "Target Index"
-          },
-          "repair": {
-            "type": "boolean",
-            "title": "Repair",
-            "default": false
-          },
-          "dialogue_turn": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dialogue Turn"
-          },
-          "introduced": {
-            "type": "boolean",
-            "title": "Introduced",
-            "default": false
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
-          "target_index"
+          "target_index",
+          "repair",
+          "introduced"
         ],
-        "title": "SessionStep"
+        "properties": {
+          "dialogue_turn": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "introduced": {
+            "type": "boolean"
+          },
+          "repair": {
+            "type": "boolean"
+          },
+          "target_index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       },
       "SessionTransition": {
-        "properties": {
-          "expected_version": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Expected Version"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "active",
-              "paused"
-            ],
-            "title": "Status"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "expected_version",
           "status"
         ],
-        "title": "SessionTransition"
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/OpenStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SettingValue": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
       },
       "Settings": {
+        "type": "object",
+        "required": [
+          "ui_language_mode"
+        ],
         "properties": {
           "native_language": {
-            "anyOf": [
+            "oneOf": [
               {
-                "type": "string",
-                "enum": [
-                  "en",
-                  "ru",
-                  "sr",
-                  "de"
-                ]
+                "$ref": "#/components/schemas/Language"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Native Language"
+            ]
           },
           "ui_language_mode": {
-            "type": "string",
-            "enum": [
-              "native",
-              "learning"
-            ],
-            "title": "Ui Language Mode",
-            "default": "native"
+            "$ref": "#/components/schemas/UiLanguageMode"
           }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Settings"
+        }
       },
       "SettingsUpdate": {
-        "properties": {
-          "native_language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Native Language"
-          },
-          "ui_language_mode": {
-            "type": "string",
-            "enum": [
-              "native",
-              "learning"
-            ],
-            "title": "Ui Language Mode",
-            "default": "native"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "native_language"
         ],
-        "title": "SettingsUpdate"
-      },
-      "SourcePackage": {
         "properties": {
-          "namespace": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Namespace"
-          },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Language"
-          },
           "native_language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "ru",
-              "sr",
-              "de"
-            ],
-            "title": "Native Language"
+            "$ref": "#/components/schemas/Language"
           },
-          "source_revision": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Source Revision"
-          },
-          "phrases": {
-            "items": {
-              "$ref": "#/components/schemas/SourcePhrase"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Phrases"
-          },
-          "lessons": {
-            "items": {
-              "$ref": "#/components/schemas/LessonInput"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Lessons"
-          },
-          "dialogues": {
-            "items": {
-              "$ref": "#/components/schemas/DialogueInput"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Dialogues"
+          "ui_language_mode": {
+            "$ref": "#/components/schemas/UiLanguageMode",
+            "default": "native"
           }
         },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "namespace",
-          "language",
-          "native_language",
-          "source_revision",
-          "phrases"
-        ],
-        "title": "SourcePackage"
-      },
-      "SourcePhrase": {
-        "properties": {
-          "source_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Source Id"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "fixed_phrase",
-              "word_sense",
-              "frame"
-            ],
-            "title": "Kind",
-            "default": "fixed_phrase"
-          },
-          "meaning_key": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Meaning Key"
-          },
-          "selected_meaning": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 10000,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Selected Meaning"
-          },
-          "recall_expression": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Recall Expression"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Text"
-          },
-          "purpose": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Purpose"
-          },
-          "context": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 10000,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Context"
-          },
-          "competing_expressions": {
-            "items": {
-              "type": "string",
-              "maxLength": 10000,
-              "minLength": 1
-            },
-            "type": "array",
-            "maxItems": 30,
-            "title": "Competing Expressions"
-          },
-          "reference_audio_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Audio Id"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "source_id",
-          "meaning_key",
-          "recall_expression",
-          "text",
-          "purpose"
-        ],
-        "title": "SourcePhrase"
+        "additionalProperties": false
       },
       "TargetInput": {
-        "properties": {
-          "source_id": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Source Id"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "fixed_phrase",
-              "word_sense",
-              "frame"
-            ],
-            "title": "Kind"
-          },
-          "meaning_key": {
-            "type": "string",
-            "maxLength": 160,
-            "minLength": 1,
-            "pattern": "^[\\w.:-]+$",
-            "title": "Meaning Key"
-          },
-          "recall_expression": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Recall Expression"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Text"
-          },
-          "purpose": {
-            "type": "string",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Purpose"
-          },
-          "chunks": {
-            "items": {
-              "$ref": "#/components/schemas/Chunk"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Chunks"
-          },
-          "required_chunks": {
-            "items": {
-              "type": "string",
-              "maxLength": 160,
-              "minLength": 1,
-              "pattern": "^[\\w.:-]+$"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Required Chunks"
-          },
-          "cues": {
-            "items": {
-              "$ref": "#/components/schemas/Cue"
-            },
-            "type": "array",
-            "maxItems": 50,
-            "title": "Cues"
-          },
-          "explanations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Explanation"
-            },
-            "propertyNames": {
-              "enum": [
-                "en",
-                "ru",
-                "sr",
-                "de"
-              ]
-            },
-            "type": "object",
-            "title": "Explanations"
-          },
-          "concepts": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Concepts"
-          },
-          "acceptable_equivalents": {
-            "items": {
-              "type": "string",
-              "maxLength": 10000,
-              "minLength": 1
-            },
-            "type": "array",
-            "maxItems": 100,
-            "title": "Acceptable Equivalents"
-          },
-          "slots": {
-            "patternProperties": {
-              "^[\\w.:-]+$": {
-                "items": {
-                  "type": "string",
-                  "maxLength": 10000,
-                  "minLength": 1
-                },
-                "type": "array"
-              }
-            },
-            "propertyNames": {
-              "maxLength": 160,
-              "minLength": 1
-            },
-            "type": "object",
-            "title": "Slots"
-          },
-          "reference_audio_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Audio Id"
-          }
-        },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "source_id",
@@ -3901,47 +4046,128 @@
           "chunks",
           "required_chunks"
         ],
-        "title": "TargetInput"
-      },
-      "ValidationError": {
         "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
+          "acceptable_equivalents": {
             "type": "array",
-            "title": "Location"
+            "items": {
+              "type": "string"
+            }
           },
-          "msg": {
-            "type": "string",
-            "title": "Message"
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            }
           },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
+          "concepts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
-          "input": {
-            "title": "Input"
+          "context_audio_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
-          "ctx": {
+          "cues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cue"
+            }
+          },
+          "explanations": {
             "type": "object",
-            "title": "Context"
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Explanation"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TargetKind"
+          },
+          "meaning_key": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "recall_expression": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "required_chunks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "slots": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
           }
         },
+        "additionalProperties": false
+      },
+      "TargetKind": {
+        "type": "string",
+        "enum": [
+          "fixed_phrase",
+          "word_sense",
+          "frame"
+        ]
+      },
+      "UiLanguageMode": {
+        "type": "string",
+        "enum": [
+          "native",
+          "learning"
+        ]
+      },
+      "WordContext": {
         "type": "object",
         "required": [
-          "loc",
-          "msg",
-          "type"
+          "situation_id",
+          "answer",
+          "reference_audio_id"
         ],
-        "title": "ValidationError"
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "reference_audio_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "situation_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       }
     }
   }

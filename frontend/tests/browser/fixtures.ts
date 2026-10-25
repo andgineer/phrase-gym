@@ -13,10 +13,10 @@ export const test = base.extend<{ isolatedLibrary: void; silentPlayback: void }>
     { auto: true },
   ],
   isolatedLibrary: [
-    async ({ request }, use, testInfo) => {
+    async ({ request }, use) => {
       const response = await request.post('/_test/reset')
       if (!response.ok()) throw new Error(`Fixture reset failed (${response.status()})`)
-      if (!testInfo.project.name.endsWith('-python-preparation')) await seedLibrary(request)
+      await seedLibrary(request)
       await use()
     },
     { auto: true },

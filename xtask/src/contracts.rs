@@ -8,10 +8,10 @@ pub struct ContractFiles {
 }
 
 pub fn committed(workspace: &Workspace) -> ContractFiles {
-    let directory = workspace.frontend().join("tests/rust-contract");
+    let frontend = workspace.frontend();
     ContractFiles {
-        openapi: directory.join("openapi.json"),
-        typescript: directory.join("api.generated.ts"),
+        openapi: frontend.join("openapi.json"),
+        typescript: frontend.join("src/api.generated.ts"),
     }
 }
 

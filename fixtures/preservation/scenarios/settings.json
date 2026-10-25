@@ -1,9 +1,5 @@
 {
   "description": "Device settings: the first launch reads defaults, each save replaces the complete device and interface set and returns it, and incomplete, unknown or invalid fields are rejected without changing what is stored.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

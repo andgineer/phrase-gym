@@ -1,5 +1,4 @@
 import type { components } from './api.generated'
-import type { components as RustComponents } from '../tests/rust-contract/api.generated'
 import { ref } from 'vue'
 
 export const serverUnavailable = ref(false)
@@ -11,9 +10,9 @@ export function requireServer() {
 
 export type Settings = components['schemas']['Settings']
 export type Language = NonNullable<Settings['native_language']>
-export type Phrase = RustComponents['schemas']['Phrase']
+export type Phrase = components['schemas']['Phrase']
 export type Lesson = components['schemas']['Lesson']
-export type PhrasePage = RustComponents['schemas']['PhrasePage']
+export type PhrasePage = components['schemas']['PhrasePage']
 export type LessonPage = components['schemas']['LessonPage']
 export type ExposureInput = components['schemas']['ExposureInput']
 

@@ -7,9 +7,9 @@ pub fn check(workspace: &Workspace) -> Result<(), Failure> {
     let mut problems = Vec::new();
     for name in tracked.split('\0').filter(|name| !name.is_empty()) {
         let path = workspace.root.join(name);
-        // Like the pre-commit hooks, skip symlinks and tracked files deleted from the working tree.
+        // Symlinks and tracked files deleted from the working tree have no content to check.
         let regular = std::fs::symlink_metadata(&path).is_ok_and(|metadata| metadata.is_file());
-        if excluded(name) || !regular {
+        if !regular {
             continue;
         }
         let content = std::fs::read(&path)
@@ -24,10 +24,6 @@ pub fn check(workspace: &Workspace) -> Result<(), Failure> {
     }
 }
 
-fn file_name(name: &str) -> &str {
-    name.rsplit('/').next().unwrap_or(name)
-}
-
 fn has_extension(name: &str, extensions: &[&str]) -> bool {
     std::path::Path::new(name)
         .extension()
@@ -38,16 +34,12 @@ fn has_extension(name: &str, extensions: &[&str]) -> bool {
         })
 }
 
-fn excluded(name: &str) -> bool {
-    name.split('/').any(|part| part == ".venv") || file_name(name) == "tasks.py"
-}
-
 pub fn file_problems(name: &str, content: &[u8]) -> Vec<String> {
     let mut problems = Vec::new();
     if has_extension(name, &["yaml", "yml"]) {
         problems.extend(yaml_problem(content).map(|problem| format!("{name}: {problem}")));
     }
-    if is_text(content) && !is_python(name, content) {
+    if is_text(content) {
         for line in trailing_whitespace_lines(content) {
             problems.push(format!("{name}:{line}: trailing whitespace"));
         }
@@ -67,24 +59,12 @@ fn yaml_problem(content: &[u8]) -> Option<String> {
     }
 }
 
-// The same text heuristic pre-commit applies: other control bytes in the first KiB mean binary.
+// Control bytes other than common whitespace and escape in the first KiB mean binary content.
 fn is_text(content: &[u8]) -> bool {
     content
         .iter()
         .take(1024)
         .all(|byte| matches!(byte, 7..=13 | 27 | 0x20..=0x7e | 0x80..=0xff))
-}
-
-fn is_python(name: &str, content: &[u8]) -> bool {
-    let file = file_name(name);
-    let first_line = content
-        .split(|byte| *byte == b'\n')
-        .next()
-        .unwrap_or_default();
-    has_extension(file, &["py"])
-        || (!file.contains('.')
-            && first_line.starts_with(b"#!")
-            && String::from_utf8_lossy(first_line).contains("python"))
 }
 
 fn trailing_whitespace_lines(content: &[u8]) -> Vec<usize> {
@@ -178,13 +158,13 @@ mod tests {
     }
 
     #[test]
-    fn skips_binary_and_python_files_like_the_hooks() {
+    fn skips_binary_files_and_checks_every_text_file() {
         assert!(file_problems("media/tone.wav", b"RIFF\0\0 \n\n").is_empty());
-        assert!(problems("tests/test_a.py", "x = 1  \n\n").is_empty());
-        assert!(problems("scripts/run", "#!/usr/bin/env python3\nx = 1 \n").is_empty());
-        assert_eq!(problems("scripts/run.sh", "#!/bin/sh\necho \n").len(), 1);
-        assert!(excluded(".venv/lib/site.yml") && excluded("tasks.py"));
-        assert!(!excluded("venv.yml"));
+        assert_eq!(
+            problems(".githooks/pre-commit", "#!/bin/sh\necho \n").len(),
+            1
+        );
+        assert_eq!(problems("notes", "text  \n\n").len(), 2);
     }
 
     #[test]

@@ -2,7 +2,7 @@ import { ref, nextTick } from 'vue'
 import { afterEach, expect, test, vi } from 'vitest'
 import { useIntakeStatusPolling } from '../src/composables/useIntakeStatusPolling'
 import { connectionRetrying, serverUnavailable } from '../src/api'
-import type { components } from './rust-contract/api.generated'
+import type { components } from '../src/api.generated'
 
 const cleanup = vi.hoisted(() => [] as (() => void)[])
 vi.mock('vue', async () => ({

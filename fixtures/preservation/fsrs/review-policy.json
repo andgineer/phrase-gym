@@ -1,5 +1,5 @@
 {
-  "source": "phrase_gym.practice.policy.ReviewPolicy with fsrs 6.3.2",
+  "source": "Recorded from the reference fsrs 6.3.2 Python scheduler",
   "policy_version": "fsrs-6.3.2-retention90-v1",
   "scheduler": {
     "desired_retention": 0.9,

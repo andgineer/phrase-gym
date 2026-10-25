@@ -16,7 +16,6 @@ use super::{HOST, TestServer, repository_root};
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     pub description: String,
-    pub implementations: Vec<String>,
     clock: String,
     #[serde(default)]
     seed_sql: Vec<String>,

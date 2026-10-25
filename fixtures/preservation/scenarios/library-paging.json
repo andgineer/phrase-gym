@@ -1,9 +1,5 @@
 {
   "description": "Library reads page and scope consistently: lessons order by title, phrases by lesson position or identity, totals count every match before paging, search ignores surrounding spaces and folds case fully (so ß, ẞ and SS match) across text, purpose, concepts and lesson titles, every read stays within its learning language, and malformed paging, search, language or identifiers are rejected.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

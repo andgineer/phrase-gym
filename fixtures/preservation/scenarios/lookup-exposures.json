@@ -1,6 +1,5 @@
 {
   "description": "Lookup exposure receipts: identical retries keep the original receipt, a changed payload under the same ID conflicts, and rejected requests persist nothing.",
-  "implementations": ["python", "rust"],
   "clock": "2026-10-12T12:00:00+00:00",
   "seed_sql": [
     "INSERT INTO target (id, language, kind, meaning_key, recall_expression, current_revision) VALUES ('2f0c6f1e-5a43-4c1b-9b7e-3d2a1c0e9f10', 'en', 'fixed_phrase', 'ask-day', 'How has your day been so far?', 1);",

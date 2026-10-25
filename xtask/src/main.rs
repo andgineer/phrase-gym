@@ -2,6 +2,7 @@ mod architecture;
 mod coach;
 mod coach_smoke;
 mod contracts;
+mod hooks;
 mod hygiene;
 mod modules;
 mod tools;
@@ -12,7 +13,7 @@ use std::process::ExitCode;
 use tools::{Failure, Workspace};
 
 const USAGE: &str = "usage: cargo xtask <pre|test|api-types|app-build|coach-bundle [--out DIR]|\
-                     coach-smoke|run [--data-dir DIR] [--port PORT]>";
+                     coach-smoke|install-hooks|run [--data-dir DIR] [--port PORT]>";
 
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -24,6 +25,7 @@ fn main() -> ExitCode {
         Some("app-build") if arguments.len() == 1 => app_build(&workspace),
         Some("coach-bundle") => coach_bundle(&workspace, &arguments[1..]),
         Some("coach-smoke") if arguments.len() == 1 => coach_smoke::smoke(&workspace),
+        Some("install-hooks") if arguments.len() == 1 => hooks::install(&workspace),
         Some("run") => run(&workspace, &arguments[1..]),
         _ => Err(Failure::new(USAGE)),
     };

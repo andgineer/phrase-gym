@@ -1,4 +1,4 @@
-import type { components } from '../tests/rust-contract/api.generated'
+import type { components } from './api.generated'
 
 type Schemas = components['schemas']
 export type InboxDraft = {

@@ -1,9 +1,5 @@
 {
   "description": "In-session repairs: a failed target is repeated only after five minutes and two other finalized targets, at most twice per target; only the first eligible result changes the schedule, and later repair results, including successes, never promote it.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

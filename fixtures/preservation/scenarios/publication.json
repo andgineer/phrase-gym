@@ -1,9 +1,5 @@
 {
   "description": "Package validation, staging and atomic publication: stable target identity across unchanged and compatible edits, immutable revisions with dialogue rebinding, rejection of changed meanings under an existing source, idempotent publication, stale staged packages conflicting without partial writes.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

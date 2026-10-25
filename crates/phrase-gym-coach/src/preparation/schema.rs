@@ -8,10 +8,8 @@ const WORD_SITUATION: &str = r"^[^_.!?|]*_____[^_.!?|]*[.!?]( \| [^_|]+)?$";
 // Generate the model's bounded output schema from the same committed contract checked by xtask.
 // No model-authored field can change the outer generation, profile, guide or publication fence.
 pub fn phrase_schema(text: &str) -> Result<Value, String> {
-    let api: Value = serde_json::from_str(include_str!(
-        "../../../../frontend/tests/rust-contract/openapi.json"
-    ))
-    .map_err(|_| "Cannot read committed output contract")?;
+    let api: Value = serde_json::from_str(include_str!("../../../../frontend/openapi.json"))
+        .map_err(|_| "Cannot read committed output contract")?;
     let schemas = api["components"]["schemas"]
         .as_object()
         .ok_or("Missing contract schemas")?;

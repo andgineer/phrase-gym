@@ -3,7 +3,6 @@ import { defineConfig, devices } from '@playwright/test'
 const port = Number(process.env.PHRASE_GYM_BROWSER_TEST_PORT ?? 8941)
 const chromiumURL = `http://127.0.0.1:${port}`
 const webkitURL = `http://127.0.0.1:${port + 1}`
-const preparation = 'preparation-lifecycle.spec.ts'
 
 export default defineConfig({
   testDir: './tests/browser',
@@ -11,11 +10,8 @@ export default defineConfig({
   // Projects have separate Server data; each project serializes its own mutations.
   workers: 2,
   use: { baseURL: chromiumURL, trace: 'retain-on-failure' },
-  webServer: [0, 1, 2, 3].map((offset) => ({
-    command:
-      offset < 2
-        ? `node frontend/tests/browser-server.mjs --port ${port + offset}`
-        : `.venv/bin/python -m tests.browser_preparation_server --port ${port + offset}`,
+  webServer: [0, 1].map((offset) => ({
+    command: `node frontend/tests/browser-server.mjs --port ${port + offset}`,
     cwd: '..',
     url: `http://127.0.0.1:${port + offset}/api/v1/settings`,
     reuseExistingServer: false,
@@ -25,7 +21,6 @@ export default defineConfig({
     {
       name: 'chromium',
       workers: 1,
-      testIgnore: preparation,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: chromiumURL,
@@ -36,21 +31,10 @@ export default defineConfig({
     {
       name: 'webkit',
       workers: 1,
-      testIgnore: preparation,
       use: {
         ...devices['Desktop Safari'],
         baseURL: webkitURL,
       },
     },
-    ...(['chromium', 'webkit'] as const).map((browserName, index) => ({
-      name: `${browserName}-python-preparation`,
-      workers: 1,
-      testMatch: preparation,
-      use: {
-        browserName,
-        baseURL: `http://127.0.0.1:${port + 2 + index}`,
-        launchOptions: browserName === 'chromium' ? { args: ['--disable-audio-output'] } : {},
-      },
-    })),
   ],
 })

@@ -4,8 +4,7 @@ use phrase_gym_server::openapi;
 
 #[test]
 fn committed_schema_matches_the_server_routes() {
-    let committed = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../frontend/tests/rust-contract/openapi.json");
+    let committed = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../frontend/openapi.json");
     let committed = std::fs::read_to_string(committed)
         .unwrap()
         .replace("\r\n", "\n");

@@ -1,9 +1,5 @@
 {
   "description": "Single open session: explicit takeover supersedes the known current session, pause keeps the slot, stale transitions conflict, and late reports to replaced sessions remain history without schedule changes.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

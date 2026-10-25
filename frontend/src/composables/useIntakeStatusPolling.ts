@@ -1,6 +1,6 @@
 import { onUnmounted, watch, type Ref } from 'vue'
 import { connectionRetrying, serverUnavailable } from '../api'
-import type { components } from '../../tests/rust-contract/api.generated'
+import type { components } from '../api.generated'
 
 type Status = components['schemas']['LessonStatus']
 export function useIntakeStatusPolling(

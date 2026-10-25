@@ -1,9 +1,5 @@
 {
   "description": "Readiness is read-only and scoped by language and lesson: targets without playable reference audio or a usable reviewed cue count as preparing even when a review is due, unscheduled ready targets are new, due reviews include the current instant, and the earliest future due time is reported.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

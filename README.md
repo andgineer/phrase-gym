@@ -4,85 +4,55 @@
 
 A language trainer for ready use of words, phrases and prepared dialogues.
 
-The production app in `src/phrase_gym` and `frontend/` includes persistent language settings, a searchable library, reviewed manual-package publication, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling.
+Phrase Gym Server (`crates/phrase-gym-server`) serves the Vue client in `frontend/` and the HTTP API: persistent language settings and personal preferences, a searchable library, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling. Phrase Gym Coach (`crates/phrase-gym-coach`), a Windows/macOS desktop app, prepares material and reference speech through the Server's durable inbox. Both are Rust.
+
+## Requirements
+
+- Rust through rustup; `rust-toolchain.toml` pins the exact toolchain.
+- Node 22.12+ on an LTS release (`.nvmrc`).
+- For Coach preparation: the Codex or Claude CLI with its subscription login and a separately installed Piper runtime, as described in the [Coach setup](docs/coach-desktop.md).
 
 ## Run locally
 
-Use Python 3.12+ with uv and Node 22.12+.
-
 ```bash
-uv sync --frozen
-cd frontend
-npm ci
-npm run typecheck
-npm run build
-cd ..
-uv run phrase-gym --data-dir .data serve --client-dir frontend/dist
+npm --prefix frontend ci
+npm --prefix frontend run build
+cargo xtask run --data-dir /private/tmp/phrase-gym-preview
 ```
 
-Open [the local app](http://127.0.0.1:8000/learn/en). Choose your native language on first launch. English, Serbian, German and Russian UI locales are available; explanations stay in the native language. The database starts without content. `/learn/en` and `/learn/sr` can be bookmarked independently.
+Open [the local app](http://127.0.0.1:8000/learn/en). Choose your native language on first launch. English, Serbian, German and Russian UI locales are available; explanations stay in the native language. The database starts without content. `/learn/en` and `/learn/sr` can be bookmarked independently. Retain the data directory between restarts. Browser journals are pending-transfer storage, not backups.
 
-For sample content, validate and stage a package:
+Server and Coach run directly on the same MacBook at `http://127.0.0.1:8000`, without connection setup or application authentication; follow the [preview access and launch instructions](docs/rust-preview.md). The global **+** opens a clipboard preview over any screen: review or edit the phrase, add an optional note, then explicitly **Send**. No manual lesson fields are required. Coach also accepts deliberate raw phrase paste automatically; both paths durably acknowledge original text before Codex or Claude preparation and generated Piper reference speech, then publish atomically. External agents can submit prepared packages and original audio through the [inbox API](docs/preview-inbox.md). Normal **Start session** opens new English material as ungraded study with **Next**, reference playback and retained recordings. After completed study, a later Start offers independent recall with the answer hidden until reveal and honest self-rating afterward. Resume keeps the existing session. Recording is optional, and every take is retained automatically. See the [Coach demo](docs/coach-desktop.md); full multilingual/content/desktop acceptance remains in the implementation plan.
 
-```bash
-uv run phrase-gym --data-dir .data import-package fixtures/manual-en.json
-uv run phrase-gym --data-dir .data import-package fixtures/manual-en.json --stage
-# Inspect the staged report and material, then use the returned import ID:
-uv run phrase-gym --data-dir .data publish IMPORT_ID --reviewed
-```
+Phrase Gym Coach is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login, Piper speech and the manual acceptance checklist.
 
-Repeat for `fixtures/manual-sr.json`. These are structural examples, not a release content pack; they deliberately contain no production audio. Reference playback requires an exact full-phrase clip imported separately before publication:
+The Server has local `backup`, `verify-backup` and `restore` commands for consistent SQLite-plus-media snapshots and isolated recovery. Follow the [backup and rollback instructions](docs/recovery.md) before upgrading a data directory.
 
-```bash
-uv run phrase-gym --data-dir .data upload-reference phrase.wav metadata.json --mime-type audio/wav
-uv run phrase-gym --data-dir .data reconcile-media
-```
-
-Use the returned media ID in the package. Metadata declares language, exact text, role, origin and provenance; generated speech also identifies its engine, voice and speech input. Inspect the actual schema at `/docs`. Reconciliation reports missing/corrupt references and orphan files while retaining originals.
-
-Start session drills due/new targets in the selected scope; Resume keeps the existing session. Recording is optional, and every take is retained automatically. Keep a tab open when audio storage fails and use Retry; do not clear browser storage to upgrade. Retain the data directory between restarts. Browser journals are pending-transfer storage, not backups.
+The local Server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and operational recovery rehearsals remain release work. The Server holds no provider credentials, and browsing prepared content needs no LLM or speech-provider requests.
 
 ## Checks and build
 
 ```bash
-uv run pytest tests/
-uv run pyrefly check --project-excludes=tests --python-interpreter-path=.venv/bin/python
-cd frontend
-npm run typecheck
-npm test
-npm run build
-npx playwright install chromium webkit
-npm run test:browser
-cd ..
-./build.sh
-```
-
-`build.sh` bundles the client in the Python wheel/source distribution. A backend-only `uv build` before preparing the client requires `--client-dir` at runtime. Invoke tasks include `app-check`, `app-build`, `api-types`, and the scaffold's existing documentation/version tasks. Run `uv run invoke --list` or `uv run phrase-gym --help`.
-
-The Rust replacement lives in the Cargo workspace (`crates/`, `xtask/`) and runs alongside the Python application during the migration. With rustup and Node 22.12+ installed:
-
-```bash
-cargo xtask pre        # rustfmt, Clippy, architecture and hygiene checks, client formatting, generated-contract drift
-cargo xtask test       # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
-cargo xtask api-types  # refresh frontend/tests/rust-contract from the Rust OpenAPI document
-cargo xtask app-build  # build the client and release Rust binaries
-cargo xtask run  # Rust server on 127.0.0.1:8000 with synthetic data
+cargo xtask install-hooks # once per clone: commits then run `cargo xtask pre` first
+cargo xtask pre           # rustfmt, Clippy, architecture and hygiene checks, client formatting, generated-contract drift
+cargo xtask test          # Rust tests, client typecheck/unit/build, Chromium and WebKit suites
+cargo xtask api-types     # refresh frontend/openapi.json and frontend/src/api.generated.ts from the Server
+cargo xtask app-build     # build the client and release Rust binaries
 cargo xtask coach-bundle  # unsigned development bundle of the Coach desktop app (macOS or Windows)
 cargo xtask coach-smoke   # launch that bundle like a user and verify its window, process supervision and failure paths
 ```
 
-The Rust demo runs Server and Coach directly on the same MacBook at `http://127.0.0.1:8000`, without connection setup or application authentication; follow [preview access and launch instructions](docs/rust-preview.md). The global **+** opens a clipboard preview over any screen: review or edit the phrase, add an optional note, then explicitly **Send**. No manual lesson fields are required. Coach also accepts deliberate raw phrase paste automatically; both paths durably acknowledge original text before Codex preparation and generated Piper reference speech, then publish atomically. External agents can submit prepared packages and original audio through the [inbox API](docs/preview-inbox.md). Normal **Start session** opens new English material as ungraded study with **Next**, reference playback and retained recordings. After completed study, a later Start offers independent recall with the answer hidden until reveal and honest self-rating afterward. See the [Coach demo](docs/coach-desktop.md); full multilingual/content/desktop acceptance remains in the implementation plan.
+Install the browser binaries once from `frontend/` with `npx playwright install chromium webkit`. Builds with `--features test-support` add content-seeding routes under `/api/v1/imports` and deterministic browser fault controls under `/_test`; release builds and the OpenAPI document omit them. The browser suite starts disposable Servers and runs the built Vue client in Chromium and WebKit. `fixtures/preservation/` holds language-neutral HTTP scenarios and recorded scheduler sequences that encode rules the Server keeps.
 
-Phrase Gym Coach, the Windows/macOS preparation app, is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login and the manual acceptance checklist.
+## Documentation
 
-The Rust Server has local `backup`, `verify-backup` and `restore` commands for consistent SQLite-plus-media snapshots and isolated recovery. Follow the [backup and rollback instructions](docs/recovery.md) before upgrading a Rust data directory.
-
-The Rust server implements every endpoint the retained client calls; the Python preparation and handoff routes are not ported because the inbox replaces them. It uses its own schema and does not open databases created by the Python application. Builds with `--features test-support` add content-seeding routes under `/api/v1/imports` and deterministic browser fault controls under `/_test`; release builds and the OpenAPI document omit them. The browser suite starts disposable Rust servers and runs the built Vue client in Chromium and WebKit. Only the named `*-python-preparation` projects use the temporary Python preparation server until that workflow moves to Rust. Preservation fixtures under `fixtures/preservation/` record the Python behavior that encodes rules the Rust server keeps.
-
-The local server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and operational recovery rehearsals remain release work. Provider keys stay server-side. No LLM or speech-provider requests are needed to browse prepared content.
+- [Preview access and launch](docs/rust-preview.md)
+- [Coach desktop setup, Piper speech and measurements](docs/coach-desktop.md)
+- [Inbox API for external agents](docs/preview-inbox.md)
+- [Backup, restore and rollback](docs/recovery.md)
 
 ## Project context
 
-Read [specs/START-HERE.md](specs/START-HERE.md) for current decisions and [the implementation plan](specs/plan/implementation-plan.md) for remaining work. Specs retain design rationale and constraints; code, tests and generated API contracts describe implemented behavior. User documentation remains under `docs/`.
+Read [specs/START-HERE.md](specs/START-HERE.md) for current decisions and [the implementation plan](specs/plan/implementation-plan.md) for remaining work. Specs retain design rationale and constraints; code, tests and generated API contracts describe implemented behavior. Development rules live in [AGENTS.md](AGENTS.md).
 
-[Documentation](https://andgineer.github.io/phrase-gym/) · [License](LICENSE)
+[License](LICENSE)

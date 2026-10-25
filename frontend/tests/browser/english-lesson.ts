@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { expect, type APIRequestContext } from '@playwright/test'
 import { tone } from './seed-library'
-import type { components } from '../rust-contract/api.generated'
+import type { components } from '../../src/api.generated'
 
 export async function englishLesson(request: APIRequestContext, details = true) {
   const media = await request.post('/api/v1/media', {

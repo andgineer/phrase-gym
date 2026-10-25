@@ -1,9 +1,5 @@
 {
   "description": "Learner takes are opaque retained bytes: identical retries return the same receipt, changed audio or metadata under an ID conflicts, every take is kept and served byte-for-byte with ranges, invalid input is rejected without storage, and context must match a persisted attempt or lookup exposure.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

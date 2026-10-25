@@ -1,6 +1,6 @@
 # Phrase Gym — agent instructions
 
-Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Server and Coach are migrating to Rust under that plan; retain the Vue client in `frontend/`. The existing Python scaffold and its commands remain in use until the tested Rust replacement permits their removal.
+Read [specs/START-HERE.md](specs/START-HERE.md) and [remaining work](specs/plan/implementation-plan.md). Specs retain current decisions and hard-to-infer design constraints; code and tests describe implemented behavior. Server and Coach are Rust; retain the Vue client in `frontend/`.
 
 For a root-session request to implement the next stage, follow the [orchestration handout](specs/plan/orchestration-handout.md) before making changes or delegating. Delegated agents follow their assigned scope and the regular rules below.
 
@@ -10,7 +10,7 @@ For a root-session request to implement the next stage, follow the [orchestratio
 
 - Keep architecture under active review in every batch. Each module and service has one coherent responsibility. Split unrelated workflows before adding more methods; do not grow a catch-all service or application component.
 - Aim for no more than 250 lines of handwritten production code per file; review and split before 300. Generated contracts and migrations may be longer. A shorter file does not justify circular dependencies, meaningless wrappers or fragmented invariants.
-- Dependencies point inward: transport and UI adapters use contracts/domain services; domain services never import HTTP routers, application startup or UI modules. Current Python contracts live in `src/phrase_gym/contracts/`; the Rust workspace must provide shared contracts at the same architectural boundary. Construct services at the application boundary.
+- Dependencies point inward: transport and UI adapters use contracts/domain services; domain services never import HTTP routers, application startup or UI modules. Shared contracts live in `crates/phrase-gym-contracts`. Construct services at the application boundary.
 - Keep validation, publication transactions and library reads separate. One workflow owns each transaction; helpers receive that transaction instead of opening hidden writes. Keep all package publication atomic.
 - Vue views render state. Route orchestration, preferences and audio effects belong in focused composables/adapters; the practice reducer stays pure. Generated API types are the client contract.
 - When moving a symbol, update all importers and tests. No re-export compatibility shims. Shared helpers are preferable to duplicated logic.
@@ -19,41 +19,32 @@ For a root-session request to implement the next stage, follow the [orchestratio
 
 | Task | Command |
 |---|---|
-| Lint, format, type check and hygiene | `uv run inv pre` |
-| Full Python, client and browser suite | `uv run inv test` |
-| Python iteration | `uv run pytest tests/` |
+| Rust format, Clippy, architecture, hygiene, client format and contract drift | `cargo xtask pre` |
+| Rust tests, client typecheck/unit/build and both browser engines | `cargo xtask test` |
+| Rust iteration | `cargo test --workspace --all-features --locked` |
 | Client iteration | `npm --prefix frontend test` |
 | Browser iteration | `npm --prefix frontend run test:browser` |
-| Build client and Python distributions | `uv run inv app-build` |
-| Refresh OpenAPI and generated client types | `uv run inv api-types` |
-| Available tasks | `uv run inv --list` |
-| Rust format, Clippy, architecture, hygiene, client format and Rust contract drift | `cargo xtask pre` |
-| Rust tests, client typecheck/unit/build and both browser engines | `cargo xtask test` |
-| Refresh the Rust OpenAPI and its generated TypeScript fixture | `cargo xtask api-types` |
+| Refresh the OpenAPI document and generated client types | `cargo xtask api-types` |
 | Build the client and release Rust binaries | `cargo xtask app-build` |
 | Run the Rust server on 127.0.0.1:8000 with a synthetic data directory | `cargo xtask run` |
 | Build the unsigned Coach development bundle (macOS/Windows) | `cargo xtask coach-bundle` |
 | Launch the Coach bundle like a user and verify the packaged smoke checks | `cargo xtask coach-smoke` |
-| Re-record the scheduler fixture from the Python implementation | `uv run python -m tests.preservation.export` |
+| Install the commit hook that runs `cargo xtask pre` (once per clone) | `cargo xtask install-hooks` |
 
-Use `uv sync --frozen`, `npm --prefix frontend ci`, and install the browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python is 3.12+; use Node 22.12+ on an LTS release (`.nvmrc`). Rust uses the exact toolchain pinned in `rust-toolchain.toml` through rustup. The pyrefly hook uses `.venv/bin/python`; the Rust hook runs `cargo xtask pre` and needs that toolchain plus Node. Adding/changing Python dependencies means updating `uv.lock`; client dependencies update the npm lockfile; Rust dependencies update the committed `Cargo.lock`, disable default features and list the features they need. Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
-
-During the transition `uv run inv pre` and `uv run inv test` remain the authoritative gate: the first runs `cargo xtask pre` as a hook and the second runs the Rust tests. `cargo xtask` replaces them only at the cutover described in the plan.
-
-**Never call Ruff directly.** `inv pre` runs the project's configured Ruff, formatter, pyrefly and hygiene hooks and matches CI. An editor lint panel does not replace it.
+Use `npm --prefix frontend ci`, and install the browser binaries from `frontend/` with `npx playwright install chromium webkit`. Use Node 22.12+ on an LTS release (`.nvmrc`). Rust uses the exact toolchain pinned in `rust-toolchain.toml` through rustup. The committed `.githooks/pre-commit` runs `cargo xtask pre` and needs that toolchain plus Node and the client dependencies. Client dependencies update the npm lockfile; Rust dependencies update the committed `Cargo.lock`, disable default features and list the features they need. Missing dependencies or browsers are environment failures to fix, not reasons to skip suites. The project needs no Python; Coach's Piper speech is a separately installed tool ([Coach setup](docs/coach-desktop.md#bounded-piper-speech-proof)).
 
 ## Done gate
 
 Choose the gate from the complete change, including staged and unstaged files.
 
-**Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run `uv run inv pre`, Python checks, application builds or Python/client/browser suites. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
+**Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run `cargo xtask test`, application builds or Rust/client/browser suites; the commit hook still runs `cargo xtask pre`. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
 
 **Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
 
-1. `uv run inv pre`: every hook passes, including the Rust hook, and pyrefly reports zero errors.
-2. `uv run inv test`: the full Python, Rust, client and browser suites pass; frontend checks must run rather than skip.
+1. `cargo xtask pre`: rustfmt, Clippy, architecture, hygiene, client formatting and contract drift checks all pass.
+2. `cargo xtask test`: the full Rust, client and both browser suites pass; frontend checks must run rather than skip.
 
-Use focused checks during iteration. Run the full ordered gate once per coherent implementation deliverable before commit or delivery, rather than after every internal edit. Rerun relevant checks for review fixes and the full gate after substantive changes; a narrow subset cannot replace it. Use the documentation-only gate for prose-only changes. If a hook rewrites files, rerun until it converges. Never bypass commit hooks with `--no-verify`.
+Use focused checks during iteration. Run the full ordered gate once per coherent implementation deliverable before commit or delivery, rather than after every internal edit. Rerun relevant checks for review fixes and the full gate after substantive changes; a narrow subset cannot replace it. Use the documentation-only gate for prose-only changes. Never bypass commit hooks with `--no-verify`.
 
 Fix findings even when they appear pre-existing. Deferral requires evidence that the same failure exists on the committed baseline and the user's agreement in the current turn. Never silently report a failing tree as passing. If execution or approval infrastructure blocks a check, describe that block explicitly and do not claim the gate passed.
 
@@ -68,15 +59,13 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 - Tests make no real provider, TTS, source mutation or external delivery calls. Fake those boundaries; never read the operator's `.env` or private recordings into fixtures or logs.
 - Never leave a failing test. Diagnose clock, ordering, race and environment causes; do not skip, xfail, delete or weaken the assertion to hide a failure.
 - Software checks are not language-content, speech-quality or actual-device acceptance. Keep Safari/headset, iPhone and content gaps explicit.
-- `fixtures/preservation/` records Python behavior that encodes spec rules the Rust replacement keeps: synthetic HTTP scenarios and scheduler sequences. They are not compatibility requirements: the Rust release reads no Python-era data and keeps no Python-era contract for its own sake ([architecture](specs/architecture.md#releases-and-data-compatibility)). Re-record them only for an intended behavior change. Every legacy test module keeps an entry in `fixtures/preservation/successors.toml`; add, move or delete entries with the module, mark modules that only guard compatibility with Python-era data or clients as superseded by that decision, and delete a legacy harness only when its entries are covered or superseded.
+- `fixtures/preservation/` holds language-neutral HTTP scenarios and recorded scheduler sequences that encode spec rules; Rust tests run them. They are not compatibility requirements ([architecture](specs/architecture.md#releases-and-data-compatibility)). Change a scenario only for an intended behavior change, in the same commit as the rule it encodes; the scheduler sequences are fixed reference values for the pinned FSRS arithmetic.
 
 ## Code conventions
 
-- While Python remains, use Python 3.12+, `src` layout, hatchling packaging and the existing uv, Click, pytest, Invoke and CI conventions. Add Rust tooling during migration and replace Python tooling at the tested cutover described in the plan.
 - Rust code passes rustfmt and Clippy pedantic with warnings denied; documentation lints are relaxed because comments default to none. The `xtask` architecture check enforces crate dependency direction, explicit dependency features, a Server dependency graph free of GUI, provider and model crates, and the module-size boundary.
 - English only in comments, docstrings, plans and repository documentation. Follow the project's English communication rule. Learning data, language names and voice IDs retain their original language/script as quoted, searchable literals.
-- All imports at module top level. No in-function lazy imports and none to break cycles; fix the dependency structure. An optional heavy provider dependency needs an explicit documented exception when actually integrated.
-- No `from __future__ import annotations`.
+- All imports at module top level, none inside functions and none to break cycles; fix the dependency structure.
 - No re-export shims when moving symbols. Import shared helpers directly from their owner.
 - Comments/docstrings explain a non-obvious why in one or two lines: a hidden constraint, library workaround or invariant. Do not restate the code, argue architectural decisions there, or cite phase/plan names; decisions belong in `specs/`.
 

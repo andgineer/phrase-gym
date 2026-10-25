@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { api } from '../api'
 import type { Language } from '../api'
-import type { components } from '../../tests/rust-contract/api.generated'
+import type { components } from '../api.generated'
 import { onboardingMessages } from '../onboardingMessages'
 import type { PracticeMessages } from '../practiceMessages'
 const props = defineProps<{

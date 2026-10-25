@@ -1,6 +1,6 @@
 import { onMounted, ref } from 'vue'
 import { api, ApiError, requireServer } from '../api'
-import type { components } from '../../tests/rust-contract/api.generated'
+import type { components } from '../api.generated'
 import { inboxDraft, type InboxDraft } from '../inboxDraft'
 import { lessonTitle } from '../lessonTitle'
 import type { OnboardingMessages } from '../onboardingMessages'

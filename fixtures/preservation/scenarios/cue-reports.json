@@ -1,9 +1,5 @@
 {
   "description": "Cue reports: reporting a cue leaves the attempt ungraded and the schedule untouched, and readiness and later plans treat that cue revision as unusable until a new revision is published.",
-  "implementations": [
-    "python",
-    "rust"
-  ],
   "clock": "2026-10-12T12:00:00+00:00",
   "steps": [
     {

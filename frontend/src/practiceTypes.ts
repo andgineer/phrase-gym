@@ -1,4 +1,4 @@
-import type { components } from '../tests/rust-contract/api.generated'
+import type { components } from './api.generated'
 export type PracticeSession = components['schemas']['PracticeSession']
 export type PracticeInput = components['schemas']['PracticeInput']
 export type AttemptEvidence = components['schemas']['AttemptEvidence']
