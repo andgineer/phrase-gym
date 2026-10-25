@@ -2,6 +2,8 @@
 
 Deliver the smallest useful research-informed learning loop first. The target is one local Python application, SQLite and the existing Vue GUI. Both earlier backends supply reusable code and tests; neither defines mandatory parity. The [architecture](../architecture.md) excludes a separate native Coach, worker infrastructure and live recovery.
 
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Deliver recall first, then speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
+
 ## Why phrases first
 
 Import a batch of already prepared English course phrases from an external AI. This is the shortest route to practising personally useful language: it avoids building internal generation, echo-words integration and word-sense clarification before the recorder, recall loop and scheduled return are useful.
@@ -12,6 +14,20 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
 
+### Start from the Python scaffold
+
+At the start of MVP implementation, reassign local `main` to [scaffold commit `5b96b57cc8b40690061f87c67d85d3b01eb07f86`](https://github.com/andgineer/phrase-gym/commit/5b96b57cc8b40690061f87c67d85d3b01eb07f86). Build on this baseline with selected recovered components instead of incrementally cleaning the Rust application.
+
+- Before moving `main`, preserve the complete current work, including uncommitted changes, and create a named local recovery reference to the saved tip. Verify that current specs, agent instructions and reusable frontend/audio code are recoverable. Never discard unrelated edits to make the reset convenient.
+- Carry the current `specs/` tree and agent instructions forward as a replacement for the scaffold's obsolete documents, not an overlay that revives old plans or archives. Keep `CLAUDE.md` linked to the single instruction source. Selectively recover the Vue recorder/player, its meaningful tests and device constraints from the saved tip, plus useful earlier Python components. Do not restore the Rust application to obtain them.
+- Preserve private data, recordings, local configuration and ignore protections. Inspect possible path collisions before changing the tracked tree; do not run a blanket clean of untracked or ignored files. The new application uses its own data directory.
+- The commit contains placeholder CLI/package code, old tooling and publishing workflows; it is not literally empty or the current product specification. Adapt only needed scaffold tooling, replace stale commands/CI/hooks with Python and retained-client checks, and omit obsolete publishing machinery. Do not carry Rust checks into a tree without Rust; update the documented done gate and executable checks together before delivering implementation, without bypassing hooks.
+- Keep the recovery reference locally. Reassigning local `main` does not authorize a push, force-push, publication or deployment.
+
+This is an implementation starting action, not a separate foundation milestone. Complete the learner path below on that scaffold.
+
+### Complete learner path
+
 Implement one complete vertical path:
 
 - Recover only useful Python components, use a pinned dependency environment and retain Vue's working audio. Serve the built client and a small generated API contract from one local application. Adapt the retained client where necessary; do not recreate every Rust endpoint.
@@ -20,7 +36,8 @@ Implement one complete vertical path:
 - Implement the [learning loop](../decision-core-trainer.md): ungraded first study, later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.
 - Preserve optional recording, all takes, final encoder data, simple saved replay and session continuity across reload/restart. Add basic due/new counts, library lookup, Suspend/Restore and the minimal English language/timezone choices. Corrected imports can replace a suspended card without rewriting its history.
 - Provide one documented launch command and a manual stopped-app backup/restore procedure. A terminal launch is acceptable; a desktop wrapper, installer, service and auto-update system are not prerequisites.
-- Update tests, generated contracts, check commands and hooks for the new Python runtime in the same deliverable. Retain meaningful Vue tests and real-backend browser coverage. Replace obsolete tests only where the new spec intentionally changes behavior; do not carry the old migration gate or numerical-port equivalence forward as a product requirement. Retire the unused Rust application/build path once this replacement works, without deleting private data.
+- Update tests, generated contracts, check commands and hooks for the new Python runtime in the same deliverable. Retain meaningful Vue tests and real-backend browser coverage. Replace obsolete tests only where the new spec intentionally changes behavior; do not carry the old migration gate or numerical-port equivalence forward as a product requirement. The Rust application remains available through the recovery reference, not in the new runtime tree.
+- Keep stable card/source and attempt identities, explicit support history and a versioned import format under the [growth boundary](../architecture.md#growth-after-the-mvp). Test the actual MVP behavior; do not implement future activity engines, reward systems or placeholder schemas.
 
 Start with import → study → record/replay as an internal checkpoint, then complete later recall and scheduling in the same MVP. Do not create separate foundation, framework or parity projects. Hand the working study path to the learner as soon as it is usable; a delayed real-clock check need not block independent implementation work.
 
@@ -41,9 +58,31 @@ Start with import → study → record/replay as an internal checkpoint, then co
 
 **Checks:** silent unit/integration and real-browser tests against the new Python backend cover this path and its simple failure/retry cases. Use a test clock for automated day/interval tests, never a learner-facing clock override. Review representative externally generated cards semantically and listen to references separately; software tests cannot establish either. The learner verifies complete microphone/comparison/saved playback on the actual MacBook. A later real-clock return remains explicitly pending until observed; immediate repetition is not a substitute.
 
-**MVP boundary:** no word generation, frames, dialogue runs, confusable dependency graph, multilingual voice matrix, native app, external inbox API, remote access or advanced backup system is required. A useful English phrase workflow is the first MVP, not a stepping stone that must wait for those features.
+**MVP boundary:** no word generation, frames, speaking missions, game rewards, dialogue runs, confusable dependency graph, multilingual voice matrix, native app, external inbox API, remote access or advanced backup system is required. A useful English phrase workflow is the first MVP, not a stepping stone that must wait for those features.
 
-## 2. Add echo-words through bounded internal preparation
+## 2. Bring learned expressions into freer speech
+
+**Learner outcome:** use a few learned expressions while composing personally relevant speech, then practise related situations without supplied wording.
+
+- Implement the [speaking progression](../decision-transfer-and-engagement.md#from-retrieval-to-freer-speech): supported personal responses, a repeated task with a changed situation or follow-up, and an unscripted attempt with no displayed target wording. Accept other natural responses; do not score compulsory phrase insertion.
+- Reuse recording/replay and existing expressions. Import a small externally prepared set of situations and follow-ups first, including adaptable expressions demonstrated through complete examples. No live AI partner, slot editor or whole-dialogue engine is required.
+- Add preparation for a real conversation and optional Used / No opportunity / Wanted it but could not retrieve it notes. Make a prompt set usable with a tutor or partner without requiring messaging, automatic sharing or a partner account.
+- Keep activity/support records, unscripted attempts and real-use notes separate from card grades. Phrase exposure affects later independent-card eligibility; activities and usage reports do not update FSRS. Upgrade existing MVP data without losing cards, grades, audio or old-format import support.
+
+**Exit:** the learner can complete a supported response, a changed unscripted task and an optional real-opportunity note, replay the saved takes and see which assistance was available. Tests cover state, exposure and scheduling separation, saved history and the upgrade path. Content and actual-use acceptance remain separate from software checks; no effectiveness experiment gates delivery.
+
+## 3. Make adult practice sustainable
+
+**Learner outcome:** choose short meaningful practice missions, see concrete progress and return after a break without penalties.
+
+- Apply the [adult engagement decision](../decision-transfer-and-engagement.md#adult-engagement): chosen missions with varied situations, a clear finish and a learner-selected weekly target.
+- Show dated recall progress, supported/unscripted practice, recording comparisons and real-use reports distinctly. Do not compute an invented fluency or mastery score.
+- Add optional completion points or achievements, including credit for honest attempts that need correction. They must not depend on favorable self-ratings or reward endless easy-card repetition. Turning them off leaves all practice usable.
+- Preserve accumulated progress across missed days and let the learner pause or adjust the target. No public leaderboard, mandatory collectibles, punitive streaks or virtual economy.
+
+**Exit:** the learner can choose and finish a mission, see accurately labeled progress, disable rewards and return after a missed week without debt or lost progress. Behavioral tests cover these rules and prove that rewards cannot alter memory grades. Enjoyment and sustained participation remain distinct acceptance questions, not inferred learning gains.
+
+## 4. Add echo-words through bounded internal preparation
 
 **Learner outcome:** paste words with their source contexts or import a supplied echo-words export and receive useful word-sense cards without manually authoring them.
 
@@ -55,7 +94,7 @@ Start with import → study → record/replay as an internal checkpoint, then co
 
 **Exit:** a learner-supplied English word batch goes from ordinary intake through preparation to first study, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards. No generalized provider framework is needed.
 
-## 3. Extend only the content the learner next needs
+## 5. Extend only the content the learner next needs
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.
 
@@ -63,13 +102,11 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 **Exit:** one representative batch in the selected extension works through the existing complete loop. No all-language/platform matrix gates delivery.
 
-## 4. Add convenience after actual use
+## 6. Add convenience after actual use
 
 Choose improvements from observed friction: a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
-If the learner finds phrases retrievable on cards but difficult to use in real situations, consider the optional [real-opportunity aid](../decision-targeted-drilling.md#transfer-to-active-use). Treat it as a hypothesis, keep usage notes separate from grades and do not require a learning experiment or forced dialogue.
-
-Remote hosting, multi-device sync, automatic speech assessment, AI role-play, full dialogue rehearsal and broad distribution are not scheduled work. Add a new stage only when a concrete user need justifies it.
+Remote hosting, multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. The speaking tasks above do not depend on them. Add a new stage only when a concrete user need justifies it.
 
 ## Standing authorization for the local English demo
 

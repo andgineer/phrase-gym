@@ -1,8 +1,8 @@
 # Useful language and retrieval cues
 
-Phrase Gym helps a learner retrieve useful expressions and word senses for speaking. It complements courses, listening, reading and real communication. It does not require acting through invented dialogues or claiming a phrase was used naturally because it was repeated on a card.
+Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a card is an intermediate outcome, not evidence that a phrase was used naturally.
 
-The first MVP accepts externally prepared English phrase batches. Words from echo-words come next through the same learning loop. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a supported card means.
+The first MVP accepts externally prepared English phrase batches. Freer speaking and adult engagement follow, before words from echo-words and further languages. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a supported card means.
 
 ## Phrase cards
 
@@ -40,8 +40,8 @@ For troublesome near-synonyms or lookalikes, give a short accurate contrast, inc
 
 ## Transfer to active use
 
-Spaced spoken retrieval is the MVP's contribution: make useful wording available from meaning, with feedback and varied cues. It cannot guarantee the learner will notice a real conversational opportunity and use that wording. [Automatic-use evidence](research/automatic-use.md) includes limited tasks and populations; do not turn these into promises of automatic speech.
+Spaced spoken retrieval is the MVP's contribution: make useful wording available from meaning, with feedback and varied cues. [Conversational-uptake evidence](research/automatic-use.md) supports instruction combined with meaningful speaking, including increased use in unscripted classroom conversations. It does not guarantee lasting everyday use or automatic speech for this app.
 
-The learner need not force target phrases into mocked dialogues. A later, optional transfer aid can show a few relevant phrases before a real activity and let the learner note **Used / No opportunity / Wanted it but could not retrieve it** afterwards. This is a practical hypothesis informed by general implementation-intention research, not validated phrase-learning treatment. It does not change FSRS or gate completion. Real-life opportunity and use are distinct from card recall.
+The [transfer and engagement decision](decision-transfer-and-engagement.md) defines the subsequent progression: supported personal responses, varied tasks without supplied wording, real-opportunity preparation and separate usage notes. These are planned learning increments. They do not require forcing expressions into unsuitable conversations or changing FSRS from mission outcomes.
 
 No AI conversation partner, speech scoring, countdown, mandatory scripts, points, streak penalties or effectiveness experiment is part of the planned MVP. The learner can finish a short session and leave.

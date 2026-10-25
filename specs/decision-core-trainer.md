@@ -1,6 +1,6 @@
 # Learning loop and observable evidence
 
-The objective is easier access to useful language when speaking. The application measures practice and self-reported recall, not spontaneous conversation, pronunciation accuracy or mastery. [Research and its limits](research/README.md) distinguish empirical findings from the defaults below.
+The objective is easier access to useful language when speaking. This MVP loop measures practice and self-reported recall, not spontaneous conversation, pronunciation accuracy or mastery. Later [speaking activities and adult engagement](decision-transfer-and-engagement.md) build on it while keeping their outcomes separate from memory grades. [Research and its limits](research/README.md) distinguish empirical findings from the defaults below.
 
 ## First meeting
 

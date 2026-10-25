@@ -2,7 +2,8 @@
 
 These are concrete uncertainties, not prerequisites for an infrastructure project. The [delivery ladder](plan/implementation-plan.md) assigns them to the relevant increment.
 
-- **Learning transfer:** research supports components of the proposed practice, not proof that Phrase Gym creates spontaneous conversational use. Describe dated recall accurately; do not label the learner fluent or promise an optimal method.
+- **Learning transfer:** [instruction studies](research/automatic-use.md) show increased expression use in unscripted classroom speech, but lasting everyday transfer for this adult personal trainer remains unverified. Implement the planned speaking progression without treating card recall, unscripted practice or self-reported real use as interchangeable evidence.
+- **Sustained engagement:** adult missions, progress feedback and optional rewards are research-informed choices, not demonstrated long-term adherence for Phrase Gym. Keep rewards independent of memory grades and make return after a break easy.
 - **First MVP:** the reduced Python/Vue path has not been delivered. Existing prototype success does not establish the new import → study → later recall → saved-replay workflow.
 - **Prepared content:** representative externally prepared phrases still need inspection for intended meaning, natural/understandable cues, leakage and acceptable answers. No fixed synthetic pack establishes every course's content quality.
 - **Speech:** the existing English Piper voice is a candidate, not a listening acceptance for all material. Other languages require their own voice and listening check when added. Serbian help preferences remain unresolved and do not block English.

@@ -16,6 +16,12 @@ Use one database and one application data directory outside the model's workspac
 
 Record the prompt, answer and support used for an attempt so later edits cannot misdescribe history. A replacement meaning starts a new card. Simple snapshots of those fields suffice; immutable profile registries, publication generations, cross-target dependency graphs and versioned job capabilities are not required.
 
+## Growth after the MVP
+
+Preserve stable card/source identities, attempt identities, recorded support and independent audio references. Keep scheduling policy separate from activity presentation and recording storage. Later [speaking activities](decision-transfer-and-engagement.md) can associate an attempt with several existing expressions without redefining a card or interpreting every recording as a memory review. Achievement and real-use records are separate from FSRS history.
+
+Implement only the first MVP's records and APIs now. Add later activity records and optional content fields through ordinary schema migrations when their stages are built; no placeholder dialogue tables, generic workflow engine, plugin framework or speculative API endpoints are needed. Preserve existing MVP cards, grades and recordings through those upgrades. Version the import package format so later additions can coexist with the MVP format; unknown versions fail clearly, and compatible old packages remain importable.
+
 ## Local access and privacy
 
 Listen on loopback and serve Vue and the API from the same origin. Retain basic Host/Origin checks against unrelated websites. There are no accounts, application credentials, remote hosting, synchronization or public endpoints in the MVP. Do not expose the local listener through a proxy as part of implementing this plan. A future remote-access request needs its own small access decision, not a prebuilt authentication platform.
