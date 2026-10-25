@@ -1,26 +1,31 @@
-# Recording, comparison and retention
+# Recording, comparison and saved replay
 
-Recording is optional on every attempt, including lookup/help practice with the full phrase visible. Silent self-check never requests a microphone. Capture starts explicitly and stops manually; show the stop instruction only during capture. Acquire a fresh microphone stream for each take and release it after the recorder emits its final data, before comparison playback. Reliable input and playback routing take priority over avoiding repeated permission prompts on iOS. Pause, navigation, Settings, backgrounding and leaving the page release media; cancelled permission requests release late streams.
+Recording and reference comparison are core product functions. Preserve the working Vue audio implementation and its browser-specific handling while replacing the backend.
 
-After a take, play the learner recording followed by the complete phrase's reference. Use Reference regardless of actor/course or generated origin, preserving provenance separately. Replaying or rerecording cannot change the original response's support or grade. Only one playback runs at a time. An outside pause (for example a headset or system media control) quietly ends comparison and returns the main action to Record; both learner and reference replay remain available.
+## Observable behavior
 
-## Keep every take
+- Recording is optional in study, independent recall and free rehearsal. Silent self-check never asks for microphone access. Start and stop are explicit learner actions; no voice detector or automatic speech grade is required.
+- After stopping, retain the final encoder output. Once the answer is revealed, comparison plays the complete learner take followed by the complete reference; either can also be replayed separately. In study/rehearsal the answer is already visible. Only one playback runs at a time.
+- Replaying or recording again cannot change which response the learner is grading. Every take remains a separate recording, including imperfect or supported repetitions. There is no Save button and no automatic expiry.
+- Show pending/save failure truthfully. Reload/restart preserves acknowledged takes and their card/attempt context; retrying a pending save does not duplicate it. Earlier takes are never overwritten by a new one.
+- A saved take is accessible again from its card/history after reload and application restart. Keep this a simple replay control, not an audio analysis dashboard.
+- An outside pause, such as a headset media control, ends automatic comparison quietly and leaves both replays available. Navigation/cancellation stops media and releases its resources. Microphone failure offers retry or silent practice and creates no forgetting grade.
 
-Automatically retain every separately identified take in SQLite, including imperfect, repeated, supported and recoverable interrupted takes. New takes never overwrite earlier ones, even when bytes match. There is no Save button or automatic expiry. Keep original bytes, declared MIME, checksum, capture facts and immutable target/revision/attempt or exposure context. No-audio failures remain events.
-
-Learner bytes are opaque to the server: no decoding, container inspection, transcoding or external provider processing. Only the frontend plays them. Server decoding can reject valid phone captures despite successful browser playback and serves no storage requirement. Keep request/schema/base64 checks, nonempty audio, the 12 MiB size limit, MIME allowlist, context/revision checks and immutable-ID conflicts. Browser completeness records normal capture completion; the server neither infers it from bytes nor certifies playback compatibility. Reference-media validation is separate.
-
-Journal pending bytes locally until a database acknowledgement matches ID, hash, byte count and completeness. An event receipt does not acknowledge audio storage. Stable IDs make retries idempotent; per-take errors retain bytes without blocking other transfers. Conditional deletion must preserve a newer capture snapshot. Stop at 8 MiB with an interruption warning to leave final-encoder headroom below the server limit; this is not silence detection.
-
-Abrupt termination can recover journaled snapshots, not the unflushed tail. Verify capture ownership across tabs before marking an abandoned take incomplete. On quota failure, keep available volatile audio and tell the learner to keep the tab open. Browser storage is not a backup; consistent database backups must include every recording BLOB.
+Learner recordings stay private and never enter AI preparation or speech providers. Store original bytes and emitted MIME without server-side transcoding or speech inspection. Retain existing upload bounds and pending browser storage where needed for the working recorder. Warn about the 8 MiB capture cutoff before the 12 MiB upload limit; this is a technical size limit, not a desired speaking duration. Preserve recoverable interrupted audio, but do not claim to recover an unflushed tail after abrupt browser termination.
 
 ## Browser constraints
 
-Use the emitted MIME, including browsers that supply none before capture starts. Reuse one media element for learner/reference playback and retries; cancellation invalidates earlier asynchronous playback. Feature-detect the optional [Audio Session API](https://www.w3.org/TR/audio-session/): use auto for native capture routing and on release, and playback for comparison/replay after the input is closed. A live microphone must remain in auto or play-and-record; playback-only sessions can end its tracks. Browsers without a writable API use native behavior. Microphone handling differs by device class and must not be unified:
+These are observed device constraints worth retaining, not a reason to rewrite audio:
 
-- **Touch devices (iPhone):** request native microphone defaults and a fresh input for every take, released before comparison playback. Forcing processing off produced silent iOS captures ([WebKit has documented capture interruptions with echo cancellation disabled](https://webkit.org/blog/18194/release-notes-for-safari-technology-preview-251/)), and a retained input was ended by playback routing.
-- **Desktop (macOS Safari):** request processing off and keep one input open across takes until practice is released. Reopening the input per take switches Bluetooth headsets between call and music profiles, silencing comparison playback midway through the take and into the reference; voice processing also lowers playback. The learner verified complete Mac playback with this behavior.
+- **iPhone/touch:** native microphone defaults; acquire a fresh stream per take and release it after final recorder data, before comparison playback. Forcing processing off previously produced silent captures.
+- **macOS Safari/desktop:** request processing off and keep input open across takes until leaving practice. Reopening per take switched Bluetooth profiles and interrupted playback; do not apply the touch-device rule to desktop.
+- Use the emitted MIME, even when it appears only after recording starts. Keep playback cancellation bound to its initiating take/card so late events cannot play or save against another card.
+- Feature-detect the optional [Audio Session API](https://www.w3.org/TR/audio-session/). Capture uses auto or play-and-record; playback-only while input is live can end tracks. Use playback for comparison after input release where appropriate. Browsers without a writable API use native behavior.
 
-Persist the actual browser capture settings. Empty captures report failure so retry can acquire a fresh input; nonempty encoded bytes alone do not establish an audible signal.
+The [WebKit capture-interruption notes](https://webkit.org/blog/18194/release-notes-for-safari-technology-preview-251/) support caution about disabling echo cancellation; actual-device checks remain decisive for this app. Desktop input retention is released on leaving practice, not after every take.
 
-Journal event/checkpoint reads use their key prefixes so advancing a card does not clone unrelated audio buffers. Local checkpoint failure retains pending evidence and reports a storage error. Rejected requests show their validation reason; pending evidence alone does not imply a lost connection.
+## Acceptance boundary
+
+Automated browser tests must be silent and cover final encoder data, ownership, retry and saved replay against the real backend. They do not certify audible microphone capture or headset routing. The learner checks variable-length speech through its final words, comparison and saved replay on the MacBook used for the MVP. Retain iPhone fixes, but new phone access/setup and headset/platform qualification do not block the local desktop MVP.
+
+Playback comparison is a learner aid, not a validated automatic pronunciation assessment or proof of conversational transfer. Backups include every saved take under the [stopped-app procedure](architecture.md#backup-and-restore).

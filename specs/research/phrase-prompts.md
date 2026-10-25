@@ -39,7 +39,7 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 - **Boers, Demecheleer, Coxhead & Webb (2014)**, [Gauging the effects of exercises on verb–noun collocations](https://doi.org/10.1177/1362168813505389), and **Boers, Dang & Strong (2017)**, [Comparing the effectiveness of phrase-focused exercises](https://doi.org/10.1177/1362168816651464). Checked: abstract. Matching exercises taught wrong pairings despite feedback; working with intact phrases beat choosing or completing the verb.
 - **Metcalfe (2017)**, [Learning from errors](https://wesleyan.edu/ofcd/resources/OFCD%20Resource%20Docs/Learning%20from%20Errors.pdf). Checked: full text. For typical learners, errors followed by corrective feedback can help, and confidently held errors are corrected best. Limit: mostly factual and semantic material.
 
-**For us:** error effects depend on the task, prior knowledge and feedback; there is no categorical boundary between facts and phrase forms. A genuinely unfamiliar phrase is studied before its first recall. A phrase the learner already studied, for example in a completed course, starts with an attempt, and the reference follows at once.
+**For us:** error effects depend on the task, prior knowledge and feedback; there is no categorical boundary between facts and phrase forms. A genuinely unfamiliar phrase benefits from study before recall; already studied material can start with an attempt. The MVP uses a brief ungraded first meeting for all imported cards to avoid inferring prior knowledge. That simplification is a product choice, not a finding that familiar phrases require restudy.
 
 ## Least help that still succeeds
 
@@ -48,7 +48,7 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 - **Fiechter & Benjamin (2019)**, [Techniques for scaffolding retrieval practice: the costs and benefits of adaptive versus diminishing cues](https://doi.org/10.3758/s13423-019-01617-6). Checked: abstract. Six experiments with English–Iñupiaq pairs. Cues accumulated within a trial as the learner needs them helped most where plain testing failed. Where plain testing worked, adaptive cues, diminishing cues and plain testing gave about the same benefit, and diminishing cues took the least time.
 - **Carpenter & DeLosh (2006)**, [Impoverished cue support enhances subsequent retention](https://pubmed.ncbi.nlm.nih.gov/16752591/). Checked: abstract. Fewer cue letters on practice tests gave better final recall.
 
-**For us:** with feedback after every attempt, a multi-step hint ladder has no demonstrated benefit. Hint stays on request, as one partial cue chosen for the phrase and then the full answer. No study identifies which part of a multiword phrase is the best cue; the choice is content design. In the vault's 63 English phrases, 40 share their first word with another phrase, so a first word is often a weak cue, but it is not forbidden.
+**For us:** with feedback after every attempt, a multi-step hint ladder has no demonstrated benefit. The MVP can use answer reveal and feedback without a partial-hint feature. If a partial hint is added, it is support rather than unaided retrieval. No study identifies which part of a multiword phrase is the best cue.
 
 ## Say it aloud
 
@@ -60,4 +60,4 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 ## Model-prepared prompts
 
 - **Attali et al. (2022)**, [The interactive reading task: transformer-based automatic item generation](https://doi.org/10.3389/frai.2022.903077). Checked: abstract. Language models generated hundreds of passages and thousands of questions for the Duolingo English Test practice test. Human review and test-taker statistics showed the approach was feasible.
-- No study measures model-written prompts or lead-in lines for phrase drills, or their error rate. **For us:** use bounded existing-target checks, retain useful alternatives for lookup, and suspend/recreate bad cards during practice. Representative semantic acceptance precedes unattended use, but there is no routine learner approval of every prompt beside its answer: that would itself be study.
+- No study measures model-written prompts or lead-in lines for phrase drills, or their error rate. **For us:** inspect representative generated cards, include defensible alternatives, and let the learner suspend bad cards. Corrected import is sufficient initially; automatic recreation and cross-entry matching do not follow from this study. Reviewing a prompt beside its answer is study, not independent recall.

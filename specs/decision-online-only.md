@@ -1,11 +1,9 @@
-# Online-only practice
+# Local application availability
 
-Practice, lookup, library, core Settings and inbox API operations require the live Phrase Gym Server. Server reads and receipts own card position, support, repairs, lifecycle and results. No downloads, offline installation, cached trainer or predicted local progression.
+The browser needs the running local Python application for library, practice, imports, settings and saved takes. It does not need an internet connection to practise already prepared material. A provider connection is needed only for preparation that calls that provider; the first MVP imports externally prepared text and synthesizes reference speech locally.
 
-Phrase Gym Coach may be offline. Published lessons, reference playback, recording storage, scheduling, inbox submission and personal-preference API updates continue using the core and its single database. Waiting preparation is visible as waiting for Coach and never causes a global learning failure. An accepted recreation request suspends that defective target while other practice continues. No live worker/provider call belongs on a practice request path.
+If the application stops, show a clear connection message and Retry. Keep active media stoppable, preserve already captured pending takes and avoid confirming unsaved work. On reconnection, resend the same pending writes and reload the confirmed card/session state. Retrying must not duplicate a review or recording.
 
-Loss of the core connection hides normal learning/Settings and blocks new server actions. Already active media remains stoppable/cancellable, preserving interrupted bytes under their initiating context. Retry resends original pending writes and reloads authoritative state before enabling learning. Browser connectivity signals are hints, not proof of recovery. Keep this a small error/retry flow, without per-action health probes or a general availability framework.
+Retain the useful Vue pending-save behavior; it protects ordinary reloads and brief outages. Do not create an offline scheduling engine, service worker, synchronization service or availability framework. The browser must not advance through unconfirmed scheduled reviews while the application is unavailable.
 
-IndexedDB retains initiated writes, acknowledged checkpoints and pending takes for retry. Preserve original IDs, payloads, order, support and capture bindings. Conflicts remain retained without resequencing; a new action uses the reconciled server card. These journals protect evidence, not offline practice or guaranteed survival of browser eviction. External API senders likewise retain unacknowledged submissions when the core is unavailable.
-
-The client registers no service worker and keeps no offline caches; contracts expose no offline practice behavior. A client update never clears pending evidence or unrelated origin storage and never reloads active/volatile audio. Browser data left by the Python-era client is neither read nor migrated ([architecture](architecture.md#releases-and-data-compatibility)).
+Preparation failure affects its submitted batch, not ready cards. There is no separate Coach whose availability determines whether new work can run. Automatic recovery from every sleep, forced quit or power loss is not an MVP promise; show an interrupted import with an explicit retry.

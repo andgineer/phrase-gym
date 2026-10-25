@@ -1,6 +1,8 @@
 # Phrase Gym Coach desktop
 
-Coach prepares content through Server's durable inbox. Practice stays in the built Vue client served by Rust Server. The local workflow accepts up to five English items per batch, including fixed phrases, reusable frames and one-sense words with two or three contexts; the full multilingual content and learning-loop MVP remains in the [implementation plan](../specs/plan/implementation-plan.md).
+These instructions describe the existing Rust prototype, not the target architecture. They retain working commands, reusable Piper setup and measurement evidence. The [delivery ladder](../specs/plan/implementation-plan.md) replaces the native Coach with a local Python application and the retained Vue GUI.
+
+Coach currently prepares content through Server's durable inbox. The prototype accepts up to five English items per batch, including fixed phrases, reusable frames and contextual words.
 
 ## Build, run and smoke-test
 
@@ -176,7 +178,7 @@ Run the measurement by hand only, from this repository and against a disposable 
 
 ## Remaining gaps
 
-The [remaining implementation plan](../specs/plan/implementation-plan.md) governs full MVP acceptance, including automatic full-content intake, multilingual references, later learning-loop coverage, desktop simplification/statistics/settings, semantic/listening review and physical device/accessibility checks. A killed Coach may leave owned macOS children alive; broad crash qualification remains open. Existing CI and Windows coverage remain enabled without claiming native provider qualification.
+These are prototype measurements, not acceptance of the [new MVP](../specs/plan/implementation-plan.md). A killed prototype Coach may leave owned macOS children alive; do not assume those runs cleaned up. Existing CI and Windows checks do not establish native provider qualification. Completing the native Coach or expanding its qualification is not planned work.
 
 ## Manual acceptance checklist
 
@@ -186,4 +188,4 @@ Run attended checks only after authorization: Finder launch, keyboard and VoiceO
 
 Silent software checks exercise the ordinary batch intake path with fake provider/speech boundaries, study, later independent checks, matched word-context rotation, scheduling and retained sessions/references/takes. They do not establish real model quality or speech quality. Inspect each real result and retain exact attempt identity, elapsed time, unknown usage where unavailable and failures; fresh semantic review and attended listening remain separate.
 
-Mac Safari and iPhone recording and comparison playback were verified by the learner. Synthetic native-encoder tests inspect early, middle and late decoded signal plus original-byte/range delivery; they cannot establish physical microphone/output behavior. Use learner-triggered variable-length and successive takes, comparison and separately identified saved replay after reload/restart. Learner-owned five-item intake, native accessibility and actual later real-clock due return remain acceptance work in the [implementation plan](../specs/plan/implementation-plan.md#next-demo-learn-a-useful-english-working-set).
+Mac Safari and iPhone recording and comparison playback were verified by the learner. Synthetic native-encoder tests inspect early, middle and late decoded signal plus original-byte/range delivery; they cannot establish physical microphone/output behavior. Use learner-triggered variable-length and successive takes, comparison and separately identified saved replay after reload/restart. These prototype observations do not establish the replacement's [recording acceptance](../specs/decision-recording-and-comparison.md#acceptance-boundary); check its saved replay and later real-clock return through the new ordinary workflow.

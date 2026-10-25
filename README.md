@@ -2,7 +2,11 @@
 
 # Phrase Gym
 
-A language trainer for ready use of words, phrases and prepared dialogues.
+A personal language trainer for retrieving useful phrases and words when speaking.
+
+The [current product specification](specs/START-HERE.md) targets a small local Python application with the existing Vue GUI. The first MVP imports externally prepared English phrase batches for study, later spoken recall, comparison and scheduled return. Internal echo-words preparation follows. This replacement is planned, not implemented by the specs cleanup.
+
+The commands below run the existing Rust prototype. Its separate Coach, job coordination and recovery tooling are not requirements for the new application. Earlier Python code remains available in Git for selective reuse.
 
 Phrase Gym Server (`crates/phrase-gym-server`) serves the Vue client in `frontend/` and the HTTP API: persistent language settings and personal preferences, a searchable library, reference audio, unified practice sessions, optional durable recordings, prepared dialogue rehearsal and FSRS scheduling. Phrase Gym Coach (`crates/phrase-gym-coach`), a Windows/macOS desktop app, prepares material and reference speech through the Server's durable inbox. Both are Rust.
 
@@ -22,13 +26,13 @@ cargo xtask run --data-dir /private/tmp/phrase-gym-preview
 
 Open [the local app](http://127.0.0.1:8000/learn/en). Choose your native language on first launch. English, Serbian, German and Russian UI locales are available; explanations stay in the native language. The database starts without content. `/learn/en` and `/learn/sr` can be bookmarked independently. Retain the data directory between restarts. Browser journals are pending-transfer storage, not backups.
 
-Server and Coach run directly on the same MacBook at `http://127.0.0.1:8000`, without connection setup or application authentication; follow the [preview access and launch instructions](docs/rust-preview.md). The global **+** opens a clipboard preview over any screen: review or edit the phrase, add an optional note, then explicitly **Send**. No manual lesson fields are required. Coach also accepts deliberate raw phrase paste automatically; both paths durably acknowledge original text before Codex or Claude preparation and generated Piper reference speech, then publish atomically. External agents can submit prepared packages and original audio through the [inbox API](docs/preview-inbox.md). Normal **Start session** opens new English material as ungraded study with **Next**, reference playback and retained recordings. After completed study, a later Start offers independent recall with the answer hidden until reveal and honest self-rating afterward. Resume keeps the existing session. Recording is optional, and every take is retained automatically. See the [Coach demo](docs/coach-desktop.md); full multilingual/content/desktop acceptance remains in the implementation plan.
+Server and Coach run directly on the same MacBook at `http://127.0.0.1:8000`, without connection setup or application authentication; follow the [preview access and launch instructions](docs/rust-preview.md). The global **+** opens a clipboard preview over any screen: review or edit the phrase, add an optional note, then explicitly **Send**. No manual lesson fields are required. Coach also accepts deliberate raw phrase paste automatically; both paths durably acknowledge original text before Codex or Claude preparation and generated Piper reference speech, then publish atomically. External agents can submit prepared packages and original audio through the [inbox API](docs/preview-inbox.md). Normal **Start session** opens new English material as ungraded study with **Next**, reference playback and retained recordings. After completed study, a later Start offers independent recall with the answer hidden until reveal and honest self-rating afterward. Resume keeps the existing session. Recording is optional, and every take is retained automatically. See the [Coach demo](docs/coach-desktop.md); this describes prototype behavior rather than the reduced MVP scope.
 
-Phrase Gym Coach is not released yet; [its setup notes](docs/coach-desktop.md) cover the development build, supported OS versions, agent CLI login, Piper speech and the manual acceptance checklist.
+The prototype Coach is not released; [its setup notes](docs/coach-desktop.md) describe the existing build, CLI login and Piper environment for reuse. The new GUI remains in Vue in the browser.
 
 The Server has local `backup`, `verify-backup` and `restore` commands for consistent SQLite-plus-media snapshots and isolated recovery. Follow the [backup and rollback instructions](docs/recovery.md) before upgrading a data directory.
 
-The local Server binds loopback and rejects cross-site mutations. This is a local development application; permanent private hosting/access policy, broader device acceptance and operational recovery rehearsals remain release work. The Server holds no provider credentials, and browsing prepared content needs no LLM or speech-provider requests.
+The prototype Server binds loopback and rejects cross-site mutations. The target remains a local personal application; remote hosting and broad platform qualification are not scheduled work. Browsing prepared content needs no LLM or speech-provider requests. The new [backup policy](specs/architecture.md#backup-and-restore) uses a stopped-app copy/restore, without the prototype's live recovery machinery.
 
 ## Checks and build
 

@@ -1,17 +1,16 @@
 # Phrase Gym decisions
 
-Code, tests and generated OpenAPI describe the implementation. These documents retain only product intent, design constraints and rationale that code does not explain.
+Build a small personal trainer around research-informed spoken retrieval, the retained Vue recorder/player and a Python backend. Specs describe the intended product; code and operational docs describe what currently runs. Existing prototype behavior is not automatically a requirement.
 
-- [Product scope, prompts, words and help](decision-targeted-drilling.md)
-- [Learning policy and evidence](decision-core-trainer.md)
-- [Recording and comparison](decision-recording-and-comparison.md)
-- [Online-only behavior](decision-online-only.md)
-- [Phrase Gym Coach, inbox and reference speech](decision-external-preparation-agent.md)
-- [Personal preferences and inbox API](decision-personal-preferences.md)
-- [Architecture and durability](architecture.md)
-- [Acceptance gaps](open-problems.md)
-- [Research evidence](research/README.md): sources behind learning decisions, for when a decision needs backing
-- [Fresh-session orchestration](plan/orchestration-handout.md): root workflow for next-stage implementation requests
-- [Remaining work](plan/implementation-plan.md)
+Read in this order:
 
-Development rules live in [AGENTS.md](../AGENTS.md); usage and commands live in [README.md](../README.md). Remove completed plan entries rather than archiving them in specs. Keep one home for each decision; do not retain review transcripts, implementation inventories or superseded alternatives.
+1. [Research basis and limits](research/README.md): which findings support the learning loop, and what remains an inference.
+2. [Content and active-use goal](decision-targeted-drilling.md): useful phrases first, word senses next.
+3. [Observable learning loop](decision-core-trainer.md): study, later retrieval, feedback, honest rating and scheduled return.
+4. [Recording and saved replay](decision-recording-and-comparison.md): preserve the working Vue audio behavior.
+5. [Preparation and speech](decision-external-preparation-agent.md): external course batches first; internal echo-words preparation later.
+6. [Language choices](decision-personal-preferences.md) and [local availability](decision-online-only.md).
+7. [Small application architecture](architecture.md): Python, Vue, SQLite and stopped-app backup/restore.
+8. [Delivery ladder](plan/implementation-plan.md) and [unverified acceptance](open-problems.md).
+
+[Agent instructions](../AGENTS.md) and the [implementation handout](plan/orchestration-handout.md) govern delivery. [README](../README.md) distinguishes the runnable prototype from this target. Keep decisions here, operational commands in docs, and only remaining work in the plan.

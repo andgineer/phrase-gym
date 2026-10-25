@@ -1,6 +1,8 @@
 # Rust Server backup and recovery
 
-Use the Rust Server commands against Rust data directories only. The Rust release does not import Python databases, media or browser journals. These local commands require filesystem access to the data; they do not use Coach or providers.
+This page documents the existing Rust prototype commands. They are not requirements for the Python replacement, whose [backup/restore policy](../specs/architecture.md#backup-and-restore) is a simple stopped-app copy. Keep these instructions while prototype data may still need recovery.
+
+Use the Rust Server commands against Rust data directories only. The prototype does not import Python databases, media or browser journals. These local commands require filesystem access to the data; they do not use Coach or providers.
 
 Create the parent directory for a new snapshot, then back up the running or stopped Server:
 
@@ -28,4 +30,4 @@ Before an upgrade, keep the previous Server binary and take a complete snapshot.
 
 Reconciliation reports missing/corrupt originals and orphan hashes and deletes no files. It retains old and active staging bytes, historical/session media and backup assets regardless of age. Unacknowledged staging files and unreferenced orphan bytes remain at the source; they are not claimed as acknowledged input in a snapshot. Disk planning must account for this retention and every learner take; there is no automatic expiry.
 
-Restore invalidates captured preparation leases before making the destination runnable. Published receipts remain recoverable; unfinished generations return to waiting within their original attempt budget, or fail if exhausted. Old claim receipts remain historical and cannot authorize writes. Reconcile the generation/publication receipt and claim again with a fresh claim identity before resuming work. Snapshot verification still validates the original image before this explicit lease invalidation. The broader operational and actual-device rehearsals remain in the [implementation plan](../specs/plan/implementation-plan.md#deferred-release-work).
+Restore invalidates captured preparation leases before making the destination runnable. Published receipts remain recoverable; unfinished generations return to waiting within their original attempt budget, or fail if exhausted. Old claim receipts remain historical and cannot authorize writes. Reconcile the generation/publication receipt and claim again with a fresh claim identity before resuming work. Snapshot verification still validates the original image before this explicit lease invalidation. This lease behavior belongs to the prototype; it is not part of the new stopped-app recovery design.

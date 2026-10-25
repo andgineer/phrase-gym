@@ -1,27 +1,21 @@
-# Personal preferences
+# Language choices
 
-Personal preferences used by Phrase Gym Coach belong to the inbox domain and are stored in Phrase Gym Server's single database, alongside inbox work and learning data. The learner describes preferences to an external agent, which reads and updates them through the inbox preferences API hosted by the core. No language-specific choice is hardcoded as a universal product rule, and ordinary material preparation never edits preferences.
+Keep a small Settings page in Vue. The learner can read and change native language, learning timezone and per-language card/help language; no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices.
 
-The profile contains the learner's native language, learning timezone, stated proficiency where known, and per-learning-language card language, help language and durable preparation guidance. Card and help languages are independent. The help language selects the language of the short explanation on the back of the card; it reflects how well the learner knows that language. The detailed explanation behind Show & explain is always in the native language, so it needs no per-language choice. Missing required preferences remain unresolved; the preparation job reports what is missing instead of guessing or prompting the learner during an unattended run. The external agent asks the learner directly outside ordinary preparation jobs and writes the authorized answer through the API.
+The learner's current choices are:
 
-For the current learner, the initial profile is:
-
-| Learning language | Stated proficiency | Card language | Short explanation (help language) | Detailed explanation |
+| Learning language | Stated proficiency | Card language | Short help | Optional detailed help |
 |---|---|---|---|---|
 | English | B2 | English | English | Russian |
 | German | A1 | Russian | Russian | Russian |
-| Serbian | Not yet stated | Serbian | Not yet chosen; no Russian | Russian |
+| Serbian | Not stated | Serbian | Unresolved; no Russian | Russian |
 
-The learner's native language is Russian and learning timezone is Europe/Belgrade. These are personal initial values, not defaults imposed on other learners. Serbian help and proficiency are resolved through the external agent before preparing material that depends on them; Serbian prompts remain Serbian for this learner.
+Native language is Russian; learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults. The MVP only needs the English row. Unresolved Serbian help does not block English or German work; resolve it before adding Serbian preparation.
 
-## Updates and preparation
+Card language controls retrieval cues; short help explains meaning/use after reveal and during study. Optional detailed explanation uses the native language and appears only on request. Neither answer-bearing layer is shown before an independent response. A detailed explanation and a proficiency questionnaire are not requirements for every MVP card.
 
-The API validates a complete profile revision and applies it atomically with an expected-current-revision check and idempotent mutation identity. Concurrent stale writes conflict rather than silently overwriting choices. Retain revision history and the originating authorized request so changes can be inspected and explicitly restored as a new revision. Preference updates are a separate operator workflow under the [selected access boundary](architecture.md#private-release-and-recovery); preparation jobs receive no preference mutation tool.
+Imported batches declare their languages and must match the selected choices; mismatch reports what to change instead of silently translating. Later AI preparation snapshots the choices at submission. Changing Settings affects subsequent preparation, not existing cards or recorded attempts. Existing content can be replaced explicitly; no revision registry or automatic mass re-preparation is required.
 
-Each preparation generation pins one profile revision. An accepted update affects later generations; it does not silently modify running jobs or existing cards. A newer profile can explicitly requeue affected work as a new generation. Existing items are re-prepared on request. Compatible changes retain target identity and history; a changed retrieval task requires a new independent check before old recall evidence is presented as evidence for the new conditions. New meanings require new targets.
+Keep existing independent device/audio preferences where useful. UI language follows the native or current learning language as already supported by Vue; no new localization project is needed for the first English content path.
 
-## Core availability
-
-The core reads the same database records used by the inbox API; there is no preference replica or synchronization service. Prepared content and running jobs retain their pinned preference revision. New sessions use the current learning timezone and UI-relevant profile values while historical attempts retain their original context.
-
-When Coach is offline, the core continues serving practice, accepting material and updating preferences. These operations require the live core, not the worker. The learning frontend does not offer a competing personal-preference editor: the external agent uses the inbox API. Device/UI controls that do not change the personal preparation profile remain core concerns. Selecting a learning language or navigating never writes the profile.
+[Research on translation and explanations](research/words-in-context.md#translation-or-l2-explanation) does not prove that advanced learners should avoid their native language. Comprehensibility and this learner's choices govern these settings. No source establishes a precise proficiency cutoff for switching prompt language.

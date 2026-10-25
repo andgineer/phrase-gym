@@ -6,7 +6,7 @@ Read [AGENTS.md](../../AGENTS.md), [START-HERE](../START-HERE.md) and the whole 
 
 The root session orchestrates only: write prompts, read reports, triage findings, perform light verification and talk to the user. Delegate production code, tests and spec/plan edits.
 
-Take the first remaining stage from the implementation plan. Select a bounded coherent slice under its acceptance criteria, preserving the existing implementation rather than rebuilding completed work. For each slice:
+Take the first remaining stage from the implementation plan. Select a bounded coherent slice under its acceptance criteria. Reuse proven code and tests selectively; neither prototype defines feature parity. Build the smallest complete learner workflow rather than an infrastructure foundation. For each slice:
 
 1. Delegate implementation to a fresh session.
 2. Delegate independent review to another fresh session.
@@ -27,7 +27,7 @@ Completion requires an independent review with no unresolved blocker or major; o
 
 ## Completion and boundaries
 
-Every demo delivery states the observable new benefit to the learner and proves that workflow live with matching runnable components. Testing, refactoring, CI repairs or other internal checkpoints alone are not a demo. Preserve the full MVP scope while making each bounded demo a useful increment; report unverified content, listening and device acceptance explicitly.
+Every demo delivery states the observable new benefit to the learner and proves that workflow live with matching runnable components. Testing, refactoring, CI repairs or other internal checkpoints alone are not a demo. Use the reduced first-MVP scope in the delivery ladder; later word generation, languages and convenience work never become prerequisites. Report unverified content, listening and device acceptance explicitly. Do not expand the small local app for hypothetical distributed or high-load requirements.
 
 Delegate verification under the complete-change [done gate](../../AGENTS.md#done-gate), including the full prescribed gates for implementation/mixed changes and documentation checks for prose-only changes. Inspect complete results before reporting completion; keep model/content, native and actual-device acceptance separate from software conformance.
 
