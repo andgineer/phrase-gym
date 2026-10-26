@@ -26,7 +26,7 @@ Implement only the first MVP's records and APIs now. Add later activity records 
 
 ## Local access and privacy
 
-Listen on loopback and serve Vue and the API from the same origin. Retain basic Host/Origin checks against unrelated websites. There are no accounts, application credentials, remote hosting, synchronization or public endpoints in the MVP. Do not expose the local listener through a proxy as part of implementing this plan. A future remote-access request needs its own small access decision, not a prebuilt authentication platform.
+Listen on loopback and serve Vue and the API from the same origin. Retain basic Host/Origin checks against unrelated websites. There are no accounts, application credentials, synchronization or public endpoints in the MVP. The learner has authorized private iPhone access through Tailscale Serve. Keep the backend on loopback and opt in to one exact HTTPS machine origin; Tailscale controls which tailnet devices may reach the shared library. Do not use Funnel or a public listener. This adds private access, not per-user data separation or automatic iPhone audio qualification.
 
 External course extraction happens outside the app. Imported source links are attribution, never instructions to fetch or execute anything. Model preparation receives only submitted material and relevant language choices, never learner recordings, database access, secrets or repository .env files. Published practice works without internet or an AI provider while the local application is running.
 

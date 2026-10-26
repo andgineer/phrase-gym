@@ -159,10 +159,14 @@ class StudyService:
     def _complete_state(self, connection: sqlite3.Connection) -> StudyResponse:
         total, studied = self._counts(connection)
         return StudyResponse(
-            done=True,
+            done=total > 0,
             total=total,
             studied=studied,
-            message=("Study complete. Your phrases are saved; later recall is not scheduled yet."),
+            message=(
+                "Study complete. Your phrases are saved; later recall is not scheduled yet."
+                if total
+                else "Add your first phrase batch to begin."
+            ),
         )
 
     def _card(self, connection: sqlite3.Connection, row: sqlite3.Row, attempt_id: str) -> StudyCard:

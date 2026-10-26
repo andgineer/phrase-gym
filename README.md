@@ -29,7 +29,12 @@ Set `PHRASE_GYM_PIPER_CONFIG` to a JSON voice configuration described in
 PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json uv run phrase-gym
 ```
 
-Open <http://127.0.0.1:8000>. The app listens only on loopback and stores its database,
+For private iPhone access on your existing tailnet, use `uv run inv run --build --tailscale`
+with the same `PHRASE_GYM_PIPER_CONFIG` setting. This points Tailscale Serve at the new server
+and allows its exact HTTPS machine hostname. Open the HTTPS URL printed by Tailscale on the
+iPhone with Tailscale connected.
+
+Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
 For a separate data directory, add `--data-dir /absolute/path`.
 

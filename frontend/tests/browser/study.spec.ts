@@ -222,6 +222,8 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
 
 test('imports, retries, studies, and retains complete takes', async ({ page }) => {
   await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Add your first phrase batch' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toHaveCount(0)
   await page.getByText('Add material').click()
   await page.getByLabel('Phrase package JSON').fill('{ bad json')
   await page.getByRole('button', { name: 'Import' }).click()

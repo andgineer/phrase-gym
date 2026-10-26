@@ -6,6 +6,28 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 MAX_REQUEST_BYTES = 16 * 1024 * 1024
 
 
+def tailscale_host(origin: str) -> str:
+    parsed = urlsplit(origin)
+    hostname = parsed.hostname or ""
+    if (
+        parsed.scheme != "https"
+        or not hostname.endswith(".ts.net")
+        or parsed.netloc != hostname
+        or parsed.path
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("Tailscale origin must be https://<machine>.<tailnet>.ts.net")
+    return hostname
+
+
+def trusted_hosts(tailscale_origin: str) -> list[str]:
+    hosts = ["127.0.0.1", "localhost", "testserver"]
+    if tailscale_origin:
+        hosts.append(tailscale_host(tailscale_origin))
+    return hosts
+
+
 def cross_origin_mutation(method: str, headers: dict[bytes, bytes]) -> bool:
     origin = headers.get(b"origin", b"").decode()
     host = headers.get(b"host", b"").decode()
@@ -23,15 +45,23 @@ def oversized_content_length(headers: dict[bytes, bytes]) -> bool:
 
 
 class LocalBoundary:
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(self, app: ASGIApp, tailscale_origin: str = "") -> None:
         self.app = app
+        self.tailscale_origin = tailscale_origin
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
         headers = dict(scope["headers"])
-        if cross_origin_mutation(scope["method"], headers):
+        origin = headers.get(b"origin", b"").decode()
+        remote_host = self.tailscale_origin.removeprefix("https://")
+        invalid_remote_origin = (
+            bool(origin)
+            and headers.get(b"host", b"").decode() == remote_host
+            and origin != self.tailscale_origin
+        )
+        if cross_origin_mutation(scope["method"], headers) or invalid_remote_origin:
             await JSONResponse({"detail": "Cross-origin mutations are not allowed"}, 403)(
                 scope,
                 receive,

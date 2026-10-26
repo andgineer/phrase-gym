@@ -22,6 +22,14 @@ def wait_added(client: TestClient, package_id: str) -> dict[str, object]:
     raise AssertionError("import remained preparing")
 
 
+def test_empty_library_is_not_completed_study(client: TestClient) -> None:
+    state = client.post("/api/study/current").json()
+    assert state["total"] == state["studied"] == 0
+    assert state["done"] is False
+    assert state["card"] is None
+    assert "first phrase batch" in state["message"]
+
+
 def test_study_recordings_and_restart(
     client: TestClient,
     package: dict[str, object],

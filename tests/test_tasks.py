@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from invoke import Context
+from invoke import Context, Result
 
 import tasks
 
@@ -66,6 +66,23 @@ def test_distribution_build_includes_the_client(monkeypatch):
     monkeypatch.setattr(context, "run", commands.append)
     tasks.build(context)
     assert commands == ["npm --prefix frontend ci", "npm --prefix frontend run build", "uv build"]
+
+
+def test_tailscale_run_routes_to_loopback_and_allows_only_the_machine_origin(monkeypatch):
+    commands = []
+    context = Context()
+
+    def execute(command, **_kwargs):
+        commands.append(command)
+        return Result(stdout='{"Self":{"DNSName":"macbook.example.ts.net."}}')
+
+    monkeypatch.setattr(context, "run", execute)
+    tasks.run(context, tailscale=True)
+    assert commands == [
+        "tailscale status --json",
+        "tailscale serve --bg --yes http://127.0.0.1:8000",
+        "uv run phrase-gym --tailscale-origin https://macbook.example.ts.net",
+    ]
 
 
 def test_size_check_includes_nested_modules_but_excludes_generated_code(tmp_path, monkeypatch):

@@ -7,7 +7,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from phrase_gym.api_recordings import recording_routes
 from phrase_gym.api_study import study_routes
-from phrase_gym.boundary import LocalBoundary
+from phrase_gym.boundary import LocalBoundary, trusted_hosts
 from phrase_gym.contracts import ImportRequest, ImportStatus
 from phrase_gym.importer import ImportConflictError, Importer
 from phrase_gym.speech import configured_speech
@@ -16,6 +16,7 @@ from phrase_gym.study import StudyService
 
 
 def create_app() -> FastAPI:
+    remote_origin = os.environ.get("PHRASE_GYM_TAILSCALE_ORIGIN", "")
     data_dir = Path(os.environ.get("PHRASE_GYM_DATA_DIR", ".data")).resolve()
     database = Database(data_dir)
     importer = Importer(database, configured_speech())
@@ -24,10 +25,10 @@ def create_app() -> FastAPI:
     app.state.importer = importer
     app.include_router(recording_routes(database))
     app.include_router(study_routes(StudyService(database)))
-    app.add_middleware(LocalBoundary)
+    app.add_middleware(LocalBoundary, tailscale_origin=remote_origin)
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["127.0.0.1", "localhost", "testserver"],
+        allowed_hosts=trusted_hosts(remote_origin),
     )
 
     @app.get("/api/health")

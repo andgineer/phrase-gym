@@ -38,6 +38,18 @@ Hatch reads it for both distributions.
 the server; `inv run` starts the server with the existing client build. Pre-commit contains the
 Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.
 
+## Private Tailscale access
+
+With Tailscale already connected, run `inv run --build --tailscale`. The task points the existing
+HTTPS Serve route at `127.0.0.1:8000` and passes the exact machine origin to Phrase Gym.
+The backend remains on loopback; only devices permitted by your Tailscale policy can use this
+shared library. This does not enable public Funnel access. Keep `PHRASE_GYM_PIPER_CONFIG` set
+when starting the server if you intend to import new material.
+
+Use `tailscale serve status` to inspect the route. Stop an old Phrase Gym process before starting
+the replacement; retain its data directory and recordings. On iPhone, use the HTTPS machine URL
+with Tailscale connected. Microphone permission and actual playback still need attended checks.
+
 ## Publish a release
 
 From a clean `main` synchronized with `origin/main`, choose an increment:

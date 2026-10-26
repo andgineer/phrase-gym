@@ -1,3 +1,4 @@
+import json
 import shlex
 import shutil
 import sys
@@ -7,6 +8,7 @@ from pathlib import Path
 from invoke import Collection, Context, task
 
 from phrase_gym.__about__ import __version__
+from phrase_gym.boundary import tailscale_host
 
 DOCS_PATH = Path("docs")
 DOCS_SRC_PATH = DOCS_PATH / "src"
@@ -129,11 +131,19 @@ def build(context: Context):
 
 
 @task
-def run(context: Context, build=False):
-    """Run the local server; --build refreshes the frontend first."""
+def run(context: Context, build=False, tailscale=False):
+    """Run the server; optionally build the client and connect private Tailscale HTTPS."""
     if build:
         build_frontend(context)
-    context.run("uv run phrase-gym")
+    command = "uv run phrase-gym"
+    if tailscale:
+        status = context.run("tailscale status --json", hide=True, pty=False)
+        hostname = json.loads(status.stdout)["Self"]["DNSName"].rstrip(".")
+        origin = f"https://{hostname}"
+        tailscale_host(origin)
+        context.run("tailscale serve --bg --yes http://127.0.0.1:8000")
+        command += f" --tailscale-origin {shlex.quote(origin)}"
+    context.run(command)
 
 
 @task
