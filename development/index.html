@@ -348,6 +348,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#private-tailscale-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Private Tailscale access
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#publish-a-release" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -444,6 +455,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#private-tailscale-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Private Tailscale access
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#publish-a-release" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -501,6 +523,15 @@ Hatch reads it for both distributions.</p>
 <p><code>inv build-frontend</code> rebuilds only the Vue client. <code>inv run --build</code> builds the client and starts
 the server; <code>inv run</code> starts the server with the existing client build. Pre-commit contains the
 Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.</p>
+<h2 id="private-tailscale-access">Private Tailscale access</h2>
+<p>With Tailscale already connected, run <code>inv run --build --tailscale</code>. The task points the existing
+HTTPS Serve route at <code>127.0.0.1:8000</code> and passes the exact machine origin to Phrase Gym.
+The backend remains on loopback; only devices permitted by your Tailscale policy can use this
+shared library. This does not enable public Funnel access. Keep <code>PHRASE_GYM_PIPER_CONFIG</code> set
+when starting the server if you intend to import new material.</p>
+<p>Use <code>tailscale serve status</code> to inspect the route. Stop an old Phrase Gym process before starting
+the replacement; retain its data directory and recordings. On iPhone, use the HTTPS machine URL
+with Tailscale connected. Microphone permission and actual playback still need attended checks.</p>
 <h2 id="publish-a-release">Publish a release</h2>
 <p>From a clean <code>main</code> synchronized with <code>origin/main</code>, choose an increment:</p>
 <div class="highlight"><pre><span></span><code>inv<span class="w"> </span>version
