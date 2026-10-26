@@ -74,8 +74,9 @@ def test_verified_runtime_produces_bounded_wav(tmp_path: Path) -> None:
     ],
 )
 def test_child_failures_are_actionable(tmp_path: Path, mode: str, message: str) -> None:
+    timeout = 0.05 if mode == "timeout" else 1
     with pytest.raises(RuntimeError, match=message):
-        synthesize(voice_setup(tmp_path, mode), timeout=0.05)
+        synthesize(voice_setup(tmp_path, mode), timeout=timeout)
 
 
 @pytest.mark.parametrize(

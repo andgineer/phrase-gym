@@ -90,6 +90,8 @@ Choose improvements from observed friction: a launcher, simpler export/import, a
 
 Remote hosting, multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. The speaking tasks above do not depend on them. Add a new stage only when a concrete user need justifies it.
 
+After the MVP, qualify Linux browser media playback and recording under the [platform boundary](../architecture.md#application-boundary). Keep Linux server tests passing throughout; browser audio qualification is separate from server compatibility.
+
 ## Standing authorization for the local English demo
 
 Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Codex or Claude subscription login, normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Codex uses this repository as its workspace; do not copy tokens or read repository .env files. Recordings and application data stay outside model access.

@@ -7,6 +7,9 @@ scheduling remain the next stage.
 
 ## Install and launch
 
+The server runs on macOS and Linux. Use a macOS browser for the MVP media player and recording;
+Linux browser audio support is planned after the MVP.
+
 Requirements: Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a configured English
 Piper voice. Install the pinned environments and build the client once:
 
@@ -50,7 +53,9 @@ uv run python scripts/checks.py test
 ```
 
 The second command runs Python tests, client typechecking/unit/build checks, and silent real-backend
-browser tests in Chromium and WebKit. Install browser binaries from `frontend/` with
+browser tests in Chromium and WebKit on macOS. CI runs the full gate on macOS and separately
+runs all Python server tests on Linux. For server-only iteration, use `uv run pytest`.
+Install browser binaries from `frontend/` with
 `npx playwright install chromium webkit`. Install the commit hook once with
 `git config core.hooksPath .githooks`.
 

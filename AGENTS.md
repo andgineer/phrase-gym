@@ -31,6 +31,8 @@ For a root-session request to implement the next stage, follow the [orchestratio
 
 Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The committed `.githooks/pre-commit` runs the pre gate and needs uv, Python, Node and the client dependencies. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
 
+Run the full browser/audio gate on macOS and retain the separate Linux Python server job in CI, following the [platform boundary](specs/architecture.md#application-boundary). Do not skip native recorder tests to accommodate Linux WebKit's missing API.
+
 ## Done gate
 
 Choose the gate from the complete change, including staged and unstaged files.

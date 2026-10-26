@@ -6,8 +6,22 @@ on:
   pull_request:
 
 jobs:
+  server:
+    name: Server (Linux)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: 0.11.7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen
+      - run: uv run pytest --cov=phrase_gym --cov-report=term-missing
   checks:
-    runs-on: ubuntu-latest
+    name: Full checks (macOS)
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
