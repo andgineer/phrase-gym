@@ -167,7 +167,21 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Record a take' }).click()
-  await page.waitForTimeout(1100)
+  await expect
+    .poll(async () => ({
+      recording: await page.getByRole('button', { name: 'Stop recording' }).isVisible(),
+      errors: await page.getByRole('alert').allTextContents(),
+    }))
+    .toEqual({ recording: true, errors: [] })
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as { __captureAudio?: { context: AudioContext } }).__captureAudio
+            ?.context.currentTime ?? 0,
+      ),
+    )
+    .toBeGreaterThan(1.1)
   await page.getByRole('button', { name: 'Stop recording' }).click()
   await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
   const saved = await page.evaluate(async () =>
@@ -256,7 +270,6 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       ),
   )
-  failSave = false
   await page.goto('/?take-transfer-race=1')
   await expect
     .poll(() =>
@@ -266,6 +279,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
       ),
     )
     .toBe(true)
+  failSave = false
   await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('phrase-gym.practice.v1', 1)

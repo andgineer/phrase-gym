@@ -6,13 +6,6 @@ export default defineConfig({
   fullyParallel: false,
   workers: 2,
   use: { trace: 'retain-on-failure' },
-  webServer: [0, 1].map((offset) => ({
-    command: `uv run python tests/browser_server.py ${port + offset}`,
-    cwd: '..',
-    url: `http://127.0.0.1:${port + offset}/api/health`,
-    reuseExistingServer: false,
-    timeout: 120_000,
-  })),
   projects: [
     {
       name: 'chromium',

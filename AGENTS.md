@@ -35,6 +35,8 @@ Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries 
 
 Choose the gate from the complete change, including staged and unstaged files.
 
+**CI results are always part of verification:** inspect GitHub Actions for the current remote commit before making changes and again before delivery. Inspect failed jobs and their logs; local checks do not establish that CI passed. After an explicitly authorized push, wait for the workflows on the exact pushed commit to finish and inspect every result before reporting success. Report the commit, run link and outcome separately from local checks. Missing, pending, cancelled or inaccessible runs are unverified, never passing. If the fix remains local, state that its CI result is pending a push; this check does not authorize pushing.
+
 **Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run application builds or Python/client/browser suites; the commit hook still runs `uv run python scripts/checks.py pre`. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
 
 **Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
