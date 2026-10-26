@@ -98,7 +98,7 @@ Existing authorization for routine local English preparation and Piper runs cont
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
-The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs, push and deployment remain outside authorization. Preserve existing learner data; prototype code retirement does not authorize deleting it.
+The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment). Preserve existing learner data; prototype code retirement does not authorize deleting it.
 
 ## Delivery discipline
 

@@ -37,7 +37,7 @@ Run the full browser/audio gate on macOS and retain the separate Linux Python se
 
 Choose the gate from the complete change, including staged and unstaged files.
 
-**CI results are always part of verification:** inspect GitHub Actions for the current remote commit before making changes and again before delivery. Inspect failed jobs and their logs; local checks do not establish that CI passed. After an explicitly authorized push, wait for the workflows on the exact pushed commit to finish and inspect every result before reporting success. Report the commit, run link and outcome separately from local checks. Missing, pending, cancelled or inaccessible runs are unverified, never passing. If the fix remains local, state that its CI result is pending a push; this check does not authorize pushing.
+**CI results are always part of verification:** inspect GitHub Actions for the current remote commit before making changes. After the local gate passes, commit and push under the standing authorization below, then wait for the workflows on the exact pushed commit to finish and inspect every result before delivery. Inspect failed jobs and their logs, fix failures, and repeat the applicable checks and push until CI passes. Local checks do not establish that CI passed. Report the commit, run link and outcome separately from local checks. Missing, pending, cancelled or inaccessible runs are unverified, never passing; report any actual block explicitly.
 
 **Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run application builds or Python/client/browser suites; the commit hook still runs `uv run python scripts/checks.py pre`. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
 
@@ -87,7 +87,7 @@ When changing prompts, provider payloads or interpretation of real model answers
 
 ## Git, secrets and deployment
 
-- Commit authorized work directly to `main`. Do not create branches or PRs by default.
-- Never push, publish or deploy without the user's explicit request for that action. A local commit does not authorize any of them.
+- Commit authorized work directly to `main` and push it to `origin/main` after the applicable local gate passes, then verify CI as required by the done gate. This is standing authorization; do not ask for separate push approval unless the user explicitly requests local-only work. Do not create branches or PRs by default, and never force-push.
+- Publishing releases and deployment still require the user's explicit request for that action.
 - Keep `.env`, provider keys, learner data and recordings ignored, private and server-side. Never bundle or print secrets.
 - Source repositories, vaults, echo-words, legacy trainers and Anki stay read-only unless separately authorized. Real deployment must be reproducible from committed code and must verify its actual health/access boundary; no one-off server edits.
