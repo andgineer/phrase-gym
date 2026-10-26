@@ -375,6 +375,266 @@
         "title": "RecordingUpload",
         "type": "object"
       },
+      "SavedRecording": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "byte_length": {
+            "title": "Byte Length",
+            "type": "integer"
+          },
+          "captured_at": {
+            "title": "Captured At",
+            "type": "string"
+          },
+          "complete": {
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mime_type": {
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "attempt_id",
+          "captured_at",
+          "mime_type",
+          "duration_ms",
+          "complete",
+          "byte_length",
+          "url"
+        ],
+        "title": "SavedRecording",
+        "type": "object"
+      },
+      "StudyCard": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_variants": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Variants",
+            "type": "array"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "cues": {
+            "items": {
+              "$ref": "#/components/schemas/Cue"
+            },
+            "title": "Cues",
+            "type": "array"
+          },
+          "detailed_explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detailed Explanation"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "recordings": {
+            "items": {
+              "$ref": "#/components/schemas/SavedRecording"
+            },
+            "title": "Recordings",
+            "type": "array"
+          },
+          "reference_url": {
+            "title": "Reference Url",
+            "type": "string"
+          },
+          "source_id": {
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          },
+          "source_link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Link"
+          }
+        },
+        "required": [
+          "id",
+          "source_id",
+          "item_id",
+          "source_label",
+          "source_link",
+          "answer",
+          "explanation",
+          "cues",
+          "accepted_variants",
+          "detailed_explanation",
+          "reference_url",
+          "attempt_id",
+          "recordings"
+        ],
+        "title": "StudyCard",
+        "type": "object"
+      },
+      "StudyCompletion": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "completed_at": {
+            "title": "Completed At",
+            "type": "string"
+          },
+          "graded": {
+            "const": false,
+            "title": "Graded",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "completed_at",
+          "graded"
+        ],
+        "title": "StudyCompletion",
+        "type": "object"
+      },
+      "StudyHistoryItem": {
+        "additionalProperties": false,
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "recordings": {
+            "items": {
+              "$ref": "#/components/schemas/SavedRecording"
+            },
+            "title": "Recordings",
+            "type": "array"
+          },
+          "reference_url": {
+            "title": "Reference Url",
+            "type": "string"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "answer",
+          "source_label",
+          "reference_url",
+          "recordings"
+        ],
+        "title": "StudyHistoryItem",
+        "type": "object"
+      },
+      "StudyResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "card": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudyCard"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "studied": {
+            "title": "Studied",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "done",
+          "total",
+          "studied"
+        ],
+        "title": "StudyResponse",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -445,9 +705,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Complete Study Api Attempts  Attempt Id  Complete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StudyCompletion"
                 }
               }
             },
@@ -725,9 +983,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Current Study Api Study Current Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StudyResponse"
                 }
               }
             },
@@ -746,8 +1002,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/StudyHistoryItem"
                   },
                   "title": "Response Study History Api Study History Get",
                   "type": "array"

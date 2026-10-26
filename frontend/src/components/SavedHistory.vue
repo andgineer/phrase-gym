@@ -1,12 +1,5 @@
 <script setup lang="ts">
-type Recording = { id: string; captured_at: string; duration_ms: number | null; url: string }
-type HistoryItem = {
-  id: string
-  answer: string
-  source_label: string
-  reference_url: string
-  recordings: Recording[]
-}
+import type { HistoryItem, Recording } from '../studyTypes'
 defineProps<{
   items: HistoryItem[]
   play: (url: string) => Promise<void>

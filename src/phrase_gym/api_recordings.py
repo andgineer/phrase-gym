@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 from phrase_gym.contracts import RecordingReceipt, RecordingUpload
-from phrase_gym.storage import Database
+from phrase_gym.storage import Database, write_private
 
 MAX_RECORDING_BYTES = 12 * 1024 * 1024
 
@@ -47,9 +47,10 @@ def recording_routes(database: Database) -> APIRouter:
                 raise HTTPException(409, "Recording does not belong to this card and attempt")
             directory = database.data_dir / "recordings" / upload.card_id
             directory.mkdir(parents=True, mode=0o700, exist_ok=True)
+            directory.chmod(0o700)
             path = directory / upload.id
             temporary = path.with_suffix(".pending")
-            temporary.write_bytes(audio)
+            write_private(temporary, audio)
             os.replace(temporary, path)
             connection.execute(
                 "INSERT INTO recordings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

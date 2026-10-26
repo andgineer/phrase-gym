@@ -14,4 +14,4 @@ Read in this order:
 8. [Small application architecture](architecture.md): Python, Vue, SQLite and stopped-app backup/restore.
 9. [Delivery ladder](plan/implementation-plan.md) and [unverified acceptance](open-problems.md).
 
-[Agent instructions](../AGENTS.md) and the [implementation handout](plan/orchestration-handout.md) govern delivery. [README](../README.md) distinguishes the runnable prototype from this target. Keep decisions here, operational commands in docs, and only remaining work in the plan.
+[Agent instructions](../AGENTS.md) and the [implementation handout](plan/orchestration-handout.md) govern delivery. [README](../README.md) documents the runnable application and launch workflow. Keep decisions here, operational commands in docs, and only remaining work in the plan.

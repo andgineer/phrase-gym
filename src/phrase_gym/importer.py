@@ -6,11 +6,11 @@ import sqlite3
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol
 from uuid import NAMESPACE_URL, uuid5
 
 from phrase_gym.contracts import ImportCard, PhrasePackage
-from phrase_gym.speech import PiperSpeech
-from phrase_gym.storage import Database
+from phrase_gym.storage import Database, write_private
 
 
 def now() -> str:
@@ -21,12 +21,21 @@ def canonical(package: PhrasePackage) -> str:
     return package.model_dump_json(exclude_none=True)
 
 
+def card_identity(source_id: str, item_id: str) -> str:
+    encoded = json.dumps([source_id, item_id], separators=(",", ":"))
+    return str(uuid5(NAMESPACE_URL, encoded))
+
+
 class ImportConflict(ValueError):
     pass
 
 
+class Speech(Protocol):
+    async def synthesize(self, text: str) -> bytes: ...
+
+
 class Importer:
-    def __init__(self, database: Database, speech: PiperSpeech):
+    def __init__(self, database: Database, speech: Speech):
         self.database = database
         self.speech = speech
         self.lock = asyncio.Lock()
@@ -114,11 +123,12 @@ class Importer:
                 prepared: list[tuple[ImportCard, Path]] = []
                 for card in package.cards:
                     audio = await self.speech.synthesize(card.answer)
-                    path = staging / f"{card.item_id}.wav"
+                    path = staging / f"{card_identity(package.source_id, card.item_id)}.wav"
                     path.write_bytes(audio)
                     prepared.append((card, path))
                 references = self.database.data_dir / "references"
                 references.mkdir(mode=0o700, exist_ok=True)
+                references.chmod(0o700)
                 with self.database.write() as connection:
                     placeholders = ",".join("?" for _ in package.cards)
                     repeated = connection.execute(
@@ -131,13 +141,18 @@ class Importer:
                             "A source item appeared while audio was preparing; no cards were added."
                         )
                     for card, staged_path in prepared:
-                        identity = json.dumps(
-                            [package.source_id, card.item_id], separators=(",", ":")
-                        )
-                        card_id = str(uuid5(NAMESPACE_URL, identity))
+                        card_id = card_identity(package.source_id, card.item_id)
                         destination = references / f"{card_id}.wav"
-                        with destination.open("xb") as output:
-                            output.write(staged_path.read_bytes())
+                        if destination.exists():
+                            owner = connection.execute(
+                                "SELECT id FROM cards WHERE reference_path=?", (str(destination),)
+                            ).fetchone()
+                            if owner:
+                                raise ImportConflict(
+                                    "Reference audio is already owned by an existing card."
+                                )
+                            destination.unlink()
+                        write_private(destination, staged_path.read_bytes())
                         created.append(destination)
                         connection.execute(
                             "INSERT INTO cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)",

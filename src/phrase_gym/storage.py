@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -36,9 +37,14 @@ CREATE TABLE IF NOT EXISTS recordings (
 
 class Database:
     def __init__(self, data_dir: Path):
-        data_dir.mkdir(parents=True, exist_ok=True)
+        data_dir.mkdir(parents=True, mode=0o700, exist_ok=True)
+        data_dir.chmod(0o700)
         self.data_dir = data_dir
         self.path = data_dir / "phrase-gym.sqlite3"
+        if not self.path.exists():
+            descriptor = os.open(self.path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600)
+            os.close(descriptor)
+        self.path.chmod(0o600)
         with self.write() as connection:
             connection.executescript(SCHEMA)
             connection.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', '1')")
@@ -53,7 +59,14 @@ class Database:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys=ON")
         connection.execute("PRAGMA journal_mode=WAL")
+        self._secure_database_files()
         return connection
+
+    def _secure_database_files(self) -> None:
+        for suffix in ("", "-wal", "-shm"):
+            path = Path(f"{self.path}{suffix}")
+            if path.exists():
+                path.chmod(0o600)
 
     @contextmanager
     def read(self) -> Iterator[sqlite3.Connection]:
@@ -75,3 +88,13 @@ class Database:
             raise
         finally:
             connection.close()
+
+
+def write_private(path: Path, content: bytes, *, exclusive: bool = True) -> None:
+    flags = os.O_WRONLY | os.O_CREAT | (os.O_EXCL if exclusive else os.O_TRUNC)
+    descriptor = os.open(path, flags, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb", closefd=False) as output:
+            output.write(content)
+    finally:
+        os.close(descriptor)

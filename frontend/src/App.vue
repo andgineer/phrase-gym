@@ -1,135 +1,54 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { api } from './api'
+import { computed, onMounted } from 'vue'
 import { useCapture } from './composables/useCapture'
-import { setAudioSession } from './audioSession'
 import { takeTransfers } from './takeTransfers'
 import type { StoredTake } from './practiceTypes'
 import SavedHistory from './components/SavedHistory.vue'
 import AddMaterial from './components/AddMaterial.vue'
+import { usePlayback } from './composables/usePlayback'
+import { useStudy } from './composables/useStudy'
 
-type Recording = { id: string; captured_at: string; duration_ms: number | null; url: string }
-type Card = {
-  id: string
-  source_label: string
-  answer: string
-  explanation: string
-  cues: Array<{ situation: string; partner_line?: string }>
-  accepted_variants: string[]
-  reference_url: string
-  attempt_id: string
-  recordings: Recording[]
-}
-type Study = {
-  done: boolean
-  total: number
-  studied: number
-  message?: string
-  card?: Card
-}
-type HistoryItem = Pick<Card, 'id' | 'answer' | 'source_label' | 'reference_url' | 'recordings'>
-
-const study = ref<Study | null>(null)
-const loadingStudy = ref(false)
-const connectionError = ref('')
-const history = ref<HistoryItem[]>([])
-let playing: HTMLAudioElement | null = null
-
-async function loadStudy() {
-  loadingStudy.value = true
-  connectionError.value = ''
-  try {
-    ;[study.value, history.value] = await Promise.all([
-      api<Study>('/study/current', { method: 'POST' }),
-      api<HistoryItem[]>('/study/history'),
-    ])
-  } catch (cause) {
-    connectionError.value = String(cause)
-  } finally {
-    loadingStudy.value = false
-  }
-}
-
-function stopPlayback() {
-  if (playing) {
-    const current = playing
-    playing = null
-    current.pause()
-    current.src = ''
-  }
-  setAudioSession('auto')
-}
-
-async function play(url: string) {
-  stopPlayback()
-  setAudioSession('playback')
-  const audio = new Audio(url)
-  playing = audio
-  audio.onended = audio.onerror = () => {
-    if (playing === audio) playing = null
-    setAudioSession('auto')
-  }
-  await audio.play()
-}
-
-async function compare(recording: Recording, referenceUrl = study.value?.card?.reference_url) {
-  stopPlayback()
-  const learner = new Audio(recording.url)
-  playing = learner
-  learner.onended = () => {
-    if (playing !== learner || !referenceUrl) return
-    void play(referenceUrl)
-  }
-  learner.onpause = () => {
-    if (playing !== learner) return
-    learner.src = ''
-    playing = null
-    setAudioSession('auto')
-  }
-  learner.onerror = stopPlayback
-  await learner.play()
-}
+const study = useStudy()
+const playback = usePlayback()
 
 const capture = useCapture({
   context: async () => {
-    if (!study.value?.card) throw new Error('No study card is open')
-    return { card_id: study.value.card.id, attempt_id: study.value.card.attempt_id }
+    if (!study.current.value?.card) throw new Error('No study card is open')
+    return {
+      card_id: study.current.value.card.id,
+      attempt_id: study.current.value.card.attempt_id,
+    }
   },
   retain: takeTransfers.retain,
   finished: async (_take: StoredTake) => {
     await takeTransfers.flush()
-    await loadStudy()
+    await study.load()
   },
   failure: async () => {},
 })
 
 async function next() {
-  if (!study.value?.card) return
+  if (!study.current.value?.card) return
   await capture.release()
   await takeTransfers.flush()
-  await api(`/attempts/${study.value.card.attempt_id}/complete`, {
-    method: 'POST',
-    body: JSON.stringify({ operation_id: crypto.randomUUID() }),
-  })
-  stopPlayback()
-  await loadStudy()
+  playback.stop()
+  await study.complete(study.current.value.card.attempt_id)
 }
 
 async function retryTakes() {
   await takeTransfers.flush()
-  await loadStudy()
+  await study.load()
 }
 
 const progress = computed(() =>
-  study.value ? `${study.value.studied} of ${study.value.total} studied` : '',
+  study.current.value
+    ? `${study.current.value.studied} of ${study.current.value.total} studied`
+    : '',
 )
 
 onMounted(async () => {
   await takeTransfers.recover()
-  await loadStudy()
-})
-onUnmounted(() => {
-  stopPlayback()
+  await study.load()
 })
 </script>
 
@@ -137,27 +56,29 @@ onUnmounted(() => {
   <div class="shell">
     <header><strong>Phrase Gym</strong><span>English phrase study</span></header>
     <main>
-      <AddMaterial @added="loadStudy" />
+      <AddMaterial @added="study.load" />
 
-      <section v-if="connectionError" class="panel error" role="alert">
-        {{ connectionError }} <button @click="loadStudy">Retry connection</button>
+      <section v-if="study.error.value" class="panel error" role="alert">
+        {{ study.error.value }} <button @click="study.load">Retry connection</button>
       </section>
-      <section v-else-if="loadingStudy" class="panel" role="status">Loading…</section>
-      <section v-else-if="study?.done" class="panel complete">
+      <section v-else-if="study.loading.value" class="panel" role="status">Loading…</section>
+      <section v-else-if="study.current.value?.done" class="panel complete">
         <p class="eyebrow">{{ progress }}</p>
         <h1>Today’s study is complete</h1>
-        <p>{{ study.message }}</p>
+        <p>{{ study.current.value.message }}</p>
       </section>
-      <section v-else-if="study?.card" class="panel study">
+      <section v-else-if="study.current.value?.card" class="panel study">
         <p class="eyebrow">First study · {{ progress }}</p>
-        <h1>{{ study.card.answer }}</h1>
-        <p class="meaning">{{ study.card.explanation }}</p>
-        <p v-if="study.card.accepted_variants.length" class="variants">
-          Also accepted: {{ study.card.accepted_variants.join('; ') }}
+        <h1>{{ study.current.value.card.answer }}</h1>
+        <p class="meaning">{{ study.current.value.card.explanation }}</p>
+        <p v-if="study.current.value.card.accepted_variants.length" class="variants">
+          Also accepted: {{ study.current.value.card.accepted_variants.join('; ') }}
         </p>
-        <p class="source">From {{ study.card.source_label }}</p>
+        <p class="source">From {{ study.current.value.card.source_label }}</p>
         <div class="actions">
-          <button @click="play(study.card.reference_url)">Play reference</button>
+          <button @click="playback.play(study.current.value.card.reference_url)">
+            Play reference
+          </button>
           <button
             v-if="!capture.capturing.value"
             :disabled="capture.requesting.value || capture.processing.value"
@@ -176,12 +97,18 @@ onUnmounted(() => {
         <p v-if="takeTransfers.error.value" role="alert" class="error">
           {{ takeTransfers.error.value }}
         </p>
-        <div v-if="study.card.recordings.length" class="takes">
+        <div v-if="study.current.value.card.recordings.length" class="takes">
           <h2>Saved takes</h2>
-          <div v-for="(recording, index) in study.card.recordings" :key="recording.id" class="take">
+          <div
+            v-for="(recording, index) in study.current.value.card.recordings"
+            :key="recording.id"
+            class="take"
+          >
             <span>Take {{ index + 1 }}</span>
-            <button @click="play(recording.url)">Replay</button>
-            <button @click="compare(recording)">Compare with reference</button>
+            <button @click="playback.play(recording.url)">Replay</button>
+            <button @click="playback.compare(recording, study.current.value.card?.reference_url)">
+              Compare with reference
+            </button>
           </div>
         </div>
         <button class="next" @click="next">Next</button>
@@ -191,7 +118,11 @@ onUnmounted(() => {
         <h1>Add your first phrase batch</h1>
         <p>Import 5–10 prepared phrases above to begin.</p>
       </section>
-      <SavedHistory :items="history" :play="play" :compare="compare" />
+      <SavedHistory
+        :items="study.history.value"
+        :play="playback.play"
+        :compare="playback.compare"
+      />
     </main>
   </div>
 </template>

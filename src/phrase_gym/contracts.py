@@ -81,3 +81,52 @@ class RecordingReceipt(StrictModel):
     byte_length: int
     sha256: str
     complete: bool
+
+
+class SavedRecording(StrictModel):
+    id: str
+    attempt_id: str
+    captured_at: str
+    mime_type: str
+    duration_ms: int | None
+    complete: bool
+    byte_length: int
+    url: str
+
+
+class StudyCard(StrictModel):
+    id: str
+    source_id: str
+    item_id: str
+    source_label: str
+    source_link: str | None
+    answer: str
+    explanation: str
+    cues: list[Cue]
+    accepted_variants: list[str]
+    detailed_explanation: str | None
+    reference_url: str
+    attempt_id: str
+    recordings: list[SavedRecording]
+
+
+class StudyResponse(StrictModel):
+    done: bool
+    total: int
+    studied: int
+    message: str | None = None
+    card: StudyCard | None = None
+
+
+class StudyHistoryItem(StrictModel):
+    id: str
+    answer: str
+    source_label: str
+    reference_url: str
+    recordings: list[SavedRecording]
+
+
+class StudyCompletion(StrictModel):
+    attempt_id: str
+    completed_at: str
+    graded: Literal[False]

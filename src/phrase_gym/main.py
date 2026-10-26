@@ -12,7 +12,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--data-dir", type=Path)
     args = parser.parse_args()
-    if args.host not in {"127.0.0.1", "localhost", "::1"}:
+    if args.host not in {"127.0.0.1", "localhost"}:
         parser.error("Phrase Gym only listens on loopback")
     if args.data_dir:
         os.environ["PHRASE_GYM_DATA_DIR"] = str(args.data_dir.resolve())

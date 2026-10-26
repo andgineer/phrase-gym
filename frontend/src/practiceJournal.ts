@@ -37,6 +37,15 @@ export async function journalPut(key: string, value: unknown): Promise<void> {
       reject(transaction.error ?? new Error('Journal write failed'))
   })
 }
+export async function journalGet<T>(key: string): Promise<T | undefined> {
+  const db = await database()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('journal')
+    const request = transaction.objectStore('journal').get(key)
+    request.onsuccess = () => resolve(request.result as T | undefined)
+    request.onerror = () => reject(request.error)
+  })
+}
 export async function journalDelete(key: string): Promise<void> {
   const db = await database()
   return new Promise((resolve, reject) => {

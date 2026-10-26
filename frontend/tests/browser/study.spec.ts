@@ -60,6 +60,27 @@ test.beforeEach(async ({ page }) => {
           },
         },
       })
+    if (sessionStorage.getItem('phrase-gym-test-transfer-race') === 'armed') {
+      sessionStorage.removeItem('phrase-gym-test-transfer-race')
+      const locks = navigator.locks
+      const nativeRequest = locks.request.bind(locks)
+      const host = window as unknown as {
+        __releaseTakeRace?: () => void
+        __takeTransferReached?: boolean
+      }
+      Object.defineProperty(locks, 'request', {
+        configurable: true,
+        value: async (...args: unknown[]) => {
+          if (String(args[0]).startsWith('phrase-gym.take:') && !host.__takeTransferReached) {
+            host.__takeTransferReached = true
+            await new Promise<void>((release) => {
+              host.__releaseTakeRace = release
+            })
+          }
+          return Reflect.apply(nativeRequest, locks, args)
+        },
+      })
+    }
     class SilentRecorder {
       static isTypeSupported() {
         return true
@@ -136,6 +157,8 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     })
     const nativePlay = host.__nativeMediaPlay
     HTMLMediaElement.prototype.play = function () {
+      this.muted = true
+      this.volume = 0
       ;(host.__playedMedia ??= []).push(this)
       return nativePlay.call(this)
     }
@@ -192,8 +215,10 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await expect(page.getByRole('heading', { name: "Let's get started." })).toBeVisible()
 
   let failSave = true
+  let failedSaves = 0
   await page.route('**/api/recordings', async (route) => {
     if (failSave && route.request().method() === 'POST') {
+      failedSaves += 1
       await route.fulfill({ status: 503, json: { detail: 'Temporary save failure' } })
       return
     }
@@ -203,10 +228,47 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'Stop recording' }).click()
   await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
   await expect(page.getByRole('alert')).toContainText('Audio remains on this device')
-  await page.reload()
-  await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
-  failSave = false
   await page.getByRole('button', { name: 'Retry save' }).click()
+  await expect.poll(() => failedSaves).toBe(2)
+  await page.evaluate(() => {
+    sessionStorage.setItem('phrase-gym-test-transfer-race', 'armed')
+  })
+  failSave = false
+  await page.reload()
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as { __takeTransferReached?: boolean }).__takeTransferReached ?? false,
+      ),
+    )
+    .toBe(true)
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('phrase-gym.practice.v1', 1)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction('journal', 'readwrite')
+      const store = transaction.objectStore('journal')
+      const cursor = store.openCursor()
+      cursor.onsuccess = () => {
+        const current = cursor.result
+        if (!current) return transaction.abort()
+        if (!String(current.key).startsWith('take-v2:')) return current.continue()
+        current.update({
+          ...current.value,
+          duration_ms: 600,
+          complete: true,
+          audio: new Uint8Array([1, 2, 3, 4, 5, 6]).buffer,
+        })
+      }
+      transaction.oncomplete = () => resolve()
+      transaction.onerror = transaction.onabort = () => reject(transaction.error)
+    })
+    ;(window as unknown as { __releaseTakeRace: () => void }).__releaseTakeRace()
+  })
   await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
@@ -225,7 +287,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     expect.arrayContaining([
       expect.objectContaining({
         mime_type: 'audio/webm;codecs=opus',
-        byte_length: 4,
+        byte_length: 6,
         complete: true,
       }),
     ]),

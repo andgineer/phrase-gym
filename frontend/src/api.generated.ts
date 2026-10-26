@@ -300,6 +300,91 @@ export interface components {
             /** Mime Type */
             mime_type: string;
         };
+        /** SavedRecording */
+        SavedRecording: {
+            /** Attempt Id */
+            attempt_id: string;
+            /** Byte Length */
+            byte_length: number;
+            /** Captured At */
+            captured_at: string;
+            /** Complete */
+            complete: boolean;
+            /** Duration Ms */
+            duration_ms: number | null;
+            /** Id */
+            id: string;
+            /** Mime Type */
+            mime_type: string;
+            /** Url */
+            url: string;
+        };
+        /** StudyCard */
+        StudyCard: {
+            /** Accepted Variants */
+            accepted_variants: string[];
+            /** Answer */
+            answer: string;
+            /** Attempt Id */
+            attempt_id: string;
+            /** Cues */
+            cues: components["schemas"]["Cue"][];
+            /** Detailed Explanation */
+            detailed_explanation: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Id */
+            id: string;
+            /** Item Id */
+            item_id: string;
+            /** Recordings */
+            recordings: components["schemas"]["SavedRecording"][];
+            /** Reference Url */
+            reference_url: string;
+            /** Source Id */
+            source_id: string;
+            /** Source Label */
+            source_label: string;
+            /** Source Link */
+            source_link: string | null;
+        };
+        /** StudyCompletion */
+        StudyCompletion: {
+            /** Attempt Id */
+            attempt_id: string;
+            /** Completed At */
+            completed_at: string;
+            /**
+             * Graded
+             * @constant
+             */
+            graded: false;
+        };
+        /** StudyHistoryItem */
+        StudyHistoryItem: {
+            /** Answer */
+            answer: string;
+            /** Id */
+            id: string;
+            /** Recordings */
+            recordings: components["schemas"]["SavedRecording"][];
+            /** Reference Url */
+            reference_url: string;
+            /** Source Label */
+            source_label: string;
+        };
+        /** StudyResponse */
+        StudyResponse: {
+            card?: components["schemas"]["StudyCard"] | null;
+            /** Done */
+            done: boolean;
+            /** Message */
+            message?: string | null;
+            /** Studied */
+            studied: number;
+            /** Total */
+            total: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -339,9 +424,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["StudyCompletion"];
                 };
             };
             /** @description Validation Error */
@@ -582,9 +665,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["StudyResponse"];
                 };
             };
         };
@@ -604,9 +685,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    }[];
+                    "application/json": components["schemas"]["StudyHistoryItem"][];
                 };
             };
         };

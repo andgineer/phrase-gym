@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { releaseCapture, withAvailableTake } from './captureOwners'
 import { api } from './api'
-import { journalPut } from './practiceJournal'
+import { journalGet, journalPut } from './practiceJournal'
 import { acknowledgeTake, recoverTake, takeEntries, takePrefix } from './takeJournalRecovery'
 import type { StoredTake } from './practiceTypes'
 import type { components } from './api.generated'
@@ -30,10 +30,12 @@ async function flush() {
   if (sending) return sending
   sending = (async () => {
     error.value = ''
-    for (const { key, value: snapshot } of await takeEntries()) {
-      if (snapshot.status !== 'pending') continue
+    for (const { key, value: listed } of await takeEntries()) {
+      if (listed.status !== 'pending') continue
       try {
-        await withAvailableTake(snapshot.id, async () => {
+        await withAvailableTake(listed.id, async () => {
+          const snapshot = await journalGet<StoredTake>(key)
+          if (!snapshot || snapshot.id !== listed.id || snapshot.status !== 'pending') return
           const body: Upload = {
             id: snapshot.id,
             card_id: snapshot.card_id,
