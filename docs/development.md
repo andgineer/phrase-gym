@@ -13,8 +13,8 @@ inv --list
 ```
 
 If migrating from the temporary custom hook, first run `git config --unset core.hooksPath`.
-`inv pre` runs the pre-commit framework, including Ruff, Pyrefly, mypy, generated-contract drift,
-module sizes and client formatting. Run `uv run python scripts/checks.py test` for the full
+`inv pre` runs the pre-commit framework, including Ruff, Pyrefly, generated-contract drift,
+module sizes and client formatting. Run `uv run inv test` for the full
 macOS gate. CI also runs the server tests on Linux. Tests use fake speech and silent browser audio.
 
 `inv reqs` upgrades the dependency lock and pre-commit hook revisions. Review and commit both
@@ -27,12 +27,16 @@ Codecov and Coveralls integration; external coverage services require their repo
 ## Build a distributable
 
 ```bash
-./build.sh
+uv run inv build
 ```
 
 This builds the Vue client before the Python wheel and source distribution. Do not publish a
 wheel built from an outdated client. `src/phrase_gym/__about__.py` is the package-version source;
 Hatch reads it for both distributions.
+
+`inv build-frontend` rebuilds only the Vue client. `inv run --build` builds the client and starts
+the server; `inv run` starts the server with the existing client build. Pre-commit contains the
+Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.
 
 ## Publish a release
 

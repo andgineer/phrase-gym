@@ -9,6 +9,7 @@ export function useStudy() {
   const current = ref<Study | null>(null)
   const history = ref<HistoryItem[]>([])
   const loading = ref(false)
+  const completing = ref(false)
   const error = ref('')
 
   async function load() {
@@ -26,13 +27,23 @@ export function useStudy() {
     }
   }
 
-  async function complete(attemptId: string) {
-    await api<Completion>(`/attempts/${attemptId}/complete`, {
-      method: 'POST',
-      body: JSON.stringify({ operation_id: crypto.randomUUID() }),
-    })
-    await load()
+  async function complete(attemptId: string, beforeComplete: () => Promise<void>) {
+    if (completing.value) return
+    completing.value = true
+    error.value = ''
+    try {
+      await beforeComplete()
+      await api<Completion>(`/attempts/${attemptId}/complete`, {
+        method: 'POST',
+        body: JSON.stringify({ operation_id: crypto.randomUUID() }),
+      })
+      await load()
+    } catch (cause) {
+      error.value = String(cause)
+    } finally {
+      completing.value = false
+    }
   }
 
-  return { current, history, loading, error, load, complete }
+  return { current, history, loading, completing, error, load, complete }
 }

@@ -53,6 +53,7 @@ test.beforeEach(async ({ page }) => {
     })
     if (!navigator.locks)
       Object.defineProperty(navigator, 'locks', {
+        configurable: true,
         value: {
           request: async (_name: string, options: unknown, callback?: Function) => {
             const run = typeof options === 'function' ? options : callback
@@ -60,26 +61,32 @@ test.beforeEach(async ({ page }) => {
           },
         },
       })
-    if (new URLSearchParams(location.search).has('take-transfer-race')) {
-      const locks = navigator.locks
-      const nativeRequest = locks.request.bind(locks)
-      const host = window as unknown as {
-        __releaseTakeRace?: () => void
-        __takeTransferReached?: boolean
-      }
-      Object.defineProperty(locks, 'request', {
-        configurable: true,
-        value: async (...args: unknown[]) => {
-          if (String(args[0]).startsWith('phrase-gym.take:') && !host.__takeTransferReached) {
-            host.__takeTransferReached = true
-            await new Promise<void>((release) => {
-              host.__releaseTakeRace = release
-            })
-          }
-          return Reflect.apply(nativeRequest, locks, args)
-        },
-      })
+    const locks = navigator.locks
+    Object.defineProperty(navigator, 'locks', { configurable: true, value: locks })
+    const nativeRequest = locks.request.bind(locks)
+    const host = window as unknown as {
+      __releaseTakeRace?: () => void
+      __takeTransferReached?: boolean
+      __lockCalls?: string[]
     }
+    Object.defineProperty(locks, 'request', {
+      configurable: true,
+      value: async (...args: unknown[]) => {
+        ;(host.__lockCalls ??= []).push(`${location.href} ${String(args[0])}`)
+        if (
+          // Read the destination URL when recovery requests the lock.
+          new URLSearchParams(location.search).has('take-transfer-race') &&
+          String(args[0]).startsWith('phrase-gym.take:') &&
+          !host.__takeTransferReached
+        ) {
+          host.__takeTransferReached = true
+          await new Promise<void>((release) => {
+            host.__releaseTakeRace = release
+          })
+        }
+        return Reflect.apply(nativeRequest, locks, args)
+      },
+    })
     class SilentRecorder {
       static isTypeSupported() {
         return true
@@ -273,12 +280,15 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.goto('/?take-transfer-race=1')
   await expect
     .poll(() =>
-      page.evaluate(
-        () =>
+      page.evaluate(() => ({
+        reached:
           (window as unknown as { __takeTransferReached?: boolean }).__takeTransferReached ?? false,
-      ),
+        calls: (window as unknown as { __lockCalls?: string[] }).__lockCalls,
+        url: location.href,
+        request: String(navigator.locks.request),
+      })),
     )
-    .toBe(true)
+    .toMatchObject({ reached: true })
   failSave = false
   await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -354,11 +364,30 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 5 phrases.')).toBeVisible()
 
-  for (let index = 0; index < 5; index++) {
+  let releaseCompletion!: () => void
+  const completionHeld = new Promise<void>((resolve) => {
+    releaseCompletion = resolve
+  })
+  let completions = 0
+  await page.route('**/api/attempts/*/complete', async (route) => {
+    completions++
+    if (completions === 1) await completionHeld
+    await route.continue()
+  })
+  for (const [index, card] of cards.entries()) {
+    await expect(
+      page.locator('section.study').getByRole('heading', { name: card.answer }),
+    ).toBeVisible()
     await expect(page.getByText('This first meeting is ungraded.')).toBeVisible()
     await page.getByRole('button', { name: 'Next' }).click()
+    if (index === 0) {
+      await expect.poll(() => completions).toBe(1)
+      await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+      releaseCompletion()
+    }
   }
   await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toBeVisible()
+  expect(completions).toBe(cards.length)
   await expect(page.getByText('later recall is not scheduled yet')).toBeVisible()
   const firstHistory = page.getByRole('heading', { name: "Let's get started." }).locator('..')
   await expect(firstHistory.getByRole('button', { name: 'Replay saved take' })).toHaveCount(2)

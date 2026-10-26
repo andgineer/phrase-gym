@@ -54,11 +54,11 @@ See [the package schema, example, and external-agent instruction](docs/importing
 . ./activate.sh
 uv run pre-commit install
 inv --list
-uv run python scripts/checks.py pre
-uv run python scripts/checks.py test
+uv run inv pre
+uv run inv test
 ```
 
-`scripts/checks.py test` runs Python tests, client typechecking/unit/build checks, and silent real-backend
+`inv test` runs Python tests, client typechecking/unit/build checks, and silent real-backend
 browser tests in Chromium and WebKit on macOS. CI runs the full gate on macOS and separately
 runs all Python server tests on Linux. For server-only iteration, use `uv run pytest`.
 Install browser binaries from `frontend/` with
@@ -67,9 +67,12 @@ Install browser binaries from `frontend/` with
 
 The scaffold's `inv pre`, `inv reqs`, `inv docs-en`, `inv build-docs`, `inv version`, and
 `inv ver-bug` / `inv ver-feature` / `inv ver-release` commands are available.
-`./build.sh` builds the client and Python distributions. A version command checks and commits the
+`uv run inv build` builds the client and Python distributions. A version command checks and commits the
 version update, then pushes its release tag; the tag workflow publishes to PyPI only after CI passes.
 See [development and release operations](docs/development.md) for setup and dry-run commands.
+
+Use `uv run inv run --build` to rebuild the frontend and start the server, or `uv run inv run`
+to start it with the existing client build.
 
 [Documentation](https://andgineer.github.io/phrase-gym/),
 [Allure reports](https://andgineer.github.io/phrase-gym/builds/tests/),

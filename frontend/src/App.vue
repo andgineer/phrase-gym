@@ -29,10 +29,11 @@ const capture = useCapture({
 
 async function next() {
   if (!study.current.value?.card) return
-  await capture.release()
-  await takeTransfers.flush()
-  playback.stop()
-  await study.complete(study.current.value.card.attempt_id)
+  await study.complete(study.current.value.card.attempt_id, async () => {
+    await capture.release()
+    await takeTransfers.flush()
+    playback.stop()
+  })
 }
 
 async function retryTakes() {
@@ -111,7 +112,7 @@ onMounted(async () => {
             </button>
           </div>
         </div>
-        <button class="next" @click="next">Next</button>
+        <button class="next" :disabled="study.completing.value" @click="next">Next</button>
         <p class="note">This first meeting is ungraded. Recording is optional.</p>
       </section>
       <section v-else class="panel empty">

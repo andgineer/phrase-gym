@@ -6,16 +6,15 @@ repo_url: https://github.com/andgineer/phrase-gym
 edit_uri: edit/main/docs/
 docs_dir: src/LANGUAGE
 site_dir: SITE_DIR
-theme:
-  name: material
-  language: LANGUAGE
 plugins:
-  - search
   - awesome-pages
+  - search:
+      lang: LANGUAGE
   - mkdocstrings:
       handlers:
         python:
-          paths: [src]
+          options:
+            show_root_heading: true
 markdown_extensions:
   - abbr
   - attr_list
@@ -24,6 +23,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.snippets:
+      base_path: docs/includes
 nav:
   - Overview: index.md
   - Installation: installation.md

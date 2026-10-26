@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+from invoke import Context
+
 import tasks
 
 
@@ -39,4 +42,38 @@ def test_scaffold_commands_remain_available() -> None:
         "uv",
         "docs-en",
         "build-docs",
+        "build",
+        "build-frontend",
+        "run",
+        "test",
     } <= set(tasks.namespace.task_names)
+
+
+@pytest.mark.parametrize("build", [False, True])
+def test_server_builds_frontend_only_when_requested(monkeypatch, build):
+    commands = []
+    context = Context()
+    monkeypatch.setattr(context, "run", commands.append)
+    tasks.run(context, build=build)
+    assert commands == (
+        ["npm --prefix frontend run build", "uv run phrase-gym"] if build else ["uv run phrase-gym"]
+    )
+
+
+def test_distribution_build_includes_the_client(monkeypatch):
+    commands = []
+    context = Context()
+    monkeypatch.setattr(context, "run", commands.append)
+    tasks.build(context)
+    assert commands == ["npm --prefix frontend ci", "npm --prefix frontend run build", "uv build"]
+
+
+def test_size_check_includes_nested_modules_but_excludes_generated_code(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    source = Path("frontend/src/composables")
+    source.mkdir(parents=True)
+    (source / "api.generated.ts").write_text("line\n" * 301)
+    tasks.check_sizes(Context())
+    (source / "useLarge.ts").write_text("line\n" * 301)
+    with pytest.raises(SystemExit, match="useLarge.ts: 301 lines"):
+        tasks.check_sizes(Context())

@@ -70,8 +70,8 @@ def test_release_updates_lock_checks_then_pushes_branch_and_tag_atomically(repos
     release.release("bug")
     assert version_file.read_text() == '__version__ = "0.10.1"\n'
     assert ("uv", "lock") in commands
-    pre = commands.index(("uv", "run", "python", "scripts/checks.py", "pre"))
-    test = commands.index(("uv", "run", "python", "scripts/checks.py", "test"))
+    pre = commands.index(("uv", "run", "inv", "pre"))
+    test = commands.index(("uv", "run", "inv", "test"))
     commit = commands.index(("git", "commit", "-m", "Version v0.10.1"))
     assert pre < test < commit
     assert commands[-2:] == [

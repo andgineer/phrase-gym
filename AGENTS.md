@@ -19,22 +19,25 @@ For a root-session request to implement the next stage, follow the [orchestratio
 
 | Task | Command |
 |---|---|
-| Python lint, format, types, module size, client format and contract drift | `uv run python scripts/checks.py pre` |
-| Python tests, client typecheck/unit/build and both browser engines | `uv run python scripts/checks.py test` |
+| Python lint, format, types, module size, client format and contract drift | `uv run inv pre` |
+| Python tests, client typecheck/unit/build and both browser engines | `uv run inv test` |
 | Python iteration | `uv run pytest` |
 | Client iteration | `npm --prefix frontend test` |
 | Browser iteration | `npm --prefix frontend run test:browser` |
 | Refresh OpenAPI and generated client types | `uv run python scripts/generate_api.py && npm --prefix frontend run api-types` |
 | Build the retained client | `npm --prefix frontend run build` |
 | Run the local application on 127.0.0.1:8000 | `uv run phrase-gym` |
+| Build the frontend and run the local application | `uv run inv run --build` |
 | Install the pre-commit hooks (once per clone) | `uv run pre-commit install` |
 | Scaffold tasks and release commands | `uv run inv --list` |
 | Build documentation | `uv run inv build-docs` |
-| Build the client and Python distributions | `./build.sh` |
+| Build the client and Python distributions | `uv run inv build` |
 
 Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The pre-commit framework runs the pre gate and needs uv, Python, Node and the client dependencies; `inv pre` runs the same hooks manually. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
 
 Preserve the repository scaffold: pre-commit, Invoke tasks, version/tag helpers, package metadata, environment/build scripts, documentation publishing, test/coverage reports and PyPI release workflows. Extend these for the application instead of replacing or deleting them. Only application/documentation boilerplate should be replaced with real implementation and documentation. Follow [development and release operations](docs/development.md).
+
+Pre-commit owns the static checks and all Ruff settings. Use Pyrefly for Python type checking; do not add a duplicate mypy gate or a wrapper that reruns the same tools. Invoke owns build, test and server commands; keep root-level executable scripts limited to the retained environment activation script.
 
 Run the full browser/audio gate on macOS and retain the separate Linux Python server job in CI, following the [platform boundary](specs/architecture.md#application-boundary). Do not skip native recorder tests to accommodate Linux WebKit's missing API.
 
@@ -44,12 +47,12 @@ Choose the gate from the complete change, including staged and unstaged files.
 
 **CI results are always part of verification:** inspect GitHub Actions for the current remote commit before making changes. After the local gate passes, commit and push under the standing authorization below, then wait for the workflows on the exact pushed commit to finish and inspect every result before delivery. Inspect failed jobs and their logs, fix failures, and repeat the applicable checks and push until CI passes. Local checks do not establish that CI passed. Report the commit, run link and outcome separately from local checks. Missing, pending, cancelled or inaccessible runs are unverified, never passing; report any actual block explicitly.
 
-**Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run application builds or Python/client/browser suites; the commit hook still runs `uv run python scripts/checks.py pre`. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
+**Documentation-only changes:** when the change contains only prose in specs, plans, README, docs or agent instructions, do not run application builds or Python/client/browser suites; the installed pre-commit hooks still run. Run `git diff --check` and `git diff --cached --check`, inspect the full diff, verify changed local links/anchors and check consistency with related decisions and plans. Report these documentation checks without claiming application tests passed. Documentation describing future behavior does not require implementing or testing that behavior.
 
 **Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
 
-1. `uv run python scripts/checks.py pre`: pre-commit hygiene, Python formatting/lint/types, module-size, client formatting and generated-contract drift checks all pass.
-2. `uv run python scripts/checks.py test`: Python, client and both real-backend browser suites pass; frontend checks must run rather than skip.
+1. `uv run inv pre`: pre-commit hygiene, Python formatting/lint/types, module-size, client formatting and generated-contract drift checks all pass.
+2. `uv run inv test`: Python, client and both real-backend browser suites pass; frontend checks must run rather than skip.
 
 Use focused checks during iteration. Run the full ordered gate once per coherent implementation deliverable before commit or delivery, rather than after every internal edit. Rerun relevant checks for review fixes and the full gate after substantive changes; a narrow subset cannot replace it. Use the documentation-only gate for prose-only changes. Never bypass commit hooks with `--no-verify`.
 
@@ -70,7 +73,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 ## Code conventions
 
-- Python passes Ruff and strict mypy; Vue passes Prettier and TypeScript checking. The executable pre gate enforces the handwritten production module-size boundary and generated-contract drift.
+- Python passes Ruff and Pyrefly; Vue passes Prettier and TypeScript checking. The executable pre gate enforces the handwritten production module-size boundary and generated-contract drift.
 - English only in comments, docstrings, plans and repository documentation. Follow the project's English communication rule. Learning data, language names and voice IDs retain their original language/script as quoted, searchable literals.
 - All imports at module top level, none inside functions and none to break cycles; fix the dependency structure.
 - No re-export shims when moving symbols. Import shared helpers directly from their owner.

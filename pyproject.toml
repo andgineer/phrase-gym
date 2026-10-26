@@ -31,13 +31,11 @@ dev = [
   "invoke==2.2.0",
   "mkdocs-awesome-pages-plugin==2.10.1",
   "mkdocstrings[python]==1.0.8",
-  "mypy==1.18.2",
   "pre-commit==4.2.0",
   "pymdown-extensions==10.21.2",
   "pyrefly==0.50.0",
   "pytest==8.4.2",
   "pytest-cov==7.0.0",
-  "ruff==0.14.2",
   "tomli-w==1.2.0",
   "zensical==0.0.41",
 ]
@@ -59,25 +57,3 @@ artifacts = ["src/phrase_gym/static/**"]
 [tool.pyrefly]
 project-includes = ["src"]
 search-path = ["src"]
-
-[tool.ruff]
-line-length = 100
-target-version = "py313"
-
-[tool.ruff.lint]
-select = [
-  "PL", "A001", "ARG", "B", "BLE", "C", "COM", "E", "F", "G", "I", "ISC",
-  "N", "PIE", "Q", "RET", "S", "SIM", "SLF", "TID", "TRY", "UP", "W",
-]
-ignore = ["B019", "S101", "G004", "TRY003", "TRY300", "TRY301", "TRY400"]
-
-[tool.ruff.lint.per-file-ignores]
-# Tests retain the existing checks; scaffold production-only rules do not constrain fixtures.
-"tests/**" = ["PL", "A001", "ARG", "BLE", "C", "COM", "G", "ISC", "N", "PIE", "Q", "RET", "S", "SLF", "TID", "TRY", "W"]
-# Development commands deliberately resolve trusted tools from the operator's PATH.
-"scripts/**" = ["S603", "S607"]
-
-[tool.mypy]
-python_version = "3.13"
-strict = true
-packages = ["phrase_gym"]

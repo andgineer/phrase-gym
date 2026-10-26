@@ -14,6 +14,7 @@ ALLOWED_DOC_LANGUAGES = ["en"] + sorted(
     path.name for path in DOCS_SRC_PATH.iterdir() if path.is_dir() and path.name != "en"
 )
 ALLOWED_VERSION_TYPES = ["release", "bug", "feature"]
+MAX_MODULE_LINES = 300
 
 
 @task
@@ -84,6 +85,65 @@ def uv(context: Context):
 def pre(context: Context):
     """Run all pre-commit checks."""
     context.run("uv run pre-commit run --verbose --all-files")
+
+
+@task
+def check_sizes(_context: Context):
+    """Check handwritten production module sizes."""
+    oversized = []
+    for root in (Path("src/phrase_gym"), Path("frontend/src")):
+        for path in root.rglob("*"):
+            if path.suffix not in {".py", ".ts", ".vue"} or "static" in path.parts:
+                continue
+            if path.name.endswith(".generated.ts"):
+                continue
+            lines = len(path.read_text().splitlines())
+            if lines > MAX_MODULE_LINES:
+                oversized.append(f"{path}: {lines} lines")
+    if oversized:
+        raise SystemExit(
+            "Handwritten production modules exceed 300 lines:\n" + "\n".join(oversized),
+        )
+
+
+@task
+def check_api(context: Context):
+    """Regenerate the API contract and reject uncommitted drift."""
+    context.run("uv run python scripts/generate_api.py")
+    context.run("npm --prefix frontend run api-types")
+    context.run("git diff --exit-code -- frontend/openapi.json frontend/src/api.generated.ts")
+
+
+@task
+def build_frontend(context: Context):
+    """Build the Vue client into the Python package."""
+    context.run("npm --prefix frontend run build")
+
+
+@task
+def build(context: Context):
+    """Build the frontend, wheel and source distribution."""
+    context.run("npm --prefix frontend ci")
+    build_frontend(context)
+    context.run("uv build")
+
+
+@task
+def run(context: Context, build=False):
+    """Run the local server; --build refreshes the frontend first."""
+    if build:
+        build_frontend(context)
+    context.run("uv run phrase-gym")
+
+
+@task
+def test(context: Context):
+    """Run Python, client and both real-backend browser suites."""
+    context.run("uv run pytest --cov=phrase_gym --cov-report=term-missing")
+    context.run("npm --prefix frontend run typecheck")
+    context.run("npm --prefix frontend test")
+    build_frontend(context)
+    context.run("npm --prefix frontend run test:browser")
 
 
 namespace = Collection.from_module(sys.modules[__name__])
