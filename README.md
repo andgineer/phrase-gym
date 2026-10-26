@@ -7,16 +7,16 @@
 | src/phrase\_gym/\_\_about\_\_.py    |        1 |        0 |    100% |           |
 | src/phrase\_gym/api\_recordings.py  |       50 |        7 |     86% |23-24, 26, 28, 37, 49, 89 |
 | src/phrase\_gym/api\_study.py       |       25 |        5 |     80% | 28, 33-36 |
-| src/phrase\_gym/app.py              |       51 |       11 |     78% |35, 41-42, 48-49, 53-58 |
-| src/phrase\_gym/boundary.py         |       46 |        6 |     87% |42-43, 48, 51-52, 62 |
+| src/phrase\_gym/app.py              |       52 |       10 |     81% |42-43, 49-50, 54-59 |
+| src/phrase\_gym/boundary.py         |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
 | src/phrase\_gym/bounded\_process.py |       46 |        3 |     93% | 28, 79-80 |
 | src/phrase\_gym/contracts.py        |       55 |        2 |     96% |    27, 48 |
 | src/phrase\_gym/importer.py         |      114 |        9 |     92% |54, 94, 96, 98, 104, 144, 157, 188, 204 |
-| src/phrase\_gym/main.py             |       19 |       19 |      0% |      1-25 |
+| src/phrase\_gym/main.py             |       27 |       27 |      0% |      1-34 |
 | src/phrase\_gym/speech.py           |       87 |        6 |     93% |101, 117, 123, 138, 161-162 |
 | src/phrase\_gym/storage.py          |       56 |        0 |    100% |           |
-| src/phrase\_gym/study.py            |       72 |        9 |     88% |59, 93, 99, 117-122, 126, 160-161 |
-| **TOTAL**                           |  **622** |   **77** | **88%** |           |
+| src/phrase\_gym/study.py            |       72 |        6 |     92% |93, 99, 117-122, 126 |
+| **TOTAL**                           |  **646** |   **81** | **87%** |           |
 
 
 ## Setup coverage badge
