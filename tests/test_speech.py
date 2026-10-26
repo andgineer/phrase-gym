@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import json
+import os
 import stat
 import sys
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 import pytest
 
 import phrase_gym.speech as speech_module
+from phrase_gym.bounded_process import run_bounded
 from phrase_gym.speech import PiperSpeech
 
 
@@ -115,3 +117,44 @@ def test_hash_locale_and_malformed_configuration_fail_before_synthesis(tmp_path:
     voice_path.write_text("not json")
     with pytest.raises(RuntimeError, match="malformed"):
         synthesize(voice_path)
+
+
+def test_cancellation_kills_and_reaps_stubborn_child(tmp_path: Path) -> None:
+    executable = tmp_path / "stubborn-child"
+    executable.write_text(
+        f"""#!{sys.executable}
+import pathlib, signal, sys, time
+signal.signal(signal.SIGTERM, signal.SIG_IGN)
+pathlib.Path(sys.argv[1]).write_text(str(__import__('os').getpid()))
+time.sleep(30)
+"""
+    )
+    executable.chmod(executable.stat().st_mode | stat.S_IXUSR)
+    pid_path = tmp_path / "child.pid"
+
+    async def scenario() -> int:
+        task = asyncio.create_task(
+            run_bounded(
+                executable,
+                [str(pid_path)],
+                cwd=tmp_path,
+                environment={"PATH": str(tmp_path), "LANG": "C.UTF-8"},
+                timeout=60,
+                stdout_limit=1_024,
+                stderr_limit=1_024,
+            )
+        )
+        for _ in range(100):
+            if pid_path.exists():
+                break
+            await asyncio.sleep(0.01)
+        assert pid_path.exists()
+        pid = int(pid_path.read_text())
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        return pid
+
+    pid = asyncio.run(scenario())
+    with pytest.raises(ProcessLookupError):
+        os.kill(pid, 0)

@@ -34,6 +34,16 @@ async def _stop(process: asyncio.subprocess.Process) -> None:
         await process.wait()
 
 
+async def _cleanup(
+    process: asyncio.subprocess.Process,
+    tasks: tuple[asyncio.Task[bytes], asyncio.Task[bytes], asyncio.Task[int]],
+) -> None:
+    for task in tasks:
+        task.cancel()
+    await _stop(process)
+    await asyncio.gather(*tasks, return_exceptions=True)
+
+
 async def run_bounded(
     program: Path,
     arguments: list[str],
@@ -61,9 +71,10 @@ async def run_bounded(
         async with asyncio.timeout(timeout):
             stdout, stderr, returncode = await asyncio.gather(stdout_task, stderr_task, wait_task)
         return ProcessResult(returncode, stdout, stderr)
-    except (TimeoutError, OutputLimit):
-        await _stop(process)
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
+    except BaseException:
+        cleanup = asyncio.create_task(_cleanup(process, tasks))
+        try:
+            await asyncio.shield(cleanup)
+        except asyncio.CancelledError:
+            await cleanup
         raise

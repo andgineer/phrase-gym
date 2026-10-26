@@ -60,8 +60,7 @@ test.beforeEach(async ({ page }) => {
           },
         },
       })
-    if (sessionStorage.getItem('phrase-gym-test-transfer-race') === 'armed') {
-      sessionStorage.removeItem('phrase-gym-test-transfer-race')
+    if (new URLSearchParams(location.search).has('take-transfer-race')) {
       const locks = navigator.locks
       const nativeRequest = locks.request.bind(locks)
       const host = window as unknown as {
@@ -228,13 +227,37 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'Stop recording' }).click()
   await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
   await expect(page.getByRole('alert')).toContainText('Audio remains on this device')
+  await page.evaluate(() => {
+    const host = window as unknown as { __retrySaveSettled?: boolean }
+    let cleared = false
+    const observer = new MutationObserver(() => {
+      const alert = document.querySelector('[role="alert"]')
+      const failed = alert?.textContent?.includes('Audio remains on this device') ?? false
+      cleared ||= !failed
+      if (cleared && failed) {
+        host.__retrySaveSettled = true
+        observer.disconnect()
+      }
+    })
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true })
+  })
   await page.getByRole('button', { name: 'Retry save' }).click()
   await expect.poll(() => failedSaves).toBe(2)
-  await page.evaluate(() => {
-    sessionStorage.setItem('phrase-gym-test-transfer-race', 'armed')
-  })
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __retrySaveSettled?: boolean }).__retrySaveSettled ?? false,
+      ),
+    )
+    .toBe(true)
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  )
   failSave = false
-  await page.reload()
+  await page.goto('/?take-transfer-race=1')
   await expect
     .poll(() =>
       page.evaluate(
@@ -268,6 +291,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
       transaction.onerror = transaction.onabort = () => reject(transaction.error)
     })
     ;(window as unknown as { __releaseTakeRace: () => void }).__releaseTakeRace()
+    history.replaceState(null, '', '/')
   })
   await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Record a take' }).click()

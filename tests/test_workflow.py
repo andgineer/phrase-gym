@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import os
 import stat
 import time
@@ -53,8 +54,12 @@ def test_study_recordings_and_restart(
         "capture_settings": {"sampleRate": 48000},
         "audio_base64": base64.b64encode(audio).decode(),
     }
+    pending = tmp_path / "recordings" / card_id / f"{recording_id}.pending"
+    pending.parent.mkdir(parents=True)
+    pending.write_bytes(b"partial-before-crash")
     receipt = client.post("/api/recordings", json=upload).json()
     assert receipt["byte_length"] == len(audio)
+    assert receipt["sha256"] == hashlib.sha256(audio).hexdigest()
     assert client.post("/api/recordings", json=upload).json() == receipt
     if os.name != "nt":
         saved = tmp_path / "recordings" / card_id / recording_id

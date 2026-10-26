@@ -50,6 +50,7 @@ def recording_routes(database: Database) -> APIRouter:
             directory.chmod(0o700)
             path = directory / upload.id
             temporary = path.with_suffix(".pending")
+            temporary.unlink(missing_ok=True)
             write_private(temporary, audio)
             os.replace(temporary, path)
             connection.execute(
