@@ -483,8 +483,8 @@ npx<span class="w"> </span>playwright<span class="w"> </span>install<span class=
 inv<span class="w"> </span>--list
 </code></pre></div>
 <p>If migrating from the temporary custom hook, first run <code>git config --unset core.hooksPath</code>.
-<code>inv pre</code> runs the pre-commit framework, including Ruff, Pyrefly, mypy, generated-contract drift,
-module sizes and client formatting. Run <code>uv run python scripts/checks.py test</code> for the full
+<code>inv pre</code> runs the pre-commit framework, including Ruff, Pyrefly, generated-contract drift,
+module sizes and client formatting. Run <code>uv run inv test</code> for the full
 macOS gate. CI also runs the server tests on Linux. Tests use fake speech and silent browser audio.</p>
 <p><code>inv reqs</code> upgrades the dependency lock and pre-commit hook revisions. Review and commit both
 changes. <code>inv uv</code> installs or upgrades uv. <code>inv docs-en</code> serves a local documentation preview at
@@ -493,11 +493,14 @@ Documentation and Allure reports are published to the <code>gh-pages</code> bran
 Configure GitHub Pages to serve the root of that branch. CI also provides coverage comments,
 Codecov and Coveralls integration; external coverage services require their repository setup.</p>
 <h2 id="build-a-distributable">Build a distributable</h2>
-<div class="highlight"><pre><span></span><code>./build.sh
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>build
 </code></pre></div>
 <p>This builds the Vue client before the Python wheel and source distribution. Do not publish a
 wheel built from an outdated client. <code>src/phrase_gym/__about__.py</code> is the package-version source;
 Hatch reads it for both distributions.</p>
+<p><code>inv build-frontend</code> rebuilds only the Vue client. <code>inv run --build</code> builds the client and starts
+the server; <code>inv run</code> starts the server with the existing client build. Pre-commit contains the
+Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.</p>
 <h2 id="publish-a-release">Publish a release</h2>
 <p>From a clean <code>main</code> synchronized with <code>origin/main</code>, choose an increment:</p>
 <div class="highlight"><pre><span></span><code>inv<span class="w"> </span>version
