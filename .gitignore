@@ -1,15 +1,30 @@
 .DS_Store
+.env
 .idea/
+
+# Local tool environments and caches
 .venv/
-build/
-dist/
 **/__pycache__
 **/.pytest_cache
-**/*.egg-info
-pytest.xml
+.ruff_cache/
 .coverage
-.dmypy.json
-pytest-coverage.txt
-*.py-e
-**/.setup-scripts/
-allure-results/
+build/
+dist/
+
+# Client dependencies
+**/node_modules/
+
+# Production client build and local application data
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+.data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Rust build output
+/target/
+
+# Private local Coach attempts and diagnostics
+.phrase-gym-coach/

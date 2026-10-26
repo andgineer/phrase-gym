@@ -1,50 +1,57 @@
-[![Build Status](https://github.com/andgineer/phrase-gym/workflows/CI/badge.svg)](https://github.com/andgineer/phrase-gym/actions)
-[![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
-# phrase-gym
+# Phrase Gym
 
-A language trainer for automatic use of words and phrases through guided recall, spaced repetition, and targeted dialogue drills. 
+Phrase Gym is a small local Python/Vue application for studying useful English phrases and
+keeping private learner recordings. This checkpoint supports package import, ungraded first
+study, reference playback, optional recording, comparison, and saved replay. Later recall and
+scheduling remain the next stage.
 
-## Design and implementation handoff
+## Install and launch
 
-Start with [specs/START-HERE.md](specs/START-HERE.md) for the complete goal, accepted decisions, design discussion, open choices and current status. The [next-session brief](specs/plan/next-session.md) and [roadmap](specs/plan/implementation-plan.md) guide future work.
+Requirements: Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a configured English
+Piper voice. Install the pinned environments and build the client once:
 
-The app source is still the user-created scaffold. No approved prototype or implemented app is present in active source. Historical experiments are clearly labelled under `specs/archive/`; they do not establish approval or completed milestones. All development documentation lives under `specs/` (plural).
+```bash
+uv sync --frozen
+npm --prefix frontend ci
+npm --prefix frontend run build
+```
 
-# Documentation
+Set `PHRASE_GYM_PIPER_CONFIG` to a JSON voice configuration described in
+[the import guide](docs/importing-phrases.md#piper-voice), then launch:
 
-[Phrase Gym](https://andgineer.github.io/phrase-gym/)
+```bash
+PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json uv run phrase-gym
+```
 
+Open <http://127.0.0.1:8000>. The app listens only on loopback and stores its database,
+references, and recordings in the operating system's Phrase Gym application-data directory.
+For a separate data directory, add `--data-dir /absolute/path`.
 
+## Add and study material
 
-# Developers
+Open **Add material**, paste a package or choose its UTF-8 JSON file, and select **Import**.
+The app validates the whole package, prepares every reference through Piper, and adds all cards
+together. A preparation error keeps the submitted package for explicit retry. Exact package
+retries return the existing result; a changed package ID or repeated source/item identity is
+rejected without overwriting learned material.
 
-Do not forget to run `. ./activate.sh`.
+Study shows the full phrase and meaning/use help. Reference playback and recording are optional.
+Every stopped take is retained separately and saved automatically; pending uploads remain in the
+browser for retry. **Next** records ungraded study completion. The finish screen deliberately does
+not invent a recall grade or schedule before the later-recall stage exists.
 
-For work it need [uv](https://github.com/astral-sh/uv) installed.
+See [the package schema, example, and external-agent instruction](docs/importing-phrases.md).
 
-Use [pre-commit](https://pre-commit.com/#install) hooks for code quality:
+## Development
 
-    pre-commit install
+```bash
+uv run python scripts/checks.py pre
+uv run python scripts/checks.py test
+```
 
-## Allure test report
+The second command runs Python tests, client typechecking/unit/build checks, and silent real-backend
+browser tests in Chromium and WebKit. Install browser binaries from `frontend/` with
+`npx playwright install chromium webkit`. Install the commit hook once with
+`git config core.hooksPath .githooks`.
 
-* [Allure report](https://andgineer.github.io/phrase-gym/builds/tests/)
-
-# Scripts
-Install [invoke](https://docs.pyinvoke.org/en/stable/) preferably with [uv tool](https://docs.astral.sh/uv/):
-
-    uv tool install invoke
-
-For a list of available scripts run:
-
-    invoke --list
-
-For more information about a script run:
-
-    invoke <script> --help
-
-## Coverage report
-* [Codecov](https://app.codecov.io/gh/andgineer/phrase-gym/tree/main/src%2Fphrase_gym)
-* [Coveralls](https://coveralls.io/github/andgineer/phrase-gym)
-
-> Created with cookiecutter using [template](https://github.com/andgineer/cookiecutter-python-package)
+Current decisions and remaining work start at [specs/START-HERE.md](specs/START-HERE.md).

@@ -1,35 +1,25 @@
-"""phrase-gym."""
-
+import argparse
+import os
 from pathlib import Path
 
-import rich_click as click
-
-from phrase_gym import __version__
-
-click.rich_click.USE_MARKDOWN = True
-OUTPUT_FILE_DEFAULT = "output"
+import uvicorn
+from platformdirs import user_data_path
 
 
-@click.command()
-@click.version_option(version=__version__, prog_name="phrase-gym")
-@click.argument("input_file", type=click.Path(exists=True))
-@click.argument("output_file", type=click.Path(), required=False)
-@click.option("--force", is_flag=True, help="Overwrite the output file if it exists.")
-def phrase_gym(input_file: str, output_file: str, force: bool) -> None:
-    """
-    `INPUT_FILE` to `OUTPUT_FILE`.
-    """
-    output_path = (
-        Path(output_file)
-        if output_file
-        else Path(input_file).parent / f"{OUTPUT_FILE_DEFAULT}.txt"
-    )
-    if output_path.exists() and not force:
-        click.echo(f"Output file {output_path} already exists. Use --force to overwrite.")
-        raise click.Abort()
-
-    click.echo(f"File saved to {output_path}")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run Phrase Gym on this computer")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--data-dir", type=Path)
+    args = parser.parse_args()
+    if args.host not in {"127.0.0.1", "localhost", "::1"}:
+        parser.error("Phrase Gym only listens on loopback")
+    if args.data_dir:
+        os.environ["PHRASE_GYM_DATA_DIR"] = str(args.data_dir.resolve())
+    else:
+        os.environ.setdefault("PHRASE_GYM_DATA_DIR", str(user_data_path("phrase-gym")))
+    uvicorn.run("phrase_gym.app:create_app", factory=True, host=args.host, port=args.port)
 
 
-if __name__ == "__main__":  # pragma: no cover
-    phrase_gym()  # pylint: disable=no-value-for-parameter
+if __name__ == "__main__":
+    main()

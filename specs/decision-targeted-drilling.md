@@ -1,67 +1,47 @@
-# Decision: targeted phrase and word drilling
+# Useful language and retrieval cues
 
-Accepted direction, 2026-10-10. This records the user's decisions; it does not approve the entire first-version feature set. See the [functional description](functional-description.md) for the app around these drills and the [remaining questions](plan/functionality-discussion.md).
+Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a card is an intermediate outcome, not evidence that a phrase was used naturally.
 
-## Product scope
+The first MVP accepts externally prepared English phrase batches. Freer speaking and adult engagement follow, before words from echo-words and further languages. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a supported card means.
 
-Train selected words in useful phrases, fixed expressions and specific dialogues until the learner can use them readily in the intended situations. Open-ended AI conversation, free role-play and a general AI speaking partner are outside the product's scope, including as a later direction.
+## Phrase cards
 
-AI may improve the material and the drilling process. Every exercise must have a defined learning target.
+Each card trains one useful expression for a clear communicative purpose. Preserve the course wording and source attribution; generated situations and explanations are identified as preparation, not quotations from the course. Prefer language the learner actually wants to use, grouped by real situations rather than a list of near-synonyms.
 
-## Recall needs a sufficiently specific cue
+The first MVP supports fixed complete phrases. A variable expression can enter as a concrete complete example, without claiming to teach its whole construction. A variable-slot editor, dialogue graph and grammar syllabus are not required.
 
-Introduce the complete expression, its meaning and its use before asking the learner to recall it. During a recall exercise, make clear that the learner is retrieving a previously learned expression.
+A prepared card contains:
 
-A broad instruction such as “Ask how his day was” cannot identify one exact answer. Many responses are good English. A situation or partner line supplies the purpose; phrase-specific material identifies the expression to retrieve.
+- A stable source/item identity, learning language and complete target answer.
+- A short explanation of meaning and appropriate use; useful accepted alternatives may be listed explicitly.
+- One or two distinct, natural retrieval cues: a situation stating the intended message and optionally a preceding partner line. Prefer two when both are defensible; do not invent awkward wording to meet a quota.
+- Reference speech matching the complete answer, prepared before the card is offered for study.
+- Source attribution and the chosen card/help languages. An optional detailed native-language explanation can be shown on request; it is not required for every MVP card.
 
-For each target:
+During recall, prompts communicate an intention rather than paraphrase the answer word by word. They contain no target phrase, initial-letter code, masked answer or answer-bearing title. Natural shared topic words are allowed: a universal ban on every content word would make prompts obscure without research support. A partner turn is optional; openers need no fictional preceding line. Situations must be understandable without studying incidental vocabulary.
 
-- Choose the smallest useful set of **meaningful chunks** that makes the intended expression clear in that context. These may come from the beginning, middle, end or several places. There is no default “show the first words” rule.
-- Consider plausible competing expressions and completions. Keep enough distinguishing material to avoid making the learner guess which wording the app wants. Minimum character count is not the objective.
-- Include necessary disambiguating material in the initial prompt. It must not be withheld until the learner fails or asks for help.
-- If the cue still permits several natural answers, strengthen it or explicitly allow those answers. Do not count ambiguity in the prompt as a learner error.
+Example: **Everyone has joined the call. Begin the meeting.** can cue **Let's get started.** A later review could use **Your friends have the ingredients ready. Suggest beginning to cook.** These are prompts for a learned response, not assertions that only one English response is valid. The learner knows the task is to retrieve their chosen expression; an underdetermined or misleading card can be suspended without a forgetting grade.
 
-This is practical disambiguation within the context and learned material, not a claim that a partial sentence has only one possible completion in the entire language. Visual and audio forms of a cue must meet the same requirement.
+Avoid generating many synonymous cards for the same cue. For the MVP, use one chosen expression and a short accepted-alternatives note where appropriate; no preferred-target management system is required. Similar text alone never proves that two senses are the same.
 
-## Vary the hidden part deliberately
+**Evidence:** [oral pragmatic-routine instruction](research/phrase-prompts.md#situation-plus-partner-turn) provides a precedent for situation/partner cues and production. [Variable retrieval](research/phrase-prompts.md#vary-the-prompt) supports variation. Neither proves this cue format is superior to translation or that the app transfers to spontaneous conversation. The number of cues and fixed-phrase first scope are design choices.
 
-Support several cue versions for the same expression. Across repetitions, the app can hide different meaningful parts so the learner recalls more than the same missing fragment every time. Retain enough information to identify the target in every version.
+## Words after the phrase MVP
 
-This is controlled variation, not random gaps or first-letter puzzles. Reusing a useful cue is allowed; a new mask is not required on every attempt. The frequency and adaptation rules remain open.
+Each word card teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. A raw echo-words entry needs enough context to choose its sense; otherwise the app asks for a short clarification instead of inventing one. Keep source identity so retrying the same entry does not duplicate it.
 
-An illustrative example, after learning **“How has your day been so far?”**:
+For English at the learner's stated B2 level, use a short English context with the target word missing, plus a sense cue if needed; ask the learner to say the complete chunk. For beginner German, use the Russian meaning of a short chunk and ask for the German chunk. Explain article/plural or another form only when relevant. Grade retrieval of the target sense/form, not an unrelated slip elsewhere in the sentence. Accepted alternatives must fit the intended meaning.
 
-| Attempt | What the learner sees | What the learner says |
-|---|---|---|
-| Introduction | The full phrase and its use: asking about the listener's day up to now; model audio | The full phrase, following the model |
-| Recall with one cue | “Recall the expression you learned.” Same purpose, plus **“_____ your day been so far?”** | “How has your day been so far?” |
-| A later cue version | Same task and purpose, plus **“How has _____ been so far?”** | “How has your day been so far?” |
+Use one productive schedule per word sense. Understanding a definition is not successful retrieval of the spoken form. Contexts and explanations follow [personal preferences](decision-personal-preferences.md); English-only help is a learner choice, not a universal teaching rule.
 
-These examples illustrate the behaviour, not a universal mask template. **The learner always says the whole phrase**, not only the missing words. Each actual cue needs checking against plausible alternatives.
+For troublesome near-synonyms or lookalikes, give a short accurate contrast, including overlap. Avoid introducing a batch of confusables together. No research establishes an exact prerequisite graph or later-day unlocking algorithm, so none is required.
 
-## Practice and feedback
+**Evidence:** [word learning](research/words-in-context.md) supports deliberate form/meaning practice, productive retrieval and context variation. A gap is one convenient task format, not a demonstrated bridge to natural conversation. Two or three contexts is a practical default, not an experimentally established optimum.
 
-1. **Introduce:** hear and see the full expression in a useful sentence or short dialogue; understand it. Listening and echoing can help establish the model.
-2. **Retrieve:** receive the situation or partner line together with a sufficient phrase-specific cue; say the complete expression aloud.
-3. **Compare and repair:** compare with the model. When stuck, request additional meaningful material or the full model, then repeat the repaired expression.
-4. **Return:** revisit the same target after intervening items and on later days. Adjust support to performance and use different hidden chunks when useful.
-5. **Use in a specific dialogue:** learn the dialogue first, then rehearse the learner's side with target-specific cues. Isolate a difficult exchange and restore it to the dialogue. Controlled changes may exercise the same word, frame or expression in another appropriate situation.
+## Transfer to active use
 
-This describes available practice, not a compulsory ladder with fixed pass thresholds. Gradually reduce support where the task remains clear. A broad prompt alone must not become an exact-phrase test just because the learner has progressed. Seek accurate, increasingly ready speech; no universal response countdown is decided.
+Spaced spoken retrieval is the MVP's contribution: make useful wording available from meaning, with feedback and varied cues. [Conversational-uptake evidence](research/automatic-use.md) supports instruction combined with meaningful speaking, including increased use in unscripted classroom conversations. It does not guarantee lasting everyday use or automatic speech for this app.
 
-## What counts as success
+The [transfer and engagement decision](decision-transfer-and-engagement.md) defines the subsequent progression: supported personal responses, varied tasks without supplied wording, real-opportunity preparation and separate usage notes. These are planned learning increments. They do not require forcing expressions into unsuitable conversations or changing FSRS from mission outcomes.
 
-- **Fixed expression:** retrieve the learned wording, with explicitly allowed equivalents such as appropriate contractions.
-- **Word or reusable frame:** retrieve the selected sense or construction and use it in the requested phrase. Define what stays fixed and what can change; do not demand an unrelated model sentence verbatim.
-- **Valid alternative:** distinguish good English from retrieval of the requested target. If the cue was insufficient, repair the exercise. Do not infer forgetting merely because the learner chose another expression.
-- **Support matters:** reading a full model, immediate echoing, partial-cue recall and independent recall are different evidence. A visible target word can support practice of its use, but does not demonstrate recall of that word.
-
-One learning target has one review schedule across its cue versions, contexts and dialogue appearances. Do not create independently scheduled sibling cards for different masks. Record the support used; the scheduling algorithm and progress thresholds remain open.
-
-## AI's role and the evidence boundary
-
-AI may prepare useful word-in-phrase examples, short dialogues, candidate cue chunks and alternate masks. It can check plausible competing completions and help refine an ambiguous prompt. Generated material needs checking for naturalness, meaning and suitability for the target; an AI check is not proof of uniqueness.
-
-Optional assistance during practice may identify an omitted target, offer a better cue or select a repair exercise. Uncertain speech recognition must not be treated as a definite learner mistake. Self-comparison with the model remains available; automatic assessment is not a prerequisite for the core drill.
-
-Research supports deliberate retrieval and spaced practice, and includes phrase-learning tasks whose cues constrain the intended answer. **Phrase-specific chunk selection, rotating masks and this complete spoken workflow are product decisions to evaluate**, not a package already established as best by research. See the [focused evidence record](research-memorizing-phrases.md).
+No AI conversation partner, speech scoring, countdown, mandatory scripts, points, streak penalties or effectiveness experiment is part of the planned MVP. The learner can finish a short session and leave.
