@@ -9,7 +9,7 @@ from phrase_gym.api_recordings import recording_routes
 from phrase_gym.api_study import study_routes
 from phrase_gym.boundary import LocalBoundary
 from phrase_gym.contracts import ImportRequest, ImportStatus
-from phrase_gym.importer import ImportConflict, Importer
+from phrase_gym.importer import ImportConflictError, Importer
 from phrase_gym.speech import configured_speech
 from phrase_gym.storage import Database
 from phrase_gym.study import StudyService
@@ -38,7 +38,7 @@ def create_app() -> FastAPI:
     async def submit_import(request: ImportRequest) -> ImportStatus:
         try:
             return ImportStatus.model_validate(importer.submit(request.package))
-        except ImportConflict as error:
+        except ImportConflictError as error:
             raise HTTPException(409, str(error)) from error
 
     @app.get("/api/imports/{package_id}")
@@ -54,7 +54,7 @@ def create_app() -> FastAPI:
             return ImportStatus.model_validate(importer.retry(package_id))
         except KeyError as error:
             raise HTTPException(404, "Import not found") from error
-        except ImportConflict as error:
+        except ImportConflictError as error:
             raise HTTPException(409, str(error)) from error
 
     static = Path(__file__).parent / "static"

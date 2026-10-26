@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-class OutputLimit(RuntimeError):
+class OutputLimitError(RuntimeError):
     pass
 
 
@@ -19,7 +19,7 @@ async def _read_limited(reader: asyncio.StreamReader, limit: int) -> bytes:
     while chunk := await reader.read(65_536):
         output.extend(chunk)
         if len(output) > limit:
-            raise OutputLimit("Child process exceeded its output limit")
+            raise OutputLimitError("Child process exceeded its output limit")
     return bytes(output)
 
 
@@ -44,7 +44,8 @@ async def _cleanup(
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def run_bounded(
+# Keep each resource limit explicit at the subprocess boundary.
+async def run_bounded(  # noqa: PLR0913
     program: Path,
     arguments: list[str],
     *,

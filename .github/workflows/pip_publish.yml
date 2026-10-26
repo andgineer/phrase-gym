@@ -1,0 +1,63 @@
+name: Upload Python Package
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  check-tag:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate release tag and package version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          from scripts.release import validate_tag
+          version = validate_tag(os.environ['RELEASE_TAG'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={version}\n')
+          PY
+  checks:
+    needs: check-tag
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+  publish:
+    needs: [check-tag, checks]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: 0.11.7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: ./build.sh
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: ${{ secrets.PYPI_USERNAME }}
+          password: ${{ secrets.PYPI_PASSWORD }}
+          packages-dir: dist
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ needs.check-tag.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          body: https://pypi.org/project/phrase-gym/${{ needs.check-tag.outputs.version }}/

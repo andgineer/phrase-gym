@@ -1,0 +1,32 @@
+site_name: Phrase Gym
+site_url: https://andgineer.github.io/phrase-gym/
+site_author: Andrey Sorokin
+repo_name: andgineer/phrase-gym
+repo_url: https://github.com/andgineer/phrase-gym
+edit_uri: edit/main/docs/
+docs_dir: src/LANGUAGE
+site_dir: SITE_DIR
+theme:
+  name: material
+  language: LANGUAGE
+plugins:
+  - search
+  - awesome-pages
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+markdown_extensions:
+  - abbr
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+nav:
+  - Overview: index.md
+  - Installation: installation.md
+  - Import phrases: importing-phrases.md
+  - Development and releases: development.md
+  - API reference: reference.md

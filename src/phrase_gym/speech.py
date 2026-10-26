@@ -6,10 +6,12 @@ import tempfile
 from pathlib import Path
 from typing import Any, cast
 
-from phrase_gym.bounded_process import OutputLimit, run_bounded
+from phrase_gym.bounded_process import OutputLimitError, run_bounded
 
 MAX_REFERENCE_BYTES = 12 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024
+MIN_SAMPLE_RATE = 8_000
+MAX_SAMPLE_RATE = 48_000
 
 
 def _wav(pcm: bytes, sample_rate: int) -> bytes:
@@ -23,7 +25,7 @@ def _wav(pcm: bytes, sample_rate: int) -> bytes:
             b"data",
             struct.pack("<I", size),
             pcm,
-        ]
+        ],
     )
 
 
@@ -86,7 +88,7 @@ class PiperSpeech:
                 )
             except TimeoutError:
                 raise RuntimeError("Piper timed out; correct the setup and retry") from None
-            except OutputLimit:
+            except OutputLimitError:
                 raise RuntimeError("Piper exceeded a bounded output limit") from None
             if result.returncode or result.stderr:
                 raise RuntimeError("Piper failed; no reference audio was accepted")
@@ -97,7 +99,7 @@ class PiperSpeech:
     def _configuration(self) -> tuple[dict[str, Any], dict[str, Any]]:
         if not self.config_path:
             raise RuntimeError(
-                "Piper is not configured. Set PHRASE_GYM_PIPER_CONFIG to the voice JSON path."
+                "Piper is not configured. Set PHRASE_GYM_PIPER_CONFIG to the voice JSON path.",
             )
         try:
             decoded_voice: object = json.loads(self.config_path.read_text())
@@ -132,12 +134,15 @@ class PiperSpeech:
             raise RuntimeError("Piper voice configuration is malformed") from error
         if locale != "en-US":
             raise RuntimeError("Piper voice must be English (en-US)")
-        if not 8_000 <= sample_rate <= 48_000:
+        if not MIN_SAMPLE_RATE <= sample_rate <= MAX_SAMPLE_RATE:
             raise RuntimeError("Piper voice has an unsupported sample rate")
         return voice, settings
 
     async def _verify_runtime(
-        self, executable: Path, expected: str, environment: dict[str, str]
+        self,
+        executable: Path,
+        expected: str,
+        environment: dict[str, str],
     ) -> None:
         try:
             result = await run_bounded(
@@ -153,7 +158,7 @@ class PiperSpeech:
                 stdout_limit=256,
                 stderr_limit=4_096,
             )
-        except (TimeoutError, OutputLimit) as error:
+        except (TimeoutError, OutputLimitError) as error:
             raise RuntimeError("Piper runtime identity check failed") from error
         if result.returncode or result.stderr or result.stdout.decode().strip() != expected:
             raise RuntimeError("Piper runtime version does not match its configuration")

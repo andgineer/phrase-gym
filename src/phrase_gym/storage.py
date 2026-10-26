@@ -51,7 +51,7 @@ class Database:
             connection.execute(
                 "UPDATE imports SET status='error', "
                 "error='Preparation was interrupted; retry this package.' "
-                "WHERE status='preparing'"
+                "WHERE status='preparing'",
             )
 
     def connect(self) -> sqlite3.Connection:

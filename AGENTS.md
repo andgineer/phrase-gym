@@ -27,9 +27,14 @@ For a root-session request to implement the next stage, follow the [orchestratio
 | Refresh OpenAPI and generated client types | `uv run python scripts/generate_api.py && npm --prefix frontend run api-types` |
 | Build the retained client | `npm --prefix frontend run build` |
 | Run the local application on 127.0.0.1:8000 | `uv run phrase-gym` |
-| Install the commit hook that runs the pre gate (once per clone) | `git config core.hooksPath .githooks` |
+| Install the pre-commit hooks (once per clone) | `uv run pre-commit install` |
+| Scaffold tasks and release commands | `uv run inv --list` |
+| Build documentation | `uv run inv build-docs` |
+| Build the client and Python distributions | `./build.sh` |
 
-Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The committed `.githooks/pre-commit` runs the pre gate and needs uv, Python, Node and the client dependencies. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
+Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The pre-commit framework runs the pre gate and needs uv, Python, Node and the client dependencies; `inv pre` runs the same hooks manually. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
+
+Preserve the repository scaffold: pre-commit, Invoke tasks, version/tag helpers, package metadata, environment/build scripts, documentation publishing, test/coverage reports and PyPI release workflows. Extend these for the application instead of replacing or deleting them. Only application/documentation boilerplate should be replaced with real implementation and documentation. Follow [development and release operations](docs/development.md).
 
 Run the full browser/audio gate on macOS and retain the separate Linux Python server job in CI, following the [platform boundary](specs/architecture.md#application-boundary). Do not skip native recorder tests to accommodate Linux WebKit's missing API.
 
@@ -43,7 +48,7 @@ Choose the gate from the complete change, including staged and unstaged files.
 
 **Implementation or mixed changes:** changes to production code, tests, runtime prompts, generated contracts, migrations, dependencies, executable scripts, build configuration, hooks or CI require the full gate, even when accompanied by specs. Before describing such a milestone as done, ready, fixed, landed or green, run these in order and inspect their complete results:
 
-1. `uv run python scripts/checks.py pre`: Python formatting/lint/types, module-size, client formatting and generated-contract drift checks all pass.
+1. `uv run python scripts/checks.py pre`: pre-commit hygiene, Python formatting/lint/types, module-size, client formatting and generated-contract drift checks all pass.
 2. `uv run python scripts/checks.py test`: Python, client and both real-backend browser suites pass; frontend checks must run rather than skip.
 
 Use focused checks during iteration. Run the full ordered gate once per coherent implementation deliverable before commit or delivery, rather than after every internal edit. Rerun relevant checks for review fixes and the full gate after substantive changes; a narrow subset cannot replace it. Use the documentation-only gate for prose-only changes. Never bypass commit hooks with `--no-verify`.

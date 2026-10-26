@@ -10,6 +10,16 @@
 .coverage
 build/
 dist/
+site/
+**/*.egg-info
+pytest.xml
+pytest-coverage.txt
+.dmypy.json
+*.py-e
+**/.setup-scripts/
+allure-results/
+htmlcov/
+coverage.xml
 
 # Client dependencies
 **/node_modules/

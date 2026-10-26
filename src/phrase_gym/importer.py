@@ -26,7 +26,7 @@ def card_identity(source_id: str, item_id: str) -> str:
     return str(uuid5(NAMESPACE_URL, encoded))
 
 
-class ImportConflict(ValueError):
+class ImportConflictError(ValueError):
     pass
 
 
@@ -46,34 +46,36 @@ class Importer:
         digest = hashlib.sha256(payload.encode()).hexdigest()
         with self.database.write() as connection:
             previous = connection.execute(
-                "SELECT * FROM imports WHERE package_id=?", (package.package_id,)
+                "SELECT * FROM imports WHERE package_id=?",
+                (package.package_id,),
             ).fetchone()
             if previous:
                 if previous["content_hash"] != digest:
-                    raise ImportConflict(
+                    raise ImportConflictError(
                         "This package_id was already used for different content; "
-                        "use a new package_id."
+                        "use a new package_id.",
                     )
                 return self._public(previous)
             busy = connection.execute(
-                "SELECT package_id FROM imports WHERE status='preparing' LIMIT 1"
+                "SELECT package_id FROM imports WHERE status='preparing' LIMIT 1",
             ).fetchone()
             if busy:
-                raise ImportConflict(
+                raise ImportConflictError(
                     f"Package {busy['package_id']} is preparing; wait for it to finish "
-                    "before importing another."
+                    "before importing another.",
                 )
             placeholders = ",".join("?" for _ in package.cards)
+            # Only parameter placeholders enter the SQL text; all values remain bound.
             conflicts = connection.execute(
-                f"SELECT source_id, item_id FROM cards "
+                f"SELECT source_id, item_id FROM cards "  # noqa: S608
                 f"WHERE source_id=? AND item_id IN ({placeholders})",
                 (package.source_id, *(card.item_id for card in package.cards)),
             ).fetchall()
             if conflicts:
                 items = ", ".join(row["item_id"] for row in conflicts)
-                raise ImportConflict(
+                raise ImportConflictError(
                     f"Source items already exist ({items}); no cards were changed. "
-                    "Replacement is available in a later stage."
+                    "Replacement is available in a later stage.",
                 )
             connection.execute(
                 "INSERT INTO imports VALUES (?, ?, ?, 'preparing', NULL, NULL, ?)",
@@ -85,7 +87,8 @@ class Importer:
     def retry(self, package_id: str) -> dict[str, object]:
         with self.database.write() as connection:
             row = connection.execute(
-                "SELECT * FROM imports WHERE package_id=?", (package_id,)
+                "SELECT * FROM imports WHERE package_id=?",
+                (package_id,),
             ).fetchone()
             if not row:
                 raise KeyError(package_id)
@@ -98,9 +101,9 @@ class Importer:
                 (package_id,),
             ).fetchone()
             if busy:
-                raise ImportConflict(
+                raise ImportConflictError(
                     f"Package {busy['package_id']} is preparing; wait for it to finish "
-                    "before retrying."
+                    "before retrying.",
                 )
             connection.execute(
                 "UPDATE imports SET status='preparing', error=NULL WHERE package_id=?",
@@ -131,25 +134,28 @@ class Importer:
                 references.chmod(0o700)
                 with self.database.write() as connection:
                     placeholders = ",".join("?" for _ in package.cards)
+                    # Only parameter placeholders enter the SQL text; all values remain bound.
                     repeated = connection.execute(
-                        f"SELECT item_id FROM cards WHERE source_id=? "
+                        f"SELECT item_id FROM cards WHERE source_id=? "  # noqa: S608
                         f"AND item_id IN ({placeholders})",
                         (package.source_id, *(card.item_id for card in package.cards)),
                     ).fetchall()
                     if repeated:
-                        raise ImportConflict(
-                            "A source item appeared while audio was preparing; no cards were added."
+                        raise ImportConflictError(
+                            "A source item appeared while audio was preparing; "
+                            "no cards were added.",
                         )
                     for card, staged_path in prepared:
                         card_id = card_identity(package.source_id, card.item_id)
                         destination = references / f"{card_id}.wav"
                         if destination.exists():
                             owner = connection.execute(
-                                "SELECT id FROM cards WHERE reference_path=?", (str(destination),)
+                                "SELECT id FROM cards WHERE reference_path=?",
+                                (str(destination),),
                             ).fetchone()
                             if owner:
-                                raise ImportConflict(
-                                    "Reference audio is already owned by an existing card."
+                                raise ImportConflictError(
+                                    "Reference audio is already owned by an existing card.",
                                 )
                             destination.unlink()
                         write_private(destination, staged_path.read_bytes())
@@ -176,7 +182,8 @@ class Importer:
                         "WHERE package_id=?",
                         (len(prepared), package.package_id),
                     )
-            except Exception as error:
+            # Background failures must clean up files and remain visible for retry.
+            except Exception as error:  # noqa: BLE001
                 for path in created:
                     path.unlink(missing_ok=True)
                 with self.database.write() as connection:

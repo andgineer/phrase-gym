@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from phrase_gym.contracts import PhrasePackage
-from phrase_gym.importer import ImportConflict, Importer, card_identity
+from phrase_gym.importer import ImportConflictError, Importer, card_identity
 from phrase_gym.speech import PiperSpeech
 from phrase_gym.storage import Database
 
@@ -38,10 +38,10 @@ def test_busy_and_source_identity_conflicts_do_not_overwrite(
         first = PhrasePackage.model_validate(package)
         importer.submit(first)
         other = first.model_copy(update={"package_id": "other-package"})
-        with pytest.raises(ImportConflict, match="preparing"):
+        with pytest.raises(ImportConflictError, match="preparing"):
             importer.submit(other)
         await asyncio.gather(*importer.tasks)
-        with pytest.raises(ImportConflict, match="Source items already exist"):
+        with pytest.raises(ImportConflictError, match="Source items already exist"):
             importer.submit(other)
 
     asyncio.run(scenario())

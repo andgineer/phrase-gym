@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+MAX_MODULE_LINES = 300
 
 
 def run(*command: str) -> None:
@@ -16,24 +17,31 @@ def module_sizes() -> None:
             if path.name.endswith(".generated.ts"):
                 continue
             lines = len(path.read_text().splitlines())
-            if lines > 300:
+            if lines > MAX_MODULE_LINES:
                 oversized.append(f"{path.relative_to(ROOT)}: {lines} lines")
     if oversized:
         raise SystemExit(
-            "Handwritten production modules exceed 300 lines:\n" + "\n".join(oversized)
+            "Handwritten production modules exceed 300 lines:\n" + "\n".join(oversized),
         )
 
 
 def pre() -> None:
+    run("uv", "run", "pre-commit", "run", "--all-files")
+
+
+def project_pre() -> None:
     run("uv", "lock", "--check")
-    run("uv", "run", "ruff", "format", "--check", ".")
-    run("uv", "run", "ruff", "check", ".")
     run("uv", "run", "mypy", "src")
     module_sizes()
     run("uv", "run", "python", "scripts/generate_api.py")
     run("npm", "--prefix", "frontend", "run", "api-types")
     run(
-        "git", "diff", "--exit-code", "--", "frontend/openapi.json", "frontend/src/api.generated.ts"
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "frontend/openapi.json",
+        "frontend/src/api.generated.ts",
     )
     run("npm", "--prefix", "frontend", "run", "format:check")
 
@@ -47,6 +55,7 @@ def test() -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2 or sys.argv[1] not in {"pre", "test"}:
-        raise SystemExit("Usage: python scripts/checks.py [pre|test]")
-    (pre if sys.argv[1] == "pre" else test)()
+    commands = {"pre": pre, "project-pre": project_pre, "test": test}
+    if len(sys.argv[1:]) != 1 or sys.argv[1] not in commands:
+        raise SystemExit("Usage: python scripts/checks.py [pre|project-pre|test]")
+    commands[sys.argv[1]]()

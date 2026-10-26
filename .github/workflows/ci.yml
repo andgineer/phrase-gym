@@ -4,11 +4,19 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   server:
     name: Server (Linux)
     runs-on: ubuntu-24.04
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -18,7 +26,67 @@ jobs:
         with:
           python-version: '3.13'
       - run: uv sync --frozen
-      - run: uv run pytest --cov=phrase_gym --cov-report=term-missing
+      - run: >-
+          uv run pytest --junitxml=pytest.xml --alluredir=allure-results
+          --cov=phrase_gym --cov-report=term-missing --cov-report=xml --cov-report=html
+      - name: Upload test and coverage results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-test-results
+          path: |
+            pytest.xml
+            coverage.xml
+            htmlcov/
+            allure-results/
+      - name: Load Allure history
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+      - name: Generate Allure report
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: andgineer/allure-report@v3.6
+        id: allure-report
+        with:
+          allure-results: allure-results
+          website: gh-pages-dir
+          reports-site-path: builds/tests
+      - name: Publish Allure report
+        if: always() && steps.allure-report.outcome == 'success'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ${{ steps.allure-report.outputs.reports-site }}
+          destination_dir: ${{ steps.allure-report.outputs.reports-site-path }}
+      - name: Coverage comment
+        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
+        id: coverage-comment
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 85
+          MINIMUM_ORANGE: 70
+      - name: Store coverage comment
+        if: steps.coverage-comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage-comment-action
+          path: python-coverage-comment-action.txt
+      - name: Coveralls
+        if: always() && github.event_name != 'workflow_call'
+        continue-on-error: true
+        uses: coverallsapp/github-action@v2
+      - name: Codecov
+        if: always() && github.event_name != 'workflow_call'
+        continue-on-error: true
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
   checks:
     name: Full checks (macOS)
     runs-on: macos-15

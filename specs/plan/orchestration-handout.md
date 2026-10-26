@@ -13,7 +13,7 @@ Implement the stage or checkpoint named by the user. If none is named, take the 
 3. Triage findings and return accepted fixes to the original implementer.
 4. Ask the independent reviewer for targeted re-review of substantive findings and their regressions.
 
-Use one implementer and one independent reviewer per coherent deliverable, reusing them for fixes and targeted re-review. Use GPT-5.6 / Sol 5.6 medium for implementation, fixes, independent review and targeted re-review: `model: "gpt-5.6-sol"`, `reasoning_effort: "medium"`, `fork_turns: "none"`. Supply enough context for agents with no prior conversation. Do not delegate further subagents. Implementers and fixers work on `main`; reviewers use a fresh scratch clone and do not modify the main tree.
+Use one implementer and one independent reviewer per coherent deliverable, reusing them for fixes and targeted re-review. Use GPT-6 / Sol 6 medium for implementation, fixes, independent review and targeted re-review: `model: "gpt-6-sol"`, `reasoning_effort: "medium"`, `fork_turns: "none"`. Supply enough context for agents with no prior conversation. Do not delegate further subagents. Implementers and fixers work on `main`; reviewers use a fresh scratch clone and do not modify the main tree.
 
 Run one session at a time; avoid competing writes and concurrent gates. After interruption, inspect agent status, Git state and outstanding checks, then resume existing work instead of duplicating it. Do not claim a running gate passed or substitute a different model after a usage limit.
 

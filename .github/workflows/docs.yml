@@ -1,0 +1,43 @@
+name: docs
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: 0.11.7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --all-extras
+      - run: uv run inv build-docs
+      - name: Load existing reports
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - name: Preserve test reports
+        if: github.event_name == 'push'
+        run: |
+          if [ -d gh-pages/builds ]; then
+            cp -r gh-pages/builds build/docs/site/builds
+          fi
+      - name: Publish documentation
+        if: github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: build/docs/site

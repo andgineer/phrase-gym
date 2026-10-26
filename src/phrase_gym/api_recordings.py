@@ -29,7 +29,8 @@ def recording_routes(database: Database) -> APIRouter:
         digest = hashlib.sha256(audio).hexdigest()
         with database.write() as connection:
             existing = connection.execute(
-                "SELECT * FROM recordings WHERE id=?", (upload.id,)
+                "SELECT * FROM recordings WHERE id=?",
+                (upload.id,),
             ).fetchone()
             if existing:
                 if existing["sha256"] != digest:
@@ -41,7 +42,8 @@ def recording_routes(database: Database) -> APIRouter:
                     complete=bool(existing["complete"]),
                 )
             attempt = connection.execute(
-                "SELECT card_id FROM attempts WHERE id=?", (upload.attempt_id,)
+                "SELECT card_id FROM attempts WHERE id=?",
+                (upload.attempt_id,),
             ).fetchone()
             if not attempt or attempt["card_id"] != upload.card_id:
                 raise HTTPException(409, "Recording does not belong to this card and attempt")
@@ -80,7 +82,8 @@ def recording_routes(database: Database) -> APIRouter:
     def recording_audio(recording_id: str) -> FileResponse:
         with database.read() as connection:
             row = connection.execute(
-                "SELECT path, mime_type FROM recordings WHERE id=?", (recording_id,)
+                "SELECT path, mime_type FROM recordings WHERE id=?",
+                (recording_id,),
             ).fetchone()
         if not row:
             raise HTTPException(404, "Recording not found")

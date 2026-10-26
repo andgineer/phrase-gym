@@ -47,13 +47,13 @@ class StudyService:
     def current(self) -> StudyResponse:
         with self.database.write() as connection:
             attempt = connection.execute(
-                "SELECT * FROM attempts WHERE completed_at IS NULL ORDER BY created_at LIMIT 1"
+                "SELECT * FROM attempts WHERE completed_at IS NULL ORDER BY created_at LIMIT 1",
             ).fetchone()
             card = self._attempt_card(connection, attempt) if attempt else None
             if not card:
                 card = connection.execute(
                     "SELECT * FROM cards WHERE studied_at IS NULL "
-                    "ORDER BY created_at, rowid LIMIT 1"
+                    "ORDER BY created_at, rowid LIMIT 1",
                 ).fetchone()
                 if not card:
                     return self._complete_state(connection)
@@ -70,7 +70,7 @@ class StudyService:
     def history(self) -> list[StudyHistoryItem]:
         with self.database.read() as connection:
             cards = connection.execute(
-                "SELECT * FROM cards WHERE studied_at IS NOT NULL ORDER BY studied_at DESC"
+                "SELECT * FROM cards WHERE studied_at IS NOT NULL ORDER BY studied_at DESC",
             ).fetchall()
             return [
                 StudyHistoryItem(
@@ -86,18 +86,21 @@ class StudyService:
     def complete(self, attempt_id: str, operation_id: str) -> StudyCompletion | None:
         with self.database.write() as connection:
             previous = connection.execute(
-                "SELECT result_json FROM operations WHERE id=?", (operation_id,)
+                "SELECT result_json FROM operations WHERE id=?",
+                (operation_id,),
             ).fetchone()
             if previous:
                 return StudyCompletion.model_validate_json(previous["result_json"])
             attempt = connection.execute(
-                "SELECT * FROM attempts WHERE id=?", (attempt_id,)
+                "SELECT * FROM attempts WHERE id=?",
+                (attempt_id,),
             ).fetchone()
             if not attempt:
                 return None
             completed_at = attempt["completed_at"] or now()
             connection.execute(
-                "UPDATE attempts SET completed_at=? WHERE id=?", (completed_at, attempt_id)
+                "UPDATE attempts SET completed_at=? WHERE id=?",
+                (completed_at, attempt_id),
             )
             connection.execute(
                 "UPDATE cards SET studied_at=COALESCE(studied_at, ?) WHERE id=?",
@@ -113,7 +116,8 @@ class StudyService:
     def reference(self, card_id: str) -> Path | None:
         with self.database.read() as connection:
             row = connection.execute(
-                "SELECT reference_path FROM cards WHERE id=?", (card_id,)
+                "SELECT reference_path FROM cards WHERE id=?",
+                (card_id,),
             ).fetchone()
         return Path(row["reference_path"]) if row else None
 
@@ -148,7 +152,7 @@ class StudyService:
     def _counts(connection: sqlite3.Connection) -> tuple[int, int]:
         total = connection.execute("SELECT COUNT(*) FROM cards").fetchone()[0]
         studied = connection.execute(
-            "SELECT COUNT(*) FROM cards WHERE studied_at IS NOT NULL"
+            "SELECT COUNT(*) FROM cards WHERE studied_at IS NOT NULL",
         ).fetchone()[0]
         return total, studied
 

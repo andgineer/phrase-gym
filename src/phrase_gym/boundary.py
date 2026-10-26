@@ -6,6 +6,22 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 MAX_REQUEST_BYTES = 16 * 1024 * 1024
 
 
+def cross_origin_mutation(method: str, headers: dict[bytes, bytes]) -> bool:
+    origin = headers.get(b"origin", b"").decode()
+    host = headers.get(b"host", b"").decode()
+    same_origin = bool(origin) and urlsplit(origin).netloc == host
+    return method not in {"GET", "HEAD", "OPTIONS"} and (
+        headers.get(b"sec-fetch-site") == b"cross-site" or bool(origin and not same_origin)
+    )
+
+
+def oversized_content_length(headers: dict[bytes, bytes]) -> bool:
+    try:
+        return int(headers.get(b"content-length", b"0")) > MAX_REQUEST_BYTES
+    except ValueError:
+        return True
+
+
 class LocalBoundary:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
@@ -15,21 +31,14 @@ class LocalBoundary:
             await self.app(scope, receive, send)
             return
         headers = dict(scope["headers"])
-        origin = headers.get(b"origin", b"").decode()
-        host = headers.get(b"host", b"").decode()
-        same_origin = bool(origin) and urlsplit(origin).netloc == host
-        if scope["method"] not in {"GET", "HEAD", "OPTIONS"} and (
-            headers.get(b"sec-fetch-site") == b"cross-site" or (origin and not same_origin)
-        ):
+        if cross_origin_mutation(scope["method"], headers):
             await JSONResponse({"detail": "Cross-origin mutations are not allowed"}, 403)(
-                scope, receive, send
+                scope,
+                receive,
+                send,
             )
             return
-        try:
-            length = int(headers.get(b"content-length", b"0"))
-        except ValueError:
-            length = MAX_REQUEST_BYTES + 1
-        if length > MAX_REQUEST_BYTES:
+        if oversized_content_length(headers):
             await JSONResponse({"detail": "Request exceeds 16 MiB"}, 413)(scope, receive, send)
             return
         body = bytearray()

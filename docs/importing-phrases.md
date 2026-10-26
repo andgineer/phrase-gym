@@ -29,8 +29,9 @@ is rejected without overwriting it. Correction/replacement with suspension belon
 library stage.
 
 The generated machine-readable request schema is available at
-[`frontend/openapi.json`](../frontend/openapi.json). A complete five-card file is
-[`examples/meeting-phrases.json`](../examples/meeting-phrases.json).
+[`frontend/openapi.json`](https://github.com/andgineer/phrase-gym/blob/main/frontend/openapi.json).
+A complete five-card file is
+[`examples/meeting-phrases.json`](https://github.com/andgineer/phrase-gym/blob/main/examples/meeting-phrases.json).
 
 ## Instruction for an external preparation agent
 
