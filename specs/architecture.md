@@ -4,6 +4,8 @@
 
 Phrase Gym is one local Python application serving the retained Vue frontend and an HTTP API, with SQLite and local audio storage. The browser is the GUI. Use the normal browser on the learner's MacBook; no Qt, native Coach window, Electron bundle or additional GUI framework is needed. A launcher can open the browser later if starting the application proves inconvenient.
 
+Retain the original Vue visual and interaction design while replacing backend workflows. The compact header, warm page, centered practice card, serif phrase heading, round microphone control and responsive spacing are established interface choices. Show only controls supported by the current Python API; later practice and library workflows can return within this interface when implemented.
+
 The Python server must work on both macOS and Linux. The MVP media player and recording experience target browsers on macOS; Linux browser audio support is deferred until after the MVP. Server portability does not expand the local-only access boundary.
 
 The application owns cards, practice, scheduling, settings and recordings. Local reference synthesis, and later bounded AI preparation, run outside request handling in a simple background task. Already prepared practice never waits for a model or speech engine. Start with one preparation task at a time; there is no worker service, broker, remote inbox, lease protocol or multi-machine coordination.

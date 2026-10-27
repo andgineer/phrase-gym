@@ -169,10 +169,11 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       return nativePlay.call(this)
     }
   })
-  await page.getByText('Add material').click()
+  await page.getByRole('button', { name: 'Add material' }).click()
   await page.getByLabel('Phrase package JSON').fill(JSON.stringify(nativePackage))
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
   await page.getByRole('button', { name: 'Record a take' }).click()
   await expect
     .poll(async () => ({
@@ -190,7 +191,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     )
     .toBeGreaterThan(1.1)
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
   const saved = await page.evaluate(async () =>
     (await fetch('/api/study/current', { method: 'POST' })).json(),
   )
@@ -222,9 +223,9 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
 
 test('imports, retries, studies, and retains complete takes', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Add your first phrase batch' })).toBeVisible()
+  await expect(page.getByText('Add your first phrase batch')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toHaveCount(0)
-  await page.getByText('Add material').click()
+  await page.getByRole('button', { name: 'Add material' }).click()
   await page.getByLabel('Phrase package JSON').fill('{ bad json')
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByRole('alert')).toContainText('Invalid JSON')
@@ -234,6 +235,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await expect(page.getByRole('alert')).toContainText('Synthetic preparation failure')
   await page.getByRole('button', { name: 'Retry preparation' }).click()
   await expect(page.getByText('Added 5 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
   await expect(page.getByRole('heading', { name: "Let's get started." })).toBeVisible()
 
   let failSave = true
@@ -319,15 +321,15 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     ;(window as unknown as { __releaseTakeRace: () => void }).__releaseTakeRace()
     history.replaceState(null, '', '/')
   })
-  await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.locator('section.study').getByText('Take 2', { exact: true })).toBeVisible()
+  await expect(page.locator('article.study').getByText('Take 2', { exact: true })).toBeVisible()
 
   await page.reload()
-  await expect(page.locator('section.study').getByText('Take 1', { exact: true })).toBeVisible()
-  await expect(page.locator('section.study').getByText('Take 2', { exact: true })).toBeVisible()
-  const activeStudy = page.locator('section.study')
+  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.locator('article.study').getByText('Take 2', { exact: true })).toBeVisible()
+  const activeStudy = page.locator('article.study')
   await expect(activeStudy.getByRole('button', { name: 'Replay', exact: true })).toHaveCount(2)
   await expect(activeStudy.getByRole('button', { name: 'Compare with reference' })).toHaveCount(2)
   const saved = await page.evaluate(async () =>
@@ -357,7 +359,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     ),
   ).toBe(beforePause)
 
-  await page.getByText('Add material').click()
+  await page.getByRole('button', { name: 'Add material' }).click()
   await page.getByLabel('Choose JSON file').setInputFiles({
     name: 'phrases.json',
     mimeType: 'application/json',
@@ -365,6 +367,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   })
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 5 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
 
   let releaseCompletion!: () => void
   const completionHeld = new Promise<void>((resolve) => {
@@ -378,7 +381,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   })
   for (const [index, card] of cards.entries()) {
     await expect(
-      page.locator('section.study').getByRole('heading', { name: card.answer }),
+      page.locator('article.study').getByRole('heading', { name: card.answer }),
     ).toBeVisible()
     await expect(page.getByText('This first meeting is ungraded.')).toBeVisible()
     await page.getByRole('button', { name: 'Next' }).click()
@@ -393,4 +396,232 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await expect(page.getByText('later recall is not scheduled yet')).toBeVisible()
   const firstHistory = page.getByRole('heading', { name: "Let's get started." }).locator('..')
   await expect(firstHistory.getByRole('button', { name: 'Replay saved take' })).toHaveCount(2)
+})
+
+test('restored practice card keeps the original layout and microphone interactions', async ({
+  page,
+}, testInfo) => {
+  const visualPackage = {
+    ...phrasePackage,
+    package_id: 'restored-visual-card-v1',
+    source_id: 'restored-visual-source',
+    cards: [{ ...cards[1], item_id: 'restored-visual-card' }],
+  }
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Add material' }).click()
+  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(visualPackage))
+  await page.getByRole('button', { name: 'Import' }).click()
+  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+  const card = page.locator('article.practice-card')
+  await expect(card.getByRole('heading', { name: cards[1].answer })).toBeVisible()
+  await expect(card.locator('.practice-prompt')).toHaveText(
+    'Use the useful expression in situation 2.',
+  )
+  await expect(card.locator('.answer-help')).toHaveText(
+    'A natural phrase for an ordinary conversation.',
+  )
+  await expect(card).not.toContainText('Browser course · Unit 1')
+  await expect(card.locator('.microphone svg')).toBeVisible()
+  expect(await card.evaluate((node) => getComputedStyle(node).borderRadius)).toBe('18px')
+  expect(await card.locator('h1').evaluate((node) => getComputedStyle(node).fontFamily)).toContain(
+    'Georgia',
+  )
+  expect(await page.locator('.shell').evaluate((node) => getComputedStyle(node).maxWidth)).toBe(
+    '880px',
+  )
+  await testInfo.attach('restored-desktop.png', {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: 'image/png',
+  })
+
+  await card.getByRole('button', { name: '▶ Reference' }).click()
+  await expect(card.getByRole('button', { name: 'Stop playback' })).toBeVisible()
+  await card.getByRole('button', { name: 'Stop playback' }).click()
+  await expect(card.getByRole('button', { name: 'Record a take' })).toBeVisible()
+
+  await page.evaluate(() => {
+    const host = window as unknown as {
+      __resolveMic?: (stream: unknown) => void
+      __stoppedMic?: boolean
+    }
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: () =>
+          new Promise((resolve) => {
+            host.__resolveMic = resolve
+          }),
+      },
+    })
+  })
+  await card.getByRole('button', { name: 'Record a take' }).click()
+  await expect(card.getByRole('button', { name: 'Cancel microphone request' })).toBeVisible()
+  await card.getByRole('button', { name: 'Cancel microphone request' }).click()
+  await page.evaluate(() => {
+    const host = window as unknown as {
+      __resolveMic: (stream: unknown) => void
+      __stoppedMic?: boolean
+    }
+    host.__resolveMic({ getTracks: () => [{ stop: () => (host.__stoppedMic = true) }] })
+  })
+  await expect(card.getByRole('button', { name: 'Record a take' })).toBeVisible()
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as unknown as { __stoppedMic?: boolean }).__stoppedMic ?? false),
+    )
+    .toBe(true)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(card).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  await testInfo.attach('restored-mobile.png', {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: 'image/png',
+  })
+})
+
+test('one-time discarded-data reset completes before pending take recovery', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(async () => {
+    localStorage.setItem('phrase-gym.reference-exposure.v1.old', 'old')
+    localStorage.setItem('phrase-gym.last-learning-language.v1', 'de')
+    localStorage.setItem('unrelated-app', 'keep')
+    const inbox = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('phrase-gym.inbox.v1', 1)
+      request.onupgradeneeded = () => request.result.createObjectStore('draft')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    inbox.close()
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('phrase-gym.practice.v1', 1)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction('journal', 'readwrite')
+      const journal = tx.objectStore('journal')
+      journal.delete('journal-reset:original-vue-restoration-20261027-v2')
+      journal.put(
+        { id: 'discarded', status: 'pending', audio: new Uint8Array([1]).buffer },
+        'take-v2:discarded',
+      )
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+    db.close()
+  })
+  let uploads = 0
+  await page.route('**/api/recordings', async (route) => {
+    uploads++
+    await route.continue()
+  })
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Add material' })).toBeVisible()
+  expect(uploads).toBe(0)
+  expect(
+    await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        const request = indexedDB.open('phrase-gym.practice.v1', 1)
+        request.onsuccess = () => resolve(request.result)
+      })
+      const take = await new Promise<unknown>((resolve) => {
+        const request = db.transaction('journal').objectStore('journal').get('take-v2:discarded')
+        request.onsuccess = () => resolve(request.result)
+      })
+      db.close()
+      return {
+        take,
+        exposure: localStorage.getItem('phrase-gym.reference-exposure.v1.old'),
+        language: localStorage.getItem('phrase-gym.last-learning-language.v1'),
+        unrelated: localStorage.getItem('unrelated-app'),
+      }
+    }),
+  ).toEqual({ take: undefined, exposure: null, language: null, unrelated: 'keep' })
+})
+
+test('playback rejection clears the current control without stopping a newer play', async ({
+  page,
+}) => {
+  const playable = {
+    ...phrasePackage,
+    package_id: 'playback-rejection-v1',
+    source_id: 'playback-rejection-source',
+    cards: [{ ...cards[1], item_id: 'playback-rejection-card' }],
+  }
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Add material' }).click()
+  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(playable))
+  await page.getByRole('button', { name: 'Import' }).click()
+  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+  await page.getByRole('button', { name: 'Record a take' }).click()
+  await page.getByRole('button', { name: 'Stop recording' }).click()
+  await expect(page.getByText('Take 1', { exact: true })).toBeVisible()
+
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = async () => {
+      throw new Error('blocked')
+    }
+  })
+  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await expect(page.getByRole('alert')).toContainText('Audio playback failed')
+  await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
+  await page.getByRole('button', { name: 'Compare with reference' }).click()
+  await expect(page.getByRole('alert')).toContainText('Audio playback failed')
+  await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
+
+  await page.evaluate(() => {
+    const host = window as unknown as { __rejectOldPlay?: () => void; __playCalls?: number }
+    host.__playCalls = 0
+    HTMLMediaElement.prototype.play = function () {
+      host.__playCalls!++
+      if (host.__playCalls === 1)
+        return new Promise<void>((_resolve, reject) => {
+          host.__rejectOldPlay = () => reject(new Error('old playback blocked'))
+        })
+      return Promise.resolve()
+    }
+  })
+  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.evaluate(() =>
+    (window as unknown as { __rejectOldPlay: () => void }).__rejectOldPlay(),
+  )
+  await expect(page.getByRole('button', { name: 'Stop playback' })).toBeVisible()
+  await expect(page.getByRole('alert')).toHaveCount(0)
+})
+
+test('import modal traps keyboard focus and finishes recording before opening', async ({
+  page,
+}) => {
+  const modalPackage = {
+    ...phrasePackage,
+    package_id: 'modal-recording-v1',
+    source_id: 'modal-recording-source',
+    cards: [{ ...cards[1], item_id: 'modal-recording-card' }],
+  }
+  await page.goto('/')
+  const opener = page.getByRole('button', { name: 'Add material' })
+  await opener.click()
+  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(modalPackage))
+  await page.getByRole('button', { name: 'Import' }).click()
+  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+  await page.getByRole('button', { name: 'Record a take' }).click()
+  await expect(page.getByRole('button', { name: 'Stop recording' })).toBeVisible()
+  await opener.click()
+  const dialog = page.getByRole('dialog', { name: 'Add material' })
+  await expect(dialog).toBeVisible()
+  await expect(page.getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Close' }).focus()
+  await page.keyboard.press('Tab')
+  expect(
+    await page.evaluate(() => document.querySelector('dialog')?.contains(document.activeElement)),
+  ).toBe(true)
+  await page.keyboard.press('Escape')
+  await expect(dialog).not.toBeVisible()
+  await expect(opener).toBeFocused()
 })

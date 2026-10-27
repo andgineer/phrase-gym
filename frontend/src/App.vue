@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCapture } from './composables/useCapture'
 import { takeTransfers } from './takeTransfers'
+import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
 import type { StoredTake } from './practiceTypes'
 import SavedHistory from './components/SavedHistory.vue'
 import AddMaterial from './components/AddMaterial.vue'
+import StudyCard from './components/StudyCard.vue'
 import { usePlayback } from './composables/usePlayback'
 import { useStudy } from './composables/useStudy'
 
 const study = useStudy()
 const playback = usePlayback()
-
+const initialized = ref(false)
 const capture = useCapture({
   context: async () => {
     if (!study.current.value?.card) throw new Error('No study card is open')
@@ -41,88 +43,96 @@ async function retryTakes() {
   await study.load()
 }
 
+async function controlAudio() {
+  if (capture.requesting.value) return capture.release()
+  if (capture.capturing.value) return capture.stop()
+  if (playback.active.value) return playback.stop()
+  return capture.start()
+}
+
+async function beforeOpenIntake() {
+  playback.stop()
+  if (capture.capturing.value) await capture.stop()
+  await capture.release()
+  await takeTransfers.flush()
+  await study.load()
+}
+
+function playReference(url: string) {
+  return playback.play(url)
+}
+
 const progress = computed(() =>
   study.current.value
-    ? `${study.current.value.studied} of ${study.current.value.total} studied`
+    ? `${study.current.value.studied + (study.current.value.done ? 0 : 1)} / ${study.current.value.total}`
     : '',
 )
 
-onMounted(async () => {
-  await takeTransfers.recover()
-  await study.load()
-})
+async function initialize() {
+  initialized.value = false
+  try {
+    await resetDiscardedLearnerDataOnce()
+    await takeTransfers.recover()
+    initialized.value = true
+    await study.load()
+  } catch (cause) {
+    study.error.value = String(cause)
+  }
+}
+
+onMounted(initialize)
 </script>
 
 <template>
   <div class="shell">
-    <header><strong>Phrase Gym</strong><span>English phrase study</span></header>
+    <header>
+      <a class="brand" href="/">Phrase Gym<span>◌</span></a>
+      <AddMaterial v-if="initialized" :before-open="beforeOpenIntake" @added="study.load" />
+    </header>
     <main>
-      <AddMaterial @added="study.load" />
-
-      <section v-if="study.error.value" class="panel error" role="alert">
-        {{ study.error.value }} <button @click="study.load">Retry connection</button>
-      </section>
-      <section v-else-if="study.loading.value" class="panel" role="status">Loading…</section>
-      <section v-else-if="study.current.value?.done" class="panel complete">
-        <p class="eyebrow">{{ progress }}</p>
+      <p v-if="study.error.value" class="error" role="alert">
+        {{ study.error.value }} <button @click="initialize">Retry connection</button>
+      </p>
+      <p v-else-if="!initialized || study.loading.value" role="status">Loading…</p>
+      <section v-else-if="study.current.value?.done" class="card complete">
+        <p class="eyebrow">English · {{ progress }}</p>
         <h1>Today’s study is complete</h1>
         <p>{{ study.current.value.message }}</p>
       </section>
-      <section v-else-if="study.current.value?.card" class="panel study">
-        <p class="eyebrow">First study · {{ progress }}</p>
-        <h1>{{ study.current.value.card.answer }}</h1>
-        <p class="meaning">{{ study.current.value.card.explanation }}</p>
-        <p v-if="study.current.value.card.accepted_variants.length" class="variants">
-          Also accepted: {{ study.current.value.card.accepted_variants.join('; ') }}
-        </p>
-        <p class="source">From {{ study.current.value.card.source_label }}</p>
-        <div class="actions">
-          <button @click="playback.play(study.current.value.card.reference_url)">
-            Play reference
-          </button>
-          <button
-            v-if="!capture.capturing.value"
-            :disabled="capture.requesting.value || capture.processing.value"
-            @click="capture.start"
-          >
-            Record a take
-          </button>
-          <button v-else @click="capture.stop()">Stop recording</button>
+      <template v-else-if="study.current.value?.card">
+        <p class="eyebrow">English</p>
+        <StudyCard
+          :card="study.current.value.card"
+          :progress="progress"
+          :capturing="capture.capturing.value"
+          :requesting="capture.requesting.value"
+          :processing="capture.processing.value"
+          :playing="playback.active.value"
+          :completing="study.completing.value"
+          :pending-takes="takeTransfers.pendingTakes.value"
+          :capture-error="capture.error.value"
+          :take-error="takeTransfers.error.value"
+          :play="playReference"
+          :compare="playback.compare"
+          @control="controlAudio"
+          @retry="retryTakes"
+          @next="next"
+        />
+      </template>
+      <section v-else class="home">
+        <p class="eyebrow">English</p>
+        <h1>Phrase Gym</h1>
+        <div class="card session-entry">
+          <p>Add your first phrase batch</p>
+          <p class="muted">Import 5–10 prepared phrases to begin.</p>
         </div>
-        <p v-if="capture.processing.value" role="status">Finishing and saving the complete take…</p>
-        <p v-if="capture.error.value" role="alert" class="error">{{ capture.error.value }}</p>
-        <p v-if="takeTransfers.pendingTakes.value" role="status">
-          {{ takeTransfers.pendingTakes.value }} take(s) waiting to save.
-          <button @click="retryTakes">Retry save</button>
-        </p>
-        <p v-if="takeTransfers.error.value" role="alert" class="error">
-          {{ takeTransfers.error.value }}
-        </p>
-        <div v-if="study.current.value.card.recordings.length" class="takes">
-          <h2>Saved takes</h2>
-          <div
-            v-for="(recording, index) in study.current.value.card.recordings"
-            :key="recording.id"
-            class="take"
-          >
-            <span>Take {{ index + 1 }}</span>
-            <button @click="playback.play(recording.url)">Replay</button>
-            <button @click="playback.compare(recording, study.current.value.card?.reference_url)">
-              Compare with reference
-            </button>
-          </div>
-        </div>
-        <button class="next" :disabled="study.completing.value" @click="next">Next</button>
-        <p class="note">This first meeting is ungraded. Recording is optional.</p>
       </section>
-      <section v-else class="panel empty">
-        <h1>Add your first phrase batch</h1>
-        <p>Import 5–10 prepared phrases above to begin.</p>
-      </section>
+      <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
       <SavedHistory
         :items="study.history.value"
         :play="playback.play"
         :compare="playback.compare"
+        :disabled="capture.capturing.value || capture.requesting.value || capture.processing.value"
       />
     </main>
   </div>

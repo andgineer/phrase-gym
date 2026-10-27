@@ -1,6 +1,7 @@
 import { toRaw } from 'vue'
 
 const databaseName = 'phrase-gym.practice.v1'
+export const discardedDataResetMarker = 'journal-reset:original-vue-restoration-20261027-v2'
 let opening: Promise<IDBDatabase> | null = null
 function database(): Promise<IDBDatabase> {
   if (!opening)
@@ -106,5 +107,22 @@ export async function journalEntries<T>(prefix: string): Promise<Array<{ key: st
     }
     transaction.oncomplete = () => resolve(entries)
     transaction.onabort = transaction.onerror = () => reject(transaction.error)
+  })
+}
+
+export async function resetDiscardedJournalOnce(): Promise<void> {
+  const db = await database()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('journal', 'readwrite')
+    const journal = transaction.objectStore('journal')
+    const marker = journal.get(discardedDataResetMarker)
+    marker.onsuccess = () => {
+      if (marker.result) return
+      journal.clear()
+      journal.put(true, discardedDataResetMarker)
+    }
+    transaction.oncomplete = () => resolve()
+    transaction.onabort = transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Journal reset failed'))
   })
 }

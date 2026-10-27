@@ -13,6 +13,7 @@ For a root-session request to implement the next stage, follow the [orchestratio
 - Dependencies point inward: transport and UI adapters use contracts/domain services; domain services never import HTTP routers, application startup or UI modules. Python owns the generated API contract. Construct services at the application boundary. Do not recreate the prototype's distributed worker or native Coach architecture.
 - Keep validation, publication transactions and library reads separate. One workflow owns each transaction; helpers receive that transaction instead of opening hidden writes. Keep all package publication atomic.
 - Vue views render state. Route orchestration, preferences and audio effects belong in focused composables/adapters; the practice reducer stays pure. Generated API types are the client contract.
+- Preserve the original Vue shell, practice card, microphone control and responsive styling as the Python backend grows. Adapt or hide controls for unavailable workflows; do not replace the interface with a new design.
 - When moving a symbol, update all importers and tests. No re-export compatibility shims. Shared helpers are preferable to duplicated logic.
 
 ## Commands and environment
