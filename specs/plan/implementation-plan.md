@@ -1,8 +1,8 @@
 # Delivery ladder
 
-Deliver the smallest useful research-informed learning loop first. The target is one local Python application, SQLite and the existing Vue GUI. Both earlier backends supply reusable code and tests; neither defines mandatory parity. The [architecture](../architecture.md) excludes a separate native Coach, worker infrastructure and live recovery.
+Deliver the smallest useful research-informed learning loop first. The target is a lightweight Phrase Gym service with SQLite and the existing Vue GUI, plus an intermittently available headless Coach for preparation. Both run on the same machine for the first versions. Both earlier backends supply reusable code and tests; neither defines mandatory parity. The [architecture](../architecture.md) defines the API-only handoff without a Coach GUI or general worker framework.
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Deliver recall first, then speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Complete phrase preparation and recall first, then speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
 
 ## Why phrases first
 
@@ -13,6 +13,12 @@ English matches the learner's resolved preferences and an existing local Piper c
 ## 1. First MVP: import a phrase batch and use it across days
 
 **Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
+
+### Preparation handoff before MVP completion
+
+- Move existing Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach service. Keep the current import package format, cards, references, recordings and history through the transition. Phrase Gym must start and offer existing study/replay and request submission without Coach or Piper installed alongside it.
+- Add the [durable handoff](../architecture.md#responsibilities): Vue paste/file and external agents submit through the Phrase Gym API, which persists each preparation request before acknowledgement and shows pending work while Coach is offline. Coach retrieves work and returns results through that API only. Validate results and publish a complete batch atomically; retries across restarts or lost responses must not duplicate requests, references or cards. Later echo-words intake uses this same boundary without adding source integration now.
+- Verify Phrase Gym startup without Coach/Piper, Coach-offline submission, restart and retry, malformed result rejection, atomic publication and continued study/replay while Coach is absent. The first MVP still imports externally prepared phrase text and makes no model-provider call.
 
 ### 1b. Later recall, scheduling and MVP completion
 
@@ -27,6 +33,7 @@ English matches the learner's resolved preferences and an existing local Piper c
 | Action or condition | What the learner must observe |
 |---|---|
 | Import a real externally prepared batch | Readable phrases, preparation progress and the confirmed added count; replayable references without developer seeding |
+| Submit a batch while Coach is offline | A durable pending acknowledgement; study and saved replay remain available, and Coach prepares the batch when it returns |
 | Import malformed content or repeat the same package | An item-specific correction message or the existing result; no partial batch and no duplicate cards |
 | Study a new phrase | Complete wording, understandable meaning, reference playback and Next; no success/failure grade |
 | Finish today's study | A clear next-return indication; no forced waiting or immediate graded readback |
@@ -39,7 +46,7 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Checks:** silent unit/integration and real-browser tests against the new Python backend cover this path and its simple failure/retry cases. Use a test clock for automated day/interval tests, never a learner-facing clock override. Review representative externally generated cards semantically and listen to references separately; software tests cannot establish either. The learner verifies complete microphone/comparison/saved playback on the actual MacBook. A later real-clock return remains explicitly pending until observed; immediate repetition is not a substitute.
 
-**MVP boundary:** no word generation, frames, speaking missions, game rewards, dialogue runs, confusable dependency graph, multilingual voice matrix, native app, external inbox API, remote access or advanced backup system is required. A useful English phrase workflow is the first MVP, not a stepping stone that must wait for those features.
+**MVP boundary:** no word generation, frames, speaking missions, game rewards, dialogue runs, confusable dependency graph, multilingual voice matrix, native app, source-specific integration, cloud deployment, general worker framework or advanced backup system is required. A useful English phrase workflow is the first MVP, not a stepping stone that must wait for those features.
 
 ## 2. Bring learned expressions into freer speech
 
@@ -67,10 +74,9 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Learner outcome:** paste words with their source contexts or import a supplied echo-words export and receive useful word-sense cards without manually authoring them.
 
-- At the start of Coach/internal preparation implementation, resolve the [Coach interface question](../open-problems.md): check whether Python with the existing web UI covers the required workflows without a native desktop GUI.
-- Reuse the import, speech and practice path. Add a single selected subscription-CLI adapter, bounded execution and clear errors; retain the source material for explicit retry.
+- Reuse the Phrase Gym submission and publication path with Coach performing preparation. Add a single selected subscription-CLI adapter in Coach, bounded execution and clear errors; retain the source material for explicit retry.
 - Prepare one sense at a time, a comprehensible definition and two or three contexts under the [word rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp). Ask briefly when meaning is genuinely ambiguous. Do not infer a sense from a bare homograph.
-- Distinguish pending, ready and failed material. No distributed queue or second desktop application. Existing ready practice stays usable during generation.
+- Distinguish pending, ready and failed material. Reuse the small durable Coach handoff; no general distributed queue or second desktop application. Existing ready practice stays usable during generation.
 - Document an export/paste interface first; direct echo-words integration or source changes require their own authorization. Do not make export automation a prerequisite.
 - Use representative new actual model results with a fresh semantic reviewer, plus attended speech listening. Cover an ambiguous word, an accepted variant, a confusable contrast and a failed request separately from structural tests.
 
@@ -88,7 +94,7 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 Choose improvements from observed friction: a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
-Remote hosting, multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. The speaking tasks above do not depend on them. Add a new stage only when a concrete user need justifies it.
+Cloud placement of Phrase Gym with Coach on the learner's laptop is planned after the local MVP under the [access boundary](../architecture.md#local-access-and-privacy). Design remote access, authentication and deployment before that work; deployment requires the learner's explicit request. Multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. Add other stages only when a concrete user need justifies them.
 
 After the MVP, qualify Linux browser media playback and recording under the [platform boundary](../architecture.md#application-boundary). Keep Linux server tests passing throughout; browser audio qualification is separate from server compatibility.
 

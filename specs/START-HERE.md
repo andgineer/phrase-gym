@@ -11,7 +11,7 @@ Read in this order:
 5. [Recording and saved replay](decision-recording-and-comparison.md): preserve the working Vue audio behavior.
 6. [Preparation and speech](decision-external-preparation-agent.md): external course batches first; internal echo-words preparation later.
 7. [Language choices](decision-personal-preferences.md) and [local availability](decision-online-only.md).
-8. [Small application architecture](architecture.md): Python, Vue, SQLite and stopped-app backup/restore.
+8. [Small application architecture](architecture.md): lightweight Phrase Gym, separate Coach, SQLite and stopped-app backup/restore.
 9. [Delivery ladder](plan/implementation-plan.md) and [unverified acceptance](open-problems.md).
 
 [Agent instructions](../AGENTS.md) and the [implementation handout](plan/orchestration-handout.md) govern delivery. [README](../README.md) documents the runnable application and launch workflow. Keep decisions here, operational commands in docs, and only remaining work in the plan.
