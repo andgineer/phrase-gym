@@ -39,7 +39,9 @@ const emit = defineEmits<{
         <button
           class="microphone"
           :class="{ capturing }"
-          :disabled="processing || (completing && !capturing && !requesting && !playing)"
+          :disabled="
+            (processing && !playing) || (completing && !capturing && !requesting && !playing)
+          "
           :aria-label="
             requesting
               ? 'Cancel microphone request'
@@ -92,8 +94,15 @@ const emit = defineEmits<{
         <h2>Saved takes</h2>
         <div v-for="(recording, index) in card.recordings" :key="recording.id" class="take">
           <span>Take {{ index + 1 }}</span>
-          <button @click="play(recording.url)">Replay</button>
-          <button @click="compare(recording, card.reference_url)">Compare with reference</button>
+          <button :disabled="capturing || requesting || processing" @click="play(recording.url)">
+            Replay
+          </button>
+          <button
+            :disabled="capturing || requesting || processing"
+            @click="compare(recording, card.reference_url)"
+          >
+            Compare with reference
+          </button>
         </div>
       </div>
       <button

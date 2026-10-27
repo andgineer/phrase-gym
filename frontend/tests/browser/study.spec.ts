@@ -32,6 +32,7 @@ test.beforeEach(async ({ page }) => {
     Object.assign(window, {
       __nativeMediaRecorder: window.MediaRecorder,
       __nativeMediaPlay: HTMLMediaElement.prototype.play,
+      __nativeMediaPause: HTMLMediaElement.prototype.pause,
     })
     Object.defineProperty(navigator, 'maxTouchPoints', { value: 0 })
     Object.defineProperty(navigator, 'mediaDevices', {
@@ -139,8 +140,11 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     const host = window as unknown as {
       __nativeMediaRecorder: typeof MediaRecorder
       __nativeMediaPlay: typeof HTMLMediaElement.prototype.play
+      __nativeMediaPause: typeof HTMLMediaElement.prototype.pause
       __captureAudio?: { context: AudioContext; oscillator: OscillatorNode }
       __playedMedia?: HTMLMediaElement[]
+      __playedUrls?: string[]
+      __playedBlobBytes?: Promise<number>
     }
     Object.defineProperty(window, 'MediaRecorder', {
       configurable: true,
@@ -162,10 +166,16 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       },
     })
     const nativePlay = host.__nativeMediaPlay
+    HTMLMediaElement.prototype.pause = host.__nativeMediaPause
     HTMLMediaElement.prototype.play = function () {
       this.muted = true
       this.volume = 0
       ;(host.__playedMedia ??= []).push(this)
+      ;(host.__playedUrls ??= []).push(this.src)
+      if (this.src.startsWith('blob:'))
+        host.__playedBlobBytes = fetch(this.src)
+          .then((response) => response.arrayBuffer())
+          .then((audio) => audio.byteLength)
       return nativePlay.call(this)
     }
   })
@@ -197,6 +207,27 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   )
   expect(saved.card.recordings[0].byte_length).toBeGreaterThan(4)
   expect(saved.card.recordings[0].mime_type).toMatch(/^audio\//)
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __playedBlobBytes: Promise<number> }).__playedBlobBytes,
+    ),
+  ).toBe(saved.card.recordings[0].byte_length)
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as unknown as { __playedUrls?: string[] }).__playedUrls ?? []),
+    )
+    .toEqual([expect.stringMatching(/^blob:/), expect.stringContaining(saved.card.reference_url)])
+  const afterAutomatic = await page.evaluate(
+    () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+  )
+  await page.getByRole('button', { name: 'Compare with reference' }).click()
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+      ),
+    )
+    .toBe(afterAutomatic + 2)
   await page.getByRole('button', { name: 'Replay' }).click()
   await expect
     .poll(() =>
@@ -251,7 +282,9 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
   await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
-  await expect(page.getByRole('alert')).toContainText('Audio remains on this device')
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Audio remains on this device' }),
+  ).toBeVisible()
   await page.evaluate(() => {
     const host = window as unknown as { __retrySaveSettled?: boolean }
     let cleared = false
@@ -615,6 +648,12 @@ test('import modal traps keyboard focus and finishes recording before opening', 
   const dialog = page.getByRole('dialog', { name: 'Add material' })
   await expect(dialog).toBeVisible()
   await expect(page.getByText('Take 1', { exact: true })).toBeVisible()
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { __playedMedia?: HTMLMediaElement[] }).__playedMedia?.length ?? 0,
+    ),
+  ).toBe(0)
   await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
   await dialog.getByRole('button', { name: 'Close' }).focus()
   await page.keyboard.press('Tab')
@@ -624,4 +663,96 @@ test('import modal traps keyboard focus and finishes recording before opening', 
   await page.keyboard.press('Escape')
   await expect(dialog).not.toBeVisible()
   await expect(opener).toBeFocused()
+})
+
+test('automatic comparison can be stopped while upload is pending and late end cannot restart it', async ({
+  page,
+}) => {
+  const comparisonPackage = {
+    ...phrasePackage,
+    package_id: 'automatic-comparison-stop-v1',
+    source_id: 'automatic-comparison-stop-source',
+    cards: [{ ...cards[1], item_id: 'automatic-comparison-stop-card' }],
+  }
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Add material' }).click()
+  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(comparisonPackage))
+  await page.getByRole('button', { name: 'Import' }).click()
+  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+
+  await page.evaluate(() => {
+    class SilentAudio {
+      src = ''
+      ended = false
+      onended: (() => void) | null = null
+      onpause: (() => void) | null = null
+      onerror: (() => void) | null = null
+      play() {
+        const host = window as unknown as { __playedMedia?: SilentAudio[] }
+        ;(host.__playedMedia ??= []).push(this)
+        return Promise.resolve()
+      }
+      pause() {
+        this.onpause?.()
+      }
+      dispatchEvent(event: Event) {
+        if (event.type === 'ended') this.onended?.()
+        if (event.type === 'pause') this.onpause?.()
+        return true
+      }
+    }
+    Object.defineProperty(window, 'Audio', { configurable: true, value: SilentAudio })
+  })
+
+  let releaseUpload!: () => void
+  const uploadHeld = new Promise<void>((resolve) => {
+    releaseUpload = resolve
+  })
+  await page.route('**/api/recordings', async (route) => {
+    if (route.request().method() === 'POST') await uploadHeld
+    await route.continue()
+  })
+  await page.getByRole('button', { name: 'Record a take' }).click()
+  await page.getByRole('button', { name: 'Stop recording' }).click()
+  await expect(page.getByText('Finishing and saving the complete take…')).toBeVisible()
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as { __playedMedia?: HTMLMediaElement[] }).__playedMedia?.length ?? 0,
+      ),
+    )
+    .toBe(1)
+  const stop = page.getByRole('button', { name: 'Stop playback' })
+  await expect(stop).toBeEnabled()
+  await stop.click()
+  await page.evaluate(() => {
+    const media = (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia[0]!
+    media.dispatchEvent(new Event('ended'))
+  })
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+    ),
+  ).toBe(1)
+  releaseUpload()
+  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+      ),
+    )
+    .toBe(2)
+  await page.evaluate(() => {
+    const media = (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia[0]!
+    media.dispatchEvent(new Event('ended'))
+  })
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+    ),
+  ).toBe(2)
 })

@@ -159,6 +159,7 @@ export function useCapture(options: CaptureOptions) {
           take.status = 'pending'
           await options.retain(take)
         } catch (cause) {
+          take.complete = false
           error.value = String(cause)
         } finally {
           if (take.audio.byteLength)

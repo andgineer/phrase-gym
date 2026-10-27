@@ -1,11 +1,13 @@
 import { onUnmounted, ref } from 'vue'
 import { setAudioSession } from '../audioSession'
+import type { StoredTake } from '../practiceTypes'
 import type { Recording } from '../studyTypes'
 
 export function usePlayback() {
   let playing: HTMLAudioElement | null = null
   const active = ref(false)
   const error = ref('')
+  let localUrl: string | null = null
 
   function stop() {
     if (playing) {
@@ -15,6 +17,8 @@ export function usePlayback() {
       current.src = ''
     }
     active.value = false
+    if (localUrl) URL.revokeObjectURL(localUrl)
+    localUrl = null
     setAudioSession('auto')
   }
 
@@ -52,23 +56,19 @@ export function usePlayback() {
     }
   }
 
-  async function compare(recording: Recording, referenceUrl?: string) {
-    stop()
+  async function compareUrl(url: string, referenceUrl?: string) {
     error.value = ''
     setAudioSession('playback')
-    const learner = new Audio(recording.url)
+    const learner = new Audio(url)
     playing = learner
     active.value = true
     learner.onended = () => {
-      if (playing !== learner || !referenceUrl) return
+      if (playing !== learner) return
+      if (!referenceUrl) return stop()
       void play(referenceUrl)
     }
     learner.onpause = () => {
-      if (playing !== learner) return
-      learner.src = ''
-      playing = null
-      active.value = false
-      setAudioSession('auto')
+      if (playing === learner && !learner.ended) stop()
     }
     learner.onerror = () => {
       if (playing !== learner) return
@@ -84,6 +84,25 @@ export function usePlayback() {
     }
   }
 
-  onUnmounted(stop)
-  return { play, compare, stop, active, error }
+  function compare(recording: Recording, referenceUrl?: string) {
+    stop()
+    return compareUrl(recording.url, referenceUrl)
+  }
+
+  function compareTake(take: StoredTake, referenceUrl: string) {
+    stop()
+    localUrl = URL.createObjectURL(new Blob([take.audio], { type: take.mime_type }))
+    return compareUrl(localUrl, referenceUrl)
+  }
+
+  function background() {
+    if (document.hidden) stop()
+  }
+
+  document.addEventListener('visibilitychange', background)
+  onUnmounted(() => {
+    document.removeEventListener('visibilitychange', background)
+    stop()
+  })
+  return { play, compare, compareTake, stop, active, error }
 }

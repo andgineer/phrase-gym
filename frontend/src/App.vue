@@ -13,6 +13,8 @@ import { useStudy } from './composables/useStudy'
 const study = useStudy()
 const playback = usePlayback()
 const initialized = ref(false)
+let mediaScope = 0
+let compareOnStop: number | null = null
 const capture = useCapture({
   context: async () => {
     if (!study.current.value?.card) throw new Error('No study card is open')
@@ -22,7 +24,18 @@ const capture = useCapture({
     }
   },
   retain: takeTransfers.retain,
-  finished: async (_take: StoredTake) => {
+  finished: async (take: StoredTake) => {
+    const shouldCompare =
+      take.complete &&
+      compareOnStop === mediaScope &&
+      study.current.value?.card?.id === take.card_id &&
+      study.current.value.card.attempt_id === take.attempt_id &&
+      !document.hidden
+    compareOnStop = null
+    if (shouldCompare) {
+      const reference = study.current.value?.card?.reference_url
+      if (reference) void playback.compareTake(take, reference)
+    }
     await takeTransfers.flush()
     await study.load()
   },
@@ -31,6 +44,9 @@ const capture = useCapture({
 
 async function next() {
   if (!study.current.value?.card) return
+  mediaScope++
+  compareOnStop = null
+  playback.stop()
   await study.complete(study.current.value.card.attempt_id, async () => {
     await capture.release()
     await takeTransfers.flush()
@@ -45,12 +61,20 @@ async function retryTakes() {
 
 async function controlAudio() {
   if (capture.requesting.value) return capture.release()
-  if (capture.capturing.value) return capture.stop()
+  if (capture.capturing.value) {
+    compareOnStop = mediaScope
+    return capture.stop()
+  }
   if (playback.active.value) return playback.stop()
+  mediaScope++
+  compareOnStop = null
+  playback.stop()
   return capture.start()
 }
 
 async function beforeOpenIntake() {
+  mediaScope++
+  compareOnStop = null
   playback.stop()
   if (capture.capturing.value) await capture.stop()
   await capture.release()
@@ -93,7 +117,9 @@ onMounted(initialize)
       <p v-if="study.error.value" class="error" role="alert">
         {{ study.error.value }} <button @click="initialize">Retry connection</button>
       </p>
-      <p v-else-if="!initialized || study.loading.value" role="status">Loading…</p>
+      <p v-else-if="!initialized || (study.loading.value && !study.current.value)" role="status">
+        Loading…
+      </p>
       <section v-else-if="study.current.value?.done" class="card complete">
         <p class="eyebrow">English · {{ progress }}</p>
         <h1>Today’s study is complete</h1>
