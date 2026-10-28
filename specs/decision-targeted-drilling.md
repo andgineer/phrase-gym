@@ -40,7 +40,7 @@ The hints and cues are examples of prepared content, not a rule to generate them
 
 During recall, prompts communicate an intention rather than paraphrase the answer word by word. They contain no target phrase, initial-letter code, masked answer or answer-bearing title. Natural shared topic words are allowed: a universal ban on every content word would make prompts obscure without research support. A partner turn is optional; openers need no fictional preceding line. Situations must be understandable without studying incidental vocabulary.
 
-Example: **Everyone has joined the call. Begin the meeting.** can cue **Let's get started.** A later review could use **Your friends have the ingredients ready. Suggest beginning to cook.** These are prompts for a learned response, not assertions that only one English response is valid. The learner knows the task is to retrieve their chosen expression; an underdetermined or misleading card can be suspended without a forgetting grade.
+In the **So far, so good.** example above, each brief question can elicit that phrase but also other natural answers. The learner knows the task is to retrieve a learned expression; a requested hint can identify it more precisely while marking the attempt as supported. An underdetermined or misleading card can be suspended without a forgetting grade.
 
 Avoid generating many synonymous cards for the same cue. For the MVP, use one chosen expression and a short accepted-alternatives note where appropriate; no preferred-target management system is required. Similar text alone never proves that two senses are the same.
 

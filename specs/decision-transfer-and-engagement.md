@@ -14,7 +14,7 @@ Offer a progression the learner can choose and revisit:
 2. With the wording available, express a personal opinion, tell a short story or respond to a relevant situation. Mark this as supported production.
 3. Repeat the communicative task with a changed topic, listener or complication. Remove the phrase list for an unscripted response; the learner composes the message and can use other natural wording.
 
-Example: practise acknowledging another person's reasoning with **I see where you're coming from, but...**, first with the expression visible, then responding to a different proposal without it. The learner must be able to continue their thought, not just reproduce its opening.
+For **So far, so good.**, one cue is **Colleague asks: How's it going?** and another is **Friend asks: How's the new job?** The learner can answer with the phrase after an optional brief hint, then encounter the other cue with the wording hidden. A short phrase can be the entire natural answer; do not pad it with extra speech to make the activity look freer.
 
 Keep activities short and relevant, with optional recording/replay and a clear finish. Phrase Recall and Speaking Practice use the same brief prepared situation cues; requested phrase-specific hints provide support without extra reading. No AI conversation partner, countdown, memorized whole script or compulsory target insertion is required.
 
