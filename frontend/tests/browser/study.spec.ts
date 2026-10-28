@@ -222,6 +222,19 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   )
   await page.getByRole('button', { name: 'Compare with reference' }).click()
   await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+      ),
+    )
+    .toBe(afterAutomatic + 1)
+  await page.evaluate(() => {
+    const learner = (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.at(
+      -1,
+    )
+    if (learner) learner.onended = null
+  })
+  await expect
     .poll(
       () =>
         page.evaluate(

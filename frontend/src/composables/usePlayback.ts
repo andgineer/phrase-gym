@@ -8,8 +8,11 @@ export function usePlayback() {
   const active = ref(false)
   const error = ref('')
   let localUrl: string | null = null
+  let comparisonTimer: number | null = null
 
   function stop() {
+    if (comparisonTimer !== null) window.clearTimeout(comparisonTimer)
+    comparisonTimer = null
     if (playing) {
       const current = playing
       playing = null
@@ -56,17 +59,22 @@ export function usePlayback() {
     }
   }
 
-  async function compareUrl(url: string, referenceUrl?: string) {
+  async function compareUrl(url: string, referenceUrl?: string, durationMs?: number | null) {
     error.value = ''
     setAudioSession('playback')
     const learner = new Audio(url)
     playing = learner
     active.value = true
-    learner.onended = () => {
+    const advance = () => {
       if (playing !== learner) return
+      if (comparisonTimer !== null) window.clearTimeout(comparisonTimer)
+      comparisonTimer = null
+      playing = null
       if (!referenceUrl) return stop()
       void play(referenceUrl)
     }
+    learner.onended = advance
+    // Some browser WebM encoders omit duration metadata and never signal the final frame.
     learner.onpause = () => {
       if (playing === learner && !learner.ended) stop()
     }
@@ -77,6 +85,8 @@ export function usePlayback() {
     }
     try {
       await learner.play()
+      if (playing === learner && durationMs !== null && durationMs !== undefined)
+        comparisonTimer = window.setTimeout(advance, durationMs + 1000)
     } catch (cause) {
       if (playing !== learner) return
       stop()
@@ -86,13 +96,13 @@ export function usePlayback() {
 
   function compare(recording: Recording, referenceUrl?: string) {
     stop()
-    return compareUrl(recording.url, referenceUrl)
+    return compareUrl(recording.url, referenceUrl, recording.duration_ms)
   }
 
   function compareTake(take: StoredTake, referenceUrl: string) {
     stop()
     localUrl = URL.createObjectURL(new Blob([take.audio], { type: take.mime_type }))
-    return compareUrl(localUrl, referenceUrl)
+    return compareUrl(localUrl, referenceUrl, take.duration_ms)
   }
 
   function background() {
