@@ -8,7 +8,8 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS imports (
   package_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, payload TEXT NOT NULL,
-  status TEXT NOT NULL, error TEXT, added_count INTEGER, created_at TEXT NOT NULL
+  status TEXT NOT NULL, error TEXT, added_count INTEGER, created_at TEXT NOT NULL,
+  result_id TEXT, result_hash TEXT
 );
 CREATE TABLE IF NOT EXISTS cards (
   id TEXT PRIMARY KEY, source_id TEXT NOT NULL, item_id TEXT NOT NULL,
@@ -48,11 +49,11 @@ class Database:
         with self.write() as connection:
             connection.executescript(SCHEMA)
             connection.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', '1')")
-            connection.execute(
-                "UPDATE imports SET status='error', "
-                "error='Preparation was interrupted; retry this package.' "
-                "WHERE status='preparing'",
-            )
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(imports)")}
+            for name in ("result_id", "result_hash"):
+                if name not in columns:
+                    connection.execute(f"ALTER TABLE imports ADD COLUMN {name} TEXT")
+            connection.execute("UPDATE imports SET status='pending' WHERE status='preparing'")
 
     def connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.path, timeout=5, check_same_thread=False)

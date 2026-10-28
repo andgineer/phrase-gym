@@ -50,7 +50,7 @@ checks real prepared content separately.
 
 ## Piper voice
 
-The application expects `PHRASE_GYM_PIPER_CONFIG` to name a private JSON file outside the
+The separately running Coach expects `PHRASE_GYM_PIPER_CONFIG` to name a private JSON file outside the
 repository. Piper itself is a separately pinned environment.
 
 On the learner's macOS machine, create that private environment outside every repository with the
@@ -81,8 +81,24 @@ SHA-256 values, and create the private voice file with this shape:
 }
 ```
 
-Phrase Gym verifies the exact installed `piper-tts` version against `runtime_version`, model/config
+Coach verifies the exact installed `piper-tts` version against `runtime_version`, model/config
 hashes, and English locale. It streams the selected interpreter's output under hard 12 MiB audio,
-64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and saves WAV
-references before publishing the package. Automated tests use a silent fake child and never invoke
+64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic publication. Automated tests use a silent fake child and never invoke
 real Piper.
+
+## API handoff
+
+`POST /api/imports` accepts `{ "package": <version-1 package> }`. The server validates and
+stores a text-only request before returning `pending`. Start `phrase-gym coach` separately to
+prepare it. `GET /api/imports` and `GET /api/imports/{package_id}` report `pending`, `preparing`,
+`added`, or `error`. Retry an error or interrupted preparation with `POST /api/imports/{package_id}/retry`; retrying the
+same package content returns its existing status. Coach retrieves work and returns a complete
+result through the API; it never opens the application database.
+
+An external agent that already has audio can call `POST /api/imports` with `package` and
+`references`, a map from each `item_id` to base64-encoded mono 16-bit PCM WAV bytes. Every
+card must have one complete playable reference, at most 12 MiB. This publishes the batch
+atomically and returns `added` without Coach. A malformed or missing reference identifies the
+item and rejects the whole request. Retrying identical package and audio returns the original
+result; changed content under the same `package_id` is rejected. The browser paste/file import
+accepts text-only packages and shows pending Coach work while it is offline.

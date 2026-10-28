@@ -18,11 +18,14 @@ def test_run_dispatches_loopback_and_data_dir(monkeypatch, tmp_path):
     ]
 
 
-def test_coach_reports_handoff_pending(monkeypatch, capsys):
-    monkeypatch.setattr(sys, "argv", ["phrase-gym", "coach"])
-    with pytest.raises(SystemExit, match="API handoff"):
-        cli.main()
-    assert not capsys.readouterr().out
+def test_coach_dispatches_to_separate_api_worker(monkeypatch):
+    called = []
+    monkeypatch.setattr(cli, "run_coach", lambda url, once: called.append((url, once)))
+    monkeypatch.setattr(
+        sys, "argv", ["phrase-gym", "coach", "--url", "http://127.0.0.1:8941", "--once"]
+    )
+    cli.main()
+    assert called == [("http://127.0.0.1:8941", True)]
 
 
 @pytest.mark.parametrize("command", ["install-coach", "uninstall-coach", "deploy"])

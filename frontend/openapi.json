@@ -1,6 +1,81 @@
 {
   "components": {
     "schemas": {
+      "CoachFailure": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Error",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "CoachFailure",
+        "type": "object"
+      },
+      "CoachResult": {
+        "additionalProperties": false,
+        "properties": {
+          "references": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "References",
+            "type": "object"
+          },
+          "result_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
+            "title": "Result Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result_id",
+          "references"
+        ],
+        "title": "CoachResult",
+        "type": "object"
+      },
+      "CoachWork-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "package": {
+            "$ref": "#/components/schemas/PhrasePackage-Input"
+          },
+          "package_id": {
+            "title": "Package Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "package_id",
+          "package"
+        ],
+        "title": "CoachWork",
+        "type": "object"
+      },
+      "CoachWork-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "package": {
+            "$ref": "#/components/schemas/PhrasePackage-Output"
+          },
+          "package_id": {
+            "title": "Package Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "package_id",
+          "package"
+        ],
+        "title": "CoachWork",
+        "type": "object"
+      },
       "CompleteStudy": {
         "additionalProperties": false,
         "properties": {
@@ -122,7 +197,21 @@
         "additionalProperties": false,
         "properties": {
           "package": {
-            "$ref": "#/components/schemas/PhrasePackage"
+            "$ref": "#/components/schemas/PhrasePackage-Input"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
           }
         },
         "required": [
@@ -162,6 +251,7 @@
           },
           "status": {
             "enum": [
+              "pending",
               "preparing",
               "added",
               "error"
@@ -177,7 +267,89 @@
         "title": "ImportStatus",
         "type": "object"
       },
-      "PhrasePackage": {
+      "PhrasePackage-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "card_language": {
+            "const": "en",
+            "title": "Card Language",
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/ImportCard"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Cards",
+            "type": "array"
+          },
+          "format": {
+            "const": "phrase-gym.package",
+            "title": "Format",
+            "type": "string"
+          },
+          "help_language": {
+            "const": "en",
+            "title": "Help Language",
+            "type": "string"
+          },
+          "learning_language": {
+            "const": "en",
+            "title": "Learning Language",
+            "type": "string"
+          },
+          "package_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
+            "title": "Package Id",
+            "type": "string"
+          },
+          "source_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_label": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source Label",
+            "type": "string"
+          },
+          "source_link": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "maxLength": 2083,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Link"
+          },
+          "version": {
+            "const": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "format",
+          "version",
+          "package_id",
+          "source_id",
+          "source_label",
+          "learning_language",
+          "card_language",
+          "help_language",
+          "cards"
+        ],
+        "title": "PhrasePackage",
+        "type": "object"
+      },
+      "PhrasePackage-Output": {
         "additionalProperties": false,
         "properties": {
           "card_language": {
@@ -785,6 +957,26 @@
       }
     },
     "/api/imports": {
+      "get": {
+        "operationId": "list_imports_api_imports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImportStatus"
+                  },
+                  "title": "Response List Imports Api Imports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Imports"
+      },
       "post": {
         "operationId": "submit_import_api_imports_post",
         "requestBody": {
@@ -820,6 +1012,32 @@
           }
         },
         "summary": "Submit Import"
+      }
+    },
+    "/api/imports/coach/next": {
+      "post": {
+        "operationId": "next_work_api_imports_coach_next_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CoachWork-Output"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Next Work Api Imports Coach Next Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Next Work"
       }
     },
     "/api/imports/{package_id}": {
@@ -859,6 +1077,104 @@
           }
         },
         "summary": "Import Status"
+      }
+    },
+    "/api/imports/{package_id}/failure": {
+      "post": {
+        "operationId": "publish_failure_api_imports__package_id__failure_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "package_id",
+            "required": true,
+            "schema": {
+              "title": "Package Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoachFailure"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Failure"
+      }
+    },
+    "/api/imports/{package_id}/result": {
+      "post": {
+        "operationId": "publish_result_api_imports__package_id__result_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "package_id",
+            "required": true,
+            "schema": {
+              "title": "Package Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoachResult"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Result"
       }
     },
     "/api/imports/{package_id}/retry": {

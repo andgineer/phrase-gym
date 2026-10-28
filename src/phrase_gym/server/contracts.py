@@ -51,6 +51,7 @@ class PhrasePackage(StrictModel):
 
 class ImportRequest(StrictModel):
     package: PhrasePackage
+    references: dict[str, str] | None = None
 
 
 class RecordingUpload(StrictModel):
@@ -71,9 +72,23 @@ class CompleteStudy(StrictModel):
 
 class ImportStatus(StrictModel):
     package_id: str
-    status: Literal["preparing", "added", "error"]
+    status: Literal["pending", "preparing", "added", "error"]
     error: str | None = None
     added_count: int | None = None
+
+
+class CoachWork(StrictModel):
+    package_id: str
+    package: PhrasePackage
+
+
+class CoachResult(StrictModel):
+    result_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
+    references: dict[str, str]
+
+
+class CoachFailure(StrictModel):
+    error: str = Field(min_length=1, max_length=1000)
 
 
 class RecordingReceipt(StrictModel):

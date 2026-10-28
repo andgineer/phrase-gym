@@ -1,25 +1,33 @@
+import asyncio
 import base64
 import hashlib
 import os
 import stat
-import time
 from pathlib import Path
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 
+from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
 from phrase_gym.server.storage import Database
 
 
-def wait_added(client: TestClient, package_id: str) -> dict[str, object]:
-    for _ in range(100):
-        state = client.get(f"/api/imports/{package_id}").json()
-        if state["status"] != "preparing":
-            return state
-        time.sleep(0.01)
-    raise AssertionError("import remained preparing")
+def prepare_added(client: TestClient, package_id: str) -> dict[str, object]:
+    work = client.post("/api/imports/coach/next").json()
+    assert work["package_id"] == package_id
+    speech = PiperSpeech(None, fake=True)
+    references = {
+        card["item_id"]: base64.b64encode(asyncio.run(speech.synthesize(card["answer"]))).decode()
+        for card in work["package"]["cards"]
+    }
+    response = client.post(
+        f"/api/imports/{package_id}/result",
+        json={"result_id": package_id, "references": references},
+    )
+    assert response.status_code == 200
+    return response.json()
 
 
 def test_empty_library_is_not_completed_study(client: TestClient) -> None:
@@ -38,7 +46,7 @@ def test_study_recordings_and_restart(
 ) -> None:
     response = client.post("/api/imports", json={"package": package})
     assert response.status_code == 202
-    assert wait_added(client, str(package["package_id"]))["added_count"] == 5
+    assert prepare_added(client, str(package["package_id"]))["added_count"] == 5
     if os.name != "nt":
         assert stat.S_IMODE(tmp_path.stat().st_mode) == 0o700
         assert stat.S_IMODE((tmp_path / "phrase-gym.sqlite3").stat().st_mode) == 0o600

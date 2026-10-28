@@ -3,15 +3,17 @@ import { resolve } from 'node:path'
 import { expect, test as base } from '@playwright/test'
 import { createSilentContext } from './silent-playback'
 
-export const test = base.extend<{ server: void }>({
+export const test = base.extend<{ server: void; coachEnabled: boolean }>({
+  coachEnabled: [true, { option: true }],
   server: [
-    async ({ baseURL }, use, testInfo) => {
+    async ({ baseURL, coachEnabled }, use, testInfo) => {
       if (!baseURL) throw new Error('Browser tests require a baseURL')
       const server = spawn(
         'uv',
         ['run', 'python', 'tests/browser_server.py', new URL(baseURL).port],
         {
           cwd: resolve(import.meta.dirname, '../../..'),
+          env: { ...process.env, PHRASE_GYM_BROWSER_NO_COACH: coachEnabled ? '0' : '1' },
           stdio: ['ignore', 'pipe', 'pipe'],
         },
       )

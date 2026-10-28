@@ -14,12 +14,6 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
 
-### Coach migration and durable handoff before MVP completion
-
-- Move Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach process. Keep import, study, reference playback, recordings and history working through the transition. With only core dependencies installed, Phrase Gym must start and offer study/replay and request submission while Coach is stopped. This development installation has no learner data to migrate; its database and working folders may be recreated.
-- Add the [durable handoff](../architecture.md#responsibilities): Vue paste/file and external agents submit through the Phrase Gym API, which persists each preparation request before acknowledgement and shows pending work while Coach is offline. Coach retrieves work and returns results through that API only. Validate results and publish a complete batch atomically; retries across restarts or lost responses must not duplicate requests, references or cards. Later echo-words intake uses this same boundary without adding source integration now.
-- Verify Phrase Gym startup without the Coach optional dependencies or Piper, Coach-offline submission, restart and retry, malformed result rejection, atomic publication and continued study/replay while Coach is absent. The first MVP still imports externally prepared phrase text and makes no model-provider call.
-
 ### 1b. Later recall, scheduling and MVP completion
 
 - Complete the [learning loop](../decision-core-trainer.md): later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.

@@ -1,49 +1,31 @@
-import asyncio
 import hashlib
 import json
-import shutil
 import sqlite3
-import tempfile
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import Protocol
-from uuid import NAMESPACE_URL, uuid5
 
-from phrase_gym.server.contracts import ImportCard, PhrasePackage
-from phrase_gym.server.storage import Database, write_private
+from phrase_gym.server.contracts import PhrasePackage
+from phrase_gym.server.publication import publish_batch
+from phrase_gym.server.reference_audio import ImportConflictError, decode_references
+from phrase_gym.server.storage import Database
 
 
 def now() -> str:
     return datetime.now(UTC).isoformat()
 
 
-def canonical(package: PhrasePackage) -> str:
-    return package.model_dump_json(exclude_none=True)
-
-
-def card_identity(source_id: str, item_id: str) -> str:
-    encoded = json.dumps([source_id, item_id], separators=(",", ":"))
-    return str(uuid5(NAMESPACE_URL, encoded))
-
-
-class ImportConflictError(ValueError):
-    pass
-
-
-class Speech(Protocol):
-    async def synthesize(self, text: str) -> bytes: ...
-
-
 class Importer:
-    def __init__(self, database: Database, speech: Speech):
+    def __init__(self, database: Database):
         self.database = database
-        self.speech = speech
-        self.lock = asyncio.Lock()
-        self.tasks: set[asyncio.Task[None]] = set()
 
-    def submit(self, package: PhrasePackage) -> dict[str, object]:
-        payload = canonical(package)
-        digest = hashlib.sha256(payload.encode()).hexdigest()
+    def submit(
+        self,
+        package: PhrasePackage,
+        references: dict[str, str] | None = None,
+    ) -> dict[str, object]:
+        payload = package.model_dump_json(exclude_none=True)
+        decoded = decode_references(package, references) if references is not None else None
+        digest_data = json.dumps({"package": payload, "references": references}, sort_keys=True)
+        digest = hashlib.sha256(digest_data.encode()).hexdigest()
         with self.database.write() as connection:
             previous = connection.execute(
                 "SELECT * FROM imports WHERE package_id=?",
@@ -52,37 +34,36 @@ class Importer:
             if previous:
                 if previous["content_hash"] != digest:
                     raise ImportConflictError(
-                        "This package_id was already used for different content; "
-                        "use a new package_id.",
+                        "This package_id has different content; use a new ID.",
                     )
                 return self._public(previous)
-            busy = connection.execute(
-                "SELECT package_id FROM imports WHERE status='preparing' LIMIT 1",
-            ).fetchone()
-            if busy:
-                raise ImportConflictError(
-                    f"Package {busy['package_id']} is preparing; wait for it to finish "
-                    "before importing another.",
-                )
-            placeholders = ",".join("?" for _ in package.cards)
-            # Only parameter placeholders enter the SQL text; all values remain bound.
-            conflicts = connection.execute(
-                f"SELECT source_id, item_id FROM cards "  # noqa: S608
-                f"WHERE source_id=? AND item_id IN ({placeholders})",
-                (package.source_id, *(card.item_id for card in package.cards)),
-            ).fetchall()
-            if conflicts:
-                items = ", ".join(row["item_id"] for row in conflicts)
-                raise ImportConflictError(
-                    f"Source items already exist ({items}); no cards were changed. "
-                    "Replacement is available in a later stage.",
-                )
+            self._reject_existing_items(connection, package)
             connection.execute(
-                "INSERT INTO imports VALUES (?, ?, ?, 'preparing', NULL, NULL, ?)",
+                "INSERT INTO imports (package_id, content_hash, payload, status, created_at) "
+                "VALUES (?, ?, ?, 'pending', ?)",
                 (package.package_id, digest, payload, now()),
             )
-        self._start(package)
+            if decoded is not None and references is not None:
+                publish_batch(
+                    connection,
+                    self.database.data_dir,
+                    package,
+                    decoded,
+                    (package.package_id, self._result_hash(references)),
+                )
         return self.status(package.package_id)
+
+    @staticmethod
+    def _reject_existing_items(connection: sqlite3.Connection, package: PhrasePackage) -> None:
+        for card in package.cards:
+            row = connection.execute(
+                "SELECT 1 FROM cards WHERE source_id=? AND item_id=?",
+                (package.source_id, card.item_id),
+            ).fetchone()
+            if row:
+                raise ImportConflictError(
+                    f"cards.{card.item_id}: source item already exists; no cards were changed.",
+                )
 
     def retry(self, package_id: str) -> dict[str, object]:
         with self.database.write() as connection:
@@ -90,119 +71,95 @@ class Importer:
                 "SELECT * FROM imports WHERE package_id=?",
                 (package_id,),
             ).fetchone()
-            if not row:
+            if row is None:
                 raise KeyError(package_id)
-            if row["status"] == "added":
-                return self._public(row)
-            if row["status"] == "preparing":
-                return self._public(row)
-            busy = connection.execute(
-                "SELECT package_id FROM imports WHERE status='preparing' AND package_id<>? LIMIT 1",
-                (package_id,),
-            ).fetchone()
-            if busy:
-                raise ImportConflictError(
-                    f"Package {busy['package_id']} is preparing; wait for it to finish "
-                    "before retrying.",
+            if row["status"] in {"error", "preparing"}:
+                connection.execute(
+                    "UPDATE imports SET status='pending', error=NULL WHERE package_id=?",
+                    (package_id,),
                 )
-            connection.execute(
-                "UPDATE imports SET status='preparing', error=NULL WHERE package_id=?",
-                (package_id,),
-            )
-            package = PhrasePackage.model_validate_json(row["payload"])
-        self._start(package)
         return self.status(package_id)
 
-    def _start(self, package: PhrasePackage) -> None:
-        task = asyncio.create_task(self._prepare(package))
-        self.tasks.add(task)
-        task.add_done_callback(self.tasks.discard)
+    def next_work(self) -> dict[str, object] | None:
+        with self.database.write() as connection:
+            row = connection.execute(
+                "SELECT * FROM imports WHERE status IN ('pending', 'preparing') "
+                "ORDER BY created_at LIMIT 1",
+            ).fetchone()
+            if row is None:
+                return None
+            connection.execute(
+                "UPDATE imports SET status='preparing' WHERE package_id=?",
+                (row["package_id"],),
+            )
+            return {"package_id": row["package_id"], "package": json.loads(row["payload"])}
 
-    async def _prepare(self, package: PhrasePackage) -> None:
-        async with self.lock:
-            staging = Path(tempfile.mkdtemp(prefix="phrase-gym-import-"))
-            created: list[Path] = []
-            try:
-                prepared: list[tuple[ImportCard, Path]] = []
-                for card in package.cards:
-                    audio = await self.speech.synthesize(card.answer)
-                    path = staging / f"{card_identity(package.source_id, card.item_id)}.wav"
-                    path.write_bytes(audio)
-                    prepared.append((card, path))
-                references = self.database.data_dir / "references"
-                references.mkdir(mode=0o700, exist_ok=True)
-                references.chmod(0o700)
-                with self.database.write() as connection:
-                    placeholders = ",".join("?" for _ in package.cards)
-                    # Only parameter placeholders enter the SQL text; all values remain bound.
-                    repeated = connection.execute(
-                        f"SELECT item_id FROM cards WHERE source_id=? "  # noqa: S608
-                        f"AND item_id IN ({placeholders})",
-                        (package.source_id, *(card.item_id for card in package.cards)),
-                    ).fetchall()
-                    if repeated:
-                        raise ImportConflictError(
-                            "A source item appeared while audio was preparing; "
-                            "no cards were added.",
-                        )
-                    for card, staged_path in prepared:
-                        card_id = card_identity(package.source_id, card.item_id)
-                        destination = references / f"{card_id}.wav"
-                        if destination.exists():
-                            owner = connection.execute(
-                                "SELECT id FROM cards WHERE reference_path=?",
-                                (str(destination),),
-                            ).fetchone()
-                            if owner:
-                                raise ImportConflictError(
-                                    "Reference audio is already owned by an existing card.",
-                                )
-                            destination.unlink()
-                        write_private(destination, staged_path.read_bytes())
-                        created.append(destination)
-                        connection.execute(
-                            "INSERT INTO cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)",
-                            (
-                                card_id,
-                                package.source_id,
-                                card.item_id,
-                                package.source_label,
-                                str(package.source_link) if package.source_link else None,
-                                card.answer,
-                                card.explanation,
-                                json.dumps([cue.model_dump() for cue in card.cues]),
-                                json.dumps(card.accepted_variants),
-                                card.detailed_explanation,
-                                str(destination),
-                                now(),
-                            ),
-                        )
-                    connection.execute(
-                        "UPDATE imports SET status='added', added_count=?, error=NULL "
-                        "WHERE package_id=?",
-                        (len(prepared), package.package_id),
+    def fail(self, package_id: str, message: str) -> dict[str, object]:
+        with self.database.write() as connection:
+            row = connection.execute(
+                "SELECT * FROM imports WHERE package_id=?",
+                (package_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(package_id)
+            if row["status"] != "added":
+                connection.execute(
+                    "UPDATE imports SET status='error', error=? WHERE package_id=?",
+                    (message, package_id),
+                )
+        return self.status(package_id)
+
+    def publish(self, package_id: str, result_id: str, audio: dict[str, str]) -> dict[str, object]:
+        with self.database.write() as connection:
+            row = connection.execute(
+                "SELECT * FROM imports WHERE package_id=?",
+                (package_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(package_id)
+            result_hash = self._result_hash(audio)
+            if row["status"] == "added":
+                if row["result_id"] != result_id or row["result_hash"] != result_hash:
+                    raise ImportConflictError(
+                        "A different result was already published for this package.",
                     )
-            # Background failures must clean up files and remain visible for retry.
-            except Exception as error:  # noqa: BLE001
-                for path in created:
-                    path.unlink(missing_ok=True)
-                with self.database.write() as connection:
-                    connection.execute(
-                        "UPDATE imports SET status='error', error=? WHERE package_id=?",
-                        (str(error), package.package_id),
-                    )
-            finally:
-                shutil.rmtree(staging, ignore_errors=True)
+                return self._public(row)
+            if row["status"] not in {"pending", "preparing"}:
+                raise ImportConflictError(
+                    "This package is not pending preparation.",
+                )
+            package = PhrasePackage.model_validate_json(row["payload"])
+            decoded = decode_references(package, audio)
+            self._reject_existing_items(connection, package)
+            publish_batch(
+                connection,
+                self.database.data_dir,
+                package,
+                decoded,
+                (result_id, result_hash),
+            )
+        return self.status(package_id)
+
+    @staticmethod
+    def _result_hash(audio: dict[str, str]) -> str:
+        return hashlib.sha256(json.dumps(audio, sort_keys=True).encode()).hexdigest()
 
     def status(self, package_id: str) -> dict[str, object]:
         with self.database.read() as connection:
             row = connection.execute(
-                "SELECT package_id, status, error, added_count FROM imports WHERE package_id=?",
+                "SELECT * FROM imports WHERE package_id=?",
                 (package_id,),
             ).fetchone()
-        if not row:
+        if row is None:
             raise KeyError(package_id)
-        return dict(row)
+        return self._public(row)
+
+    def list_statuses(self) -> list[dict[str, object]]:
+        with self.database.read() as connection:
+            rows = connection.execute(
+                "SELECT * FROM imports ORDER BY created_at DESC",
+            ).fetchall()
+        return [self._public(row) for row in rows]
 
     @staticmethod
     def _public(row: sqlite3.Row) -> dict[str, object]:

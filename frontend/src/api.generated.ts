@@ -62,10 +62,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Imports */
+        get: operations["list_imports_api_imports_get"];
         put?: never;
         /** Submit Import */
         post: operations["submit_import_api_imports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/coach/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Next Work */
+        post: operations["next_work_api_imports_coach_next_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -83,6 +101,40 @@ export interface paths {
         get: operations["import_status_api_imports__package_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/{package_id}/failure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Failure */
+        post: operations["publish_failure_api_imports__package_id__failure_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/{package_id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Result */
+        post: operations["publish_result_api_imports__package_id__result_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -178,6 +230,32 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CoachFailure */
+        CoachFailure: {
+            /** Error */
+            error: string;
+        };
+        /** CoachResult */
+        CoachResult: {
+            /** References */
+            references: {
+                [key: string]: string;
+            };
+            /** Result Id */
+            result_id: string;
+        };
+        /** CoachWork */
+        "CoachWork-Input": {
+            package: components["schemas"]["PhrasePackage-Input"];
+            /** Package Id */
+            package_id: string;
+        };
+        /** CoachWork */
+        "CoachWork-Output": {
+            package: components["schemas"]["PhrasePackage-Output"];
+            /** Package Id */
+            package_id: string;
+        };
         /** CompleteStudy */
         CompleteStudy: {
             /** Operation Id */
@@ -212,7 +290,11 @@ export interface components {
         };
         /** ImportRequest */
         ImportRequest: {
-            package: components["schemas"]["PhrasePackage"];
+            package: components["schemas"]["PhrasePackage-Input"];
+            /** References */
+            references?: {
+                [key: string]: string;
+            } | null;
         };
         /** ImportStatus */
         ImportStatus: {
@@ -226,10 +308,48 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "preparing" | "added" | "error";
+            status: "pending" | "preparing" | "added" | "error";
         };
         /** PhrasePackage */
-        PhrasePackage: {
+        "PhrasePackage-Input": {
+            /**
+             * Card Language
+             * @constant
+             */
+            card_language: "en";
+            /** Cards */
+            cards: components["schemas"]["ImportCard"][];
+            /**
+             * Format
+             * @constant
+             */
+            format: "phrase-gym.package";
+            /**
+             * Help Language
+             * @constant
+             */
+            help_language: "en";
+            /**
+             * Learning Language
+             * @constant
+             */
+            learning_language: "en";
+            /** Package Id */
+            package_id: string;
+            /** Source Id */
+            source_id: string;
+            /** Source Label */
+            source_label: string;
+            /** Source Link */
+            source_link?: string | null;
+            /**
+             * Version
+             * @constant
+             */
+            version: 1;
+        };
+        /** PhrasePackage */
+        "PhrasePackage-Output": {
             /**
              * Card Language
              * @constant
@@ -491,6 +611,26 @@ export interface operations {
             };
         };
     };
+    list_imports_api_imports_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportStatus"][];
+                };
+            };
+        };
+    };
     submit_import_api_imports_post: {
         parameters: {
             query?: never;
@@ -524,6 +664,26 @@ export interface operations {
             };
         };
     };
+    next_work_api_imports_coach_next_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoachWork-Output"] | null;
+                };
+            };
+        };
+    };
     import_status_api_imports__package_id__get: {
         parameters: {
             query?: never;
@@ -534,6 +694,76 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_failure_api_imports__package_id__failure_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                package_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoachFailure"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_result_api_imports__package_id__result_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                package_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoachResult"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

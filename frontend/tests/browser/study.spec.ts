@@ -518,6 +518,7 @@ test('restored practice card keeps the original layout and microphone interactio
 
 test('one-time discarded-data reset completes before pending take recovery', async ({ page }) => {
   await page.goto('/')
+  await expect(page.getByRole('button', { name: 'Add material' })).toBeVisible()
   await page.evaluate(async () => {
     localStorage.setItem('phrase-gym.reference-exposure.v1.old', 'old')
     localStorage.setItem('phrase-gym.last-learning-language.v1', 'de')

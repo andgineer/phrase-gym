@@ -5,7 +5,7 @@ from pathlib import Path
 import uvicorn
 from platformdirs import user_data_path
 
-from phrase_gym.coach.main import main as coach_main
+from phrase_gym.coach.main import run_coach
 from phrase_gym.server.boundary import tailscale_host
 
 
@@ -33,14 +33,16 @@ def main() -> None:
     run_parser.add_argument("--port", type=int, default=8000)
     run_parser.add_argument("--data-dir", type=Path)
     run_parser.add_argument("--tailscale-origin", type=str)
-    commands.add_parser("coach", help="Run foreground Coach preparation")
+    coach_parser = commands.add_parser("coach", help="Run foreground Coach preparation")
+    coach_parser.add_argument("--url", default="http://127.0.0.1:8000")
+    coach_parser.add_argument("--once", action="store_true")
     for name in ("install-coach", "uninstall-coach", "deploy"):
         commands.add_parser(name, help="Planned command; not available yet")
     args = parser.parse_args()
     if args.command == "run":
         run(args, run_parser)
     elif args.command == "coach":
-        coach_main()
+        run_coach(args.url, once=args.once)
     else:
         parser.error(f"{args.command} is not available yet")
 

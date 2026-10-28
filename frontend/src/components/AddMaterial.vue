@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
 
@@ -19,8 +19,8 @@ let poll: number | null = null
 async function pollImport(packageId: string) {
   try {
     state.value = await api<ImportStatus>(`/imports/${packageId}`)
-    if (state.value.status === 'preparing') {
-      poll = window.setTimeout(() => void pollImport(packageId), 100)
+    if (state.value.status === 'preparing' || state.value.status === 'pending') {
+      poll = window.setTimeout(() => void pollImport(packageId), 1000)
     } else {
       importing.value = false
       if (state.value.status === 'added') emit('added')
@@ -30,6 +30,20 @@ async function pollImport(packageId: string) {
     importing.value = false
   }
 }
+
+onMounted(async () => {
+  try {
+    const imports = await api<ImportStatus[]>('/imports')
+    if (imports[0]) {
+      state.value = imports[0]
+      if (state.value.status === 'pending' || state.value.status === 'preparing') {
+        await pollImport(state.value.package_id)
+      }
+    }
+  } catch (cause) {
+    error.value = String(cause)
+  }
+})
 
 async function importPackage() {
   error.value = ''
@@ -111,6 +125,7 @@ onUnmounted(() => {
     >
       +
     </button>
+    <span v-if="state?.status === 'pending'" role="status">Pending Coach</span>
     <dialog
       ref="dialog"
       class="intake-dialog"
@@ -130,7 +145,13 @@ onUnmounted(() => {
           Import
         </button>
       </div>
+      <p v-if="state?.status === 'pending'" role="status">
+        Pending Coach. You can keep studying while it is offline.
+      </p>
       <p v-if="state?.status === 'preparing'" role="status">Preparing audio…</p>
+      <button v-if="state?.status === 'preparing'" class="quiet" @click="retry">
+        Retry interrupted preparation
+      </button>
       <p v-if="state?.status === 'added'" role="status" class="success">
         Added {{ state.added_count }} phrases.
       </p>

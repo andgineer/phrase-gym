@@ -14,7 +14,7 @@ The server runs on macOS and Linux. Use a macOS browser for the MVP media player
 Linux browser audio support is planned after the MVP.
 
 For a source checkout, use Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a
-configured English Piper voice. Install the pinned environments and build the client once:
+configured English Piper voice for Coach synthesis. Install the pinned environments and build the client once:
 
 ```bash
 uv sync --frozen
@@ -22,22 +22,22 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ```
 
-Set `PHRASE_GYM_PIPER_CONFIG` to a JSON voice configuration described in
-[the import guide](docs/importing-phrases.md#piper-voice), then launch:
+Start Phrase Gym without any Piper installation:
 
 ```bash
-PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json uv run phrase-gym run
+uv run phrase-gym run
 ```
 
-For private iPhone access on your existing tailnet, use `uv run inv run --build --tailscale`
-with the same `PHRASE_GYM_PIPER_CONFIG` setting. This points Tailscale Serve at the new server
+For private iPhone access on your existing tailnet, use `uv run inv run --build --tailscale`. This points Tailscale Serve at the new server
 and allows its exact HTTPS machine hostname. Open the HTTPS URL printed by Tailscale on the
 iPhone with Tailscale connected.
 
 The built wheel contains the Vue client. A lean installed package runs `phrase-gym run`.
-The `coach` extra supplies Piper; the `deploy` extra is reserved for later provisioning.
-`phrase-gym coach` currently reports that the API handoff is pending, and the service
-registration and deployment commands report that they are unavailable.
+Coach runs separately: set `PHRASE_GYM_PIPER_CONFIG` to the private voice file in
+[the import guide](docs/importing-phrases.md#piper-voice), then run
+`uv run phrase-gym coach` in another terminal. The private Piper environment belongs to Coach;
+the server needs only core dependencies. Service registration and deployment commands remain
+unavailable.
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
@@ -46,8 +46,11 @@ For a separate data directory, add `--data-dir /absolute/path`.
 ## Add and study material
 
 Open **Add material**, paste a package or choose its UTF-8 JSON file, and select **Import**.
-The app validates the whole package, prepares every reference through Piper, and adds all cards
-together. A preparation error keeps the submitted package for explicit retry. Exact package
+The app saves the request before acknowledging it. A text-only package stays pending while Coach
+is offline; Coach prepares reference audio and returns it through the API. An external agent can
+submit the same package with complete WAV references in one API request, without Coach. The server
+validates and publishes all cards and references together. A preparation error remains visible
+for explicit retry. Exact package
 retries return the existing result; a changed package ID or repeated source/item identity is
 rejected without overwriting learned material.
 

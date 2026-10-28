@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-import phrase_gym.server.speech as speech_module
-from phrase_gym.server.bounded_process import run_bounded
-from phrase_gym.server.speech import PiperSpeech
+import phrase_gym.coach.speech as speech_module
+from phrase_gym.coach.bounded_process import run_bounded
+from phrase_gym.coach.speech import PiperSpeech
 
 
 def voice_setup(tmp_path: Path, mode: str = "success", version: str = "1.8.0") -> Path:
