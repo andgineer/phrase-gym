@@ -14,11 +14,19 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
 
-### Preparation handoff before MVP completion
+### Next checkpoint: package and command scaffolding
 
-- Move existing Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach service. Keep the current import package format, cards, references, recordings and history through the transition. Phrase Gym must start and offer existing study/replay and request submission without Coach or Piper installed alongside it.
+- Establish the [single-distribution layout and command interface](../architecture.md#package-and-commands): `server/`, `coach/` and `deploy/` under `src/phrase_gym/`, with server API adapters under `server/api/` and small CLI parsing/dispatch in `server/main.py`. Preserve the running Vue and Python application and the current learner data.
+- Define core server dependencies and optional `coach` and `deploy` extras in the one `pyproject.toml` and `uv.lock`. Provide the minimal `phrase-gym run` and `phrase-gym coach` command paths and clear behavior for the planned commands that are not implemented yet. Keep CLI help and core server startup usable without the optional dependencies. Do not implement background service registration, cloud provisioning or model preparation in this checkpoint.
+- Package the built Vue client and required resources so an installed artifact can run without the source checkout, Node or Invoke. Verify the lean and full installation paths, CLI help, server startup and artifact contents in a clean installed context. Continue to use Invoke for repository development gates and release tasks.
+
+**Checkpoint boundary:** the current in-server Piper synthesis may remain temporarily during this structural step. Scaffolding alone does not satisfy the separate-Coach runtime or durable handoff acceptance below. The next checkpoint moves synthesis and then establishes the API-only handoff before the first MVP is complete.
+
+### Coach migration and durable handoff before MVP completion
+
+- Move existing Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach process. Keep the current import package format, cards, references, recordings and history through the transition. With only core dependencies installed, Phrase Gym must start and offer existing study/replay and request submission while Coach is stopped.
 - Add the [durable handoff](../architecture.md#responsibilities): Vue paste/file and external agents submit through the Phrase Gym API, which persists each preparation request before acknowledgement and shows pending work while Coach is offline. Coach retrieves work and returns results through that API only. Validate results and publish a complete batch atomically; retries across restarts or lost responses must not duplicate requests, references or cards. Later echo-words intake uses this same boundary without adding source integration now.
-- Verify Phrase Gym startup without Coach/Piper, Coach-offline submission, restart and retry, malformed result rejection, atomic publication and continued study/replay while Coach is absent. The first MVP still imports externally prepared phrase text and makes no model-provider call.
+- Verify Phrase Gym startup without the Coach optional dependencies or Piper, Coach-offline submission, restart and retry, malformed result rejection, atomic publication and continued study/replay while Coach is absent. The first MVP still imports externally prepared phrase text and makes no model-provider call.
 
 ### 1b. Later recall, scheduling and MVP completion
 
@@ -94,7 +102,9 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 Choose improvements from observed friction: a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
-Cloud placement of Phrase Gym with Coach on the learner's laptop is planned after the local MVP under the [access boundary](../architecture.md#local-access-and-privacy). Design remote access, authentication and deployment before that work; deployment requires the learner's explicit request. Multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. Add other stages only when a concrete user need justifies them.
+Implement the [per-user Coach service commands](../architecture.md#package-and-commands) after the local MVP: `install-coach` registers and starts Coach, and `uninstall-coach` removes the registration while preserving data. Verify startup and removal on macOS launchd and Linux systemd user services; neither command requires the cloud `deploy` extra.
+
+Cloud placement of Phrase Gym with Coach on the learner's laptop is planned after the local MVP under the [access boundary](../architecture.md#local-access-and-privacy). The packaged `phrase-gym deploy` command must use a versioned installed artifact without a source clone, following the [package boundary](../architecture.md#package-and-commands). Design remote access, authentication and the cloud provider deployment before that work; actual deployment requires the learner's explicit request. Multi-device sync, automatic speech assessment, a live AI conversation partner, memorized full-dialogue rehearsal and broad distribution are not scheduled work. Add other stages only when a concrete user need justifies them.
 
 After the MVP, qualify Linux browser media playback and recording under the [platform boundary](../architecture.md#application-boundary). Keep Linux server tests passing throughout; browser audio qualification is separate from server compatibility.
 

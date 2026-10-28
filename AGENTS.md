@@ -38,7 +38,7 @@ Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries 
 
 Preserve the repository scaffold: pre-commit, Invoke tasks, version/tag helpers, package metadata, environment/build scripts, documentation publishing, test/coverage reports and PyPI release workflows. Extend these for the application instead of replacing or deleting them. Only application/documentation boilerplate should be replaced with real implementation and documentation. Follow [development and release operations](docs/development.md).
 
-Pre-commit owns the static checks and all Ruff settings. Use Pyrefly for Python type checking; do not add a duplicate mypy gate or a wrapper that reruns the same tools. Invoke owns build, test and server commands; keep root-level executable scripts limited to the retained environment activation script.
+Pre-commit owns the static checks and all Ruff settings. Use Pyrefly for Python type checking; do not add a duplicate mypy gate or a wrapper that reruns the same tools. Invoke owns repository development, build, test and release tasks; the packaged CLI owns user runtime and deployment commands, which Invoke may wrap. Keep root-level executable scripts limited to the retained environment activation script.
 
 Run the full browser/audio gate on macOS and retain the separate Linux Python server job in CI, following the [platform boundary](specs/architecture.md#application-boundary). Do not skip native recorder tests to accommodate Linux WebKit's missing API.
 
