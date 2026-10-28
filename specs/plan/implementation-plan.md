@@ -16,7 +16,7 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 ### Coach migration and durable handoff before MVP completion
 
-- Move existing Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach process. Keep the current import package format, cards, references, recordings and history through the transition. With only core dependencies installed, Phrase Gym must start and offer existing study/replay and request submission while Coach is stopped.
+- Move Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach process. Keep import, study, reference playback, recordings and history working through the transition. With only core dependencies installed, Phrase Gym must start and offer study/replay and request submission while Coach is stopped. This development installation has no learner data to migrate; its database and working folders may be recreated.
 - Add the [durable handoff](../architecture.md#responsibilities): Vue paste/file and external agents submit through the Phrase Gym API, which persists each preparation request before acknowledgement and shows pending work while Coach is offline. Coach retrieves work and returns results through that API only. Validate results and publish a complete batch atomically; retries across restarts or lost responses must not duplicate requests, references or cards. Later echo-words intake uses this same boundary without adding source integration now.
 - Verify Phrase Gym startup without the Coach optional dependencies or Piper, Coach-offline submission, restart and retry, malformed result rejection, atomic publication and continued study/replay while Coach is absent. The first MVP still imports externally prepared phrase text and makes no model-provider call.
 
@@ -24,9 +24,9 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 - Complete the [learning loop](../decision-core-trainer.md): later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.
 - Add basic due/new counts, library lookup, Suspend/Restore and the minimal English language/timezone choices. Corrected imports can replace a suspended card without rewriting its history.
-- Provide and verify the manual stopped-app backup/restore procedure. Preserve the cards, study history and recordings created in stage 1a.
+- Provide and verify the manual stopped-app backup/restore procedure. Preserve cards, study history and recordings created during the MVP.
 
-**Exit:** satisfy the complete MVP acceptance table and checks below. A later real-clock return remains pending until observed; it need not block independent implementation work. A request for the whole first MVP covers both 1a and 1b.
+**Exit:** satisfy the complete MVP acceptance table and checks below. A later real-clock return remains pending until observed; it need not block independent implementation work. A request for the whole first MVP covers the Coach handoff and later recall.
 
 ### Observable acceptance
 
@@ -106,7 +106,7 @@ Existing authorization for routine local English preparation and Piper runs cont
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
-The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment). Preserve existing learner data; prototype code retirement does not authorize deleting it.
+The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
 ## Delivery discipline
 
