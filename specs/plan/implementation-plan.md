@@ -1,46 +1,6 @@
 # Delivery ladder
 
-Deliver the smallest useful research-informed learning loop first. The target is a lightweight Phrase Gym service with SQLite and the existing Vue GUI, plus an intermittently available headless Coach for preparation. Both run on the same machine for the first versions. Both earlier backends supply reusable code and tests; neither defines mandatory parity. The [architecture](../architecture.md) defines the API-only handoff without a Coach GUI or general worker framework.
-
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Complete phrase preparation and recall first, then speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
-
-## Why phrases first
-
-Import a batch of already prepared English course phrases from an external AI. This is the shortest route to practising personally useful language: it avoids building internal generation, echo-words integration and word-sense clarification before the recorder, recall loop and scheduled return are useful.
-
-English matches the learner's resolved preferences and an existing local Piper candidate. This is a delivery choice, not evidence that phrases teach better than words. Source extraction stays outside this repository. A supplied export is sufficient; do not build a crawler or edit a source project.
-
-## 1. First MVP: import a phrase batch and use it across days
-
-**Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
-
-### 1b. Later recall, scheduling and MVP completion
-
-- Complete the [learning loop](../decision-core-trainer.md): later-day independent recall, cue rotation, reveal/compare, three ratings of the original response, one supported repetition where needed, due return and optional ungraded practice. Use library FSRS with the simplified eligibility policy.
-- Add basic due/new counts, library lookup, Suspend/Restore and the minimal English language/timezone choices. Corrected imports can replace a suspended card without rewriting its history.
-- Provide and verify the manual stopped-app backup/restore procedure. Preserve cards, study history and recordings created during the MVP.
-
-**Exit:** satisfy the complete MVP acceptance table and checks below. A later real-clock return remains pending until observed; it need not block independent implementation work. A request for the whole first MVP covers the Coach handoff and later recall.
-
-### Observable acceptance
-
-| Action or condition | What the learner must observe |
-|---|---|
-| Import a real externally prepared batch | Readable phrases, preparation progress and the confirmed added count; replayable references without developer seeding |
-| Submit a batch while Coach is offline | A durable pending acknowledgement; study and saved replay remain available, and Coach prepares the batch when it returns |
-| Import malformed content or repeat the same package | An item-specific correction message or the existing result; no partial batch and no duplicate cards |
-| Study a new phrase | Complete wording, understandable meaning, reference playback and Next; no success/failure grade |
-| Finish today's study | A clear next-return indication; no forced waiting or immediate graded readback |
-| Return on a later learning day | An answer-free cue and optional recording; varied cues across returns where available |
-| Reveal and self-rate | Reference and short help; rating describes the original response, and one saved review changes the due date |
-| Fail, ask to study, find an ambiguous card or encounter microphone failure | Corrective study, skip or suspension as appropriate; technical/card errors do not become forgetting grades |
-| Record twice, reload and restart the app | Both complete saved takes remain associated with the right card and can be replayed |
-| Practise early or repeat after rating | Clearly ungraded rehearsal; no second schedule update |
-| Stop the app, back up, restore a copy and launch it | Cards, due history, references and saved takes are present and playable |
-
-**Checks:** silent unit/integration and real-browser tests against the new Python backend cover this path and its simple failure/retry cases. Use a test clock for automated day/interval tests, never a learner-facing clock override. Review representative externally generated cards semantically and listen to references separately; software tests cannot establish either. The learner verifies complete microphone/comparison/saved playback on the actual MacBook. A later real-clock return remains explicitly pending until observed; immediate repetition is not a substitute.
-
-**MVP boundary:** no word generation, frames, speaking missions, game rewards, dialogue runs, confusable dependency graph, multilingual voice matrix, native app, source-specific integration, cloud deployment, general worker framework or advanced backup system is required. A useful English phrase workflow is the first MVP, not a stepping stone that must wait for those features.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Continue with speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
 
 ## 2. Bring learned expressions into freer speech
 

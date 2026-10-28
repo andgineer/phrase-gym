@@ -27,6 +27,14 @@ header {
   padding-bottom: 28px;
   border-bottom: 1px solid #deded1;
 }
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+header nav button {
+  padding-inline: 10px;
+}
 .brand {
   font-size: 1.3rem;
   font-weight: 780;
@@ -83,6 +91,7 @@ label {
   font-weight: 600;
 }
 input[type='search'],
+input[type='text'],
 select {
   width: 100%;
   border: 1px solid #ccd2c7;

@@ -70,6 +70,22 @@ class CompleteStudy(StrictModel):
     operation_id: str = Field(min_length=8, max_length=100)
 
 
+class ReviewRequest(CompleteStudy):
+    rating: Literal["not_yet", "with_effort", "recalled"]
+    response_mode: Literal["spoken", "silent"]
+
+
+class AttemptAction(StrictModel):
+    response_mode: Literal["spoken", "silent"] | None = None
+
+
+class Settings(StrictModel):
+    native_language: Literal["ru", "en"]
+    learning_timezone: str = Field(min_length=1, max_length=64)
+    card_language: Literal["en"]
+    help_language: Literal["en"]
+
+
 class ImportStatus(StrictModel):
     package_id: str
     status: Literal["pending", "preparing", "added", "error"]
@@ -123,6 +139,9 @@ class StudyCard(StrictModel):
     reference_url: str
     attempt_id: str
     recordings: list[SavedRecording]
+    kind: Literal["study", "review", "free"] = "study"
+    revealed: bool = True
+    cue: Cue | None = None
 
 
 class StudyResponse(StrictModel):
@@ -131,17 +150,33 @@ class StudyResponse(StrictModel):
     studied: int
     message: str | None = None
     card: StudyCard | None = None
+    due_count: int = 0
+    new_count: int = 0
+    next_return: str | None = None
+
+
+class ReviewItem(StrictModel):
+    reviewed_at: str
+    cue: Cue
+    response_mode: str
+    help_before: bool
+    rating: str
+    due_at: str
 
 
 class StudyHistoryItem(StrictModel):
     id: str
+    item_id: str
     answer: str
     source_label: str
     reference_url: str
     recordings: list[SavedRecording]
+    suspended: bool
+    due_at: str | None
+    reviews: list[ReviewItem]
 
 
 class StudyCompletion(StrictModel):
     attempt_id: str
     completed_at: str
-    graded: Literal[False]
+    graded: bool

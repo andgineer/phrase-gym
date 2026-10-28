@@ -109,7 +109,7 @@ def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
 
 def test_study_contracts_are_closed_generated_schemas(client: TestClient) -> None:
     schemas = client.get("/openapi.json").json()["components"]["schemas"]
-    for name in ("StudyResponse", "StudyCard", "StudyHistoryItem", "StudyCompletion"):
+    for name in ("StudyResponse", "StudyCard", "StudyHistoryItem-Output", "StudyCompletion"):
         assert schemas[name]["additionalProperties"] is False
 
 

@@ -2,11 +2,13 @@ import os
 import sys
 import tempfile
 import threading
+from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
 
 from phrase_gym.coach.main import run_coach
+from phrase_gym.server.app import create_app
 
 
 def main() -> None:
@@ -22,7 +24,19 @@ def main() -> None:
                 args=(f"http://127.0.0.1:{port}",),
                 daemon=True,
             ).start()
-        uvicorn.run("phrase_gym.server.app:create_app", factory=True, host="127.0.0.1", port=port)
+        app = create_app()
+        simulated_time: list[datetime | None] = [None]
+        app.state.study.clock = lambda: simulated_time[0] or datetime.now(UTC)
+
+        @app.post("/__test/clock/{iso_time}")
+        def set_clock(iso_time: str) -> dict[str, str]:
+            simulated_time[0] = datetime.fromisoformat(iso_time)
+            return {"time": simulated_time[0].isoformat()}
+
+        test_route = app.router.routes.pop()
+        app.router.routes.insert(-1, test_route)
+
+        uvicorn.run(app, host="127.0.0.1", port=port)
 
 
 if __name__ == "__main__":

@@ -34,7 +34,10 @@ def publish_batch(
             created.append(destination)
             write_private(destination, decoded[card.item_id])
             connection.execute(
-                "INSERT INTO cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)",
+                "INSERT INTO cards (id,source_id,item_id,source_label,source_link,answer,"
+                "explanation,cues_json,variants_json,detailed_explanation,"
+                "reference_path,created_at,studied_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)",
                 (
                     card_id,
                     package.source_id,

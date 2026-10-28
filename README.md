@@ -4,9 +4,8 @@
 [![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
-keeping private learner recordings. This checkpoint supports package import, ungraded first
-study, reference playback, optional recording, comparison, and saved replay. Later recall and
-scheduling remain the next stage.
+keeping private learner recordings. It supports package import, first study, later spoken recall,
+self-rating, scheduled return, reference playback, comparison, and saved replay.
 
 ## Install and launch
 
@@ -56,8 +55,14 @@ rejected without overwriting learned material.
 
 Study shows the full phrase and meaning/use help. Reference playback and recording are optional.
 Every stopped take is retained separately and saved automatically; pending uploads remain in the
-browser for retry. **Next** records ungraded study completion. The finish screen deliberately does
-not invent a recall grade or schedule before the later-recall stage exists.
+browser for retry. **Next** records ungraded study completion. On the next learning day, due cards
+show an answer-free cue. Try to recall the wording, reveal it, then rate the original response:
+**Not yet**, **With effort**, or **Recalled**. A difficult response can be repeated once with
+the answer visible. **Study / skip grading** and **Unclear card** avoid a false forgetting grade.
+The **Library** offers saved takes, dated reviews, Suspend/Restore, and ungraded practice.
+**Settings** contains the native language and learning timezone.
+
+For a private stopped-app backup and restore, follow [the maintenance procedure](docs/backup-and-restore.md).
 
 See [the package schema, example, and external-agent instruction](docs/importing-phrases.md).
 

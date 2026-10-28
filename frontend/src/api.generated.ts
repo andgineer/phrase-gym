@@ -21,6 +21,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/attempts/{attempt_id}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal */
+        post: operations["reveal_api_attempts__attempt_id__reveal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/attempts/{attempt_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review */
+        post: operations["review_api_attempts__attempt_id__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{card_id}/expose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Expose */
+        post: operations["expose_api_cards__card_id__expose_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{card_id}/practise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Practise */
+        post: operations["practise_api_cards__card_id__practise_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cards/{card_id}/reference": {
         parameters: {
             query?: never;
@@ -32,6 +100,40 @@ export interface paths {
         get: operations["reference_audio_api_cards__card_id__reference_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{card_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore */
+        post: operations["restore_api_cards__card_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{card_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspend */
+        post: operations["suspend_api_cards__card_id__suspend_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -158,6 +260,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Library */
+        get: operations["library_api_library_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recordings": {
         parameters: {
             query?: never;
@@ -185,6 +304,24 @@ export interface paths {
         /** Recording Audio */
         get: operations["recording_audio_api_recordings__recording_id__audio_get"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings */
+        get: operations["settings_api_settings_get"];
+        /** Update Settings */
+        put: operations["update_settings_api_settings_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -230,6 +367,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AttemptAction */
+        AttemptAction: {
+            /** Response Mode */
+            response_mode?: ("spoken" | "silent") | null;
+        };
         /** CoachFailure */
         CoachFailure: {
             /** Error */
@@ -420,6 +562,35 @@ export interface components {
             /** Mime Type */
             mime_type: string;
         };
+        /** ReviewItem */
+        ReviewItem: {
+            cue: components["schemas"]["Cue"];
+            /** Due At */
+            due_at: string;
+            /** Help Before */
+            help_before: boolean;
+            /** Rating */
+            rating: string;
+            /** Response Mode */
+            response_mode: string;
+            /** Reviewed At */
+            reviewed_at: string;
+        };
+        /** ReviewRequest */
+        ReviewRequest: {
+            /** Operation Id */
+            operation_id: string;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "not_yet" | "with_effort" | "recalled";
+            /**
+             * Response Mode
+             * @enum {string}
+             */
+            response_mode: "spoken" | "silent";
+        };
         /** SavedRecording */
         SavedRecording: {
             /** Attempt Id */
@@ -439,6 +610,26 @@ export interface components {
             /** Url */
             url: string;
         };
+        /** Settings */
+        Settings: {
+            /**
+             * Card Language
+             * @constant
+             */
+            card_language: "en";
+            /**
+             * Help Language
+             * @constant
+             */
+            help_language: "en";
+            /** Learning Timezone */
+            learning_timezone: string;
+            /**
+             * Native Language
+             * @enum {string}
+             */
+            native_language: "ru" | "en";
+        };
         /** StudyCard */
         StudyCard: {
             /** Accepted Variants */
@@ -447,6 +638,7 @@ export interface components {
             answer: string;
             /** Attempt Id */
             attempt_id: string;
+            cue?: components["schemas"]["Cue"] | null;
             /** Cues */
             cues: components["schemas"]["Cue"][];
             /** Detailed Explanation */
@@ -457,10 +649,21 @@ export interface components {
             id: string;
             /** Item Id */
             item_id: string;
+            /**
+             * Kind
+             * @default study
+             * @enum {string}
+             */
+            kind: "study" | "review" | "free";
             /** Recordings */
             recordings: components["schemas"]["SavedRecording"][];
             /** Reference Url */
             reference_url: string;
+            /**
+             * Revealed
+             * @default true
+             */
+            revealed: boolean;
             /** Source Id */
             source_id: string;
             /** Source Label */
@@ -474,32 +677,70 @@ export interface components {
             attempt_id: string;
             /** Completed At */
             completed_at: string;
-            /**
-             * Graded
-             * @constant
-             */
-            graded: false;
+            /** Graded */
+            graded: boolean;
         };
         /** StudyHistoryItem */
-        StudyHistoryItem: {
+        "StudyHistoryItem-Input": {
             /** Answer */
             answer: string;
+            /** Due At */
+            due_at: string | null;
             /** Id */
             id: string;
+            /** Item Id */
+            item_id: string;
             /** Recordings */
             recordings: components["schemas"]["SavedRecording"][];
             /** Reference Url */
             reference_url: string;
+            /** Reviews */
+            reviews: components["schemas"]["ReviewItem"][];
             /** Source Label */
             source_label: string;
+            /** Suspended */
+            suspended: boolean;
+        };
+        /** StudyHistoryItem */
+        "StudyHistoryItem-Output": {
+            /** Answer */
+            answer: string;
+            /** Due At */
+            due_at: string | null;
+            /** Id */
+            id: string;
+            /** Item Id */
+            item_id: string;
+            /** Recordings */
+            recordings: components["schemas"]["SavedRecording"][];
+            /** Reference Url */
+            reference_url: string;
+            /** Reviews */
+            reviews: components["schemas"]["ReviewItem"][];
+            /** Source Label */
+            source_label: string;
+            /** Suspended */
+            suspended: boolean;
         };
         /** StudyResponse */
         StudyResponse: {
             card?: components["schemas"]["StudyCard"] | null;
             /** Done */
             done: boolean;
+            /**
+             * Due Count
+             * @default 0
+             */
+            due_count: number;
             /** Message */
             message?: string | null;
+            /**
+             * New Count
+             * @default 0
+             */
+            new_count: number;
+            /** Next Return */
+            next_return?: string | null;
             /** Studied */
             studied: number;
             /** Total */
@@ -558,6 +799,140 @@ export interface operations {
             };
         };
     };
+    reveal_api_attempts__attempt_id__reveal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_api_attempts__attempt_id__review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyCompletion"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    expose_api_cards__card_id__expose_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    practise_api_cards__card_id__practise_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     reference_audio_api_cards__card_id__reference_get: {
         parameters: {
             query?: never;
@@ -576,6 +951,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_api_cards__card_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suspend_api_cards__card_id__suspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -816,6 +1257,26 @@ export interface operations {
             };
         };
     };
+    library_api_library_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyHistoryItem-Output"][];
+                };
+            };
+        };
+    };
     save_recording_api_recordings_post: {
         parameters: {
             query?: never;
@@ -880,6 +1341,59 @@ export interface operations {
             };
         };
     };
+    settings_api_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+        };
+    };
+    update_settings_api_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Settings"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     current_study_api_study_current_post: {
         parameters: {
             query?: never;
@@ -915,7 +1429,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StudyHistoryItem"][];
+                    "application/json": components["schemas"]["StudyHistoryItem-Output"][];
                 };
             };
         };

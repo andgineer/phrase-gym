@@ -25,8 +25,8 @@ Each card requires a stable `item_id`, a fixed complete English `answer`, a shor
 `detailed_explanation` may add longer help. Unknown fields are rejected.
 
 `source_id` plus `item_id` is permanent card identity. Repeating that identity in another package
-is rejected without overwriting it. Correction/replacement with suspension belongs to the later
-library stage.
+is rejected without overwriting it. To replace defective content, suspend the old card in the
+Library and import a corrected card with a new `item_id`; the old card and its history remain.
 
 The generated machine-readable request schema is available at
 [`frontend/openapi.json`](https://github.com/andgineer/phrase-gym/blob/main/frontend/openapi.json).

@@ -1,6 +1,28 @@
 {
   "components": {
     "schemas": {
+      "AttemptAction": {
+        "additionalProperties": false,
+        "properties": {
+          "response_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "spoken",
+                  "silent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Mode"
+          }
+        },
+        "title": "AttemptAction",
+        "type": "object"
+      },
       "CoachFailure": {
         "additionalProperties": false,
         "properties": {
@@ -547,6 +569,79 @@
         "title": "RecordingUpload",
         "type": "object"
       },
+      "ReviewItem": {
+        "additionalProperties": false,
+        "properties": {
+          "cue": {
+            "$ref": "#/components/schemas/Cue"
+          },
+          "due_at": {
+            "title": "Due At",
+            "type": "string"
+          },
+          "help_before": {
+            "title": "Help Before",
+            "type": "boolean"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "string"
+          },
+          "response_mode": {
+            "title": "Response Mode",
+            "type": "string"
+          },
+          "reviewed_at": {
+            "title": "Reviewed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reviewed_at",
+          "cue",
+          "response_mode",
+          "help_before",
+          "rating",
+          "due_at"
+        ],
+        "title": "ReviewItem",
+        "type": "object"
+      },
+      "ReviewRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "rating": {
+            "enum": [
+              "not_yet",
+              "with_effort",
+              "recalled"
+            ],
+            "title": "Rating",
+            "type": "string"
+          },
+          "response_mode": {
+            "enum": [
+              "spoken",
+              "silent"
+            ],
+            "title": "Response Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id",
+          "rating",
+          "response_mode"
+        ],
+        "title": "ReviewRequest",
+        "type": "object"
+      },
       "SavedRecording": {
         "additionalProperties": false,
         "properties": {
@@ -603,6 +698,43 @@
         "title": "SavedRecording",
         "type": "object"
       },
+      "Settings": {
+        "additionalProperties": false,
+        "properties": {
+          "card_language": {
+            "const": "en",
+            "title": "Card Language",
+            "type": "string"
+          },
+          "help_language": {
+            "const": "en",
+            "title": "Help Language",
+            "type": "string"
+          },
+          "learning_timezone": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Learning Timezone",
+            "type": "string"
+          },
+          "native_language": {
+            "enum": [
+              "ru",
+              "en"
+            ],
+            "title": "Native Language",
+            "type": "string"
+          }
+        },
+        "required": [
+          "native_language",
+          "learning_timezone",
+          "card_language",
+          "help_language"
+        ],
+        "title": "Settings",
+        "type": "object"
+      },
       "StudyCard": {
         "additionalProperties": false,
         "properties": {
@@ -620,6 +752,16 @@
           "attempt_id": {
             "title": "Attempt Id",
             "type": "string"
+          },
+          "cue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Cue"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "cues": {
             "items": {
@@ -651,6 +793,16 @@
             "title": "Item Id",
             "type": "string"
           },
+          "kind": {
+            "default": "study",
+            "enum": [
+              "study",
+              "review",
+              "free"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
           "recordings": {
             "items": {
               "$ref": "#/components/schemas/SavedRecording"
@@ -661,6 +813,11 @@
           "reference_url": {
             "title": "Reference Url",
             "type": "string"
+          },
+          "revealed": {
+            "default": true,
+            "title": "Revealed",
+            "type": "boolean"
           },
           "source_id": {
             "title": "Source Id",
@@ -712,7 +869,6 @@
             "type": "string"
           },
           "graded": {
-            "const": false,
             "title": "Graded",
             "type": "boolean"
           }
@@ -725,15 +881,30 @@
         "title": "StudyCompletion",
         "type": "object"
       },
-      "StudyHistoryItem": {
+      "StudyHistoryItem-Input": {
         "additionalProperties": false,
         "properties": {
           "answer": {
             "title": "Answer",
             "type": "string"
           },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
           "id": {
             "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "title": "Item Id",
             "type": "string"
           },
           "recordings": {
@@ -747,17 +918,99 @@
             "title": "Reference Url",
             "type": "string"
           },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewItem"
+            },
+            "title": "Reviews",
+            "type": "array"
+          },
           "source_label": {
             "title": "Source Label",
             "type": "string"
+          },
+          "suspended": {
+            "title": "Suspended",
+            "type": "boolean"
           }
         },
         "required": [
           "id",
+          "item_id",
           "answer",
           "source_label",
           "reference_url",
-          "recordings"
+          "recordings",
+          "suspended",
+          "due_at",
+          "reviews"
+        ],
+        "title": "StudyHistoryItem",
+        "type": "object"
+      },
+      "StudyHistoryItem-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "recordings": {
+            "items": {
+              "$ref": "#/components/schemas/SavedRecording"
+            },
+            "title": "Recordings",
+            "type": "array"
+          },
+          "reference_url": {
+            "title": "Reference Url",
+            "type": "string"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewItem"
+            },
+            "title": "Reviews",
+            "type": "array"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          },
+          "suspended": {
+            "title": "Suspended",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "item_id",
+          "answer",
+          "source_label",
+          "reference_url",
+          "recordings",
+          "suspended",
+          "due_at",
+          "reviews"
         ],
         "title": "StudyHistoryItem",
         "type": "object"
@@ -779,6 +1032,11 @@
             "title": "Done",
             "type": "boolean"
           },
+          "due_count": {
+            "default": 0,
+            "title": "Due Count",
+            "type": "integer"
+          },
           "message": {
             "anyOf": [
               {
@@ -789,6 +1047,22 @@
               }
             ],
             "title": "Message"
+          },
+          "new_count": {
+            "default": 0,
+            "title": "New Count",
+            "type": "integer"
+          },
+          "next_return": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Return"
           },
           "studied": {
             "title": "Studied",
@@ -897,6 +1171,186 @@
         "summary": "Complete Study"
       }
     },
+    "/api/attempts/{attempt_id}/reveal": {
+      "post": {
+        "operationId": "reveal_api_attempts__attempt_id__reveal_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reveal"
+      }
+    },
+    "/api/attempts/{attempt_id}/review": {
+      "post": {
+        "operationId": "review_api_attempts__attempt_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyCompletion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review"
+      }
+    },
+    "/api/cards/{card_id}/expose": {
+      "post": {
+        "operationId": "expose_api_cards__card_id__expose_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "title": "Card Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Expose Api Cards  Card Id  Expose Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Expose"
+      }
+    },
+    "/api/cards/{card_id}/practise": {
+      "post": {
+        "operationId": "practise_api_cards__card_id__practise_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "title": "Card Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Practise"
+      }
+    },
     "/api/cards/{card_id}/reference": {
       "get": {
         "operationId": "reference_audio_api_cards__card_id__reference_get",
@@ -932,6 +1386,92 @@
           }
         },
         "summary": "Reference Audio"
+      }
+    },
+    "/api/cards/{card_id}/restore": {
+      "post": {
+        "operationId": "restore_api_cards__card_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "title": "Card Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Restore Api Cards  Card Id  Restore Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Restore"
+      }
+    },
+    "/api/cards/{card_id}/suspend": {
+      "post": {
+        "operationId": "suspend_api_cards__card_id__suspend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "title": "Card Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Suspend Api Cards  Card Id  Suspend Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suspend"
       }
     },
     "/api/health": {
@@ -1216,6 +1756,28 @@
         "summary": "Retry Import"
       }
     },
+    "/api/library": {
+      "get": {
+        "operationId": "library_api_library_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StudyHistoryItem-Output"
+                  },
+                  "title": "Response Library Api Library Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Library"
+      }
+    },
     "/api/recordings": {
       "post": {
         "operationId": "save_recording_api_recordings_post",
@@ -1291,6 +1853,60 @@
         "summary": "Recording Audio"
       }
     },
+    "/api/settings": {
+      "get": {
+        "operationId": "settings_api_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Settings"
+      },
+      "put": {
+        "operationId": "update_settings_api_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Settings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Settings"
+      }
+    },
     "/api/study/current": {
       "post": {
         "operationId": "current_study_api_study_current_post",
@@ -1318,7 +1934,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/StudyHistoryItem"
+                    "$ref": "#/components/schemas/StudyHistoryItem-Output"
                   },
                   "title": "Response Study History Api Study History Get",
                   "type": "array"

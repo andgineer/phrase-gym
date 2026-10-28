@@ -2,7 +2,10 @@ import os
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
+
+from phrase_gym.server.scheduling import next_day_start
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -33,6 +36,16 @@ CREATE TABLE IF NOT EXISTS recordings (
   capture_settings_json TEXT NOT NULL, path TEXT NOT NULL, byte_length INTEGER NOT NULL,
   sha256 TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY, attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(id),
+  card_id TEXT NOT NULL REFERENCES cards(id), reviewed_at TEXT NOT NULL,
+  learning_day TEXT NOT NULL, cue_snapshot TEXT NOT NULL, response_mode TEXT NOT NULL,
+  help_before INTEGER NOT NULL, rating TEXT NOT NULL, due_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1),
+  native_language TEXT NOT NULL, learning_timezone TEXT NOT NULL,
+  card_language TEXT NOT NULL, help_language TEXT NOT NULL);
+INSERT OR IGNORE INTO settings VALUES (1, 'ru', 'Europe/Belgrade', 'en', 'en');
 """
 
 
@@ -48,11 +61,47 @@ class Database:
         self.path.chmod(0o600)
         with self.write() as connection:
             connection.executescript(SCHEMA)
-            connection.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', '1')")
+            version = connection.execute(
+                "SELECT value FROM meta WHERE key='schema_version'",
+            ).fetchone()
+            if version and version[0] not in ("1", "2"):
+                raise RuntimeError(
+                    f"Unsupported Phrase Gym data schema {version[0]}; restore a compatible backup",
+                )
+            connection.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', '2')")
             columns = {row[1] for row in connection.execute("PRAGMA table_info(imports)")}
             for name in ("result_id", "result_hash"):
                 if name not in columns:
                     connection.execute(f"ALTER TABLE imports ADD COLUMN {name} TEXT")
+            card_columns = {row[1] for row in connection.execute("PRAGMA table_info(cards)")}
+            for name, definition in (
+                ("due_at", "TEXT"),
+                ("fsrs_json", "TEXT"),
+                ("suspended", "INTEGER NOT NULL DEFAULT 0"),
+                ("cue_index", "INTEGER NOT NULL DEFAULT 0"),
+                ("exposed_day", "TEXT"),
+            ):
+                if name not in card_columns:
+                    connection.execute(f"ALTER TABLE cards ADD COLUMN {name} {definition}")
+            attempt_columns = {row[1] for row in connection.execute("PRAGMA table_info(attempts)")}
+            for name, definition in (
+                ("kind", "TEXT NOT NULL DEFAULT 'study'"),
+                ("learning_day", "TEXT"),
+                ("revealed_at", "TEXT"),
+                ("response_mode", "TEXT"),
+            ):
+                if name not in attempt_columns:
+                    connection.execute(f"ALTER TABLE attempts ADD COLUMN {name} {definition}")
+            prior_study = connection.execute(
+                "SELECT id, studied_at FROM cards WHERE studied_at IS NOT NULL AND due_at IS NULL",
+            ).fetchall()
+            for card in prior_study:
+                due = next_day_start(connection, datetime.fromisoformat(card["studied_at"]))
+                connection.execute(
+                    "UPDATE cards SET due_at=? WHERE id=?",
+                    (due.isoformat(), card["id"]),
+                )
+            connection.execute("UPDATE meta SET value='2' WHERE key='schema_version'")
             connection.execute("UPDATE imports SET status='pending' WHERE status='preparing'")
 
     def connect(self) -> sqlite3.Connection:

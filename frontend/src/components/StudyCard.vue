@@ -12,6 +12,7 @@ defineProps<{
   pendingTakes: number
   captureError: string
   takeError: string
+  rated: string | null
   play: (url: string) => Promise<void>
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
 }>()
@@ -19,6 +20,10 @@ const emit = defineEmits<{
   control: []
   retry: []
   next: []
+  reveal: []
+  rate: [rating: string]
+  skip: []
+  suspend: []
 }>()
 </script>
 
@@ -28,11 +33,21 @@ const emit = defineEmits<{
       <span>{{ progress }}</span>
     </div>
     <article class="card practice-card study">
-      <p role="status">First study. Read and say the phrase.</p>
-      <p v-if="card.cues[0]" class="practice-prompt">{{ card.cues[0].situation }}</p>
-      <p v-if="card.cues[0]?.partner_line">{{ card.cues[0].partner_line }}</p>
-      <h1 tabindex="-1" lang="en" data-testid="practice-phrase">{{ card.answer }}</h1>
-      <p v-if="card.accepted_variants.length" class="muted">
+      <p role="status">
+        {{
+          card.kind === 'review'
+            ? 'Independent recall'
+            : card.kind === 'free'
+              ? 'Ungraded rehearsal'
+              : 'First study. Read and say the phrase.'
+        }}
+      </p>
+      <p v-if="card.cue" class="practice-prompt">{{ card.cue.situation }}</p>
+      <p v-if="card.cue?.partner_line">{{ card.cue.partner_line }}</p>
+      <h1 v-if="card.revealed" tabindex="-1" lang="en" data-testid="practice-phrase">
+        {{ card.answer }}
+      </h1>
+      <p v-if="card.revealed && card.accepted_variants.length" class="muted">
         Also accepted: {{ card.accepted_variants.join('; ') }}
       </p>
       <div class="audio-controls">
@@ -69,16 +84,21 @@ const emit = defineEmits<{
           </svg>
         </button>
         <button
-          :disabled="!card.recordings.length || capturing || requesting || processing"
+          :disabled="
+            !card.revealed || !card.recordings.length || capturing || requesting || processing
+          "
           @click="play(card.recordings.at(-1)!.url)"
         >
           ▶ My recording
         </button>
-        <button :disabled="capturing || requesting || processing" @click="play(card.reference_url)">
+        <button
+          :disabled="!card.revealed || capturing || requesting || processing"
+          @click="play(card.reference_url)"
+        >
           ▶ Reference
         </button>
       </div>
-      <div class="answer-help">
+      <div v-if="card.revealed" class="answer-help">
         <p>{{ card.explanation }}</p>
       </div>
       <p v-if="capturing" role="status">Tap the microphone again to finish your take.</p>
@@ -90,7 +110,7 @@ const emit = defineEmits<{
         <button @click="emit('retry')">Retry save</button>
       </p>
       <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
-      <div v-if="card.recordings.length" class="saved-takes">
+      <div v-if="card.revealed && card.recordings.length" class="saved-takes">
         <h2>Saved takes</h2>
         <div v-for="(recording, index) in card.recordings" :key="recording.id" class="take">
           <span>Take {{ index + 1 }}</span>
@@ -105,14 +125,58 @@ const emit = defineEmits<{
           </button>
         </div>
       </div>
+      <div v-if="card.kind === 'review' && !card.revealed" class="actions">
+        <button
+          class="primary"
+          :disabled="capturing || requesting || processing"
+          @click="emit('reveal')"
+        >
+          Reveal answer
+        </button>
+        <button :disabled="capturing || requesting || processing" @click="emit('skip')">
+          Study / skip grading
+        </button>
+        <button :disabled="capturing || requesting || processing" @click="emit('suspend')">
+          Unclear card
+        </button>
+      </div>
+      <div v-else-if="card.kind === 'review' && !rated" class="actions">
+        <p>Rate your original response before reveal.</p>
+        <button
+          v-for="(label, key) in {
+            not_yet: 'Not yet',
+            with_effort: 'With effort',
+            recalled: 'Recalled',
+          }"
+          :key="key"
+          :disabled="completing || capturing || requesting || processing"
+          @click="emit('rate', key)"
+        >
+          {{ label }}
+        </button>
+        <button @click="emit('skip')">Study / skip grading</button>
+        <button @click="emit('suspend')">Unclear card</button>
+      </div>
+      <p v-if="rated && rated !== 'recalled'">
+        One supported repetition is available. Record it if useful, then choose Next.
+      </p>
       <button
+        v-if="card.kind !== 'review' || rated"
         class="primary study-next"
         :disabled="completing || capturing || requesting || processing"
         @click="emit('next')"
       >
         Next
       </button>
-      <p class="muted">This first meeting is ungraded. Recording is optional.</p>
+      <p class="muted">
+        {{
+          card.kind === 'study'
+            ? 'This first meeting is ungraded. Recording is optional.'
+            : card.kind === 'free' || rated
+              ? 'Further practice is ungraded.'
+              : 'Recording is optional; microphone problems do not count as forgetting.'
+        }}
+      </p>
     </article>
   </section>
 </template>
