@@ -1,12 +1,12 @@
 # Fresh-session orchestration handout
 
-Read [AGENTS.md](../../AGENTS.md), [START-HERE](../START-HERE.md) and the whole [implementation plan](implementation-plan.md). The implementation plan is the single home for remaining stages, their order, scope and acceptance. Follow its links to focused decisions and operational documentation; do not duplicate its task lists here.
+Read [AGENTS.md](../../AGENTS.md), [START-HERE](../START-HERE.md) and the whole [implementation plan](implementation-plan.md). The implementation plan owns remaining stage order and links to any detailed stage plan; the selected stage plan owns its scope and acceptance. Follow links to focused decisions and operational documentation; do not duplicate task lists here.
 
 ## Role and workflow
 
 The root session orchestrates only: write prompts, read reports, triage findings, perform light verification and talk to the user. Delegate production code, tests and spec/plan edits.
 
-Implement the stage or checkpoint named by the user. If none is named, take the first remaining checkpoint in the implementation plan, or the first remaining stage when it has no checkpoints. The plan owns scope, acceptance and stopping boundaries; a user prompt only needs to name the work and plan. Reuse proven code and tests selectively; neither prototype defines feature parity. Build the smallest complete learner workflow rather than an infrastructure foundation. For each coherent deliverable:
+Implement the stage or checkpoint named by the user. If none is named, take the first remaining checkpoint in the implementation plan or its linked stage plan, or the first remaining stage when it has no checkpoints. The selected plan owns scope, acceptance and stopping boundaries; a user prompt only needs to name the work and plan. Reuse proven code and tests selectively; neither prototype defines feature parity. Build the smallest complete learner workflow rather than an infrastructure foundation. For each coherent deliverable:
 
 1. Delegate implementation to a fresh session.
 2. Delegate independent review to another fresh session.
@@ -33,6 +33,6 @@ Every demo delivery states the observable new benefit to the learner and proves 
 
 Delegate verification under the complete-change [done gate](../../AGENTS.md#done-gate), including the full prescribed gates for implementation/mixed changes and documentation checks for prose-only changes. Inspect complete results before reporting completion; keep model/content, native and actual-device acceptance separate from software conformance.
 
-Require implementers to delete completed stage entries from the implementation plan, preserve unresolved acceptance and keep lasting decisions in focused specs. Keep this handout stable and compact. Do not add completed-stage logs, implementation inventories, commit histories, test-count audits, incident narratives or temporary runtime details to specs; Git preserves history.
+Require implementers to delete completed stage entries and their detailed plans, preserve unresolved acceptance and keep lasting decisions in focused specs. Keep this handout stable and compact. Do not add completed-stage logs, implementation inventories, commit histories, test-count audits, incident narratives or temporary runtime details to specs; Git preserves history.
 
 Follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment): commit authorized work to `main`, push after the local gate passes and verify CI before delivery. Publishing releases and deployment require separate explicit authorization. Follow AGENTS.md and the focused specs for provider measurements, privacy, read-only sources and effective permissions. Report actual blocks rather than bypassing approvals or promising automatic quota recovery. Finish with a concise report of commits, checks, unresolved acceptance and material deviations.

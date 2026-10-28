@@ -6,13 +6,7 @@ Before the first release, every stage uses a freshly created application databas
 
 ## 2. Add unlimited Extra Practice
 
-**Learner outcome:** practise learned phrases for as long as desired, using the same concise cues and feedback as the scheduled drill.
-
-- Present one phrase-recall drill with **Daily** and **Extra** entry points. Daily contains the scheduled work waiting today and retains its bounded session. The learner can start Extra directly or choose it when Daily finishes, and can stop at any time. Extra uses the same card path, with no session cap on new or repeated cards; after traversing its available cards it cycles again until stopped. It offers phrases practised in Daily today once first, then recently practised phrases, then phrases due for spaced return and other available cards. Rotate available cues and allow another cue on request.
-- Use the same short situation cues, optional **Hint**, answer reveal, self-rating and recording/replay in both entry points. Prepare multiple short cues and multiple one- or two-word phrase-specific recall hints per phrase. Show one randomly selected hint only on request, avoiding an immediate repeat, and treat the attempt as supported. Keep the short explanation on the card back and a detailed native-language translation/explanation in the detailed view. Use the **So far, so good.** [content set](../decision-targeted-drilling.md#phrase-cards) as the reference example. Import these fields with the phrase content; no separate speaking-situation data is needed.
-- Apply the existing scheduling rules in both entry points: only a due, independent attempt before wording or a hint is shown can receive the usual self-rating and FSRS update, at most once per card per learning day. Phrases already practised in Daily today enter Extra once without another schedule update; further same-day cycles and not-yet-due practice remain ungraded. Supported exposure affects later independent-card eligibility. New cards studied in Extra first become eligible for independent recall on the next learning day.
-
-**Exit:** the learner can finish Daily, continue into Extra or start Extra directly, practise beyond Daily's limits, cycle until stopping, use rotating cues and requested hints, and replay saved takes. Tests cover queue order, stopping, exposure, one graded review per card per day, and saved history. This stage does not establish freer speech or everyday transfer.
+**Learner outcome:** practise learned phrases for as long as desired through the same drill as Daily. The [Stage 2 plan](stage-2-daily-extra.md) owns the confirmed behavior, screen design, and later architecture and implementation details. This stage does not establish freer speech or everyday transfer.
 
 ## 3. Make adult practice sustainable
 

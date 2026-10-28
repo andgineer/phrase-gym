@@ -1,0 +1,16 @@
+# Stage 2 — Daily and Extra phrase practice
+
+This is the working plan for the next stage. It records confirmed learner behavior and will gain reviewed screen, architecture and implementation details before the implementation loop. The [delivery ladder](implementation-plan.md) retains stage order. The [phrase content decision](../decision-targeted-drilling.md#phrase-cards) owns content rules and the [practice decision](../decision-transfer-and-engagement.md#daily-and-extra-phrase-recall) owns lasting behavior.
+
+## Confirmed behavior
+
+- There is one phrase-recall drill with two entry points. **Daily** contains the scheduled work waiting today and retains its bounded session. **Extra** can start directly or after Daily ends, uses the same card interaction, has no session limit on new or repeated cards, cycles through available cards, and stops only when the learner chooses to stop.
+- Extra offers each phrase practised in Daily today once first, then recently practised phrases, then phrases due for spaced return and other available cards. After traversing the available cards it cycles again. Available cues rotate, and the learner can request another cue.
+- Both entry points use the same short situation cues, optional requested **Hint**, answer reveal, self-rating and recording/replay. A phrase has several hand-prepared one- or two-word recall hints. A request shows one randomly selected hint, avoiding an immediate repeat when another is available. A hinted attempt is supported, so it cannot change the recall schedule.
+- A due independent attempt can receive the existing **Not yet / With effort / Recalled** rating and FSRS update in either entry point, at most once per phrase per learning day. A phrase already practised in Daily today enters Extra without another schedule update; later same-day cycles and not-yet-due practice are ungraded. New phrases studied in Extra first become eligible for independent recall on the next learning day.
+- The phrase card keeps one shared set of cues for Daily and Extra, a short explanation on its back, and a detailed native-language translation and explanation opened on request. The **So far, so good.** [content set](../decision-targeted-drilling.md#phrase-cards) is the reference example. No separate speaking-situation list or follow-up step is needed.
+- Before the first release, build a fresh application database and current import packages. No pre-release migration or old-format import support is required. This stage extends phrase recall and does not claim freer speech or everyday transfer.
+
+## Screen design to review
+
+Review the entry screen, card front and hint behavior, answer/back and rating, Daily-to-Extra handoff, Extra stopping and cycling, and Library/history one screen at a time. Add each screen here after functional confirmation. Architecture and implementation details follow the screen design.
