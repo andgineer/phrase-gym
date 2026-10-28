@@ -27,7 +27,7 @@ For a root-session request to implement the next stage, follow the [orchestratio
 | Browser iteration | `npm --prefix frontend run test:browser` |
 | Refresh OpenAPI and generated client types | `uv run python scripts/generate_api.py && npm --prefix frontend run api-types` |
 | Build the retained client | `npm --prefix frontend run build` |
-| Run the local application on 127.0.0.1:8000 | `uv run phrase-gym` |
+| Run the local application on 127.0.0.1:8000 | `uv run phrase-gym run` |
 | Build the frontend and run the local application | `uv run inv run --build` |
 | Install the pre-commit hooks (once per clone) | `uv run pre-commit install` |
 | Scaffold tasks and release commands | `uv run inv --list` |

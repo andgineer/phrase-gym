@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, cast
 
-from phrase_gym.bounded_process import OutputLimitError, run_bounded
+from phrase_gym.server.bounded_process import OutputLimitError, run_bounded
 
 MAX_REFERENCE_BYTES = 12 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024

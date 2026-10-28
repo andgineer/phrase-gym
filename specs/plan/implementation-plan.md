@@ -14,14 +14,6 @@ English matches the learner's resolved preferences and an existing local Piper c
 
 **Learner outcome:** import 5–10 useful phrases once, study a few, return on a later day to say them from meaning, compare recordings, self-rate and see when they return.
 
-### Next checkpoint: package and command scaffolding
-
-- Establish the [single-distribution layout and command interface](../architecture.md#package-and-commands): `server/`, `coach/` and `deploy/` under `src/phrase_gym/`, with server API adapters under `server/api/` and small CLI parsing/dispatch in `server/main.py`. Preserve the running Vue and Python application and the current learner data.
-- Define core server dependencies and optional `coach` and `deploy` extras in the one `pyproject.toml` and `uv.lock`. Provide the minimal `phrase-gym run` and `phrase-gym coach` command paths and clear behavior for the planned commands that are not implemented yet. Keep CLI help and core server startup usable without the optional dependencies. Do not implement background service registration, cloud provisioning or model preparation in this checkpoint.
-- Package the built Vue client and required resources so an installed artifact can run without the source checkout, Node or Invoke. Verify the lean and full installation paths, CLI help, server startup and artifact contents in a clean installed context. Continue to use Invoke for repository development gates and release tasks.
-
-**Checkpoint boundary:** the current in-server Piper synthesis may remain temporarily during this structural step. Scaffolding alone does not satisfy the separate-Coach runtime or durable handoff acceptance below. The next checkpoint moves synthesis and then establishes the API-only handoff before the first MVP is complete.
-
 ### Coach migration and durable handoff before MVP completion
 
 - Move existing Piper reference synthesis and its private dependencies out of Phrase Gym startup into the separately runnable Coach process. Keep the current import package format, cards, references, recordings and history through the transition. With only core dependencies installed, Phrase Gym must start and offer existing study/replay and request submission while Coach is stopped.

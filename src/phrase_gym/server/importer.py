@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Protocol
 from uuid import NAMESPACE_URL, uuid5
 
-from phrase_gym.contracts import ImportCard, PhrasePackage
-from phrase_gym.storage import Database, write_private
+from phrase_gym.server.contracts import ImportCard, PhrasePackage
+from phrase_gym.server.storage import Database, write_private
 
 
 def now() -> str:

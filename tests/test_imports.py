@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from phrase_gym.contracts import PhrasePackage
-from phrase_gym.importer import ImportConflictError, Importer, card_identity
-from phrase_gym.speech import PiperSpeech
-from phrase_gym.storage import Database
+from phrase_gym.server.contracts import PhrasePackage
+from phrase_gym.server.importer import ImportConflictError, Importer, card_identity
+from phrase_gym.server.speech import PiperSpeech
+from phrase_gym.server.storage import Database
 
 
 def test_failure_is_atomic_and_explicit_retry_adds_full_batch(

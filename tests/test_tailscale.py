@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from phrase_gym.app import create_app
-from phrase_gym.boundary import tailscale_host
+from phrase_gym.server.app import create_app
+from phrase_gym.server.boundary import tailscale_host
 
 
 @pytest.mark.parametrize(

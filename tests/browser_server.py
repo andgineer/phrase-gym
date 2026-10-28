@@ -13,7 +13,7 @@ def main() -> None:
         os.environ["PHRASE_GYM_FAKE_TTS"] = "1"
         os.environ["PHRASE_GYM_FAKE_TTS_FAILURES"] = "1"
         os.environ["PHRASE_GYM_FAKE_TTS_FAIL_TEXT"] = "Let's get started."
-        uvicorn.run("phrase_gym.app:create_app", factory=True, host="127.0.0.1", port=port)
+        uvicorn.run("phrase_gym.server.app:create_app", factory=True, host="127.0.0.1", port=port)
 
 
 if __name__ == "__main__":

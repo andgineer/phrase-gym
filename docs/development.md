@@ -30,8 +30,9 @@ Codecov and Coveralls integration; external coverage services require their repo
 uv run inv build
 ```
 
-This builds the Vue client before the Python wheel and source distribution. Do not publish a
-wheel built from an outdated client. `src/phrase_gym/__about__.py` is the package-version source;
+This builds the Vue client into `src/phrase_gym/server/static/` before the Python wheel and
+source distribution. Do not publish a wheel built from an outdated client.
+`src/phrase_gym/__about__.py` is the package-version source;
 Hatch reads it for both distributions.
 
 `inv build-frontend` rebuilds only the Vue client. `inv run --build` builds the client and starts

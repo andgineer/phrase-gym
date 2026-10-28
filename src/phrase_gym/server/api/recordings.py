@@ -7,8 +7,8 @@ import os
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-from phrase_gym.contracts import RecordingReceipt, RecordingUpload
-from phrase_gym.storage import Database, write_private
+from phrase_gym.server.contracts import RecordingReceipt, RecordingUpload
+from phrase_gym.server.storage import Database, write_private
 
 MAX_RECORDING_BYTES = 12 * 1024 * 1024
 

@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import cast
 from uuid import uuid4
 
-from phrase_gym.contracts import (
+from phrase_gym.server.contracts import (
     SavedRecording,
     StudyCard,
     StudyCompletion,
     StudyHistoryItem,
     StudyResponse,
 )
-from phrase_gym.storage import Database
+from phrase_gym.server.storage import Database
 
 
 def now() -> str:

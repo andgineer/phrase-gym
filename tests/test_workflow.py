@@ -9,8 +9,8 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from phrase_gym.app import create_app
-from phrase_gym.storage import Database
+from phrase_gym.server.app import create_app
+from phrase_gym.server.storage import Database
 
 
 def wait_added(client: TestClient, package_id: str) -> dict[str, object]:

@@ -56,7 +56,9 @@ def test_server_builds_frontend_only_when_requested(monkeypatch, build):
     monkeypatch.setattr(context, "run", commands.append)
     tasks.run(context, build=build)
     assert commands == (
-        ["npm --prefix frontend run build", "uv run phrase-gym"] if build else ["uv run phrase-gym"]
+        ["npm --prefix frontend run build", "uv run phrase-gym run"]
+        if build
+        else ["uv run phrase-gym run"]
     )
 
 
@@ -81,7 +83,7 @@ def test_tailscale_run_routes_to_loopback_and_allows_only_the_machine_origin(mon
     assert commands == [
         "tailscale status --json",
         "tailscale serve --bg --yes http://127.0.0.1:8000",
-        "uv run phrase-gym --tailscale-origin https://macbook.example.ts.net",
+        "uv run phrase-gym run --tailscale-origin https://macbook.example.ts.net",
     ]
 
 

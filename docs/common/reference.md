@@ -3,6 +3,6 @@
 The HTTP contract is generated from the Python models. A running server exposes it at
 `/openapi.json` and its interactive API documentation at `/docs`.
 
-::: phrase_gym.contracts.PhrasePackage
+::: phrase_gym.server.contracts.PhrasePackage
 
-::: phrase_gym.app.create_app
+::: phrase_gym.server.app.create_app

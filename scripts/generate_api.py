@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from phrase_gym.app import create_app
+from phrase_gym.server.app import create_app
 
 
 def main() -> None:

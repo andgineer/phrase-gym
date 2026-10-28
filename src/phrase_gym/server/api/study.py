@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-from phrase_gym.contracts import (
+from phrase_gym.server.contracts import (
     CompleteStudy,
     StudyCompletion,
     StudyHistoryItem,
     StudyResponse,
 )
-from phrase_gym.study import StudyService
+from phrase_gym.server.study import StudyService
 
 
 def study_routes(service: StudyService) -> APIRouter:

@@ -1,6 +1,10 @@
 import pytest
 
-from phrase_gym.boundary import MAX_REQUEST_BYTES, cross_origin_mutation, oversized_content_length
+from phrase_gym.server.boundary import (
+    MAX_REQUEST_BYTES,
+    cross_origin_mutation,
+    oversized_content_length,
+)
 
 
 @pytest.mark.parametrize(

@@ -13,8 +13,8 @@ scheduling remain the next stage.
 The server runs on macOS and Linux. Use a macOS browser for the MVP media player and recording;
 Linux browser audio support is planned after the MVP.
 
-Requirements: Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a configured English
-Piper voice. Install the pinned environments and build the client once:
+For a source checkout, use Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a
+configured English Piper voice. Install the pinned environments and build the client once:
 
 ```bash
 uv sync --frozen
@@ -26,13 +26,18 @@ Set `PHRASE_GYM_PIPER_CONFIG` to a JSON voice configuration described in
 [the import guide](docs/importing-phrases.md#piper-voice), then launch:
 
 ```bash
-PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json uv run phrase-gym
+PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json uv run phrase-gym run
 ```
 
 For private iPhone access on your existing tailnet, use `uv run inv run --build --tailscale`
 with the same `PHRASE_GYM_PIPER_CONFIG` setting. This points Tailscale Serve at the new server
 and allows its exact HTTPS machine hostname. Open the HTTPS URL printed by Tailscale on the
 iPhone with Tailscale connected.
+
+The built wheel contains the Vue client. A lean installed package runs `phrase-gym run`.
+The `coach` extra supplies Piper; the `deploy` extra is reserved for later provisioning.
+`phrase-gym coach` currently reports that the API handoff is pending, and the service
+registration and deployment commands report that they are unavailable.
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.

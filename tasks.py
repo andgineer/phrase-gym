@@ -8,7 +8,7 @@ from pathlib import Path
 from invoke import Collection, Context, task
 
 from phrase_gym.__about__ import __version__
-from phrase_gym.boundary import tailscale_host
+from phrase_gym.server.boundary import tailscale_host
 
 DOCS_PATH = Path("docs")
 DOCS_SRC_PATH = DOCS_PATH / "src"
@@ -135,7 +135,7 @@ def run(context: Context, build=False, tailscale=False):
     """Run the server; optionally build the client and connect private Tailscale HTTPS."""
     if build:
         build_frontend(context)
-    command = "uv run phrase-gym"
+    command = "uv run phrase-gym run"
     if tailscale:
         status = context.run("tailscale status --json", hide=True, pty=False)
         hostname = json.loads(status.stdout)["Self"]["DNSName"].rstrip(".")
