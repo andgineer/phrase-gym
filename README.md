@@ -5,20 +5,23 @@
 | Name                                       |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/phrase\_gym/\_\_about\_\_.py           |        1 |        0 |    100% |           |
-| src/phrase\_gym/coach/main.py              |        2 |        0 |    100% |           |
-| src/phrase\_gym/server/api/imports.py      |       26 |       10 |     62% |14-15, 21-22, 26-31 |
+| src/phrase\_gym/coach/bounded\_process.py  |       46 |        3 |     93% | 28, 79-80 |
+| src/phrase\_gym/coach/main.py              |       44 |       30 |     32% |16-20, 23-31, 35, 42-51, 55-66 |
+| src/phrase\_gym/coach/speech.py            |       87 |       10 |     89% |51-52, 101, 117, 123, 138, 161-162, 168-169 |
+| src/phrase\_gym/server/api/coach.py        |       25 |        3 |     88% | 23, 31-32 |
+| src/phrase\_gym/server/api/imports.py      |       30 |        6 |     80% |29-30, 36-39 |
 | src/phrase\_gym/server/api/recordings.py   |       50 |        7 |     86% |23-24, 26, 28, 37, 49, 89 |
-| src/phrase\_gym/server/api/study.py        |       25 |        5 |     80% | 28, 33-36 |
-| src/phrase\_gym/server/app.py              |       33 |        0 |    100% |           |
+| src/phrase\_gym/server/api/study.py        |       25 |        2 |     92% |    28, 35 |
+| src/phrase\_gym/server/app.py              |       34 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py         |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
-| src/phrase\_gym/server/bounded\_process.py |       46 |        3 |     93% | 28, 79-80 |
-| src/phrase\_gym/server/contracts.py        |       55 |        2 |     96% |    27, 48 |
-| src/phrase\_gym/server/importer.py         |      114 |        9 |     92% |54, 94, 96, 98, 104, 144, 157, 188, 204 |
-| src/phrase\_gym/server/main.py             |       39 |        7 |     82% |16-20, 24, 49 |
-| src/phrase\_gym/server/speech.py           |       87 |        6 |     93% |101, 117, 123, 138, 161-162 |
-| src/phrase\_gym/server/storage.py          |       56 |        0 |    100% |           |
-| src/phrase\_gym/server/study.py            |       72 |        6 |     92% |93, 99, 117-122, 126 |
-| **TOTAL**                                  |  **667** |   **61** | **91%** |           |
+| src/phrase\_gym/server/contracts.py        |       61 |        2 |     97% |    27, 48 |
+| src/phrase\_gym/server/importer.py         |       91 |        7 |     92% |36, 75, 104, 119, 123, 128, 154 |
+| src/phrase\_gym/server/main.py             |       41 |        7 |     83% |16-20, 24, 51 |
+| src/phrase\_gym/server/publication.py      |       30 |        1 |     97% |        33 |
+| src/phrase\_gym/server/reference\_audio.py |       34 |        3 |     91% |41, 43, 45 |
+| src/phrase\_gym/server/storage.py          |       60 |        1 |     98% |        55 |
+| src/phrase\_gym/server/study.py            |       72 |        3 |     96% |93, 99, 126 |
+| **TOTAL**                                  |  **792** |   **91** | **89%** |           |
 
 
 ## Setup coverage badge
