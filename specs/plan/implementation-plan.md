@@ -2,23 +2,24 @@
 
 The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Continue with speaking transfer and sustainable engagement before expanding content sources. The [transfer decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions.
 
+Before the first release, every stage uses a freshly created application database and current import packages. No pre-release stage requires a database migration or support for older import formats.
+
 ## 2. Bring learned expressions into freer speech
 
 **Learner outcome:** use a few learned expressions while composing personally relevant speech, then practise related situations without supplied wording.
 
-- Implement the [speaking progression](../decision-transfer-and-engagement.md#from-retrieval-to-freer-speech): supported personal responses, a repeated task with a changed situation or follow-up, and an unscripted attempt with no displayed target wording. Accept other natural responses; do not score compulsory phrase insertion.
-- Reuse recording/replay and existing expressions. Import a small externally prepared set of situations and follow-ups first, including adaptable expressions demonstrated through complete examples. No live AI partner, slot editor or whole-dialogue engine is required.
-- Add preparation for a real conversation and optional Used / No opportunity / Wanted it but could not retrieve it notes. Make a prompt set usable with a tutor or partner without requiring messaging, automatic sharing or a partner account.
-- Keep activity/support records, unscripted attempts and real-use notes separate from card grades. Phrase exposure affects later independent-card eligibility; activities and usage reports do not update FSRS. Upgrade existing MVP data without losing cards, grades, audio or old-format import support.
+- Name the existing card drill **Phrase Recall** and add **Speaking Practice** as a separate start action. Offer Speaking Practice automatically after Phrase Recall, with **Skip** and **Finish** available. Its queue offers each phrase practised in Phrase Recall today once, then recently practised phrases, then phrases due for spaced return; offer a different cue on request. Start with a short situation cue rather than a chosen or displayed phrase. Let the learner speak, reveal the phrase for an optional supported second response, then use another cue with wording hidden for an unscripted response. Accept other natural responses without compulsory phrase insertion.
+- Reuse recording/replay and the phrase card's situation cues in both drills; do not duplicate speaking situations or add a separate follow-up step. Prepare multiple short cues and multiple one- or two-word phrase-specific recall hints per phrase. Show one randomly selected hint only on request, avoiding an immediate repeat, and treat the attempt as supported. Keep the short explanation on the card back and a detailed native-language translation/explanation in the detailed view. Import these fields with the phrase content under the [content rules](../decision-targeted-drilling.md#phrase-cards). An adaptable expression can use complete examples without a slot editor. No live AI partner or whole-dialogue engine is required.
+- Keep activity/support records and unscripted attempts distinct from card grades. In Speaking Practice, only a due, independent attempt before wording is shown can receive the same self-rating and FSRS update as Phrase Recall; never grade a different natural answer as a phrase failure. Phrases already practised in Phrase Recall today enter Speaking Practice once without another schedule update. Supported responses and not-yet-due practice never update FSRS. Phrase exposure affects later independent-card eligibility.
 
-**Exit:** the learner can complete a supported response, a changed unscripted task and an optional real-opportunity note, replay the saved takes and see which assistance was available. Tests cover state, exposure and scheduling separation, saved history and the upgrade path. Content and actual-use acceptance remain separate from software checks; no effectiveness experiment gates delivery.
+**Exit:** the learner can complete a supported response and a changed unscripted task, replay the saved takes and see which assistance was available. Tests cover state, exposure and scheduling separation and saved history. Content and actual-use acceptance remain separate from software checks; no effectiveness experiment gates delivery.
 
 ## 3. Make adult practice sustainable
 
 **Learner outcome:** choose short meaningful practice missions, see concrete progress and return after a break without penalties.
 
 - Apply the [adult engagement decision](../decision-transfer-and-engagement.md#adult-engagement): chosen missions with varied situations, a clear finish and a learner-selected weekly target.
-- Show dated recall progress, supported/unscripted practice, recording comparisons and real-use reports distinctly. Do not compute an invented fluency or mastery score.
+- Show dated recall progress, supported/unscripted practice and recording comparisons distinctly. Do not compute an invented fluency or mastery score.
 - Add optional completion points or achievements, including credit for honest attempts that need correction. They must not depend on favorable self-ratings or reward endless easy-card repetition. Turning them off leaves all practice usable.
 - Preserve accumulated progress across missed days and let the learner pause or adjust the target. No public leaderboard, mandatory collectibles, punitive streaks or virtual economy.
 

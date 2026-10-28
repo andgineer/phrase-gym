@@ -13,17 +13,16 @@ Offer a progression the learner can choose and revisit:
 1. Study and later retrieve wording through the existing card loop.
 2. With the wording available, express a personal opinion, tell a short story or respond to a relevant situation. Mark this as supported production.
 3. Repeat the communicative task with a changed topic, listener or complication. Remove the phrase list for an unscripted response; the learner composes the message and can use other natural wording.
-4. Prepare for a real conversation with a few relevant expressions, then optionally note **Used / No opportunity / Wanted it but could not retrieve it**. Material can also guide a tutor or partner who supplies unpredictable follow-up questions.
 
-Example: practise acknowledging another person's reasoning with **I see where you're coming from, but...**, first with the expression visible, then responding to a different proposal without it, followed by **What would you suggest instead?** The learner must be able to continue their thought, not just reproduce its opening. Fixed follow-up prompts can support solo practice; they do not reproduce a live interlocutor.
+Example: practise acknowledging another person's reasoning with **I see where you're coming from, but...**, first with the expression visible, then responding to a different proposal without it. The learner must be able to continue their thought, not just reproduce its opening.
 
-Keep activities short and relevant, with optional recording/replay and a clear finish. Use externally prepared situations and follow-ups first. No AI conversation partner, countdown, memorized whole script or compulsory target insertion is required. A human partner is an available practice route, not an application dependency.
+Keep activities short and relevant, with optional recording/replay and a clear finish. Phrase Recall and Speaking Practice use the same brief prepared situation cues; requested phrase-specific hints provide support without extra reading. No AI conversation partner, countdown, memorized whole script or compulsory target insertion is required.
 
 ## Evidence and history
 
-Record supported production, independent card recall, unscripted practice and self-reported real use distinctly. Unscripted means no supplied wording; it is not proof of natural conversation outside the app. Record the situation and assistance so a recording's circumstances remain understandable.
+Record supported production, independent card recall and unscripted practice distinctly. Unscripted means no supplied wording; it is not proof of natural conversation outside the app. Record the situation and assistance so a recording's circumstances remain understandable.
 
-Only eligible independent card reviews update FSRS. Supported responses, repeated tasks, mission completion and real-use notes never create or upgrade memory grades. Seeing a phrase in speaking practice follows the same supported-exposure rule as study or lookup before a later card review. A learner choosing another natural expression in freer speech has not failed a designated-answer test. No opportunity is not a failure.
+Only eligible independent phrase recall updates FSRS, whether it occurs in Phrase Recall or Speaking Practice. A Speaking Practice attempt is eligible only when its phrase is due, its wording has not been shown and the learner can rate an actual attempt to retrieve that phrase. Supported responses, not-yet-due practice, repeated tasks and mission completion never create or upgrade memory grades. Seeing a phrase in speaking practice follows the same supported-exposure rule as study or lookup before a later card review. A learner choosing another natural expression in freer speech has not failed a designated-answer test.
 
 Do not label expressions automatic, fluent or mastered from card intervals, phrase counts, completed missions or recordings. Software checks verify these distinctions and saved state; they do not establish learning effectiveness. No mandatory learner experiment is a delivery gate.
 
@@ -32,7 +31,7 @@ Do not label expressions automatic, fluent or mastered from card intervals, phra
 Adults are the intended audience. [Motivation research](research/motivation.md) supports designing for choice, a sense of progress and meaningful activity, while separating enjoyment from persistence and learning. Engagement is planned product work, not an assumption that adult discipline makes repetitive drills sustainable.
 
 - Offer chosen missions such as explaining a frustrating experience, disagreeing tactfully, negotiating a plan or telling a story with a changed ending. Reuse familiar expressions while varying the situation.
-- Show concrete progress: dated unaided recall, supported practice, comparable recordings and reported real use, each with its own label. Avoid a single invented fluency score.
+- Show concrete progress: dated unaided recall, supported practice and comparable recordings, each with its own label. Avoid a single invented fluency score.
 - Let the learner choose a modest weekly target, pause and return without debt, penalties or losing accumulated progress. Short sessions have a clear endpoint.
 - Offer optional points or achievements for completing useful practice, including honest unsuccessful attempts. Rewards never depend on choosing a favorable self-rating, repeating easy cards indefinitely or forcing a phrase into unsuitable speech. Turning rewards off leaves learning available.
 

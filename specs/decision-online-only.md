@@ -1,6 +1,6 @@
 # Local application availability
 
-In the current local deployment, the browser needs the running Phrase Gym service for library, practice, imports, settings and saved takes. It does not need an internet connection or a running Coach to practise already prepared material. A provider connection is needed only when Coach performs preparation that calls that provider; first-MVP phrase text is externally prepared and reference speech is synthesized locally by Coach after the [migration checkpoint](plan/implementation-plan.md). Later cloud placement would require its own access and connectivity design.
+In the current local deployment, the browser needs the running Phrase Gym service for library, practice, imports, settings and saved takes. It does not need an internet connection or a running Coach to practise already prepared material. A provider connection is needed only when Coach performs preparation that calls that provider; first-MVP phrase text is externally prepared and reference speech is synthesized locally by Coach. Later cloud placement would require its own access and connectivity design.
 
 If the application stops, show a clear connection message and Retry. Keep active media stoppable, preserve already captured pending takes and avoid confirming unsaved work. On reconnection, resend the same pending writes and reload the confirmed card/session state. Retrying must not duplicate a review or recording.
 

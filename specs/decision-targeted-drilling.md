@@ -18,6 +18,26 @@ A prepared card contains:
 - Reference speech matching the complete answer, prepared before the card is offered for study.
 - Source attribution and the chosen card/help languages. An optional detailed native-language explanation can be shown on request; it is not required for every MVP card.
 
+For the speaking stage, each phrase also has several hand-prepared recall hints of one or two words. They are brief aids for retrieving that particular wording among other natural replies, not extra descriptions of the situation or automatically extracted first/last words. **Hint** shows one randomly selected hint only when requested, avoiding an immediate repeat when another is available; a hinted attempt is supported and cannot receive an independent recall grade. The same short situation cues serve Phrase Recall and Speaking Practice, with available cues rotated; do not store a second set of speaking situations that duplicates them. Keep the short meaning/use explanation on the card back and a detailed native-language translation and explanation in the detailed view. Neither explanation appears before an independent attempt.
+
+For **So far, so good.**, the content fields are:
+
+```json
+{
+  "answer": "So far, so good.",
+  "recall_hints": ["far", "so … good"],
+  "cues": [
+    { "situation": "Colleague asks: How's it going?" },
+    { "situation": "Friend asks: How's the new job?" }
+  ],
+  "explanation": "Things have gone well up to now.",
+  "detailed_explanation": "«Пока всё хорошо». Короткий ответ о том, как идут дела сейчас. Он говорит о результате до этого момента, а не обещает, что дальше всё будет так же.",
+  "accepted_variants": []
+}
+```
+
+The hints and cues are examples of prepared content, not a rule to generate them mechanically.
+
 During recall, prompts communicate an intention rather than paraphrase the answer word by word. They contain no target phrase, initial-letter code, masked answer or answer-bearing title. Natural shared topic words are allowed: a universal ban on every content word would make prompts obscure without research support. A partner turn is optional; openers need no fictional preceding line. Situations must be understandable without studying incidental vocabulary.
 
 Example: **Everyone has joined the call. Begin the meeting.** can cue **Let's get started.** A later review could use **Your friends have the ingredients ready. Suggest beginning to cook.** These are prompts for a learned response, not assertions that only one English response is valid. The learner knows the task is to retrieve their chosen expression; an underdetermined or misleading card can be suspended without a forgetting grade.
@@ -42,6 +62,6 @@ For troublesome near-synonyms or lookalikes, give a short accurate contrast, inc
 
 Spaced spoken retrieval is the MVP's contribution: make useful wording available from meaning, with feedback and varied cues. [Conversational-uptake evidence](research/automatic-use.md) supports instruction combined with meaningful speaking, including increased use in unscripted classroom conversations. It does not guarantee lasting everyday use or automatic speech for this app.
 
-The [transfer and engagement decision](decision-transfer-and-engagement.md) defines the subsequent progression: supported personal responses, varied tasks without supplied wording, real-opportunity preparation and separate usage notes. These are planned learning increments. They do not require forcing expressions into unsuitable conversations or changing FSRS from mission outcomes.
+The [transfer and engagement decision](decision-transfer-and-engagement.md) defines the subsequent progression: supported personal responses and varied tasks without supplied wording. These are planned learning increments. They do not require forcing expressions into unsuitable conversations or changing FSRS from mission outcomes.
 
 No AI conversation partner, speech scoring, countdown, mandatory scripts, points, streak penalties or effectiveness experiment is part of the planned MVP. The learner can finish a short session and leave.

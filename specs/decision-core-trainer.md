@@ -36,7 +36,7 @@ Save each finalized review once, with date, cue, original response mode, whether
 
 **Unclear card** or **Suspend** immediately removes a defective card from practice without marking a failure. The library exposes suspended cards and **Restore**. In the MVP, replace defective wording by importing a corrected card and leaving the old card suspended with its history; no automated recreation system is needed. Restoring a card does not replay old ratings. Changes to the target or prompt during an attempt invalidate that attempt's grade.
 
-Show due/new counts and dated review history. Supported study, free rehearsal and later independent recall remain visibly different. Never label a card fluent, automatic or mastered from its schedule or recording. Optional reports of real-life use, if added later, remain separate from memory grades.
+Show due/new counts and dated review history. Supported study, free rehearsal and later independent recall remain visibly different. Never label a card fluent, automatic or mastered from its schedule or recording.
 
 ## Evidence behind the loop
 
