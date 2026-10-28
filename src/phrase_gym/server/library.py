@@ -1,15 +1,18 @@
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from phrase_gym.server.contracts import ReviewItem, Settings, StudyHistoryItem
+from phrase_gym.server.exposure import expose_card
 from phrase_gym.server.storage import Database
 from phrase_gym.server.study_views import recordings
 
 
 class LibraryService:
-    def __init__(self, database: Database):
+    def __init__(self, database: Database, clock: Callable[[], datetime] | None = None):
         self.database = database
+        self.clock = clock or (lambda: datetime.now(UTC))
 
     def cards(self) -> list[StudyHistoryItem]:
         with self.database.read() as connection:
@@ -47,19 +50,12 @@ class LibraryService:
                 )
             return result
 
-    def expose(self, card_id: str, timezone: str | None = None) -> bool:
+    def expose(self, card_id: str) -> bool:
         with self.database.write() as connection:
             card = connection.execute("SELECT id FROM cards WHERE id=?", (card_id,)).fetchone()
             if not card:
                 return False
-            zone = (
-                timezone
-                or connection.execute(
-                    "SELECT learning_timezone FROM settings WHERE id=1",
-                ).fetchone()[0]
-            )
-            day = datetime.now(UTC).astimezone(ZoneInfo(zone)).date().isoformat()
-            connection.execute("UPDATE cards SET exposed_day=? WHERE id=?", (day, card_id))
+            expose_card(connection, card_id, self.clock())
             return True
 
     def suspend(self, card_id: str, value: bool) -> bool:

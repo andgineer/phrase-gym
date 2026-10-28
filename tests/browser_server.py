@@ -27,6 +27,7 @@ def main() -> None:
         app = create_app()
         simulated_time: list[datetime | None] = [None]
         app.state.study.clock = lambda: simulated_time[0] or datetime.now(UTC)
+        app.state.library.clock = lambda: simulated_time[0] or datetime.now(UTC)
 
         @app.post("/__test/clock/{iso_time}")
         def set_clock(iso_time: str) -> dict[str, str]:

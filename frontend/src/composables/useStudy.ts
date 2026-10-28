@@ -63,7 +63,10 @@ export function useStudy() {
       rated.value = rating
       await loadHistory()
     } catch (cause) {
-      error.value = String(cause)
+      if (cause instanceof Error && 'status' in cause && cause.status === 409) {
+        await load()
+        error.value = 'This review is no longer independent. It was skipped without a grade.'
+      } else error.value = String(cause)
     } finally {
       completing.value = false
     }

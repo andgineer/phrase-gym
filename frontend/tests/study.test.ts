@@ -49,3 +49,22 @@ it.each(['preparation', 'request'])(
     expect(study.completing.value).toBe(false)
   },
 )
+
+it('refreshes a review invalidated by answer exposure instead of leaving rating buttons active', async () => {
+  const study = useStudy()
+  const conflict = Object.assign(new Error('Attempt already completed'), { status: 409 })
+  vi.mocked(api)
+    .mockRejectedValueOnce(conflict)
+    .mockResolvedValueOnce({ card: null })
+    .mockResolvedValueOnce([])
+
+  await study.rate('exposed-attempt', 'recalled', 'silent')
+
+  expect(study.current.value?.card).toBeNull()
+  expect(study.error.value).toContain('skipped without a grade')
+  expect(vi.mocked(api).mock.calls.map(([path]) => path)).toEqual([
+    '/attempts/exposed-attempt/review',
+    '/study/current',
+    '/study/history',
+  ])
+})

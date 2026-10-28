@@ -456,6 +456,27 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await expect(page.getByText('One supported repetition is available.')).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
   await expect(page.getByText('Independent recall')).toBeVisible()
+  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByLabel('Find card by source or item ID').fill('meeting-2')
+  await page.getByRole('button', { name: /meeting-2/ }).click()
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
+  await expect(page.getByText('Use the useful expression in situation 3.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'With effort' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByLabel('Find card by source or item ID').fill('meeting-3')
+  await page.getByRole('button', { name: /meeting-3/ }).click()
+  await page.getByRole('button', { name: 'Practise freely' }).click()
+  await expect(page.getByText('Ungraded rehearsal')).toBeVisible()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByText('Use the useful expression in situation 4.')).toBeVisible()
+  const afterExposure = await page.request
+    .get('/api/study/history')
+    .then((response) => response.json())
+  expect(
+    afterExposure
+      .filter((item: { item_id: string }) => ['meeting-2', 'meeting-3'].includes(item.item_id))
+      .every((item: { reviews: unknown[] }) => item.reviews.length === 0),
+  ).toBe(true)
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByLabel('Learning timezone').fill('Europe/London')
   await page.getByRole('button', { name: 'Save settings' }).click()

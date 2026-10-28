@@ -1,7 +1,9 @@
 import json
 import sqlite3
+from datetime import datetime
 
 from phrase_gym.server.contracts import SavedRecording, StudyCard, StudyResponse
+from phrase_gym.server.scheduling import effective_due
 
 
 def recordings(connection: sqlite3.Connection, card_id: str) -> list[SavedRecording]:
@@ -35,17 +37,17 @@ def response(
     studied = connection.execute(
         "SELECT COUNT(*) FROM cards WHERE studied_at IS NOT NULL",
     ).fetchone()[0]
-    due = connection.execute(
-        "SELECT COUNT(*) FROM cards WHERE suspended=0 AND studied_at IS NOT NULL AND due_at<=?",
-        (instant,),
-    ).fetchone()[0]
+    scheduled = connection.execute(
+        "SELECT * FROM cards WHERE suspended=0 AND studied_at IS NOT NULL",
+    ).fetchall()
+    due_times = [effective_due(connection, row) for row in scheduled]
+    now = datetime.fromisoformat(instant)
+    due = sum(when <= now for when in due_times)
     new = connection.execute(
         "SELECT COUNT(*) FROM cards WHERE suspended=0 AND studied_at IS NULL",
     ).fetchone()[0]
-    future = connection.execute(
-        "SELECT MIN(due_at) FROM cards WHERE suspended=0 AND studied_at IS NOT NULL AND due_at>?",
-        (instant,),
-    ).fetchone()[0]
+    later = [when for when in due_times if when > now]
+    future = min(later).isoformat() if later else None
     message = None
     if not card:
         message = (

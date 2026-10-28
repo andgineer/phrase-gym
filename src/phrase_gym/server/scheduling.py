@@ -22,6 +22,25 @@ def next_day_start(connection: sqlite3.Connection, instant: datetime) -> datetim
     return datetime.combine(tomorrow, datetime.min.time(), zone).astimezone(UTC)
 
 
+def effective_due(connection: sqlite3.Connection, card: sqlite3.Row) -> datetime:
+    due = datetime.fromisoformat(card["due_at"])
+    if card["fsrs_json"] is None:
+        studied = datetime.fromisoformat(card["studied_at"])
+        due = max(due, next_day_start(connection, studied))
+    return due
+
+
+def reviewed_today(connection: sqlite3.Connection, card_id: str, day: str) -> bool:
+    attempts = connection.execute(
+        "SELECT created_at FROM attempts WHERE card_id=? AND kind='review'",
+        (card_id,),
+    ).fetchall()
+    return any(
+        learning_day(connection, datetime.fromisoformat(row["created_at"])) == day
+        for row in attempts
+    )
+
+
 def schedule(
     fsrs_json: str | None,
     rating: str,
@@ -43,16 +62,29 @@ def record_review(
     instant: datetime,
 ) -> None:
     day = learning_day(connection, instant)
-    if connection.execute(
-        "SELECT 1 FROM reviews WHERE card_id=? AND learning_day=?",
-        (attempt["card_id"], day),
-    ).fetchone():
+    reviews = connection.execute(
+        "SELECT reviewed_at FROM reviews WHERE card_id=?",
+        (attempt["card_id"],),
+    ).fetchall()
+    if any(
+        learning_day(connection, datetime.fromisoformat(row["reviewed_at"])) == day
+        for row in reviews
+    ):
         raise ValueError("Independent review is limited to one per learning day")
     card = connection.execute("SELECT * FROM cards WHERE id=?", (attempt["card_id"],)).fetchone()
     if card["suspended"]:
         raise ValueError("Suspended cards cannot be rated")
     if card["exposed_day"] == day:
         raise ValueError("This card was viewed today; choose Study / skip grading")
+    if (
+        card["fsrs_json"] is None
+        and learning_day(
+            connection,
+            datetime.fromisoformat(card["studied_at"]),
+        )
+        == day
+    ):
+        raise ValueError("First recall is offered on a later learning day")
     fsrs_json, due = schedule(card["fsrs_json"], rating, instant, connection)
     connection.execute(
         "UPDATE cards SET fsrs_json=?, due_at=?, cue_index=cue_index+1 WHERE id=?",

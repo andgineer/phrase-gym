@@ -7,7 +7,14 @@ from typing import cast
 from uuid import uuid4
 
 from phrase_gym.server.contracts import StudyCard, StudyCompletion, StudyResponse
-from phrase_gym.server.scheduling import learning_day, next_day_start, record_review
+from phrase_gym.server.exposure import expose_card
+from phrase_gym.server.scheduling import (
+    effective_due,
+    learning_day,
+    next_day_start,
+    record_review,
+    reviewed_today,
+)
 from phrase_gym.server.storage import Database
 from phrase_gym.server.study_views import response, study_card
 
@@ -34,7 +41,12 @@ class StudyService:
                     "SELECT * FROM cards WHERE id=?",
                     (active["card_id"],),
                 ).fetchone()
-                return response(connection, card, active, self.clock().isoformat())
+                if active["kind"] != "review" or effective_due(connection, card) <= instant:
+                    return response(connection, card, active, instant.isoformat())
+                connection.execute(
+                    "UPDATE attempts SET completed_at=? WHERE id=?",
+                    (instant.isoformat(), active["id"]),
+                )
             count = connection.execute(
                 "SELECT COUNT(*) FROM attempts WHERE kind IN ('study','review') AND learning_day=?",
                 (day,),
@@ -42,14 +54,21 @@ class StudyService:
             card = None
             kind = "study"
             if count < MAX_SESSION_CARDS:
-                card = connection.execute(
+                due_cards = connection.execute(
                     "SELECT * FROM cards WHERE studied_at IS NOT NULL AND suspended=0 "
                     "AND due_at<=? AND (exposed_day IS NULL OR exposed_day!=?) "
-                    "AND id NOT IN (SELECT card_id FROM attempts WHERE kind='review' "
-                    "AND learning_day=?) "
-                    "ORDER BY due_at, created_at LIMIT 1",
-                    (instant.isoformat(), day, day),
-                ).fetchone()
+                    "ORDER BY due_at, created_at",
+                    (instant.isoformat(), day),
+                ).fetchall()
+                card = next(
+                    (
+                        candidate
+                        for candidate in due_cards
+                        if effective_due(connection, candidate) <= instant
+                        and not reviewed_today(connection, candidate["id"], day)
+                    ),
+                    None,
+                )
                 if card:
                     kind = "review"
                 elif (
@@ -133,7 +152,7 @@ class StudyService:
                 return None
             instant = self.clock()
             day = learning_day(connection, instant)
-            connection.execute("UPDATE cards SET exposed_day=? WHERE id=?", (day, card_id))
+            expose_card(connection, card_id, instant)
             attempt = self._start(connection, card, "free", day, instant)
             return study_card(connection, card, attempt)
 

@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(study_routes(study))
     app.include_router(review_routes(study))
     library = LibraryService(database)
+    app.state.library = library
     app.include_router(library_routes(library))
     app.include_router(settings_routes(library))
     app.add_middleware(LocalBoundary, tailscale_origin=remote_origin)
