@@ -576,11 +576,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/phrase_gym/server/app.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
@@ -601,7 +597,17 @@
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
     <span class="n">remote_origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_TAILSCALE_ORIGIN"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
     <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_DATA_DIR"</span><span class="p">,</span> <span class="s2">".data"</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
@@ -612,7 +618,13 @@
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">import_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">coach_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">recording_routes</span><span class="p">(</span><span class="n">database</span><span class="p">))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">study_routes</span><span class="p">(</span><span class="n">StudyService</span><span class="p">(</span><span class="n">database</span><span class="p">)))</span>
+    <span class="n">study</span> <span class="o">=</span> <span class="n">StudyService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">study</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">study_routes</span><span class="p">(</span><span class="n">study</span><span class="p">))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">review_routes</span><span class="p">(</span><span class="n">study</span><span class="p">))</span>
+    <span class="n">library</span> <span class="o">=</span> <span class="n">LibraryService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">library_routes</span><span class="p">(</span><span class="n">library</span><span class="p">))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">settings_routes</span><span class="p">(</span><span class="n">library</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">LocalBoundary</span><span class="p">,</span> <span class="n">tailscale_origin</span><span class="o">=</span><span class="n">remote_origin</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
         <span class="n">TrustedHostMiddleware</span><span class="p">,</span>

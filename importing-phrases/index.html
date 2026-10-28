@@ -576,8 +576,8 @@ import; source links are attribution only and are never fetched.</p>
 <code>partner_line</code>. Optional <code>accepted_variants</code> must be genuinely suitable for the same intention;
 <code>detailed_explanation</code> may add longer help. Unknown fields are rejected.</p>
 <p><code>source_id</code> plus <code>item_id</code> is permanent card identity. Repeating that identity in another package
-is rejected without overwriting it. Correction/replacement with suspension belongs to the later
-library stage.</p>
+is rejected without overwriting it. To replace defective content, suspend the old card in the
+Library and import a corrected card with a new <code>item_id</code>; the old card and its history remain.</p>
 <p>The generated machine-readable request schema is available at
 <a href="https://github.com/andgineer/phrase-gym/blob/main/frontend/openapi.json"><code>frontend/openapi.json</code></a>.
 A complete five-card file is
