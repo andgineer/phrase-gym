@@ -15,19 +15,20 @@
 | src/phrase\_gym/server/api/review.py       |       21 |       11 |     48% |12-15, 19-30 |
 | src/phrase\_gym/server/api/settings.py     |       15 |        0 |    100% |           |
 | src/phrase\_gym/server/api/study.py        |       31 |        8 |     74% |24-25, 27, 32-35, 41 |
-| src/phrase\_gym/server/app.py              |       44 |        0 |    100% |           |
+| src/phrase\_gym/server/app.py              |       45 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py         |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
 | src/phrase\_gym/server/contracts.py        |       73 |        2 |     97% |    27, 48 |
+| src/phrase\_gym/server/exposure.py         |        6 |        0 |    100% |           |
 | src/phrase\_gym/server/importer.py         |       91 |        7 |     92% |36, 75, 104, 119, 123, 128, 154 |
-| src/phrase\_gym/server/library.py          |       44 |        8 |     82% |     51-63 |
+| src/phrase\_gym/server/library.py          |       45 |        1 |     98% |        57 |
 | src/phrase\_gym/server/main.py             |       41 |        7 |     83% |16-20, 24, 51 |
 | src/phrase\_gym/server/publication.py      |       30 |        1 |     97% |        33 |
 | src/phrase\_gym/server/reference\_audio.py |       42 |        3 |     93% |51, 53, 55 |
-| src/phrase\_gym/server/scheduling.py       |       34 |        3 |     91% |50, 53, 55 |
+| src/phrase\_gym/server/scheduling.py       |       46 |        4 |     91% |73, 76, 78, 87 |
 | src/phrase\_gym/server/storage.py          |       78 |        2 |     97% |    68, 75 |
-| src/phrase\_gym/server/study.py            |      100 |        7 |     93% |33-37, 113, 133, 155, 162, 166 |
-| src/phrase\_gym/server/study\_views.py     |       19 |        0 |    100% |           |
-| **TOTAL**                                  | **1041** |  **127** | **88%** |           |
+| src/phrase\_gym/server/study.py            |      104 |        5 |     95% |45, 132, 152, 174, 181 |
+| src/phrase\_gym/server/study\_views.py     |       25 |        0 |    100% |           |
+| **TOTAL**                                  | **1071** |  **119** | **89%** |           |
 
 
 ## Setup coverage badge
