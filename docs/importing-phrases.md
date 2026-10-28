@@ -82,7 +82,7 @@ SHA-256 values, and create the private voice file with this shape:
 ```
 
 Coach verifies the exact installed `piper-tts` version against `runtime_version`, model/config
-hashes, and English locale. It streams the selected interpreter's output under hard 12 MiB audio,
+hashes, and English locale. It streams the selected interpreter's output under hard 8 MiB audio,
 64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic publication. Automated tests use a silent fake child and never invoke
 real Piper.
 
@@ -97,7 +97,9 @@ result through the API; it never opens the application database.
 
 An external agent that already has audio can call `POST /api/imports` with `package` and
 `references`, a map from each `item_id` to base64-encoded mono 16-bit PCM WAV bytes. Every
-card must have one complete playable reference, at most 12 MiB. This publishes the batch
+card must have one complete playable reference, at most 8 MiB, and all references together must
+fit a 9 MiB audio budget. These limits keep the base64 JSON below the API's 16 MiB request limit.
+This publishes the batch
 atomically and returns `added` without Coach. A malformed or missing reference identifies the
 item and rejects the whole request. Retrying identical package and audio returns the original
 result; changed content under the same `package_id` is rejected. The browser paste/file import

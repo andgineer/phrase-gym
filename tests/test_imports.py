@@ -1,5 +1,7 @@
 import asyncio
 import base64
+import io
+import wave
 from pathlib import Path
 
 import pytest
@@ -127,6 +129,43 @@ def test_external_bad_reference_rejects_request_without_pending_work(
     assert response.status_code == 409
     assert "meeting-2" in response.text
     assert client.get("/api/imports").json() == []
+
+
+def silent_wav(size: int) -> str:
+    output = io.BytesIO()
+    with wave.open(output, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(22_050)
+        wav.writeframes(b"\x00" * (size - 44))
+    return base64.b64encode(output.getvalue()).decode()
+
+
+def test_reference_budget_fits_transport_and_rejects_oversized_batch(
+    client: TestClient, package: dict[str, object]
+) -> None:
+    package["cards"] = package["cards"][:1]
+    near_limit = silent_wav(8 * 1024 * 1024)
+    accepted = client.post(
+        "/api/imports",
+        json={"package": package, "references": {"meeting-1": near_limit}},
+    )
+    assert accepted.status_code == 202
+    assert accepted.json()["status"] == "added"
+
+    package["package_id"] = "over-budget-package"
+    package["source_id"] = "over-budget-source"
+    package["cards"] = [{**package["cards"][0], "item_id": item} for item in ("first", "second")]
+    five_mib = silent_wav(5 * 1024 * 1024)
+    rejected = client.post(
+        "/api/imports",
+        json={"package": package, "references": {"first": five_mib, "second": five_mib}},
+    )
+    assert rejected.status_code == 409
+    assert "9 MiB batch audio budget" in rejected.text
+    assert {row["package_id"] for row in client.get("/api/imports").json()} == {
+        "course-meetings-v1"
+    }
 
 
 def test_validation_identifies_bad_item_and_unknown_version(

@@ -8,7 +8,7 @@ from typing import Any, cast
 
 from phrase_gym.coach.bounded_process import OutputLimitError, run_bounded
 
-MAX_REFERENCE_BYTES = 12 * 1024 * 1024
+MAX_REFERENCE_BYTES = 8 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024
 MIN_SAMPLE_RATE = 8_000
 MAX_SAMPLE_RATE = 48_000

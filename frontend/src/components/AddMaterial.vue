@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
 
@@ -11,64 +11,84 @@ const open = ref(false)
 const interruptionReady = ref(true)
 const dialog = ref<HTMLDialogElement | null>(null)
 const opener = ref<HTMLButtonElement | null>(null)
-const state = ref<ImportStatus | null>(null)
+const statuses = ref<ImportStatus[]>([])
+const pendingCount = computed(
+  () =>
+    statuses.value.filter((status) => status.status === 'pending' || status.status === 'preparing')
+      .length,
+)
+const failedCount = computed(
+  () => statuses.value.filter((status) => status.status === 'error').length,
+)
 const error = ref('')
+const statusError = ref('')
 const importing = ref(false)
 let poll: number | null = null
+let loaded = false
+let mounted = false
 
-async function pollImport(packageId: string) {
+function upsert(status: ImportStatus) {
+  const previous = statuses.value.find((item) => item.package_id === status.package_id)
+  statuses.value = [
+    status,
+    ...statuses.value.filter((item) => item.package_id !== status.package_id),
+  ]
+  if (status.status === 'added' && previous?.status !== 'added') emit('added')
+}
+
+async function refreshStatuses() {
   try {
-    state.value = await api<ImportStatus>(`/imports/${packageId}`)
-    if (state.value.status === 'preparing' || state.value.status === 'pending') {
-      poll = window.setTimeout(() => void pollImport(packageId), 1000)
-    } else {
-      importing.value = false
-      if (state.value.status === 'added') emit('added')
+    const next = await api<ImportStatus[]>('/imports')
+    if (!mounted) return
+    if (loaded) {
+      const previous = new Map(statuses.value.map((status) => [status.package_id, status.status]))
+      if (
+        next.some(
+          (status) => status.status === 'added' && previous.get(status.package_id) !== 'added',
+        )
+      )
+        emit('added')
     }
+    statuses.value = next
+    loaded = true
+    statusError.value = ''
   } catch (cause) {
-    error.value = String(cause)
-    importing.value = false
+    statusError.value = String(cause)
+  } finally {
+    if (mounted) poll = window.setTimeout(() => void refreshStatuses(), 1000)
   }
 }
 
-onMounted(async () => {
-  try {
-    const imports = await api<ImportStatus[]>('/imports')
-    if (imports[0]) {
-      state.value = imports[0]
-      if (state.value.status === 'pending' || state.value.status === 'preparing') {
-        await pollImport(state.value.package_id)
-      }
-    }
-  } catch (cause) {
-    error.value = String(cause)
-  }
+onMounted(() => {
+  mounted = true
+  void refreshStatuses()
 })
 
 async function importPackage() {
   error.value = ''
+  importing.value = true
   try {
     const value = JSON.parse(text.value) as unknown
-    importing.value = true
-    state.value = await api<ImportStatus>('/imports', {
+    const status = await api<ImportStatus>('/imports', {
       method: 'POST',
       body: JSON.stringify({ package: value }),
     })
-    await pollImport(state.value.package_id)
+    upsert(status)
   } catch (cause) {
-    importing.value = false
     error.value = cause instanceof SyntaxError ? `Invalid JSON: ${cause.message}` : String(cause)
+  } finally {
+    importing.value = false
   }
 }
 
-async function retry() {
-  if (!state.value) return
-  importing.value = true
+async function retry(packageId: string) {
   error.value = ''
-  state.value = await api<ImportStatus>(`/imports/${state.value.package_id}/retry`, {
-    method: 'POST',
-  })
-  await pollImport(state.value.package_id)
+  try {
+    const status = await api<ImportStatus>(`/imports/${packageId}/retry`, { method: 'POST' })
+    upsert(status)
+  } catch (cause) {
+    error.value = String(cause)
+  }
 }
 
 async function chooseFile(event: Event) {
@@ -110,6 +130,7 @@ function trapFocus(event: KeyboardEvent) {
 }
 
 onUnmounted(() => {
+  mounted = false
   if (poll !== null) window.clearTimeout(poll)
 })
 </script>
@@ -125,7 +146,8 @@ onUnmounted(() => {
     >
       +
     </button>
-    <span v-if="state?.status === 'pending'" role="status">Pending Coach</span>
+    <span v-if="pendingCount" role="status">Pending Coach</span>
+    <span v-if="failedCount" role="status">Import needs attention</span>
     <dialog
       ref="dialog"
       class="intake-dialog"
@@ -145,21 +167,31 @@ onUnmounted(() => {
           Import
         </button>
       </div>
-      <p v-if="state?.status === 'pending'" role="status">
-        Pending Coach. You can keep studying while it is offline.
-      </p>
-      <p v-if="state?.status === 'preparing'" role="status">Preparing audio…</p>
-      <button v-if="state?.status === 'preparing'" class="quiet" @click="retry">
-        Retry interrupted preparation
-      </button>
-      <p v-if="state?.status === 'added'" role="status" class="success">
-        Added {{ state.added_count }} phrases.
-      </p>
-      <div v-if="state?.status === 'error'" role="alert" class="error">
-        <p>{{ state.error }}</p>
-        <button @click="retry">Retry preparation</button>
-      </div>
+      <ul v-if="statuses.length" class="import-statuses" aria-label="Import requests">
+        <li v-for="status in statuses" :key="status.package_id">
+          <strong>{{ status.package_id }}</strong>
+          <p v-if="status.status === 'pending'" role="status">
+            Pending Coach. You can keep studying while it is offline.
+          </p>
+          <p v-if="status.status === 'preparing'" role="status">Preparing audio…</p>
+          <button
+            v-if="status.status === 'preparing'"
+            class="quiet"
+            @click="retry(status.package_id)"
+          >
+            Retry interrupted preparation
+          </button>
+          <p v-if="status.status === 'added'" role="status" class="success">
+            Added {{ status.added_count }} phrases.
+          </p>
+          <div v-if="status.status === 'error'" role="alert" class="error">
+            <p>{{ status.error }}</p>
+            <button @click="retry(status.package_id)">Retry preparation</button>
+          </div>
+        </li>
+      </ul>
       <p v-if="error" role="alert" class="error pre">{{ error }}</p>
+      <p v-if="statusError" role="alert" class="error pre">{{ statusError }}</p>
       <button class="quiet" @click="dialog?.close()">Close</button>
     </dialog>
   </section>

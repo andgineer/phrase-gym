@@ -5,7 +5,8 @@ import wave
 
 from phrase_gym.server.contracts import PhrasePackage
 
-MAX_REFERENCE_BYTES = 12 * 1024 * 1024
+MAX_REFERENCE_BYTES = 8 * 1024 * 1024
+MAX_BATCH_REFERENCE_BYTES = 9 * 1024 * 1024
 MIN_WAV_BYTES = 44
 PCM_SAMPLE_WIDTH = 2
 MIN_SAMPLE_RATE = 8_000
@@ -24,7 +25,16 @@ def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str
         raise ImportConflictError(
             f"Reference items do not match: missing={missing}, extra={extra}",
         )
-    return {item: _decode_reference(item, value) for item, value in audio.items()}
+    decoded: dict[str, bytes] = {}
+    total = 0
+    for item, value in audio.items():
+        decoded[item] = _decode_reference(item, value)
+        total += len(decoded[item])
+        if total > MAX_BATCH_REFERENCE_BYTES:
+            raise ImportConflictError(
+                f"cards.{item}: references exceed the 9 MiB batch audio budget",
+            )
+    return decoded
 
 
 def _decode_reference(item: str, value: str) -> bytes:

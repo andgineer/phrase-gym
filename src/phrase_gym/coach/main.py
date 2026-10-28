@@ -7,17 +7,33 @@ import time
 import urllib.error
 import urllib.request
 from typing import Any
+from urllib.parse import urlsplit
 
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
+
+MAX_TCP_PORT = 65_535
 
 
 class CoachApi:
     def __init__(self, base_url: str):
-        if not base_url.startswith("http://127.0.0.1:") and not base_url.startswith(
-            "http://localhost:",
+        parsed = urlsplit(base_url)
+        try:
+            port = parsed.port
+        except ValueError:
+            port = None
+        if (
+            parsed.scheme != "http"
+            or parsed.hostname not in {"127.0.0.1", "localhost"}
+            or parsed.username is not None
+            or parsed.password is not None
+            or port is None
+            or not 1 <= port <= MAX_TCP_PORT
+            or parsed.path not in {"", "/"}
+            or parsed.query
+            or parsed.fragment
         ):
             raise ValueError("Coach requires a loopback Phrase Gym URL")
-        self.base_url = base_url.rstrip("/")
+        self.base_url = f"http://{parsed.hostname}:{port}"
 
     def post(self, path: str, payload: dict[str, object] | None = None) -> Any:
         body = json.dumps(payload or {}).encode()

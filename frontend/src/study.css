@@ -47,6 +47,17 @@
 .intake-dialog .file input {
   display: none;
 }
+.import-statuses {
+  list-style: none;
+  padding: 0;
+}
+.import-statuses li {
+  border-top: 1px solid #deded1;
+  padding: 0.75rem 0;
+}
+.import-statuses p {
+  margin: 0.35rem 0;
+}
 .study-next {
   display: block;
   margin-top: 22px;
