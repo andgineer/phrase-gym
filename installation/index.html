@@ -389,12 +389,16 @@ npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="
 npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="w"> </span>run<span class="w"> </span>build
 </code></pre></div>
 <p>Configure a local English <a href="../importing-phrases/#piper-voice">Piper voice</a>, then start the server:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym
+<div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>run
 </code></pre></div>
-<p>For a source checkout, use <code>uv run phrase-gym</code> instead. Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.
-Use <code>phrase-gym --help</code> for the port and data-directory options. Keep voice files and learner
+<p>For a source checkout, use <code>uv run phrase-gym run</code> instead. Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.
+Use <code>phrase-gym run --help</code> for the port and data-directory options. Keep voice files and learner
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.</p>
+<p>The <code>coach</code> command is present but preparation is pending the API handoff. The
+<code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
+The <code>coach</code> extra supplies Piper; <code>deploy</code> is reserved for later provisioning. The core server
+and help need only the lean installation.</p>
 
 
 

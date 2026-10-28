@@ -517,8 +517,9 @@ Codecov and Coveralls integration; external coverage services require their repo
 <h2 id="build-a-distributable">Build a distributable</h2>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>build
 </code></pre></div>
-<p>This builds the Vue client before the Python wheel and source distribution. Do not publish a
-wheel built from an outdated client. <code>src/phrase_gym/__about__.py</code> is the package-version source;
+<p>This builds the Vue client into <code>src/phrase_gym/server/static/</code> before the Python wheel and
+source distribution. Do not publish a wheel built from an outdated client.
+<code>src/phrase_gym/__about__.py</code> is the package-version source;
 Hatch reads it for both distributions.</p>
 <p><code>inv build-frontend</code> rebuilds only the Vue client. <code>inv run --build</code> builds the client and starts
 the server; <code>inv run</code> starts the server with the existing client build. Pre-commit contains the
