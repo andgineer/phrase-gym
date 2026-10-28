@@ -34,7 +34,7 @@ Record the prompt, answer and support used for an attempt so later edits cannot 
 
 ## Growth after the MVP
 
-Preserve stable card/source identities, attempt identities, recorded support and independent audio references. Keep scheduling policy separate from activity presentation and recording storage. Later [speaking activities](decision-transfer-and-engagement.md) can associate an attempt with several existing expressions without redefining a card or interpreting every recording as a memory review. Achievement records are separate from FSRS history.
+Preserve stable card/source identities, attempt identities, recorded support and independent audio references. Keep scheduling policy separate from activity presentation and recording storage. [Extra practice](decision-transfer-and-engagement.md) uses the same card and attempt rules as Daily; it does not need a second phrase identity or general activity engine. Achievement records are separate from FSRS history.
 
 Implement only the first MVP's records and APIs now; no placeholder dialogue tables, generic workflow engine, plugin framework or speculative API endpoints are needed. Before the first release, rebuild the application database and import packages for every new stage without migration or old-format import support. After the first release, use ordinary schema and package upgrades that preserve application data.
 

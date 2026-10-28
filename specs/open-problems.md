@@ -2,7 +2,7 @@
 
 These are concrete uncertainties, not prerequisites for an infrastructure project. The [delivery ladder](plan/implementation-plan.md) assigns them to the relevant increment.
 
-- **Learning transfer:** [instruction studies](research/automatic-use.md) show increased expression use in unscripted classroom speech, but lasting everyday transfer for this adult personal trainer remains unverified. Implement the planned speaking progression without treating card recall or unscripted practice as evidence of everyday use.
+- **Learning transfer:** [instruction studies](research/automatic-use.md) show increased expression use in unscripted classroom speech, but lasting everyday transfer for this adult personal trainer remains unverified. Daily and Extra remain phrase recall; a distinct freer-speaking activity still needs functional design before implementation.
 - **Sustained engagement:** adult missions, progress feedback and optional rewards are research-informed choices, not demonstrated long-term adherence for Phrase Gym. Keep rewards independent of memory grades and make return after a break easy.
 - **First MVP:** the software loop and stopped-app copy procedure are implemented. A later real-clock return, semantic inspection of representative external cards, listening to their references and complete attended MacBook recording/replay remain unverified.
 - **Prepared content:** representative externally prepared phrases still need inspection for intended meaning, natural/understandable cues, leakage and acceptable answers. No fixed synthetic pack establishes every course's content quality.

@@ -1,6 +1,6 @@
 # Learning loop and observable evidence
 
-The objective is easier access to useful language when speaking. This MVP loop measures practice and self-reported recall, not spontaneous conversation, pronunciation accuracy or mastery. Later [speaking activities and adult engagement](decision-transfer-and-engagement.md) build on it while keeping their outcomes separate from memory grades. [Research and its limits](research/README.md) distinguish empirical findings from the defaults below.
+The objective is easier access to useful language when speaking. This MVP loop measures practice and self-reported recall, not spontaneous conversation, pronunciation accuracy or mastery. Later [Extra practice and adult engagement](decision-transfer-and-engagement.md) build on it while keeping their outcomes separate from memory grades. [Research and its limits](research/README.md) distinguish empirical findings from the defaults below.
 
 ## First meeting
 
@@ -24,7 +24,7 @@ Use the Python FSRS library with population parameters, desired retention 0.90, 
 
 At most one independent scheduled review per card per learning day changes its schedule. The first check follows completed study; subsequent checks require the card to be due. Any computed return earlier than the next learning day is offered on that next day. FSRS determines later intervals from actual review time/history. The three buttons, retention setting and daily eligibility rule are pragmatic defaults, not a claim of optimal language learning.
 
-Use the learner's timezone, initially Europe/Belgrade. Prefer oldest due cards, then introduce up to five new cards within a session of at most 20 cards. These are workload defaults, not research thresholds. **Resume** continues unfinished work; **Start** offers eligible work; an empty queue says when work returns. An explicit **Practise freely** action permits ungraded rehearsal at any time without changing due obligations.
+Use the learner's timezone, initially Europe/Belgrade. Prefer oldest due cards, then introduce up to five new cards within a session of at most 20 cards. These are workload defaults, not research thresholds. **Resume** continues unfinished work; **Start** offers eligible work; an empty queue says when work returns. The MVP's **Practise freely** action permits ungraded rehearsal at any time; the planned Extra entry point supersedes it with the same card path and the normal eligibility rules for due reviews.
 
 Rotate available cues in simple round-robin order across independent reviews. A card shown with its answer in study, lookup or free practice is supported for the rest of that learning day; it cannot become a fresh independent test by reopening the app. Preserve eligibility of the original response captured before its own reveal. Keep this as ordinary per-card attempt/exposure state, not a general cross-card exposure engine. Preparation avoids prompts that give away another card's answer in the same batch.
 
