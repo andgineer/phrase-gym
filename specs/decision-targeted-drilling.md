@@ -18,7 +18,7 @@ A prepared card contains:
 - Reference speech matching the complete answer, prepared before the card is offered for study.
 - Source attribution and the chosen card/help languages. An optional detailed native-language explanation can be shown on request; it is not required for every MVP card.
 
-For the next phrase-practice stage, each phrase also has several hand-prepared recall hints of one or two words. They are brief aids for retrieving that particular wording among other natural replies, not extra descriptions of the situation or automatically extracted first/last words. **Hint** shows one randomly selected hint only when requested, avoiding an immediate repeat when another is available; a hinted attempt is supported and cannot receive an independent recall grade. The same short situation cues serve Daily and Extra, with available cues rotated; do not store a second set of situations that duplicates them. Keep the short meaning/use explanation on the card back and a detailed native-language translation and explanation in the detailed view. Neither explanation appears before an independent attempt.
+For the next phrase-practice stage, each phrase also has at least two distinct hand-prepared recall hints of one or two words and short searchable `usage_contexts`. These describe where or for what purpose a phrase is used, such as **small talk** or **greetings**; include only contexts that actually fit the phrase. Hints are brief aids for retrieving that particular wording among other natural replies, not extra descriptions of the situation or automatically extracted first/last words. **Hint** shows one randomly selected hint only when requested, avoiding an immediate repeat when another is available. Hint use does not hide the rating buttons; the learner rates what they could recall before asking for help. The same short situation cues serve Daily and Extra, randomly selected while avoiding the immediately previous cue when another is available; do not store a second set of situations that duplicates them. Keep the short meaning/use explanation on the card back and a detailed native-language translation and explanation in the detailed view. Neither explanation appears before an independent attempt. Phrase lookup searches the answer, short and detailed explanations, cues and usage contexts. Phrase details show them as **Used for**.
 
 For **So far, so good.**, the content fields are:
 
@@ -26,6 +26,7 @@ For **So far, so good.**, the content fields are:
 {
   "answer": "So far, so good.",
   "recall_hints": ["far", "so … good"],
+  "usage_contexts": ["small talk", "progress update"],
   "cues": [
     { "situation": "Colleague asks: How's it going?" },
     { "situation": "Friend asks: How's the new job?" }

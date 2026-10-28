@@ -5,7 +5,7 @@ Recording and reference comparison are core product functions. Preserve the work
 ## Observable behavior
 
 - Recording is optional in study, independent recall and free rehearsal. Silent self-check never asks for microphone access. Start and stop are explicit learner actions; no voice detector or automatic speech grade is required.
-- After stopping, retain the final encoder output. Once the answer is revealed, comparison plays the complete learner take followed by the complete reference; either can also be replayed separately. In study/rehearsal the answer is already visible. Only one playback runs at a time.
+- After stopping, retain the final encoder output durably in the browser before navigation; upload continues independently of card navigation or rating, with pending/error recovery. On a hidden-answer front, automatic playback may play the learner take alone. Once the answer is revealed, comparison plays the complete learner take followed by the complete reference; either can also be replayed separately. In study/rehearsal the answer is already visible. Only one playback runs at a time.
 - Replaying or recording again cannot change which response the learner is grading. Every take remains a separate recording, including imperfect or supported repetitions. There is no Save button and no automatic expiry.
 - Show pending/save failure truthfully. Reload/restart preserves acknowledged takes and their card/attempt context; retrying a pending save does not duplicate it. Earlier takes are never overwritten by a new one.
 - A saved take is accessible again from its card/history after reload and application restart. Keep this a simple replay control, not an audio analysis dashboard.
