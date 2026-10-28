@@ -343,6 +343,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#api-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        API handoff
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -476,6 +487,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#api-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        API handoff
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -575,7 +597,7 @@ alternatives before giving it to the learner.</p>
 <p>Phrase Gym validates structure, not teaching quality. The learner or a semantic reviewer still
 checks real prepared content separately.</p>
 <h2 id="piper-voice">Piper voice</h2>
-<p>The application expects <code>PHRASE_GYM_PIPER_CONFIG</code> to name a private JSON file outside the
+<p>The separately running Coach expects <code>PHRASE_GYM_PIPER_CONFIG</code> to name a private JSON file outside the
 repository. Piper itself is a separately pinned environment.</p>
 <p>On the learner's macOS machine, create that private environment outside every repository with the
 same Python minor version as Phrase Gym and these exact packages:</p>
@@ -599,11 +621,24 @@ SHA-256 values, and create the private voice file with this shape:</p>
 <span class="w">  </span><span class="nt">"locale"</span><span class="p">:</span><span class="w"> </span><span class="s2">"en-US"</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Phrase Gym verifies the exact installed <code>piper-tts</code> version against <code>runtime_version</code>, model/config
+<p>Coach verifies the exact installed <code>piper-tts</code> version against <code>runtime_version</code>, model/config
 hashes, and English locale. It streams the selected interpreter's output under hard 12 MiB audio,
-64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and saves WAV
-references before publishing the package. Automated tests use a silent fake child and never invoke
+64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic publication. Automated tests use a silent fake child and never invoke
 real Piper.</p>
+<h2 id="api-handoff">API handoff</h2>
+<p><code>POST /api/imports</code> accepts <code>{ "package": &lt;version-1 package&gt; }</code>. The server validates and
+stores a text-only request before returning <code>pending</code>. Start <code>phrase-gym coach</code> separately to
+prepare it. <code>GET /api/imports</code> and <code>GET /api/imports/{package_id}</code> report <code>pending</code>, <code>preparing</code>,
+<code>added</code>, or <code>error</code>. Retry an error or interrupted preparation with <code>POST /api/imports/{package_id}/retry</code>; retrying the
+same package content returns its existing status. Coach retrieves work and returns a complete
+result through the API; it never opens the application database.</p>
+<p>An external agent that already has audio can call <code>POST /api/imports</code> with <code>package</code> and
+<code>references</code>, a map from each <code>item_id</code> to base64-encoded mono 16-bit PCM WAV bytes. Every
+card must have one complete playable reference, at most 12 MiB. This publishes the batch
+atomically and returns <code>added</code> without Coach. A malformed or missing reference identifies the
+item and rejects the whole request. Retrying identical package and audio returns the original
+result; changed content under the same <code>package_id</code> is rejected. The browser paste/file import
+accepts text-only packages and shows pending Coach work while it is offline.</p>
 
 
 
