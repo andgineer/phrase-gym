@@ -32,6 +32,12 @@ Use one application database and data directory outside the model's workspace. K
 
 Record the prompt, answer and support with each saved take so later edits cannot misdescribe playback. A replacement meaning starts a new phrase. Simple take snapshots suffice; immutable profile registries, publication generations, cross-target dependency graphs and versioned job capabilities are not required.
 
+## Deletion cleanup
+
+Phrase deletion removes visible records and invalidates the phrase's active view in one SQLite transaction. That same transaction durably records the owned reference/take paths awaiting deletion before their records disappear. Filesystem removal follows the commit; SQLite and filesystem changes are not claimed to be atomic. Paths remain pending until removal succeeds, with an already absent file treated as success.
+
+Retry pending cleanup on server startup and through an explicit retry when cleanup fails. Expose the outstanding cleanup and actionable error until it succeeds, including after restart; do not report complete file removal early or restore a deleted phrase. Retry only recorded owned paths, and never reuse those paths for a replacement phrase or take. A small pending-path record suffices; no general job framework is needed. Late uploads still fail for the deleted phrase and cannot publish an orphan recording.
+
 ## Growth after the MVP
 
 Preserve stable phrase/source and take identities, recorded support and independent audio references. Keep scheduling policy separate from activity presentation and recording storage. [Extra practice](decision-transfer-and-engagement.md) uses the same phrase and current-session rules as Daily; it does not need a second phrase identity or general activity engine. `Phrase` is one stored record with `text` as its wording; Card is only a Vue view. The planned phrase loop uses one completed-practice log and one mutable current-view record, with no separate historical attempt or review tables or duplicate daily aggregate counters. Two date-keyed values store Extra allowance targets; live settings and indexed log counts determine remaining capacity.
