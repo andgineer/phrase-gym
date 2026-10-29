@@ -41,7 +41,7 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 ## 6. Add convenience after actual use
 
-Choose improvements from observed friction: a settings editor for the stored due/new session limits, a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
+Choose improvements from observed friction: a settings editor for the stored daily due/new limits, a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
 Implement the [per-user Coach service commands](../architecture.md#package-and-commands) after the local MVP: `install-coach` registers and starts Coach, and `uninstall-coach` removes the registration while preserving data. Verify startup and removal on macOS launchd and Linux systemd user services; neither command requires the cloud `deploy` extra.
 

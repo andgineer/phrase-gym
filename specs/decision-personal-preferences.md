@@ -1,6 +1,6 @@
 # Language choices
 
-Keep a small Settings page in Vue. The learner can read and change native language, learning timezone and per-language card/help language; no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. Store shared `session_due_limit` and `session_new_limit` settings for Daily and Extra, initially 20 and five. Snapshot them at session start; Stage 2 need not expose an editor. A later settings editor may change them for future sessions. Each value is a nonnegative integer, and both cannot be zero.
+Keep a small Settings page in Vue. The learner can read and change native language, learning timezone and per-language card/help language; no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. Store `daily_due_limit` and `daily_new_limit` settings, initially 20 and five. Daily and Extra read their current values for allowance decisions; an increase can make more work available today. Stage 2 need not expose an editor; a later settings editor may change them. Each value is a nonnegative integer, and both cannot be zero.
 
 The learner's current choices are:
 
