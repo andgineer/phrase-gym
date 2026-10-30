@@ -571,6 +571,9 @@ course-provider call during import; source links are attribution only and are ne
 </tr>
 </tbody>
 </table>
+<p>All reference audio for one package, whether Coach prepares it or an agent supplies it, must fit
+one 9 MiB budget: about 3.5 minutes of speech at 22,050 Hz. Fifty long sentences can exceed it;
+the import then fails with an error asking you to split the package, so keep packages short.</p>
 <p>Each lesson has a stable <code>lesson_id</code>, a learner-readable <code>title</code> and one or more <code>phrases</code>.
 One package may contain several lessons; every phrase belongs to exactly one of them.</p>
 <p>Each phrase requires:</p>

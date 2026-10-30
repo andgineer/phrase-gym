@@ -501,10 +501,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/phrase_gym/server/import_contracts.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 82</span>
 <span class="normal"> 83</span>
 <span class="normal"> 84</span>
 <span class="normal"> 85</span>
@@ -527,7 +524,10 @@
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PhrasePackage</span><span class="p">(</span><span class="n">StrictModel</span><span class="p">):</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PhrasePackage</span><span class="p">(</span><span class="n">StrictModel</span><span class="p">):</span>
     <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"phrase-gym.package"</span><span class="p">]</span>
     <span class="n">version</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">package_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">IDENTITY_PATTERN</span><span class="p">)</span>
@@ -628,8 +628,7 @@
 <span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
     <span class="n">remote_origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_TAILSCALE_ORIGIN"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
     <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_DATA_DIR"</span><span class="p">,</span> <span class="s2">".data"</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
@@ -648,7 +647,6 @@
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">review_routes</span><span class="p">(</span><span class="n">study</span><span class="p">))</span>
     <span class="n">library</span> <span class="o">=</span> <span class="n">LibraryService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">lessons</span> <span class="o">=</span> <span class="n">LessonChoices</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">library</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">lessons</span> <span class="o">=</span> <span class="n">lessons</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">library_routes</span><span class="p">(</span><span class="n">library</span><span class="p">,</span> <span class="n">lessons</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">deletion_routes</span><span class="p">(</span><span class="n">PhraseDeletion</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">cleanup</span><span class="p">)))</span>
