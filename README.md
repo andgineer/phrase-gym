@@ -21,7 +21,7 @@
 | src/phrase\_gym/server/contracts.py         |       49 |        0 |    100% |           |
 | src/phrase\_gym/server/deletion.py          |       29 |        0 |    100% |           |
 | src/phrase\_gym/server/exposure.py          |        6 |        0 |    100% |           |
-| src/phrase\_gym/server/file\_cleanup.py     |       37 |        0 |    100% |           |
+| src/phrase\_gym/server/file\_cleanup.py     |       44 |        0 |    100% |           |
 | src/phrase\_gym/server/import\_contracts.py |       91 |        4 |     96% |24, 51, 58, 65 |
 | src/phrase\_gym/server/importer.py          |       85 |        6 |     93% |36, 63, 92, 107, 111, 116 |
 | src/phrase\_gym/server/lesson\_choices.py   |       27 |        0 |    100% |           |
@@ -37,7 +37,7 @@
 | src/phrase\_gym/server/storage.py           |       91 |        2 |     98% |  124, 176 |
 | src/phrase\_gym/server/study.py             |       99 |        4 |     96% |130, 150, 172, 183 |
 | src/phrase\_gym/server/study\_views.py      |       23 |        0 |    100% |           |
-| **TOTAL**                                   | **1355** |  **101** | **93%** |           |
+| **TOTAL**                                   | **1362** |  **101** | **93%** |           |
 
 
 ## Setup coverage badge
