@@ -93,7 +93,7 @@ onMounted(initialize)
           :requesting="capture.requesting.value"
           :processing="capture.processing.value"
           :playing="playback.active.value"
-          :busy="practice.busy.value"
+          :busy="practice.busy.value || session.completing.value"
           :has-take="session.latestTake.value !== null"
           :pending-takes="takeTransfers.pendingTakes.value"
           :capture-error="capture.error.value"

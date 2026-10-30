@@ -107,12 +107,15 @@ const front = computed(() => props.card.kind === 'recall' && !props.card.reveale
               v-for="[outcome, label, style] in ratings"
               :key="outcome"
               :class="style"
-              :disabled="busy || requesting"
+              :disabled="busy || requesting || processing"
               @click="emit('complete', outcome)"
             >
               {{ label }}
             </button>
-            <button :disabled="busy || requesting" @click="emit('complete', 'skipped')">
+            <button
+              :disabled="busy || requesting || processing"
+              @click="emit('complete', 'skipped')"
+            >
               Skip
             </button>
           </div>
@@ -124,7 +127,7 @@ const front = computed(() => props.card.kind === 'recall' && !props.card.reveale
           <p class="muted">First meeting · no rating</p>
           <button
             class="primary study-next"
-            :disabled="busy || requesting"
+            :disabled="busy || requesting || processing"
             @click="emit('complete', 'studied')"
           >
             Next

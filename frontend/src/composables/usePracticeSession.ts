@@ -12,12 +12,19 @@ export function usePracticeSession() {
   const card = computed(() => practice.view.value.card)
   // Takes of the open appearance stay playable here before their background upload finishes.
   const localTakes = ref<StoredTake[]>([])
+  const completing = ref(false)
   let mediaScope = 0
   let compareOnStop: number | null = null
 
+  // Any card change, including a reconcile after a conflict, cancels the old phrase's media.
   watch(
     () => card.value?.view_token,
-    () => (localTakes.value = []),
+    () => {
+      mediaScope++
+      compareOnStop = null
+      playback.stop()
+      localTakes.value = []
+    },
   )
 
   const capture = useCapture({
@@ -65,14 +72,22 @@ export function usePracticeSession() {
   async function settleMedia() {
     mediaScope++
     compareOnStop = null
-    if (capture.capturing.value) await capture.stop()
+    // Also waits for a stop already in progress, so the final take is retained first.
+    await capture.stop()
     playback.stop()
   }
 
   async function complete(outcome: Outcome) {
-    if (practice.busy.value) return
-    await settleMedia()
-    await practice.complete(outcome)
+    const target = card.value?.view_token
+    if (completing.value || practice.busy.value || !target) return
+    completing.value = true
+    try {
+      await settleMedia()
+      // A completion is bound to the card it was pressed on, never to one shown meanwhile.
+      if (card.value?.view_token === target) await practice.complete(outcome)
+    } finally {
+      completing.value = false
+    }
   }
 
   async function leave() {
@@ -97,6 +112,7 @@ export function usePracticeSession() {
     practice,
     playback,
     capture,
+    completing,
     latestTake,
     playMine,
     compareMine,
