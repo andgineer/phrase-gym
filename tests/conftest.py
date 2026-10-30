@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from phrase_gym.server.app import create_app
+from tests.phrase_packages import Package, make_package
 
 
 @pytest.fixture
@@ -17,25 +18,5 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClie
 
 
 @pytest.fixture
-def package() -> dict[str, object]:
-    return {
-        "format": "phrase-gym.package",
-        "version": 1,
-        "package_id": "course-meetings-v1",
-        "source_id": "course-meetings",
-        "source_label": "Course · Meetings",
-        "source_link": "https://example.test/meetings",
-        "learning_language": "en",
-        "card_language": "en",
-        "help_language": "en",
-        "cards": [
-            {
-                "item_id": f"meeting-{index}",
-                "answer": f"Complete phrase number {index}.",
-                "explanation": "Use it to communicate naturally in a meeting.",
-                "cues": [{"situation": f"Meeting situation number {index}."}],
-                "accepted_variants": [],
-            }
-            for index in range(1, 6)
-        ],
-    }
+def package() -> Package:
+    return make_package()

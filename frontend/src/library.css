@@ -1,0 +1,88 @@
+.library {
+  display: grid;
+  gap: 18px;
+}
+.library h2 {
+  margin: 0;
+}
+.lesson-picker,
+.phrase-finder {
+  display: grid;
+  gap: 12px;
+}
+.lesson-picker p,
+.phrase-finder p {
+  margin: 0;
+}
+.library-results {
+  margin: 0;
+}
+.library-results li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 4px;
+}
+.phrase-summary {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 16rem;
+  overflow-wrap: anywhere;
+}
+.phrase-summary strong {
+  font-family: Georgia, serif;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.phrase-details {
+  display: grid;
+  gap: 4px;
+}
+.phrase-details .back {
+  justify-self: start;
+  margin-bottom: 8px;
+}
+.phrase-details h1 {
+  margin-bottom: 4px;
+}
+.take-history {
+  padding: 0;
+  list-style: none;
+}
+.take-history li {
+  border-top: 1px solid #deded1;
+  padding-top: 8px;
+}
+.take-history p {
+  flex-basis: 100%;
+  margin: 0;
+}
+button.danger {
+  color: #8c3829;
+  border-color: #d9a69a;
+  justify-self: start;
+}
+.success {
+  color: #2f6a4b;
+}
+.cleanup-notice {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  button.danger {
+    color: #ffcec1;
+  }
+  .success {
+    color: #a5d1b8;
+  }
+}

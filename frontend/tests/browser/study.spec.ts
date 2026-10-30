@@ -1,8 +1,9 @@
+import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 
 const cards = Array.from({ length: 5 }, (_, index) => ({
   item_id: `meeting-${index + 1}`,
-  answer: [
+  text: [
     "Let's get started.",
     'Could you walk me through that?',
     "I'll get back to you tomorrow.",
@@ -11,12 +12,16 @@ const cards = Array.from({ length: 5 }, (_, index) => ({
   ][index],
   explanation: 'A natural phrase for an ordinary conversation.',
   cues: [{ situation: `Use the useful expression in situation ${index + 1}.` }],
+  recall_hints: [`hint ${index + 1}`, `clue ${index + 1}`],
+  usage_contexts: ['meetings'],
   accepted_variants: index === 0 ? ["Let's begin."] : [],
 }))
+type Phrase = (typeof cards)[number]
+const lessons = (phrases: Phrase[]) => [{ lesson_id: 'unit-1', title: 'Meetings', phrases }]
 
 const phrasePackage = {
   format: 'phrase-gym.package',
-  version: 1,
+  version: 2,
   package_id: 'browser-five-phrases-v1',
   source_id: 'browser-course-unit-1',
   source_label: 'Browser course · Unit 1',
@@ -24,7 +29,7 @@ const phrasePackage = {
   learning_language: 'en',
   card_language: 'en',
   help_language: 'en',
-  cards,
+  lessons: lessons(cards),
 }
 
 test.beforeEach(async ({ page }) => {
@@ -35,23 +40,9 @@ test.beforeEach(async ({ page }) => {
       __nativeMediaPause: HTMLMediaElement.prototype.pause,
     })
     Object.defineProperty(navigator, 'maxTouchPoints', { value: 0 })
-    Object.defineProperty(navigator, 'mediaDevices', {
-      configurable: true,
-      value: {
-        getUserMedia: async () => ({
-          getTracks: () => [],
-          getAudioTracks: () => [
-            {
-              readyState: 'live',
-              muted: false,
-              stop() {},
-              getSettings: () => ({ sampleRate: 48000, channelCount: 1 }),
-              onended: null,
-            },
-          ],
-        }),
-      },
-    })
+  })
+  await installFakeMedia(page)
+  await page.addInitScript(() => {
     if (!navigator.locks)
       Object.defineProperty(navigator, 'locks', {
         configurable: true,
@@ -88,35 +79,6 @@ test.beforeEach(async ({ page }) => {
         return Reflect.apply(nativeRequest, locks, args)
       },
     })
-    class SilentRecorder {
-      static isTypeSupported() {
-        return true
-      }
-      state = 'inactive'
-      mimeType = 'audio/webm;codecs=opus'
-      ondataavailable: ((event: { data: Blob }) => void) | null = null
-      onstop: (() => void) | null = null
-      onerror: (() => void) | null = null
-      constructor(_stream: unknown, _options: unknown) {}
-      start() {
-        this.state = 'recording'
-      }
-      stop() {
-        this.state = 'inactive'
-        this.ondataavailable?.({
-          data: new Blob([new Uint8Array([1, 2, 3, 4])], { type: this.mimeType }),
-        })
-        queueMicrotask(() => this.onstop?.())
-      }
-    }
-    Object.defineProperty(window, 'MediaRecorder', { configurable: true, value: SilentRecorder })
-    HTMLMediaElement.prototype.play = async function () {
-      const host = window as unknown as { __playedMedia?: HTMLMediaElement[] }
-      ;(host.__playedMedia ??= []).push(this)
-    }
-    HTMLMediaElement.prototype.pause = function () {
-      this.dispatchEvent(new Event('pause'))
-    }
   })
 })
 
@@ -127,13 +89,13 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     ...phrasePackage,
     package_id: 'native-recorder-v1',
     source_id: 'native-recorder-source',
-    cards: [
+    lessons: lessons([
       {
         ...cards[0],
         item_id: 'native-recorder-card',
-        answer: 'This recording uses the browser encoder.',
+        text: 'This recording uses the browser encoder.',
       },
-    ],
+    ]),
   }
   await page.goto('/')
   await page.evaluate(() => {
@@ -429,7 +391,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   })
   for (const [index, card] of cards.entries()) {
     await expect(
-      page.locator('article.study').getByRole('heading', { name: card.answer }),
+      page.locator('article.study').getByRole('heading', { name: card.text }),
     ).toBeVisible()
     await expect(page.getByText('This first meeting is ungraded.')).toBeVisible()
     await page.getByRole('button', { name: 'Next' }).click()
@@ -443,9 +405,8 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   expect(completions).toBe(cards.length)
   await expect(page.getByText(/Next return:/)).toBeVisible()
   await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByRole('button', { name: 'Browser course · Unit 1 · meeting-1' }).click()
-  const firstHistory = page.getByRole('heading', { name: "Let's get started." }).locator('..')
-  await expect(firstHistory.getByRole('button', { name: 'Replay saved take' })).toHaveCount(2)
+  await page.getByRole('button', { name: "Open details: Let's get started." }).click()
+  await expect(page.getByRole('button', { name: '▶ Mine' })).toHaveCount(2)
   await page.request.post('/__test/clock/2026-11-01T10:00:00Z')
   await page.reload()
   await expect(page.getByText('Independent recall')).toBeVisible()
@@ -455,36 +416,29 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'With effort' }).click()
   await expect(page.getByText('One supported repetition is available.')).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByText('Independent recall')).toBeVisible()
+  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
   await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find card by source or item ID').fill('meeting-2')
-  await page.getByRole('button', { name: /meeting-2/ }).click()
+  await page.getByLabel('Find a phrase').fill('walk me through')
+  await page.getByRole('button', { name: 'Open details: Could you walk me through that?' }).click()
+  await expect(page.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await expect(page.getByText('Use the useful expression in situation 3.')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'With effort' })).toHaveCount(0)
+  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find card by source or item ID').fill('meeting-3')
-  await page.getByRole('button', { name: /meeting-3/ }).click()
+  await page.getByLabel('Find a phrase').fill('get back to you')
+  await page.getByRole('button', { name: /^Open details: I'll get back/ }).click()
   await page.getByRole('button', { name: 'Practise freely' }).click()
   await expect(page.getByText('Ungraded rehearsal')).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByText('Use the useful expression in situation 4.')).toBeVisible()
-  const afterExposure = await page.request
-    .get('/api/study/history')
-    .then((response) => response.json())
-  expect(
-    afterExposure
-      .filter((item: { item_id: string }) => ['meeting-2', 'meeting-3'].includes(item.item_id))
-      .every((item: { reviews: unknown[] }) => item.reviews.length === 0),
-  ).toBe(true)
+  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByLabel('Learning timezone').fill('Europe/London')
   await page.getByRole('button', { name: 'Save settings' }).click()
   await expect(page.getByText('Settings saved.')).toBeVisible()
   await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find card by source or item ID').fill('meeting-1')
-  await expect(page.getByRole('button', { name: /meeting-1/ })).toHaveCount(1)
-  await page.getByRole('button', { name: /meeting-1/ }).click()
+  await page.getByLabel('Find a phrase').fill('started')
+  await expect(page.getByRole('button', { name: /^Open details/ })).toHaveCount(1)
+  await page.getByRole('button', { name: "Open details: Let's get started." }).click()
   await page.getByRole('button', { name: 'Practise freely' }).click()
   await expect(page.getByText('Ungraded rehearsal')).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
@@ -498,7 +452,7 @@ test('restored practice card keeps the original layout and microphone interactio
     ...phrasePackage,
     package_id: 'restored-visual-card-v1',
     source_id: 'restored-visual-source',
-    cards: [{ ...cards[1], item_id: 'restored-visual-card' }],
+    lessons: lessons([{ ...cards[1], item_id: 'restored-visual-card' }]),
   }
   await page.goto('/')
   await page.getByRole('button', { name: 'Add material' }).click()
@@ -507,7 +461,7 @@ test('restored practice card keeps the original layout and microphone interactio
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
   const card = page.locator('article.practice-card')
-  await expect(card.getByRole('heading', { name: cards[1].answer })).toBeVisible()
+  await expect(card.getByRole('heading', { name: cards[1].text })).toBeVisible()
   await expect(card.locator('.practice-prompt')).toHaveText(
     'Use the useful expression in situation 2.',
   )
@@ -642,7 +596,7 @@ test('playback rejection clears the current control without stopping a newer pla
     ...phrasePackage,
     package_id: 'playback-rejection-v1',
     source_id: 'playback-rejection-source',
-    cards: [{ ...cards[1], item_id: 'playback-rejection-card' }],
+    lessons: lessons([{ ...cards[1], item_id: 'playback-rejection-card' }]),
   }
   await page.goto('/')
   await page.getByRole('button', { name: 'Add material' }).click()
@@ -694,7 +648,7 @@ test('import modal traps keyboard focus and finishes recording before opening', 
     ...phrasePackage,
     package_id: 'modal-recording-v1',
     source_id: 'modal-recording-source',
-    cards: [{ ...cards[1], item_id: 'modal-recording-card' }],
+    lessons: lessons([{ ...cards[1], item_id: 'modal-recording-card' }]),
   }
   await page.goto('/')
   const opener = page.getByRole('button', { name: 'Add material' })
@@ -733,7 +687,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
     ...phrasePackage,
     package_id: 'automatic-comparison-stop-v1',
     source_id: 'automatic-comparison-stop-source',
-    cards: [{ ...cards[1], item_id: 'automatic-comparison-stop-card' }],
+    lessons: lessons([{ ...cards[1], item_id: 'automatic-comparison-stop-card' }]),
   }
   await page.goto('/')
   await page.getByRole('button', { name: 'Add material' }).click()

@@ -1,107 +1,127 @@
 import os
 import sqlite3
 from collections.abc import Iterator
-from contextlib import contextmanager
-from datetime import datetime
+from contextlib import closing, contextmanager
 from pathlib import Path
 
-from phrase_gym.server.scheduling import next_day_start
-
+SCHEMA_VERSION = "3"
+DATABASE_NAME = "phrase-gym.sqlite3"
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS imports (
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE imports (
   package_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, payload TEXT NOT NULL,
   status TEXT NOT NULL, error TEXT, added_count INTEGER, created_at TEXT NOT NULL,
   result_id TEXT, result_hash TEXT
 );
-CREATE TABLE IF NOT EXISTS cards (
-  id TEXT PRIMARY KEY, source_id TEXT NOT NULL, item_id TEXT NOT NULL,
-  source_label TEXT NOT NULL, source_link TEXT, answer TEXT NOT NULL,
-  explanation TEXT NOT NULL, cues_json TEXT NOT NULL, variants_json TEXT NOT NULL,
-  detailed_explanation TEXT, reference_path TEXT NOT NULL, created_at TEXT NOT NULL,
-  studied_at TEXT, UNIQUE(source_id, item_id)
+CREATE TABLE lessons (
+  id TEXT PRIMARY KEY, source_id TEXT NOT NULL, lesson_key TEXT NOT NULL,
+  title TEXT NOT NULL, source_label TEXT NOT NULL, search_text TEXT NOT NULL,
+  created_at TEXT NOT NULL, position INTEGER NOT NULL, UNIQUE(source_id, lesson_key)
 );
-CREATE TABLE IF NOT EXISTS attempts (
-  id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id), created_at TEXT NOT NULL,
-  completed_at TEXT, answer_snapshot TEXT NOT NULL, explanation_snapshot TEXT NOT NULL,
-  cue_snapshot TEXT NOT NULL, support_json TEXT NOT NULL
+CREATE TABLE phrases (
+  id TEXT PRIMARY KEY, lesson_id TEXT NOT NULL REFERENCES lessons(id),
+  source_id TEXT NOT NULL, item_id TEXT NOT NULL, source_label TEXT NOT NULL,
+  source_link TEXT, text TEXT NOT NULL, explanation TEXT NOT NULL,
+  detailed_explanation TEXT, cues_json TEXT NOT NULL, hints_json TEXT NOT NULL,
+  contexts_json TEXT NOT NULL, variants_json TEXT NOT NULL,
+  search_primary TEXT NOT NULL, search_text TEXT NOT NULL, reference_path TEXT NOT NULL,
+  created_at TEXT NOT NULL, position INTEGER NOT NULL, studied_at TEXT, due_at TEXT,
+  fsrs_json TEXT, cue_index INTEGER NOT NULL DEFAULT 0, exposed_day TEXT,
+  UNIQUE(source_id, item_id)
 );
-CREATE TABLE IF NOT EXISTS operations (
-  id TEXT PRIMARY KEY, kind TEXT NOT NULL, result_json TEXT NOT NULL
+CREATE INDEX phrases_by_lesson ON phrases(lesson_id, created_at, position);
+CREATE TABLE attempts (
+  id TEXT PRIMARY KEY, phrase_id TEXT NOT NULL REFERENCES phrases(id),
+  created_at TEXT NOT NULL, completed_at TEXT, answer_snapshot TEXT NOT NULL,
+  explanation_snapshot TEXT NOT NULL, cue_snapshot TEXT NOT NULL, support_json TEXT NOT NULL,
+  kind TEXT NOT NULL, learning_day TEXT, revealed_at TEXT, response_mode TEXT
 );
-CREATE TABLE IF NOT EXISTS recordings (
-  id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id),
+CREATE TABLE operations (id TEXT PRIMARY KEY, kind TEXT NOT NULL, result_json TEXT NOT NULL);
+CREATE TABLE recordings (
+  id TEXT PRIMARY KEY, phrase_id TEXT NOT NULL REFERENCES phrases(id),
   attempt_id TEXT NOT NULL REFERENCES attempts(id), captured_at TEXT NOT NULL,
   mime_type TEXT NOT NULL, duration_ms INTEGER, complete INTEGER NOT NULL,
   capture_settings_json TEXT NOT NULL, path TEXT NOT NULL, byte_length INTEGER NOT NULL,
-  sha256 TEXT NOT NULL
+  sha256 TEXT NOT NULL, mode TEXT NOT NULL, cue_json TEXT, hint TEXT,
+  answer_snapshot TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS reviews (
+CREATE INDEX recordings_by_phrase ON recordings(phrase_id, captured_at);
+CREATE TABLE reviews (
   id TEXT PRIMARY KEY, attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(id),
-  card_id TEXT NOT NULL REFERENCES cards(id), reviewed_at TEXT NOT NULL,
+  phrase_id TEXT NOT NULL REFERENCES phrases(id), reviewed_at TEXT NOT NULL,
   learning_day TEXT NOT NULL, cue_snapshot TEXT NOT NULL, response_mode TEXT NOT NULL,
   help_before INTEGER NOT NULL, rating TEXT NOT NULL, due_at TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1),
+CREATE TABLE deleted_phrases (id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL);
+CREATE TABLE cleanup_paths (
+  path TEXT PRIMARY KEY, phrase_id TEXT NOT NULL, recorded_at TEXT NOT NULL, error TEXT
+);
+CREATE TABLE settings (id INTEGER PRIMARY KEY CHECK(id=1),
   native_language TEXT NOT NULL, learning_timezone TEXT NOT NULL,
   card_language TEXT NOT NULL, help_language TEXT NOT NULL);
-INSERT OR IGNORE INTO settings VALUES (1, 'ru', 'Europe/Belgrade', 'en', 'en');
+INSERT INTO settings VALUES (1, 'ru', 'Europe/Belgrade', 'en', 'en');
 """
+
+
+class UnsupportedSchemaError(RuntimeError):
+    pass
+
+
+def _schema_version(connection: sqlite3.Connection) -> str | None:
+    tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master")}
+    if not tables:
+        return None
+    if "meta" not in tables:
+        return "unknown"
+    row = connection.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
+    return row[0] if row else "unknown"
+
+
+def existing_schema_version(path: Path) -> str | None:
+    if not path.exists() or path.stat().st_size == 0:
+        return None
+    # Immutable inspection creates no WAL sidecars in a directory this version cannot use.
+    with closing(sqlite3.connect(f"{path.as_uri()}?immutable=1", uri=True)) as connection:
+        return _schema_version(connection)
+
+
+def unsupported(data_dir: Path, version: str) -> UnsupportedSchemaError:
+    return UnsupportedSchemaError(
+        f"{data_dir} holds Phrase Gym data schema {version}; this version needs schema "
+        f"{SCHEMA_VERSION}. Start with a new empty --data-dir or restore a compatible "
+        "backup. The existing directory was not changed.",
+    )
+
+
+def require_compatible(data_dir: Path) -> None:
+    version = existing_schema_version(data_dir / DATABASE_NAME)
+    if version not in (None, SCHEMA_VERSION):
+        raise unsupported(data_dir, version)
 
 
 class Database:
     def __init__(self, data_dir: Path):
+        self.data_dir = data_dir
+        self.path = data_dir / DATABASE_NAME
+        require_compatible(data_dir)
         data_dir.mkdir(parents=True, mode=0o700, exist_ok=True)
         data_dir.chmod(0o700)
-        self.data_dir = data_dir
-        self.path = data_dir / "phrase-gym.sqlite3"
         if not self.path.exists():
             descriptor = os.open(self.path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600)
             os.close(descriptor)
         self.path.chmod(0o600)
         with self.write() as connection:
-            connection.executescript(SCHEMA)
-            version = connection.execute(
-                "SELECT value FROM meta WHERE key='schema_version'",
-            ).fetchone()
-            if version and version[0] not in ("1", "2"):
-                raise RuntimeError(
-                    f"Unsupported Phrase Gym data schema {version[0]}; restore a compatible backup",
-                )
-            connection.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', '2')")
-            columns = {row[1] for row in connection.execute("PRAGMA table_info(imports)")}
-            for name in ("result_id", "result_hash"):
-                if name not in columns:
-                    connection.execute(f"ALTER TABLE imports ADD COLUMN {name} TEXT")
-            card_columns = {row[1] for row in connection.execute("PRAGMA table_info(cards)")}
-            for name, definition in (
-                ("due_at", "TEXT"),
-                ("fsrs_json", "TEXT"),
-                ("suspended", "INTEGER NOT NULL DEFAULT 0"),
-                ("cue_index", "INTEGER NOT NULL DEFAULT 0"),
-                ("exposed_day", "TEXT"),
-            ):
-                if name not in card_columns:
-                    connection.execute(f"ALTER TABLE cards ADD COLUMN {name} {definition}")
-            attempt_columns = {row[1] for row in connection.execute("PRAGMA table_info(attempts)")}
-            for name, definition in (
-                ("kind", "TEXT NOT NULL DEFAULT 'study'"),
-                ("learning_day", "TEXT"),
-                ("revealed_at", "TEXT"),
-                ("response_mode", "TEXT"),
-            ):
-                if name not in attempt_columns:
-                    connection.execute(f"ALTER TABLE attempts ADD COLUMN {name} {definition}")
-            prior_study = connection.execute(
-                "SELECT id, studied_at FROM cards WHERE studied_at IS NOT NULL AND due_at IS NULL",
-            ).fetchall()
-            for card in prior_study:
-                due = next_day_start(connection, datetime.fromisoformat(card["studied_at"]))
+            current = _schema_version(connection)
+            if current is None:
+                for statement in SCHEMA.split(";"):
+                    if statement.strip():
+                        connection.execute(statement)
                 connection.execute(
-                    "UPDATE cards SET due_at=? WHERE id=?",
-                    (due.isoformat(), card["id"]),
+                    "INSERT INTO meta VALUES ('schema_version', ?)",
+                    (SCHEMA_VERSION,),
                 )
-            connection.execute("UPDATE meta SET value='2' WHERE key='schema_version'")
+            elif current != SCHEMA_VERSION:
+                raise unsupported(data_dir, current)
             connection.execute("UPDATE imports SET status='pending' WHERE status='preparing'")
 
     def connect(self) -> sqlite3.Connection:
@@ -148,3 +168,10 @@ def write_private(path: Path, content: bytes, *, exclusive: bool = True) -> None
             output.write(content)
     finally:
         os.close(descriptor)
+
+
+def owned_path(data_dir: Path, path: str) -> Path:
+    resolved = Path(path).resolve()
+    if not resolved.is_relative_to(data_dir.resolve()):
+        raise ValueError(f"{path} is outside the application data directory")
+    return resolved

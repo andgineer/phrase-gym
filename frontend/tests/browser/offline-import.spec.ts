@@ -23,19 +23,27 @@ function silentReference(): string {
 test('two offline requests retain independent status and retry across reload', async ({ page }) => {
   const phrasePackage = {
     format: 'phrase-gym.package',
-    version: 1,
+    version: 2,
     package_id: 'offline-browser-first',
     source_id: 'offline-browser-first-source',
     source_label: 'Offline course',
     learning_language: 'en',
     card_language: 'en',
     help_language: 'en',
-    cards: [
+    lessons: [
       {
-        item_id: 'first',
-        answer: 'I can take care of that.',
-        explanation: 'Offer to handle a task.',
-        cues: [{ situation: 'A colleague asks who can handle the task.' }],
+        lesson_id: 'tasks',
+        title: 'Tasks',
+        phrases: [
+          {
+            item_id: 'first',
+            text: 'I can take care of that.',
+            explanation: 'Offer to handle a task.',
+            cues: [{ situation: 'A colleague asks who can handle the task.' }],
+            recall_hints: ['take care', 'handle'],
+            usage_contexts: ['work tasks'],
+          },
+        ],
       },
     ],
   }

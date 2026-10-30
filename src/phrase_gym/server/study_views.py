@@ -6,25 +6,29 @@ from phrase_gym.server.contracts import SavedRecording, StudyCard, StudyResponse
 from phrase_gym.server.scheduling import effective_due
 
 
-def recordings(connection: sqlite3.Connection, card_id: str) -> list[SavedRecording]:
+def saved_recording(row: sqlite3.Row) -> SavedRecording:
+    return SavedRecording(
+        id=row["id"],
+        attempt_id=row["attempt_id"],
+        captured_at=row["captured_at"],
+        mime_type=row["mime_type"],
+        duration_ms=row["duration_ms"],
+        complete=bool(row["complete"]),
+        byte_length=row["byte_length"],
+        url=f"/api/recordings/{row['id']}/audio",
+        mode=row["mode"],
+        cue=json.loads(row["cue_json"]) if row["cue_json"] else None,
+        hint=row["hint"],
+        answer=row["answer_snapshot"],
+    )
+
+
+def recordings(connection: sqlite3.Connection, phrase_id: str) -> list[SavedRecording]:
     rows = connection.execute(
-        "SELECT id, attempt_id, captured_at, mime_type, duration_ms, complete, byte_length "
-        "FROM recordings WHERE card_id=? ORDER BY captured_at, id",
-        (card_id,),
+        "SELECT * FROM recordings WHERE phrase_id=? ORDER BY captured_at, id",
+        (phrase_id,),
     ).fetchall()
-    return [
-        SavedRecording(
-            id=row["id"],
-            attempt_id=row["attempt_id"],
-            captured_at=row["captured_at"],
-            mime_type=row["mime_type"],
-            duration_ms=row["duration_ms"],
-            complete=bool(row["complete"]),
-            byte_length=row["byte_length"],
-            url=f"/api/recordings/{row['id']}/audio",
-        )
-        for row in rows
-    ]
+    return [saved_recording(row) for row in rows]
 
 
 def response(
@@ -33,19 +37,13 @@ def response(
     attempt: sqlite3.Row | None,
     instant: str,
 ) -> StudyResponse:
-    total = connection.execute("SELECT COUNT(*) FROM cards").fetchone()[0]
-    studied = connection.execute(
-        "SELECT COUNT(*) FROM cards WHERE studied_at IS NOT NULL",
-    ).fetchone()[0]
+    total = connection.execute("SELECT COUNT(*) FROM phrases").fetchone()[0]
     scheduled = connection.execute(
-        "SELECT * FROM cards WHERE suspended=0 AND studied_at IS NOT NULL",
+        "SELECT * FROM phrases WHERE studied_at IS NOT NULL",
     ).fetchall()
     due_times = [effective_due(connection, row) for row in scheduled]
     now = datetime.fromisoformat(instant)
     due = sum(when <= now for when in due_times)
-    new = connection.execute(
-        "SELECT COUNT(*) FROM cards WHERE suspended=0 AND studied_at IS NULL",
-    ).fetchone()[0]
     later = [when for when in due_times if when > now]
     future = min(later).isoformat() if later else None
     message = None
@@ -60,9 +58,9 @@ def response(
     return StudyResponse(
         done=bool(total and not card),
         total=total,
-        studied=studied,
+        studied=len(scheduled),
         due_count=due,
-        new_count=new,
+        new_count=total - len(scheduled),
         next_return=future,
         message=message,
         card=study_card(connection, card, attempt) if card and attempt else None,
@@ -81,12 +79,12 @@ def study_card(
         item_id=row["item_id"],
         source_label=row["source_label"],
         source_link=row["source_link"],
-        answer=row["answer"] if revealed else "",
+        text=row["text"] if revealed else "",
         explanation=row["explanation"] if revealed else "",
         cues=json.loads(row["cues_json"]) if revealed else [],
         accepted_variants=json.loads(row["variants_json"]) if revealed else [],
         detailed_explanation=row["detailed_explanation"] if revealed else None,
-        reference_url=f"/api/cards/{row['id']}/reference" if revealed else "",
+        reference_url=f"/api/phrases/{row['id']}/reference" if revealed else "",
         attempt_id=attempt["id"],
         recordings=recordings(connection, row["id"]),
         kind=attempt["kind"],

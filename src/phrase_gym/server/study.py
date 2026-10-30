@@ -2,12 +2,11 @@ import json
 import sqlite3
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import cast
 from uuid import uuid4
 
 from phrase_gym.server.contracts import StudyCard, StudyCompletion, StudyResponse
-from phrase_gym.server.exposure import expose_card
+from phrase_gym.server.exposure import expose_phrase
 from phrase_gym.server.scheduling import (
     effective_due,
     learning_day,
@@ -33,13 +32,12 @@ class StudyService:
             day = learning_day(connection, instant)
             active = connection.execute(
                 "SELECT * FROM attempts WHERE completed_at IS NULL AND kind!='free' "
-                "AND card_id IN (SELECT id FROM cards WHERE suspended=0) "
                 "ORDER BY created_at LIMIT 1",
             ).fetchone()
             if active:
                 card = connection.execute(
-                    "SELECT * FROM cards WHERE id=?",
-                    (active["card_id"],),
+                    "SELECT * FROM phrases WHERE id=?",
+                    (active["phrase_id"],),
                 ).fetchone()
                 if active["kind"] != "review" or effective_due(connection, card) <= instant:
                     return response(connection, card, active, instant.isoformat())
@@ -55,7 +53,7 @@ class StudyService:
             kind = "study"
             if count < MAX_SESSION_CARDS:
                 due_cards = connection.execute(
-                    "SELECT * FROM cards WHERE studied_at IS NOT NULL AND suspended=0 "
+                    "SELECT * FROM phrases WHERE studied_at IS NOT NULL "
                     "AND due_at<=? AND (exposed_day IS NULL OR exposed_day!=?) "
                     "ORDER BY due_at, created_at",
                     (instant.isoformat(), day),
@@ -79,8 +77,8 @@ class StudyService:
                     < MAX_NEW_CARDS
                 ):
                     card = connection.execute(
-                        "SELECT * FROM cards WHERE studied_at IS NULL AND suspended=0 "
-                        "ORDER BY created_at, rowid LIMIT 1",
+                        "SELECT * FROM phrases WHERE studied_at IS NULL "
+                        "ORDER BY created_at, position LIMIT 1",
                     ).fetchone()
             if card:
                 attempt = self._start(connection, card, kind, day, instant)
@@ -102,14 +100,14 @@ class StudyService:
             ["complete wording", "meaning/use help", "reference audio"] if kind != "review" else []
         )
         connection.execute(
-            "INSERT INTO attempts (id,card_id,created_at,completed_at,answer_snapshot,"
+            "INSERT INTO attempts (id,phrase_id,created_at,completed_at,answer_snapshot,"
             "explanation_snapshot,cue_snapshot,support_json,kind,learning_day) "
             "VALUES (?,?,?,NULL,?,?,?,?,?,?)",
             (
                 attempt_id,
                 card["id"],
                 instant.isoformat(),
-                card["answer"],
+                card["text"],
                 card["explanation"],
                 json.dumps(cue),
                 json.dumps(support),
@@ -136,8 +134,8 @@ class StudyService:
                 (self.clock().isoformat(), response_mode, attempt_id),
             )
             card = connection.execute(
-                "SELECT * FROM cards WHERE id=?",
-                (attempt["card_id"],),
+                "SELECT * FROM phrases WHERE id=?",
+                (attempt["phrase_id"],),
             ).fetchone()
             updated = connection.execute(
                 "SELECT * FROM attempts WHERE id=?",
@@ -145,14 +143,14 @@ class StudyService:
             ).fetchone()
             return study_card(connection, card, updated)
 
-    def free(self, card_id: str) -> StudyCard | None:
+    def free(self, phrase_id: str) -> StudyCard | None:
         with self.database.write() as connection:
-            card = connection.execute("SELECT * FROM cards WHERE id=?", (card_id,)).fetchone()
+            card = connection.execute("SELECT * FROM phrases WHERE id=?", (phrase_id,)).fetchone()
             if not card:
                 return None
             instant = self.clock()
             day = learning_day(connection, instant)
-            expose_card(connection, card_id, instant)
+            expose_phrase(connection, phrase_id, instant)
             attempt = self._start(connection, card, "free", day, instant)
             return study_card(connection, card, attempt)
 
@@ -191,8 +189,8 @@ class StudyService:
             elif attempt["kind"] == "study":
                 due = next_day_start(connection, instant).isoformat()
                 connection.execute(
-                    "UPDATE cards SET studied_at=COALESCE(studied_at,?), due_at=? WHERE id=?",
-                    (instant.isoformat(), due, attempt["card_id"]),
+                    "UPDATE phrases SET studied_at=COALESCE(studied_at,?), due_at=? WHERE id=?",
+                    (instant.isoformat(), due, attempt["phrase_id"]),
                 )
             connection.execute(
                 "UPDATE attempts SET completed_at=? WHERE id=?",
@@ -221,8 +219,8 @@ class StudyService:
             (instant, attempt["id"]),
         )
         connection.execute(
-            "UPDATE cards SET exposed_day=? WHERE id=?",
-            (attempt["learning_day"], attempt["card_id"]),
+            "UPDATE phrases SET exposed_day=? WHERE id=?",
+            (attempt["learning_day"], attempt["phrase_id"]),
         )
         result = StudyCompletion(attempt_id=attempt["id"], completed_at=instant, graded=False)
         connection.execute(
@@ -230,11 +228,3 @@ class StudyService:
             (operation_id, result.model_dump_json()),
         )
         return result
-
-    def reference(self, card_id: str) -> Path | None:
-        with self.database.read() as connection:
-            row = connection.execute(
-                "SELECT reference_path FROM cards WHERE id=?",
-                (card_id,),
-            ).fetchone()
-        return Path(row["reference_path"]) if row else None

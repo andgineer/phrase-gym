@@ -1,8 +1,12 @@
 import { beforeEach, expect, it, vi } from 'vitest'
-import { api } from '../src/api'
+import { ApiError, api } from '../src/api'
 import { useStudy } from '../src/composables/useStudy'
+import type { Study } from '../src/studyTypes'
 
-vi.mock('../src/api', () => ({ api: vi.fn() }))
+vi.mock('../src/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/api')>()),
+  api: vi.fn(),
+}))
 
 beforeEach(() => vi.mocked(api).mockReset())
 
@@ -26,7 +30,6 @@ it('ignores repeated Next while saving audio and completes the original attempt 
   expect(vi.mocked(api).mock.calls.map(([path]) => path)).toEqual([
     '/attempts/original-attempt/complete',
     '/study/current',
-    '/study/history',
   ])
   expect(study.completing.value).toBe(false)
 })
@@ -52,11 +55,8 @@ it.each(['preparation', 'request'])(
 
 it('refreshes a review invalidated by answer exposure instead of leaving rating buttons active', async () => {
   const study = useStudy()
-  const conflict = Object.assign(new Error('Attempt already completed'), { status: 409 })
-  vi.mocked(api)
-    .mockRejectedValueOnce(conflict)
-    .mockResolvedValueOnce({ card: null })
-    .mockResolvedValueOnce([])
+  const conflict = new ApiError('Attempt already completed', 409)
+  vi.mocked(api).mockRejectedValueOnce(conflict).mockResolvedValueOnce({ card: null })
 
   await study.rate('exposed-attempt', 'recalled', 'silent')
 
@@ -65,6 +65,25 @@ it('refreshes a review invalidated by answer exposure instead of leaving rating 
   expect(vi.mocked(api).mock.calls.map(([path]) => path)).toEqual([
     '/attempts/exposed-attempt/review',
     '/study/current',
-    '/study/history',
   ])
+})
+
+it('refreshes the rated card recordings in capture order and ignores a deleted phrase', async () => {
+  const study = useStudy()
+  study.current.value = {
+    done: false,
+    total: 1,
+    studied: 0,
+    card: { id: 'phrase', attempt_id: 'attempt', recordings: [] },
+  } as unknown as Study
+  vi.mocked(api)
+    .mockResolvedValueOnce({})
+    .mockResolvedValueOnce({ items: [{ id: 'newer' }, { id: 'older' }], next_offset: null })
+  await study.rate('attempt', 'with_effort', 'silent')
+  expect(study.current.value?.card?.recordings.map((take) => take.id)).toEqual(['older', 'newer'])
+  expect(vi.mocked(api).mock.calls.at(-1)?.[0]).toBe('/phrases/phrase/recordings?limit=100')
+
+  vi.mocked(api).mockRejectedValueOnce(new ApiError('Phrase not found', 404))
+  await study.refreshRecordings()
+  expect(study.error.value).toBe('')
 })

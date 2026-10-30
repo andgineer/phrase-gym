@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
 
 from phrase_gym.server.contracts import (
     CompleteStudy,
@@ -27,18 +26,11 @@ def study_routes(service: StudyService) -> APIRouter:
             raise HTTPException(404, "Study attempt not found")
         return result
 
-    @router.post("/cards/{card_id}/practise")
-    def practise(card_id: str) -> StudyCard:
-        card = service.free(card_id)
+    @router.post("/phrases/{phrase_id}/practise")
+    def practise(phrase_id: str) -> StudyCard:
+        card = service.free(phrase_id)
         if not card:
-            raise HTTPException(404, "Card not found")
+            raise HTTPException(404, "Phrase not found")
         return card
-
-    @router.get("/cards/{card_id}/reference")
-    def reference_audio(card_id: str) -> FileResponse:
-        path = service.reference(card_id)
-        if not path:
-            raise HTTPException(404, "Card not found")
-        return FileResponse(path, media_type="audio/wav")
 
     return router

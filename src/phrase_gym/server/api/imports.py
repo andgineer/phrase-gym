@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from phrase_gym.server.contracts import (
+from phrase_gym.server.import_contracts import (
     ImportRequest,
     ImportStatus,
 )

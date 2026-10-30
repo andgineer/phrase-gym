@@ -4,9 +4,12 @@ import { useCapture } from './composables/useCapture'
 import { takeTransfers } from './takeTransfers'
 import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
 import type { StoredTake } from './practiceTypes'
+import type { Card } from './studyTypes'
 import LibraryPanel from './components/LibraryPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import AddMaterial from './components/AddMaterial.vue'
+import CleanupNotice from './components/CleanupNotice.vue'
+import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
 import { usePlayback } from './composables/usePlayback'
 import { useStudy } from './composables/useStudy'
@@ -22,7 +25,7 @@ const capture = useCapture({
   context: async () => {
     if (!study.current.value?.card) throw new Error('No study card is open')
     return {
-      card_id: study.current.value.card.id,
+      phrase_id: study.current.value.card.id,
       attempt_id: study.current.value.card.attempt_id,
     }
   },
@@ -31,7 +34,7 @@ const capture = useCapture({
     const shouldCompare =
       take.complete &&
       compareOnStop === mediaScope &&
-      study.current.value?.card?.id === take.card_id &&
+      study.current.value?.card?.id === take.phrase_id &&
       study.current.value.card.attempt_id === take.attempt_id &&
       !document.hidden
     compareOnStop = null
@@ -40,7 +43,7 @@ const capture = useCapture({
       if (reference) void playback.compareTake(take, reference)
     }
     await takeTransfers.flush()
-    if (study.rated.value) await study.loadHistory()
+    if (study.rated.value) await study.refreshRecordings()
     else await study.load()
   },
   failure: async () => {},
@@ -97,14 +100,6 @@ async function skip() {
   })
 }
 
-async function suspend() {
-  const card = study.current.value?.card
-  if (!card) return
-  await capture.release()
-  await api(`/cards/${card.id}/suspend`, { method: 'POST' })
-  await study.load()
-}
-
 async function retryTakes() {
   await takeTransfers.flush()
   await study.load()
@@ -138,21 +133,19 @@ async function openPanel(nextPanel: 'practice' | 'library' | 'settings') {
   await capture.release()
   playback.stop()
   await takeTransfers.flush()
-  if (nextPanel === 'library') await study.loadHistory()
   if (nextPanel === 'practice') await study.load()
   panel.value = nextPanel
 }
 
-async function practise(cardId: string) {
-  const card = await api<import('./studyTypes').Card>(`/cards/${cardId}/practise`, {
-    method: 'POST',
-  })
-  if (study.current.value) study.current.value.card = card
+async function practise(phraseId: string) {
+  playback.stop()
+  try {
+    const card = await api<Card>(`/phrases/${phraseId}/practise`, { method: 'POST' })
+    if (study.current.value) study.current.value.card = card
+  } catch (cause) {
+    study.error.value = String(cause)
+  }
   panel.value = 'practice'
-}
-
-function playReference(url: string) {
-  return playback.play(url)
 }
 
 const progress = computed(() =>
@@ -188,15 +181,16 @@ onMounted(initialize)
       <AddMaterial v-if="initialized" :before-open="beforeOpenIntake" @added="study.load" />
     </header>
     <main>
+      <CleanupNotice v-if="initialized" />
+      <TakeRejections />
       <SettingsPanel v-if="panel === 'settings'" />
       <LibraryPanel
         v-else-if="panel === 'library'"
-        :items="study.history.value"
         :disabled="capture.capturing.value || capture.requesting.value || capture.processing.value"
         :play="playback.play"
         :compare="playback.compare"
+        :stop-playback="playback.stop"
         @practise="practise"
-        @changed="study.loadHistory"
       />
       <template v-else>
         <p v-if="study.error.value" class="error" role="alert">
@@ -224,7 +218,7 @@ onMounted(initialize)
             :capture-error="capture.error.value"
             :take-error="takeTransfers.error.value"
             :rated="study.rated.value"
-            :play="playReference"
+            :play="playback.play"
             :compare="playback.compare"
             @control="controlAudio"
             @retry="retryTakes"
@@ -232,7 +226,6 @@ onMounted(initialize)
             @reveal="reveal"
             @rate="rate"
             @skip="skip"
-            @suspend="suspend"
           />
         </template>
         <section v-else class="home">

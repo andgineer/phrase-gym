@@ -23,7 +23,6 @@ const emit = defineEmits<{
   reveal: []
   rate: [rating: string]
   skip: []
-  suspend: []
 }>()
 </script>
 
@@ -45,7 +44,7 @@ const emit = defineEmits<{
       <p v-if="card.cue" class="practice-prompt">{{ card.cue.situation }}</p>
       <p v-if="card.cue?.partner_line">{{ card.cue.partner_line }}</p>
       <h1 v-if="card.revealed" tabindex="-1" lang="en" data-testid="practice-phrase">
-        {{ card.answer }}
+        {{ card.text }}
       </h1>
       <p v-if="card.revealed && card.accepted_variants.length" class="muted">
         Also accepted: {{ card.accepted_variants.join('; ') }}
@@ -136,9 +135,6 @@ const emit = defineEmits<{
         <button :disabled="capturing || requesting || processing" @click="emit('skip')">
           Study / skip grading
         </button>
-        <button :disabled="capturing || requesting || processing" @click="emit('suspend')">
-          Unclear card
-        </button>
       </div>
       <div v-else-if="card.kind === 'review' && !rated" class="actions">
         <p>Rate your original response before reveal.</p>
@@ -155,7 +151,6 @@ const emit = defineEmits<{
           {{ label }}
         </button>
         <button @click="emit('skip')">Study / skip grading</button>
-        <button @click="emit('suspend')">Unclear card</button>
       </div>
       <p v-if="rated && rated !== 'recalled'">
         One supported repetition is available. Record it if useful, then choose Next.

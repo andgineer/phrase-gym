@@ -1,28 +1,47 @@
 <script setup lang="ts">
-import type { HistoryItem, Recording } from '../studyTypes'
-defineProps<{
-  items: HistoryItem[]
+import { onMounted } from 'vue'
+import { usePagedList } from '../composables/usePagedList'
+import type { Recording, RecordingPage } from '../studyTypes'
+
+const props = defineProps<{
+  phraseId: string
+  referenceUrl: string
+  disabled: boolean
   play: (url: string) => Promise<void>
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
-  disabled: boolean
 }>()
+const modes: Record<Recording['mode'], string> = {
+  study: 'First study',
+  review: 'Recall',
+  free: 'Rehearsal',
+}
+const takes = usePagedList<Recording, RecordingPage>(
+  () => `/phrases/${encodeURIComponent(props.phraseId)}/recordings`,
+  10,
+)
+onMounted(() => void takes.reload())
+
+function describe(take: Recording) {
+  const parts = [new Date(take.captured_at).toLocaleDateString(), modes[take.mode]]
+  if (take.cue) parts.push(`Cue: ${take.cue.situation}`)
+  if (take.hint) parts.push(`Hint: ${take.hint}`)
+  return parts.join(' · ')
+}
 </script>
 
 <template>
-  <section v-if="items.some((item) => item.recordings.length)" class="card history">
-    <h2>Saved recording history</h2>
-    <template v-for="item in items" :key="item.id">
-      <div v-if="item.recordings.length" class="history-card">
-        <h3>{{ item.answer }}</h3>
-        <p class="source">{{ item.source_label }}</p>
-        <div v-for="(recording, index) in item.recordings" :key="recording.id" class="take">
-          <span>Take {{ index + 1 }}</span>
-          <button :disabled="disabled" @click="play(recording.url)">Replay saved take</button>
-          <button :disabled="disabled" @click="compare(recording, item.reference_url)">
-            Compare saved take
-          </button>
-        </div>
-      </div>
-    </template>
+  <section class="saved-history" aria-labelledby="saved-history-heading">
+    <h2 id="saved-history-heading">Saved recordings</h2>
+    <ul v-if="takes.items.value.length" class="take-history">
+      <li v-for="take in takes.items.value" :key="take.id" class="take">
+        <p>{{ describe(take) }}</p>
+        <p class="muted">Answer then: {{ take.answer }}</p>
+        <button :disabled="disabled" @click="play(take.url)">▶ Mine</button>
+        <button :disabled="disabled" @click="compare(take, referenceUrl)">Compare</button>
+      </li>
+    </ul>
+    <p v-else-if="takes.loaded.value" class="muted">No saved recordings yet.</p>
+    <button v-if="takes.nextOffset.value !== null" @click="takes.more">More</button>
+    <p v-if="takes.error.value" role="alert" class="error">{{ takes.error.value }}</p>
   </section>
 </template>

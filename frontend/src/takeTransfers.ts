@@ -1,16 +1,28 @@
 import { ref } from 'vue'
 import { releaseCapture, withAvailableTake } from './captureOwners'
-import { api } from './api'
-import { journalGet, journalPut } from './practiceJournal'
+import { ApiError, api } from './api'
+import { journalDelete, journalGet, journalPut } from './practiceJournal'
 import { acknowledgeTake, recoverTake, takeEntries, takePrefix } from './takeJournalRecovery'
 import type { StoredTake } from './practiceTypes'
 import type { components } from './api.generated'
 
 type Receipt = components['schemas']['RecordingReceipt']
 type Upload = components['schemas']['RecordingUpload']
+type RejectedTake = { id: string; key: string; message: string }
 const pendingTakes = ref(0)
 const error = ref('')
+const rejected = ref<RejectedTake[]>([])
 let sending: Promise<void> | null = null
+
+function permanentlyRefused(cause: unknown) {
+  return (
+    cause instanceof ApiError &&
+    cause.status >= 400 &&
+    cause.status < 500 &&
+    cause.status !== 408 &&
+    cause.status !== 429
+  )
+}
 
 function base64(audio: ArrayBuffer) {
   let value = ''
@@ -30,6 +42,7 @@ async function flush() {
   if (sending) return sending
   sending = (async () => {
     error.value = ''
+    const refused: RejectedTake[] = []
     for (const { key, value: listed } of await takeEntries()) {
       if (listed.status !== 'pending') continue
       try {
@@ -38,7 +51,7 @@ async function flush() {
           if (!snapshot || snapshot.id !== listed.id || snapshot.status !== 'pending') return
           const body: Upload = {
             id: snapshot.id,
-            card_id: snapshot.card_id,
+            phrase_id: snapshot.phrase_id,
             attempt_id: snapshot.attempt_id,
             captured_at: snapshot.captured_at,
             mime_type: snapshot.mime_type,
@@ -65,9 +78,12 @@ async function flush() {
           await acknowledgeTake(key, snapshot)
         })
       } catch (cause) {
-        error.value = `${String(cause)} Audio remains on this device.`
+        if (permanentlyRefused(cause))
+          refused.push({ id: listed.id, key, message: (cause as ApiError).message })
+        else error.value = `${String(cause)} Audio remains on this device.`
       }
     }
+    rejected.value = refused
     pendingTakes.value = (await takeEntries()).length
   })().finally(() => (sending = null))
   return sending
@@ -79,4 +95,12 @@ async function recover() {
   await flush()
 }
 
-export const takeTransfers = { pendingTakes, error, retain, flush, recover }
+async function discard(id: string) {
+  const take = rejected.value.find((candidate) => candidate.id === id)
+  if (!take) return
+  await withAvailableTake(id, () => journalDelete(take.key))
+  rejected.value = rejected.value.filter((candidate) => candidate.id !== id)
+  pendingTakes.value = (await takeEntries()).length
+}
+
+export const takeTransfers = { pendingTakes, error, rejected, retain, flush, recover, discard }

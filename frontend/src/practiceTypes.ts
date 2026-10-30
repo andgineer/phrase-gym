@@ -1,6 +1,6 @@
 export type StoredTake = {
   id: string
-  card_id: string
+  phrase_id: string
   attempt_id: string
   captured_at: string
   mime_type: string

@@ -1,62 +1,15 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import Field
 
+from phrase_gym.server.import_contracts import Cue, StrictModel
 
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-
-
-class Cue(StrictModel):
-    situation: str = Field(min_length=5, max_length=500)
-    partner_line: str | None = Field(default=None, min_length=1, max_length=300)
-
-
-class ImportCard(StrictModel):
-    item_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
-    answer: str = Field(min_length=2, max_length=500)
-    explanation: str = Field(min_length=5, max_length=1000)
-    cues: list[Cue] = Field(min_length=1, max_length=2)
-    accepted_variants: list[str] = Field(default_factory=list, max_length=8)
-    detailed_explanation: str | None = Field(default=None, max_length=2000)
-
-    @field_validator("accepted_variants")
-    @classmethod
-    def variants_are_nonempty(cls, values: list[str]) -> list[str]:
-        if any(not value.strip() for value in values):
-            raise ValueError("accepted variants cannot be empty")
-        return values
-
-
-class PhrasePackage(StrictModel):
-    format: Literal["phrase-gym.package"]
-    version: Literal[1]
-    package_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
-    source_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
-    source_label: str = Field(min_length=1, max_length=200)
-    source_link: HttpUrl | None = None
-    learning_language: Literal["en"]
-    card_language: Literal["en"]
-    help_language: Literal["en"]
-    cards: list[ImportCard] = Field(min_length=1, max_length=20)
-
-    @field_validator("cards")
-    @classmethod
-    def item_ids_are_unique(cls, cards: list[ImportCard]) -> list[ImportCard]:
-        ids = [card.item_id for card in cards]
-        if len(ids) != len(set(ids)):
-            raise ValueError("card item_id values must be unique within a package")
-        return cards
-
-
-class ImportRequest(StrictModel):
-    package: PhrasePackage
-    references: dict[str, str] | None = None
+PAGE_LIMIT = 100
 
 
 class RecordingUpload(StrictModel):
     id: str = Field(min_length=8, max_length=100)
-    card_id: str = Field(min_length=8, max_length=100)
+    phrase_id: str = Field(min_length=8, max_length=100)
     attempt_id: str = Field(min_length=8, max_length=100)
     captured_at: str = Field(min_length=10, max_length=64)
     mime_type: str = Field(min_length=3, max_length=100)
@@ -86,27 +39,6 @@ class Settings(StrictModel):
     help_language: Literal["en"]
 
 
-class ImportStatus(StrictModel):
-    package_id: str
-    status: Literal["pending", "preparing", "added", "error"]
-    error: str | None = None
-    added_count: int | None = None
-
-
-class CoachWork(StrictModel):
-    package_id: str
-    package: PhrasePackage
-
-
-class CoachResult(StrictModel):
-    result_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
-    references: dict[str, str]
-
-
-class CoachFailure(StrictModel):
-    error: str = Field(min_length=1, max_length=1000)
-
-
 class RecordingReceipt(StrictModel):
     id: str
     byte_length: int
@@ -123,6 +55,10 @@ class SavedRecording(StrictModel):
     complete: bool
     byte_length: int
     url: str
+    mode: Literal["study", "review", "free"]
+    cue: Cue | None
+    hint: str | None
+    answer: str
 
 
 class StudyCard(StrictModel):
@@ -131,7 +67,7 @@ class StudyCard(StrictModel):
     item_id: str
     source_label: str
     source_link: str | None
-    answer: str
+    text: str
     explanation: str
     cues: list[Cue]
     accepted_variants: list[str]
@@ -155,28 +91,68 @@ class StudyResponse(StrictModel):
     next_return: str | None = None
 
 
-class ReviewItem(StrictModel):
-    reviewed_at: str
-    cue: Cue
-    response_mode: str
-    help_before: bool
-    rating: str
-    due_at: str
-
-
-class StudyHistoryItem(StrictModel):
-    id: str
-    item_id: str
-    answer: str
-    source_label: str
-    reference_url: str
-    recordings: list[SavedRecording]
-    suspended: bool
-    due_at: str | None
-    reviews: list[ReviewItem]
-
-
 class StudyCompletion(StrictModel):
     attempt_id: str
     completed_at: str
     graded: bool
+
+
+class PracticeCounts(StrictModel):
+    phrase_count: int
+    due_count: int
+    new_count: int
+
+
+class LessonChoice(PracticeCounts):
+    id: str
+    title: str
+    source_label: str
+
+
+class LessonPage(StrictModel):
+    items: list[LessonChoice]
+    next_offset: int | None
+    all_lessons: PracticeCounts
+
+
+class PhraseSummary(StrictModel):
+    id: str
+    text: str
+    usage_contexts: list[str]
+    lesson_title: str
+
+
+class PhrasePage(StrictModel):
+    items: list[PhraseSummary]
+    next_offset: int | None
+
+
+class PhraseDetails(StrictModel):
+    id: str
+    text: str
+    explanation: str
+    detailed_explanation: str | None
+    usage_contexts: list[str]
+    accepted_variants: list[str]
+    lesson_id: str
+    lesson_title: str
+    source_label: str
+    source_link: str | None
+    reference_url: str
+    studied: bool
+    due_date: str | None
+
+
+class RecordingPage(StrictModel):
+    items: list[SavedRecording]
+    next_offset: int | None
+
+
+class CleanupStatus(StrictModel):
+    pending: int
+    error: str | None
+
+
+class DeletionResult(StrictModel):
+    deleted_text: str
+    cleanup: CleanupStatus

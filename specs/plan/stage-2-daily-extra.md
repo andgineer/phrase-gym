@@ -128,22 +128,13 @@ Implement the lasting rules in their owning specs:
 - [Deletion](../decision-core-trainer.md#deletion) and [file cleanup](../architecture.md#deletion-cleanup) own confirmation, retained facts and durable cleanup recovery.
 - [Recording](../decision-recording-and-comparison.md#observable-behavior) and [application responsibilities](../architecture.md#responsibilities) own take persistence and service boundaries.
 
-Replace `/study/current` opening a Card on page load, `exposed_day`, separate attempt/review tables, suspension, the ungraded **Practise freely** action and awaited upload flushes on navigation at the checkpoints below. Keep the existing practice usable through 2A; 2B replaces its state model. The settings editor remains later convenience work.
-
-## Checkpoint 2A — Content and discovery
-
-**Learner benefit:** import organized phrases, search by meaning/use and inspect or delete a phrase while existing practice stays usable.
-
-- Extend input validation, fresh schema and atomic publication for lesson identities, hints and contexts. Add paged lesson choices, global phrase search and details with source/lesson, reference and paged saved recordings. Add confirmed **Delete** in Library and details; remove Suspend/Restore. Adapt existing practice to the `Phrase` record until 2B replaces its state model.
-- Verify import rollback, identity conflicts, a 1,000-phrase mixed-lesson search, lookup without scheduling writes, Delete cancel/confirm, reference/take cleanup, pending-upload failure, unlink failure and restart after deletion commits but before file cleanup. Verify durable pending paths, visible cleanup failure and successful retry without restoring the phrase. A real-server mobile browser test exercises import, search, detail and Delete. Refresh contracts/types and run the ordered implementation gate, independent review and exact-commit CI.
-
-**Stop after 2A:** discovery and deletion work end to end. This pre-release checkpoint may retain old practice tables temporarily while the existing path still uses them; 2B removes them without a migration requirement.
+Replace `/study/current` opening a Card on page load, `exposed_day`, separate attempt/review tables, the ungraded **Practise freely** action and awaited upload flushes on navigation at the checkpoints below. The existing practice runs on the `Phrase` record until 2B replaces its state model. The settings editor remains later convenience work.
 
 ## Checkpoint 2B — Shared card and Daily
 
 **Learner benefit:** choose a lesson and complete or resume today's due/new practice with honest ratings and optional recording.
 
-- Implement `practice_log`, the date-keyed allowance targets, live daily settings, one mutable current view, phrase `last_review` and shared first-study/recall Card. Daily opens or resumes the same view; completion is recomputed from current limits and today's log. Keep first-study Next, requested Hint, random cues, Details, auto-advancing rating/Skip, revealed-back Delete, front/back microphone and background take saving. Remove historical attempt/review tables; saved recordings own their support snapshots.
+- Implement `practice_log`, the date-keyed allowance targets, live daily settings, one mutable current view, phrase `last_review` and shared first-study/recall Card. Daily opens or resumes the same view; completion is recomputed from current limits and today's log. Move the Library's lesson search and choices onto the entry as **Lesson to drill** beside global **Find a phrase**. Keep first-study Next, requested Hint, random cues, Details, auto-advancing rating/Skip, revealed-back Delete, front/back microphone and background take saving. Remove historical attempt/review tables and the take's attempt reference; saved recordings keep their own mode, cue, requested hint and answer snapshots.
 - Test first study, first versus repeated same-day grade, FSRS/`last_review` atomicity, 20/5 independent limits, live setting increase after apparent exhaustion, log idempotency and absence of rows for open/abandoned views, fresh view tokens on every phrase advance, stale-tab actions with new completion IDs, exact completion retry after later advances or restart, changed-payload conflicts, timezone change and failed-save rollback. Real-server Chromium/WebKit tests cover silent/recorded Daily, resume, reveal/rehearsal before rating, auto-advance, capture stopped on rating, late upload and mobile controls. Refresh contracts/types and run the ordered implementation gate, review and exact-commit CI.
 
 **Stop after 2B:** Daily and Library work; Extra is not offered until its extension path is complete. A plain completion message is enough until 2D.

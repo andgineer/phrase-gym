@@ -49,8 +49,9 @@ class CoachApi:
 
 async def prepare(work: dict[str, Any], speech: PiperSpeech) -> dict[str, str]:
     return {
-        card["item_id"]: base64.b64encode(await speech.synthesize(card["answer"])).decode()
-        for card in work["package"]["cards"]
+        phrase["item_id"]: base64.b64encode(await speech.synthesize(phrase["text"])).decode()
+        for lesson in work["package"]["lessons"]
+        for phrase in lesson["phrases"]
     }
 
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from phrase_gym.server.contracts import CoachFailure, CoachResult, CoachWork, ImportStatus
+from phrase_gym.server.import_contracts import CoachFailure, CoachResult, CoachWork, ImportStatus
 from phrase_gym.server.importer import Importer
 from phrase_gym.server.reference_audio import ImportConflictError
 

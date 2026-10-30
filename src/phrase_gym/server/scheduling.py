@@ -30,10 +30,10 @@ def effective_due(connection: sqlite3.Connection, card: sqlite3.Row) -> datetime
     return due
 
 
-def reviewed_today(connection: sqlite3.Connection, card_id: str, day: str) -> bool:
+def reviewed_today(connection: sqlite3.Connection, phrase_id: str, day: str) -> bool:
     attempts = connection.execute(
-        "SELECT created_at FROM attempts WHERE card_id=? AND kind='review'",
-        (card_id,),
+        "SELECT created_at FROM attempts WHERE phrase_id=? AND kind='review'",
+        (phrase_id,),
     ).fetchall()
     return any(
         learning_day(connection, datetime.fromisoformat(row["created_at"])) == day
@@ -63,19 +63,20 @@ def record_review(
 ) -> None:
     day = learning_day(connection, instant)
     reviews = connection.execute(
-        "SELECT reviewed_at FROM reviews WHERE card_id=?",
-        (attempt["card_id"],),
+        "SELECT reviewed_at FROM reviews WHERE phrase_id=?",
+        (attempt["phrase_id"],),
     ).fetchall()
     if any(
         learning_day(connection, datetime.fromisoformat(row["reviewed_at"])) == day
         for row in reviews
     ):
         raise ValueError("Independent review is limited to one per learning day")
-    card = connection.execute("SELECT * FROM cards WHERE id=?", (attempt["card_id"],)).fetchone()
-    if card["suspended"]:
-        raise ValueError("Suspended cards cannot be rated")
+    card = connection.execute(
+        "SELECT * FROM phrases WHERE id=?",
+        (attempt["phrase_id"],),
+    ).fetchone()
     if card["exposed_day"] == day:
-        raise ValueError("This card was viewed today; choose Study / skip grading")
+        raise ValueError("This phrase was viewed today; choose Study / skip grading")
     if (
         card["fsrs_json"] is None
         and learning_day(
@@ -87,7 +88,7 @@ def record_review(
         raise ValueError("First recall is offered on a later learning day")
     fsrs_json, due = schedule(card["fsrs_json"], rating, instant, connection)
     connection.execute(
-        "UPDATE cards SET fsrs_json=?, due_at=?, cue_index=cue_index+1 WHERE id=?",
+        "UPDATE phrases SET fsrs_json=?, due_at=?, cue_index=cue_index+1 WHERE id=?",
         (fsrs_json, due, card["id"]),
     )
     connection.execute(

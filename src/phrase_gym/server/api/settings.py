@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
 
 from phrase_gym.server.contracts import Settings
-from phrase_gym.server.library import LibraryService
+from phrase_gym.server.settings import SettingsService
 
 
-def settings_routes(service: LibraryService) -> APIRouter:
+def settings_routes(service: SettingsService) -> APIRouter:
     router = APIRouter(prefix="/api")
 
     @router.get("/settings")
@@ -14,7 +14,7 @@ def settings_routes(service: LibraryService) -> APIRouter:
     @router.put("/settings")
     def update_settings(settings: Settings) -> Settings:
         try:
-            return service.update_settings(settings)
+            return service.update(settings)
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
 

@@ -1,44 +1,94 @@
 {
   "format": "phrase-gym.package",
-  "version": 1,
-  "package_id": "course-meetings-unit-1-v1",
+  "version": 2,
+  "package_id": "course-meetings-unit-1-v2",
   "source_id": "course-meetings-unit-1",
   "source_label": "Meetings course · Unit 1",
   "source_link": "https://example.com/course/meetings/unit-1",
   "learning_language": "en",
   "card_language": "en",
   "help_language": "en",
-  "cards": [
+  "lessons": [
     {
-      "item_id": "begin-meeting",
-      "answer": "Let's get started.",
-      "explanation": "Suggest beginning an activity when everyone is ready.",
-      "cues": [{ "situation": "Everyone has joined the call. Begin the meeting." }],
-      "accepted_variants": ["Let's begin."]
+      "lesson_id": "running-a-meeting",
+      "title": "Running a meeting",
+      "phrases": [
+        {
+          "item_id": "begin-meeting",
+          "text": "Let's get started.",
+          "explanation": "Suggest beginning an activity when everyone is ready.",
+          "cues": [
+            { "situation": "Everyone has joined the call. Begin the meeting." },
+            { "situation": "The workshop room is full and it is time to begin." }
+          ],
+          "recall_hints": ["get …", "let us"],
+          "usage_contexts": ["meetings", "starting a call"],
+          "accepted_variants": ["Let's begin."]
+        },
+        {
+          "item_id": "clarify-process",
+          "text": "Could you walk me through that?",
+          "explanation": "Ask someone to explain a process step by step.",
+          "cues": [
+            { "situation": "A colleague described a process too quickly. Ask for a guided explanation." }
+          ],
+          "recall_hints": ["walk", "me through"],
+          "usage_contexts": ["meetings", "asking for an explanation"]
+        },
+        {
+          "item_id": "reply-later",
+          "text": "I'll get back to you tomorrow.",
+          "explanation": "Promise a later response after you have time to check.",
+          "cues": [{ "situation": "You need a day to confirm the figures before answering." }],
+          "recall_hints": ["get back", "to you"],
+          "usage_contexts": ["work email", "delaying an answer"]
+        }
+      ]
     },
     {
-      "item_id": "clarify-process",
-      "answer": "Could you walk me through that?",
-      "explanation": "Ask someone to explain a process step by step.",
-      "cues": [{ "situation": "A colleague described a process too quickly. Ask for a guided explanation." }]
+      "lesson_id": "scheduling",
+      "title": "Scheduling",
+      "phrases": [
+        {
+          "item_id": "accept-plan",
+          "text": "That works for me.",
+          "explanation": "Confirm that a proposed plan or time is suitable.",
+          "cues": [
+            { "partner_line": "How about Thursday at ten?", "situation": "Accept the proposed meeting time." }
+          ],
+          "recall_hints": ["works", "for me"],
+          "usage_contexts": ["scheduling", "agreeing to a plan"]
+        },
+        {
+          "item_id": "consider-option",
+          "text": "Let me think about it.",
+          "explanation": "Ask for time before deciding or responding.",
+          "cues": [
+            { "situation": "Someone offers you a new responsibility and you do not want to decide immediately." }
+          ],
+          "recall_hints": ["think", "about it"],
+          "usage_contexts": ["decisions", "delaying an answer"]
+        }
+      ]
     },
     {
-      "item_id": "reply-later",
-      "answer": "I'll get back to you tomorrow.",
-      "explanation": "Promise a later response after you have time to check.",
-      "cues": [{ "situation": "You need a day to confirm the figures before answering." }]
-    },
-    {
-      "item_id": "accept-plan",
-      "answer": "That works for me.",
-      "explanation": "Confirm that a proposed plan or time is suitable.",
-      "cues": [{ "partner_line": "How about Thursday at ten?", "situation": "Accept the proposed meeting time." }]
-    },
-    {
-      "item_id": "consider-option",
-      "answer": "Let me think about it.",
-      "explanation": "Ask for time before deciding or responding.",
-      "cues": [{ "situation": "Someone offers you a new responsibility and you do not want to decide immediately." }]
+      "lesson_id": "small-talk",
+      "title": "Small talk",
+      "phrases": [
+        {
+          "item_id": "so-far-so-good",
+          "text": "So far, so good.",
+          "recall_hints": ["far", "so … good"],
+          "usage_contexts": ["small talk", "progress update"],
+          "cues": [
+            { "situation": "Colleague asks: How's it going?" },
+            { "situation": "Friend asks: How's the new job?" }
+          ],
+          "explanation": "Things have gone well up to now.",
+          "detailed_explanation": "«Пока всё хорошо». Короткий ответ о том, как идут дела сейчас. Он говорит о результате до этого момента, а не обещает, что дальше всё будет так же.",
+          "accepted_variants": []
+        }
+      ]
     }
   ]
 }

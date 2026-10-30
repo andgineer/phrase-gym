@@ -3,7 +3,7 @@ import binascii
 import io
 import wave
 
-from phrase_gym.server.contracts import PhrasePackage
+from phrase_gym.server.import_contracts import PhrasePackage
 
 MAX_REFERENCE_BYTES = 8 * 1024 * 1024
 MAX_BATCH_REFERENCE_BYTES = 9 * 1024 * 1024
@@ -18,7 +18,7 @@ class ImportConflictError(ValueError):
 
 
 def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str, bytes]:
-    expected = {card.item_id for card in package.cards}
+    expected = {phrase.item_id for _, phrase in package.phrases()}
     if set(audio) != expected:
         missing = sorted(expected - set(audio))
         extra = sorted(set(audio) - expected)
@@ -32,7 +32,7 @@ def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str
         total += len(decoded[item])
         if total > MAX_BATCH_REFERENCE_BYTES:
             raise ImportConflictError(
-                f"cards.{item}: references exceed the 9 MiB batch audio budget",
+                f"phrases.{item}: references exceed the 9 MiB batch audio budget",
             )
     return decoded
 
@@ -55,4 +55,4 @@ def _decode_reference(item: str, value: str) -> bytes:
                 raise ValueError("reference audio is incomplete")
         return raw
     except (ValueError, wave.Error, binascii.Error, EOFError) as error:
-        raise ImportConflictError(f"cards.{item}: invalid reference audio: {error}") from error
+        raise ImportConflictError(f"phrases.{item}: invalid reference audio: {error}") from error

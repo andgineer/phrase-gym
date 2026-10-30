@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import hashlib
 import os
@@ -9,25 +8,9 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
 from phrase_gym.server.storage import Database
-
-
-def prepare_added(client: TestClient, package_id: str) -> dict[str, object]:
-    work = client.post("/api/imports/coach/next").json()
-    assert work["package_id"] == package_id
-    speech = PiperSpeech(None, fake=True)
-    references = {
-        card["item_id"]: base64.b64encode(asyncio.run(speech.synthesize(card["answer"]))).decode()
-        for card in work["package"]["cards"]
-    }
-    response = client.post(
-        f"/api/imports/{package_id}/result",
-        json={"result_id": package_id, "references": references},
-    )
-    assert response.status_code == 200
-    return response.json()
+from tests.phrase_packages import Package, prepare_with_coach
 
 
 def test_empty_library_is_not_completed_study(client: TestClient) -> None:
@@ -40,13 +23,11 @@ def test_empty_library_is_not_completed_study(client: TestClient) -> None:
 
 def test_study_recordings_and_restart(
     client: TestClient,
-    package: dict[str, object],
+    package: Package,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    response = client.post("/api/imports", json={"package": package})
-    assert response.status_code == 202
-    assert prepare_added(client, str(package["package_id"]))["added_count"] == 5
+    assert prepare_with_coach(client, package)["added_count"] == 5
     if os.name != "nt":
         assert stat.S_IMODE(tmp_path.stat().st_mode) == 0o700
         assert stat.S_IMODE((tmp_path / "phrase-gym.sqlite3").stat().st_mode) == 0o600
@@ -54,14 +35,14 @@ def test_study_recordings_and_restart(
         assert stat.S_IMODE(reference.stat().st_mode) == 0o600
     study = client.post("/api/study/current").json()
     assert study["studied"] == 0
-    assert study["card"]["answer"] == "Complete phrase number 1."
+    assert study["card"]["text"] == "Complete phrase number 1."
     attempt_id = study["card"]["attempt_id"]
-    card_id = study["card"]["id"]
+    phrase_id = study["card"]["id"]
     audio = b"final-encoder-tail"
     recording_id = str(uuid4())
     upload = {
         "id": recording_id,
-        "card_id": card_id,
+        "phrase_id": phrase_id,
         "attempt_id": attempt_id,
         "captured_at": "2026-10-25T10:00:00Z",
         "mime_type": "audio/webm;codecs=opus",
@@ -70,7 +51,7 @@ def test_study_recordings_and_restart(
         "capture_settings": {"sampleRate": 48000},
         "audio_base64": base64.b64encode(audio).decode(),
     }
-    pending = tmp_path / "recordings" / card_id / f"{recording_id}.pending"
+    pending = tmp_path / "recordings" / phrase_id / f"{recording_id}.pending"
     pending.parent.mkdir(parents=True)
     pending.write_bytes(b"partial-before-crash")
     receipt = client.post("/api/recordings", json=upload).json()
@@ -78,7 +59,7 @@ def test_study_recordings_and_restart(
     assert receipt["sha256"] == hashlib.sha256(audio).hexdigest()
     assert client.post("/api/recordings", json=upload).json() == receipt
     if os.name != "nt":
-        saved = tmp_path / "recordings" / card_id / recording_id
+        saved = tmp_path / "recordings" / phrase_id / recording_id
         assert stat.S_IMODE(saved.parent.stat().st_mode) == 0o700
         assert stat.S_IMODE(saved.stat().st_mode) == 0o600
     completed = client.post(
@@ -93,9 +74,11 @@ def test_study_recordings_and_restart(
         next_card = restarted.post("/api/study/current").json()
         assert next_card["studied"] == 1
         assert next_card["card"]["item_id"] == "meeting-2"
-        history = restarted.get("/api/study/history").json()
-        assert history[0]["id"] == card_id
-        assert history[0]["recordings"][0]["id"] == recording_id
+        history = restarted.get(f"/api/phrases/{phrase_id}/recordings").json()
+        assert [item["id"] for item in history["items"]] == [recording_id]
+        assert history["items"][0]["mode"] == "study"
+        assert history["items"][0]["answer"] == "Complete phrase number 1."
+        assert history["items"][0]["cue"]["situation"] == "Meeting situation number 1."
 
 
 def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
@@ -109,7 +92,16 @@ def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
 
 def test_study_contracts_are_closed_generated_schemas(client: TestClient) -> None:
     schemas = client.get("/openapi.json").json()["components"]["schemas"]
-    for name in ("StudyResponse", "StudyCard", "StudyHistoryItem-Output", "StudyCompletion"):
+    for name in (
+        "StudyResponse",
+        "StudyCard",
+        "StudyCompletion",
+        "LessonPage",
+        "PhrasePage",
+        "PhraseDetails",
+        "RecordingPage",
+        "DeletionResult",
+    ):
         assert schemas[name]["additionalProperties"] is False
 
 

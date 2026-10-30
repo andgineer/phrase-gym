@@ -40,7 +40,9 @@ unavailable.
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
-For a separate data directory, add `--data-dir /absolute/path`.
+For a separate data directory, add `--data-dir /absolute/path`. Before the first release, a new
+version may need a fresh data directory: startup then stops with an explanation and leaves the
+earlier directory unchanged.
 
 ## Add and study material
 
@@ -48,18 +50,25 @@ Open **Add material**, paste a package or choose its UTF-8 JSON file, and select
 The app saves the request before acknowledging it. A text-only package stays pending while Coach
 is offline; Coach prepares reference audio and returns it through the API. An external agent can
 submit the same package with complete WAV references in one API request, without Coach. The server
-validates and publishes all cards and references together. A preparation error remains visible
-for explicit retry. Exact package
-retries return the existing result; a changed package ID or repeated source/item identity is
-rejected without overwriting learned material.
+validates and publishes all phrases, lessons and references together. A preparation error remains
+visible for explicit retry. Exact package retries return the existing result; changed content under
+a package ID or a repeated source/item identity is rejected without overwriting learned material.
 
 Study shows the full phrase and meaning/use help. Reference playback and recording are optional.
 Every stopped take is retained separately and saved automatically; pending uploads remain in the
 browser for retry. **Next** records ungraded study completion. On the next learning day, due cards
 show an answer-free cue. Try to recall the wording, reveal it, then rate the original response:
 **Not yet**, **With effort**, or **Recalled**. A difficult response can be repeated once with
-the answer visible. **Study / skip grading** and **Unclear card** avoid a false forgetting grade.
-The **Library** offers saved takes, dated reviews, Suspend/Restore, and ungraded practice.
+the answer visible. **Study / skip grading** avoids a false forgetting grade.
+
+The **Library** lets you narrow phrases by lesson, with its due and new counts, and search all
+lessons by wording, meaning, situation or use. Phrase details show the answer, what it is used
+for, the lesson and source, reference playback, the next due date, saved recordings with their
+cue and answer at the time, and ungraded practice. Looking a phrase up never changes its schedule.
+**Delete**, in the list or details, permanently removes a phrase with its reference audio and
+saved recordings after confirmation; a recording still waiting to upload for that phrase stays on
+the device until you discard it. If deleted files cannot be removed, the app keeps showing the
+problem with **Retry cleanup** until removal succeeds.
 **Settings** contains the native language and learning timezone.
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/backup-and-restore.md).

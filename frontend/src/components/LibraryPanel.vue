@@ -1,80 +1,65 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { api } from '../api'
-import type { HistoryItem } from '../studyTypes'
+import { ref } from 'vue'
+import type { DeletionResult, DeletionTarget } from '../libraryTypes'
+import type { Recording } from '../studyTypes'
+import DeleteDialog from './DeleteDialog.vue'
+import LessonPicker from './LessonPicker.vue'
+import PhraseDetails from './PhraseDetails.vue'
+import PhraseFinder from './PhraseFinder.vue'
 
 const props = defineProps<{
-  items: HistoryItem[]
   disabled: boolean
   play: (url: string) => Promise<void>
-  compare: (recording: HistoryItem['recordings'][number], reference: string) => Promise<void>
+  compare: (recording: Recording, referenceUrl: string) => Promise<void>
+  stopPlayback: () => void
 }>()
-const emit = defineEmits<{ practise: [cardId: string]; changed: [] }>()
-const opened = ref<string | null>(null)
+const emit = defineEmits<{ practise: [phraseId: string] }>()
+const lessonId = ref('')
 const query = ref('')
-const filtered = computed(() =>
-  props.items.filter((item) =>
-    `${item.source_label} ${item.item_id}`.toLowerCase().includes(query.value.toLowerCase()),
-  ),
-)
-const error = ref('')
+const opened = ref<string | null>(null)
+const pendingDelete = ref<DeletionTarget | null>(null)
+const notice = ref('')
+const lessons = ref<InstanceType<typeof LessonPicker> | null>(null)
+const finder = ref<InstanceType<typeof PhraseFinder> | null>(null)
 
-async function open(cardId: string) {
-  try {
-    await api(`/cards/${cardId}/expose`, { method: 'POST' })
-    opened.value = cardId
-  } catch (cause) {
-    error.value = String(cause)
-  }
+function open(phraseId: string) {
+  notice.value = ''
+  opened.value = phraseId
 }
 
-async function setSuspended(item: HistoryItem) {
-  try {
-    await api(`/cards/${item.id}/${item.suspended ? 'restore' : 'suspend'}`, { method: 'POST' })
-    emit('changed')
-  } catch (cause) {
-    error.value = String(cause)
-  }
+async function deleted(result: DeletionResult) {
+  pendingDelete.value = null
+  props.stopPlayback()
+  opened.value = null
+  notice.value = `Deleted “${result.deleted_text}”.`
+  await Promise.all([finder.value?.reload(), lessons.value?.reload()])
 }
 </script>
 
 <template>
-  <section v-if="props.items.length" class="card history">
+  <PhraseDetails
+    v-if="opened"
+    :key="opened"
+    :phrase-id="opened"
+    :disabled="disabled"
+    :play="play"
+    :compare="compare"
+    @back="opened = null"
+    @practise="emit('practise', $event)"
+    @remove="pendingDelete = $event"
+  />
+  <section v-show="!opened" class="card library">
     <h2>Library</h2>
-    <p class="muted">Open a card for its wording, saved takes, and ungraded practice.</p>
-    <input
-      type="search"
-      v-model="query"
-      aria-label="Find card by source or item ID"
-      placeholder="Find card by source or item ID"
+    <p v-if="notice" role="status" class="success">{{ notice }}</p>
+    <LessonPicker ref="lessons" v-model="lessonId" />
+    <PhraseFinder
+      ref="finder"
+      v-model:query="query"
+      :lesson-id="lessonId"
+      :disabled="disabled"
+      @open="open"
+      @remove="pendingDelete = $event"
     />
-    <p v-if="error" role="alert" class="error">{{ error }}</p>
-    <div v-for="item in filtered" :key="item.id" class="history-card">
-      <button :disabled="disabled" @click="open(item.id)">
-        {{ item.source_label }} · {{ item.item_id }} {{ item.suspended ? '(suspended)' : '' }}
-      </button>
-      <template v-if="opened === item.id">
-        <h3>{{ item.answer }}</h3>
-        <p v-if="item.due_at">Next scheduled return: {{ item.due_at.slice(0, 10) }}</p>
-        <button :disabled="disabled" @click="emit('practise', item.id)">Practise freely</button>
-        <button :disabled="disabled" @click="setSuspended(item)">
-          {{ item.suspended ? 'Restore' : 'Suspend' }}
-        </button>
-        <button :disabled="disabled" @click="props.play(item.reference_url)">Play reference</button>
-        <div v-for="(recording, takeIndex) in item.recordings" :key="recording.id" class="take">
-          <span>Take {{ takeIndex + 1 }}</span>
-          <button :disabled="disabled" @click="props.play(recording.url)">Replay saved take</button>
-          <button :disabled="disabled" @click="props.compare(recording, item.reference_url)">
-            Compare saved take
-          </button>
-        </div>
-        <ul v-if="item.reviews.length">
-          <li v-for="review in item.reviews" :key="review.reviewed_at">
-            {{ review.reviewed_at.slice(0, 10) }} · {{ review.rating.replace('_', ' ') }} ·
-            {{ review.response_mode }} · due {{ review.due_at.slice(0, 10) }}
-          </li>
-        </ul>
-      </template>
-    </div>
   </section>
+  <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deleted" />
 </template>

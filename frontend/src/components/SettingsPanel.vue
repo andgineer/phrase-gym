@@ -20,7 +20,7 @@ async function save() {
       method: 'PUT',
       body: JSON.stringify(settings.value),
     })
-    message.value = 'Settings saved. Existing cards keep their prepared language.'
+    message.value = 'Settings saved. Existing phrases keep their prepared language.'
   } catch (cause) {
     message.value = String(cause)
   }

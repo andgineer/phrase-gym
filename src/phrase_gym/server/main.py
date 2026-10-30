@@ -7,6 +7,7 @@ from platformdirs import user_data_path
 
 from phrase_gym.coach.main import run_coach
 from phrase_gym.server.boundary import tailscale_host
+from phrase_gym.server.storage import UnsupportedSchemaError, require_compatible
 
 
 def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
@@ -22,6 +23,10 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
         os.environ["PHRASE_GYM_DATA_DIR"] = str(args.data_dir.resolve())
     else:
         os.environ.setdefault("PHRASE_GYM_DATA_DIR", str(user_data_path("phrase-gym")))
+    try:
+        require_compatible(Path(os.environ["PHRASE_GYM_DATA_DIR"]))
+    except UnsupportedSchemaError as error:
+        parser.exit(2, f"phrase-gym: {error}\n")
     uvicorn.run("phrase_gym.server.app:create_app", factory=True, host=args.host, port=args.port)
 
 

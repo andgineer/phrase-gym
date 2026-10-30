@@ -52,8 +52,8 @@ export const test = base.extend<{ server: void; coachEnabled: boolean }>({
     },
     { auto: true },
   ],
-  context: async ({ browser }, use) => {
-    const context = await createSilentContext(browser)
+  context: async ({ browser, viewport, hasTouch, isMobile }, use) => {
+    const context = await createSilentContext(browser, { viewport, hasTouch, isMobile })
     await use(context)
     await context.close()
   },

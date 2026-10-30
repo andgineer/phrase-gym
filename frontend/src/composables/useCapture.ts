@@ -8,7 +8,7 @@ import {
 } from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 
-type TakeContext = Pick<StoredTake, 'card_id' | 'attempt_id'>
+type TakeContext = Pick<StoredTake, 'phrase_id' | 'attempt_id'>
 type CaptureOptions = {
   context: () => Promise<TakeContext>
   retain: (take: StoredTake) => Promise<void>

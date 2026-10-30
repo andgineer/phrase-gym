@@ -7,7 +7,7 @@ const state = vi.hoisted(() => ({
 
 const partial = {
   id: 'take-race',
-  card_id: 'card-race',
+  phrase_id: 'phrase-race',
   attempt_id: 'attempt-race',
   captured_at: '2026-10-26T08:00:00Z',
   mime_type: 'audio/webm',
@@ -43,7 +43,8 @@ vi.mock('../src/takeJournalRecovery', () => ({
     state.acknowledged = take.audio
   },
 }))
-vi.mock('../src/api', () => ({
+vi.mock('../src/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/api')>()),
   api: async (_path: string, init: RequestInit) => {
     state.body = JSON.parse(String(init.body)) as Record<string, unknown>
     const bytes = final.audio

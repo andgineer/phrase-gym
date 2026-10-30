@@ -3,8 +3,8 @@ import json
 import sqlite3
 from datetime import UTC, datetime
 
-from phrase_gym.server.contracts import PhrasePackage
-from phrase_gym.server.publication import publish_batch
+from phrase_gym.server.import_contracts import PhrasePackage
+from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
 from phrase_gym.server.storage import Database
 
@@ -37,7 +37,7 @@ class Importer:
                         "This package_id has different content; use a new ID.",
                     )
                 return self._public(previous)
-            self._reject_existing_items(connection, package)
+            reject_identity_conflicts(connection, package)
             connection.execute(
                 "INSERT INTO imports (package_id, content_hash, payload, status, created_at) "
                 "VALUES (?, ?, ?, 'pending', ?)",
@@ -52,18 +52,6 @@ class Importer:
                     (package.package_id, self._result_hash(references)),
                 )
         return self.status(package.package_id)
-
-    @staticmethod
-    def _reject_existing_items(connection: sqlite3.Connection, package: PhrasePackage) -> None:
-        for card in package.cards:
-            row = connection.execute(
-                "SELECT 1 FROM cards WHERE source_id=? AND item_id=?",
-                (package.source_id, card.item_id),
-            ).fetchone()
-            if row:
-                raise ImportConflictError(
-                    f"cards.{card.item_id}: source item already exists; no cards were changed.",
-                )
 
     def retry(self, package_id: str) -> dict[str, object]:
         with self.database.write() as connection:
@@ -130,7 +118,7 @@ class Importer:
                 )
             package = PhrasePackage.model_validate_json(row["payload"])
             decoded = decode_references(package, audio)
-            self._reject_existing_items(connection, package)
+            reject_identity_conflicts(connection, package)
             publish_batch(
                 connection,
                 self.database.data_dir,

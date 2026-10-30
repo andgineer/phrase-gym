@@ -24,6 +24,7 @@ mv "$DATA_DIR" "$DATA_DIR.before-restore-$(date +%Y%m%d-%H%M%S)"
 cp -Rp "$BACKUP_DIR" "$DATA_DIR"
 ```
 
-Start the same compatible Phrase Gym version. In the Library, check card counts, due dates and
-dated review history. Play a representative reference and each saved take you need to confirm.
+Start the same compatible Phrase Gym version. In the Library, check lesson and phrase counts and
+open representative phrase details for due dates and saved recordings. Play a representative
+reference and each saved take you need to confirm.
 If a copy fails, keep the fallback and backup untouched and retry while the app is stopped.
