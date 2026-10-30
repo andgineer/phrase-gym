@@ -517,9 +517,9 @@
 
 
 <h1 id="importing-prepared-english-phrases">Importing prepared English phrases</h1>
-<p>Phrase Gym accepts one UTF-8 JSON object. Import format <code>phrase-gym.package</code> version <code>1</code> is the
-stable stage-1 package contract. The application makes no model or course-provider call during
-import; source links are attribution only and are never fetched.</p>
+<p>Phrase Gym accepts one UTF-8 JSON object. Import format <code>phrase-gym.package</code> version <code>2</code> is the
+current package contract; earlier versions are rejected. The application makes no model or
+course-provider call during import; source links are attribution only and are never fetched.</p>
 <h2 id="schema">Schema</h2>
 <table>
 <thead>
@@ -535,7 +535,7 @@ import; source links are attribution only and are never fetched.</p>
 </tr>
 <tr>
 <td><code>version</code></td>
-<td>Exactly <code>1</code>; unknown versions fail clearly</td>
+<td>Exactly <code>2</code>; other versions fail clearly</td>
 </tr>
 <tr>
 <td><code>package_id</code></td>
@@ -566,33 +566,81 @@ import; source links are attribution only and are never fetched.</p>
 <td><code>en</code></td>
 </tr>
 <tr>
-<td><code>cards</code></td>
-<td>1–20 cards; an ordinary batch should contain 5–10</td>
+<td><code>lessons</code></td>
+<td>1–20 lessons with at most 50 phrases in total; an ordinary batch has 5–10 phrases</td>
 </tr>
 </tbody>
 </table>
-<p>Each card requires a stable <code>item_id</code>, a fixed complete English <code>answer</code>, a short English
-<code>explanation</code>, and one or two <code>cues</code>. A cue requires a natural <code>situation</code> and may include a
-<code>partner_line</code>. Optional <code>accepted_variants</code> must be genuinely suitable for the same intention;
-<code>detailed_explanation</code> may add longer help. Unknown fields are rejected.</p>
-<p><code>source_id</code> plus <code>item_id</code> is permanent card identity. Repeating that identity in another package
-is rejected without overwriting it. To replace defective content, suspend the old card in the
-Library and import a corrected card with a new <code>item_id</code>; the old card and its history remain.</p>
+<p>Each lesson has a stable <code>lesson_id</code>, a learner-readable <code>title</code> and one or more <code>phrases</code>.
+One package may contain several lessons; every phrase belongs to exactly one of them.</p>
+<p>Each phrase requires:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>item_id</code></td>
+<td>Stable ID, unique within the package</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>The fixed complete English wording</td>
+</tr>
+<tr>
+<td><code>explanation</code></td>
+<td>Short English meaning/use help shown after the answer</td>
+</tr>
+<tr>
+<td><code>cues</code></td>
+<td>One or two distinct situations; each has <code>situation</code> and an optional <code>partner_line</code></td>
+</tr>
+<tr>
+<td><code>recall_hints</code></td>
+<td>Two to six distinct hand-prepared hints of one or two words, at most 40 characters each, never the whole phrase</td>
+</tr>
+<tr>
+<td><code>usage_contexts</code></td>
+<td>One to six distinct short searchable uses, such as <code>small talk</code> or <code>greetings</code></td>
+</tr>
+<tr>
+<td><code>accepted_variants</code></td>
+<td>Optional genuinely suitable alternatives for the same intention</td>
+</tr>
+<tr>
+<td><code>detailed_explanation</code></td>
+<td>Optional longer native-language help shown on request</td>
+</tr>
+</tbody>
+</table>
+<p>Unknown fields are rejected, and validation names the lesson, phrase and field to correct.</p>
+<p><code>source_id</code> plus <code>lesson_id</code> is permanent lesson identity: a later package can add phrases to
+that lesson only with the same title. <code>source_id</code> plus <code>item_id</code> is permanent phrase identity.
+Repeating it while that phrase is in the Library is rejected without overwriting it. To replace
+a defective phrase, delete it in the Library or its details after confirmation, then import the
+corrected phrase in a new package; it becomes a new phrase with fresh reference audio.</p>
 <p>The generated machine-readable request schema is available at
 <a href="https://github.com/andgineer/phrase-gym/blob/main/frontend/openapi.json"><code>frontend/openapi.json</code></a>.
-A complete five-card file is
+A complete three-lesson file is
 <a href="https://github.com/andgineer/phrase-gym/blob/main/examples/meeting-phrases.json"><code>examples/meeting-phrases.json</code></a>.</p>
 <h2 id="instruction-for-an-external-preparation-agent">Instruction for an external preparation agent</h2>
 <blockquote>
 <p>Prepare 5–10 useful fixed English phrases from the supplied course material as one Phrase Gym
-package version 1. Preserve the course wording and give the package, source, and every item a
-stable searchable ID. For each card provide the complete English phrase, a short plain-English
-meaning/use explanation, and one or two distinct natural situations that communicate the
-intention without revealing the target wording. Add a preceding partner line only when natural.
-Include only genuinely acceptable variants. Do not add raw words, variable slots, dialogue
-graphs, invented quotations, audio URLs, or fields outside the documented schema. Return JSON
-only, then inspect every card for intended meaning, natural cues, answer leakage, and suitable
-alternatives before giving it to the learner.</p>
+package version 2. Preserve the course wording, group phrases into the course's lessons, and
+give the package, source, every lesson and every phrase a stable searchable ID. For each phrase
+provide the complete English <code>text</code>, a short plain-English meaning/use explanation, one or two
+distinct short situations that communicate the intention without revealing the target wording,
+two or more hand-picked recall hints of one or two words that help retrieve this exact wording
+(not simply its first or last word), and short <code>usage_contexts</code> a learner might search for.
+Add a preceding partner line only when natural. Include only genuinely acceptable variants.
+Use the "So far, so good." phrase in the example file as the model. Do not add raw words,
+variable slots, dialogue graphs, invented quotations, audio URLs, or fields outside the
+documented schema. Return JSON only, then inspect every phrase for intended meaning, natural
+cues, answer leakage, useful hints and contexts, and suitable alternatives before giving it to
+the learner.</p>
 </blockquote>
 <p>Phrase Gym validates structure, not teaching quality. The learner or a semantic reviewer still
 checks real prepared content separately.</p>
@@ -626,7 +674,7 @@ hashes, and English locale. It streams the selected interpreter's output under h
 64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic publication. Automated tests use a silent fake child and never invoke
 real Piper.</p>
 <h2 id="api-handoff">API handoff</h2>
-<p><code>POST /api/imports</code> accepts <code>{ "package": &lt;version-1 package&gt; }</code>. The server validates and
+<p><code>POST /api/imports</code> accepts <code>{ "package": &lt;version-2 package&gt; }</code>. The server validates and
 stores a text-only request before returning <code>pending</code>. Start <code>phrase-gym coach</code> separately to
 prepare it. <code>GET /api/imports</code> and <code>GET /api/imports/{package_id}</code> report <code>pending</code>, <code>preparing</code>,
 <code>added</code>, or <code>error</code>. Retry an error or interrupted preparation with <code>POST /api/imports/{package_id}/retry</code>; retrying the
@@ -634,7 +682,7 @@ same package content returns its existing status. Coach retrieves work and retur
 result through the API; it never opens the application database.</p>
 <p>An external agent that already has audio can call <code>POST /api/imports</code> with <code>package</code> and
 <code>references</code>, a map from each <code>item_id</code> to base64-encoded mono 16-bit PCM WAV bytes. Every
-card must have one complete playable reference, at most 8 MiB, and all references together must
+phrase must have one complete playable reference, at most 8 MiB, and all references together must
 fit a 9 MiB audio budget. These limits keep the base64 JSON below the API's 16 MiB request limit.
 This publishes the batch
 atomically and returns <code>added</code> without Coach. A malformed or missing reference identifies the
