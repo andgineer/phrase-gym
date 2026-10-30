@@ -20,7 +20,7 @@
 | src/phrase\_gym/server/boundary.py            |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
 | src/phrase\_gym/server/completion.py          |       61 |        0 |    100% |           |
 | src/phrase\_gym/server/contracts.py           |       45 |        0 |    100% |           |
-| src/phrase\_gym/server/current\_practice.py   |       19 |        0 |    100% |           |
+| src/phrase\_gym/server/current\_practice.py   |       20 |        0 |    100% |           |
 | src/phrase\_gym/server/daily.py               |       29 |        0 |    100% |           |
 | src/phrase\_gym/server/deletion.py            |       31 |        0 |    100% |           |
 | src/phrase\_gym/server/extra.py               |       33 |        0 |    100% |           |
@@ -43,9 +43,9 @@
 | src/phrase\_gym/server/scheduling.py          |       28 |        0 |    100% |           |
 | src/phrase\_gym/server/search\_terms.py       |       10 |        0 |    100% |           |
 | src/phrase\_gym/server/settings.py            |       20 |        2 |     90% |     30-31 |
-| src/phrase\_gym/server/storage.py             |       91 |        2 |     98% |  136, 188 |
+| src/phrase\_gym/server/storage.py             |       99 |        2 |     98% |  136, 199 |
 | src/phrase\_gym/server/view\_actions.py       |       51 |        0 |    100% |           |
-| **TOTAL**                                     | **1637** |   **83** | **95%** |           |
+| **TOTAL**                                     | **1646** |   **83** | **95%** |           |
 
 
 ## Setup coverage badge
