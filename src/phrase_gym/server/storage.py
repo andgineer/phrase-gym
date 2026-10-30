@@ -159,6 +159,17 @@ class Database:
             connection.close()
 
     @contextmanager
+    def snapshot(self) -> Iterator[sqlite3.Connection]:
+        # A deferred transaction takes no write lock; under WAL its first read fixes the snapshot.
+        connection = self.connect()
+        try:
+            connection.execute("BEGIN DEFERRED")
+            yield connection
+        finally:
+            connection.rollback()
+            connection.close()
+
+    @contextmanager
     def write(self) -> Iterator[sqlite3.Connection]:
         connection = self.connect()
         try:

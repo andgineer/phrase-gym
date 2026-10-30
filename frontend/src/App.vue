@@ -31,9 +31,9 @@ watch(card, (current, previous) => {
   screen.value = 'entry'
 })
 
-async function start(open: () => Promise<void>) {
-  await open()
-  if (!card.value) return
+// Only this open's own card counts; a card left in the client is never shown again.
+async function start(open: () => Promise<boolean>) {
+  if (!(await open())) return
   detailsPhrase.value = null
   screen.value = 'card'
 }

@@ -95,3 +95,35 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
   await press(page, 'Daily')
   await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
 })
+
+test('a completion released after leaving the card never brings a stale card back', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await press(page, 'Daily')
+  await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
+  let releaseCompletion!: () => void
+  const completionHeld = new Promise<void>((resolve) => (releaseCompletion = resolve))
+  await page.route('**/api/practice/complete', async (route) => {
+    await completionHeld
+    await route.continue()
+  })
+  const completed = page.waitForResponse('**/api/practice/complete')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await press(page, 'Practice')
+  await expect(card(page)).toHaveCount(0)
+  releaseCompletion()
+  expect((await completed).ok()).toBe(true)
+  await expect(page.getByRole('button', { name: 'Extra', exact: true })).toBeEnabled()
+  await expect(card(page)).toHaveCount(0)
+
+  const operations = await loseFirstExtraResponse(page)
+  await press(page, 'Extra')
+  await expect(page.getByRole('alert')).toContainText('Extra was not confirmed; retry it.')
+  await expect(card(page)).toHaveCount(0)
+  await press(page, 'Retry')
+  await expect(modeLine(page)).toHaveText('Extra · 2 / 5 new')
+  await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
+  expect(operations).toEqual([operations[0], operations[0]])
+})

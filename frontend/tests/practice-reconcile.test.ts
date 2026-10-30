@@ -128,3 +128,33 @@ it('any later open abandons a failed Extra press so its Retry cannot resend it',
   await practice.retryExtra()
   expect(paths().filter((path) => path === '/practice/extra')).toHaveLength(3)
 })
+
+it('drops a completion result that arrives after the learner left its card', async () => {
+  const practice = usePractice()
+  practice.view.value = openedState(state(card('left')))
+  let release!: (value: unknown) => void
+  vi.mocked(api).mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
+  const completing = practice.complete('got_it')
+  practice.closeCard()
+  release({ receipt: { completion_id: 'other' }, replayed: false, state: state(card('next')) })
+  await completing
+  expect(paths()).toEqual(['/practice/complete'])
+  expect(practice.view.value.card).toBeNull()
+  expect(practice.error.value).toBe('')
+  vi.mocked(api).mockRejectedValueOnce(new TypeError('Failed to fetch'))
+  expect(await practice.openExtra(null)).toBe(false)
+  expect(practice.view.value.card).toBeNull()
+  expect(practice.pendingExtra.value).not.toBeNull()
+})
+
+it('reports a shown card only for the open that produced it', async () => {
+  const practice = usePractice()
+  vi.mocked(api)
+    .mockResolvedValueOnce(state(card('daily')))
+    .mockResolvedValueOnce(state(null))
+  expect(await practice.openDaily(null)).toBe(true)
+  expect(await practice.openPhrase('phrase-gone')).toBe(false)
+  vi.mocked(api).mockRejectedValueOnce(new ApiError('Phrase not found', 404))
+  practice.view.value = openedState(state(card('kept')))
+  expect(await practice.openPhrase('phrase-gone')).toBe(false)
+})

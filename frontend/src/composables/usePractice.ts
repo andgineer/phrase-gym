@@ -22,43 +22,52 @@ export function usePractice() {
   const pending = ref<PendingCompletion | null>(null)
   const pendingExtra = ref<PendingExtra | null>(null)
   let lessonId: string | null = null
+  // Each open or close starts a new epoch; results from an earlier one never load a card.
+  let epoch = 0
 
   function post<T>(path: string, body: object) {
     return api<T>(`/practice/${path}`, { method: 'POST', body: JSON.stringify(body) })
   }
 
-  async function load(path: string, body: object) {
+  async function load(path: string, body: object): Promise<boolean> {
+    const mine = ++epoch
     busy.value = true
     error.value = ''
     // Another open abandons a failed Extra press, so its Retry cannot apply much later.
     pendingExtra.value = null
     try {
-      view.value = openedState(await post<PracticeState>(path, body))
+      const state = await post<PracticeState>(path, body)
+      if (mine !== epoch) return false
+      view.value = openedState(state)
       pending.value = null
+      return state.card !== null
     } catch (cause) {
-      error.value = String(cause)
+      if (mine === epoch) error.value = String(cause)
+      return false
     } finally {
       busy.value = false
     }
   }
 
-  async function openDaily(lesson: string | null = lessonId) {
+  function openDaily(lesson: string | null = lessonId) {
     lessonId = lesson
-    await load('daily', { lesson_id: lesson })
+    return load('daily', { lesson_id: lesson })
   }
 
   const openPhrase = (phraseId: string) => load('phrase', { phrase_id: phraseId })
 
   // Reconciliation only reads, so it cannot close another tab's view; Daily makes any change.
   async function reconcile(): Promise<boolean | null> {
+    const mine = epoch
     busy.value = true
     try {
       const state = await api<PracticeState>('/practice/current')
+      if (mine !== epoch) return null
       view.value = openedState(state)
       pending.value = null
       return state.card !== null
     } catch (cause) {
-      error.value = String(cause)
+      if (mine === epoch) error.value = String(cause)
       return null
     } finally {
       busy.value = false
@@ -66,53 +75,61 @@ export function usePractice() {
   }
 
   // Practice never falls back to Daily; closing its card returns to the phrase's details.
-  async function resync(conflict: boolean, acknowledged = '') {
+  async function resync(conflict: boolean, acknowledged = ''): Promise<boolean> {
     if (view.value.card?.mode === 'practice') {
       view.value = initialView()
       pending.value = null
       error.value = conflict ? practiceClosed : ''
-      return
+      return false
     }
     const found = await reconcile()
-    if (found === null) return
+    if (found === null) return false
     if (conflict) error.value = found ? `${changed} Showing the current card.` : changed
     else if (!found) view.value = { ...view.value, message: acknowledged }
+    return found
   }
 
-  async function sendExtra(request: PendingExtra) {
+  async function sendExtra(request: PendingExtra): Promise<boolean> {
+    const mine = ++epoch
     busy.value = true
     error.value = ''
     try {
-      const step = extendedPractice(view.value, await post<ExtraResult>('extra', request))
+      const result = await post<ExtraResult>('extra', request)
+      if (mine !== epoch) return false
+      const step = extendedPractice(view.value, result)
       pendingExtra.value = null
       busy.value = false
-      if (step.reconcile) await resync(false, 'Extra was saved. Press Daily to continue.')
-      else view.value = step.view
+      if (step.reconcile) return await resync(false, 'Extra was saved. Press Daily to continue.')
+      view.value = step.view
+      return step.view.card !== null
     } catch (cause) {
+      if (mine !== epoch) return false
       if (cause instanceof ApiError && cause.status < 500) pendingExtra.value = null
       error.value = pendingExtra.value
         ? `${String(cause)} Extra was not confirmed; retry it.`
         : String(cause)
+      return false
     } finally {
       busy.value = false
     }
   }
 
-  async function openExtra(lesson: string | null) {
-    if (busy.value) return
+  async function openExtra(lesson: string | null): Promise<boolean> {
+    if (busy.value) return false
     lessonId = lesson
     // Every deliberate press gets its own operation ID; only Retry reuses one.
     pendingExtra.value = { operation_id: crypto.randomUUID(), lesson_id: lesson }
-    await sendExtra(pendingExtra.value)
+    return sendExtra(pendingExtra.value)
   }
 
-  async function retryExtra() {
-    if (pendingExtra.value && !busy.value) await sendExtra(pendingExtra.value)
+  async function retryExtra(): Promise<boolean> {
+    return pendingExtra.value && !busy.value ? sendExtra(pendingExtra.value) : false
   }
 
   async function act(path: string, body: object = {}, detailsOpen?: boolean) {
     const card = view.value.card
     if (!card || busy.value) return
+    const mine = epoch
     error.value = ''
     try {
       const updated = await post<Card>(path, {
@@ -120,24 +137,29 @@ export function usePractice() {
         phrase_id: card.phrase_id,
         ...body,
       })
-      view.value = updatedCard(view.value, updated, detailsOpen)
+      if (mine === epoch) view.value = updatedCard(view.value, updated, detailsOpen)
     } catch (cause) {
+      if (mine !== epoch) return
       if (cause instanceof ApiError && cause.status === 409) await resync(true)
       else error.value = String(cause)
     }
   }
 
   async function send(request: PendingCompletion) {
+    const mine = epoch
     busy.value = true
     error.value = ''
     try {
       const result = await post<CompletionResult>('complete', request)
+      // The server kept this completion; a card the learner already left stays closed.
+      if (mine !== epoch) return
       const step = completedPractice(view.value, request, result)
       pending.value = null
       busy.value = false
       if (step.reconcile) await resync(false, 'Your answer was saved. Press Daily to continue.')
       else view.value = step.view
     } catch (cause) {
+      if (mine !== epoch) return
       if (cause instanceof ApiError && cause.status === 409) {
         pending.value = null
         busy.value = false
@@ -149,6 +171,7 @@ export function usePractice() {
   }
 
   function closeCard() {
+    epoch++
     view.value = initialView()
     pending.value = null
   }

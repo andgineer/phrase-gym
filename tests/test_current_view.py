@@ -61,3 +61,14 @@ def test_current_does_not_close_or_replace_an_old_date_view(practice: Practice) 
     assert state["card"] is None and state["progress"]["new_completed"] == 0
     assert stored(practice) == before
     assert before[0][0]["view_token"] == old["view_token"]
+
+
+def test_current_treats_a_view_whose_phrase_is_gone_as_no_card(practice: Practice) -> None:
+    card = practice.card()
+    with practice.database.write() as connection:
+        connection.execute("UPDATE current_view SET phrase_id='gone-phrase-1'")
+    state = current(practice)
+    assert state["card"] is None and state["progress"]["new_completed"] == 0
+    assert practice.rows("SELECT view_token FROM current_view") == [
+        {"view_token": card["view_token"]}
+    ]
