@@ -115,7 +115,7 @@ it('keeps the card after a failed save and retries with the same completion ID',
   expect(practice.pending.value).toBeNull()
 })
 
-it('reconciles a stale view conflict with the current Daily view', async () => {
+it('reconciles a stale view conflict by reading the current view, never reopening Daily', async () => {
   const practice = usePractice()
   vi.mocked(api).mockResolvedValueOnce(state(card('first', { revealed: true })))
   await practice.openDaily('lesson-1')
@@ -123,8 +123,8 @@ it('reconciles a stale view conflict with the current Daily view', async () => {
     .mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
     .mockResolvedValueOnce(state(card('replacement')))
   await practice.complete('skipped')
-  expect(paths()).toEqual(['/practice/daily', '/practice/complete', '/practice/daily'])
-  expect(body(2)).toEqual({ lesson_id: 'lesson-1' })
+  expect(paths()).toEqual(['/practice/daily', '/practice/complete', '/practice/current'])
+  expect(vi.mocked(api).mock.calls[2]![1]).toBeUndefined()
   expect(practice.view.value.card?.view_token).toBe('replacement')
   expect(practice.error.value).toContain('changed in another tab')
   expect(practice.pending.value).toBeNull()

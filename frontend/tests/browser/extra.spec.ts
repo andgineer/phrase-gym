@@ -1,39 +1,16 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
+import {
+  card,
+  details,
+  extraPackage,
+  modeLine,
+  openDetails,
+  stopButton,
+  texts,
+} from './extra-package'
 import { importPackage, playedMedia, savedTakes } from './helpers'
-
-const phrase = (item_id: string, text: string) => ({
-  item_id,
-  text,
-  explanation: `Meaning of ${text}`,
-  detailed_explanation: `Longer help for ${text}`,
-  cues: [{ situation: `Situation for ${text}` }],
-  recall_hints: [`${item_id} hint`, `${item_id} clue`],
-  usage_contexts: ['small talk'],
-})
-const texts = ['So far, so good.', 'Nice to meet you.', 'That works for me.']
-const extraPackage = {
-  format: 'phrase-gym.package',
-  version: 2,
-  package_id: 'extra-browser-v1',
-  source_id: 'extra-browser-source',
-  source_label: 'Extra course',
-  learning_language: 'en',
-  card_language: 'en',
-  help_language: 'en',
-  lessons: [
-    {
-      lesson_id: 'small-talk',
-      title: 'Small talk',
-      phrases: texts.map((text, index) => phrase(`item-${index}`, text)),
-    },
-  ],
-}
-const card = (page: Page) => page.locator('article.practice-card')
-const modeLine = (page: Page) => page.getByTestId('mode-line')
-const stopButton = (page: Page) => page.getByRole('button', { name: 'Stop', exact: true })
-const details = (page: Page) => page.locator('section.phrase-details')
 
 async function setLimits(page: Page, due: number, fresh: number) {
   const settings = await (await page.request.get('/api/settings')).json()
@@ -41,12 +18,6 @@ async function setLimits(page: Page, due: number, fresh: number) {
     data: { ...settings, daily_due_limit: due, daily_new_limit: fresh },
   })
   expect(response.ok()).toBe(true)
-}
-
-async function openDetails(page: Page, text: string, tap = false) {
-  const button = page.getByRole('button', { name: `Open details: ${text}` })
-  await (tap ? button.tap() : button.click())
-  await expect(details(page).getByRole('heading', { name: text })).toBeVisible()
 }
 
 test.beforeEach(async ({ page }) => installFakeMedia(page))

@@ -10,7 +10,15 @@ import uvicorn
 from phrase_gym.coach.main import run_coach
 from phrase_gym.server.app import create_app
 
-CLOCKED_SERVICES = ("daily", "extra", "phrase_practice", "view_actions", "completion", "lessons")
+CLOCKED_SERVICES = (
+    "current",
+    "daily",
+    "extra",
+    "phrase_practice",
+    "view_actions",
+    "completion",
+    "lessons",
+)
 
 
 def main() -> None:

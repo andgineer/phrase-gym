@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from fastapi import APIRouter, HTTPException
 
 from phrase_gym.server.completion import PracticeCompletion
+from phrase_gym.server.current_practice import CurrentPractice
 from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.extra import ExtraPractice
 from phrase_gym.server.phrase_practice import PhrasePractice, UnknownPhraseError
@@ -35,14 +36,17 @@ def conflicts() -> Iterator[None]:
         raise HTTPException(404, "Phrase not found") from error
 
 
-def practice_routes(
+def practice_entry_routes(
+    current: CurrentPractice,
     daily: DailyPractice,
     extra: ExtraPractice,
     phrase: PhrasePractice,
-    actions: ViewActions,
-    completion: PracticeCompletion,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/practice")
+
+    @router.get("/current")
+    def current_view() -> PracticeState:
+        return current.read()
 
     @router.post("/daily")
     def open_daily(request: OpenDaily) -> PracticeState:
@@ -58,6 +62,12 @@ def practice_routes(
     def open_phrase(request: OpenPhrasePractice) -> PracticeState:
         with conflicts():
             return phrase.open(request.phrase_id)
+
+    return router
+
+
+def practice_card_routes(actions: ViewActions, completion: PracticeCompletion) -> APIRouter:
+    router = APIRouter(prefix="/api/practice")
 
     @router.post("/reveal")
     def reveal(request: ViewAction) -> PracticeCard:

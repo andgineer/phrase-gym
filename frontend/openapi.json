@@ -2441,6 +2441,24 @@
         "summary": "New Cue"
       }
     },
+    "/api/practice/current": {
+      "get": {
+        "operationId": "current_view_api_practice_current_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Current View"
+      }
+    },
     "/api/practice/daily": {
       "post": {
         "operationId": "open_daily_api_practice_daily_post",

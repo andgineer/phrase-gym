@@ -31,10 +31,11 @@ watch(card, (current, previous) => {
   screen.value = 'entry'
 })
 
-async function start(open: () => Promise<void>, mode?: 'practice') {
-  detailsPhrase.value = null
+async function start(open: () => Promise<void>) {
   await open()
-  if (card.value && (!mode || card.value.mode === mode)) screen.value = 'card'
+  if (!card.value) return
+  detailsPhrase.value = null
+  screen.value = 'card'
 }
 
 const daily = () => start(() => practice.openDaily(lessonId.value || null))
@@ -43,7 +44,7 @@ const retryExtra = () => start(practice.retryExtra)
 
 async function practisePhrase(phraseId: string) {
   await session.settleMedia()
-  await start(() => practice.openPhrase(phraseId), 'practice')
+  await start(() => practice.openPhrase(phraseId))
 }
 
 async function navigate(next: 'entry' | 'settings') {
@@ -52,6 +53,8 @@ async function navigate(next: 'entry' | 'settings') {
   detailsPhrase.value = null
   if (next === 'entry') entryKey.value++
   screen.value = next
+  // The entry never holds a card, so a failed open cannot fall back to a stale one.
+  practice.closeCard()
 }
 
 function removeCard() {

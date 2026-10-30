@@ -12,8 +12,7 @@ import {
 } from '../practiceReducer'
 import type { Card, CompletionResult, ExtraResult, Outcome, PracticeState } from '../studyTypes'
 
-const changedElsewhere =
-  'This card changed in another tab or a new day began. Showing the current card.'
+const changed = 'This card changed in another tab or a new day began.'
 const practiceClosed = 'This Practice card changed in another tab or a new day began.'
 
 export function usePractice() {
@@ -31,6 +30,8 @@ export function usePractice() {
   async function load(path: string, body: object) {
     busy.value = true
     error.value = ''
+    // Another open abandons a failed Extra press, so its Retry cannot apply much later.
+    pendingExtra.value = null
     try {
       view.value = openedState(await post<PracticeState>(path, body))
       pending.value = null
@@ -48,16 +49,34 @@ export function usePractice() {
 
   const openPhrase = (phraseId: string) => load('phrase', { phrase_id: phraseId })
 
+  // Reconciliation only reads, so it cannot close another tab's view; Daily makes any change.
+  async function reconcile(): Promise<boolean | null> {
+    busy.value = true
+    try {
+      const state = await api<PracticeState>('/practice/current')
+      view.value = openedState(state)
+      pending.value = null
+      return state.card !== null
+    } catch (cause) {
+      error.value = String(cause)
+      return null
+    } finally {
+      busy.value = false
+    }
+  }
+
   // Practice never falls back to Daily; closing its card returns to the phrase's details.
-  async function resync(notice = '') {
+  async function resync(conflict: boolean, acknowledged = '') {
     if (view.value.card?.mode === 'practice') {
       view.value = initialView()
       pending.value = null
-      error.value = notice && practiceClosed
+      error.value = conflict ? practiceClosed : ''
       return
     }
-    await openDaily()
-    if (!error.value) error.value = notice
+    const found = await reconcile()
+    if (found === null) return
+    if (conflict) error.value = found ? `${changed} Showing the current card.` : changed
+    else if (!found) view.value = { ...view.value, message: acknowledged }
   }
 
   async function sendExtra(request: PendingExtra) {
@@ -67,7 +86,7 @@ export function usePractice() {
       const step = extendedPractice(view.value, await post<ExtraResult>('extra', request))
       pendingExtra.value = null
       busy.value = false
-      if (step.reconcile) await openDaily()
+      if (step.reconcile) await resync(false, 'Extra was saved. Press Daily to continue.')
       else view.value = step.view
     } catch (cause) {
       if (cause instanceof ApiError && cause.status < 500) pendingExtra.value = null
@@ -103,7 +122,7 @@ export function usePractice() {
       })
       view.value = updatedCard(view.value, updated, detailsOpen)
     } catch (cause) {
-      if (cause instanceof ApiError && cause.status === 409) await resync(changedElsewhere)
+      if (cause instanceof ApiError && cause.status === 409) await resync(true)
       else error.value = String(cause)
     }
   }
@@ -116,17 +135,22 @@ export function usePractice() {
       const step = completedPractice(view.value, request, result)
       pending.value = null
       busy.value = false
-      if (step.reconcile) await resync()
+      if (step.reconcile) await resync(false, 'Your answer was saved. Press Daily to continue.')
       else view.value = step.view
     } catch (cause) {
       if (cause instanceof ApiError && cause.status === 409) {
         pending.value = null
         busy.value = false
-        await resync(changedElsewhere)
+        await resync(true)
       } else error.value = `${String(cause)} The card is unchanged; retry to save it.`
     } finally {
       busy.value = false
     }
+  }
+
+  function closeCard() {
+    view.value = initialView()
+    pending.value = null
   }
 
   async function complete(outcome: Outcome) {
@@ -153,7 +177,7 @@ export function usePractice() {
     newCue: () => act('cue', { operation_id: crypto.randomUUID() }),
     hint: () => act('hint', { operation_id: crypto.randomUUID() }),
     toggleDetails: () => (view.value = { ...view.value, detailsOpen: !view.value.detailsOpen }),
-    closeCard: () => (view.value = initialView()),
+    closeCard,
     complete,
     retry,
   }

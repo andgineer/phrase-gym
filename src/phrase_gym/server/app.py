@@ -9,11 +9,12 @@ from phrase_gym.server.api.coach import coach_routes
 from phrase_gym.server.api.deletion import deletion_routes
 from phrase_gym.server.api.imports import import_routes
 from phrase_gym.server.api.library import library_routes
-from phrase_gym.server.api.practice import practice_routes
+from phrase_gym.server.api.practice import practice_card_routes, practice_entry_routes
 from phrase_gym.server.api.recordings import recording_routes
 from phrase_gym.server.api.settings import settings_routes
 from phrase_gym.server.boundary import LocalBoundary, trusted_hosts
 from phrase_gym.server.completion import PracticeCompletion
+from phrase_gym.server.current_practice import CurrentPractice
 from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.deletion import PhraseDeletion
 from phrase_gym.server.extra import ExtraPractice
@@ -41,20 +42,21 @@ def create_app() -> FastAPI:
     app.include_router(import_routes(importer))
     app.include_router(coach_routes(importer))
     app.include_router(recording_routes(RecordingStore(database)))
+    app.state.current = CurrentPractice(database)
     app.state.daily = DailyPractice(database)
     app.state.extra = ExtraPractice(database)
     app.state.phrase_practice = PhrasePractice(database)
     app.state.view_actions = ViewActions(database)
     app.state.completion = PracticeCompletion(database)
     app.include_router(
-        practice_routes(
+        practice_entry_routes(
+            app.state.current,
             app.state.daily,
             app.state.extra,
             app.state.phrase_practice,
-            app.state.view_actions,
-            app.state.completion,
         ),
     )
+    app.include_router(practice_card_routes(app.state.view_actions, app.state.completion))
     library = LibraryService(database)
     lessons = LessonChoices(database)
     app.state.lessons = lessons

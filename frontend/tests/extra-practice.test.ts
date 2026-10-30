@@ -89,7 +89,7 @@ it('retries a lost Extra response with the same ID and reconciles the replay', a
     .mockResolvedValueOnce({ receipt: receipt(id), replayed: true, state: null })
     .mockResolvedValueOnce(state(card('newer')))
   await practice.retryExtra()
-  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/daily'])
+  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current'])
   expect(body(1)).toEqual(body(0))
   expect(practice.view.value.card?.view_token).toBe('newer')
   expect(practice.pendingExtra.value).toBeNull()

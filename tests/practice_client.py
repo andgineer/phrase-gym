@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from phrase_gym.server.storage import Database
 
 Card = dict[str, Any]
-CLOCKED = ("daily", "extra", "phrase_practice", "view_actions", "completion", "lessons")
+CLOCKED = ("current", "daily", "extra", "phrase_practice", "view_actions", "completion", "lessons")
 
 
 class Practice:
