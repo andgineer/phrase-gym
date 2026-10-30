@@ -13,13 +13,14 @@
 | src/phrase\_gym/server/api/deletion.py        |       18 |        0 |    100% |           |
 | src/phrase\_gym/server/api/imports.py         |       30 |        4 |     87% |     36-39 |
 | src/phrase\_gym/server/api/library.py         |       36 |        1 |     97% |        55 |
-| src/phrase\_gym/server/api/practice.py        |       51 |        0 |    100% |           |
+| src/phrase\_gym/server/api/practice.py        |       58 |        0 |    100% |           |
 | src/phrase\_gym/server/api/recordings.py      |       33 |        5 |     85% |24-25, 27, 29, 41 |
 | src/phrase\_gym/server/api/settings.py        |       15 |        2 |     87% |     18-19 |
-| src/phrase\_gym/server/app.py                 |       60 |        0 |    100% |           |
+| src/phrase\_gym/server/app.py                 |       63 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py            |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
 | src/phrase\_gym/server/completion.py          |       61 |        0 |    100% |           |
 | src/phrase\_gym/server/contracts.py           |       45 |        0 |    100% |           |
+| src/phrase\_gym/server/current\_practice.py   |       19 |        0 |    100% |           |
 | src/phrase\_gym/server/daily.py               |       29 |        0 |    100% |           |
 | src/phrase\_gym/server/deletion.py            |       31 |        0 |    100% |           |
 | src/phrase\_gym/server/extra.py               |       33 |        0 |    100% |           |
@@ -44,7 +45,7 @@
 | src/phrase\_gym/server/settings.py            |       20 |        2 |     90% |     30-31 |
 | src/phrase\_gym/server/storage.py             |       91 |        2 |     98% |  136, 188 |
 | src/phrase\_gym/server/view\_actions.py       |       51 |        0 |    100% |           |
-| **TOTAL**                                     | **1608** |   **83** | **95%** |           |
+| **TOTAL**                                     | **1637** |   **83** | **95%** |           |
 
 
 ## Setup coverage badge
