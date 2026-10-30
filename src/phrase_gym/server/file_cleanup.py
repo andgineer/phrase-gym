@@ -31,24 +31,27 @@ class FileCleanup:
             )
         return CleanupStatus(pending=pending, error=error)
 
-    def _owned(self, path: str) -> Path:
+    def _owned(self, path: str, phrase_id: str) -> Path:
+        if Path(path).is_symlink():
+            raise ValueError(f"{path} is a symbolic link")
         resolved = owned_path(self.database.data_dir, path)
-        if (
-            resolved.is_dir()
-            and resolved.parent != (self.database.data_dir / "recordings").resolve()
-        ):
-            raise ValueError(f"{path} is not a phrase recordings folder")
+        if resolved.is_dir():
+            recordings = (self.database.data_dir / "recordings").resolve()
+            if resolved.parent != recordings or resolved.name != phrase_id:
+                raise ValueError(f"{path} is not the deleted phrase's recordings folder")
+            with self.database.read() as connection:
+                if connection.execute("SELECT 1 FROM phrases WHERE id=?", (phrase_id,)).fetchone():
+                    raise ValueError(f"{path} belongs to a phrase that still exists")
         return resolved
 
     def retry(self) -> CleanupStatus:
         with self.database.read() as connection:
-            paths = [
-                row[0]
-                for row in connection.execute("SELECT path FROM cleanup_paths ORDER BY rowid")
-            ]
-        for path in paths:
+            paths = connection.execute(
+                "SELECT path, phrase_id FROM cleanup_paths ORDER BY rowid",
+            ).fetchall()
+        for path, phrase_id in paths:
             try:
-                remove_owned_path(self._owned(path))
+                remove_owned_path(self._owned(path, phrase_id))
             except (OSError, ValueError) as error:
                 with self.database.write() as connection:
                     connection.execute(

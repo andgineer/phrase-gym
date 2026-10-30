@@ -187,7 +187,14 @@ def test_orphaned_take_file_does_not_block_folder_cleanup(
 
 @pytest.mark.parametrize("field", ["id", "phrase_id", "attempt_id"])
 @pytest.mark.parametrize(
-    "value", ["../../references/other.wav", "nested/take-1234", "take.with.dots", "..secret1"]
+    "value",
+    [
+        "../../references/other.wav",
+        "nested/take-1234",
+        "take.with.dots",
+        "..secret1",
+        "ABCDEFGH-1234",
+    ],
 )
 def test_unsafe_take_identities_are_rejected(
     client: TestClient, opened: dict[str, object], field: str, value: str
@@ -225,5 +232,48 @@ def test_cleanup_refuses_a_recorded_folder_outside_phrase_recordings(
             (str(keep), "unknown-phrase", "2026-10-30T00:00:00+00:00"),
         )
     status = client.post("/api/cleanup/retry").json()
-    assert status["pending"] == 1 and "not a phrase recordings folder" in status["error"]
+    assert (
+        status["pending"] == 1 and "not the deleted phrase's recordings folder" in status["error"]
+    )
     assert (keep / "kept.wav").is_file()
+
+
+def record_cleanup(client: TestClient, path: Path, phrase_id: str) -> None:
+    with client.app.state.database.write() as connection:
+        connection.execute(
+            "INSERT INTO cleanup_paths (path, phrase_id, recorded_at) VALUES (?,?,?)",
+            (str(path), phrase_id, "2026-10-30T00:00:00+00:00"),
+        )
+
+
+def test_case_variant_take_ids_cannot_share_a_file(
+    client: TestClient, opened: dict[str, object]
+) -> None:
+    assert upload_take(client, opened, "abcdefgh-1234", b"first take").status_code == 200
+    assert upload_take(client, opened, "ABCDEFGH-1234", b"second take").status_code == 422
+    assert client.get("/api/recordings/abcdefgh-1234/audio").content == b"first take"
+
+
+@pytest.mark.parametrize("owner", ["matching", "other-deleted-phrase"])
+def test_cleanup_keeps_a_folder_whose_phrase_still_exists_or_differs(
+    client: TestClient, opened: dict[str, object], tmp_path: Path, owner: str
+) -> None:
+    folder = tmp_path / "recordings" / str(opened["id"])
+    record_cleanup(client, folder, str(opened["id"]) if owner == "matching" else owner)
+    status = client.post("/api/cleanup/retry").json()
+    assert status["pending"] == 1
+    expected = "still exists" if owner == "matching" else "not the deleted phrase's"
+    assert expected in status["error"]
+    assert len(list(folder.iterdir())) == 2
+
+
+def test_cleanup_refuses_a_symlinked_folder_without_following_it(
+    client: TestClient, opened: dict[str, object], tmp_path: Path
+) -> None:
+    target = tmp_path / "recordings" / str(opened["id"])
+    link = tmp_path / "recordings" / "deleted-phrase-0001"
+    link.symlink_to(target, target_is_directory=True)
+    record_cleanup(client, link, "deleted-phrase-0001")
+    status = client.post("/api/cleanup/retry").json()
+    assert status["pending"] == 1 and "symbolic link" in status["error"]
+    assert link.is_symlink() and len(list(target.iterdir())) == 2

@@ -901,7 +901,7 @@
         "additionalProperties": false,
         "properties": {
           "attempt_id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
+            "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
             "title": "Attempt Id",
             "type": "string"
           },
@@ -953,7 +953,7 @@
             "title": "Duration Ms"
           },
           "id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
+            "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
             "title": "Id",
             "type": "string"
           },
@@ -964,7 +964,7 @@
             "type": "string"
           },
           "phrase_id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
+            "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
             "title": "Phrase Id",
             "type": "string"
           }

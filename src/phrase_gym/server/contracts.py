@@ -6,8 +6,9 @@ from pydantic import Field, field_validator
 from phrase_gym.server.import_contracts import Cue, StrictModel
 
 PAGE_LIMIT = 100
-# Take identities become file names, so they exclude path separators and dots.
-STORED_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$"
+# Take identities become file names: no separators or dots, and lowercase so that IDs differing
+# only by case cannot share a file on case-insensitive filesystems.
+STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
 
 
 class RecordingUpload(StrictModel):
