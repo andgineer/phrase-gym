@@ -4,8 +4,9 @@
 [![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
-keeping private learner recordings. It supports package import, Daily practice with first study and
-later spoken recall, self-rating, scheduled return, reference playback, comparison, and saved replay.
+keeping private learner recordings. It supports package import, Daily and Extra practice with first
+study and later spoken recall, phrase-specific Practice, self-rating, scheduled return, reference
+playback, comparison, and saved replay.
 
 ## Install and launch
 
@@ -55,8 +56,8 @@ visible for explicit retry. Exact package retries return the existing result; ch
 a package ID or a repeated source/item identity is rejected without overwriting learned material.
 
 The Practice entry offers **Search lessons**, **Lesson to drill** with its due and new counts,
-**Daily**, and the Library with **Find a phrase**. Nothing starts until you press **Daily**, which
-opens or resumes today's card. Daily offers the oldest due phrases first, up to 20 recalls, then up
+**Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press
+**Daily**, which opens or resumes today's card. Daily offers the oldest due phrases first, up to 20 recalls, then up
 to five new phrases per learning day; the stored limits are read live, so a raised limit lets Daily
 continue. A new phrase opens on its answer with meaning help, reference playback and optional
 recording; **Next** completes this first meeting without a rating. From the next learning day a due
@@ -65,6 +66,13 @@ After **Show**, you can still record a rehearsal, then rate the response you gav
 reveal: **Not yet**, **Effort** or **Got it**. A rating or **Skip** saves and advances at once.
 **Delete** on a revealed card asks for confirmation and advances without a grade.
 
+**Extra** starts a fresh pass for more practice today. Once today's completed recalls or first
+meetings reach a daily limit, each press extends that category by one more limit (for example 20
+recalls become 40); pressing again without further practice adds nothing, and completed practice is
+never reset. Skipped phrases from earlier passes come back; phrases that are not yet due never do.
+If nothing is waiting, Extra says so at once. **Stop** on an Extra card finishes any recording and
+returns to the entry; **Daily** resumes that card later.
+
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and
 answer it was recorded with; pending uploads remain for retry and never block the next card.
 **▶ Mine** and **Compare** replay the latest take of the open card.
@@ -72,7 +80,10 @@ answer it was recorded with; pending uploads remain for retry and never block th
 The Library lists the selected lesson's phrases and searches all lessons by wording, meaning,
 situation or use. Phrase details show the answer, what it is used for, the lesson and source,
 reference playback, the next due date and saved recordings with their mode, cue and answer at the
-time. Looking a phrase up never changes its schedule.
+time. Looking a phrase up never changes its schedule. **Practice** in details opens that phrase on
+the same card, as a first meeting if it is new, and returns to its details after a rating, **Skip**
+or **Next**. It does not use the daily limits, but its first rating on a learning day reschedules the
+phrase even before it is due.
 **Delete**, in the list or details, permanently removes a phrase with its reference audio and
 saved recordings after confirmation; completed practice keeps its wording. A recording still
 waiting to upload for that phrase stays on the device until you discard it. If deleted files cannot

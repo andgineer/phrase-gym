@@ -20,21 +20,36 @@ const screen = ref<'entry' | 'card' | 'settings'>('entry')
 const lessonId = ref('')
 const entryKey = ref(0)
 const pendingDelete = ref<DeletionTarget | null>(null)
+// Owned here so the entry, remounted after a finished Practice card, reopens its details.
+const detailsPhrase = ref<string | null>(null)
 const card = computed(() => practice.view.value.card)
 
-// An exhausted traversal returns to entry with its completion message.
-watch(card, (current) => {
-  if (!current && screen.value === 'card') screen.value = 'entry'
+// An exhausted traversal returns to entry; a finished Practice card returns to its details.
+watch(card, (current, previous) => {
+  if (current || screen.value !== 'card') return
+  if (previous?.mode === 'practice') detailsPhrase.value = previous.phrase_id
+  screen.value = 'entry'
 })
 
-async function daily() {
-  await practice.openDaily(lessonId.value || null)
-  if (card.value) screen.value = 'card'
+async function start(open: () => Promise<void>, mode?: 'practice') {
+  detailsPhrase.value = null
+  await open()
+  if (card.value && (!mode || card.value.mode === mode)) screen.value = 'card'
+}
+
+const daily = () => start(() => practice.openDaily(lessonId.value || null))
+const extra = () => start(() => practice.openExtra(lessonId.value || null))
+const retryExtra = () => start(practice.retryExtra)
+
+async function practisePhrase(phraseId: string) {
+  await session.settleMedia()
+  await start(() => practice.openPhrase(phraseId), 'practice')
 }
 
 async function navigate(next: 'entry' | 'settings') {
   await session.leave()
   void takeTransfers.flush()
+  detailsPhrase.value = null
   if (next === 'entry') entryKey.value++
   screen.value = next
 }
@@ -47,7 +62,11 @@ function removeCard() {
 async function deletedCard() {
   pendingDelete.value = null
   await session.settleMedia()
-  await practice.openDaily()
+  if (card.value?.mode !== 'practice') return practice.openDaily()
+  // The deleted phrase has no details to return to.
+  screen.value = 'entry'
+  detailsPhrase.value = null
+  practice.closeCard()
 }
 
 async function initialize() {
@@ -112,6 +131,7 @@ onMounted(initialize)
           @compare="session.compareMine"
           @retry-save="takeTransfers.flush"
           @retry-completion="practice.retry"
+          @stop="navigate('entry')"
         />
       </template>
       <template v-else>
@@ -122,10 +142,15 @@ onMounted(initialize)
           :message="practice.view.value.message"
           :error="practice.error.value"
           :busy="practice.busy.value"
+          :can-retry-extra="practice.pendingExtra.value !== null"
+          v-model:details-phrase="detailsPhrase"
           :play="playback.play"
           :compare="playback.compare"
           :stop-playback="playback.stop"
           @daily="daily"
+          @extra="extra"
+          @retry-extra="retryExtra"
+          @practice="practisePhrase"
         />
       </template>
       <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>

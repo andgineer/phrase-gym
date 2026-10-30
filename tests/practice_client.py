@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from phrase_gym.server.storage import Database
 
 Card = dict[str, Any]
-CLOCKED = ("daily", "view_actions", "completion", "lessons")
+CLOCKED = ("daily", "extra", "phrase_practice", "view_actions", "completion", "lessons")
 
 
 class Practice:
@@ -38,6 +38,26 @@ class Practice:
     def card(self, lesson_id: str | None = None) -> Card:
         card = self.daily(lesson_id)["card"]
         assert card, "Daily offered no card"
+        return card
+
+    def press_extra(
+        self, lesson_id: str | None = None, operation_id: str | None = None
+    ) -> httpx.Response:
+        body = {"operation_id": operation_id or str(uuid4()), "lesson_id": lesson_id}
+        return self.client.post("/api/practice/extra", json=body)
+
+    def extra(
+        self, lesson_id: str | None = None, operation_id: str | None = None
+    ) -> dict[str, Any]:
+        response = self.press_extra(lesson_id, operation_id)
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def practise(self, phrase_id: str) -> Card:
+        response = self.client.post("/api/practice/phrase", json={"phrase_id": phrase_id})
+        assert response.status_code == 200, response.text
+        card = response.json()["card"]
+        assert card and card["mode"] == "practice"
         return card
 
     def action(self, path: str, card: Card, **extra: object) -> httpx.Response:

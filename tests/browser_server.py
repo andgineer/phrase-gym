@@ -10,6 +10,8 @@ import uvicorn
 from phrase_gym.coach.main import run_coach
 from phrase_gym.server.app import create_app
 
+CLOCKED_SERVICES = ("daily", "extra", "phrase_practice", "view_actions", "completion", "lessons")
+
 
 def main() -> None:
     port = int(sys.argv[1])
@@ -26,7 +28,7 @@ def main() -> None:
             ).start()
         app = create_app()
         simulated_time: list[datetime | None] = [None]
-        for service in ("daily", "view_actions", "completion", "lessons"):
+        for service in CLOCKED_SERVICES:
             getattr(app.state, service).clock = lambda: simulated_time[0] or datetime.now(UTC)
 
         @app.post("/__test/clock/{iso_time}")

@@ -295,6 +295,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/practice/extra": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Extra */
+        post: operations["open_extra_api_practice_extra_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/practice/hint": {
         parameters: {
             query?: never;
@@ -306,6 +323,23 @@ export interface paths {
         put?: never;
         /** Hint */
         post: operations["hint_api_practice_hint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/phrase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Phrase */
+        post: operations["open_phrase_api_practice_phrase_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -492,6 +526,24 @@ export interface components {
             /** Deleted Text */
             deleted_text: string;
         };
+        /** ExtraReceipt */
+        ExtraReceipt: {
+            /** Due Target */
+            due_target: number;
+            /** Learning Date */
+            learning_date: string;
+            /** New Target */
+            new_target: number;
+            /** Operation Id */
+            operation_id: string;
+        };
+        /** ExtraResult */
+        ExtraResult: {
+            receipt: components["schemas"]["ExtraReceipt"];
+            /** Replayed */
+            replayed: boolean;
+            state: components["schemas"]["PracticeState"] | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -585,6 +637,18 @@ export interface components {
         OpenDaily: {
             /** Lesson Id */
             lesson_id?: string | null;
+        };
+        /** OpenExtra */
+        OpenExtra: {
+            /** Lesson Id */
+            lesson_id?: string | null;
+            /** Operation Id */
+            operation_id: string;
+        };
+        /** OpenPhrasePractice */
+        OpenPhrasePractice: {
+            /** Phrase Id */
+            phrase_id: string;
         };
         /** PhraseDetails */
         PhraseDetails: {
@@ -1471,6 +1535,39 @@ export interface operations {
             };
         };
     };
+    open_extra_api_practice_extra_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenExtra"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtraResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     hint_api_practice_hint_post: {
         parameters: {
             query?: never;
@@ -1491,6 +1588,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_phrase_api_practice_phrase_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenPhrasePractice"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeState"];
                 };
             };
             /** @description Validation Error */

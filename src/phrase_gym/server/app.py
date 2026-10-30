@@ -16,10 +16,12 @@ from phrase_gym.server.boundary import LocalBoundary, trusted_hosts
 from phrase_gym.server.completion import PracticeCompletion
 from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.deletion import PhraseDeletion
+from phrase_gym.server.extra import ExtraPractice
 from phrase_gym.server.file_cleanup import FileCleanup
 from phrase_gym.server.importer import Importer
 from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
+from phrase_gym.server.phrase_practice import PhrasePractice
 from phrase_gym.server.recording_store import RecordingStore
 from phrase_gym.server.settings import SettingsService
 from phrase_gym.server.storage import Database
@@ -40,10 +42,18 @@ def create_app() -> FastAPI:
     app.include_router(coach_routes(importer))
     app.include_router(recording_routes(RecordingStore(database)))
     app.state.daily = DailyPractice(database)
+    app.state.extra = ExtraPractice(database)
+    app.state.phrase_practice = PhrasePractice(database)
     app.state.view_actions = ViewActions(database)
     app.state.completion = PracticeCompletion(database)
     app.include_router(
-        practice_routes(app.state.daily, app.state.view_actions, app.state.completion),
+        practice_routes(
+            app.state.daily,
+            app.state.extra,
+            app.state.phrase_practice,
+            app.state.view_actions,
+            app.state.completion,
+        ),
     )
     library = LibraryService(database)
     lessons = LessonChoices(database)

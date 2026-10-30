@@ -4,16 +4,24 @@ import sqlite3
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+from phrase_gym.server.allowance import daily_progress
 from phrase_gym.server.practice_contracts import (
     CompletionReceipt,
     CompletionRequest,
     CompletionResult,
     Outcome,
+    PracticeState,
     Rating,
 )
 from phrase_gym.server.practice_selection import advance
 from phrase_gym.server.practice_state import practice_state
-from phrase_gym.server.practice_views import PracticeConflictError, require_view, view_phrase
+from phrase_gym.server.practice_views import (
+    PracticeConflictError,
+    clear_phrase,
+    require_view,
+    view_mode,
+    view_phrase,
+)
 from phrase_gym.server.scheduling import graded_today, learning_day, next_day_start, schedule
 from phrase_gym.server.storage import Database
 
@@ -37,6 +45,8 @@ def _record_outcome(
     if outcome == "studied":
         raise PracticeConflictError("Recall completes with a rating or Skip")
     if outcome == "skipped":
+        if view["practice"]:
+            return None, True, False
         skipped = json.loads(view["skipped_json"])
         connection.execute(
             "UPDATE current_view SET skipped_json=? WHERE id=1",
@@ -94,7 +104,7 @@ class PracticeCompletion:
                 completion_id=request.completion_id,
                 phrase_id=phrase["id"],
                 learning_date=day,
-                mode=view["origin"],
+                mode=view_mode(view),
                 kind=view["kind"],
                 rating=rating,
                 skipped=skipped,
@@ -123,9 +133,15 @@ class PracticeCompletion:
                 "VALUES (?, 'completion', ?, ?)",
                 (request.completion_id, payload, receipt.model_dump_json()),
             )
-            advance(connection, now, day, self.rng)
-            return CompletionResult(
-                receipt=receipt,
-                replayed=False,
-                state=practice_state(connection, now, day),
-            )
+            if view["practice"]:
+                # Practice returns to details; the next Daily selects a fresh regular view.
+                clear_phrase(connection)
+                state = PracticeState(
+                    card=None,
+                    progress=daily_progress(connection, day),
+                    message=None,
+                )
+            else:
+                advance(connection, now, day, self.rng)
+                state = practice_state(connection, now, day)
+            return CompletionResult(receipt=receipt, replayed=False, state=state)

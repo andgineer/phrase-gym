@@ -33,6 +33,7 @@ const emit = defineEmits<{
   compare: []
   retrySave: []
   retryCompletion: []
+  stop: []
 }>()
 const ratings: Array<[Outcome, string, string]> = [
   ['not_yet', 'Not yet', 'not-yet'],
@@ -47,6 +48,7 @@ const front = computed(() => props.card.kind === 'recall' && !props.card.reveale
   <section class="practice-panel">
     <div class="session-toolbar">
       <span data-testid="mode-line">{{ progressLine(card, progress) }}</span>
+      <button v-if="card.mode === 'extra'" @click="emit('stop')">Stop</button>
     </div>
     <article class="card practice-card study">
       <template v-if="front">

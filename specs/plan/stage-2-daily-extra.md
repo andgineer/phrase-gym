@@ -130,15 +130,6 @@ Implement the lasting rules in their owning specs:
 
 The settings editor remains later convenience work.
 
-## Checkpoint 2C — Extra extension and phrase-specific Practice
-
-**Learner benefit:** press Extra to extend today's due/new allowance, or practise one chosen phrase from details.
-
-- **Extra** updates both date-keyed targets under the [allowance and retry rules](../decision-core-trainer.md#daily-allowance) and opens a fresh traversal; select phrases one by one under the effective allowances, issuing a fresh token for each appearance. It never resets completed counts. Stop returns to entry. If no eligible phrase remains, explain that immediately. Add phrase-specific **Practice** through the shared Card and return to details after rating, Skip or first-study Next. Any explicit Practice grade calls FSRS when `last_review` is not today, even before due.
-- Test default due/new counts and expected targets: 12/2 → 20/5, 20/5 → 40/10 and 27/7 → 47/12; repeated Extra at unchanged counts; lower settings preserving prior positive targets; zero category; skipped due reappearing in a new traversal; no not-due cycling; stale old-view retry; lost Extra response retried after later completions, another tab replaces the view, a date change or restart, without extending again or invalidating the newer view; changed Extra payload under one operation ID; a separate deliberate Extra press with a new ID; due/not-due Practice; opening Practice while an unfinished Daily first-study view exists, including for that same phrase, rejects the old view's completion without a log row or allowance change; subsequent Daily selects a fresh view. Cover Stop and late takes. Real-server Chromium/WebKit tests cover entry-to-Extra, repeat press, Stop, detail Practice and mobile capture/replay. Refresh contracts/types and run the ordered implementation gate, review and exact-commit CI.
-
-**Stop after 2C:** Extra starts only on an explicit press and never erases today's completed work.
-
 ## Checkpoint 2D — Completion and practice facts
 
 **Learner benefit:** see today's completed practice, a truthful streak and phrases studied today.

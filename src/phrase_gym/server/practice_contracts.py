@@ -78,3 +78,25 @@ class CompletionResult(StrictModel):
     receipt: CompletionReceipt
     replayed: bool
     state: PracticeState | None
+
+
+class OpenExtra(StrictModel):
+    operation_id: OperationId
+    lesson_id: str | None = Field(default=None, max_length=100)
+
+
+class ExtraReceipt(StrictModel):
+    operation_id: str
+    learning_date: str
+    due_target: int
+    new_target: int
+
+
+class ExtraResult(StrictModel):
+    receipt: ExtraReceipt
+    replayed: bool
+    state: PracticeState | None
+
+
+class OpenPhrasePractice(StrictModel):
+    phrase_id: str = Field(min_length=1, max_length=100)

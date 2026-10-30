@@ -163,3 +163,18 @@ it('cancels old-phrase playback when a conflict reconciles to another card', asy
   expect(session.practice.view.value.card?.view_token).toBe('b')
   expect(media.stopPlayback).toHaveBeenCalled()
 })
+
+it('Stop retains the finishing take and cancels playback before leaving the card', async () => {
+  const session = usePracticeSession()
+  session.practice.view.value = openedState(state({ ...card('a', false), mode: 'extra' }))
+  media.capture.capturing.value = true
+  let left = false
+  const stopping = session.leave().then(() => (left = true))
+  await Promise.resolve()
+  expect(left).toBe(false)
+  media.capture.finish()
+  await stopping
+  expect(media.capture.processing.value).toBe(false)
+  expect(media.stopPlayback).toHaveBeenCalled()
+  expect(api).not.toHaveBeenCalled()
+})

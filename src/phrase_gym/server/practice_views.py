@@ -3,11 +3,10 @@ import random
 import sqlite3
 from uuid import uuid4
 
+from phrase_gym.server.contracts import PracticeMode
 from phrase_gym.server.import_contracts import Cue
 from phrase_gym.server.practice_contracts import CardAnswer, PracticeCard, ViewAction
 from phrase_gym.server.recording_views import view_recordings
-
-REGULAR_ORIGINS = ("daily", "extra")
 
 
 class PracticeConflictError(ValueError):
@@ -18,8 +17,27 @@ class StaleViewError(PracticeConflictError):
     pass
 
 
+class UnknownLessonError(KeyError):
+    pass
+
+
+def require_lesson(connection: sqlite3.Connection, lesson_id: str | None) -> None:
+    if (
+        lesson_id
+        and not connection.execute(
+            "SELECT 1 FROM lessons WHERE id=?",
+            (lesson_id,),
+        ).fetchone()
+    ):
+        raise UnknownLessonError(lesson_id)
+
+
 def load_view(connection: sqlite3.Connection) -> sqlite3.Row | None:
     return connection.execute("SELECT * FROM current_view WHERE id=1").fetchone()
+
+
+def view_mode(view: sqlite3.Row) -> PracticeMode:
+    return "practice" if view["practice"] else view["origin"]
 
 
 def start_traversal(
@@ -30,8 +48,8 @@ def start_traversal(
 ) -> None:
     connection.execute(
         "INSERT OR REPLACE INTO current_view (id, traversal_id, learning_date, origin, "
-        "lesson_id, skipped_json, phrase_id, view_token, kind, revealed, cue_index, "
-        "hint_index, operations_json) VALUES (1,?,?,?,?,'[]',NULL,NULL,NULL,0,NULL,NULL,'{}')",
+        "lesson_id, skipped_json, phrase_id, view_token, kind, practice, revealed, cue_index, "
+        "hint_index, operations_json) VALUES (1,?,?,?,?,'[]',NULL,NULL,NULL,0,0,NULL,NULL,'{}')",
         (str(uuid4()), day, origin, lesson_id),
     )
 
@@ -46,6 +64,8 @@ def show_phrase(
     phrase: sqlite3.Row,
     kind: str,
     rng: random.Random,
+    *,
+    practice: bool = False,
 ) -> None:
     cue_index = None
     if kind == "recall":
@@ -53,16 +73,16 @@ def show_phrase(
         connection.execute("UPDATE phrases SET last_cue=? WHERE id=?", (cue_index, phrase["id"]))
     # Every appearance gets a fresh token, even when the same phrase is shown again.
     connection.execute(
-        "UPDATE current_view SET phrase_id=?, view_token=?, kind=?, revealed=?, cue_index=?, "
-        "hint_index=NULL, operations_json='{}' WHERE id=1",
-        (phrase["id"], str(uuid4()), kind, int(kind == "first_study"), cue_index),
+        "UPDATE current_view SET phrase_id=?, view_token=?, kind=?, practice=?, revealed=?, "
+        "cue_index=?, hint_index=NULL, operations_json='{}' WHERE id=1",
+        (phrase["id"], str(uuid4()), kind, int(practice), int(kind == "first_study"), cue_index),
     )
 
 
 def clear_phrase(connection: sqlite3.Connection) -> None:
     connection.execute(
-        "UPDATE current_view SET phrase_id=NULL, view_token=NULL, kind=NULL, revealed=0, "
-        "cue_index=NULL, hint_index=NULL, operations_json='{}' WHERE id=1",
+        "UPDATE current_view SET phrase_id=NULL, view_token=NULL, kind=NULL, practice=0, "
+        "revealed=0, cue_index=NULL, hint_index=NULL, operations_json='{}' WHERE id=1",
     )
 
 
@@ -107,7 +127,7 @@ def practice_card(
     return PracticeCard(
         view_token=view["view_token"],
         phrase_id=phrase["id"],
-        mode=view["origin"],
+        mode=view_mode(view),
         kind=view["kind"],
         revealed=revealed,
         cue=Cue(**cues[view["cue_index"]]) if view["cue_index"] is not None else None,

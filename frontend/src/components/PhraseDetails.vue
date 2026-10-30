@@ -11,7 +11,7 @@ const props = defineProps<{
   play: (url: string) => Promise<void>
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
 }>()
-const emit = defineEmits<{ back: []; remove: [DeletionTarget] }>()
+const emit = defineEmits<{ back: []; remove: [DeletionTarget]; practice: [phraseId: string] }>()
 const phrase = ref<PhraseDetails | null>(null)
 const explained = ref(false)
 const error = ref('')
@@ -37,6 +37,9 @@ onMounted(async () => {
         Also accepted: {{ phrase.accepted_variants.join('; ') }}
       </p>
       <div class="row-actions">
+        <button class="primary" :disabled="disabled" @click="emit('practice', phrase.id)">
+          Practice
+        </button>
         <button :aria-expanded="explained" @click="explained = !explained">Details</button>
         <button :disabled="disabled" @click="play(phrase.reference_url)">▶ Phrase</button>
       </div>

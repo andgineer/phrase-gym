@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = "4"
+SCHEMA_VERSION = "5"
 DATABASE_NAME = "phrase-gym.sqlite3"
 SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -60,8 +60,8 @@ CREATE TABLE current_view (
   id INTEGER PRIMARY KEY CHECK(id=1), traversal_id TEXT NOT NULL,
   learning_date TEXT NOT NULL, origin TEXT NOT NULL, lesson_id TEXT,
   skipped_json TEXT NOT NULL, phrase_id TEXT, view_token TEXT, kind TEXT,
-  revealed INTEGER NOT NULL, cue_index INTEGER, hint_index INTEGER,
-  operations_json TEXT NOT NULL
+  practice INTEGER NOT NULL, revealed INTEGER NOT NULL, cue_index INTEGER,
+  hint_index INTEGER, operations_json TEXT NOT NULL
 );
 CREATE TABLE deleted_phrases (id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL);
 CREATE TABLE cleanup_paths (

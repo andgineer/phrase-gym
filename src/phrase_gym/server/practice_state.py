@@ -21,9 +21,15 @@ def _message(
     ).fetchall()
     if not phrases:
         return "No phrases in this lesson." if lesson else "Add your first phrase batch to begin."
-    completed = progress.due_completed + progress.new_completed
-    finished = "Today's Daily practice is complete." if completed else "Nothing waiting today."
     summary = schedule_summary(connection, phrases, now)
+    if view["origin"] == "extra":
+        waiting = (summary.due_count and progress.due_allowance) or (
+            summary.new_count and progress.new_allowance
+        )
+        finished = "Today's Extra practice is complete." if waiting else "Nothing waiting today."
+    else:
+        completed = progress.due_completed + progress.new_completed
+        finished = "Today's Daily practice is complete." if completed else "Nothing waiting today."
     if summary.due_count or summary.new_count or not summary.next_due:
         return finished
     return f"{finished} Next due: {summary.next_due}."

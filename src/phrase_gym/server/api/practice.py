@@ -4,17 +4,22 @@ from contextlib import contextmanager
 from fastapi import APIRouter, HTTPException
 
 from phrase_gym.server.completion import PracticeCompletion
-from phrase_gym.server.daily import DailyPractice, UnknownLessonError
+from phrase_gym.server.daily import DailyPractice
+from phrase_gym.server.extra import ExtraPractice
+from phrase_gym.server.phrase_practice import PhrasePractice, UnknownPhraseError
 from phrase_gym.server.practice_contracts import (
     CompletionRequest,
     CompletionResult,
+    ExtraResult,
     OpenDaily,
+    OpenExtra,
+    OpenPhrasePractice,
     PracticeCard,
     PracticeState,
     ViewAction,
     ViewOperation,
 )
-from phrase_gym.server.practice_views import PracticeConflictError
+from phrase_gym.server.practice_views import PracticeConflictError, UnknownLessonError
 from phrase_gym.server.view_actions import ViewActions
 
 
@@ -24,10 +29,16 @@ def conflicts() -> Iterator[None]:
         yield
     except PracticeConflictError as error:
         raise HTTPException(409, str(error)) from error
+    except UnknownLessonError as error:
+        raise HTTPException(404, "Lesson not found") from error
+    except UnknownPhraseError as error:
+        raise HTTPException(404, "Phrase not found") from error
 
 
 def practice_routes(
     daily: DailyPractice,
+    extra: ExtraPractice,
+    phrase: PhrasePractice,
     actions: ViewActions,
     completion: PracticeCompletion,
 ) -> APIRouter:
@@ -35,10 +46,18 @@ def practice_routes(
 
     @router.post("/daily")
     def open_daily(request: OpenDaily) -> PracticeState:
-        try:
+        with conflicts():
             return daily.open(request.lesson_id)
-        except UnknownLessonError as error:
-            raise HTTPException(404, "Lesson not found") from error
+
+    @router.post("/extra")
+    def open_extra(request: OpenExtra) -> ExtraResult:
+        with conflicts():
+            return extra.open(request)
+
+    @router.post("/phrase")
+    def open_phrase(request: OpenPhrasePractice) -> PracticeState:
+        with conflicts():
+            return phrase.open(request.phrase_id)
 
     @router.post("/reveal")
     def reveal(request: ViewAction) -> PracticeCard:

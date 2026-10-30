@@ -9,7 +9,9 @@ vi.mock('../src/api', async (importOriginal) => ({
   api: vi.fn(),
 }))
 
-beforeEach(() => vi.mocked(api).mockReset())
+beforeEach(() => {
+  vi.mocked(api).mockReset()
+})
 
 const progress = { due_completed: 3, due_allowance: 20, new_completed: 0, new_allowance: 5 }
 function card(token: string, changes: Partial<Card> = {}): Card {

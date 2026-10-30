@@ -343,6 +343,64 @@
         "title": "DeletionResult",
         "type": "object"
       },
+      "ExtraReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "due_target": {
+            "title": "Due Target",
+            "type": "integer"
+          },
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "new_target": {
+            "title": "New Target",
+            "type": "integer"
+          },
+          "operation_id": {
+            "title": "Operation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id",
+          "learning_date",
+          "due_target",
+          "new_target"
+        ],
+        "title": "ExtraReceipt",
+        "type": "object"
+      },
+      "ExtraResult": {
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/ExtraReceipt"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "replayed",
+          "state"
+        ],
+        "title": "ExtraResult",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -674,6 +732,51 @@
           }
         },
         "title": "OpenDaily",
+        "type": "object"
+      },
+      "OpenExtra": {
+        "additionalProperties": false,
+        "properties": {
+          "lesson_id": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
+          "operation_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Operation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation_id"
+        ],
+        "title": "OpenExtra",
+        "type": "object"
+      },
+      "OpenPhrasePractice": {
+        "additionalProperties": false,
+        "properties": {
+          "phrase_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Phrase Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phrase_id"
+        ],
+        "title": "OpenPhrasePractice",
         "type": "object"
       },
       "PhraseDetails": {
@@ -2376,6 +2479,44 @@
         "summary": "Open Daily"
       }
     },
+    "/api/practice/extra": {
+      "post": {
+        "operationId": "open_extra_api_practice_extra_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenExtra"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Extra"
+      }
+    },
     "/api/practice/hint": {
       "post": {
         "operationId": "hint_api_practice_hint_post",
@@ -2412,6 +2553,44 @@
           }
         },
         "summary": "Hint"
+      }
+    },
+    "/api/practice/phrase": {
+      "post": {
+        "operationId": "open_phrase_api_practice_phrase_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenPhrasePractice"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Phrase"
       }
     },
     "/api/practice/reveal": {

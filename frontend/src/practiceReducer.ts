@@ -1,4 +1,11 @@
-import type { Card, CompletionResult, Outcome, PracticeState, Progress } from './studyTypes'
+import type {
+  Card,
+  CompletionResult,
+  ExtraResult,
+  Outcome,
+  PracticeState,
+  Progress,
+} from './studyTypes'
 
 export type PracticeView = {
   card: Card | null
@@ -6,6 +13,7 @@ export type PracticeView = {
   message: string
   detailsOpen: boolean
 }
+export type PendingExtra = { operation_id: string; lesson_id: string | null }
 export type PendingCompletion = {
   completion_id: string
   view_token: string
@@ -60,6 +68,12 @@ export function completedPractice(
     view.card?.view_token !== pending.view_token
   )
     return { view, reconcile: true }
+  return { view: openedState(result.state), reconcile: false }
+}
+
+// A replayed Extra only acknowledges that press; the current view may have moved on since.
+export function extendedPractice(view: PracticeView, result: ExtraResult): CompletionStep {
+  if (result.replayed || !result.state) return { view, reconcile: true }
   return { view: openedState(result.state), reconcile: false }
 }
 
