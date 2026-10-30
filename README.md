@@ -6,7 +6,7 @@
 |-------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/phrase\_gym/\_\_about\_\_.py            |        1 |        0 |    100% |           |
 | src/phrase\_gym/coach/bounded\_process.py   |       46 |        3 |     93% | 28, 79-80 |
-| src/phrase\_gym/coach/main.py               |       51 |       27 |     47% |39-47, 51, 59-68, 72-83 |
+| src/phrase\_gym/coach/main.py               |       59 |       21 |     64% |39-47, 61-62, 69, 76-77, 82-93 |
 | src/phrase\_gym/coach/speech.py             |       87 |       10 |     89% |51-52, 101, 117, 123, 138, 161-162, 168-169 |
 | src/phrase\_gym/server/api/coach.py         |       25 |        3 |     88% | 23, 31-32 |
 | src/phrase\_gym/server/api/deletion.py      |       18 |        0 |    100% |           |
@@ -16,27 +16,28 @@
 | src/phrase\_gym/server/api/review.py        |       21 |       11 |     48% |12-15, 19-30 |
 | src/phrase\_gym/server/api/settings.py      |       15 |        0 |    100% |           |
 | src/phrase\_gym/server/api/study.py         |       24 |        6 |     75% |23-24, 31-34 |
-| src/phrase\_gym/server/app.py               |       56 |        0 |    100% |           |
+| src/phrase\_gym/server/app.py               |       55 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py          |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
-| src/phrase\_gym/server/contracts.py         |       41 |        0 |    100% |           |
-| src/phrase\_gym/server/deletion.py          |       30 |        0 |    100% |           |
+| src/phrase\_gym/server/contracts.py         |       49 |        0 |    100% |           |
+| src/phrase\_gym/server/deletion.py          |       29 |        0 |    100% |           |
 | src/phrase\_gym/server/exposure.py          |        6 |        0 |    100% |           |
-| src/phrase\_gym/server/file\_cleanup.py     |       33 |        0 |    100% |           |
-| src/phrase\_gym/server/import\_contracts.py |       89 |        4 |     96% |22, 49, 56, 63 |
+| src/phrase\_gym/server/file\_cleanup.py     |       37 |        0 |    100% |           |
+| src/phrase\_gym/server/import\_contracts.py |       91 |        4 |     96% |24, 51, 58, 65 |
 | src/phrase\_gym/server/importer.py          |       85 |        6 |     93% |36, 63, 92, 107, 111, 116 |
 | src/phrase\_gym/server/lesson\_choices.py   |       27 |        0 |    100% |           |
-| src/phrase\_gym/server/library.py           |       40 |        0 |    100% |           |
+| src/phrase\_gym/server/library.py           |       38 |        0 |    100% |           |
 | src/phrase\_gym/server/main.py              |       46 |        7 |     85% |17-21, 25, 56 |
+| src/phrase\_gym/server/phrase\_counts.py    |       11 |        0 |    100% |           |
 | src/phrase\_gym/server/publication.py       |       56 |        0 |    100% |           |
-| src/phrase\_gym/server/recording\_store.py  |       40 |        1 |     98% |        31 |
-| src/phrase\_gym/server/reference\_audio.py  |       42 |        3 |     93% |51, 53, 55 |
+| src/phrase\_gym/server/recording\_store.py  |       42 |        2 |     95% |    31, 59 |
+| src/phrase\_gym/server/reference\_audio.py  |       42 |        3 |     93% |52, 54, 56 |
 | src/phrase\_gym/server/scheduling.py        |       44 |        3 |     93% |73, 79, 88 |
 | src/phrase\_gym/server/search\_terms.py     |       10 |        0 |    100% |           |
 | src/phrase\_gym/server/settings.py          |       18 |        0 |    100% |           |
 | src/phrase\_gym/server/storage.py           |       91 |        2 |     98% |  124, 176 |
 | src/phrase\_gym/server/study.py             |       99 |        4 |     96% |130, 150, 172, 183 |
-| src/phrase\_gym/server/study\_views.py      |       25 |        0 |    100% |           |
-| **TOTAL**                                   | **1326** |  **106** | **92%** |           |
+| src/phrase\_gym/server/study\_views.py      |       23 |        0 |    100% |           |
+| **TOTAL**                                   | **1355** |  **101** | **93%** |           |
 
 
 ## Setup coverage badge
