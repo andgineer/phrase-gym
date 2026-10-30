@@ -592,8 +592,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/phrase_gym/server/app.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
-<span class="normal">32</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
@@ -638,7 +637,9 @@
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
     <span class="n">remote_origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_TAILSCALE_ORIGIN"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
     <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_DATA_DIR"</span><span class="p">,</span> <span class="s2">".data"</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
@@ -651,20 +652,21 @@
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">import_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">coach_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">recording_routes</span><span class="p">(</span><span class="n">RecordingStore</span><span class="p">(</span><span class="n">database</span><span class="p">)))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">CurrentPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">daily</span> <span class="o">=</span> <span class="n">DailyPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="n">ExtraPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">phrase_practice</span> <span class="o">=</span> <span class="n">PhrasePractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">view_actions</span> <span class="o">=</span> <span class="n">ViewActions</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">completion</span> <span class="o">=</span> <span class="n">PracticeCompletion</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span>
-        <span class="n">practice_routes</span><span class="p">(</span>
+        <span class="n">practice_entry_routes</span><span class="p">(</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current</span><span class="p">,</span>
             <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">daily</span><span class="p">,</span>
             <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span>
             <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">phrase_practice</span><span class="p">,</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">view_actions</span><span class="p">,</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">completion</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">practice_card_routes</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">view_actions</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">completion</span><span class="p">))</span>
     <span class="n">library</span> <span class="o">=</span> <span class="n">LibraryService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">lessons</span> <span class="o">=</span> <span class="n">LessonChoices</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
     <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">lessons</span> <span class="o">=</span> <span class="n">lessons</span>
