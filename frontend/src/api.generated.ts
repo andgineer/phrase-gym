@@ -4,57 +4,6 @@
  */
 
 export interface paths {
-    "/api/attempts/{attempt_id}/complete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Complete Study */
-        post: operations["complete_study_api_attempts__attempt_id__complete_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/attempts/{attempt_id}/reveal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reveal */
-        post: operations["reveal_api_attempts__attempt_id__reveal_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/attempts/{attempt_id}/review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Review */
-        post: operations["review_api_attempts__attempt_id__review_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/cleanup": {
         parameters: {
             query?: never;
@@ -261,23 +210,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/phrases/{phrase_id}/practise": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Practise */
-        post: operations["practise_api_phrases__phrase_id__practise_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/phrases/{phrase_id}/recordings": {
         parameters: {
             query?: never;
@@ -306,6 +238,91 @@ export interface paths {
         get: operations["reference_audio_api_phrases__phrase_id__reference_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete */
+        post: operations["complete_api_practice_complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/cue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** New Cue */
+        post: operations["new_cue_api_practice_cue_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Daily */
+        post: operations["open_daily_api_practice_daily_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/hint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hint */
+        post: operations["hint_api_practice_hint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal */
+        post: operations["reveal_api_practice_reveal_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -364,31 +381,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/study/current": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Current Study */
-        post: operations["current_study_api_study_current_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AttemptAction */
-        AttemptAction: {
-            /** Response Mode */
-            response_mode?: ("spoken" | "silent") | null;
+        /** CardAnswer */
+        CardAnswer: {
+            /** Accepted Variants */
+            accepted_variants: string[];
+            /** Detailed Explanation */
+            detailed_explanation: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Reference Url */
+            reference_url: string;
+            /** Text */
+            text: string;
+            /** Usage Contexts */
+            usage_contexts: string[];
         };
         /** CleanupStatus */
         CleanupStatus: {
@@ -423,10 +433,51 @@ export interface components {
             /** Package Id */
             package_id: string;
         };
-        /** CompleteStudy */
-        CompleteStudy: {
-            /** Operation Id */
-            operation_id: string;
+        /** CompletionReceipt */
+        CompletionReceipt: {
+            /** Completion Id */
+            completion_id: string;
+            /** Fsrs Updated */
+            fsrs_updated: boolean;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "first_study" | "recall";
+            /** Learning Date */
+            learning_date: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "daily" | "extra" | "practice";
+            /** Phrase Id */
+            phrase_id: string;
+            /** Rating */
+            rating: ("not_yet" | "effort" | "got_it") | null;
+            /** Skipped */
+            skipped: boolean;
+        };
+        /** CompletionRequest */
+        CompletionRequest: {
+            /** Completion Id */
+            completion_id: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "studied" | "not_yet" | "effort" | "got_it" | "skipped";
+            /** Phrase Id */
+            phrase_id: string;
+            /** View Token */
+            view_token: string;
+        };
+        /** CompletionResult */
+        CompletionResult: {
+            receipt: components["schemas"]["CompletionReceipt"];
+            /** Replayed */
+            replayed: boolean;
+            state: components["schemas"]["PracticeState"] | null;
         };
         /** Cue */
         Cue: {
@@ -513,6 +564,8 @@ export interface components {
             id: string;
             /** New Count */
             new_count: number;
+            /** Next Due */
+            next_due: string | null;
             /** Phrase Count */
             phrase_count: number;
             /** Source Label */
@@ -527,6 +580,11 @@ export interface components {
             items: components["schemas"]["LessonChoice"][];
             /** Next Offset */
             next_offset: number | null;
+        };
+        /** OpenDaily */
+        OpenDaily: {
+            /** Lesson Id */
+            lesson_id?: string | null;
         };
         /** PhraseDetails */
         PhraseDetails: {
@@ -651,14 +709,61 @@ export interface components {
             /** Usage Contexts */
             usage_contexts: string[];
         };
+        /** PracticeCard */
+        PracticeCard: {
+            answer: components["schemas"]["CardAnswer"] | null;
+            cue: components["schemas"]["Cue"] | null;
+            /** Hint */
+            hint: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "first_study" | "recall";
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "daily" | "extra" | "practice";
+            /** Other Cue Available */
+            other_cue_available: boolean;
+            /** Phrase Id */
+            phrase_id: string;
+            /** Recordings */
+            recordings: components["schemas"]["SavedRecording"][];
+            /** Revealed */
+            revealed: boolean;
+            /** View Token */
+            view_token: string;
+        };
         /** PracticeCounts */
         PracticeCounts: {
             /** Due Count */
             due_count: number;
             /** New Count */
             new_count: number;
+            /** Next Due */
+            next_due: string | null;
             /** Phrase Count */
             phrase_count: number;
+        };
+        /** PracticeProgress */
+        PracticeProgress: {
+            /** Due Allowance */
+            due_allowance: number;
+            /** Due Completed */
+            due_completed: number;
+            /** New Allowance */
+            new_allowance: number;
+            /** New Completed */
+            new_completed: number;
+        };
+        /** PracticeState */
+        PracticeState: {
+            card: components["schemas"]["PracticeCard"] | null;
+            /** Message */
+            message: string | null;
+            progress: components["schemas"]["PracticeProgress"];
         };
         /** RecordingPage */
         RecordingPage: {
@@ -680,8 +785,6 @@ export interface components {
         };
         /** RecordingUpload */
         RecordingUpload: {
-            /** Attempt Id */
-            attempt_id: string;
             /** Audio Base64 */
             audio_base64: string;
             /** Capture Settings */
@@ -692,36 +795,34 @@ export interface components {
             captured_at: string;
             /** Complete */
             complete: boolean;
+            cue?: components["schemas"]["Cue"] | null;
             /** Duration Ms */
             duration_ms?: number | null;
+            /** Hint */
+            hint?: string | null;
             /** Id */
             id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "first_study" | "recall";
             /** Mime Type */
             mime_type: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "daily" | "extra" | "practice";
             /** Phrase Id */
             phrase_id: string;
-        };
-        /** ReviewRequest */
-        ReviewRequest: {
-            /** Operation Id */
-            operation_id: string;
-            /**
-             * Rating
-             * @enum {string}
-             */
-            rating: "not_yet" | "with_effort" | "recalled";
-            /**
-             * Response Mode
-             * @enum {string}
-             */
-            response_mode: "spoken" | "silent";
+            /** View Token */
+            view_token: string;
         };
         /** SavedRecording */
         SavedRecording: {
             /** Answer */
             answer: string;
-            /** Attempt Id */
-            attempt_id: string;
             /** Byte Length */
             byte_length: number;
             /** Captured At */
@@ -735,6 +836,11 @@ export interface components {
             hint: string | null;
             /** Id */
             id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "first_study" | "recall";
             /** Learning Date */
             learning_date: string;
             /** Mime Type */
@@ -743,7 +849,7 @@ export interface components {
              * Mode
              * @enum {string}
              */
-            mode: "study" | "review" | "free";
+            mode: "daily" | "extra" | "practice";
             /** Url */
             url: string;
         };
@@ -754,6 +860,10 @@ export interface components {
              * @constant
              */
             card_language: "en";
+            /** Daily Due Limit */
+            daily_due_limit: number;
+            /** Daily New Limit */
+            daily_new_limit: number;
             /**
              * Help Language
              * @constant
@@ -767,80 +877,6 @@ export interface components {
              */
             native_language: "ru" | "en";
         };
-        /** StudyCard */
-        StudyCard: {
-            /** Accepted Variants */
-            accepted_variants: string[];
-            /** Attempt Id */
-            attempt_id: string;
-            cue?: components["schemas"]["Cue"] | null;
-            /** Cues */
-            cues: components["schemas"]["Cue"][];
-            /** Detailed Explanation */
-            detailed_explanation: string | null;
-            /** Explanation */
-            explanation: string;
-            /** Id */
-            id: string;
-            /** Item Id */
-            item_id: string;
-            /**
-             * Kind
-             * @default study
-             * @enum {string}
-             */
-            kind: "study" | "review" | "free";
-            /** Recordings */
-            recordings: components["schemas"]["SavedRecording"][];
-            /** Reference Url */
-            reference_url: string;
-            /**
-             * Revealed
-             * @default true
-             */
-            revealed: boolean;
-            /** Source Id */
-            source_id: string;
-            /** Source Label */
-            source_label: string;
-            /** Source Link */
-            source_link: string | null;
-            /** Text */
-            text: string;
-        };
-        /** StudyCompletion */
-        StudyCompletion: {
-            /** Attempt Id */
-            attempt_id: string;
-            /** Completed At */
-            completed_at: string;
-            /** Graded */
-            graded: boolean;
-        };
-        /** StudyResponse */
-        StudyResponse: {
-            card?: components["schemas"]["StudyCard"] | null;
-            /** Done */
-            done: boolean;
-            /**
-             * Due Count
-             * @default 0
-             */
-            due_count: number;
-            /** Message */
-            message?: string | null;
-            /**
-             * New Count
-             * @default 0
-             */
-            new_count: number;
-            /** Next Return */
-            next_return?: string | null;
-            /** Studied */
-            studied: number;
-            /** Total */
-            total: number;
-        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -849,6 +885,22 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** ViewAction */
+        ViewAction: {
+            /** Phrase Id */
+            phrase_id: string;
+            /** View Token */
+            view_token: string;
+        };
+        /** ViewOperation */
+        ViewOperation: {
+            /** Operation Id */
+            operation_id: string;
+            /** Phrase Id */
+            phrase_id: string;
+            /** View Token */
+            view_token: string;
         };
     };
     responses: never;
@@ -859,111 +911,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    complete_study_api_attempts__attempt_id__complete_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                attempt_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CompleteStudy"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyCompletion"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reveal_api_attempts__attempt_id__reveal_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                attempt_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AttemptAction"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyCard"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    review_api_attempts__attempt_id__review_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                attempt_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReviewRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyCompletion"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     cleanup_status_api_cleanup_get: {
         parameters: {
             query?: never;
@@ -1360,37 +1307,6 @@ export interface operations {
             };
         };
     };
-    practise_api_phrases__phrase_id__practise_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                phrase_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyCard"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     phrase_recordings_api_phrases__phrase_id__recordings_get: {
         parameters: {
             query?: {
@@ -1443,6 +1359,171 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_api_practice_complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompletionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompletionResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    new_cue_api_practice_cue_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewOperation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_daily_api_practice_daily_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenDaily"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hint_api_practice_hint_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewOperation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reveal_api_practice_reveal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeCard"];
                 };
             };
             /** @description Validation Error */
@@ -1569,26 +1650,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    current_study_api_study_current_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyResponse"];
                 };
             };
         };

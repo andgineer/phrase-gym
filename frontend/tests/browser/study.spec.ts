@@ -1,5 +1,9 @@
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
+import { phraseId, savedTakes } from './helpers'
+
+const openDaily = (page: import('@playwright/test').Page) =>
+  page.getByRole('button', { name: 'Daily', exact: true }).click()
 
 const cards = Array.from({ length: 5 }, (_, index) => ({
   item_id: `meeting-${index + 1}`,
@@ -146,6 +150,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await expect
     .poll(async () => ({
@@ -163,26 +168,27 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     )
     .toBeGreaterThan(1.1)
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
-  const saved = await page.evaluate(async () =>
-    (await fetch('/api/study/current', { method: 'POST' })).json(),
-  )
-  expect(saved.card.recordings[0].byte_length).toBeGreaterThan(4)
-  expect(saved.card.recordings[0].mime_type).toMatch(/^audio\//)
+  await expect(page.locator('article.study').getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  const recorded = 'This recording uses the browser encoder.'
+  await expect.poll(async () => (await savedTakes(page, recorded)).length).toBe(1)
+  const [saved] = await savedTakes(page, recorded)
+  expect(saved.byte_length).toBeGreaterThan(4)
+  expect(saved.mime_type).toMatch(/^audio\//)
   expect(
     await page.evaluate(
       () => (window as unknown as { __playedBlobBytes: Promise<number> }).__playedBlobBytes,
     ),
-  ).toBe(saved.card.recordings[0].byte_length)
+  ).toBe(saved.byte_length)
+  const reference = `/api/phrases/${await phraseId(page, recorded)}/reference`
   await expect
     .poll(() =>
       page.evaluate(() => (window as unknown as { __playedUrls?: string[] }).__playedUrls ?? []),
     )
-    .toEqual([expect.stringMatching(/^blob:/), expect.stringContaining(saved.card.reference_url)])
+    .toEqual([expect.stringMatching(/^blob:/), expect.stringContaining(reference)])
   const afterAutomatic = await page.evaluate(
     () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
   )
-  await page.getByRole('button', { name: 'Compare with reference' }).click()
+  await page.getByRole('button', { name: 'Compare', exact: true }).click()
   await expect
     .poll(() =>
       page.evaluate(
@@ -205,7 +211,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       { timeout: 15_000 },
     )
     .toBe(afterAutomatic + 2)
-  await page.getByRole('button', { name: 'Replay' }).click()
+  await page.getByRole('button', { name: '▶ Mine' }).click()
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -226,13 +232,13 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     )
     .toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toBeVisible()
+  await expect(page.getByText(/^Today's Daily practice is complete\./)).toBeVisible()
 })
 
 test('imports, retries, studies, and retains complete takes', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('Add your first phrase batch')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toHaveCount(0)
+  await expect(page.locator('article.study')).toHaveCount(0)
   await page.getByRole('button', { name: 'Add material' }).click()
   await page.getByLabel('Phrase package JSON').fill('{ bad json')
   await page.getByRole('button', { name: 'Import' }).click()
@@ -244,6 +250,8 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: 'Retry preparation' }).click()
   await expect(page.getByText('Added 5 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await expect(page.locator('article.study')).toHaveCount(0)
+  await openDaily(page)
   await expect(page.getByRole('heading', { name: "Let's get started." })).toBeVisible()
 
   let failSave = true
@@ -331,21 +339,20 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     ;(window as unknown as { __releaseTakeRace: () => void }).__releaseTakeRace()
     history.replaceState(null, '', '/')
   })
-  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Record a take' }).click()
-  await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.locator('article.study').getByText('Take 2', { exact: true })).toBeVisible()
+  const started = "Let's get started."
+  await expect.poll(async () => (await savedTakes(page, started)).length).toBe(1)
+  await openDaily(page)
+  const activeStudy = page.locator('article.study')
+  await expect(activeStudy.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await activeStudy.getByRole('button', { name: 'Record a take' }).click()
+  await activeStudy.getByRole('button', { name: 'Stop recording' }).click()
+  await expect.poll(async () => (await savedTakes(page, started)).length).toBe(2)
 
   await page.reload()
-  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
-  await expect(page.locator('article.study').getByText('Take 2', { exact: true })).toBeVisible()
-  const activeStudy = page.locator('article.study')
-  await expect(activeStudy.getByRole('button', { name: 'Replay', exact: true })).toHaveCount(2)
-  await expect(activeStudy.getByRole('button', { name: 'Compare with reference' })).toHaveCount(2)
-  const saved = await page.evaluate(async () =>
-    (await fetch('/api/study/current', { method: 'POST' })).json(),
-  )
-  expect(saved.card.recordings).toEqual(
+  await openDaily(page)
+  await expect(activeStudy.getByRole('heading', { name: started })).toBeVisible()
+  await expect(activeStudy.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  expect(await savedTakes(page, started)).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         mime_type: 'audio/webm;codecs=opus',
@@ -354,7 +361,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
       }),
     ]),
   )
-  await activeStudy.getByRole('button', { name: 'Compare with reference' }).first().click()
+  await activeStudy.getByRole('button', { name: 'Compare', exact: true }).click()
   const beforePause = await page.evaluate(
     () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
   )
@@ -384,7 +391,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     releaseCompletion = resolve
   })
   let completions = 0
-  await page.route('**/api/attempts/*/complete', async (route) => {
+  await page.route('**/api/practice/complete', async (route) => {
     completions++
     if (completions === 1) await completionHeld
     await route.continue()
@@ -393,7 +400,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     await expect(
       page.locator('article.study').getByRole('heading', { name: card.text }),
     ).toBeVisible()
-    await expect(page.getByText('This first meeting is ungraded.')).toBeVisible()
+    await expect(page.getByText('First meeting · no rating')).toBeVisible()
     await page.getByRole('button', { name: 'Next' }).click()
     if (index === 0) {
       await expect.poll(() => completions).toBe(1)
@@ -401,48 +408,36 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
       releaseCompletion()
     }
   }
-  await expect(page.getByRole('heading', { name: 'Today’s study is complete' })).toBeVisible()
+  await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
   expect(completions).toBe(cards.length)
-  await expect(page.getByText(/Next return:/)).toBeVisible()
-  await page.getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: "Open details: Let's get started." }).click()
   await expect(page.getByRole('button', { name: '▶ Mine' })).toHaveCount(2)
+  await page.getByRole('button', { name: '← Back' }).click()
   await page.request.post('/__test/clock/2026-11-01T10:00:00Z')
   await page.reload()
-  await expect(page.getByText('Independent recall')).toBeVisible()
+  await expect(page.locator('article.study')).toHaveCount(0)
+  await openDaily(page)
+  await expect(page.getByText('Use the useful expression in situation 1.')).toBeVisible()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Reveal answer' }).click()
+  await page.getByRole('button', { name: 'Show' }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
-  await page.getByRole('button', { name: 'With effort' }).click()
-  await expect(page.getByText('One supported repetition is available.')).toBeVisible()
-  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Effort' }).click()
   await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
-  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByLabel('Find a phrase').fill('walk me through')
   await page.getByRole('button', { name: 'Open details: Could you walk me through that?' }).click()
   await expect(page.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
-  await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
-  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find a phrase').fill('get back to you')
-  await page.getByRole('button', { name: /^Open details: I'll get back/ }).click()
-  await page.getByRole('button', { name: 'Practise freely' }).click()
-  await expect(page.getByText('Ungraded rehearsal')).toBeVisible()
-  await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Practise freely' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await page.getByLabel('Learning timezone').fill('Europe/London')
   await page.getByRole('button', { name: 'Save settings' }).click()
   await expect(page.getByText('Settings saved.')).toBeVisible()
-  await page.getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByLabel('Find a phrase').fill('started')
   await expect(page.getByRole('button', { name: /^Open details/ })).toHaveCount(1)
-  await page.getByRole('button', { name: "Open details: Let's get started." }).click()
-  await page.getByRole('button', { name: 'Practise freely' }).click()
-  await expect(page.getByText('Ungraded rehearsal')).toBeVisible()
-  await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByText('Independent recall')).toBeVisible()
+  await openDaily(page)
+  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
 })
 
 test('restored practice card keeps the original layout and microphone interactions', async ({
@@ -460,11 +455,10 @@ test('restored practice card keeps the original layout and microphone interactio
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await openDaily(page)
   const card = page.locator('article.practice-card')
   await expect(card.getByRole('heading', { name: cards[1].text })).toBeVisible()
-  await expect(card.locator('.practice-prompt')).toHaveText(
-    'Use the useful expression in situation 2.',
-  )
+  await expect(page.getByTestId('mode-line')).toHaveText('Daily · 1 / 5 new')
   await expect(card.locator('.answer-help')).toHaveText(
     'A natural phrase for an ordinary conversation.',
   )
@@ -482,7 +476,7 @@ test('restored practice card keeps the original layout and microphone interactio
     contentType: 'image/png',
   })
 
-  await card.getByRole('button', { name: '▶ Reference' }).click()
+  await card.getByRole('button', { name: '▶ Phrase' }).click()
   await expect(card.getByRole('button', { name: 'Stop playback' })).toBeVisible()
   await card.getByRole('button', { name: 'Stop playback' }).click()
   await expect(card.getByRole('button', { name: 'Record a take' })).toBeVisible()
@@ -604,19 +598,20 @@ test('playback rejection clears the current control without stopping a newer pla
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '▶ Mine' })).toBeVisible()
 
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = async () => {
       throw new Error('blocked')
     }
   })
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: '▶ Phrase' }).click()
   await expect(page.getByRole('alert')).toContainText('Audio playback failed')
   await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
-  await page.getByRole('button', { name: 'Compare with reference' }).click()
+  await page.getByRole('button', { name: 'Compare', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Audio playback failed')
   await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
 
@@ -632,8 +627,8 @@ test('playback rejection clears the current control without stopping a newer pla
       return Promise.resolve()
     }
   })
-  await page.getByRole('button', { name: '▶ Reference' }).click()
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: '▶ Phrase' }).click()
+  await page.getByRole('button', { name: '▶ Phrase' }).click()
   await page.evaluate(() =>
     (window as unknown as { __rejectOldPlay: () => void }).__rejectOldPlay(),
   )
@@ -657,12 +652,13 @@ test('import modal traps keyboard focus and finishes recording before opening', 
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await expect(page.getByRole('button', { name: 'Stop recording' })).toBeVisible()
   await opener.click()
   const dialog = page.getByRole('dialog', { name: 'Add material' })
   await expect(dialog).toBeVisible()
-  await expect(page.getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('▶ Mine', { exact: true })).toBeVisible()
   expect(
     await page.evaluate(
       () =>
@@ -695,6 +691,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
   await page.getByRole('button', { name: 'Import' }).click()
   await expect(page.getByText('Added 1 phrases.')).toBeVisible()
   await page.getByRole('button', { name: 'Close' }).click()
+  await openDaily(page)
 
   await page.evaluate(() => {
     class SilentAudio {
@@ -730,7 +727,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
   })
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.getByText('Finishing and saving the complete take…')).toBeVisible()
+  await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
   await expect
     .poll(() =>
       page.evaluate(
@@ -752,8 +749,8 @@ test('automatic comparison can be stopped while upload is pending and late end c
     ),
   ).toBe(1)
   releaseUpload()
-  await expect(page.locator('article.study').getByText('Take 1', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await expect(page.getByText('1 take(s) waiting to save.')).toHaveCount(0)
+  await page.getByRole('button', { name: '▶ Phrase' }).click()
   await expect
     .poll(() =>
       page.evaluate(

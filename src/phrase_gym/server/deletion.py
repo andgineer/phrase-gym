@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 from phrase_gym.server.contracts import DeletionResult
 from phrase_gym.server.file_cleanup import FileCleanup
+from phrase_gym.server.practice_views import clear_phrase, load_view
 from phrase_gym.server.storage import Database
 
 
@@ -39,8 +40,10 @@ class PhraseDeletion:
                 "INSERT OR IGNORE INTO cleanup_paths (path, phrase_id, recorded_at) VALUES (?,?,?)",
                 [(path, phrase_id, instant) for path in paths],
             )
-            for table in ("reviews", "recordings", "attempts"):
-                connection.execute(f"DELETE FROM {table} WHERE phrase_id=?", (phrase_id,))  # noqa: S608
+            connection.execute("DELETE FROM recordings WHERE phrase_id=?", (phrase_id,))
+            if (view := load_view(connection)) and view["phrase_id"] == phrase_id:
+                clear_phrase(connection)
+            # Completed practice keeps its wording snapshot; the log's phrase reference is nulled.
             connection.execute("DELETE FROM phrases WHERE id=?", (phrase_id,))
             connection.execute(
                 "INSERT INTO deleted_phrases (id, deleted_at) VALUES (?, ?)",

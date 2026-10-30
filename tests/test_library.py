@@ -1,17 +1,22 @@
 import sqlite3
 import time
 from contextlib import closing
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
-from phrase_gym.server.storage import Database
-from phrase_gym.server.study import StudyService
 from tests.phrase_packages import lesson, make_package, phrase, publish, upload_take
+from tests.practice_client import Practice
 
-TABLES = ("phrases", "lessons", "attempts", "reviews", "operations", "recordings")
+TABLES = (
+    "phrases",
+    "lessons",
+    "practice_log",
+    "current_view",
+    "operations",
+    "recordings",
+)
 
 
 def snapshot(path: Path) -> dict[str, list[tuple[object, ...]]]:
@@ -119,12 +124,10 @@ def test_lesson_choices_are_paged_searchable_and_counted(
             ]
         ),
     )
-    instant = datetime(2026, 10, 28, 10, tzinfo=UTC)
-    client.app.state.lessons.clock = lambda: instant
-    study = StudyService(Database(tmp_path), lambda: instant)
-    card = study.current().card
-    assert card and card.text == "Complete phrase number 1."
-    study.complete(card.attempt_id, str(uuid4()))
+    practice = Practice(client)
+    card = practice.card()
+    assert card["answer"]["text"] == "Complete phrase number 1."
+    practice.finish(card, "studied")
 
     first = client.get("/api/lessons", params={"limit": 2}).json()
     assert [item["title"] for item in first["items"]] == ["Greetings", "Small talk"]
@@ -136,8 +139,15 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         "phrase_count": 2,
         "due_count": 0,
         "new_count": 1,
+        "next_due": "2026-10-29",
     }
-    assert first["all_lessons"] == {"phrase_count": 4, "due_count": 0, "new_count": 3}
+    assert first["all_lessons"] == {
+        "phrase_count": 4,
+        "due_count": 0,
+        "new_count": 3,
+        "next_due": "2026-10-29",
+    }
+    assert first["items"][1]["next_due"] is None
     rest = client.get("/api/lessons", params={"offset": 2, "limit": 2}).json()
     assert [item["title"] for item in rest["items"]] == ["Meetings"]
     assert rest["next_offset"] is None
@@ -146,9 +156,10 @@ def test_lesson_choices_are_paged_searchable_and_counted(
     )
     assert client.get("/api/lessons", params={"query": "nothing"}).json()["items"] == []
 
-    instant += timedelta(days=1)
+    practice.later(days=1)
     tomorrow = client.get("/api/lessons").json()
     assert tomorrow["items"][0]["due_count"] == 1
+    assert tomorrow["items"][0]["next_due"] is None
     assert tomorrow["all_lessons"]["due_count"] == 1
     assert client.get("/api/lessons", params={"limit": 0}).status_code == 422
     assert client.get("/api/lessons", params={"limit": 101}).status_code == 422
@@ -166,18 +177,17 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
         accepted_variants=["So far so good."],
     )
     publish(client, make_package(lessons=[lesson("small-talk", "Small talk", [details_phrase])]))
-    instant = datetime(2026, 10, 28, 10, tzinfo=UTC)
-    study = StudyService(Database(tmp_path), lambda: instant)
-    card = study.current().card
-    assert card
-    before = client.get(f"/api/phrases/{card.id}").json()
+    practice = Practice(client)
+    card = practice.card()
+    phrase_id = card["phrase_id"]
+    before = client.get(f"/api/phrases/{phrase_id}").json()
     assert before["studied"] is False and before["due_date"] is None
     take_ids = [str(uuid4()) for _ in range(3)]
     for take_id in take_ids:
-        assert upload_take(client, card.model_dump(), take_id).status_code == 200
-    study.complete(card.attempt_id, str(uuid4()))
+        assert upload_take(client, card, take_id).status_code == 200
+    practice.finish(card, "studied")
 
-    details = client.get(f"/api/phrases/{card.id}").json()
+    details = client.get(f"/api/phrases/{phrase_id}").json()
     assert details | {"id": "", "lesson_id": ""} == {
         "id": "",
         "lesson_id": "",
@@ -189,16 +199,16 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
         "lesson_title": "Small talk",
         "source_label": "Course · Meetings",
         "source_link": "https://example.test/meetings",
-        "reference_url": f"/api/phrases/{card.id}/reference",
+        "reference_url": f"/api/phrases/{phrase_id}/reference",
         "studied": True,
         "due_date": "2026-10-29",
     }
     assert client.get(details["reference_url"]).content.startswith(b"RIFF")
-    page = client.get(f"/api/phrases/{card.id}/recordings", params={"limit": 2}).json()
+    page = client.get(f"/api/phrases/{phrase_id}/recordings", params={"limit": 2}).json()
     assert len(page["items"]) == 2 and page["next_offset"] == 2
-    assert page["items"][0]["mode"] == "study"
+    assert (page["items"][0]["mode"], page["items"][0]["kind"]) == ("daily", "first_study")
     assert page["items"][0]["answer"] == "So far, so good."
-    more = client.get(f"/api/phrases/{card.id}/recordings", params={"offset": 2}).json()
+    more = client.get(f"/api/phrases/{phrase_id}/recordings", params={"offset": 2}).json()
     assert len(more["items"]) == 1 and more["next_offset"] is None
     assert {item["id"] for item in page["items"] + more["items"]} == set(take_ids)
     assert client.get("/api/phrases/missing-phrase").status_code == 404
@@ -207,30 +217,27 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
 
 def test_lookup_makes_no_scheduling_writes(client: TestClient, tmp_path: Path) -> None:
     publish(client, make_package())
-    instant = datetime(2026, 10, 28, 10, tzinfo=UTC)
-    study = StudyService(Database(tmp_path), lambda: instant)
-    first = study.current().card
-    assert first
-    study.complete(first.attempt_id, str(uuid4()))
-    instant += timedelta(days=1)
-    review = study.current().card
-    assert review and review.kind == "review"
+    practice = Practice(client)
+    practice.study_all_new()
+    practice.later(days=1)
+    review = practice.card()
+    assert review["kind"] == "recall"
     before = snapshot(tmp_path)
     client.get("/api/lessons", params={"query": "meet"})
     client.get("/api/phrases", params={"query": "phrase number"})
-    client.get(f"/api/phrases/{review.id}")
-    client.get(f"/api/phrases/{review.id}/recordings")
-    client.get(f"/api/phrases/{review.id}/reference")
+    client.get(f"/api/phrases/{review['phrase_id']}")
+    client.get(f"/api/phrases/{review['phrase_id']}/recordings")
+    client.get(f"/api/phrases/{review['phrase_id']}/reference")
     assert snapshot(tmp_path) == before
-    assert study.current().card.attempt_id == review.attempt_id
+    assert practice.card() == review
 
 
 def test_recording_dates_use_the_learning_timezone(client: TestClient) -> None:
     publish(client, make_package())
-    card = client.post("/api/study/current").json()["card"]
+    card = Practice(client).card()
     late = upload_take(client, card, str(uuid4()), captured_at="2026-10-28T23:30:00+00:00")
     assert late.status_code == 200
     naive = upload_take(client, card, str(uuid4()), captured_at="2026-10-28T23:30:00")
     assert naive.status_code == 422
-    item = client.get(f"/api/phrases/{card['id']}/recordings").json()["items"][0]
+    item = client.get(f"/api/phrases/{card['phrase_id']}/recordings").json()["items"][0]
     assert item["learning_date"] == "2026-10-29"

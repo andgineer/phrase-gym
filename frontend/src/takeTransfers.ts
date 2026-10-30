@@ -49,7 +49,11 @@ async function flush() {
           const body: Upload = {
             id: snapshot.id,
             phrase_id: snapshot.phrase_id,
-            attempt_id: snapshot.attempt_id,
+            view_token: snapshot.view_token,
+            mode: snapshot.mode,
+            kind: snapshot.kind,
+            cue: snapshot.cue,
+            hint: snapshot.hint,
             captured_at: snapshot.captured_at,
             mime_type: snapshot.mime_type,
             duration_ms: snapshot.duration_ms,

@@ -11,14 +11,7 @@ from fastapi.testclient import TestClient
 from phrase_gym.server.app import create_app
 from phrase_gym.server.storage import Database
 from tests.phrase_packages import Package, prepare_with_coach
-
-
-def test_empty_library_is_not_completed_study(client: TestClient) -> None:
-    state = client.post("/api/study/current").json()
-    assert state["total"] == state["studied"] == 0
-    assert state["done"] is False
-    assert state["card"] is None
-    assert "first phrase batch" in state["message"]
+from tests.practice_client import Practice
 
 
 def test_study_recordings_and_restart(
@@ -33,17 +26,18 @@ def test_study_recordings_and_restart(
         assert stat.S_IMODE((tmp_path / "phrase-gym.sqlite3").stat().st_mode) == 0o600
         reference = next((tmp_path / "references").iterdir())
         assert stat.S_IMODE(reference.stat().st_mode) == 0o600
-    study = client.post("/api/study/current").json()
-    assert study["studied"] == 0
-    assert study["card"]["text"] == "Complete phrase number 1."
-    attempt_id = study["card"]["attempt_id"]
-    phrase_id = study["card"]["id"]
+    practice = Practice(client)
+    card = practice.card()
+    assert card["answer"]["text"] == "Complete phrase number 1."
+    phrase_id = card["phrase_id"]
     audio = b"final-encoder-tail"
     recording_id = str(uuid4())
     upload = {
         "id": recording_id,
         "phrase_id": phrase_id,
-        "attempt_id": attempt_id,
+        "view_token": card["view_token"],
+        "mode": "daily",
+        "kind": "first_study",
         "captured_at": "2026-10-25T10:00:00Z",
         "mime_type": "audio/webm;codecs=opus",
         "duration_ms": 1200,
@@ -62,28 +56,27 @@ def test_study_recordings_and_restart(
         saved = tmp_path / "recordings" / phrase_id / recording_id
         assert stat.S_IMODE(saved.parent.stat().st_mode) == 0o700
         assert stat.S_IMODE(saved.stat().st_mode) == 0o600
-    completed = client.post(
-        f"/api/attempts/{attempt_id}/complete", json={"operation_id": str(uuid4())}
-    ).json()
-    assert completed["graded"] is False
+    completed = practice.finish(card, "studied")
+    assert completed["receipt"]["fsrs_updated"] is False
 
     monkeypatch.setenv("PHRASE_GYM_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("PHRASE_GYM_FAKE_TTS", "1")
     with TestClient(create_app()) as restarted:
         assert restarted.get(f"/api/recordings/{recording_id}/audio").content == audio
-        next_card = restarted.post("/api/study/current").json()
-        assert next_card["studied"] == 1
-        assert next_card["card"]["item_id"] == "meeting-2"
+        next_card = Practice(restarted, practice.now).card()
+        assert next_card["answer"]["text"] == "Complete phrase number 2."
         history = restarted.get(f"/api/phrases/{phrase_id}/recordings").json()
         assert [item["id"] for item in history["items"]] == [recording_id]
-        assert history["items"][0]["mode"] == "study"
+        assert history["items"][0]["mode"] == "daily"
+        assert history["items"][0]["kind"] == "first_study"
         assert history["items"][0]["answer"] == "Complete phrase number 1."
-        assert history["items"][0]["cue"]["situation"] == "Meeting situation number 1."
+        assert history["items"][0]["cue"] is None
 
 
 def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
     response = client.post(
-        "/api/study/current",
+        "/api/practice/daily",
+        json={},
         headers={"origin": "https://attacker.example", "sec-fetch-site": "cross-site"},
     )
     assert response.status_code == 403
@@ -93,9 +86,10 @@ def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
 def test_study_contracts_are_closed_generated_schemas(client: TestClient) -> None:
     schemas = client.get("/openapi.json").json()["components"]["schemas"]
     for name in (
-        "StudyResponse",
-        "StudyCard",
-        "StudyCompletion",
+        "PracticeState",
+        "PracticeCard",
+        "CompletionResult",
+        "CompletionRequest",
         "LessonPage",
         "PhrasePage",
         "PhraseDetails",

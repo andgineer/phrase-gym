@@ -10,7 +10,11 @@ const state = vi.hoisted(() => ({
 const take = {
   id: 'take-for-deleted-phrase',
   phrase_id: 'deleted-phrase',
-  attempt_id: 'attempt',
+  view_token: 'view-token',
+  mode: 'daily' as const,
+  kind: 'first_study' as const,
+  cue: null,
+  hint: null,
   captured_at: '2026-10-26T08:00:00Z',
   mime_type: 'audio/webm',
   duration_ms: 100,

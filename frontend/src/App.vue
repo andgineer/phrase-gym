@@ -1,168 +1,64 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useCapture } from './composables/useCapture'
+import { computed, onMounted, ref, watch } from 'vue'
 import { takeTransfers } from './takeTransfers'
 import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
-import type { StoredTake } from './practiceTypes'
-import type { Card } from './studyTypes'
-import LibraryPanel from './components/LibraryPanel.vue'
+import type { DeletionTarget } from './libraryTypes'
 import SettingsPanel from './components/SettingsPanel.vue'
 import AddMaterial from './components/AddMaterial.vue'
 import CleanupNotice from './components/CleanupNotice.vue'
+import DeleteDialog from './components/DeleteDialog.vue'
+import PracticeEntry from './components/PracticeEntry.vue'
 import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
-import { usePlayback } from './composables/usePlayback'
-import { useStudy } from './composables/useStudy'
-import { api } from './api'
+import { usePracticeSession } from './composables/usePracticeSession'
 
-const study = useStudy()
-const playback = usePlayback()
+const session = usePracticeSession()
+const { practice, playback, capture } = session
 const initialized = ref(false)
-const panel = ref<'practice' | 'library' | 'settings'>('practice')
-let mediaScope = 0
-let compareOnStop: number | null = null
-const capture = useCapture({
-  context: async () => {
-    if (!study.current.value?.card) throw new Error('No study card is open')
-    return {
-      phrase_id: study.current.value.card.id,
-      attempt_id: study.current.value.card.attempt_id,
-    }
-  },
-  retain: takeTransfers.retain,
-  finished: async (take: StoredTake) => {
-    const shouldCompare =
-      take.complete &&
-      compareOnStop === mediaScope &&
-      study.current.value?.card?.id === take.phrase_id &&
-      study.current.value.card.attempt_id === take.attempt_id &&
-      !document.hidden
-    compareOnStop = null
-    if (shouldCompare) {
-      const reference = study.current.value?.card?.reference_url
-      if (reference) void playback.compareTake(take, reference)
-    }
-    await takeTransfers.flush()
-    if (study.rated.value) await study.refreshRecordings()
-    else await study.load()
-  },
-  failure: async () => {},
+const startupError = ref('')
+const screen = ref<'entry' | 'card' | 'settings'>('entry')
+const lessonId = ref('')
+const entryKey = ref(0)
+const pendingDelete = ref<DeletionTarget | null>(null)
+const card = computed(() => practice.view.value.card)
+
+// An exhausted traversal returns to entry with its completion message.
+watch(card, (current) => {
+  if (!current && screen.value === 'card') screen.value = 'entry'
 })
 
-async function next() {
-  if (!study.current.value?.card) return
-  mediaScope++
-  compareOnStop = null
-  playback.stop()
-  if (study.current.value.card.kind === 'free') {
-    await study.complete(study.current.value.card.attempt_id, async () => {
-      await capture.release()
-      await takeTransfers.flush()
-    })
-    return
-  }
-  if (study.rated.value) {
-    await capture.release()
-    await takeTransfers.flush()
-    await study.load()
-    return
-  }
-  await study.complete(study.current.value.card.attempt_id, async () => {
-    await capture.release()
-    await takeTransfers.flush()
-    playback.stop()
-  })
+async function daily() {
+  await practice.openDaily(lessonId.value || null)
+  if (card.value) screen.value = 'card'
 }
 
-async function reveal() {
-  const card = study.current.value?.card
-  if (!card) return
-  await takeTransfers.flush()
-  const mode = card.recordings.some((recording) => recording.attempt_id === card.attempt_id)
-    ? 'spoken'
-    : 'silent'
-  await study.reveal(card.attempt_id, mode)
+async function navigate(next: 'entry' | 'settings') {
+  await session.leave()
+  void takeTransfers.flush()
+  if (next === 'entry') entryKey.value++
+  screen.value = next
 }
 
-async function rate(rating: string) {
-  const card = study.current.value?.card
-  if (!card) return
-  await study.rate(card.attempt_id, rating, 'silent')
-  if (rating === 'recalled') await study.load()
+function removeCard() {
+  const current = card.value
+  if (current?.answer) pendingDelete.value = { id: current.phrase_id, text: current.answer.text }
 }
 
-async function skip() {
-  const card = study.current.value?.card
-  if (!card) return
-  await study.complete(card.attempt_id, async () => {
-    await capture.release()
-    await takeTransfers.flush()
-  })
+async function deletedCard() {
+  pendingDelete.value = null
+  await session.settleMedia()
+  await practice.openDaily()
 }
-
-async function retryTakes() {
-  await takeTransfers.flush()
-  await study.load()
-}
-
-async function controlAudio() {
-  if (capture.requesting.value) return capture.release()
-  if (capture.capturing.value) {
-    compareOnStop = mediaScope
-    return capture.stop()
-  }
-  if (playback.active.value) return playback.stop()
-  mediaScope++
-  compareOnStop = null
-  playback.stop()
-  return capture.start()
-}
-
-async function beforeOpenIntake() {
-  mediaScope++
-  compareOnStop = null
-  playback.stop()
-  if (capture.capturing.value) await capture.stop()
-  await capture.release()
-  await takeTransfers.flush()
-  await study.load()
-}
-
-async function openPanel(nextPanel: 'practice' | 'library' | 'settings') {
-  if (capture.capturing.value) await capture.stop()
-  await capture.release()
-  playback.stop()
-  await takeTransfers.flush()
-  if (nextPanel === 'practice') await study.load()
-  panel.value = nextPanel
-}
-
-async function practise(phraseId: string) {
-  playback.stop()
-  try {
-    const card = await api<Card>(`/phrases/${phraseId}/practise`, { method: 'POST' })
-    if (study.current.value) study.current.value.card = card
-  } catch (cause) {
-    study.error.value = String(cause)
-  }
-  panel.value = 'practice'
-}
-
-const progress = computed(() =>
-  study.current.value
-    ? `${study.current.value.studied + (study.current.value.done ? 0 : 1)} / ${study.current.value.total}`
-    : '',
-)
 
 async function initialize() {
   initialized.value = false
+  startupError.value = ''
   try {
     await resetDiscardedLearnerDataOnce()
     await takeTransfers.recover()
     initialized.value = true
-    await study.load()
   } catch (cause) {
-    study.error.value = String(cause)
+    startupError.value = String(cause)
   }
 }
 
@@ -174,73 +70,66 @@ onMounted(initialize)
     <header>
       <a class="brand" href="/">Phrase Gym<span>◌</span></a>
       <nav v-if="initialized">
-        <button @click="openPanel('practice')">Practice</button
-        ><button @click="openPanel('library')">Library</button
-        ><button @click="openPanel('settings')">Settings</button>
+        <button @click="navigate('entry')">Practice</button
+        ><button @click="navigate('settings')">Settings</button>
       </nav>
-      <AddMaterial v-if="initialized" :before-open="beforeOpenIntake" @added="study.load" />
+      <AddMaterial v-if="initialized" :before-open="session.leave" @added="entryKey++" />
     </header>
     <main>
       <CleanupNotice v-if="initialized" />
       <TakeRejections />
-      <SettingsPanel v-if="panel === 'settings'" />
-      <LibraryPanel
-        v-else-if="panel === 'library'"
-        :disabled="capture.capturing.value || capture.requesting.value || capture.processing.value"
-        :play="playback.play"
-        :compare="playback.compare"
-        :stop-playback="playback.stop"
-        @practise="practise"
-      />
-      <template v-else>
-        <p v-if="study.error.value" class="error" role="alert">
-          {{ study.error.value }} <button @click="initialize">Retry connection</button>
-        </p>
-        <p v-else-if="!initialized || (study.loading.value && !study.current.value)" role="status">
-          Loading…
-        </p>
-        <section v-else-if="study.current.value?.done" class="card complete">
-          <p class="eyebrow">English · {{ progress }}</p>
-          <h1>Today’s study is complete</h1>
-          <p>{{ study.current.value.message }}</p>
-        </section>
-        <template v-else-if="study.current.value?.card">
-          <p class="eyebrow">English</p>
-          <StudyCard
-            :card="study.current.value.card"
-            :progress="progress"
-            :capturing="capture.capturing.value"
-            :requesting="capture.requesting.value"
-            :processing="capture.processing.value"
-            :playing="playback.active.value"
-            :completing="study.completing.value"
-            :pending-takes="takeTransfers.pendingTakes.value"
-            :capture-error="capture.error.value"
-            :take-error="takeTransfers.error.value"
-            :rated="study.rated.value"
-            :play="playback.play"
-            :compare="playback.compare"
-            @control="controlAudio"
-            @retry="retryTakes"
-            @next="next"
-            @reveal="reveal"
-            @rate="rate"
-            @skip="skip"
-          />
-        </template>
-        <section v-else class="home">
-          <p class="eyebrow">English</p>
-          <h1>Phrase Gym</h1>
-          <div class="card session-entry">
-            <p>Add your first phrase batch</p>
-            <p class="muted">Import 5–10 prepared phrases to begin.</p>
-          </div>
-        </section>
-        <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
-        <p v-if="study.current.value" class="muted">
-          {{ study.current.value.due_count }} due · {{ study.current.value.new_count }} new
-        </p>
+      <p v-if="startupError" class="error" role="alert">
+        {{ startupError }} <button @click="initialize">Retry connection</button>
+      </p>
+      <p v-else-if="!initialized" role="status">Loading…</p>
+      <SettingsPanel v-else-if="screen === 'settings'" />
+      <template v-else-if="screen === 'card' && card">
+        <p class="eyebrow">English</p>
+        <StudyCard
+          :card="card"
+          :progress="practice.view.value.progress"
+          :details-open="practice.view.value.detailsOpen"
+          :capturing="capture.capturing.value"
+          :requesting="capture.requesting.value"
+          :processing="capture.processing.value"
+          :playing="playback.active.value"
+          :busy="practice.busy.value"
+          :has-take="session.latestTake.value !== null"
+          :pending-takes="takeTransfers.pendingTakes.value"
+          :capture-error="capture.error.value"
+          :take-error="takeTransfers.error.value"
+          :practice-error="practice.error.value"
+          :can-retry="practice.pending.value !== null"
+          @control="session.controlAudio"
+          @show="practice.reveal()"
+          @details="card.revealed ? practice.toggleDetails() : practice.reveal(true)"
+          @new-cue="practice.newCue"
+          @hint="practice.hint"
+          @complete="session.complete"
+          @remove="removeCard"
+          @play-phrase="card.answer && playback.play(card.answer.reference_url)"
+          @play-mine="session.playMine"
+          @compare="session.compareMine"
+          @retry-save="takeTransfers.flush"
+          @retry-completion="practice.retry"
+        />
       </template>
+      <template v-else>
+        <p class="eyebrow">English</p>
+        <PracticeEntry
+          :key="entryKey"
+          v-model:lesson-id="lessonId"
+          :message="practice.view.value.message"
+          :error="practice.error.value"
+          :busy="practice.busy.value"
+          :play="playback.play"
+          :compare="playback.compare"
+          :stop-playback="playback.stop"
+          @daily="daily"
+        />
+      </template>
+      <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
+      <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deletedCard" />
     </main>
   </div>
 </template>

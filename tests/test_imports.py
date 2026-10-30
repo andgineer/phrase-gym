@@ -42,7 +42,7 @@ def test_offline_restart_retry_and_idempotent_publication(
         accepted = client.post("/api/imports", json={"package": package})
         assert accepted.status_code == 202
         assert accepted.json()["status"] == "pending"
-        assert client.post("/api/study/current").json()["total"] == 0
+        assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
         assert client.post("/api/imports", json={"package": package}).json() == accepted.json()
         work = client.post("/api/imports/coach/next").json()
         assert work["package_id"] == package["package_id"]
@@ -57,7 +57,7 @@ def test_offline_restart_retry_and_idempotent_publication(
             == first.json()
         )
         assert client.post("/api/imports/coach/next").json() is None
-        assert client.post("/api/study/current").json()["card"]["text"]
+        assert client.post("/api/practice/daily", json={}).json()["card"]["answer"]["text"]
     assert table_count(Database(tmp_path), "phrases") == 5
     assert len(list((tmp_path / "references").iterdir())) == 5
 
@@ -121,8 +121,8 @@ def test_external_agent_supplies_complete_references_without_coach(
     assert response.json()["added_count"] == 5
     assert client.post("/api/imports", json=supplied).json() == response.json()
     assert client.post("/api/imports/coach/next").json() is None
-    study = client.post("/api/study/current").json()
-    assert client.get(study["card"]["reference_url"]).content.startswith(b"RIFF")
+    card = client.post("/api/practice/daily", json={}).json()["card"]
+    assert client.get(card["answer"]["reference_url"]).content.startswith(b"RIFF")
     supplied["references"]["meeting-4"] = "invalid"
     assert client.post("/api/imports", json=supplied).status_code == 409
 

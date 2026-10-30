@@ -8,7 +8,11 @@ const state = vi.hoisted(() => ({
 const partial = {
   id: 'take-race',
   phrase_id: 'phrase-race',
-  attempt_id: 'attempt-race',
+  view_token: 'view-race',
+  mode: 'daily' as const,
+  kind: 'recall' as const,
+  cue: { situation: 'Colleague asks: How is it going?' },
+  hint: 'far',
   captured_at: '2026-10-26T08:00:00Z',
   mime_type: 'audio/webm',
   duration_ms: 100,
@@ -70,6 +74,11 @@ test('re-reads the finalized journal row after acquiring take ownership', async 
   await takeTransfers.flush()
   expect(state.body).toMatchObject({
     id: 'take-race',
+    view_token: 'view-race',
+    mode: 'daily',
+    kind: 'recall',
+    cue: { situation: 'Colleague asks: How is it going?' },
+    hint: 'far',
     duration_ms: 500,
     complete: true,
     audio_base64: 'AQIDBA==',

@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import sqlite3
 from pathlib import Path
 
 from phrase_gym.server.contracts import RecordingReceipt, RecordingUpload
@@ -13,6 +14,14 @@ class RecordingConflictError(ValueError):
 
 class DeletedPhraseError(ValueError):
     pass
+
+
+def _require_shown_support(upload: RecordingUpload, phrase: sqlite3.Row) -> None:
+    cues = json.loads(phrase["cues_json"])
+    if upload.cue and upload.cue.model_dump(exclude_none=True) not in cues:
+        raise RecordingConflictError("Recording cue is not one of this phrase's cues")
+    if upload.hint is not None and upload.hint not in json.loads(phrase["hints_json"]):
+        raise RecordingConflictError("Recording hint is not one of this phrase's hints")
 
 
 class RecordingStore:
@@ -45,12 +54,13 @@ class RecordingStore:
                     "This phrase was deleted, so the recording was not saved. "
                     "Discard it from this device.",
                 )
-            attempt = connection.execute(
-                "SELECT * FROM attempts WHERE id=?",
-                (upload.attempt_id,),
+            phrase = connection.execute(
+                "SELECT text, cues_json, hints_json FROM phrases WHERE id=?",
+                (upload.phrase_id,),
             ).fetchone()
-            if not attempt or attempt["phrase_id"] != upload.phrase_id:
-                raise RecordingConflictError("Recording does not belong to this phrase and attempt")
+            if not phrase:
+                raise RecordingConflictError("Recording does not belong to a known phrase")
+            _require_shown_support(upload, phrase)
             directory = self.database.data_dir / "recordings" / upload.phrase_id
             directory.mkdir(parents=True, mode=0o700, exist_ok=True)
             directory.chmod(0o700)
@@ -62,13 +72,13 @@ class RecordingStore:
             write_private(temporary, audio)
             os.replace(temporary, path)
             connection.execute(
-                "INSERT INTO recordings (id,phrase_id,attempt_id,captured_at,mime_type,"
+                "INSERT INTO recordings (id,phrase_id,view_token,captured_at,mime_type,"
                 "duration_ms,complete,capture_settings_json,path,byte_length,sha256,mode,"
-                "cue_json,hint,answer_snapshot) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?)",
+                "kind,cue_json,hint,answer_snapshot) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     upload.id,
                     upload.phrase_id,
-                    upload.attempt_id,
+                    upload.view_token,
                     upload.captured_at,
                     upload.mime_type,
                     upload.duration_ms,
@@ -77,9 +87,11 @@ class RecordingStore:
                     str(path),
                     len(audio),
                     digest,
-                    attempt["kind"],
-                    attempt["cue_snapshot"],
-                    attempt["answer_snapshot"],
+                    upload.mode,
+                    upload.kind,
+                    upload.cue.model_dump_json(exclude_none=True) if upload.cue else None,
+                    upload.hint,
+                    phrase["text"],
                 ),
             )
         return RecordingReceipt(

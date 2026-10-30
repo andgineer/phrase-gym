@@ -1,26 +1,56 @@
 {
   "components": {
     "schemas": {
-      "AttemptAction": {
+      "CardAnswer": {
         "additionalProperties": false,
         "properties": {
-          "response_mode": {
+          "accepted_variants": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Variants",
+            "type": "array"
+          },
+          "detailed_explanation": {
             "anyOf": [
               {
-                "enum": [
-                  "spoken",
-                  "silent"
-                ],
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Response Mode"
+            "title": "Detailed Explanation"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "reference_url": {
+            "title": "Reference Url",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "usage_contexts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Usage Contexts",
+            "type": "array"
           }
         },
-        "title": "AttemptAction",
+        "required": [
+          "text",
+          "explanation",
+          "detailed_explanation",
+          "accepted_variants",
+          "usage_contexts",
+          "reference_url"
+        ],
+        "title": "CardAnswer",
         "type": "object"
       },
       "CleanupStatus": {
@@ -124,20 +154,146 @@
         "title": "CoachWork",
         "type": "object"
       },
-      "CompleteStudy": {
+      "CompletionReceipt": {
         "additionalProperties": false,
         "properties": {
-          "operation_id": {
+          "completion_id": {
+            "title": "Completion Id",
+            "type": "string"
+          },
+          "fsrs_updated": {
+            "title": "Fsrs Updated",
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "first_study",
+              "recall"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "daily",
+              "extra",
+              "practice"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "phrase_id": {
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "not_yet",
+                  "effort",
+                  "got_it"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion_id",
+          "phrase_id",
+          "learning_date",
+          "mode",
+          "kind",
+          "rating",
+          "skipped",
+          "fsrs_updated"
+        ],
+        "title": "CompletionReceipt",
+        "type": "object"
+      },
+      "CompletionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "completion_id": {
             "maxLength": 100,
             "minLength": 8,
-            "title": "Operation Id",
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Completion Id",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "studied",
+              "not_yet",
+              "effort",
+              "got_it",
+              "skipped"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "phrase_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "view_token": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "View Token",
             "type": "string"
           }
         },
         "required": [
-          "operation_id"
+          "view_token",
+          "phrase_id",
+          "completion_id",
+          "outcome"
         ],
-        "title": "CompleteStudy",
+        "title": "CompletionRequest",
+        "type": "object"
+      },
+      "CompletionResult": {
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/CompletionReceipt"
+          },
+          "replayed": {
+            "title": "Replayed",
+            "type": "boolean"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "replayed",
+          "state"
+        ],
+        "title": "CompletionResult",
         "type": "object"
       },
       "Cue": {
@@ -432,6 +588,17 @@
             "title": "New Count",
             "type": "integer"
           },
+          "next_due": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due"
+          },
           "phrase_count": {
             "title": "Phrase Count",
             "type": "integer"
@@ -449,6 +616,7 @@
           "phrase_count",
           "due_count",
           "new_count",
+          "next_due",
           "id",
           "title",
           "source_label"
@@ -487,6 +655,25 @@
           "all_lessons"
         ],
         "title": "LessonPage",
+        "type": "object"
+      },
+      "OpenDaily": {
+        "additionalProperties": false,
+        "properties": {
+          "lesson_id": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          }
+        },
+        "title": "OpenDaily",
         "type": "object"
       },
       "PhraseDetails": {
@@ -815,6 +1002,96 @@
         "title": "PhraseSummary",
         "type": "object"
       },
+      "PracticeCard": {
+        "additionalProperties": false,
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CardAnswer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Cue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "kind": {
+            "enum": [
+              "first_study",
+              "recall"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "daily",
+              "extra",
+              "practice"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "other_cue_available": {
+            "title": "Other Cue Available",
+            "type": "boolean"
+          },
+          "phrase_id": {
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "recordings": {
+            "items": {
+              "$ref": "#/components/schemas/SavedRecording"
+            },
+            "title": "Recordings",
+            "type": "array"
+          },
+          "revealed": {
+            "title": "Revealed",
+            "type": "boolean"
+          },
+          "view_token": {
+            "title": "View Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "view_token",
+          "phrase_id",
+          "mode",
+          "kind",
+          "revealed",
+          "cue",
+          "other_cue_available",
+          "hint",
+          "answer",
+          "recordings"
+        ],
+        "title": "PracticeCard",
+        "type": "object"
+      },
       "PracticeCounts": {
         "additionalProperties": false,
         "properties": {
@@ -826,6 +1103,17 @@
             "title": "New Count",
             "type": "integer"
           },
+          "next_due": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due"
+          },
           "phrase_count": {
             "title": "Phrase Count",
             "type": "integer"
@@ -834,9 +1122,75 @@
         "required": [
           "phrase_count",
           "due_count",
-          "new_count"
+          "new_count",
+          "next_due"
         ],
         "title": "PracticeCounts",
+        "type": "object"
+      },
+      "PracticeProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "due_allowance": {
+            "title": "Due Allowance",
+            "type": "integer"
+          },
+          "due_completed": {
+            "title": "Due Completed",
+            "type": "integer"
+          },
+          "new_allowance": {
+            "title": "New Allowance",
+            "type": "integer"
+          },
+          "new_completed": {
+            "title": "New Completed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "due_completed",
+          "due_allowance",
+          "new_completed",
+          "new_allowance"
+        ],
+        "title": "PracticeProgress",
+        "type": "object"
+      },
+      "PracticeState": {
+        "additionalProperties": false,
+        "properties": {
+          "card": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeCard"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/PracticeProgress"
+          }
+        },
+        "required": [
+          "card",
+          "progress",
+          "message"
+        ],
+        "title": "PracticeState",
         "type": "object"
       },
       "RecordingPage": {
@@ -900,11 +1254,6 @@
       "RecordingUpload": {
         "additionalProperties": false,
         "properties": {
-          "attempt_id": {
-            "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
-            "title": "Attempt Id",
-            "type": "string"
-          },
           "audio_base64": {
             "title": "Audio Base64",
             "type": "string"
@@ -939,6 +1288,16 @@
             "title": "Complete",
             "type": "boolean"
           },
+          "cue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Cue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "duration_ms": {
             "anyOf": [
               {
@@ -952,9 +1311,29 @@
             ],
             "title": "Duration Ms"
           },
+          "hint": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
           "id": {
             "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
             "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "first_study",
+              "recall"
+            ],
+            "title": "Kind",
             "type": "string"
           },
           "mime_type": {
@@ -963,16 +1342,32 @@
             "title": "Mime Type",
             "type": "string"
           },
+          "mode": {
+            "enum": [
+              "daily",
+              "extra",
+              "practice"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
           "phrase_id": {
             "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
             "title": "Phrase Id",
+            "type": "string"
+          },
+          "view_token": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{7,99}$",
+            "title": "View Token",
             "type": "string"
           }
         },
         "required": [
           "id",
           "phrase_id",
-          "attempt_id",
+          "view_token",
+          "mode",
+          "kind",
           "captured_at",
           "mime_type",
           "complete",
@@ -981,50 +1376,11 @@
         "title": "RecordingUpload",
         "type": "object"
       },
-      "ReviewRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "operation_id": {
-            "maxLength": 100,
-            "minLength": 8,
-            "title": "Operation Id",
-            "type": "string"
-          },
-          "rating": {
-            "enum": [
-              "not_yet",
-              "with_effort",
-              "recalled"
-            ],
-            "title": "Rating",
-            "type": "string"
-          },
-          "response_mode": {
-            "enum": [
-              "spoken",
-              "silent"
-            ],
-            "title": "Response Mode",
-            "type": "string"
-          }
-        },
-        "required": [
-          "operation_id",
-          "rating",
-          "response_mode"
-        ],
-        "title": "ReviewRequest",
-        "type": "object"
-      },
       "SavedRecording": {
         "additionalProperties": false,
         "properties": {
           "answer": {
             "title": "Answer",
-            "type": "string"
-          },
-          "attempt_id": {
-            "title": "Attempt Id",
             "type": "string"
           },
           "byte_length": {
@@ -1075,6 +1431,14 @@
             "title": "Id",
             "type": "string"
           },
+          "kind": {
+            "enum": [
+              "first_study",
+              "recall"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
           "learning_date": {
             "title": "Learning Date",
             "type": "string"
@@ -1085,9 +1449,9 @@
           },
           "mode": {
             "enum": [
-              "study",
-              "review",
-              "free"
+              "daily",
+              "extra",
+              "practice"
             ],
             "title": "Mode",
             "type": "string"
@@ -1099,7 +1463,6 @@
         },
         "required": [
           "id",
-          "attempt_id",
           "captured_at",
           "learning_date",
           "mime_type",
@@ -1108,6 +1471,7 @@
           "byte_length",
           "url",
           "mode",
+          "kind",
           "cue",
           "hint",
           "answer"
@@ -1122,6 +1486,18 @@
             "const": "en",
             "title": "Card Language",
             "type": "string"
+          },
+          "daily_due_limit": {
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Daily Due Limit",
+            "type": "integer"
+          },
+          "daily_new_limit": {
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Daily New Limit",
+            "type": "integer"
           },
           "help_language": {
             "const": "en",
@@ -1147,221 +1523,11 @@
           "native_language",
           "learning_timezone",
           "card_language",
-          "help_language"
+          "help_language",
+          "daily_due_limit",
+          "daily_new_limit"
         ],
         "title": "Settings",
-        "type": "object"
-      },
-      "StudyCard": {
-        "additionalProperties": false,
-        "properties": {
-          "accepted_variants": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Accepted Variants",
-            "type": "array"
-          },
-          "attempt_id": {
-            "title": "Attempt Id",
-            "type": "string"
-          },
-          "cue": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Cue"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "cues": {
-            "items": {
-              "$ref": "#/components/schemas/Cue"
-            },
-            "title": "Cues",
-            "type": "array"
-          },
-          "detailed_explanation": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Detailed Explanation"
-          },
-          "explanation": {
-            "title": "Explanation",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "item_id": {
-            "title": "Item Id",
-            "type": "string"
-          },
-          "kind": {
-            "default": "study",
-            "enum": [
-              "study",
-              "review",
-              "free"
-            ],
-            "title": "Kind",
-            "type": "string"
-          },
-          "recordings": {
-            "items": {
-              "$ref": "#/components/schemas/SavedRecording"
-            },
-            "title": "Recordings",
-            "type": "array"
-          },
-          "reference_url": {
-            "title": "Reference Url",
-            "type": "string"
-          },
-          "revealed": {
-            "default": true,
-            "title": "Revealed",
-            "type": "boolean"
-          },
-          "source_id": {
-            "title": "Source Id",
-            "type": "string"
-          },
-          "source_label": {
-            "title": "Source Label",
-            "type": "string"
-          },
-          "source_link": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Link"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "source_id",
-          "item_id",
-          "source_label",
-          "source_link",
-          "text",
-          "explanation",
-          "cues",
-          "accepted_variants",
-          "detailed_explanation",
-          "reference_url",
-          "attempt_id",
-          "recordings"
-        ],
-        "title": "StudyCard",
-        "type": "object"
-      },
-      "StudyCompletion": {
-        "additionalProperties": false,
-        "properties": {
-          "attempt_id": {
-            "title": "Attempt Id",
-            "type": "string"
-          },
-          "completed_at": {
-            "title": "Completed At",
-            "type": "string"
-          },
-          "graded": {
-            "title": "Graded",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "attempt_id",
-          "completed_at",
-          "graded"
-        ],
-        "title": "StudyCompletion",
-        "type": "object"
-      },
-      "StudyResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "card": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StudyCard"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "done": {
-            "title": "Done",
-            "type": "boolean"
-          },
-          "due_count": {
-            "default": 0,
-            "title": "Due Count",
-            "type": "integer"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          },
-          "new_count": {
-            "default": 0,
-            "title": "New Count",
-            "type": "integer"
-          },
-          "next_return": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Next Return"
-          },
-          "studied": {
-            "title": "Studied",
-            "type": "integer"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "done",
-          "total",
-          "studied"
-        ],
-        "title": "StudyResponse",
         "type": "object"
       },
       "ValidationError": {
@@ -1396,6 +1562,60 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "ViewAction": {
+        "additionalProperties": false,
+        "properties": {
+          "phrase_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "view_token": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "View Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "view_token",
+          "phrase_id"
+        ],
+        "title": "ViewAction",
+        "type": "object"
+      },
+      "ViewOperation": {
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "phrase_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "view_token": {
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "View Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "view_token",
+          "phrase_id",
+          "operation_id"
+        ],
+        "title": "ViewOperation",
+        "type": "object"
       }
     }
   },
@@ -1405,153 +1625,6 @@
   },
   "openapi": "3.1.0",
   "paths": {
-    "/api/attempts/{attempt_id}/complete": {
-      "post": {
-        "operationId": "complete_study_api_attempts__attempt_id__complete_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attempt_id",
-            "required": true,
-            "schema": {
-              "title": "Attempt Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteStudy"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudyCompletion"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Complete Study"
-      }
-    },
-    "/api/attempts/{attempt_id}/reveal": {
-      "post": {
-        "operationId": "reveal_api_attempts__attempt_id__reveal_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attempt_id",
-            "required": true,
-            "schema": {
-              "title": "Attempt Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttemptAction"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudyCard"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Reveal"
-      }
-    },
-    "/api/attempts/{attempt_id}/review": {
-      "post": {
-        "operationId": "review_api_attempts__attempt_id__review_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attempt_id",
-            "required": true,
-            "schema": {
-              "title": "Attempt Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReviewRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudyCompletion"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Review"
-      }
-    },
     "/api/cleanup": {
       "get": {
         "operationId": "cleanup_status_api_cleanup_get",
@@ -2090,45 +2163,6 @@
         "summary": "Phrase Details"
       }
     },
-    "/api/phrases/{phrase_id}/practise": {
-      "post": {
-        "operationId": "practise_api_phrases__phrase_id__practise_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "phrase_id",
-            "required": true,
-            "schema": {
-              "title": "Phrase Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudyCard"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Practise"
-      }
-    },
     "/api/phrases/{phrase_id}/recordings": {
       "get": {
         "operationId": "phrase_recordings_api_phrases__phrase_id__recordings_get",
@@ -2226,6 +2260,196 @@
           }
         },
         "summary": "Reference Audio"
+      }
+    },
+    "/api/practice/complete": {
+      "post": {
+        "operationId": "complete_api_practice_complete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete"
+      }
+    },
+    "/api/practice/cue": {
+      "post": {
+        "operationId": "new_cue_api_practice_cue_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewOperation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "New Cue"
+      }
+    },
+    "/api/practice/daily": {
+      "post": {
+        "operationId": "open_daily_api_practice_daily_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenDaily"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Daily"
+      }
+    },
+    "/api/practice/hint": {
+      "post": {
+        "operationId": "hint_api_practice_hint_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewOperation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hint"
+      }
+    },
+    "/api/practice/reveal": {
+      "post": {
+        "operationId": "reveal_api_practice_reveal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reveal"
       }
     },
     "/api/recordings": {
@@ -2355,24 +2579,6 @@
           }
         },
         "summary": "Update Settings"
-      }
-    },
-    "/api/study/current": {
-      "post": {
-        "operationId": "current_study_api_study_current_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StudyResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Current Study"
       }
     }
   }

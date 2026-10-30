@@ -38,13 +38,14 @@ def test_tailscale_access_is_opt_in_and_same_origin(tmp_path, monkeypatch):
         for origin in (f"http://{host}", "https://attacker.example", "null"):
             assert (
                 client.post(
-                    "/api/study/current", headers={"host": host, "origin": origin}
+                    "/api/practice/daily", json={}, headers={"host": host, "origin": origin}
                 ).status_code
                 == 403
             )
         assert (
             client.post(
-                "/api/study/current",
+                "/api/practice/daily",
+                json={},
                 headers={
                     "host": host,
                     "origin": f"https://{host}",
@@ -55,7 +56,8 @@ def test_tailscale_access_is_opt_in_and_same_origin(tmp_path, monkeypatch):
         )
         assert (
             client.post(
-                "/api/study/current",
+                "/api/practice/daily",
+                json={},
                 headers={"host": host, "origin": f"https://{host}", "sec-fetch-site": "cross-site"},
             ).status_code
             == 403

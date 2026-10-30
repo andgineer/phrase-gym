@@ -11,10 +11,11 @@ const props = defineProps<{
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
 }>()
 const modes: Record<Recording['mode'], string> = {
-  study: 'First study',
-  review: 'Recall',
-  free: 'Rehearsal',
+  daily: 'Daily',
+  extra: 'Extra',
+  practice: 'Practice',
 }
+const kinds: Record<Recording['kind'], string> = { first_study: 'First meeting', recall: 'Recall' }
 const takes = usePagedList<Recording, RecordingPage>(
   () => `/phrases/${encodeURIComponent(props.phraseId)}/recordings`,
   10,
@@ -22,7 +23,7 @@ const takes = usePagedList<Recording, RecordingPage>(
 onMounted(() => void takes.reload())
 
 function describe(take: Recording) {
-  const parts = [take.learning_date, modes[take.mode]]
+  const parts = [take.learning_date, modes[take.mode], kinds[take.kind]]
   if (take.cue) parts.push(`Cue: ${take.cue.situation}`)
   if (take.hint) parts.push(`Hint: ${take.hint}`)
   return parts.join(' · ')

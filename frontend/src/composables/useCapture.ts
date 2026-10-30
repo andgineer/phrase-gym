@@ -6,11 +6,10 @@ import {
   retainsMicrophoneBetweenTakes,
   setAudioSession,
 } from '../audioSession'
-import type { StoredTake } from '../practiceTypes'
+import type { StoredTake, TakeSnapshot } from '../practiceTypes'
 
-type TakeContext = Pick<StoredTake, 'phrase_id' | 'attempt_id'>
 type CaptureOptions = {
-  context: () => Promise<TakeContext>
+  context: () => Promise<TakeSnapshot>
   retain: (take: StoredTake) => Promise<void>
   finished: (take: StoredTake) => Promise<void>
   failure: () => Promise<void>

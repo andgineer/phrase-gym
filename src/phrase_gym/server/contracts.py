@@ -1,11 +1,14 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from phrase_gym.server.import_contracts import Cue, StrictModel
 
 PAGE_LIMIT = 100
+MAX_DAILY_LIMIT = 500
+PracticeMode = Literal["daily", "extra", "practice"]
+CardKind = Literal["first_study", "recall"]
 # Take identities become file names: no separators or dots, and lowercase so that IDs differing
 # only by case cannot share a file on case-insensitive filesystems.
 STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
@@ -14,7 +17,11 @@ STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
 class RecordingUpload(StrictModel):
     id: str = Field(pattern=STORED_ID_PATTERN)
     phrase_id: str = Field(pattern=STORED_ID_PATTERN)
-    attempt_id: str = Field(pattern=STORED_ID_PATTERN)
+    view_token: str = Field(pattern=STORED_ID_PATTERN)
+    mode: PracticeMode
+    kind: CardKind
+    cue: Cue | None = None
+    hint: str | None = Field(default=None, max_length=100)
     captured_at: str = Field(min_length=10, max_length=64)
     mime_type: str = Field(min_length=3, max_length=100)
     duration_ms: int | None = Field(default=None, ge=0, le=3_600_000)
@@ -30,24 +37,19 @@ class RecordingUpload(StrictModel):
         return value
 
 
-class CompleteStudy(StrictModel):
-    operation_id: str = Field(min_length=8, max_length=100)
-
-
-class ReviewRequest(CompleteStudy):
-    rating: Literal["not_yet", "with_effort", "recalled"]
-    response_mode: Literal["spoken", "silent"]
-
-
-class AttemptAction(StrictModel):
-    response_mode: Literal["spoken", "silent"] | None = None
-
-
 class Settings(StrictModel):
     native_language: Literal["ru", "en"]
     learning_timezone: str = Field(min_length=1, max_length=64)
     card_language: Literal["en"]
     help_language: Literal["en"]
+    daily_due_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
+    daily_new_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
+
+    @model_validator(mode="after")
+    def some_practice_is_allowed(self) -> "Settings":
+        if not self.daily_due_limit and not self.daily_new_limit:
+            raise ValueError("daily due and new limits cannot both be zero")
+        return self
 
 
 class RecordingReceipt(StrictModel):
@@ -59,7 +61,6 @@ class RecordingReceipt(StrictModel):
 
 class SavedRecording(StrictModel):
     id: str
-    attempt_id: str
     captured_at: str
     learning_date: str
     mime_type: str
@@ -67,52 +68,18 @@ class SavedRecording(StrictModel):
     complete: bool
     byte_length: int
     url: str
-    mode: Literal["study", "review", "free"]
+    mode: PracticeMode
+    kind: CardKind
     cue: Cue | None
     hint: str | None
     answer: str
-
-
-class StudyCard(StrictModel):
-    id: str
-    source_id: str
-    item_id: str
-    source_label: str
-    source_link: str | None
-    text: str
-    explanation: str
-    cues: list[Cue]
-    accepted_variants: list[str]
-    detailed_explanation: str | None
-    reference_url: str
-    attempt_id: str
-    recordings: list[SavedRecording]
-    kind: Literal["study", "review", "free"] = "study"
-    revealed: bool = True
-    cue: Cue | None = None
-
-
-class StudyResponse(StrictModel):
-    done: bool
-    total: int
-    studied: int
-    message: str | None = None
-    card: StudyCard | None = None
-    due_count: int = 0
-    new_count: int = 0
-    next_return: str | None = None
-
-
-class StudyCompletion(StrictModel):
-    attempt_id: str
-    completed_at: str
-    graded: bool
 
 
 class PracticeCounts(StrictModel):
     phrase_count: int
     due_count: int
     new_count: int
+    next_due: str | None
 
 
 class LessonChoice(PracticeCounts):

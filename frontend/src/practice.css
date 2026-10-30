@@ -69,3 +69,21 @@
 .lookup-recording {
   margin-top: 16px;
 }
+.partner-line {
+  font-style: italic;
+}
+.hint {
+  color: #527a69;
+  font-weight: 600;
+}
+.practice-card .danger {
+  display: block;
+  margin-top: 18px;
+}
+.session-entry {
+  margin-bottom: 18px;
+}
+.session-entry .actions {
+  display: flex;
+  gap: 12px;
+}

@@ -4,8 +4,8 @@
 [![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
-keeping private learner recordings. It supports package import, first study, later spoken recall,
-self-rating, scheduled return, reference playback, comparison, and saved replay.
+keeping private learner recordings. It supports package import, Daily practice with first study and
+later spoken recall, self-rating, scheduled return, reference playback, comparison, and saved replay.
 
 ## Install and launch
 
@@ -54,21 +54,29 @@ validates and publishes all phrases, lessons and references together. A preparat
 visible for explicit retry. Exact package retries return the existing result; changed content under
 a package ID or a repeated source/item identity is rejected without overwriting learned material.
 
-Study shows the full phrase and meaning/use help. Reference playback and recording are optional.
-Every stopped take is retained separately and saved automatically; pending uploads remain in the
-browser for retry. **Next** records ungraded study completion. On the next learning day, due cards
-show an answer-free cue. Try to recall the wording, reveal it, then rate the original response:
-**Not yet**, **With effort**, or **Recalled**. A difficult response can be repeated once with
-the answer visible. **Study / skip grading** avoids a false forgetting grade.
+The Practice entry offers **Search lessons**, **Lesson to drill** with its due and new counts,
+**Daily**, and the Library with **Find a phrase**. Nothing starts until you press **Daily**, which
+opens or resumes today's card. Daily offers the oldest due phrases first, up to 20 recalls, then up
+to five new phrases per learning day; the stored limits are read live, so a raised limit lets Daily
+continue. A new phrase opens on its answer with meaning help, reference playback and optional
+recording; **Next** completes this first meeting without a rating. From the next learning day a due
+phrase shows an answer-free situation cue with **New cue**, **Hint**, **Show** and **Details**.
+After **Show**, you can still record a rehearsal, then rate the response you gave before help or
+reveal: **Not yet**, **Effort** or **Got it**. A rating or **Skip** saves and advances at once.
+**Delete** on a revealed card asks for confirmation and advances without a grade.
 
-The **Library** lets you narrow phrases by lesson, with its due and new counts, and search all
-lessons by wording, meaning, situation or use. Phrase details show the answer, what it is used
-for, the lesson and source, reference playback, the next due date, saved recordings with their
-cue and answer at the time, and ungraded practice. Looking a phrase up never changes its schedule.
+Every stopped take is retained in the browser and uploads in the background with the cue, hint and
+answer it was recorded with; pending uploads remain for retry and never block the next card.
+**▶ Mine** and **Compare** replay the latest take of the open card.
+
+The Library lists the selected lesson's phrases and searches all lessons by wording, meaning,
+situation or use. Phrase details show the answer, what it is used for, the lesson and source,
+reference playback, the next due date and saved recordings with their mode, cue and answer at the
+time. Looking a phrase up never changes its schedule.
 **Delete**, in the list or details, permanently removes a phrase with its reference audio and
-saved recordings after confirmation; a recording still waiting to upload for that phrase stays on
-the device until you discard it. If deleted files cannot be removed, the app keeps showing the
-problem with **Retry cleanup** until removal succeeds.
+saved recordings after confirmation; completed practice keeps its wording. A recording still
+waiting to upload for that phrase stays on the device until you discard it. If deleted files cannot
+be removed, the app keeps showing the problem with **Retry cleanup** until removal succeeds.
 **Settings** contains the native language and learning timezone.
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/backup-and-restore.md).

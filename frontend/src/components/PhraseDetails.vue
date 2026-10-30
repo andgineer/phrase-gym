@@ -11,7 +11,7 @@ const props = defineProps<{
   play: (url: string) => Promise<void>
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
 }>()
-const emit = defineEmits<{ back: []; practise: [phraseId: string]; remove: [DeletionTarget] }>()
+const emit = defineEmits<{ back: []; remove: [DeletionTarget] }>()
 const phrase = ref<PhraseDetails | null>(null)
 const explained = ref(false)
 const error = ref('')
@@ -39,7 +39,6 @@ onMounted(async () => {
       <div class="row-actions">
         <button :aria-expanded="explained" @click="explained = !explained">Details</button>
         <button :disabled="disabled" @click="play(phrase.reference_url)">▶ Phrase</button>
-        <button :disabled="disabled" @click="emit('practise', phrase.id)">Practise freely</button>
       </div>
       <div v-if="explained" class="explanation">
         <h2>Details</h2>

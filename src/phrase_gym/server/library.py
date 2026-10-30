@@ -7,10 +7,10 @@ from phrase_gym.server.contracts import (
     PhraseSummary,
     RecordingPage,
 )
+from phrase_gym.server.recording_views import saved_recording
 from phrase_gym.server.scheduling import effective_due, learning_day
 from phrase_gym.server.search_terms import query_terms, word_prefix_filter
 from phrase_gym.server.storage import Database
-from phrase_gym.server.study_views import saved_recording
 
 
 class LibraryService:

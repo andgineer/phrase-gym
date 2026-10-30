@@ -42,8 +42,13 @@ export async function installFakeMedia(page: Page) {
     }
     Object.defineProperty(window, 'MediaRecorder', { configurable: true, value: SilentRecorder })
     HTMLMediaElement.prototype.play = async function () {
-      const host = window as unknown as { __playedMedia?: HTMLMediaElement[] }
+      const host = window as unknown as {
+        __playedMedia?: HTMLMediaElement[]
+        __playedUrls?: string[]
+      }
       ;(host.__playedMedia ??= []).push(this)
+      // Playback cleanup clears src, so keep what each play started with.
+      ;(host.__playedUrls ??= []).push(this.src)
     }
     HTMLMediaElement.prototype.pause = function () {
       this.dispatchEvent(new Event('pause'))

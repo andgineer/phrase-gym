@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
+import { importPackage as importWith } from './helpers'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
@@ -56,13 +57,8 @@ function organizedPackage(packageId: string) {
   }
 }
 
-async function importPackage(page: Page, value: object, added: string) {
-  await page.getByRole('button', { name: 'Add material' }).tap()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(value))
-  await page.getByRole('button', { name: 'Import', exact: true }).tap()
-  await expect(page.getByText(added)).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).tap()
-}
+const importPackage = (page: Page, value: object, added: string) =>
+  importWith(page, value, added, true)
 
 async function noHorizontalScroll(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
@@ -73,24 +69,26 @@ test.beforeEach(async ({ page }) => installFakeMedia(page))
 test('mobile import, lesson choice, search, details and confirmed Delete', async ({ page }) => {
   await page.goto('/')
   await importPackage(page, organizedPackage('mobile-library-v1'), 'Added 4 phrases.')
+  const counts = page.getByTestId('lesson-counts')
+  await expect(counts).toHaveText('0 due · 4 new')
+  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   const card = page.locator('article.practice-card')
   await expect(card.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
   await card.getByRole('button', { name: 'Record a take' }).tap()
   await card.getByRole('button', { name: 'Stop recording' }).tap()
-  await expect(card.getByText('Take 1', { exact: true })).toBeVisible()
+  await expect(card.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(page.getByText(/take\(s\) waiting to save/)).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Library', exact: true }).tap()
-  const counts = page.getByTestId('lesson-counts')
-  await expect(counts).toHaveText('0 due · 4 new · 4 phrases')
+  await page.getByRole('button', { name: 'Practice', exact: true }).tap()
+  const lessonChoice = page.getByLabel('Lesson to drill')
+  await expect(counts).toHaveText('0 due · 4 new')
   await page.getByLabel('Search lessons').fill('meet')
-  await expect(page.getByLabel('Lesson', { exact: true }).locator('option')).toHaveText([
+  await expect(lessonChoice.locator('option')).toHaveText([
     'All lessons',
     'Meetings · Mobile course',
   ])
-  await page
-    .getByLabel('Lesson', { exact: true })
-    .selectOption({ label: 'Meetings · Mobile course' })
-  await expect(counts).toHaveText('0 due · 2 new · 2 phrases')
+  await lessonChoice.selectOption({ label: 'Meetings · Mobile course' })
+  await expect(counts).toHaveText('0 due · 2 new')
   const results = page.getByRole('list', { name: 'Phrases' })
   await expect(results.locator('strong')).toHaveText([
     'Could you walk me through that?',
@@ -116,7 +114,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await details.getByRole('button', { name: 'Details', exact: true }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
-  await expect(details.getByText(/First study · Cue: Asked: How is it going\?/)).toBeVisible()
+  await expect(details.getByText(/ · Daily · First meeting$/)).toBeVisible()
   await expect(details.getByRole('button', { name: '▶ Mine' })).toHaveCount(1)
   await details.getByRole('button', { name: '▶ Phrase' }).tap()
   await expect
@@ -149,25 +147,28 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
 
   await find.fill('')
   await page.getByLabel('Search lessons').fill('')
-  await page
-    .getByLabel('Lesson', { exact: true })
-    .selectOption({ label: 'Small talk · Mobile course' })
+  await lessonChoice.selectOption({ label: 'Small talk · Mobile course' })
   await expect(results.locator('strong')).toHaveText(['Nice to meet you.'])
-  await expect(counts).toHaveText('0 due · 1 new · 1 phrases')
+  await expect(counts).toHaveText('0 due · 1 new')
   await page.getByLabel('Search lessons').fill('meet')
   await expect(counts).toHaveCount(0)
   await page.getByLabel('Search lessons').fill('')
-  await expect(counts).toHaveText('0 due · 1 new · 1 phrases')
+  await expect(counts).toHaveText('0 due · 1 new')
   await page.getByRole('button', { name: 'Delete: Nice to meet you.' }).tap()
   const listConfirm = page.getByRole('dialog', { name: 'Delete “Nice to meet you.”?' })
   await listConfirm.getByRole('button', { name: 'Cancel' }).tap()
   await expect(results.locator('strong')).toHaveText(['Nice to meet you.'])
   await page.getByRole('button', { name: 'Delete: Nice to meet you.' }).tap()
   await listConfirm.getByRole('button', { name: 'Delete permanently' }).tap()
-  await expect(page.getByText('No phrases in this lesson', { exact: true })).toBeVisible()
-  await expect(counts).toHaveText('0 due · 0 new · 0 phrases')
+  await expect(
+    page.getByRole('status').filter({ hasText: 'No phrases in this lesson' }),
+  ).toBeVisible()
+  await expect(counts).toHaveText('No phrases in this lesson')
+  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await expect(page.getByText('No phrases in this lesson.', { exact: true })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Practice', exact: true }).tap()
+  await lessonChoice.selectOption({ label: 'All lessons' })
+  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   await expect(card.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
 })
@@ -177,6 +178,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   const single = organizedPackage('mobile-pending-v1')
   single.lessons = [{ ...single.lessons[1], phrases: [single.lessons[1].phrases[1]] }]
   await importPackage(page, single, 'Added 1 phrases.')
+  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   await page.route('**/api/recordings', (route) =>
     route.request().method() === 'POST'
       ? route.fulfill({ status: 503, json: { detail: 'Temporary save failure' } })
@@ -187,7 +189,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   await card.getByRole('button', { name: 'Stop recording' }).tap()
   await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Library', exact: true }).tap()
+  await page.getByRole('button', { name: 'Practice', exact: true }).tap()
   await page.getByRole('button', { name: 'Delete: That works for me.' }).tap()
   await page.getByRole('button', { name: 'Delete permanently' }).tap()
   await expect(page.getByText('Deleted “That works for me.”.')).toBeVisible()

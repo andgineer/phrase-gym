@@ -20,6 +20,16 @@ const counts = computed(() =>
     ? lessons.items.value.find((lesson) => lesson.id === selected.value)
     : lessons.page.value?.all_lessons,
 )
+const empty = computed(() => lessons.page.value?.all_lessons.phrase_count === 0)
+const summary = computed(() => {
+  const value = counts.value
+  if (!value) return ''
+  if (!value.phrase_count) return 'No phrases in this lesson'
+  if (value.due_count || value.new_count) return `${value.due_count} due · ${value.new_count} new`
+  return value.next_due
+    ? `Nothing waiting today · Next due: ${value.next_due}`
+    : 'Nothing waiting today'
+})
 let debounce: number | undefined
 
 watch(query, () => {
@@ -39,19 +49,21 @@ defineExpose({ reload: lessons.reload })
 </script>
 
 <template>
-  <div class="lesson-picker">
+  <div v-if="empty" class="lesson-picker">
+    <p>Add your first phrase batch</p>
+    <p class="muted">Import 5–10 prepared phrases to begin.</p>
+  </div>
+  <div v-else class="lesson-picker">
     <label for="lesson-search">Search lessons</label>
     <input id="lesson-search" v-model="query" type="search" placeholder="Lesson or source title" />
-    <label for="lesson-choice">Lesson</label>
+    <label for="lesson-choice">Lesson to drill</label>
     <select id="lesson-choice" v-model="selected">
       <option value="">All lessons</option>
       <option v-for="lesson in options" :key="lesson.id" :value="lesson.id">
         {{ lesson.title }} · {{ lesson.source_label }}
       </option>
     </select>
-    <p v-if="counts" class="muted" data-testid="lesson-counts">
-      {{ counts.due_count }} due · {{ counts.new_count }} new · {{ counts.phrase_count }} phrases
-    </p>
+    <p v-if="summary" class="muted" data-testid="lesson-counts">{{ summary }}</p>
     <p v-if="query.trim() && lessons.loaded.value && !lessons.items.value.length" class="muted">
       No matches
     </p>

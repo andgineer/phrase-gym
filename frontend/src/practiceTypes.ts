@@ -1,7 +1,12 @@
-export type StoredTake = {
+import type { components } from './api.generated'
+
+type Upload = components['schemas']['RecordingUpload']
+export type TakeSnapshot = Pick<
+  Upload,
+  'phrase_id' | 'view_token' | 'mode' | 'kind' | 'cue' | 'hint'
+>
+export type StoredTake = TakeSnapshot & {
   id: string
-  phrase_id: string
-  attempt_id: string
   captured_at: string
   mime_type: string
   duration_ms: number | null

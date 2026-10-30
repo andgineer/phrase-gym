@@ -99,7 +99,7 @@ export function usePlayback() {
     return compareUrl(recording.url, referenceUrl, recording.duration_ms)
   }
 
-  function compareTake(take: StoredTake, referenceUrl: string) {
+  function compareTake(take: StoredTake, referenceUrl?: string) {
     stop()
     localUrl = URL.createObjectURL(new Blob([take.audio], { type: take.mime_type }))
     return compareUrl(localUrl, referenceUrl, take.duration_ms)

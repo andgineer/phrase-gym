@@ -86,17 +86,23 @@ def upload_take(
     take_id: str,
     audio: bytes = b"complete saved take",
     captured_at: str = "2026-10-28T10:00:00+00:00",
+    **snapshot: object,
 ) -> Any:
     return client.post(
         "/api/recordings",
         json={
             "id": take_id,
-            "phrase_id": card["id"],
-            "attempt_id": card["attempt_id"],
+            "phrase_id": card["phrase_id"],
+            "view_token": card["view_token"],
+            "mode": card["mode"],
+            "kind": card["kind"],
+            "cue": card["cue"],
+            "hint": card["hint"],
             "captured_at": captured_at,
             "mime_type": "audio/webm",
             "duration_ms": 700,
             "complete": True,
             "audio_base64": base64.b64encode(audio).decode(),
+            **snapshot,
         },
     )

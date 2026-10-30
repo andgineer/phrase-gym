@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = "3"
+SCHEMA_VERSION = "4"
 DATABASE_NAME = "phrase-gym.sqlite3"
 SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -26,31 +26,42 @@ CREATE TABLE phrases (
   contexts_json TEXT NOT NULL, variants_json TEXT NOT NULL,
   search_primary TEXT NOT NULL, search_text TEXT NOT NULL, reference_path TEXT NOT NULL,
   created_at TEXT NOT NULL, position INTEGER NOT NULL, studied_at TEXT, due_at TEXT,
-  fsrs_json TEXT, cue_index INTEGER NOT NULL DEFAULT 0, exposed_day TEXT,
+  fsrs_json TEXT, last_review TEXT, last_cue INTEGER,
   UNIQUE(source_id, item_id)
 );
 CREATE INDEX phrases_by_lesson ON phrases(lesson_id, created_at, position);
-CREATE TABLE attempts (
-  id TEXT PRIMARY KEY, phrase_id TEXT NOT NULL REFERENCES phrases(id),
-  created_at TEXT NOT NULL, completed_at TEXT, answer_snapshot TEXT NOT NULL,
-  explanation_snapshot TEXT NOT NULL, cue_snapshot TEXT NOT NULL, support_json TEXT NOT NULL,
-  kind TEXT NOT NULL, learning_day TEXT, revealed_at TEXT, response_mode TEXT
+CREATE INDEX phrases_by_due ON phrases(due_at);
+CREATE TABLE operations (
+  id TEXT PRIMARY KEY, kind TEXT NOT NULL, request_json TEXT NOT NULL,
+  result_json TEXT NOT NULL
 );
-CREATE TABLE operations (id TEXT PRIMARY KEY, kind TEXT NOT NULL, result_json TEXT NOT NULL);
 CREATE TABLE recordings (
   id TEXT PRIMARY KEY, phrase_id TEXT NOT NULL REFERENCES phrases(id),
-  attempt_id TEXT NOT NULL REFERENCES attempts(id), captured_at TEXT NOT NULL,
+  view_token TEXT NOT NULL, captured_at TEXT NOT NULL,
   mime_type TEXT NOT NULL, duration_ms INTEGER, complete INTEGER NOT NULL,
   capture_settings_json TEXT NOT NULL, path TEXT NOT NULL, byte_length INTEGER NOT NULL,
-  sha256 TEXT NOT NULL, mode TEXT NOT NULL, cue_json TEXT, hint TEXT,
+  sha256 TEXT NOT NULL, mode TEXT NOT NULL, kind TEXT NOT NULL, cue_json TEXT, hint TEXT,
   answer_snapshot TEXT NOT NULL
 );
 CREATE INDEX recordings_by_phrase ON recordings(phrase_id, captured_at);
-CREATE TABLE reviews (
-  id TEXT PRIMARY KEY, attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(id),
-  phrase_id TEXT NOT NULL REFERENCES phrases(id), reviewed_at TEXT NOT NULL,
-  learning_day TEXT NOT NULL, cue_snapshot TEXT NOT NULL, response_mode TEXT NOT NULL,
-  help_before INTEGER NOT NULL, rating TEXT NOT NULL, due_at TEXT NOT NULL
+CREATE INDEX recordings_by_view ON recordings(view_token, captured_at);
+CREATE TABLE practice_log (
+  id TEXT PRIMARY KEY, phrase_id TEXT REFERENCES phrases(id) ON DELETE SET NULL,
+  phrase_text TEXT NOT NULL, lesson_title TEXT NOT NULL, completed_at TEXT NOT NULL,
+  learning_date TEXT NOT NULL, kind TEXT NOT NULL, rating TEXT, skipped INTEGER NOT NULL,
+  fsrs_updated INTEGER NOT NULL, mode TEXT NOT NULL
+);
+CREATE INDEX practice_log_by_date ON practice_log(learning_date, mode, kind);
+CREATE INDEX practice_log_by_phrase ON practice_log(phrase_id);
+CREATE TABLE extra_targets (
+  learning_date TEXT PRIMARY KEY, due_target INTEGER NOT NULL, new_target INTEGER NOT NULL
+);
+CREATE TABLE current_view (
+  id INTEGER PRIMARY KEY CHECK(id=1), traversal_id TEXT NOT NULL,
+  learning_date TEXT NOT NULL, origin TEXT NOT NULL, lesson_id TEXT,
+  skipped_json TEXT NOT NULL, phrase_id TEXT, view_token TEXT, kind TEXT,
+  revealed INTEGER NOT NULL, cue_index INTEGER, hint_index INTEGER,
+  operations_json TEXT NOT NULL
 );
 CREATE TABLE deleted_phrases (id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL);
 CREATE TABLE cleanup_paths (
@@ -58,8 +69,9 @@ CREATE TABLE cleanup_paths (
 );
 CREATE TABLE settings (id INTEGER PRIMARY KEY CHECK(id=1),
   native_language TEXT NOT NULL, learning_timezone TEXT NOT NULL,
-  card_language TEXT NOT NULL, help_language TEXT NOT NULL);
-INSERT INTO settings VALUES (1, 'ru', 'Europe/Belgrade', 'en', 'en');
+  card_language TEXT NOT NULL, help_language TEXT NOT NULL,
+  daily_due_limit INTEGER NOT NULL, daily_new_limit INTEGER NOT NULL);
+INSERT INTO settings VALUES (1, 'ru', 'Europe/Belgrade', 'en', 'en', 20, 5);
 """
 
 
