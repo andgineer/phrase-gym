@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from phrase_gym.server.contracts import CleanupStatus
@@ -6,9 +7,8 @@ from phrase_gym.server.storage import Database, owned_path
 
 def remove_owned_path(path: Path) -> None:
     if path.is_dir():
-        for leftover in path.glob("*.pending"):
-            leftover.unlink(missing_ok=True)
-        path.rmdir()
+        # Only a deleted phrase's own take folder is removed whole, including orphaned files.
+        shutil.rmtree(path)
     else:
         path.unlink(missing_ok=True)
 
@@ -31,6 +31,15 @@ class FileCleanup:
             )
         return CleanupStatus(pending=pending, error=error)
 
+    def _owned(self, path: str) -> Path:
+        resolved = owned_path(self.database.data_dir, path)
+        if (
+            resolved.is_dir()
+            and resolved.parent != (self.database.data_dir / "recordings").resolve()
+        ):
+            raise ValueError(f"{path} is not a phrase recordings folder")
+        return resolved
+
     def retry(self) -> CleanupStatus:
         with self.database.read() as connection:
             paths = [
@@ -39,7 +48,7 @@ class FileCleanup:
             ]
         for path in paths:
             try:
-                remove_owned_path(owned_path(self.database.data_dir, path))
+                remove_owned_path(self._owned(path))
             except (OSError, ValueError) as error:
                 with self.database.write() as connection:
                     connection.execute(

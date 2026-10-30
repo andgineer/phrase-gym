@@ -1,25 +1,11 @@
 import sqlite3
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from datetime import UTC, datetime
 
-from phrase_gym.server.contracts import LessonChoice, LessonPage, PracticeCounts
-from phrase_gym.server.scheduling import effective_due
+from phrase_gym.server.contracts import LessonChoice, LessonPage
+from phrase_gym.server.phrase_counts import schedule_summary
 from phrase_gym.server.search_terms import query_terms, word_prefix_filter
 from phrase_gym.server.storage import Database
-
-
-def practice_counts(
-    connection: sqlite3.Connection,
-    rows: Iterable[sqlite3.Row],
-    now: datetime,
-) -> PracticeCounts:
-    phrases = list(rows)
-    studied = [row for row in phrases if row["studied_at"]]
-    return PracticeCounts(
-        phrase_count=len(phrases),
-        due_count=sum(effective_due(connection, row) <= now for row in studied),
-        new_count=len(phrases) - len(studied),
-    )
 
 
 class LessonChoices:
@@ -41,21 +27,20 @@ class LessonChoices:
             by_lesson: dict[str, list[sqlite3.Row]] = {}
             for row in phrases:
                 by_lesson.setdefault(row["lesson_id"], []).append(row)
-            items = [
-                LessonChoice(
-                    id=lesson["id"],
-                    title=lesson["title"],
-                    source_label=lesson["source_label"],
-                    **practice_counts(
-                        connection,
-                        by_lesson.get(lesson["id"], []),
-                        now,
-                    ).model_dump(),
+            items = []
+            for lesson in lessons[:limit]:
+                counts, _ = schedule_summary(connection, by_lesson.get(lesson["id"], []), now)
+                items.append(
+                    LessonChoice(
+                        id=lesson["id"],
+                        title=lesson["title"],
+                        source_label=lesson["source_label"],
+                        **counts.model_dump(),
+                    ),
                 )
-                for lesson in lessons[:limit]
-            ]
-            return LessonPage(
-                items=items,
-                next_offset=offset + limit if len(lessons) > limit else None,
-                all_lessons=practice_counts(connection, phrases, now),
-            )
+            all_lessons, _ = schedule_summary(connection, phrases, now)
+        return LessonPage(
+            items=items,
+            next_offset=offset + limit if len(lessons) > limit else None,
+            all_lessons=all_lessons,
+        )

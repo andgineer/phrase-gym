@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
+from phrase_gym.server.search_terms import search_key
+
 IDENTITY_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$"
 MAX_PACKAGE_PHRASES = 50
 MAX_HINT_LENGTH = 40
@@ -65,7 +67,8 @@ class ImportPhrase(StrictModel):
 
     @model_validator(mode="after")
     def hints_do_not_repeat_the_answer(self) -> "ImportPhrase":
-        if any(hint.casefold() == self.text.casefold() for hint in self.recall_hints):
+        answer = search_key(self.text)
+        if any(search_key(hint) == answer for hint in self.recall_hints):
             raise ValueError("recall hints cannot repeat the complete phrase")
         return self
 

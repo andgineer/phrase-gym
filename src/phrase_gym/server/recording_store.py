@@ -55,7 +55,9 @@ class RecordingStore:
             directory.mkdir(parents=True, mode=0o700, exist_ok=True)
             directory.chmod(0o700)
             path = directory / upload.id
-            temporary = path.with_suffix(".pending")
+            if path.resolve().parent != directory.resolve():
+                raise RecordingConflictError("Recording id must name a file in its phrase folder")
+            temporary = directory / f"{upload.id}.pending"
             temporary.unlink(missing_ok=True)
             write_private(temporary, audio)
             os.replace(temporary, path)

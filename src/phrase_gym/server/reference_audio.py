@@ -32,7 +32,8 @@ def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str
         total += len(decoded[item])
         if total > MAX_BATCH_REFERENCE_BYTES:
             raise ImportConflictError(
-                f"phrases.{item}: references exceed the 9 MiB batch audio budget",
+                f"phrases.{item}: references exceed the 9 MiB batch audio budget; "
+                "split the package into smaller packages",
             )
     return decoded
 

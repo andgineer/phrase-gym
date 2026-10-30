@@ -14,14 +14,11 @@ const error = ref('')
 const rejected = ref<RejectedTake[]>([])
 let sending: Promise<void> | null = null
 
+// Conflict, deleted phrase, oversized or invalid takes never save; access refusals can later.
+const permanentRefusals = new Set([409, 410, 413, 422])
+
 function permanentlyRefused(cause: unknown) {
-  return (
-    cause instanceof ApiError &&
-    cause.status >= 400 &&
-    cause.status < 500 &&
-    cause.status !== 408 &&
-    cause.status !== 429
-  )
+  return cause instanceof ApiError && permanentRefusals.has(cause.status)
 }
 
 function base64(audio: ArrayBuffer) {

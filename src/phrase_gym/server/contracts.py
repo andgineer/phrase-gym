@@ -1,22 +1,32 @@
+from datetime import datetime
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from phrase_gym.server.import_contracts import Cue, StrictModel
 
 PAGE_LIMIT = 100
+# Take identities become file names, so they exclude path separators and dots.
+STORED_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$"
 
 
 class RecordingUpload(StrictModel):
-    id: str = Field(min_length=8, max_length=100)
-    phrase_id: str = Field(min_length=8, max_length=100)
-    attempt_id: str = Field(min_length=8, max_length=100)
+    id: str = Field(pattern=STORED_ID_PATTERN)
+    phrase_id: str = Field(pattern=STORED_ID_PATTERN)
+    attempt_id: str = Field(pattern=STORED_ID_PATTERN)
     captured_at: str = Field(min_length=10, max_length=64)
     mime_type: str = Field(min_length=3, max_length=100)
     duration_ms: int | None = Field(default=None, ge=0, le=3_600_000)
     complete: bool
     capture_settings: dict[str, str | int | float | bool] = Field(default_factory=dict)
     audio_base64: str
+
+    @field_validator("captured_at")
+    @classmethod
+    def captured_at_has_timezone(cls, value: str) -> str:
+        if datetime.fromisoformat(value).tzinfo is None:
+            raise ValueError("captured_at must include a timezone")
+        return value
 
 
 class CompleteStudy(StrictModel):
@@ -50,6 +60,7 @@ class SavedRecording(StrictModel):
     id: str
     attempt_id: str
     captured_at: str
+    learning_date: str
     mime_type: str
     duration_ms: int | None
     complete: bool

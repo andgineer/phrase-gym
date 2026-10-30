@@ -142,7 +142,7 @@ def test_restart_after_deletion_commit_before_file_cleanup(
     assert deletion.commit(str(opened["id"])) == "Complete phrase number 1."
     assert all(path.is_file() for path in files)
     pending = {str(row[0]) for row in rows(database, "SELECT path FROM cleanup_paths")}
-    assert pending == {*map(str, files), str(tmp_path / "recordings" / str(opened["id"]))}
+    assert pending == {str(files[0]), str(tmp_path / "recordings" / str(opened["id"]))}
     with TestClient(create_app()) as restarted:
         assert restarted.get("/api/cleanup").json() == {"pending": 0, "error": None}
         assert restarted.get(f"/api/phrases/{opened['id']}").status_code == 404
@@ -173,3 +173,57 @@ def test_replacement_import_uses_fresh_identity_and_paths(
     assert new[1] != str(old_reference)
     pending = {str(row[0]) for row in rows(database, "SELECT path FROM cleanup_paths")}
     assert str(old_reference) in pending and str(new[1]) not in pending
+
+
+def test_orphaned_take_file_does_not_block_folder_cleanup(
+    client: TestClient, opened: dict[str, object], tmp_path: Path
+) -> None:
+    folder = tmp_path / "recordings" / str(opened["id"])
+    (folder / "renamed-before-crash").write_bytes(b"take without a database row")
+    result = client.delete(f"/api/phrases/{opened['id']}").json()
+    assert result["cleanup"] == {"pending": 0, "error": None}
+    assert not folder.exists()
+
+
+@pytest.mark.parametrize("field", ["id", "phrase_id", "attempt_id"])
+@pytest.mark.parametrize(
+    "value", ["../../references/other.wav", "nested/take-1234", "take.with.dots", "..secret1"]
+)
+def test_unsafe_take_identities_are_rejected(
+    client: TestClient, opened: dict[str, object], field: str, value: str
+) -> None:
+    identities = {"id": str(uuid4()), "phrase_id": opened["id"], "attempt_id": opened["attempt_id"]}
+    identities[field] = value
+    card = {"id": identities["phrase_id"], "attempt_id": identities["attempt_id"]}
+    assert upload_take(client, card, str(identities["id"])).status_code == 422
+
+
+def test_take_identity_cannot_overwrite_or_delete_another_reference(
+    client: TestClient, package: Package, tmp_path: Path
+) -> None:
+    publish(client, package)
+    card = client.post("/api/study/current").json()["card"]
+    database = client.app.state.database
+    other = rows(database, "SELECT id, reference_path FROM phrases WHERE id!=? LIMIT 1", card["id"])
+    other_id, other_reference = str(other[0][0]), Path(str(other[0][1]))
+    traversal = f"../../references/{other_id}"
+    assert upload_take(client, card, traversal, b"not a reference").status_code == 422
+    assert client.delete(f"/api/phrases/{card['id']}").status_code == 200
+    assert other_reference.read_bytes().startswith(b"RIFF")
+    assert client.get(f"/api/phrases/{other_id}/reference").content.startswith(b"RIFF")
+
+
+def test_cleanup_refuses_a_recorded_folder_outside_phrase_recordings(
+    client: TestClient, tmp_path: Path
+) -> None:
+    keep = tmp_path / "references"
+    keep.mkdir(exist_ok=True)
+    (keep / "kept.wav").write_bytes(b"RIFF")
+    with client.app.state.database.write() as connection:
+        connection.execute(
+            "INSERT INTO cleanup_paths (path, phrase_id, recorded_at) VALUES (?,?,?)",
+            (str(keep), "unknown-phrase", "2026-10-30T00:00:00+00:00"),
+        )
+    status = client.post("/api/cleanup/retry").json()
+    assert status["pending"] == 1 and "not a phrase recordings folder" in status["error"]
+    assert (keep / "kept.wav").is_file()

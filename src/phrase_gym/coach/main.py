@@ -55,6 +55,14 @@ async def prepare(work: dict[str, Any], speech: PiperSpeech) -> dict[str, str]:
     }
 
 
+def refusal(error: urllib.error.HTTPError) -> str:
+    try:
+        detail = json.loads(error.read() or b"{}").get("detail")
+    except (OSError, ValueError, AttributeError):
+        detail = None
+    return detail if isinstance(detail, str) and detail else str(error)
+
+
 def process_once(api: CoachApi, speech: PiperSpeech) -> bool:
     work = api.post("coach/next")
     if work is None:
@@ -63,7 +71,9 @@ def process_once(api: CoachApi, speech: PiperSpeech) -> bool:
     try:
         references = asyncio.run(prepare(work, speech))
         api.post(f"{package_id}/result", {"result_id": package_id, "references": references})
-    except (OSError, ValueError, RuntimeError, urllib.error.HTTPError) as error:
+    except urllib.error.HTTPError as error:
+        api.post(f"{package_id}/failure", {"error": refusal(error)[:1000]})
+    except (OSError, ValueError, RuntimeError) as error:
         api.post(f"{package_id}/failure", {"error": str(error)[:1000]})
     return True
 

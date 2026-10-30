@@ -3,14 +3,16 @@ import sqlite3
 from datetime import datetime
 
 from phrase_gym.server.contracts import SavedRecording, StudyCard, StudyResponse
-from phrase_gym.server.scheduling import effective_due
+from phrase_gym.server.phrase_counts import schedule_summary
+from phrase_gym.server.scheduling import learning_day
 
 
-def saved_recording(row: sqlite3.Row) -> SavedRecording:
+def saved_recording(connection: sqlite3.Connection, row: sqlite3.Row) -> SavedRecording:
     return SavedRecording(
         id=row["id"],
         attempt_id=row["attempt_id"],
         captured_at=row["captured_at"],
+        learning_date=learning_day(connection, datetime.fromisoformat(row["captured_at"])),
         mime_type=row["mime_type"],
         duration_ms=row["duration_ms"],
         complete=bool(row["complete"]),
@@ -28,7 +30,7 @@ def recordings(connection: sqlite3.Connection, phrase_id: str) -> list[SavedReco
         "SELECT * FROM recordings WHERE phrase_id=? ORDER BY captured_at, id",
         (phrase_id,),
     ).fetchall()
-    return [saved_recording(row) for row in rows]
+    return [saved_recording(connection, row) for row in rows]
 
 
 def response(
@@ -37,15 +39,10 @@ def response(
     attempt: sqlite3.Row | None,
     instant: str,
 ) -> StudyResponse:
-    total = connection.execute("SELECT COUNT(*) FROM phrases").fetchone()[0]
-    scheduled = connection.execute(
-        "SELECT * FROM phrases WHERE studied_at IS NOT NULL",
-    ).fetchall()
-    due_times = [effective_due(connection, row) for row in scheduled]
-    now = datetime.fromisoformat(instant)
-    due = sum(when <= now for when in due_times)
-    later = [when for when in due_times if when > now]
-    future = min(later).isoformat() if later else None
+    phrases = connection.execute("SELECT * FROM phrases").fetchall()
+    counts, next_due = schedule_summary(connection, phrases, datetime.fromisoformat(instant))
+    total = counts.phrase_count
+    future = next_due.isoformat() if next_due else None
     message = None
     if not card:
         message = (
@@ -58,9 +55,9 @@ def response(
     return StudyResponse(
         done=bool(total and not card),
         total=total,
-        studied=len(scheduled),
-        due_count=due,
-        new_count=total - len(scheduled),
+        studied=total - counts.new_count,
+        due_count=counts.due_count,
+        new_count=counts.new_count,
         next_return=future,
         message=message,
         card=study_card(connection, card, attempt) if card and attempt else None,

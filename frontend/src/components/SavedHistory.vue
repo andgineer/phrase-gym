@@ -22,7 +22,7 @@ const takes = usePagedList<Recording, RecordingPage>(
 onMounted(() => void takes.reload())
 
 function describe(take: Recording) {
-  const parts = [new Date(take.captured_at).toLocaleDateString(), modes[take.mode]]
+  const parts = [take.learning_date, modes[take.mode]]
   if (take.cue) parts.push(`Cue: ${take.cue.situation}`)
   if (take.hint) parts.push(`Hint: ${take.hint}`)
   return parts.join(' · ')

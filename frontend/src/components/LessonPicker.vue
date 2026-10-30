@@ -14,9 +14,10 @@ const options = computed(() =>
     ? [chosen.value, ...lessons.items.value]
     : lessons.items.value,
 )
+// Only a freshly loaded lesson has current counts; a lesson hidden by the search may be stale.
 const counts = computed(() =>
   selected.value
-    ? (lessons.items.value.find((lesson) => lesson.id === selected.value) ?? chosen.value)
+    ? lessons.items.value.find((lesson) => lesson.id === selected.value)
     : lessons.page.value?.all_lessons,
 )
 let debounce: number | undefined

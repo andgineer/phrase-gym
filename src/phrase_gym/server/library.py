@@ -1,6 +1,4 @@
 import json
-from collections.abc import Callable
-from datetime import UTC, datetime
 from pathlib import Path
 
 from phrase_gym.server.contracts import (
@@ -16,9 +14,8 @@ from phrase_gym.server.study_views import saved_recording
 
 
 class LibraryService:
-    def __init__(self, database: Database, clock: Callable[[], datetime] | None = None):
+    def __init__(self, database: Database):
         self.database = database
-        self.clock = clock or (lambda: datetime.now(UTC))
 
     def phrases(self, query: str, lesson_id: str | None, offset: int, limit: int) -> PhrasePage:
         terms = query_terms(query)
@@ -88,8 +85,9 @@ class LibraryService:
                 "ORDER BY captured_at DESC, id DESC LIMIT ? OFFSET ?",
                 (phrase_id, limit + 1, offset),
             ).fetchall()
+            items = [saved_recording(connection, row) for row in rows[:limit]]
         return RecordingPage(
-            items=[saved_recording(row) for row in rows[:limit]],
+            items=items,
             next_offset=offset + limit if len(rows) > limit else None,
         )
 

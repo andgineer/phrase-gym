@@ -901,8 +901,7 @@
         "additionalProperties": false,
         "properties": {
           "attempt_id": {
-            "maxLength": 100,
-            "minLength": 8,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
             "title": "Attempt Id",
             "type": "string"
           },
@@ -954,8 +953,7 @@
             "title": "Duration Ms"
           },
           "id": {
-            "maxLength": 100,
-            "minLength": 8,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
             "title": "Id",
             "type": "string"
           },
@@ -966,8 +964,7 @@
             "type": "string"
           },
           "phrase_id": {
-            "maxLength": 100,
-            "minLength": 8,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,99}$",
             "title": "Phrase Id",
             "type": "string"
           }
@@ -1078,6 +1075,10 @@
             "title": "Id",
             "type": "string"
           },
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
           "mime_type": {
             "title": "Mime Type",
             "type": "string"
@@ -1100,6 +1101,7 @@
           "id",
           "attempt_id",
           "captured_at",
+          "learning_date",
           "mime_type",
           "duration_ms",
           "complete",

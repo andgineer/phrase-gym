@@ -53,30 +53,37 @@ beforeEach(() => {
   state.entries = [{ key: `take-v2:${take.id}`, value: take }]
 })
 
-test('a deleted phrase refusal is kept on the device until the learner discards it', async () => {
-  const { takeTransfers } = await import('../src/takeTransfers')
-  state.failure = new ApiError('This phrase was deleted. Discard it from this device.', 410)
-  await takeTransfers.flush()
-  expect(takeTransfers.rejected.value).toEqual([
-    {
-      id: take.id,
-      key: `take-v2:${take.id}`,
-      message: 'This phrase was deleted. Discard it from this device.',
-    },
-  ])
-  expect(takeTransfers.error.value).toBe('')
-  expect(takeTransfers.pendingTakes.value).toBe(1)
-  expect(state.deleted).toEqual([])
+test.each([410, 409, 413, 422])(
+  'a permanent %s refusal is kept until discarded',
+  async (status) => {
+    const { takeTransfers } = await import('../src/takeTransfers')
+    state.failure = new ApiError('This phrase was deleted. Discard it from this device.', status)
+    await takeTransfers.flush()
+    expect(takeTransfers.rejected.value).toEqual([
+      {
+        id: take.id,
+        key: `take-v2:${take.id}`,
+        message: 'This phrase was deleted. Discard it from this device.',
+      },
+    ])
+    expect(takeTransfers.error.value).toBe('')
+    expect(takeTransfers.pendingTakes.value).toBe(1)
+    expect(state.deleted).toEqual([])
 
-  await takeTransfers.discard(take.id)
-  expect(state.deleted).toEqual([`take-v2:${take.id}`])
-  expect(takeTransfers.rejected.value).toEqual([])
-  expect(takeTransfers.pendingTakes.value).toBe(0)
-})
+    await takeTransfers.discard(take.id)
+    expect(state.deleted).toEqual([`take-v2:${take.id}`])
+    expect(takeTransfers.rejected.value).toEqual([])
+    expect(takeTransfers.pendingTakes.value).toBe(0)
+  },
+)
 
-test('a temporary failure stays retryable and offers no discard', async () => {
+test.each([
+  [503, 'Temporary save failure'],
+  [403, 'Cross-origin mutations are not allowed'],
+  [400, 'Invalid host header'],
+])('a %s refusal stays retryable and offers no discard', async (status, message) => {
   const { takeTransfers } = await import('../src/takeTransfers')
-  state.failure = new ApiError('Temporary save failure', 503)
+  state.failure = new ApiError(message, status)
   await takeTransfers.flush()
   expect(takeTransfers.rejected.value).toEqual([])
   expect(takeTransfers.error.value).toContain('Audio remains on this device')

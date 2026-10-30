@@ -44,7 +44,6 @@ def create_app() -> FastAPI:
     app.include_router(review_routes(study))
     library = LibraryService(database)
     lessons = LessonChoices(database)
-    app.state.library = library
     app.state.lessons = lessons
     app.include_router(library_routes(library, lessons))
     app.include_router(deletion_routes(PhraseDeletion(database, cleanup)))

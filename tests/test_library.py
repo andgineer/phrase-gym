@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
@@ -14,7 +15,7 @@ TABLES = ("phrases", "lessons", "attempts", "reviews", "operations", "recordings
 
 
 def snapshot(path: Path) -> dict[str, list[tuple[object, ...]]]:
-    with sqlite3.connect(path / "phrase-gym.sqlite3") as connection:
+    with closing(sqlite3.connect(path / "phrase-gym.sqlite3")) as connection:
         return {
             table: connection.execute(f"SELECT * FROM {table} ORDER BY rowid").fetchall()
             for table in TABLES
@@ -222,3 +223,14 @@ def test_lookup_makes_no_scheduling_writes(client: TestClient, tmp_path: Path) -
     client.get(f"/api/phrases/{review.id}/reference")
     assert snapshot(tmp_path) == before
     assert study.current().card.attempt_id == review.attempt_id
+
+
+def test_recording_dates_use_the_learning_timezone(client: TestClient) -> None:
+    publish(client, make_package())
+    card = client.post("/api/study/current").json()["card"]
+    late = upload_take(client, card, str(uuid4()), captured_at="2026-10-28T23:30:00+00:00")
+    assert late.status_code == 200
+    naive = upload_take(client, card, str(uuid4()), captured_at="2026-10-28T23:30:00")
+    assert naive.status_code == 422
+    item = client.get(f"/api/phrases/{card['id']}/recordings").json()["items"][0]
+    assert item["learning_date"] == "2026-10-29"

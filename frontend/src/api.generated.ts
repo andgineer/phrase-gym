@@ -735,6 +735,8 @@ export interface components {
             hint: string | null;
             /** Id */
             id: string;
+            /** Learning Date */
+            learning_date: string;
             /** Mime Type */
             mime_type: string;
             /**

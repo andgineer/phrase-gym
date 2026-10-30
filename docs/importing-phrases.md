@@ -19,6 +19,10 @@ course-provider call during import; source links are attribution only and are ne
 | `help_language` | `en` |
 | `lessons` | 1–20 lessons with at most 50 phrases in total; an ordinary batch has 5–10 phrases |
 
+All reference audio for one package, whether Coach prepares it or an agent supplies it, must fit
+one 9 MiB budget: about 3.5 minutes of speech at 22,050 Hz. Fifty long sentences can exceed it;
+the import then fails with an error asking you to split the package, so keep packages short.
+
 Each lesson has a stable `lesson_id`, a learner-readable `title` and one or more `phrases`.
 One package may contain several lessons; every phrase belongs to exactly one of them.
 

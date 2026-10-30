@@ -1,13 +1,18 @@
 import base64
 import io
 import json
+import urllib.error
 import wave
+from email.message import Message
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
 import phrase_gym.server.publication as publication
+from phrase_gym.coach.main import process_once
+from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
 from phrase_gym.server.import_contracts import PhrasePackage
 from phrase_gym.server.importer import Importer
@@ -165,6 +170,7 @@ def test_reference_budget_fits_transport_and_rejects_oversized_batch(client: Tes
     )
     assert rejected.status_code == 409
     assert "9 MiB batch audio budget" in rejected.text
+    assert "split the package" in rejected.text
     assert {row["package_id"] for row in client.get("/api/imports").json()} == {
         "course-meetings-v1"
     }
@@ -185,6 +191,12 @@ def test_reference_budget_fits_transport_and_rejects_oversized_batch(client: Tes
         (
             lambda p: p["lessons"][0]["phrases"][0].update(
                 recall_hints=["Complete phrase number 1.", "other"]
+            ),
+            ["phrases", 0],
+        ),
+        (
+            lambda p: p["lessons"][0]["phrases"][0].update(
+                recall_hints=["complete PHRASE, number 1", "other"]
             ),
             ["phrases", 0],
         ),
@@ -275,6 +287,49 @@ def test_source_item_conflict_names_existing_phrase_and_deletion(
     assert "“Complete phrase number 3.”" in response.text
     assert "Delete that phrase first" in response.text
     assert table_count(client.app.state.database, "lessons") == 1
+
+
+class ClientCoachApi:
+    """Routes Coach's API calls to the in-process app with urllib's error behavior."""
+
+    def __init__(self, client: TestClient):
+        self.client = client
+
+    def post(self, path: str, payload: dict[str, object] | None = None) -> Any:
+        response = self.client.post(f"/api/imports/{path}", json=payload or {})
+        if response.status_code >= 400:
+            raise urllib.error.HTTPError(
+                path, response.status_code, "Conflict", Message(), io.BytesIO(response.content)
+            )
+        return response.json()
+
+
+def test_coach_reports_the_server_explanation_for_a_conflict(
+    client: TestClient, package: Package
+) -> None:
+    assert client.post("/api/imports", json={"package": package}).status_code == 202
+    publish(client, make_package("rival-package", [lesson("unit-1", "Meetings", [phrase(5)])]))
+    assert process_once(ClientCoachApi(client), PiperSpeech(None, fake=True))
+    status = client.get(f"/api/imports/{package['package_id']}").json()
+    assert status["status"] == "error"
+    assert "phrases.meeting-5" in status["error"]
+    assert "“Complete phrase number 5.”" in status["error"]
+    assert "Delete that phrase first" in status["error"]
+
+
+def test_same_lesson_and_item_ids_under_another_source_are_separate(
+    client: TestClient, package: Package
+) -> None:
+    publish(client, package)
+    other = make_package(
+        "other-source-package",
+        [lesson("unit-1", "Different title", [phrase(1, text="Another source wording.")])],
+        "other-source",
+    )
+    assert publish(client, other)["added_count"] == 1
+    titles = [item["title"] for item in client.get("/api/lessons").json()["items"]]
+    assert titles == ["Meetings", "Different title"]
+    assert table_count(client.app.state.database, "phrases") == 6
 
 
 def test_conflict_appearing_while_coach_prepares_fails_without_partial_publication(

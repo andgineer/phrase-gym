@@ -31,12 +31,9 @@ class PhraseDeletion:
             ).fetchone()
             if phrase is None:
                 return None
-            takes = connection.execute(
-                "SELECT path FROM recordings WHERE phrase_id=? ORDER BY rowid",
-                (phrase_id,),
-            ).fetchall()
+            # Takes live only in the phrase's own folder, which cleanup removes as a whole.
             directory = self.database.data_dir / "recordings" / phrase_id
-            paths = [phrase["reference_path"], *(row["path"] for row in takes), str(directory)]
+            paths = [phrase["reference_path"], str(directory)]
             instant = self.clock().isoformat()
             connection.executemany(
                 "INSERT OR IGNORE INTO cleanup_paths (path, phrase_id, recorded_at) VALUES (?,?,?)",

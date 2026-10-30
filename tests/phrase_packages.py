@@ -85,6 +85,7 @@ def upload_take(
     card: dict[str, Any],
     take_id: str,
     audio: bytes = b"complete saved take",
+    captured_at: str = "2026-10-28T10:00:00+00:00",
 ) -> Any:
     return client.post(
         "/api/recordings",
@@ -92,7 +93,7 @@ def upload_take(
             "id": take_id,
             "phrase_id": card["id"],
             "attempt_id": card["attempt_id"],
-            "captured_at": "2026-10-28T10:00:00+00:00",
+            "captured_at": captured_at,
             "mime_type": "audio/webm",
             "duration_ms": 700,
             "complete": True,
