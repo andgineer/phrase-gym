@@ -17,8 +17,8 @@ through the Phrase Gym HTTP API. The learner supplies source locations and the s
 3. Identify the reusable chunk in each source example, then author and inspect its gap cues
    and wording hints using the checks below. This semantic work is the core task. Keep authored
    contexts distinct from source quotations.
-4. Prepare one complete audio reference for every phrase as described below. Reuse suitable
-   source recordings; generate missing references with an available, authorized speech tool.
+4. Prepare one audio reference for every phrase as described below. Reuse supplied source
+   recordings; when no audio is supplied, choose an available, authorized TTS tool and natural voice.
    Finish both text and audio before submission. Do not submit text-only requests.
 5. Submit `package` and `references` together with `POST /api/imports`. Confirm `status: added`
    and `added_count`. The complete batch is then immediately available for learning.
@@ -138,15 +138,17 @@ For every row, the learner still has to produce the missing English expression.
 5. **Transferable context:** keep the target constant across cues while changing useful context;
    do not demand memorization of the original sentence's business claim or technical vocabulary.
 6. **Honest support:** identify the chunk in the explanation, keep suitable alternatives only,
-   and preserve exact source text/audio alignment. Keep source-claim verification limits in the
-   review notes; do not append the same disclaimer to every learner explanation. Study precedes
+   and preserve the source's phrase-to-recording association. Keep source-claim verification limits
+   in the review notes; do not append the same disclaimer to every learner explanation. Study precedes
    recall; requested help is supported retrieval.
 7. **Coverage:** map every source phrase to its prepared card and package. All supplied phrases
    must be represented; a smaller batch is not permission to leave the rest out.
 
 Retain a review sheet outside the API payload listing each source sentence, selected chunk,
 completed cues, an individual rationale for every hint, full source coverage, and any ambiguity
-or audio limitation. Report the full prepared material for learner review. Do not invent schema fields for this sheet.
+or audio access/format blocker. Include source audio paths or TTS tool/voice details and any
+conversion or explicitly requested edit. Report the full prepared material for learner review.
+Do not invent schema fields for this sheet.
 
 Phrase Gym validates structure, not teaching quality. Structural acceptance cannot certify chunk
 selection, effective hints or speech quality. The [research notes](https://github.com/andgineer/phrase-gym/blob/main/specs/research/phrase-prompts.md)
@@ -202,18 +204,32 @@ request structure. No variable-slot engine, dialogue graph, audio URL or extra f
 
 ## Audio preparation
 
-Resolve recording links or embeds in the authorized source material. Reuse recordings only when
-accessible, complete, and matching the exact phrase text. Convert suitable recordings to mono
-16-bit PCM WAV; remove spoken item numbers or unrelated speech without clipping the phrase.
-Leave original files unchanged. If no suitable source recording exists, synthesize the complete
-phrase with an available English voice. Do not silently replace suitable source speech.
+Use the recording supplied for each phrase, resolving links or embeds from the authorized source.
+Trust the source's phrase-to-recording association. Do not listen, transcribe, run ASR, score
+pronunciation or otherwise analyze its speech unless the learner specifically requests that work.
+Do not treat absence of such analysis as a missing acceptance check or an import blocker.
 
-Verify that every file decodes, contains the full phrase, and fits the limits below. Check wording
-and speech quality using available audio inspection capabilities; report any quality checks that
-could not be performed. Decoding alone does not establish correct words or natural pronunciation.
-Do not play audio aloud on the learner's device without arranging attended listening.
-If speech generation requires unavailable access or a new paid service, ask the learner to resolve
-that prerequisite before submission.
+Preserve supplied speech. Do not trim spoken item numbers, remove silence, denoise, normalize or
+replace it with TTS on your own initiative. Make a content edit only when the learner requests it,
+for example “remove the task number at the beginning”. Keep original source files unchanged and
+perform any requested edit on a separate copy. Report inaccessible supplied recordings as an
+access blocker rather than silently substituting generated speech.
+
+The current import API requires mono 16-bit PCM WAV at 8,000–48,000 Hz. Reuse a compliant file
+unchanged. Convert MP3 or other incompatible formats to a separate WAV copy only because this API
+requires it; this is format adaptation, not speech analysis or permission to edit the content.
+Preserve the entire recording and its sample rate when accepted. Do not resample everything to
+22,050 Hz by default. Check only file readability, decoding, required format and request size
+limits for submission. Split batches to meet the aggregate budget; do not shorten recordings.
+
+When the source provides no audio, synthesize the complete `text` with the most natural suitable
+voice available through an authorized tool. The agent chooses the TTS tool and voice; Piper is
+one local option, not a requirement or a preferred fallback that must override a better available
+voice. Choose for the language, pronunciation and natural delivery, and record the tool/voice used.
+No listening, transcription or separate audio-analysis stage is required for routine preparation.
+If generation needs unavailable access or new paid service authorization, report that prerequisite.
+Do not automate login or play audio aloud on the learner's device without attended listening being
+explicitly arranged. Prepare all references before submitting the package.
 
 ## API handoff
 
@@ -230,8 +246,8 @@ This illustrates the envelope; replace the placeholders with the documented pack
 one reference for every `item_id`. Audio belongs in `references`, not inside the package or at a URL.
 Every complete source example must be paired with its matching reference before submission.
 
-Each reference must be a complete playable mono 16-bit PCM WAV, at most 8 MiB. All decoded WAV
-files together must fit 9 MiB. Base64 expands the audio by about one third; the complete HTTP request
+Each reference must be a nonempty playable mono 16-bit PCM WAV at 8,000–48,000 Hz, at most 8 MiB.
+All decoded WAV files together must fit 9 MiB. Base64 expands the audio by about one third; the complete HTTP request
 must fit 16 MiB. These limits apply per request. Split larger courses into packages, preserving
 lesson identities and titles.
 

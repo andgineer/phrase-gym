@@ -24,13 +24,24 @@ Validate the whole submission before adding it. Tell the learner which item/fiel
 
 ## Reference speech
 
-For the text-only MVP, Coach synthesizes English reference audio with the existing local Piper installation/voice. No provider login is needed for speech. Use the [durable Phrase Gym handoff](architecture.md#responsibilities) so submission works while Coach is offline. Prepare audio once and save it; practice plays saved audio without inference. A batch is ready only when its phrases and all required reference audio are saved. Show **Pending** or **Preparing audio**, then the confirmed added-phrase count, or a clear failure with **Retry**. Failed or interrupted imports do not leave half a batch in practice. The external-agent path requires complete validated references with the batch and publishes immediately. The agent reuses suitable source recordings or generates missing references before submission.
+For the text-only MVP, Coach synthesizes English reference audio with the existing local Piper installation/voice. No provider login is needed for speech. Use the [durable Phrase Gym handoff](architecture.md#responsibilities) so submission works while Coach is offline. Prepare audio once and save it; practice plays saved audio without inference. A batch is ready only when its phrases and all required reference audio are saved. Show **Pending** or **Preparing audio**, then the confirmed added-phrase count, or a clear failure with **Retry**. Failed or interrupted imports do not leave half a batch in practice. The external-agent path requires complete validated references with the batch and publishes immediately. The external agent reuses supplied source recordings or chooses an available authorized TTS tool and natural voice for missing audio. The built-in Coach uses Piper; this does not constrain external agents to Piper.
 
 Preserve submitted text and diagnostic reason on failure. Bound concurrent preparation to personal-app scale and show queued work honestly. Coach performs expensive work outside Phrase Gym transactions; Phrase Gym validates the returned result and commits the ready batch in one transaction. Retry uses stable identities so a repeated submission or result does not duplicate phrases or references. Do not build a job dashboard, broker or general distributed recovery framework.
 
-When an external agent supplies original course audio, preserve it and report its provenance; never silently replace it with synthesized speech. Supplied audio must match the answer. Remote audio URLs are not automatically fetched. One acceptable voice for each supported language is sufficient; fallback engines and a voice marketplace are unnecessary.
+External agents trust the supplied source's phrase-to-recording association and report provenance.
+No listening, transcription, ASR or speech-quality analysis is required for routine preparation.
+Do not treat their absence as an import acceptance gap. Preserve supplied recordings without
+trimming, denoising or other content changes unless the learner explicitly requests an edit;
+work on copies and retain the originals. Convert only when necessary for the current mono 16-bit
+PCM WAV contract, preserving duration and an accepted sample rate. A compliant file is reused
+unchanged. Technical format/size checks remain necessary; they are not semantic audio analysis.
+Remote audio URLs are not automatically fetched by Phrase Gym. External-agent TTS selection
+needs no application voice marketplace or general provider framework.
 
-Audio must be playable and complete, with the intended wording and suitable pronunciation. Technical decoding cannot certify speech quality. Listen to representative output with the learner before calling the voice accepted; automated tests remain silent.
+For missing audio, the external agent aims for natural speech of the complete source example
+using its chosen authorized tool and voice. Routine imports do not require a separate audio-analysis
+stage. Technical decoding cannot certify speech quality, and choosing a voice does not establish
+learner preference. Attended listening can be requested separately; automated tests remain silent.
 
 ## Later input: echo-words and plain text
 
