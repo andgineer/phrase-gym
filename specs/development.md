@@ -24,6 +24,16 @@ Documentation and Allure reports are published to the `gh-pages` branch by their
 Configure GitHub Pages to serve the root of that branch. CI also provides coverage comments,
 Codecov and Coveralls integration; external coverage services require their repository setup.
 
+User launch, Coach setup, private access and backups are documented in the
+[user guide](../docs/src/en/installation.md).
+
+## Documentation sources
+
+Keep user and external-agent pages in `docs/src/en/` and list them in `docs/mkdocs.yml`.
+Each language directory is the complete source for that language; the build copies it into
+`build/docs/src/` without injecting pages from elsewhere. Development and release guidance
+belongs in `specs/`, outside the user site.
+
 ## Build a distributable
 
 ```bash
@@ -38,18 +48,6 @@ Hatch reads it for both distributions.
 `inv build-frontend` rebuilds only the Vue client. `inv run --build` builds the client and starts
 the server; `inv run` starts the server with the existing client build. Pre-commit contains the
 Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.
-
-## Private Tailscale access
-
-With Tailscale already connected, run `inv run --build --tailscale`. The task points the existing
-HTTPS Serve route at `127.0.0.1:8000` and passes the exact machine origin to Phrase Gym.
-The backend remains on loopback; only devices permitted by your Tailscale policy can use this
-shared library. This does not enable public Funnel access. Run Coach with `PHRASE_GYM_PIPER_CONFIG` when preparing text-only material. The server starts
-without Piper and continues to serve study and replay while Coach is stopped.
-
-Use `tailscale serve status` to inspect the route. Stop an old Phrase Gym process before starting
-the replacement; retain its data directory and recordings. On iPhone, use the HTTPS machine URL
-with Tailscale connected. Microphone permission and actual playback still need attended checks.
 
 ## Publish a release
 

@@ -17,3 +17,7 @@ browsers. Linux browser audio qualification is planned after the MVP.
 
 Start with [installation](installation.md), then [import a phrase package](importing-phrases.md).
 The service listens only on loopback and keeps learner data in its local application-data directory.
+
+For your external AI agent, pass along the [preparation instructions and API handoff](importing-phrases.md#instruction-for-an-external-preparation-agent).
+See also [private access](private-access.md), [backup and restore](backup-and-restore.md),
+and the [HTTP API reference](reference.md).

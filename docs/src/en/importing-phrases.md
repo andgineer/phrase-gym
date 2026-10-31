@@ -121,7 +121,9 @@ result through the API; it never opens the application database.
 An external agent that already has audio can call `POST /api/imports` with `package` and
 `references`, a map from each `item_id` to base64-encoded mono 16-bit PCM WAV bytes. Every
 phrase must have one complete playable reference, at most 8 MiB, and all references together must
-fit a 9 MiB audio budget. These limits keep the base64 JSON below the API's 16 MiB request limit.
+fit a 9 MiB audio budget. Base64 expands the audio by about one third; the 9 MiB budget leaves room for phrase data
+within the API's 16 MiB request limit. These are per-package request limits, not a limit on
+your library: split larger courses across packages, reusing lesson identities and titles.
 This publishes the batch
 atomically and returns `added` without Coach. A malformed or missing reference identifies the
 item and rejects the whole request. Retrying identical package and audio returns the original

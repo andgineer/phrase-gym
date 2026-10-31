@@ -53,9 +53,6 @@ def docs_rendered(language: str):
     config_path.write_text(config.replace("LANGUAGE", language).replace("SITE_DIR", site_dir))
     shutil.rmtree(source_path, ignore_errors=True)
     shutil.copytree(DOCS_SRC_PATH / language, source_path)
-    shutil.copytree(DOCS_PATH / "common", source_path, dirs_exist_ok=True)
-    shutil.copyfile(DOCS_PATH / "importing-phrases.md", source_path / "importing-phrases.md")
-    shutil.copyfile(DOCS_PATH / "development.md", source_path / "development.md")
     yield config_path
 
 

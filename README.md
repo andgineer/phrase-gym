@@ -34,7 +34,7 @@ iPhone with Tailscale connected.
 
 The built wheel contains the Vue client. A lean installed package runs `phrase-gym run`.
 Coach runs separately: set `PHRASE_GYM_PIPER_CONFIG` to the private voice file in
-[the import guide](docs/importing-phrases.md#piper-voice), then run
+[the import guide](docs/src/en/importing-phrases.md#piper-voice), then run
 `uv run phrase-gym coach` in another terminal. The private Piper environment belongs to Coach;
 the server needs only core dependencies. Service registration and deployment commands remain
 unavailable.
@@ -100,9 +100,9 @@ waiting to upload for that phrase stays on the device until you discard it. If d
 be removed, the app keeps showing the problem with **Retry cleanup** until removal succeeds.
 **Settings** contains the native language and learning timezone.
 
-For a private stopped-app backup and restore, follow [the maintenance procedure](docs/backup-and-restore.md).
+For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
 
-See [the package schema, example, and external-agent instruction](docs/importing-phrases.md).
+See [the package schema, example, and external-agent instruction](docs/src/en/importing-phrases.md).
 
 ## Development
 
@@ -125,7 +125,7 @@ The scaffold's `inv pre`, `inv reqs`, `inv docs-en`, `inv build-docs`, `inv vers
 `inv ver-bug` / `inv ver-feature` / `inv ver-release` commands are available.
 `uv run inv build` builds the client and Python distributions. A version command checks and commits the
 version update, then pushes its release tag; the tag workflow publishes to PyPI only after CI passes.
-See [development and release operations](docs/development.md) for setup and dry-run commands.
+See [development and release operations](specs/development.md) for setup and dry-run commands.
 
 Use `uv run inv run --build` to rebuild the frontend and start the server, or `uv run inv run`
 to start it with the existing client build.

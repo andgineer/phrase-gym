@@ -34,9 +34,9 @@ For a root-session request to implement the next stage, follow the [orchestratio
 | Build documentation | `uv run inv build-docs` |
 | Build the client and Python distributions | `uv run inv build` |
 
-Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The pre-commit framework runs the pre gate and needs uv, Python, Node and the client dependencies; `inv pre` runs the same hooks manually. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
+Use `uv sync --frozen` and `npm --prefix frontend ci`; install browser binaries from `frontend/` with `npx playwright install chromium webkit`. Python 3.13 and application dependencies are pinned in `uv.lock`. Use Node 22.12+ on an LTS release (`.nvmrc`). The pre-commit framework runs the pre gate and needs uv, Python, Node and the client dependencies; `inv pre` runs the same hooks manually. Dependency changes update their committed lockfiles. Piper uses its separately pinned private environment described in [the import guide](docs/src/en/importing-phrases.md#piper-voice). Missing dependencies or browsers are environment failures to fix, not reasons to skip suites.
 
-Preserve the repository scaffold: pre-commit, Invoke tasks, version/tag helpers, package metadata, environment/build scripts, documentation publishing, test/coverage reports and PyPI release workflows. Extend these for the application instead of replacing or deleting them. Only application/documentation boilerplate should be replaced with real implementation and documentation. Follow [development and release operations](docs/development.md).
+Preserve the repository scaffold: pre-commit, Invoke tasks, version/tag helpers, package metadata, environment/build scripts, documentation publishing, test/coverage reports and PyPI release workflows. Extend these for the application instead of replacing or deleting them. Only application/documentation boilerplate should be replaced with real implementation and documentation. Follow [development and release operations](specs/development.md).
 
 Pre-commit owns the static checks and all Ruff settings. Use Pyrefly for Python type checking; do not add a duplicate mypy gate or a wrapper that reruns the same tools. Invoke owns repository development, build, test and release tasks; the packaged CLI owns user runtime and deployment commands, which Invoke may wrap. Keep root-level executable scripts limited to the retained environment activation script.
 
@@ -82,7 +82,7 @@ Fix findings even when they appear pre-existing. Deferral requires evidence that
 
 ## Specs and plans
 
-- `specs/` contains current decisions, their rationale and substantial design constraints that are difficult to infer from code. Code, tests and generated contracts document implemented behavior; usage and operational commands belong in README or `docs/`.
+- `specs/` contains current decisions, their rationale and substantial design constraints that are difficult to infer from code. Code, tests and generated contracts document implemented behavior; user and external-agent guidance belongs in `docs/src/`; development and release operations belong in `specs/`. Keep README links pointed at those sources.
 - Keep one authoritative home per decision. Do not retain historical references, superseded sketches, review logs, implementation inventories or completed plans in specs. Git preserves earlier versions.
 - The implementation plan contains only remaining work. Delete completed entries and plans; retain any lasting decision in its focused spec. Correct contradictory text in the same commit and keep acceptance gaps concise.
 
