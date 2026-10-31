@@ -14,14 +14,15 @@ import {
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
-const { facts, error, listing, studied, pendingTakes, reload, toggleList } = usePracticeFacts()
+const { facts, error, listing, studied, currentMessage, uploadingTakes, reload, toggleList } =
+  usePracticeFacts(() => props.message)
 const today = computed(() => facts.value?.today)
 const practised = computed(() => (facts.value?.work.completions ?? 0) > 0)
 const todayShown = computed(
-  () => !!today.value && (today.value.completions || today.value.recordings || pendingTakes.value),
+  () => !!today.value && (today.value.completions || today.value.recordings),
 )
 const visible = computed(
-  () => props.message || practised.value || pendingTakes.value || error.value,
+  () => currentMessage.value || practised.value || uploadingTakes.value || error.value,
 )
 defineExpose({ reload })
 </script>
@@ -29,7 +30,7 @@ defineExpose({ reload })
 <template>
   <section v-if="visible" class="card practice-facts" aria-label="Practice facts">
     <h2 v-if="today?.completions">Today’s practice ✦</h2>
-    <p v-if="message" role="status" class="entry-message">{{ message }}</p>
+    <p v-if="currentMessage" role="status" class="entry-message">{{ currentMessage }}</p>
     <template v-if="facts && practised">
       <div class="streak">
         <p data-testid="streak">{{ streakLine(facts.streak) }}</p>
@@ -54,9 +55,6 @@ defineExpose({ reload })
       <p v-if="today.recordings" data-testid="today-recordings">
         {{ counted(today.recordings, 'recording') }} available
       </p>
-      <p v-if="pendingTakes" class="muted" data-testid="pending-uploads">
-        {{ counted(pendingTakes, 'recording') }} waiting to upload
-      </p>
       <button v-if="today.completions" :aria-expanded="listing" @click="toggleList">
         See today’s phrases
       </button>
@@ -71,6 +69,9 @@ defineExpose({ reload })
         <p v-if="studied.error.value" role="alert" class="error">{{ studied.error.value }}</p>
       </template>
     </div>
+    <p v-if="uploadingTakes" class="muted" data-testid="pending-uploads">
+      {{ counted(uploadingTakes, 'recording') }} waiting to upload from this device
+    </p>
     <div v-if="facts && practised" class="facts-group">
       <h3 class="eyebrow">Your work · all lessons</h3>
       <p data-testid="your-work">{{ workLine(facts) }}</p>

@@ -60,13 +60,25 @@ async function expectStudied(item: Locator, text: string, outcome: string) {
   await expect(item.locator('.muted')).toHaveText(outcome)
 }
 
+// Monday 10:00 in Europe/Belgrade, far from any learning-day boundary.
+const start = Date.parse('2026-11-02T09:00:00Z')
+
+async function setClock(page: Page, hours: number) {
+  const instant = new Date(start + hours * 3600 * 1000)
+  await page.request.post(`/__test/clock/${instant.toISOString()}`)
+  // Takes are stamped by the browser, so its clock follows the server's.
+  await page.clock.setFixedTime(instant)
+}
+
 async function moveClock(page: Page, hours: number) {
-  const later = new Date(Date.now() + hours * 3600 * 1000).toISOString()
-  await page.request.post(`/__test/clock/${later}`)
+  await setClock(page, hours)
   await page.reload()
 }
 
-test.beforeEach(async ({ page }) => installFakeMedia(page))
+test.beforeEach(async ({ page }) => {
+  await installFakeMedia(page)
+  await setClock(page, 0)
+})
 
 test('completion returns to Today facts that continue through limits, Extra and uploads', async ({
   page,
@@ -119,7 +131,9 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await meet(page, texts[2])
   await meet(page, texts[3])
   await expect(page.getByText("Today's Extra practice is complete.", { exact: true })).toBeVisible()
-  await expect(fact(page, 'pending-uploads')).toHaveText('1 recording waiting to upload')
+  await expect(fact(page, 'pending-uploads')).toHaveText(
+    '1 recording waiting to upload from this device',
+  )
   await expect(fact(page, 'today-recordings')).toHaveCount(0)
   releaseUpload()
   await expect(fact(page, 'pending-uploads')).toHaveCount(0)
@@ -171,7 +185,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await meet(page, texts[0])
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
 
-  await moveClock(page, 26)
+  await moveClock(page, 24)
   await expect(todayHeading(page)).toHaveCount(0)
   await expect(fact(page, 'today-counts')).toHaveCount(0)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
@@ -198,16 +212,65 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await page.getByLabel('Find a phrase').fill(texts[3])
   await expect(page.getByRole('button', { name: `Open details: ${texts[3]}` })).toBeVisible()
 
-  await moveClock(page, 26 + 48)
+  await moveClock(page, 72)
   await expect(todayHeading(page)).toHaveCount(0)
   await expect(fact(page, 'streak')).toHaveText('No current practice streak')
   await expect(fact(page, 'best-streak')).toHaveText('Personal best: 2 days')
   await expect(fact(page, 'your-work')).toHaveText(
     '4 completions · 3 first meetings · 2 days with practice',
   )
-  await expect(fact(page, 'next-return')).toHaveText(/^Next return: Today · \d phrases? due$/)
+  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 3 phrases due')
   await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText(/^Daily · 1 \/ 1 (due|new)$/)
+  await expect(modeLine(page)).toHaveText('Daily · 1 / 1 due')
+})
+
+test('an open entry recomputes facts and counts when it returns on a new learning day', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await setLimits(page, 1, 1)
+  await press(page, 'Daily')
+  await meet(page, texts[0])
+  const message = page.getByText("Today's Daily practice is complete.", { exact: true })
+  await expect(message).toBeVisible()
+  await expect(fact(page, 'today-counts')).toHaveText('1 completion · 1 first meeting')
+  await expect(fact(page, 'next-return')).toHaveText('Next return: Tomorrow · 1 phrase due')
+  const counts = page.getByTestId('lesson-counts')
+  await expect(counts).toHaveText('0 due · 5 new')
+  await press(page, 'See today’s phrases')
+  const studied = facts(page).getByRole('list', { name: 'Today’s phrases' }).getByRole('listitem')
+  await expect(studied).toHaveCount(1)
+
+  await setClock(page, 24)
+  const listed = page.waitForRequest((request) =>
+    request.url().includes('/api/practice/studied?learning_date=2026-11-03'),
+  )
+  await page.evaluate(() => {
+    document.dispatchEvent(new Event('visibilitychange'))
+    window.dispatchEvent(new Event('focus'))
+  })
+  await listed
+  await expect(todayHeading(page)).toHaveCount(0)
+  await expect(fact(page, 'today-counts')).toHaveCount(0)
+  await expect(message).toHaveCount(0)
+  await expect(studied).toHaveCount(0)
+  await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
+  const days = fact(page, 'recent-days').getByRole('listitem')
+  await expect(days.last()).toHaveAccessibleName('Tue: no practice')
+  await expect(days.nth(5)).toHaveAccessibleName('Mon: practiced')
+  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 1 phrase due')
+  await expect(counts).toHaveText('1 due · 5 new')
+
+  await press(page, 'Daily')
+  await card(page).getByRole('button', { name: 'Show' }).click()
+  await press(page, 'Got it')
+  await meet(page, texts[1])
+  await expect(fact(page, 'today-counts')).toHaveText('2 completions · 1 first meeting')
+  await press(page, 'See today’s phrases')
+  await expect(studied).toHaveCount(2)
+  await expectStudied(studied.first(), texts[0], 'Got it · Daily · Small talk')
+  await expectStudied(studied.last(), texts[1], 'first meeting · Daily · Small talk')
 })
 
 test.describe('mobile', () => {

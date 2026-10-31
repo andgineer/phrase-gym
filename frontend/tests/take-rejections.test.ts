@@ -72,6 +72,7 @@ test.each([410, 409, 413, 422])(
     ])
     expect(takeTransfers.error.value).toBe('')
     expect(takeTransfers.pendingTakes.value).toBe(1)
+    expect(takeTransfers.uploadingTakes.value).toBe(0)
     expect(state.deleted).toEqual([])
 
     await takeTransfers.discard(take.id)
@@ -91,6 +92,7 @@ test.each([
   await takeTransfers.flush()
   expect(takeTransfers.rejected.value).toEqual([])
   expect(takeTransfers.error.value).toContain('Audio remains on this device')
+  expect(takeTransfers.uploadingTakes.value).toBe(1)
   await takeTransfers.discard(take.id)
   expect(state.deleted).toEqual([])
 })

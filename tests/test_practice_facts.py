@@ -183,6 +183,29 @@ def test_live_limit_increase_continues_the_same_daily_entry(practice: Practice) 
     assert facts(practice)["today"]["first_meetings"] == 2
 
 
+def test_new_eligible_phrase_continues_the_same_daily_entry(practice: Practice) -> None:
+    publish(practice.client, many(1))
+    state = practice.finish(practice.card(), "studied")["state"]
+    assert state["card"] is None
+    assert state["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
+    later = make_package(
+        package_id="course-later-v1",
+        source_id="course-later",
+        lessons=[lesson("unit-2", "Later", [phrase(9)])],
+    )
+    publish(practice.client, later)
+    card = practice.card()
+    assert card["kind"] == "first_study" and card["mode"] == "daily"
+    assert practice.phrase(card["phrase_id"])["text"] == "Complete phrase number 9."
+    practice.finish(card, "studied")
+    today = facts(practice)["today"]
+    assert (today["completions"], today["first_meetings"]) == (2, 2)
+    assert [item["lesson_title"] for item in studied(practice, "2026-10-28")["items"]] == [
+        "Meetings",
+        "Later",
+    ]
+
+
 def test_multiple_takes_count_once_saved_and_unsaved_takes_do_not(practice: Practice) -> None:
     publish(practice.client, many(2))
     card = practice.card()

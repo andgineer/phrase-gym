@@ -190,6 +190,8 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
 
   await page.getByRole('button', { name: 'Practice', exact: true }).tap()
+  const waiting = page.getByTestId('pending-uploads')
+  await expect(waiting).toHaveText('1 recording waiting to upload from this device')
   await page.getByRole('button', { name: 'Delete: That works for me.' }).tap()
   await page.getByRole('button', { name: 'Delete permanently' }).tap()
   await expect(page.getByText('Deleted “That works for me.”.')).toBeVisible()
@@ -198,6 +200,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   await page.getByRole('button', { name: 'Practice', exact: true }).tap()
   const refused = page.getByRole('alert').filter({ hasText: 'phrase was deleted' })
   await expect(refused).toContainText('A recording kept on this device cannot be saved')
+  await expect(waiting).toHaveCount(0)
   await page.reload()
   await expect(refused).toBeVisible()
   await refused.getByRole('button', { name: 'Discard recording' }).tap()

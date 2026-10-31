@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { releaseCapture, withAvailableTake } from './captureOwners'
 import { ApiError, api } from './api'
 import { journalDelete, journalGet, journalPut } from './practiceJournal'
@@ -13,6 +13,8 @@ const pendingTakes = ref(0)
 const error = ref('')
 const rejected = ref<RejectedTake[]>([])
 let sending: Promise<void> | null = null
+// Refused takes stay stored for an explicit discard but will never upload.
+const uploadingTakes = computed(() => Math.max(0, pendingTakes.value - rejected.value.length))
 
 // Conflict, deleted phrase, oversized or invalid takes never save; access refusals can later.
 const permanentRefusals = new Set([409, 410, 413, 422])
@@ -104,4 +106,13 @@ async function discard(id: string) {
   pendingTakes.value = (await takeEntries()).length
 }
 
-export const takeTransfers = { pendingTakes, error, rejected, retain, flush, recover, discard }
+export const takeTransfers = {
+  pendingTakes,
+  uploadingTakes,
+  error,
+  rejected,
+  retain,
+  flush,
+  recover,
+  discard,
+}

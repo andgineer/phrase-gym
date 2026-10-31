@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { usePageReturn } from '../composables/usePageReturn'
 import { usePagedList } from '../composables/usePagedList'
 import type { LessonChoice, LessonPage } from '../libraryTypes'
 
@@ -44,6 +45,7 @@ watch(lessons.items, (items) => {
   if (fresh) chosen.value = fresh
 })
 onMounted(() => void lessons.reload())
+usePageReturn(() => void lessons.reload())
 onUnmounted(() => window.clearTimeout(debounce))
 defineExpose({ reload: lessons.reload })
 </script>
