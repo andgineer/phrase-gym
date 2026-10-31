@@ -6,11 +6,15 @@ The product goal is to expand the language an adult actually chooses while speak
 
 ## Daily and Extra phrase recall
 
-Use personally useful expressions with their meaning, communicative purpose, register and source. The first MVP represents complete examples. Daily and Extra use the same phrase card, randomly selected concise situation cues, optional requested recall hints, answer reveal and recording/replay on both sides of the card.
+Use personally useful expressions with their meaning, communicative purpose, register and source. The first MVP represents complete examples. Daily and Extra use the same phrase card, randomly selected concise contextual gap cues, optional requested recall hints, answer reveal and recording/replay on both sides of the card.
 
 Daily and Extra fetch oldest due phrases, then new phrases, one at a time. Settings hold live daily due/new limits, initially 20 and five; completed counts come from `practice_log`. **Daily** resumes the current view and can continue after a settings increase. Each explicit **Extra** press extends today’s allowance once completed count reaches that category's base limit and starts a fresh traversal; repeating it without further completions does not add more. Extra does not erase completed work. Automatic selection ends when allowances or eligible phrases run out; it does not cycle through not-due phrases. The same phrase's schedule can change at most once per configured learning day through an explicit rating, even in phrase-specific Practice before due. Hint use does not suppress rating; the learner rates recall before help. New cards studied in Extra first return for independent recall on the next learning day.
 
-For **So far, so good.**, one cue is **Colleague asks: How's it going?** and another is **Friend asks: How's the new job?** The learner says the short phrase, can request one of its brief hints, then sees the phrase and short explanation on the card back. The full phrase is enough; the activity does not demand extra speech.
+The [chunk content decision](decision-targeted-drilling.md#phrases) defines what is retrieved:
+a useful expression inside visible context, not the incidental details of a memorized sentence.
+The learner recalls the missing chunk, optionally says the completed cue sentence, and rates
+the chunk before requested help. The card back identifies it within the original source example.
+Indirect hints can support recall without supplying the target's words.
 
 This is phrase retrieval in varied contexts. Reusing the cue and requesting a hint can help practise recall, but neither demonstrates freer speaking or natural use outside the app. A distinct freer-speaking activity needs its own functional design before scheduling it. No AI conversation partner, countdown, memorized whole script or compulsory target insertion is required.
 

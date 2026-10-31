@@ -4,7 +4,7 @@ Each note answers one design question. Every source has a link, what was studied
 
 | Question | Note |
 |---|---|
-| What should the learner see or hear before saying a fixed phrase, and what happens after an error? | [Phrase prompts](phrase-prompts.md) |
+| What should cue a useful chunk, how much help preserves retrieval, and what happens after an error? | [Phrase prompts](phrase-prompts.md) |
 | What helps learned expressions enter independently composed speech? | [Automatic use and conversational uptake](automatic-use.md) |
 | How should reviews be spaced and graded? | [Spacing and grading](spacing-and-grading.md) |
 | How should words be learned with translation or explanation, context and contrast? | [Words](words-in-context.md) |
@@ -18,7 +18,7 @@ No source tests Phrase Gym's complete spoken workflow. A decision that applies t
 |---|---|---|
 | [Kim & Webb (2022)](https://doi.org/10.1111/lang.12479): spacing benefits L2 learning; equal and expanding schedules were comparable overall | Cards return on later days instead of requiring repeated readback in one sitting | Does not select FSRS, 0.90 retention or a next-day first check |
 | [Li & Taguchi (2014)](https://doi.org/10.1111/modl.12123): speed gains were specific to input/output practice modality | Invite the learner to say the response, with optional recording | Request forms in L2 Chinese; does not prove conversational transfer here |
-| [Bardovi-Harlig, Mossman & Su (2017)](https://scholarspace.manoa.hawaii.edu/server/api/core/bitstreams/12991145-c5d6-4eb5-b7c4-d2a228eb8d84/content): instruction with noticing and production improved elicited oral routines | Teach wording/use first, then cue a communicative intention with an optional partner line | Combined classroom treatment; no isolated proof that situation cues outperform translation |
+| [Bardovi-Harlig, Mossman & Su (2017)](https://scholarspace.manoa.hawaii.edu/server/api/core/bitstreams/12991145-c5d6-4eb5-b7c4-d2a228eb8d84/content): instruction with noticing and production improved elicited oral routines | Teach wording/use first, then retrieve an expression from a meaningful cue | Combined classroom treatment; no isolated proof that situation cues outperform translation |
 | [Butowska-Buczyńska et al. (2024)](https://doi.org/10.1073/pnas.2413511121): varied retrieval cues improved learning in the studied tasks | Rotate a small set of natural cues | Not a test of spontaneous phrase use; no optimal cue count follows |
 | [Study and feedback evidence](phrase-prompts.md#study-first-when-the-phrase-is-unfamiliar) varies with prior knowledge and task | Ungraded first study, then attempted recall and prompt correction | Studying every imported card first is a simple default, not a rule that known phrases must be restudied |
 | [Retrieval and self-rating evidence](spacing-and-grading.md#retrieval-and-repetition) favors continued retrieval and judging the actual attempt | Reveal, compare and rate the original response; repeated supported takes do not upgrade it | The three buttons and one graded review per day are design choices |

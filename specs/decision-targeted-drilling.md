@@ -6,46 +6,66 @@ The first MVP accepts externally prepared English phrase batches. Freer speaking
 
 ## Phrases
 
-Each phrase trains one useful expression for a clear communicative purpose. Preserve the course wording and source attribution; generated situations and explanations are identified as preparation, not quotations from the course. Prefer language the learner actually wants to use, grouped by real situations rather than a list of near-synonyms.
+Each card targets a useful reusable chunk, such as **strongly believe**, **totally convinced**,
+**Trust me**, or **Here's another great thing about that**. The goal is to make conventional
+wording available in new speech. Memorizing incidental content about a particular product is
+not the goal. A self-contained routine can be the entire target; a longer course sentence is
+usually an example containing a smaller transferable expression.
 
-The first MVP supports fixed complete phrases. A variable expression can enter as a concrete complete example, without claiming to teach its whole construction. A variable-slot editor, dialogue graph and grammar syllabus are not required.
+Choose one coherent chunk per card, preserving its lexical core and required grammar. Keep
+`text` as the complete unchanged course sentence with matching reference speech and attribution.
+The explanation explicitly identifies the target chunk, its meaning/use and the surrounding
+example context. This uses the current complete-example contract; it does not require a slot
+editor, new target field, generated per-cue answers or automatic speech evaluation.
 
-A prepared `Phrase` contains `text` for the exact wording, plus:
+The default cue is a natural sentence with the whole target chunk replaced by one constant-length
+gap and, when useful, a short meaning gloss. The visible context carries the incidental proposition.
+For example, **We __________ that this approach will set us apart from competitors. (=We truly
+think)** asks for **strongly believe**; **We're __________ that this tool will make data analysis
+more efficient. (=We are completely sure)** asks for **totally convinced**. Grammar distinguishes
+these two taught chunks without revealing either lexical core; other natural English answers
+remain possible. For a complete routine, a brief exchange with the response blank can work.
 
-- A stable source/item identity and learning language.
-- A short explanation of meaning and appropriate use; useful accepted alternatives may be listed explicitly.
-- One or two distinct, natural retrieval cues: a situation stating the intended message and optionally a preceding partner line. Prefer two when both are defensible; do not invent awkward wording to meet a quota.
-- Reference speech matching the complete answer, prepared before the phrase is offered for study.
-- Source attribution and the chosen card/help languages. An optional detailed native-language explanation can be shown on request; it is not required for every MVP phrase.
+Prefer two genuinely different contexts that accept the same unchanged chunk; one is acceptable
+when a second would be forced. Keep prompts comprehensible without learning incidental vocabulary.
+A partner line is optional. Check every completed cue for naturalness, grammar and meaning, then
+try likely competing taught chunks. Do not solve ambiguity by leaking the answer. Generated
+contexts are preparation, not quotations from the course.
 
-Each phrase also has at least two distinct hand-prepared recall hints of one or two words and short searchable `usage_contexts`. These describe where or for what purpose a phrase is used, such as **small talk** or **greetings**; include only contexts that actually fit the phrase. Hints are brief aids for retrieving that particular wording among other natural replies, not extra descriptions of the situation or automatically extracted first/last words. **Hint** shows one randomly selected hint only when requested, avoiding an immediate repeat when another is available. Hint use does not hide the rating buttons; the learner rates what they could recall before asking for help. The same short situation cues serve Daily and Extra, randomly selected while avoiding the immediately previous cue when another is available; do not store a second set of situations that duplicates them. Keep the short meaning/use explanation on the card back and a detailed native-language translation and explanation in the detailed view. Neither explanation appears before an independent attempt. Phrase lookup searches the answer, short and detailed explanations, cues and usage contexts. Phrase details show them as **Used for**.
+Hints are short indirect associations with meaning, purpose, register or grammatical relationships.
+They must add useful support beyond the cue's gloss while still requiring retrieval of the chunk.
+Never supply its key words, fragments, stems, initials, sounds or ellipsis-disguised answer.
+For example, **personal assurance** can remind the learner of **Trust me**; **trust** gives away
+what is being learned. Two to six distinct hints of one or two words work independently because
+the app chooses them randomly. This is a content rule, not a claim that weaker hints always win.
 
-For **So far, so good.**, the content fields are:
+The learner retrieves the missing chunk and may say the completed cue sentence. The self-rating
+concerns the target's form and appropriate use, not exact reproduction of the example's incidental
+content. The revealed sentence/audio illustrates the same chunk in its original source context;
+it is not necessarily the full answer to a newly authored cue. Supported recall after Hint remains
+distinct from the original unaided attempt. An acceptable alternative is not a language error;
+revise or replace a misleading card rather than treating ambiguous preparation as forgetting.
 
-```json
-{
-  "text": "So far, so good.",
-  "recall_hints": ["far", "so … good"],
-  "usage_contexts": ["small talk", "progress update"],
-  "cues": [
-    { "situation": "Colleague asks: How's it going?" },
-    { "situation": "Friend asks: How's the new job?" }
-  ],
-  "explanation": "Things have gone well up to now.",
-  "detailed_explanation": "«Пока всё хорошо». Короткий ответ о том, как идут дела сейчас. Он говорит о результате до этого момента, а не обещает, что дальше всё будет так же.",
-  "accepted_variants": []
-}
-```
+Prepared records also carry short searchable `usage_contexts`, useful accepted alternatives and
+optional detailed native-language help. The short explanation appears during study and after
+reveal; detailed help is available on request. Neither reveals the target before an independent
+attempt. A card's scheduling identity is shared across its cues; new contexts do not create
+duplicate cards. Daily and Extra use the same cues and hints. Phrase lookup searches the answer,
+explanations, cues and usage contexts, shown as **Used for** in details.
 
-The hints and cues are examples of prepared content, not a rule to generate them mechanically.
+The [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) owns the
+preparation procedure, worked examples, rejection checks and schema mapping. Review every card's
+chunk boundaries, cue completions and non-revealing hints before publication. A semantic review
+is separate from API acceptance; no fixed example establishes quality for an entire course.
 
-During recall, prompts communicate an intention rather than paraphrase the answer word by word. They contain no target phrase, initial-letter code, masked answer or answer-bearing title. Natural shared topic words are allowed: a universal ban on every content word would make prompts obscure without research support. A partner turn is optional; openers need no fictional preceding line. Situations must be understandable without studying incidental vocabulary.
-
-In the **So far, so good.** example above, each brief question can elicit that phrase but also other natural answers. The learner knows the task is to retrieve a learned expression; a requested hint can identify it more precisely while marking the attempt as supported. An underdetermined or misleading phrase can be deleted after confirmation without a forgetting grade.
-
-Avoid generating many synonymous phrases for the same cue. For the MVP, use one chosen expression and a short accepted-alternatives note where appropriate; no preferred-target management system is required. Similar text alone never proves that two senses are the same.
-
-**Evidence:** [oral pragmatic-routine instruction](research/phrase-prompts.md#situation-plus-partner-turn) provides a precedent for situation/partner cues and production. [Variable retrieval](research/phrase-prompts.md#vary-the-prompt) supports variation. Neither proves this cue format is superior to translation or that the app transfers to spontaneous conversation. The number of cues and fixed-phrase first scope are design choices.
+**Evidence and limits:** [collocation exercises](research/phrase-prompts.md#one-phrase-per-moment)
+support studied constructed responses in the tested conditions; that study used first-letter
+support and did not test these hint rules. [Retrieval support](research/phrase-prompts.md#least-help-that-still-succeeds)
+motivates preserving a real retrieval demand, not a universal ban on supported practice.
+[Formulaic language](research/automatic-use.md) motivates reusable expressions rather than whole
+incidental sentences. Contextual chunk gaps and indirect-only hints are learner-directed product
+choices informed by this evidence; no reviewed study establishes their superiority for this app
+or guarantees spontaneous conversational transfer.
 
 ## Words after the phrase MVP
 

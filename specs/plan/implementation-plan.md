@@ -31,7 +31,7 @@ Before the first release, every stage uses a freshly created application databas
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.
 
-Choose one concrete need at a time: German chunks with Russian cues/help; Serbian after resolving help preferences; original course audio; or useful variable-expression examples. Verify that language's comprehension, prompts and one voice separately. A slot system or full dialogues require a demonstrated learning use, not parity with the prototypes.
+Choose one concrete need at a time: German chunks with Russian cues/help; Serbian after resolving help preferences; or richer source material. Retain the complete-example import format and [chunk content decision](../decision-targeted-drilling.md#phrases). Verify that language's comprehension, prompts and one voice separately. A slot system or full dialogues require a demonstrated learning use, not parity with the prototypes.
 
 **Exit:** one representative batch in the selected extension works through the existing complete loop. No all-language/platform matrix gates delivery.
 
