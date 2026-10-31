@@ -269,7 +269,59 @@
   <span class="md-ellipsis">
     
   
-  Import phrases
+  Add phrases
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-add-phrases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Instructions for your AI agent
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../piper-voice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Coach voice setup
 
     
   </span>
@@ -421,13 +473,13 @@ npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="
 Use <code>phrase-gym run --help</code> for the port and data-directory options. Keep voice files and learner
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.</p>
-<p>For text-only imports, configure a local English <a href="../importing-phrases/#piper-voice">Piper voice</a>
+<p>For text-only imports, configure a local English <a href="../piper-voice/">Piper voice</a>
 and run Coach in another terminal:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
 </code></pre></div>
 <p>For a source checkout, use <code>uv run phrase-gym coach</code>. Coach receives pending imports through
 Phrase Gym's API and generates reference audio. Imports with complete reference audio do not
-need Coach. Piper uses the separately pinned private environment described in the import guide.</p>
+need Coach. Piper uses the separately pinned private environment described in the voice setup guide.</p>
 <p>The <code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
 The optional <code>coach</code> and <code>deploy</code> extras are reserved for future preparation and provisioning
 features. The core server and help need only the lean installation.</p>
