@@ -288,14 +288,40 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/" class="md-nav__link">
+      <a href="../private-access/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-  Development and releases
+  Private access
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Backup and restore
 
     
   </span>
@@ -388,17 +414,25 @@ Published packages include the built browser client:</p>
 npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="w"> </span>ci
 npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="w"> </span>run<span class="w"> </span>build
 </code></pre></div>
-<p>Configure a local English <a href="../importing-phrases/#piper-voice">Piper voice</a>, then start the server:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>run
+<p>Start the server; Piper is not required to launch it:</p>
+<div class="highlight"><pre><span></span><code>phrase-gym<span class="w"> </span>run
 </code></pre></div>
 <p>For a source checkout, use <code>uv run phrase-gym run</code> instead. Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.
 Use <code>phrase-gym run --help</code> for the port and data-directory options. Keep voice files and learner
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.</p>
-<p>The <code>coach</code> command is present but preparation is pending the API handoff. The
-<code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
-The <code>coach</code> extra supplies Piper; <code>deploy</code> is reserved for later provisioning. The core server
-and help need only the lean installation.</p>
+<p>For text-only imports, configure a local English <a href="../importing-phrases/#piper-voice">Piper voice</a>
+and run Coach in another terminal:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
+</code></pre></div>
+<p>For a source checkout, use <code>uv run phrase-gym coach</code>. Coach receives pending imports through
+Phrase Gym's API and generates reference audio. Imports with complete reference audio do not
+need Coach. Piper uses the separately pinned private environment described in the import guide.</p>
+<p>The <code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
+The optional <code>coach</code> and <code>deploy</code> extras are reserved for future preparation and provisioning
+features. The core server and help need only the lean installation.</p>
+<p>For access from another device, see <a href="../private-access/">private Tailscale access</a>.
+Keep a private <a href="../backup-and-restore/">backup of your learning data</a>.</p>
 
 
 

@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://andgineer.github.io/phrase-gym/reference/">
       
       
-        <link rel="prev" href="../development/">
+        <link rel="prev" href="../backup-and-restore/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>Python API reference - Phrase Gym</title>
+        <title>HTTP API reference - Phrase Gym</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#python-api-reference" class="md-skip">
+        <a href="#http-api-reference" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Python API reference
+              HTTP API reference
             
           </span>
         </div>
@@ -276,14 +276,40 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/" class="md-nav__link">
+      <a href="../private-access/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-  Development and releases
+  Private access
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Backup and restore
 
     
   </span>
@@ -311,23 +337,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  API reference
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="././" class="md-nav__link md-nav__link--active">
         
   
@@ -343,48 +352,6 @@
   
 
       </a>
-      
-        
-
-
-<nav class="md-nav md-nav--secondary" aria-label="On this page">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      On this page
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#phrase_gym.server.import_contracts.PhrasePackage" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        PhrasePackage
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#phrase_gym.server.app.create_app" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        create_app
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -407,11 +374,6 @@
                       
                     
                     
-                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-                      <div class="md-sidebar-button__wrapper">
-                        <label class="md-sidebar-button" for="__toc"></label>
-                      </div>
-                    
                   
                   <div class="md-sidebar__inner">
                     
@@ -423,36 +385,6 @@
   
     
   
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      On this page
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#phrase_gym.server.import_contracts.PhrasePackage" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        PhrasePackage
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#phrase_gym.server.app.create_app" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        create_app
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -470,232 +402,13 @@
   
 
 
-<h1 id="python-api-reference">Python API reference</h1>
-<p>The HTTP contract is generated from the Python models. A running server exposes it at
-<code>/openapi.json</code> and its interactive API documentation at <code>/docs</code>.</p>
-
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="phrase_gym.server.import_contracts.PhrasePackage" class="doc doc-heading">
-            <code>phrase_gym.server.import_contracts.PhrasePackage</code>
-
-
-</h2>
-
-
-    <div class="doc doc-contents first">
-            <p class="doc doc-class-bases">
-              Bases: <code><span title="phrase_gym.server.import_contracts.StrictModel">StrictModel</span></code></p>
-
-
-
-
-
-
-
-
-
-
-              <details class="mkdocstrings-source">
-                <summary>Source code in <code>src/phrase_gym/server/import_contracts.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PhrasePackage</span><span class="p">(</span><span class="n">StrictModel</span><span class="p">):</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"phrase-gym.package"</span><span class="p">]</span>
-    <span class="n">version</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">package_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">IDENTITY_PATTERN</span><span class="p">)</span>
-    <span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">IDENTITY_PATTERN</span><span class="p">)</span>
-    <span class="n">source_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-    <span class="n">source_link</span><span class="p">:</span> <span class="n">HttpUrl</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">learning_language</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"en"</span><span class="p">]</span>
-    <span class="n">card_language</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"en"</span><span class="p">]</span>
-    <span class="n">help_language</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"en"</span><span class="p">]</span>
-    <span class="n">lessons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ImportLesson</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"lessons"</span><span class="p">)</span>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">identities_are_unique</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lessons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ImportLesson</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ImportLesson</span><span class="p">]:</span>
-        <span class="n">lesson_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">lesson</span><span class="o">.</span><span class="n">lesson_id</span> <span class="k">for</span> <span class="n">lesson</span> <span class="ow">in</span> <span class="n">lessons</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lesson_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">lesson_ids</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"lesson_id values must be unique within a package"</span><span class="p">)</span>
-        <span class="n">item_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">phrase</span><span class="o">.</span><span class="n">item_id</span> <span class="k">for</span> <span class="n">lesson</span> <span class="ow">in</span> <span class="n">lessons</span> <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">lesson</span><span class="o">.</span><span class="n">phrases</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item_ids</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"phrase item_id values must be unique within a package"</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_PACKAGE_PHRASES</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a package may contain at most </span><span class="si">{</span><span class="n">MAX_PACKAGE_PHRASES</span><span class="si">}</span><span class="s2"> phrases"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lessons</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">phrases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ImportLesson</span><span class="p">,</span> <span class="n">ImportPhrase</span><span class="p">]]:</span>
-        <span class="k">return</span> <span class="p">[(</span><span class="n">lesson</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span> <span class="k">for</span> <span class="n">lesson</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lessons</span> <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">lesson</span><span class="o">.</span><span class="n">phrases</span><span class="p">]</span>
-</code></pre></div></td></tr></table></div>
-              </details>
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="phrase_gym.server.app.create_app" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">phrase_gym</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span></code>
-
-</h2>
-
-
-    <div class="doc doc-contents first">
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/phrase_gym/server/app.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
-    <span class="n">remote_origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_TAILSCALE_ORIGIN"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-    <span class="n">data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PHRASE_GYM_DATA_DIR"</span><span class="p">,</span> <span class="s2">".data"</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-    <span class="n">database</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
-    <span class="n">cleanup</span> <span class="o">=</span> <span class="n">FileCleanup</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">cleanup</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>
-    <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Phrase Gym"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">"1.0.0"</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
-    <span class="n">importer</span> <span class="o">=</span> <span class="n">Importer</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">importer</span> <span class="o">=</span> <span class="n">importer</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">import_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">coach_routes</span><span class="p">(</span><span class="n">importer</span><span class="p">))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">recording_routes</span><span class="p">(</span><span class="n">RecordingStore</span><span class="p">(</span><span class="n">database</span><span class="p">)))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">CurrentPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">daily</span> <span class="o">=</span> <span class="n">DailyPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="n">ExtraPractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">phrase_practice</span> <span class="o">=</span> <span class="n">PhrasePractice</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">view_actions</span> <span class="o">=</span> <span class="n">ViewActions</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">completion</span> <span class="o">=</span> <span class="n">PracticeCompletion</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span>
-        <span class="n">practice_entry_routes</span><span class="p">(</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current</span><span class="p">,</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">daily</span><span class="p">,</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">extra</span><span class="p">,</span>
-            <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">phrase_practice</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">practice_card_routes</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">view_actions</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">completion</span><span class="p">))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">facts</span> <span class="o">=</span> <span class="n">PracticeFactsService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">practice_facts_routes</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">facts</span><span class="p">))</span>
-    <span class="n">library</span> <span class="o">=</span> <span class="n">LibraryService</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">lessons</span> <span class="o">=</span> <span class="n">LessonChoices</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">lessons</span> <span class="o">=</span> <span class="n">lessons</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">library_routes</span><span class="p">(</span><span class="n">library</span><span class="p">,</span> <span class="n">lessons</span><span class="p">))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">deletion_routes</span><span class="p">(</span><span class="n">PhraseDeletion</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">cleanup</span><span class="p">)))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">settings_routes</span><span class="p">(</span><span class="n">SettingsService</span><span class="p">(</span><span class="n">database</span><span class="p">)))</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">LocalBoundary</span><span class="p">,</span> <span class="n">tailscale_origin</span><span class="o">=</span><span class="n">remote_origin</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
-        <span class="n">TrustedHostMiddleware</span><span class="p">,</span>
-        <span class="n">allowed_hosts</span><span class="o">=</span><span class="n">trusted_hosts</span><span class="p">(</span><span class="n">remote_origin</span><span class="p">),</span>
-    <span class="p">)</span>
-
-    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/health"</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"ok"</span><span class="p">}</span>
-
-    <span class="n">static</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"static"</span>
-    <span class="k">if</span> <span class="n">static</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">static</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"client"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">app</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
+<h1 id="http-api-reference">HTTP API reference</h1>
+<p>A running Phrase Gym server exposes its generated HTTP contract at
+<a href="http://127.0.0.1:8000/openapi.json">/openapi.json</a> and interactive API documentation at
+<a href="http://127.0.0.1:8000/docs">/docs</a>. Adjust the host and port if your server uses another address.
+External agents can read that contract to validate requests against the running version.</p>
+<p>For preparation instructions, the package schema and submission/status endpoints, see
+<a href="../importing-phrases/">Importing prepared English phrases</a>.</p>
 
 
 
