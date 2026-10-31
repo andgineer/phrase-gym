@@ -10,13 +10,14 @@ The input is one documented UTF-8 JSON structure containing an input ID, source 
 
 External preparation and later Coach prompts follow the [chunk content decision](decision-targeted-drilling.md#phrases)
 and the worked preparation rules in the [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules).
-Select the transferable chunk first, then create natural gap cues and indirect hints that leave
-its lexical core to be retrieved. Keep the complete source example in `text` with matching audio;
+Cover every supplied source phrase. Select its transferable chunk first, then create natural
+gap cues and varied requested wording hints that help retrieve the exact studied expression.
+Keep the complete source example in `text` with matching audio;
 identify the selected chunk in its explanation. Cue contexts may vary without changing the
 chunk or creating extra scheduling identities. Semantic inspection covers chunk boundaries,
-completed cue grammar, competing answers and hint leakage, separately from schema acceptance.
-Requested hints must not supply target words or fragments. Usage contexts remain short searchable
-uses; explanations and alternatives remain answer-side help. No new slot structure or per-cue
+completed cue grammar, competing answers and each hint's memory support, separately from schema
+acceptance. Requested hints may supply target words or word fragments, but never the entire chunk.
+Usage contexts remain short searchable uses; explanations and alternatives remain answer-side help. No new slot structure or per-cue
 audio is implied by this preparation format.
 
 Validate the whole submission before adding it. Tell the learner which item/field needs correction. Identical input-ID/content retries return the same result; changed content under that ID asks for a new input ID. A new submission containing the same source/item identity must not silently duplicate or overwrite a learned phrase: show the conflict and permit a new phrase after the learner confirms deletion of the old one. No semantic deduplication service is required.

@@ -12,6 +12,7 @@ wording available in new speech. Memorizing incidental content about a particula
 not the goal. A self-contained routine can be the entire target; a longer course sentence is
 usually an example containing a smaller transferable expression.
 
+Cover every supplied source phrase; package size is a batching limit, not a selection quota.
 Choose one coherent chunk per card, preserving its lexical core and required grammar. Keep
 `text` as the complete unchanged course sentence with matching reference speech and attribution.
 The explanation explicitly identifies the target chunk, its meaning/use and the surrounding
@@ -29,15 +30,22 @@ remain possible. For a complete routine, a brief exchange with the response blan
 Prefer two genuinely different contexts that accept the same unchanged chunk; one is acceptable
 when a second would be forced. Keep prompts comprehensible without learning incidental vocabulary.
 A partner line is optional. Check every completed cue for naturalness, grammar and meaning, then
-try likely competing taught chunks. Do not solve ambiguity by leaking the answer. Generated
-contexts are preparation, not quotations from the course.
+try likely competing chunks from the whole source. Natural alternatives can remain; a requested
+wording hint helps identify the studied expression without displaying its complete answer.
+Generated contexts are preparation, not quotations from the course.
 
-Hints are short indirect associations with meaning, purpose, register or grammatical relationships.
-They must add useful support beyond the cue's gloss while still requiring retrieval of the chunk.
-Never supply its key words, fragments, stems, initials, sounds or ellipsis-disguised answer.
-For example, **personal assurance** can remind the learner of **Trust me**; **trust** gives away
-what is being learned. Two to six distinct hints of one or two words work independently because
-the app chooses them randomly. This is a content rule, not a claim that weaker hints always win.
+The bracketed cue gloss supplies meaning; requested hints help retrieve the exact studied wording
+among natural alternatives or restart recall when the learner is stuck. Choose a diagnostic word,
+a short fragment of the chunk or part of a word, rather than another definition or abstract label.
+For **strongly believe**, **strongly** or **bel…** can activate recall of the rest. Never supply
+the entire selected chunk, even if the source sentence contains additional words. Short targets
+may need partial-word hints so the learner still has something meaningful to retrieve.
+
+Prepare two to six distinct hints of one or two words/fragments. Vary the word or fragment supplied
+so practice does not depend on one fixed hint. Each must work alone with every cue because the
+app chooses randomly and avoids an immediate repeat when possible. They are not an ordered ladder.
+Review each hint's intended memory nudge and what remains to retrieve. This is supported recall,
+not a claim of unaided retrieval or a research-established optimum amount of support.
 
 The learner retrieves the missing chunk and may say the completed cue sentence. The self-rating
 concerns the target's form and appropriate use, not exact reproduction of the example's incidental
@@ -55,15 +63,15 @@ explanations, cues and usage contexts, shown as **Used for** in details.
 
 The [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) owns the
 preparation procedure, worked examples, rejection checks and schema mapping. Review every card's
-chunk boundaries, cue completions and non-revealing hints before publication. A semantic review
-is separate from API acceptance; no fixed example establishes quality for an entire course.
+source coverage, chunk boundaries, cue completions and varied wording hints before publication.
+A semantic review is separate from API acceptance; no fixed example establishes quality for an entire course.
 
 **Evidence and limits:** [collocation exercises](research/phrase-prompts.md#one-phrase-per-moment)
 support studied constructed responses in the tested conditions; that study used first-letter
 support and did not test these hint rules. [Retrieval support](research/phrase-prompts.md#least-help-that-still-succeeds)
 motivates preserving a real retrieval demand, not a universal ban on supported practice.
 [Formulaic language](research/automatic-use.md) motivates reusable expressions rather than whole
-incidental sentences. Contextual chunk gaps and indirect-only hints are learner-directed product
+incidental sentences. Contextual chunk gaps and varied partial-wording hints are learner-directed product
 choices informed by this evidence; no reviewed study establishes their superiority for this app
 or guarantees spontaneous conversational transfer.
 

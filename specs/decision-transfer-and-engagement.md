@@ -14,7 +14,8 @@ The [chunk content decision](decision-targeted-drilling.md#phrases) defines what
 a useful expression inside visible context, not the incidental details of a memorized sentence.
 The learner recalls the missing chunk, optionally says the completed cue sentence, and rates
 the chunk before requested help. The card back identifies it within the original source example.
-Indirect hints can support recall without supplying the target's words.
+Varied requested words or word fragments can nudge recall of the exact expression without
+supplying the whole chunk; the cue gloss already supplies its meaning.
 
 This is phrase retrieval in varied contexts. Reusing the cue and requesting a hint can help practise recall, but neither demonstrates freer speaking or natural use outside the app. A distinct freer-speaking activity needs its own functional design before scheduling it. No AI conversation partner, countdown, memorized whole script or compulsory target insertion is required.
 
