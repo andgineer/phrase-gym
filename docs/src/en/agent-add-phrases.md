@@ -1,4 +1,7 @@
-# Prepare and submit phrases
+# Instructions for an AI agent
+
+> Learners do not need to read this page. Pass it to the AI agent preparing the import.
+> The instructions below address that agent.
 
 Prepare complete, ready-to-study material from the learner's authorized sources and submit it
 through the Phrase Gym HTTP API. The learner supplies source locations and the server address

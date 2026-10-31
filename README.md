@@ -28,8 +28,7 @@ earlier directory unchanged.
 An external AI agent can prepare phrases and their reference audio from course material, then
 submit the complete batch for immediate study. Alternatively, import a prepared text package
 through **Add material** and let the application's Coach prepare its audio.
-See [how to add phrases](docs/src/en/importing-phrases.md) for both workflows and
-[the external-agent instructions](docs/src/en/agent-add-phrases.md) for complete API submissions.
+See [how to add phrases](docs/src/en/importing-phrases.md) for both workflows.
 
 The Practice entry offers **Search lessons**, **Lesson to drill** with its due and new counts,
 **Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press
