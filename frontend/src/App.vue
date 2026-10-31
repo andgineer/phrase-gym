@@ -24,7 +24,7 @@ const pendingDelete = ref<DeletionTarget | null>(null)
 // Owned here so the entry, remounted after a finished Practice card, reopens its details.
 const detailsPhrase = ref<string | null>(null)
 const card = computed(() => practice.view.value.card)
-const entryMessage = useDatedMessage(() => practice.view.value.message)
+const entryMessage = useDatedMessage(() => practice.view.value)
 
 // An exhausted traversal returns to entry; a finished Practice card returns to its details.
 watch(card, (current, previous) => {

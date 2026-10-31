@@ -3,6 +3,7 @@ import { beforeEach, expect, test, vi } from 'vitest'
 
 beforeEach(() => vi.resetModules())
 const fresh = () => import('../src/learningDay')
+const complete = "Today's Daily practice is complete."
 
 test('a date change is signalled once, never for the first known or same date', async () => {
   const { observeLearningDay, onLearningDayChange } = await fresh()
@@ -17,27 +18,48 @@ test('a date change is signalled once, never for the first known or same date', 
   expect(refresh).toHaveBeenCalledTimes(1)
 })
 
-test('a message stays hidden on later learning dates until a new one appears', async () => {
+test('an undated message shows until the next server date dates it', async () => {
   const { observeLearningDay, useDatedMessage } = await fresh()
+  const state = ref({ message: '' })
+  const shown = useDatedMessage(() => state.value)
+  state.value = { message: complete }
+  await nextTick()
+  expect(shown.value).toBe(complete)
   observeLearningDay('2026-11-02')
-  const message = ref('')
-  const shown = useDatedMessage(() => message.value)
-  message.value = "Today's Daily practice is complete."
   await nextTick()
-  expect(shown.value).toBe("Today's Daily practice is complete.")
-  observeLearningDay('2026-11-03')
-  expect(shown.value).toBe('')
-  message.value = 'Nothing waiting today.'
-  await nextTick()
-  expect(shown.value).toBe('Nothing waiting today.')
+  expect(shown.value).toBe(complete)
 })
 
-test('a message dated before a remount stays hidden when the entry is shown again', async () => {
+test('a message made after a stale known day takes the date reported next', async () => {
   const { observeLearningDay, useDatedMessage } = await fresh()
   observeLearningDay('2026-11-02')
-  const message = ref("Today's Daily practice is complete.")
-  const shown = useDatedMessage(() => message.value)
+  const state = ref({ message: '' })
+  const shown = useDatedMessage(() => state.value)
+  state.value = { message: complete }
+  await nextTick()
   observeLearningDay('2026-11-03')
+  await nextTick()
+  expect(shown.value).toBe(complete)
   observeLearningDay('2026-11-03')
+  await nextTick()
+  expect(shown.value).toBe(complete)
+})
+
+test('a message dated an earlier day stays hidden until a new practice state', async () => {
+  const { observeLearningDay, useDatedMessage } = await fresh()
+  const state = ref({ message: '' })
+  const shown = useDatedMessage(() => state.value)
+  state.value = { message: 'Nothing waiting today.' }
+  await nextTick()
+  observeLearningDay('2026-11-02')
+  await nextTick()
+  observeLearningDay('2026-11-03')
+  await nextTick()
   expect(shown.value).toBe('')
+  state.value = { message: 'Nothing waiting today.' }
+  await nextTick()
+  expect(shown.value).toBe('Nothing waiting today.')
+  observeLearningDay('2026-11-03')
+  await nextTick()
+  expect(shown.value).toBe('Nothing waiting today.')
 })

@@ -367,6 +367,40 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   await expect(counts).toHaveText('0 due · 1 new')
 })
 
+test('a Daily finished just after midnight shows its own completion message', async ({ page }) => {
+  await setClock(page, 13 + 50 / 60)
+  await page.goto('/')
+  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await setLimits(page, 1, 1)
+  await press(page, 'Daily')
+  await meet(page, texts[0])
+  const message = page.getByText("Today's Daily practice is complete.", { exact: true })
+  await expect(message).toBeVisible()
+  await expect(fact(page, 'today-counts')).toHaveText('1 completion · 1 first meeting')
+
+  await setClock(page, 14 + 10 / 60)
+  await press(page, 'Daily')
+  await expect(modeLine(page)).toHaveText('Daily · 1 / 1 due')
+  await card(page).getByRole('button', { name: 'Show' }).click()
+  await press(page, 'Got it')
+  await meet(page, texts[1])
+  await expect(fact(page, 'today-counts')).toHaveText('2 completions · 1 first meeting')
+  await expect(message).toBeVisible()
+  await expect(fact(page, 'streak')).toHaveText('🔥 2-day practice streak')
+})
+
+test('the completion message stays visible when the entry facts cannot load', async ({ page }) => {
+  await page.goto('/')
+  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await setLimits(page, 1, 1)
+  await press(page, 'Daily')
+  await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
+  await page.route('**/api/practice/facts', (route) => route.fulfill({ status: 503, json: {} }))
+  await press(page, 'Next')
+  await expect(facts(page).getByRole('alert')).toHaveText('Error: Request failed (503)')
+  await expect(page.getByText("Today's Daily practice is complete.", { exact: true })).toBeVisible()
+})
+
 test.describe('mobile', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
