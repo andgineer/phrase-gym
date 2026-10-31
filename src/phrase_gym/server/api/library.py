@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 
+from phrase_gym.server.api.paging import Limit, Offset
 from phrase_gym.server.contracts import (
-    PAGE_LIMIT,
     LessonPage,
     PhraseDetails,
     PhrasePage,
@@ -13,8 +13,6 @@ from phrase_gym.server.contracts import (
 from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
 
-Offset = Annotated[int, Query(ge=0)]
-Limit = Annotated[int, Query(ge=1, le=PAGE_LIMIT)]
 SearchText = Annotated[str, Query(max_length=200)]
 
 

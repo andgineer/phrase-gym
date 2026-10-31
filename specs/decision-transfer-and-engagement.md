@@ -2,7 +2,7 @@
 
 The product goal is to expand the language an adult actually chooses while speaking, including useful expressions encountered in courses and videos. Independent card recall is an intermediate outcome. The app complements listening, reading and real conversation; richer language means appropriate expressive choices, not a quota of impressive phrases.
 
-[Research on conversational uptake](research/automatic-use.md) supports deliberate phrase instruction combined with speaking practice, including gains in unscripted classroom conversations. It does not establish durable everyday transfer for this app or isolate one necessary exercise. The [delivery ladder](plan/implementation-plan.md) next adds repeatable bounded phrase sessions. That extension is not an unscripted speaking activity.
+[Research on conversational uptake](research/automatic-use.md) supports deliberate phrase instruction combined with speaking practice, including gains in unscripted classroom conversations. It does not establish durable everyday transfer for this app or isolate one necessary exercise. Daily and Extra are repeatable bounded phrase sessions, not an unscripted speaking activity; the [delivery ladder](plan/implementation-plan.md) orders later work.
 
 ## Daily and Extra phrase recall
 
@@ -22,11 +22,26 @@ On every explicit rating in Daily, Extra or phrase-specific Practice, call FSRS 
 
 Do not label expressions automatic, fluent or mastered from card intervals, phrase counts, completed missions or recordings. Software checks verify these distinctions and saved state; they do not establish learning effectiveness. No mandatory learner experiment is a delivery gate.
 
+## Practice entry and today's facts
+
+Entry offers **Search lessons**, which only narrows the lesson picker, **Lesson to drill** (default **All lessons**) with the selection's due/new counts, **Daily**, **Extra** and a global **Find a phrase** that ignores the selected lesson. An empty library keeps **Add material**; an empty lesson says **No phrases in this lesson**; a selection with nothing due or new says **Nothing waiting today** with its next due date when known. Neither mode starts automatically. A card shows its single mode, Daily, Extra or Practice, with today's progress; Extra cards offer **Stop**, which returns to entry without a completion.
+
+An exhausted Daily or Extra traversal returns to entry with a completion message and a practice-facts panel above the entry controls, which stay usable. All facts are learner-wide across lessons and read from completed practice and current phrases; nothing stores a daily total or a complete marker, so a live limit increase, Extra or a new eligible phrase lets the same Daily entry continue.
+
+- **Today** counts completions, first meetings, Skips and each rating across Daily, Extra and Practice. It shows saved recordings captured today that are still available separately from takes still waiting to upload from this browser. **See today's phrases** pages through today's completions in order, each with its wording snapshot, kind, rating or Skip, mode and lesson; a phrase deleted later stays listed and is marked deleted.
+- **Your work** gives cumulative completions, first meetings and days with practice, including activity for phrases later deleted.
+- **Next return** names the earliest learning date, not before today, on which a current studied phrase is due, with the number due by then. It is omitted when no phrase is scheduled.
+- The streak follows [adult engagement](#adult-engagement).
+
+No mastery score, scheduling-history timeline or longest-gap highlight is shown.
+
+Phrase details show the answer, **Used for** contexts, short meaning, lesson and source, reference playback, the current due date, [saved recordings](decision-recording-and-comparison.md#observable-behavior), **Details**, **Practice** and **Delete**. Looking a phrase up never changes its schedule; **Practice** opens it on the shared card and returns to its details. Phrase search, lesson choices and saved recordings are paged with **More** and say when nothing matches.
+
 ## Adult engagement
 
 Adults are the intended audience. [Motivation research](research/motivation.md) supports designing for choice, a sense of progress and meaningful activity, while separating enjoyment from persistence and learning. Engagement is planned product work, not an assumption that adult discipline makes repetitive drills sustainable.
 
-Stage 2 shows a visible **current practice streak** on entry and after Daily, with a personal best and recent practice days. A calendar day counts when the learner completes a first meeting, rating or Skip in Daily, Extra or phrase-detail Practice, regardless of rating or recording. Before today has practice, the current streak may still show the run ending yesterday; it resets after today ends without practice. Missing a day resets the current consecutive-day count but never erases the best streak or accumulated work. The streak has no effect on FSRS and is never used to shame the learner. Optional points, achievements and a chosen weekly target follow in the engagement stage.
+Entry shows a visible **current practice streak**, a personal best and the last seven learning days, derived from the distinct learning dates of completed practice. A learning day counts when the learner completes a first meeting, rating or Skip in Daily, Extra or phrase-detail Practice, regardless of rating or recording; opening, revealing, abandoning or Stop alone does not count. Each completion keeps the learning date of the timezone in force when it was completed, so a later timezone change affects only which day is today. Before today has practice, the current streak may still show the run ending yesterday; it resets after today ends without practice. Missing a day resets the current consecutive-day count but never erases the best streak or accumulated work. The streak has no effect on FSRS and is never used to shame the learner. Optional points, achievements and a chosen weekly target follow later in the delivery ladder.
 
 - Offer chosen missions using useful phrase practice with a clear finish and varied cues. Do not label repeated card answers as freer speech.
 - Show concrete progress from durable daily totals and comparable saved recordings, each with its own label. Avoid a single invented fluency score.

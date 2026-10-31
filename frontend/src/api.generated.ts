@@ -329,6 +329,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/practice/facts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Practice Facts */
+        get: operations["practice_facts_api_practice_facts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/practice/hint": {
         parameters: {
             query?: never;
@@ -374,6 +391,23 @@ export interface paths {
         put?: never;
         /** Reveal */
         post: operations["reveal_api_practice_reveal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice/studied": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Studied Phrases */
+        get: operations["studied_phrases_api_practice_studied_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -537,6 +571,15 @@ export interface components {
             /** Situation */
             situation: string;
         };
+        /** CumulativeWork */
+        CumulativeWork: {
+            /** Completions */
+            completions: number;
+            /** First Meetings */
+            first_meetings: number;
+            /** Practice Days */
+            practice_days: number;
+        };
         /** DeletionResult */
         DeletionResult: {
             cleanup: components["schemas"]["CleanupStatus"];
@@ -649,6 +692,13 @@ export interface components {
             items: components["schemas"]["LessonChoice"][];
             /** Next Offset */
             next_offset: number | null;
+        };
+        /** NextReturn */
+        NextReturn: {
+            /** Learning Date */
+            learning_date: string;
+            /** Phrase Count */
+            phrase_count: number;
         };
         /** OpenDaily */
         OpenDaily: {
@@ -828,6 +878,22 @@ export interface components {
             /** Phrase Count */
             phrase_count: number;
         };
+        /** PracticeDay */
+        PracticeDay: {
+            /** Learning Date */
+            learning_date: string;
+            /** Practiced */
+            practiced: boolean;
+        };
+        /** PracticeFacts */
+        PracticeFacts: {
+            /** Learning Date */
+            learning_date: string;
+            next_return: components["schemas"]["NextReturn"] | null;
+            streak: components["schemas"]["PracticeStreak"];
+            today: components["schemas"]["TodayCounts"];
+            work: components["schemas"]["CumulativeWork"];
+        };
         /** PracticeProgress */
         PracticeProgress: {
             /** Due Allowance */
@@ -845,6 +911,15 @@ export interface components {
             /** Message */
             message: string | null;
             progress: components["schemas"]["PracticeProgress"];
+        };
+        /** PracticeStreak */
+        PracticeStreak: {
+            /** Best */
+            best: number;
+            /** Current */
+            current: number;
+            /** Recent Days */
+            recent_days: components["schemas"]["PracticeDay"][];
         };
         /** RecordingPage */
         RecordingPage: {
@@ -957,6 +1032,57 @@ export interface components {
              * @enum {string}
              */
             native_language: "ru" | "en";
+        };
+        /** StudiedPage */
+        StudiedPage: {
+            /** Items */
+            items: components["schemas"]["StudiedPhrase"][];
+            /** Next Offset */
+            next_offset: number | null;
+        };
+        /** StudiedPhrase */
+        StudiedPhrase: {
+            /** Completion Id */
+            completion_id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "first_study" | "recall";
+            /** Lesson Title */
+            lesson_title: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "daily" | "extra" | "practice";
+            /** Phrase Id */
+            phrase_id: string | null;
+            /** Rating */
+            rating: ("not_yet" | "effort" | "got_it") | null;
+            /** Skipped */
+            skipped: boolean;
+            /** Text */
+            text: string;
+        };
+        /** TodayCounts */
+        TodayCounts: {
+            /** Completions */
+            completions: number;
+            /** Effort */
+            effort: number;
+            /** First Meetings */
+            first_meetings: number;
+            /** Got It */
+            got_it: number;
+            /** Not Yet */
+            not_yet: number;
+            /** Recalls */
+            recalls: number;
+            /** Recordings */
+            recordings: number;
+            /** Skipped */
+            skipped: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1605,6 +1731,26 @@ export interface operations {
             };
         };
     };
+    practice_facts_api_practice_facts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeFacts"];
+                };
+            };
+        };
+    };
     hint_api_practice_hint_post: {
         parameters: {
             query?: never;
@@ -1691,6 +1837,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeCard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    studied_phrases_api_practice_studied_get: {
+        parameters: {
+            query: {
+                learning_date: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudiedPage"];
                 };
             };
             /** @description Validation Error */

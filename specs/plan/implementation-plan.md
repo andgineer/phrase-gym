@@ -1,21 +1,17 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Extend phrase recall with repeatable bounded sessions, then make practice sustainable before expanding content sources. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. This extension is still phrase recall; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results and a streak; next, make practice sustainable before expanding content sources. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Before the first release, every stage uses a freshly created application database and current import packages. No pre-release stage requires a database migration or support for older import formats.
-
-## 2. Add repeatable Extra Practice
-
-**Learner outcome:** start another bounded phrase session whenever desired through the same drill as Daily, and see concrete Daily results and a current practice streak. The [Stage 2 plan](stage-2-daily-extra.md) owns the behavior, screen design, architecture and implementation details. The first remaining checkpoint in that plan is the next ordinary stage request. This stage does not establish freer speech or everyday transfer.
 
 ## 3. Make adult practice sustainable
 
 **Learner outcome:** choose short meaningful practice missions, see concrete progress and return after a break without penalties.
 
 - Apply the [adult engagement decision](../decision-transfer-and-engagement.md#adult-engagement): chosen missions with varied situations, a clear finish and a learner-selected weekly target.
-- Show durable daily practice totals and saved recording comparisons distinctly. Do not compute an invented fluency or mastery score.
+- Build on the factual [practice facts](../decision-transfer-and-engagement.md#practice-entry-and-todays-facts) and saved recording comparisons, each distinctly labeled. Do not compute an invented fluency or mastery score.
 - Add optional completion points or achievements, including credit for honest attempts that need correction. They must not depend on favorable self-ratings or reward endless easy-card repetition. Turning them off leaves all practice usable.
-- Preserve accumulated progress across missed days and let the learner pause or adjust the target. Keep the Stage 2 current/best streak factual and separate from rewards and memory grades. No public leaderboard, mandatory collectibles, streak-based penalty or virtual economy.
+- Preserve accumulated progress across missed days and let the learner pause or adjust the target. Keep the current/best practice streak factual and separate from rewards and memory grades. No public leaderboard, mandatory collectibles, streak-based penalty or virtual economy.
 
 **Exit:** the learner can choose and finish a mission, see accurately labeled progress, disable rewards and return after a missed week without debt or lost progress. Behavioral tests cover these rules and prove that rewards cannot alter memory grades. Enjoyment and sustained participation remain distinct acceptance questions, not inferred learning gains.
 

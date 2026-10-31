@@ -87,3 +87,64 @@
   display: flex;
   gap: 12px;
 }
+.practice-facts {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.practice-facts h2,
+.practice-facts h3,
+.practice-facts p {
+  margin: 0;
+}
+.practice-facts .streak {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 18px;
+  font-weight: 600;
+}
+.recent-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #637169;
+  font-size: 0.9rem;
+}
+.recent-days .practiced {
+  color: #294f43;
+  font-weight: 600;
+}
+.facts-group {
+  display: grid;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid #deded1;
+}
+.facts-group > button {
+  justify-self: start;
+}
+.studied-list {
+  margin: 0;
+}
+.studied-list li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 4px;
+}
+.studied-list strong {
+  font-family: Georgia, serif;
+  font-weight: 500;
+}
+@media (prefers-color-scheme: dark) {
+  .recent-days {
+    color: #b9c9bf;
+  }
+  .recent-days .practiced {
+    color: #a5d1b8;
+  }
+}

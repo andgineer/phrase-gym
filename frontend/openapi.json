@@ -325,6 +325,30 @@
         "title": "Cue",
         "type": "object"
       },
+      "CumulativeWork": {
+        "additionalProperties": false,
+        "properties": {
+          "completions": {
+            "title": "Completions",
+            "type": "integer"
+          },
+          "first_meetings": {
+            "title": "First Meetings",
+            "type": "integer"
+          },
+          "practice_days": {
+            "title": "Practice Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "completions",
+          "first_meetings",
+          "practice_days"
+        ],
+        "title": "CumulativeWork",
+        "type": "object"
+      },
       "DeletionResult": {
         "additionalProperties": false,
         "properties": {
@@ -713,6 +737,25 @@
           "all_lessons"
         ],
         "title": "LessonPage",
+        "type": "object"
+      },
+      "NextReturn": {
+        "additionalProperties": false,
+        "properties": {
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "phrase_count": {
+            "title": "Phrase Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "learning_date",
+          "phrase_count"
+        ],
+        "title": "NextReturn",
         "type": "object"
       },
       "OpenDaily": {
@@ -1231,6 +1274,62 @@
         "title": "PracticeCounts",
         "type": "object"
       },
+      "PracticeDay": {
+        "additionalProperties": false,
+        "properties": {
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "practiced": {
+            "title": "Practiced",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "learning_date",
+          "practiced"
+        ],
+        "title": "PracticeDay",
+        "type": "object"
+      },
+      "PracticeFacts": {
+        "additionalProperties": false,
+        "properties": {
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "next_return": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextReturn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "streak": {
+            "$ref": "#/components/schemas/PracticeStreak"
+          },
+          "today": {
+            "$ref": "#/components/schemas/TodayCounts"
+          },
+          "work": {
+            "$ref": "#/components/schemas/CumulativeWork"
+          }
+        },
+        "required": [
+          "learning_date",
+          "streak",
+          "today",
+          "work",
+          "next_return"
+        ],
+        "title": "PracticeFacts",
+        "type": "object"
+      },
       "PracticeProgress": {
         "additionalProperties": false,
         "properties": {
@@ -1294,6 +1393,33 @@
           "message"
         ],
         "title": "PracticeState",
+        "type": "object"
+      },
+      "PracticeStreak": {
+        "additionalProperties": false,
+        "properties": {
+          "best": {
+            "title": "Best",
+            "type": "integer"
+          },
+          "current": {
+            "title": "Current",
+            "type": "integer"
+          },
+          "recent_days": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeDay"
+            },
+            "title": "Recent Days",
+            "type": "array"
+          }
+        },
+        "required": [
+          "current",
+          "best",
+          "recent_days"
+        ],
+        "title": "PracticeStreak",
         "type": "object"
       },
       "RecordingPage": {
@@ -1631,6 +1757,161 @@
           "daily_new_limit"
         ],
         "title": "Settings",
+        "type": "object"
+      },
+      "StudiedPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudiedPhrase"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "required": [
+          "items",
+          "next_offset"
+        ],
+        "title": "StudiedPage",
+        "type": "object"
+      },
+      "StudiedPhrase": {
+        "additionalProperties": false,
+        "properties": {
+          "completion_id": {
+            "title": "Completion Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "first_study",
+              "recall"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "lesson_title": {
+            "title": "Lesson Title",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "daily",
+              "extra",
+              "practice"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "phrase_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phrase Id"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "not_yet",
+                  "effort",
+                  "got_it"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "completion_id",
+          "phrase_id",
+          "text",
+          "lesson_title",
+          "mode",
+          "kind",
+          "rating",
+          "skipped"
+        ],
+        "title": "StudiedPhrase",
+        "type": "object"
+      },
+      "TodayCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "completions": {
+            "title": "Completions",
+            "type": "integer"
+          },
+          "effort": {
+            "title": "Effort",
+            "type": "integer"
+          },
+          "first_meetings": {
+            "title": "First Meetings",
+            "type": "integer"
+          },
+          "got_it": {
+            "title": "Got It",
+            "type": "integer"
+          },
+          "not_yet": {
+            "title": "Not Yet",
+            "type": "integer"
+          },
+          "recalls": {
+            "title": "Recalls",
+            "type": "integer"
+          },
+          "recordings": {
+            "title": "Recordings",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "completions",
+          "first_meetings",
+          "recalls",
+          "skipped",
+          "got_it",
+          "effort",
+          "not_yet",
+          "recordings"
+        ],
+        "title": "TodayCounts",
         "type": "object"
       },
       "ValidationError": {
@@ -2535,6 +2816,24 @@
         "summary": "Open Extra"
       }
     },
+    "/api/practice/facts": {
+      "get": {
+        "operationId": "practice_facts_api_practice_facts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeFacts"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Practice Facts"
+      }
+    },
     "/api/practice/hint": {
       "post": {
         "operationId": "hint_api_practice_hint_post",
@@ -2647,6 +2946,69 @@
           }
         },
         "summary": "Reveal"
+      }
+    },
+    "/api/practice/studied": {
+      "get": {
+        "operationId": "studied_phrases_api_practice_studied_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "learning_date",
+            "required": true,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "title": "Learning Date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudiedPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Studied Phrases"
       }
     },
     "/api/recordings": {

@@ -6,7 +6,7 @@
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
 keeping private learner recordings. It supports package import, Daily and Extra practice with first
 study and later spoken recall, phrase-specific Practice, self-rating, scheduled return, reference
-playback, comparison, and saved replay.
+playback, comparison, saved replay, and today's practice facts with a factual streak.
 
 ## Install and launch
 
@@ -72,6 +72,15 @@ recalls become 40); pressing again without further practice adds nothing, and co
 never reset. Skipped phrases from earlier passes come back; phrases that are not yet due never do.
 If nothing is waiting, Extra says so at once. **Stop** on an Extra card finishes any recording and
 returns to the entry; **Daily** resumes that card later.
+
+When a Daily or Extra pass runs out, the entry says so and shows today's practice above its
+controls, across all lessons: completions, first meetings, Skips and ratings from Daily, Extra and
+Practice; recordings saved today, with takes still uploading counted separately; **See today's
+phrases** with **More**, which keeps the wording of phrases deleted since; the current and best
+practice streak with the last seven days; your cumulative work; and the next date phrases are due.
+Any first meeting, rating or Skip counts the day toward the streak. Until today's first practice
+the streak still shows the run that ended yesterday; after a missed day it is zero, while the
+personal best and cumulative work remain.
 
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and
 answer it was recorded with; pending uploads remain for retry and never block the next card.

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { Recording } from '../studyTypes'
 import LessonPicker from './LessonPicker.vue'
 import LibraryPanel from './LibraryPanel.vue'
+import PracticeFacts from './PracticeFacts.vue'
 
 defineProps<{
   message: string
@@ -22,16 +23,22 @@ const emit = defineEmits<{
 const lessonId = defineModel<string>('lessonId', { default: '' })
 const detailsPhrase = defineModel<string | null>('detailsPhrase', { default: null })
 const picker = ref<InstanceType<typeof LessonPicker> | null>(null)
+const facts = ref<InstanceType<typeof PracticeFacts> | null>(null)
+
+function libraryChanged() {
+  void picker.value?.reload()
+  void facts.value?.reload()
+}
 </script>
 
 <template>
+  <PracticeFacts v-show="!detailsPhrase" ref="facts" :message="message" />
   <section v-show="!detailsPhrase" class="card session-entry">
     <LessonPicker ref="picker" v-model="lessonId" />
     <div class="actions">
       <button class="primary" :disabled="busy" @click="emit('daily')">Daily</button>
       <button :disabled="busy" @click="emit('extra')">Extra</button>
     </div>
-    <p v-if="message" role="status" class="entry-message">{{ message }}</p>
   </section>
   <p v-if="error" role="alert" class="error">
     {{ error }}
@@ -44,7 +51,7 @@ const picker = ref<InstanceType<typeof LessonPicker> | null>(null)
     :play="play"
     :compare="compare"
     :stop-playback="stopPlayback"
-    @changed="picker?.reload()"
+    @changed="libraryChanged"
     @practice="emit('practice', $event)"
   />
 </template>

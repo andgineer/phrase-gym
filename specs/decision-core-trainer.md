@@ -10,7 +10,7 @@ First automatic independent recall is offered on the next learning day. This is 
 
 ## Independent recall
 
-1. Show a short situation and, when useful, the other person's preceding line. Hide the answer, reference audio, answer-bearing help and lesson/item titles that give it away.
+1. Show a short situation and, when useful, the other person's preceding line. Hide the answer, reference audio, answer-bearing help and lesson/item titles that give it away. Until reveal, the card withholds the answer, its explanations, accepted alternatives, reference and saved takes, whose snapshots contain the answer.
 2. Invite a spoken response, with an optional recording. Silent self-check remains available without microphone access. There is no countdown, speed score or required mock dialogue.
 3. **Show** reveals the reference wording and short explanation; reference playback and comparison with the learner's take become available. **Details** also reveals the answer and opens the longer explanation. The learner rates the response made before help or reveal.
 4. **Not yet** means missing/wrong wording or inability to retrieve without help; **Effort** means correct recall with difficulty; **Got it** means comfortable correct recall. A sensible alternative is not a language error: use the phrase's accepted alternatives, or delete a defective phrase from its detail view after confirmation.
@@ -56,7 +56,7 @@ Each recall appearance chooses a random prepared cue, avoiding the phrase's last
 
 ## Deletion
 
-**Delete** in Library, phrase details or a revealed card back requires confirmation naming the phrase and the loss of its reference and saved recordings. Cancel changes nothing. Confirmed deletion invalidates its active view, removes phrase and takes, and blocks late uploads from recreating it. Deletion on a revealed back advances without a grade or practice-log row; in phrase-specific Practice it returns to the Library because no details remain. Completed log rows keep their wording/lesson snapshots and a nullable phrase reference so past practice remains truthful. [Durable file cleanup](architecture.md#deletion-cleanup) handles interruption and unlink failure separately from the database transaction. A replacement phrase is a fresh import. There is no Suspend/Restore state. Never label a phrase fluent, automatic or mastered from a schedule or recording.
+**Delete** in Library, phrase details or a revealed card back requires confirmation naming the phrase and stating that it, its reference and its saved recordings will be permanently removed. Cancel leaves the screen and current view unchanged. Confirmed deletion invalidates its active view, removes phrase and takes, and blocks late uploads from recreating it. Deletion on a revealed back advances without a grade or practice-log row; in phrase-specific Practice it returns to the Library because no details remain. Completed log rows keep their wording/lesson snapshots and a nullable phrase reference so past practice remains truthful. [Durable file cleanup](architecture.md#deletion-cleanup) handles interruption and unlink failure separately from the database transaction. A replacement phrase is a fresh import. There is no Suspend/Restore state. Never label a phrase fluent, automatic or mastered from a schedule or recording.
 
 ## Evidence behind the loop
 

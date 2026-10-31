@@ -18,6 +18,7 @@ CLOCKED_SERVICES = (
     "view_actions",
     "completion",
     "lessons",
+    "facts",
 )
 
 

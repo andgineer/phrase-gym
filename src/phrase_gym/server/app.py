@@ -7,6 +7,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from phrase_gym.server.api.coach import coach_routes
 from phrase_gym.server.api.deletion import deletion_routes
+from phrase_gym.server.api.facts import practice_facts_routes
 from phrase_gym.server.api.imports import import_routes
 from phrase_gym.server.api.library import library_routes
 from phrase_gym.server.api.practice import practice_card_routes, practice_entry_routes
@@ -23,6 +24,7 @@ from phrase_gym.server.importer import Importer
 from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
 from phrase_gym.server.phrase_practice import PhrasePractice
+from phrase_gym.server.practice_facts import PracticeFactsService
 from phrase_gym.server.recording_store import RecordingStore
 from phrase_gym.server.settings import SettingsService
 from phrase_gym.server.storage import Database
@@ -57,6 +59,8 @@ def create_app() -> FastAPI:
         ),
     )
     app.include_router(practice_card_routes(app.state.view_actions, app.state.completion))
+    app.state.facts = PracticeFactsService(database)
+    app.include_router(practice_facts_routes(app.state.facts))
     library = LibraryService(database)
     lessons = LessonChoices(database)
     app.state.lessons = lessons
