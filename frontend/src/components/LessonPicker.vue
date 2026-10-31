@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { usePageReturn } from '../composables/usePageReturn'
 import { usePagedList } from '../composables/usePagedList'
+import { onLearningDayChange } from '../learningDay'
 import type { LessonChoice, LessonPage } from '../libraryTypes'
 
 const selected = defineModel<string>({ default: '' })
@@ -45,7 +45,7 @@ watch(lessons.items, (items) => {
   if (fresh) chosen.value = fresh
 })
 onMounted(() => void lessons.reload())
-usePageReturn(() => void lessons.reload())
+onLearningDayChange(() => void lessons.refresh())
 onUnmounted(() => window.clearTimeout(debounce))
 defineExpose({ reload: lessons.reload })
 </script>

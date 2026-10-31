@@ -12,14 +12,14 @@ export function usePagedList<T, P extends Page<T> = Page<T>>(path: () => string,
   const error = ref('')
   let sequence = 0
 
-  async function fetchPage(offset: number) {
+  async function fetchPage(offset: number, limit = pageSize) {
     const request = ++sequence
     const base = path()
     loading.value = true
     error.value = ''
     try {
       const separator = base.includes('?') ? '&' : '?'
-      const next = await api<P>(`${base}${separator}offset=${offset}&limit=${pageSize}`)
+      const next = await api<P>(`${base}${separator}offset=${offset}&limit=${limit}`)
       // A slower response for an earlier query must not replace newer results.
       if (request !== sequence) return
       items.value = offset ? [...items.value, ...next.items] : next.items
@@ -41,6 +41,8 @@ export function usePagedList<T, P extends Page<T> = Page<T>>(path: () => string,
     loaded,
     error,
     reload: () => fetchPage(0),
+    // Reloads every page already shown, so a chosen later item keeps fresh data.
+    refresh: () => fetchPage(0, Math.min(Math.max(items.value.length, pageSize), 100)),
     more: () => (nextOffset.value === null ? Promise.resolve() : fetchPage(nextOffset.value)),
   }
 }

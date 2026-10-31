@@ -1,11 +1,12 @@
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { onMounted, ref, shallowRef, watch } from 'vue'
 import { api } from '../api'
 import { takeTransfers } from '../takeTransfers'
 import type { PracticeFacts, StudiedPage, StudiedPhrase } from '../factsTypes'
+import { observeLearningDay } from '../learningDay'
 import { usePageReturn } from './usePageReturn'
 import { usePagedList } from './usePagedList'
 
-export function usePracticeFacts(message: () => string) {
+export function usePracticeFacts() {
   const facts = shallowRef<PracticeFacts | null>(null)
   const error = ref('')
   const listing = ref(false)
@@ -13,24 +14,18 @@ export function usePracticeFacts(message: () => string) {
     () => `/practice/studied?learning_date=${facts.value?.learning_date ?? ''}`,
     5,
   )
-  // The completion message belongs to the learning day on which it appeared.
-  const messageDay = ref<string | null>(null)
-  const currentMessage = computed(() =>
-    !facts.value || messageDay.value === null || messageDay.value === facts.value.learning_date
-      ? message()
-      : '',
-  )
   let sequence = 0
 
-  async function reload() {
+  // Counts are cheap to refresh; the paged list restarts only when asked or on a new day.
+  async function reload(list = false) {
     const request = ++sequence
     try {
       const next = await api<PracticeFacts>('/practice/facts')
       if (request !== sequence) return
+      const newDay = observeLearningDay(next.learning_date)
       facts.value = next
-      messageDay.value ??= next.learning_date
       error.value = ''
-      if (listing.value) await studied.reload()
+      if (listing.value && (list || newDay)) await studied.reload()
     } catch (cause) {
       if (request === sequence) error.value = String(cause)
     }
@@ -39,13 +34,9 @@ export function usePracticeFacts(message: () => string) {
   async function toggleList() {
     listing.value = !listing.value
     // Fresh facts fix the learning date before the list is fetched for it.
-    if (listing.value) await reload()
+    if (listing.value) await reload(true)
   }
 
-  watch(message, () => {
-    messageDay.value = null
-    void reload()
-  })
   // A finished background upload turns a pending take into an available recording.
   watch(takeTransfers.pendingTakes, () => void reload())
   usePageReturn(() => void reload())
@@ -56,9 +47,8 @@ export function usePracticeFacts(message: () => string) {
     error,
     listing,
     studied,
-    currentMessage,
     uploadingTakes: takeTransfers.uploadingTakes,
-    reload,
+    refresh: () => reload(true),
     toggleList,
   }
 }

@@ -27,7 +27,7 @@ const facts = ref<InstanceType<typeof PracticeFacts> | null>(null)
 
 function libraryChanged() {
   void picker.value?.reload()
-  void facts.value?.reload()
+  void facts.value?.refresh()
 }
 </script>
 

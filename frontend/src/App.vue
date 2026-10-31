@@ -11,6 +11,7 @@ import PracticeEntry from './components/PracticeEntry.vue'
 import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
 import { usePracticeSession } from './composables/usePracticeSession'
+import { useDatedMessage } from './learningDay'
 
 const session = usePracticeSession()
 const { practice, playback, capture } = session
@@ -23,6 +24,7 @@ const pendingDelete = ref<DeletionTarget | null>(null)
 // Owned here so the entry, remounted after a finished Practice card, reopens its details.
 const detailsPhrase = ref<string | null>(null)
 const card = computed(() => practice.view.value.card)
+const entryMessage = useDatedMessage(() => practice.view.value.message)
 
 // An exhausted traversal returns to entry; a finished Practice card returns to its details.
 watch(card, (current, previous) => {
@@ -142,7 +144,7 @@ onMounted(initialize)
         <PracticeEntry
           :key="entryKey"
           v-model:lesson-id="lessonId"
-          :message="practice.view.value.message"
+          :message="entryMessage"
           :error="practice.error.value"
           :busy="practice.busy.value"
           :can-retry-extra="practice.pendingExtra.value !== null"

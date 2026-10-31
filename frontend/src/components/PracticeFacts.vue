@@ -14,8 +14,9 @@ import {
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
-const { facts, error, listing, studied, currentMessage, uploadingTakes, reload, toggleList } =
-  usePracticeFacts(() => props.message)
+const { facts, error, listing, studied, uploadingTakes, refresh, toggleList } = usePracticeFacts()
+// Facts of this mount confirm the learning date before an earlier message can be judged current.
+const currentMessage = computed(() => (facts.value ? props.message : ''))
 const today = computed(() => facts.value?.today)
 const practised = computed(() => (facts.value?.work.completions ?? 0) > 0)
 const todayShown = computed(
@@ -24,7 +25,7 @@ const todayShown = computed(
 const visible = computed(
   () => currentMessage.value || practised.value || uploadingTakes.value || error.value,
 )
-defineExpose({ reload })
+defineExpose({ refresh })
 </script>
 
 <template>

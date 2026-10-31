@@ -36,6 +36,32 @@ const factsPackage = {
     },
   ],
 }
+const pagedLessons = Array.from({ length: 21 }, (_, index) => ({
+  lesson_id: `unit-${index + 1}`,
+  title: `Unit ${index + 1}`,
+  phrases: [
+    {
+      ...factsPackage.lessons[0]!.phrases[0]!,
+      item_id: `paged-${index + 1}`,
+      text: `Paged phrase ${index + 1}.`,
+      cues: [{ situation: `Paged situation ${index + 1}` }],
+    },
+  ],
+}))
+// One package holds at most 20 lessons, so the 21st lesson arrives separately.
+const pagedPackages = [pagedLessons.slice(0, 20), pagedLessons.slice(20)].map((lessons, part) => ({
+  ...factsPackage,
+  package_id: `facts-paged-${part}-v1`,
+  source_id: 'facts-paged-source',
+  lessons,
+}))
+const latePackage = {
+  ...factsPackage,
+  package_id: 'facts-late-v1',
+  source_id: 'facts-late-source',
+  lessons: [{ ...factsPackage.lessons[0]!, lesson_id: 'late', title: 'Late lesson' }],
+}
+latePackage.lessons[0]!.phrases = [{ ...factsPackage.lessons[0]!.phrases[0]!, text: 'Late one.' }]
 const facts = (page: Page) => page.getByRole('region', { name: 'Practice facts' })
 const fact = (page: Page, id: string) => page.getByTestId(id)
 const press = (page: Page, name: string) => page.getByRole('button', { name, exact: true }).click()
@@ -68,6 +94,13 @@ async function setClock(page: Page, hours: number) {
   await page.request.post(`/__test/clock/${instant.toISOString()}`)
   // Takes are stamped by the browser, so its clock follows the server's.
   await page.clock.setFixedTime(instant)
+}
+
+async function returnToPage(page: Page) {
+  await page.evaluate(() => {
+    document.dispatchEvent(new Event('visibilitychange'))
+    window.dispatchEvent(new Event('focus'))
+  })
 }
 
 async function moveClock(page: Page, hours: number) {
@@ -261,6 +294,9 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await expect(days.nth(5)).toHaveAccessibleName('Mon: practiced')
   await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 1 phrase due')
   await expect(counts).toHaveText('1 due · 5 new')
+  await importPackage(page, latePackage, 'Added 1 phrases.')
+  await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
+  await expect(message).toHaveCount(0)
 
   await press(page, 'Daily')
   await card(page).getByRole('button', { name: 'Show' }).click()
@@ -271,6 +307,64 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await expect(studied).toHaveCount(2)
   await expectStudied(studied.first(), texts[0], 'Got it · Daily · Small talk')
   await expectStudied(studied.last(), texts[1], 'first meeting · Daily · Small talk')
+})
+
+test('returning on the same day keeps loaded pages and a later lesson; a new day resets them', async ({
+  page,
+}) => {
+  const requests: string[] = []
+  page.on('request', (request) =>
+    requests.push(new URL(request.url()).pathname + new URL(request.url()).search),
+  )
+  const count = (prefix: string) => requests.filter((path) => path.startsWith(prefix)).length
+  await page.goto('/')
+  await importPackage(page, pagedPackages[0]!, 'Added 20 phrases.')
+  await importPackage(page, pagedPackages[1]!, 'Added 1 phrases.')
+  await setLimits(page, 1, 6)
+  await press(page, 'Daily')
+  for (let step = 1; step <= 6; step++) {
+    await expect(modeLine(page)).toHaveText(`Daily · ${step} / 6 new`)
+    await press(page, 'Next')
+  }
+  await expect(fact(page, 'today-counts')).toHaveText('6 completions · 6 first meetings')
+  await press(page, 'See today’s phrases')
+  const studied = facts(page).getByRole('list', { name: 'Today’s phrases' }).getByRole('listitem')
+  await expect(studied).toHaveCount(5)
+  await facts(page).getByRole('button', { name: 'More', exact: true }).click()
+  await expect(studied).toHaveCount(6)
+  await press(page, 'More lessons')
+  const choice = page.getByLabel('Lesson to drill')
+  await expect(choice.locator('option')).toHaveCount(22)
+  await choice.selectOption({ label: 'Unit 21 · Facts course' })
+  const counts = page.getByTestId('lesson-counts')
+  await expect(counts).toHaveText('0 due · 1 new')
+
+  const loads = count('/api/practice/facts')
+  const lists = count('/api/practice/studied')
+  const lessons = count('/api/lessons')
+  await returnToPage(page)
+  await expect.poll(() => count('/api/practice/facts')).toBe(loads + 2)
+  await expect(page.getByRole('button', { name: 'More lessons' })).toHaveCount(0)
+  await expect(choice.locator('option')).toHaveCount(22)
+  await expect(choice).toHaveValue(/.+/)
+  await expect(counts).toHaveText('0 due · 1 new')
+  await expect(studied).toHaveCount(6)
+  expect([count('/api/practice/studied'), count('/api/lessons')]).toEqual([lists, lessons])
+
+  await setClock(page, 24)
+  const newList = page.waitForRequest((request) =>
+    request.url().includes('/api/practice/studied?learning_date=2026-11-03'),
+  )
+  const refreshed = page.waitForRequest((request) =>
+    request.url().includes('/api/lessons?query=&offset=0&limit=21'),
+  )
+  await returnToPage(page)
+  await Promise.all([newList, refreshed])
+  await expect(todayHeading(page)).toHaveCount(0)
+  await expect(studied).toHaveCount(0)
+  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 6 phrases due')
+  await expect(choice.locator('option')).toHaveCount(22)
+  await expect(counts).toHaveText('0 due · 1 new')
 })
 
 test.describe('mobile', () => {
