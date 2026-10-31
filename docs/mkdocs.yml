@@ -28,7 +28,9 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Installation: installation.md
-  - Import phrases: importing-phrases.md
+  - Add phrases: importing-phrases.md
+  - Instructions for your AI agent: agent-add-phrases.md
+  - Coach voice setup: piper-voice.md
   - Private access: private-access.md
   - Backup and restore: backup-and-restore.md
   - API reference: reference.md

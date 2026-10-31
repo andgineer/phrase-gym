@@ -34,7 +34,7 @@ iPhone with Tailscale connected.
 
 The built wheel contains the Vue client. A lean installed package runs `phrase-gym run`.
 Coach runs separately: set `PHRASE_GYM_PIPER_CONFIG` to the private voice file in
-[the import guide](docs/src/en/importing-phrases.md#piper-voice), then run
+[the Coach voice setup guide](docs/src/en/piper-voice.md), then run
 `uv run phrase-gym coach` in another terminal. The private Piper environment belongs to Coach;
 the server needs only core dependencies. Service registration and deployment commands remain
 unavailable.
@@ -102,7 +102,7 @@ be removed, the app keeps showing the problem with **Retry cleanup** until remov
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
 
-See [the package schema, example, and external-agent instruction](docs/src/en/importing-phrases.md).
+See [how to add phrases](docs/src/en/importing-phrases.md) and [instructions for your AI agent](docs/src/en/agent-add-phrases.md).
 
 ## Development
 

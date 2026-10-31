@@ -6,4 +6,4 @@ A running Phrase Gym server exposes its generated HTTP contract at
 External agents can read that contract to validate requests against the running version.
 
 For preparation instructions, the package schema and submission/status endpoints, see
-[Importing prepared English phrases](importing-phrases.md).
+[Instructions for your AI agent](agent-add-phrases.md).
