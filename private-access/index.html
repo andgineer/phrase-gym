@@ -460,8 +460,7 @@
 <p>With Tailscale already connected, from a source checkout run <code>uv run inv run --build --tailscale</code>. The task points the existing
 HTTPS Serve route at <code>127.0.0.1:8000</code> and passes the exact machine origin to Phrase Gym.
 The backend remains on loopback; only devices permitted by your Tailscale policy can use this
-shared library. This does not enable public Funnel access. Run Coach with <code>PHRASE_GYM_PIPER_CONFIG</code> when preparing text-only material. The server starts
-without Piper and continues to serve study and replay while Coach is stopped.</p>
+shared library. This does not enable public Funnel access.</p>
 <p>Use <code>tailscale serve status</code> to inspect the route. Stop an old Phrase Gym process before starting
 the replacement; retain its data directory and recordings. On iPhone, use the HTTPS machine URL
 with Tailscale connected. Microphone permission and actual playback still need attended checks.</p>

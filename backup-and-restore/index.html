@@ -457,19 +457,19 @@
 
 
 <h1 id="back-up-and-restore-local-learning-data">Back up and restore local learning data</h1>
-<p>Stop Coach, finish any pending browser recording saves, and quit Phrase Gym before copying files.
+<p>Stop Coach if it is running, finish any pending browser recording saves, and quit Phrase Gym before copying files.
 Use the complete data directory, including <code>phrase-gym.sqlite3</code>, any <code>-wal</code> and <code>-shm</code> files,
 <code>references/</code>, and <code>recordings/</code>. The default is the OS user data directory for <code>phrase-gym</code>;
 on macOS it is <code>~/Library/Application Support/phrase-gym</code>. If you launched with <code>--data-dir</code>, use
 that exact directory instead. Keep backups private because they contain learner recordings.</p>
-<p>With both processes stopped, run these commands after setting <code>DATA_DIR</code> to the correct path:</p>
+<p>With the application and any preparation process stopped, run these commands after setting <code>DATA_DIR</code> to the correct path:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">DATA_DIR</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/Library/Application Support/phrase-gym"</span>
 <span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/Phrase Gym backups/phrase-gym-</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span><span class="s2">"</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">"</span><span class="k">$(</span>dirname<span class="w"> </span><span class="s2">"</span><span class="nv">$BACKUP_DIR</span><span class="s2">"</span><span class="k">)</span><span class="s2">"</span>
 cp<span class="w"> </span>-Rp<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$BACKUP_DIR</span><span class="s2">"</span>
 </code></pre></div>
 <p>Check that the backup contains the database, <code>references/</code> and <code>recordings/</code>. To restore, stop
-both processes again and keep the current directory as a fallback. Copy the entire dated backup
+the application and any preparation process again and keep the current directory as a fallback. Copy the entire dated backup
 back into place; do not overwrite a live database or copy only its main file.</p>
 <div class="highlight"><pre><span></span><code>mv<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">.before-restore-</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span><span class="s2">"</span>
 cp<span class="w"> </span>-Rp<span class="w"> </span><span class="s2">"</span><span class="nv">$BACKUP_DIR</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">"</span>

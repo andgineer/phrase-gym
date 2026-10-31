@@ -235,6 +235,23 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Installation
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="././" class="md-nav__link md-nav__link--active">
         
   
@@ -250,6 +267,37 @@
   
 
       </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#audio-preparation-with-coach" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Audio preparation with Coach
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -428,6 +476,11 @@
                       
                     
                     
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
                   
                   <div class="md-sidebar__inner">
                     
@@ -439,6 +492,25 @@
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#audio-preparation-with-coach" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Audio preparation with Coach
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -461,7 +533,7 @@
 Published packages include the built browser client:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>phrase-gym<span class="w"> </span>--upgrade<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.13
 </code></pre></div>
-<p>Until a release is published, install from a source checkout:</p>
+<p>Until a release is published, install from a source checkout with Node 22.12+ on an LTS release:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--frozen
 npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="w"> </span>ci
 npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="w"> </span>run<span class="w"> </span>build
@@ -473,7 +545,8 @@ npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="
 Use <code>phrase-gym run --help</code> for the port and data-directory options. Keep voice files and learner
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.</p>
-<p>For text-only imports, configure a local English <a href="../piper-voice/">Piper voice</a>
+<h2 id="audio-preparation-with-coach">Audio preparation with Coach</h2>
+<p>Coach is the application's separate preparation process. For text-only imports, configure a local English <a href="../piper-voice/">Piper voice</a>
 and run Coach in another terminal:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
 </code></pre></div>
