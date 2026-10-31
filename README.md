@@ -13,31 +13,9 @@ playback, comparison, saved replay, and today's practice facts with a factual st
 The server runs on macOS and Linux. Use a macOS browser for the MVP media player and recording;
 Linux browser audio support is planned after the MVP.
 
-For a source checkout, use Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.12+ and a
-configured English Piper voice for Coach synthesis. Install the pinned environments and build the client once:
-
-```bash
-uv sync --frozen
-npm --prefix frontend ci
-npm --prefix frontend run build
-```
-
-Start Phrase Gym without any Piper installation:
-
-```bash
-uv run phrase-gym run
-```
-
-For private iPhone access on your existing tailnet, use `uv run inv run --build --tailscale`. This points Tailscale Serve at the new server
-and allows its exact HTTPS machine hostname. Open the HTTPS URL printed by Tailscale on the
-iPhone with Tailscale connected.
-
-The built wheel contains the Vue client. A lean installed package runs `phrase-gym run`.
-Coach runs separately: set `PHRASE_GYM_PIPER_CONFIG` to the private voice file in
-[the Coach voice setup guide](docs/src/en/piper-voice.md), then run
-`uv run phrase-gym coach` in another terminal. The private Piper environment belongs to Coach;
-the server needs only core dependencies. Service registration and deployment commands remain
-unavailable.
+Follow the [installation guide](docs/src/en/installation.md) to install and launch the application,
+including its optional material-preparation process. For another device, see
+[private access](docs/src/en/private-access.md).
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
@@ -47,13 +25,11 @@ earlier directory unchanged.
 
 ## Add and study material
 
-Open **Add material**, paste a package or choose its UTF-8 JSON file, and select **Import**.
-The app saves the request before acknowledging it. A text-only package stays pending while Coach
-is offline; Coach prepares reference audio and returns it through the API. An external agent can
-submit the same package with complete WAV references in one API request, without Coach. The server
-validates and publishes all phrases, lessons and references together. A preparation error remains
-visible for explicit retry. Exact package retries return the existing result; changed content under
-a package ID or a repeated source/item identity is rejected without overwriting learned material.
+An external AI agent can prepare phrases and their reference audio from course material, then
+submit the complete batch for immediate study. Alternatively, import a prepared text package
+through **Add material** and let the application's Coach prepare its audio.
+See [how to add phrases](docs/src/en/importing-phrases.md) for both workflows and
+[the external-agent instructions](docs/src/en/agent-add-phrases.md) for complete API submissions.
 
 The Practice entry offers **Search lessons**, **Lesson to drill** with its due and new counts,
 **Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press
@@ -101,8 +77,6 @@ be removed, the app keeps showing the problem with **Retry cleanup** until remov
 **Settings** contains the native language and learning timezone.
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
-
-See [how to add phrases](docs/src/en/importing-phrases.md) and [instructions for your AI agent](docs/src/en/agent-add-phrases.md).
 
 ## Development
 

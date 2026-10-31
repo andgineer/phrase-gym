@@ -17,9 +17,10 @@ courses or notes. For that, use your personal AI agent.
 ## Ask your personal AI agent
 
 Pass [these instructions](agent-add-phrases.md) to your AI agent. Tell it where to find your
-material and give it your Phrase Gym server address. It can extract phrases, prepare them and
-send them directly to Phrase Gym. Ask it to report which phrases were added and anything still
-waiting for Coach.
+material and give it your Phrase Gym server address. It prepares the text, reuses suitable source
+recordings or generates missing audio, and submits the complete material directly to Phrase Gym.
+Once the server confirms the import, the phrases are immediately available for learning.
+Ask the agent to report what was added and any material it could not finish.
 
-If the agent cannot reach your server, it can give you a prepared file to import through
-**Add material**. The agent instructions contain all format and API details.
+The agent must be able to reach your server and prepare audio. If either is unavailable, resolve
+that prerequisite with the agent before continuing.

@@ -5,5 +5,5 @@ A running Phrase Gym server exposes its generated HTTP contract at
 [/docs](http://127.0.0.1:8000/docs). Adjust the host and port if your server uses another address.
 External agents can read that contract to validate requests against the running version.
 
-For preparation instructions, the package schema and submission/status endpoints, see
-[Instructions for your AI agent](agent-add-phrases.md).
+For complete external-agent preparation and submission instructions, see
+[Prepare and submit phrases](agent-add-phrases.md).

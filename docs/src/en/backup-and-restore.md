@@ -1,12 +1,12 @@
 # Back up and restore local learning data
 
-Stop Coach, finish any pending browser recording saves, and quit Phrase Gym before copying files.
+Stop Coach if it is running, finish any pending browser recording saves, and quit Phrase Gym before copying files.
 Use the complete data directory, including `phrase-gym.sqlite3`, any `-wal` and `-shm` files,
 `references/`, and `recordings/`. The default is the OS user data directory for `phrase-gym`;
 on macOS it is `~/Library/Application Support/phrase-gym`. If you launched with `--data-dir`, use
 that exact directory instead. Keep backups private because they contain learner recordings.
 
-With both processes stopped, run these commands after setting `DATA_DIR` to the correct path:
+With the application and any preparation process stopped, run these commands after setting `DATA_DIR` to the correct path:
 
 ```bash
 DATA_DIR="$HOME/Library/Application Support/phrase-gym"
@@ -16,7 +16,7 @@ cp -Rp "$DATA_DIR" "$BACKUP_DIR"
 ```
 
 Check that the backup contains the database, `references/` and `recordings/`. To restore, stop
-both processes again and keep the current directory as a fallback. Copy the entire dated backup
+the application and any preparation process again and keep the current directory as a fallback. Copy the entire dated backup
 back into place; do not overwrite a live database or copy only its main file.
 
 ```bash

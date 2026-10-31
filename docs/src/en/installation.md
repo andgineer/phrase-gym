@@ -7,7 +7,7 @@ Published packages include the built browser client:
 uv tool install phrase-gym --upgrade --python 3.13
 ```
 
-Until a release is published, install from a source checkout:
+Until a release is published, install from a source checkout with Node 22.12+ on an LTS release:
 
 ```bash
 uv sync --frozen
@@ -26,7 +26,9 @@ Use `phrase-gym run --help` for the port and data-directory options. Keep voice 
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.
 
-For text-only imports, configure a local English [Piper voice](piper-voice.md)
+## Audio preparation with Coach
+
+Coach is the application's separate preparation process. For text-only imports, configure a local English [Piper voice](piper-voice.md)
 and run Coach in another terminal:
 
 ```bash
