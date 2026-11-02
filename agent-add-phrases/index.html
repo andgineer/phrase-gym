@@ -845,8 +845,11 @@ lesson identities and titles.</p>
 <p>The server validates and publishes all phrases and references atomically, returning <code>added</code> and
 <code>added_count</code>. A malformed or missing reference rejects the whole request. Retrying identical
 package and audio returns the original result; changed content under the same <code>package_id</code> is
-rejected. Use <code>GET /api/imports/{package_id}</code> to confirm a result when necessary. Submission and
-verification use the API; never write directly to the application database.</p>
+rejected. <code>GET /api/imports/{package_id}</code> returns a submission's current result at any later
+time: <code>pending</code> or <code>preparing</code> while Phrase Gym's Coach still has to prepare audio, <code>added</code> with
+<code>added_count</code> once the phrases are published, or <code>error</code> with the reason. The learner closing a
+failure notice in the browser does not change this result. Submission and verification use the
+API; never write directly to the application database.</p>
 
 
 
