@@ -19,9 +19,9 @@ including its optional material-preparation process. For another device, see
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
-For a separate data directory, add `--data-dir /absolute/path`. Before the first release, a new
-version may need a fresh data directory: startup then stops with an explanation and leaves the
-earlier directory unchanged.
+For a separate data directory, add `--data-dir /absolute/path`. A new version keeps your data
+and upgrades the database in place. If startup finds a database from a newer or unknown version,
+it stops with an explanation and leaves the directory unchanged.
 
 ## Add and study material
 

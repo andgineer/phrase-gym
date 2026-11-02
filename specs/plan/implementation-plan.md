@@ -2,7 +2,9 @@
 
 The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results and a streak; next, make practice sustainable before expanding content sources. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
-Before the first release, every stage uses a freshly created application database and current import packages. No pre-release stage requires a database migration or support for older import formats.
+Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
+
+**Open gap:** the current code refuses the learner's schema-5 database. Add the database upgrade mechanism and the upgrade from schema 5 to 6 before the learner next restarts the server.
 
 ## 3. Make adult practice sustainable
 

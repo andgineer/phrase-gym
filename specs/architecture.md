@@ -42,7 +42,7 @@ Retry pending cleanup on server startup and through an explicit retry when clean
 
 Preserve stable phrase/source and take identities, recorded support and independent audio references. Keep scheduling policy separate from activity presentation and recording storage. [Extra practice](decision-transfer-and-engagement.md) uses the same phrase and current-session rules as Daily; it does not need a second phrase identity or general activity engine. `Phrase` is one stored record with `text` as its wording; Card is only a Vue view. The planned phrase loop uses one completed-practice log and one mutable current-view record, with no separate historical attempt or review tables or duplicate daily aggregate counters. Two date-keyed values store Extra allowance targets; live settings and indexed log counts determine remaining capacity.
 
-Implement only the first MVP's records and APIs now; no placeholder dialogue tables, generic workflow engine, plugin framework or speculative API endpoints are needed. Before the first release, rebuild the application database and import packages for every new stage without migration or old-format import support. After the first release, use ordinary schema and package upgrades that preserve application data.
+Implement only the first MVP's records and APIs now; no placeholder dialogue tables, generic workflow engine, plugin framework or speculative API endpoints are needed. Every stage keeps the learner's existing database under the [data compatibility rule](#releases-and-data-compatibility). Import packages use the current format only; older package formats are rejected rather than converted.
 
 ## Local access and privacy
 
@@ -66,4 +66,4 @@ Reuse useful Python code from Git and useful behavior/tests from both prototypes
 
 Prototype compatibility is not an MVP feature. Do not delete existing learner data or recordings during replacement. Use a clearly identified new application data directory; any later import of selected prototype content is an explicit, bounded action. Starting fresh does not authorize erasing old data.
 
-After the first release, use simple schema versions and upgrades while the app is stopped, preceded by a backup. Unknown schemas fail with an actionable message. Rollback uses the previous application version and its complete backup; it needs no concurrent operation support.
+The learner's practice history, schedules and recordings are real study data, so the application database is preserved from now on: no stage, schema change, demo or test run clears or recreates it. Every schema change ships with an upgrade that carries an existing database forward in place with all its data. Upgrades run while the app is stopped, preceded by a backup of the database. Unknown or newer schemas fail with an actionable message and leave the data unchanged. Rollback uses the previous application version and its complete backup; it needs no concurrent operation support.
