@@ -339,6 +339,23 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Backup and restore
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="././" class="md-nav__link md-nav__link--active">
         
   
@@ -354,6 +371,37 @@
   
 
       </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automatic-copy-before-an-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Automatic copy before an upgrade
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -402,6 +450,11 @@
                       
                     
                     
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
                   
                   <div class="md-sidebar__inner">
                     
@@ -413,6 +466,25 @@
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automatic-copy-before-an-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Automatic copy before an upgrade
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -452,6 +524,13 @@ cp<span class="w"> </span>-Rp<span class="w"> </span><span class="s2">"</span><s
 open representative phrase details for due dates and saved recordings. Play a representative
 reference and each saved take you need to confirm.
 If a copy fails, keep the fallback and backup untouched and retry while the app is stopped.</p>
+<h2 id="automatic-copy-before-an-upgrade">Automatic copy before an upgrade</h2>
+<p>When a new Phrase Gym version needs a newer database layout, it upgrades your database in place
+on startup. Just before that, it saves a copy of the database beside it, named
+<code>phrase-gym-schema-&lt;old version&gt;-&lt;date and time&gt;.sqlite3</code>. Your references and recordings are not
+changed by an upgrade. To go back to the previous Phrase Gym version, stop the application, move
+<code>phrase-gym.sqlite3</code> and any <code>-wal</code> and <code>-shm</code> files aside, copy the saved file to
+<code>phrase-gym.sqlite3</code>, and start the previous version.</p>
 
 
 
