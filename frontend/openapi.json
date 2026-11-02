@@ -763,25 +763,6 @@
         "title": "LessonPage",
         "type": "object"
       },
-      "NextReturn": {
-        "additionalProperties": false,
-        "properties": {
-          "learning_date": {
-            "title": "Learning Date",
-            "type": "string"
-          },
-          "phrase_count": {
-            "title": "Phrase Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "learning_date",
-          "phrase_count"
-        ],
-        "title": "NextReturn",
-        "type": "object"
-      },
       "OpenDaily": {
         "additionalProperties": false,
         "properties": {
@@ -1324,16 +1305,6 @@
             "title": "Learning Date",
             "type": "string"
           },
-          "next_return": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NextReturn"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "notices": {
             "items": {
               "$ref": "#/components/schemas/ImportNotice"
@@ -1347,6 +1318,9 @@
           "today": {
             "$ref": "#/components/schemas/TodayCounts"
           },
+          "waiting": {
+            "$ref": "#/components/schemas/WaitingCounts"
+          },
           "work": {
             "$ref": "#/components/schemas/CumulativeWork"
           }
@@ -1356,7 +1330,7 @@
           "streak",
           "today",
           "work",
-          "next_return",
+          "waiting",
           "notices"
         ],
         "title": "PracticeFacts",
@@ -2031,6 +2005,25 @@
           "operation_id"
         ],
         "title": "ViewOperation",
+        "type": "object"
+      },
+      "WaitingCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "due_count": {
+            "title": "Due Count",
+            "type": "integer"
+          },
+          "new_count": {
+            "title": "New Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "new_count",
+          "due_count"
+        ],
+        "title": "WaitingCounts",
         "type": "object"
       }
     }

@@ -134,7 +134,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(fact(page, 'your-work')).toHaveText(
     '1 completion · 1 first meeting · 1 day with practice',
   )
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Tomorrow · 1 phrase due')
+  await expect(fact(page, 'waiting')).toHaveText('5 phrases new · 0 phrases due')
   const panel = await facts(page).boundingBox()
   const daily = await page.getByRole('button', { name: 'Daily', exact: true }).boundingBox()
   expect(daily!.y).toBeGreaterThan(panel!.y + panel!.height)
@@ -177,7 +177,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await meet(page, texts[4])
   await meet(page, texts[5])
   await expect(fact(page, 'today-counts')).toHaveText('6 completions · 6 first meetings')
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Tomorrow · 6 phrases due')
+  await expect(fact(page, 'waiting')).toHaveText('0 phrases new · 0 phrases due')
 
   await press(page, 'See today’s phrases')
   const studied = facts(page).getByRole('list', { name: 'Today’s phrases' }).getByRole('listitem')
@@ -195,7 +195,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
     .click()
   await expectStudied(studied.first(), texts[0], 'first meeting · Daily · Small talk · deleted')
   await expect(fact(page, 'today-counts')).toHaveText('6 completions · 6 first meetings')
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Tomorrow · 5 phrases due')
+  await expect(fact(page, 'waiting')).toHaveText('0 phrases new · 0 phrases due')
 
   await openDetails(page, texts[2])
   const history = details(page).locator('.take-history li')
@@ -225,7 +225,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   const days = fact(page, 'recent-days').getByRole('listitem')
   await expect(days.last()).toHaveAccessibleName(/: no practice$/)
   await expect(days.nth(5)).toHaveAccessibleName(/: practiced$/)
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 1 phrase due')
+  await expect(fact(page, 'waiting')).toHaveText('5 phrases new · 1 phrase due')
   await expect(page.getByTestId('lesson-counts')).toHaveText('1 due · 5 new')
 
   await press(page, 'Daily')
@@ -252,7 +252,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(fact(page, 'your-work')).toHaveText(
     '4 completions · 3 first meetings · 2 days with practice',
   )
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 3 phrases due')
+  await expect(fact(page, 'waiting')).toHaveText('3 phrases new · 3 phrases due')
   await press(page, 'Daily')
   await expect(modeLine(page)).toHaveText('Daily · 1 / 1 due')
 })
@@ -268,7 +268,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   const message = page.getByText("Today's Daily practice is complete.", { exact: true })
   await expect(message).toBeVisible()
   await expect(fact(page, 'today-counts')).toHaveText('1 completion · 1 first meeting')
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Tomorrow · 1 phrase due')
+  await expect(fact(page, 'waiting')).toHaveText('5 phrases new · 0 phrases due')
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 5 new')
   await press(page, 'See today’s phrases')
@@ -292,7 +292,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   const days = fact(page, 'recent-days').getByRole('listitem')
   await expect(days.last()).toHaveAccessibleName('Tue: no practice')
   await expect(days.nth(5)).toHaveAccessibleName('Mon: practiced')
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 1 phrase due')
+  await expect(fact(page, 'waiting')).toHaveText('5 phrases new · 1 phrase due')
   await expect(counts).toHaveText('1 due · 5 new')
   await importPackage(page, latePackage, 1)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
@@ -362,7 +362,7 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   await Promise.all([newList, refreshed])
   await expect(todayHeading(page)).toHaveCount(0)
   await expect(studied).toHaveCount(0)
-  await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 6 phrases due')
+  await expect(fact(page, 'waiting')).toHaveText('15 phrases new · 6 phrases due')
   await expect(choice.locator('option')).toHaveCount(22)
   await expect(counts).toHaveText('0 due · 1 new')
 })

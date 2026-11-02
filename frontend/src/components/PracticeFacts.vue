@@ -4,11 +4,11 @@ import { usePracticeFacts } from '../composables/usePracticeFacts'
 import {
   bestLine,
   counted,
-  nextReturnLine,
   ratingsLine,
   streakLine,
   studiedLine,
   todayLine,
+  waitingLine,
   weekday,
   workLine,
 } from '../practiceFacts'
@@ -83,7 +83,7 @@ defineExpose({ refresh })
     <div v-if="facts && practised" class="facts-group">
       <h3 class="eyebrow">Your work · all lessons</h3>
       <p data-testid="your-work">{{ workLine(facts) }}</p>
-      <p v-if="facts.next_return" data-testid="next-return">{{ nextReturnLine(facts) }}</p>
+      <p data-testid="waiting">{{ waitingLine(facts) }}</p>
     </div>
     <ul v-if="notices.length" class="import-notices" aria-label="Import problems">
       <li v-for="notice in notices" :key="notice.package_id">

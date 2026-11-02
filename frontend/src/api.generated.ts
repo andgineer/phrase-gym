@@ -701,13 +701,6 @@ export interface components {
             /** Next Offset */
             next_offset: number | null;
         };
-        /** NextReturn */
-        NextReturn: {
-            /** Learning Date */
-            learning_date: string;
-            /** Phrase Count */
-            phrase_count: number;
-        };
         /** OpenDaily */
         OpenDaily: {
             /** Lesson Id */
@@ -897,11 +890,11 @@ export interface components {
         PracticeFacts: {
             /** Learning Date */
             learning_date: string;
-            next_return: components["schemas"]["NextReturn"] | null;
             /** Notices */
             notices: components["schemas"]["ImportNotice"][];
             streak: components["schemas"]["PracticeStreak"];
             today: components["schemas"]["TodayCounts"];
+            waiting: components["schemas"]["WaitingCounts"];
             work: components["schemas"]["CumulativeWork"];
         };
         /** PracticeProgress */
@@ -1118,6 +1111,13 @@ export interface components {
             phrase_id: string;
             /** View Token */
             view_token: string;
+        };
+        /** WaitingCounts */
+        WaitingCounts: {
+            /** Due Count */
+            due_count: number;
+            /** New Count */
+            new_count: number;
         };
     };
     responses: never;

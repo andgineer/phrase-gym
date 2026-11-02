@@ -4,15 +4,15 @@ from datetime import UTC, date, datetime, time, timedelta
 
 from phrase_gym.server.facts_contracts import (
     CumulativeWork,
-    NextReturn,
     PracticeFacts,
     StudiedPage,
     StudiedPhrase,
     TodayCounts,
+    WaitingCounts,
 )
 from phrase_gym.server.import_notices import import_notices
-from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS
-from phrase_gym.server.scheduling import effective_due, learning_day, learning_zone
+from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
+from phrase_gym.server.scheduling import learning_day, learning_zone
 from phrase_gym.server.storage import Database
 from phrase_gym.server.streak import practice_streak
 
@@ -49,16 +49,12 @@ def _today_counts(connection: sqlite3.Connection, day: str) -> TodayCounts:
     )
 
 
-def _next_return(connection: sqlite3.Connection, day: str) -> NextReturn | None:
+def _waiting(connection: sqlite3.Connection, now: datetime) -> WaitingCounts:
     rows = connection.execute(
-        f"SELECT {SCHEDULE_COLUMNS} FROM phrases WHERE studied_at IS NOT NULL",  # noqa: S608
+        f"SELECT {SCHEDULE_COLUMNS} FROM phrases",  # noqa: S608
     ).fetchall()
-    due_days = [learning_day(connection, effective_due(connection, row)) for row in rows]
-    if not due_days:
-        return None
-    # Overdue phrases are offered again today, never on an earlier date.
-    first = max(min(due_days), day)
-    return NextReturn(learning_date=first, phrase_count=sum(due <= first for due in due_days))
+    summary = schedule_summary(connection, rows, now)
+    return WaitingCounts(new_count=summary.new_count, due_count=summary.due_count)
 
 
 class PracticeFactsService:
@@ -68,7 +64,8 @@ class PracticeFactsService:
 
     def facts(self) -> PracticeFacts:
         with self.database.snapshot() as connection:
-            day = learning_day(connection, self.clock())
+            now = self.clock()
+            day = learning_day(connection, now)
             dates = [
                 row[0]
                 for row in connection.execute("SELECT DISTINCT learning_date FROM practice_log")
@@ -85,7 +82,7 @@ class PracticeFactsService:
                     first_meetings=first_meetings,
                     practice_days=len(dates),
                 ),
-                next_return=_next_return(connection, day),
+                waiting=_waiting(connection, now),
                 notices=import_notices(connection),
             )
 

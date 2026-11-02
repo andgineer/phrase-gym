@@ -55,7 +55,7 @@ def streak(practice: Practice) -> tuple[int, int, list[bool]]:
     return found["current"], found["best"], [day["practiced"] for day in found["recent_days"]]
 
 
-def test_fresh_library_has_no_facts_and_no_next_return(practice: Practice) -> None:
+def test_fresh_library_has_no_facts_and_nothing_waiting(practice: Practice) -> None:
     assert facts(practice) == {
         "learning_date": "2026-10-28",
         "streak": {
@@ -79,7 +79,7 @@ def test_fresh_library_has_no_facts_and_no_next_return(practice: Practice) -> No
             0,
         ),
         "work": {"completions": 0, "first_meetings": 0, "practice_days": 0},
-        "next_return": None,
+        "waiting": {"new_count": 0, "due_count": 0},
         "notices": [],
     }
 
@@ -278,17 +278,26 @@ def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None
     assert found["today"]["completions"] == 1 and found["streak"]["current"] == 2
 
 
-def test_next_return_counts_phrases_due_by_the_next_learning_day(practice: Practice) -> None:
+def waiting(practice: Practice) -> dict[str, int]:
+    found = facts(practice)["waiting"]
+    lessons = practice.client.get("/api/lessons").json()["all_lessons"]
+    assert found == {"new_count": lessons["new_count"], "due_count": lessons["due_count"]}
+    return found
+
+
+def test_waiting_counts_new_and_currently_due_phrases_beyond_the_allowance(
+    practice: Practice,
+) -> None:
     publish(practice.client, many(4))
-    assert facts(practice)["next_return"] is None
+    assert waiting(practice) == {"new_count": 4, "due_count": 0}
     practice.set_limits(1, 2)
     practice.study_all_new()
-    assert facts(practice)["next_return"] == {"learning_date": "2026-10-29", "phrase_count": 2}
+    assert waiting(practice) == {"new_count": 2, "due_count": 0}
     practice.later(days=1)
+    assert waiting(practice) == {"new_count": 2, "due_count": 2}
     rate(practice, practice.card(), "got_it")
-    # The phrase left beyond today's due allowance is still waiting today.
-    assert facts(practice)["next_return"] == {"learning_date": "2026-10-29", "phrase_count": 1}
+    # The phrase left beyond today's due allowance still counts as due now.
+    assert waiting(practice) == {"new_count": 2, "due_count": 1}
     with practice.database.write() as connection:
         connection.execute("UPDATE phrases SET due_at='2026-11-05T09:00:00+00:00'")
-    found = facts(practice)["next_return"]
-    assert found == {"learning_date": "2026-11-05", "phrase_count": 2}
+    assert waiting(practice) == {"new_count": 2, "due_count": 0}

@@ -35,7 +35,7 @@ An exhausted Daily or Extra traversal returns to entry with a completion message
 
 - **Today** counts completions, first meetings, Skips and each rating across Daily, Extra and Practice. It shows saved recordings captured today that are still available. Takes still waiting to upload from this browser are counted apart from Today, whatever day they were captured; a refused take keeps its own discard error instead. **See today's phrases** pages through today's completions in order, each with its wording snapshot, kind, rating or Skip, mode and lesson; a phrase deleted later stays listed and is marked deleted.
 - **Your work** gives cumulative completions, first meetings and days with practice, including activity for phrases later deleted.
-- **Next return** names the earliest learning date, not before today, on which a current studied phrase is due, with the number due by then. It is omitted when no phrase is scheduled.
+- Below **Your work**, one line states how many phrases are new and how many are due right now across all lessons, for example "10 phrases new · 72 phrases due", matching the **All lessons** counts. Due phrases beyond today's Daily allowance still count as due. The line names no date, because after a completed Daily a date would read as more work owed today, while Daily offers further due phrases only on a later learning day.
 - The streak follows [adult engagement](#adult-engagement).
 
 No mastery score, scheduling-history timeline or longest-gap highlight is shown.

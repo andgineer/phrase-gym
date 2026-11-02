@@ -31,9 +31,9 @@ class CumulativeWork(StrictModel):
     practice_days: int
 
 
-class NextReturn(StrictModel):
-    learning_date: str
-    phrase_count: int
+class WaitingCounts(StrictModel):
+    new_count: int
+    due_count: int
 
 
 class ImportNotice(StrictModel):
@@ -47,7 +47,7 @@ class PracticeFacts(StrictModel):
     streak: PracticeStreak
     today: TodayCounts
     work: CumulativeWork
-    next_return: NextReturn | None
+    waiting: WaitingCounts
     notices: list[ImportNotice]
 
 

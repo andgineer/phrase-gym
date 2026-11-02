@@ -2,12 +2,11 @@ import { expect, it } from 'vitest'
 import type { PracticeFacts, StudiedPhrase } from '../src/factsTypes'
 import {
   bestLine,
-  nextDay,
-  nextReturnLine,
   ratingsLine,
   streakLine,
   studiedLine,
   todayLine,
+  waitingLine,
   weekday,
   workLine,
 } from '../src/practiceFacts'
@@ -27,7 +26,7 @@ const facts = (changes: Partial<PracticeFacts> = {}): PracticeFacts => ({
   streak: { current: 8, best: 12, recent_days: [] },
   today,
   work: { completions: 340, first_meetings: 126, practice_days: 17 },
-  next_return: { learning_date: '2026-11-01', phrase_count: 4 },
+  waiting: { new_count: 10, due_count: 72 },
   notices: [],
   ...changes,
 })
@@ -60,17 +59,14 @@ it('states the streak factually, including after a missed day', () => {
   expect(bestLine(missed)).toBe('Personal best: 1 day')
 })
 
-it('names tomorrow and calendar weekdays regardless of the browser offset', () => {
-  expect(nextReturnLine(facts())).toBe('Next return: Tomorrow · 4 phrases due')
-  const later = { learning_date: '2026-11-05', phrase_count: 1 }
-  expect(nextReturnLine(facts({ next_return: later }))).toBe(
-    'Next return: 2026-11-05 · 1 phrase due',
+it('states how many phrases are new and due right now', () => {
+  expect(waitingLine(facts())).toBe('10 phrases new · 72 phrases due')
+  expect(waitingLine(facts({ waiting: { new_count: 1, due_count: 0 } }))).toBe(
+    '1 phrase new · 0 phrases due',
   )
-  expect(nextReturnLine(facts({ next_return: null }))).toBe('')
-  const waiting = { learning_date: '2026-10-31', phrase_count: 2 }
-  expect(nextReturnLine(facts({ next_return: waiting }))).toBe('Next return: Today · 2 phrases due')
-  expect(nextDay('2026-12-31')).toBe('2027-01-01')
-  expect(nextDay('2026-03-29')).toBe('2026-03-30')
+})
+
+it('names calendar weekdays regardless of the browser offset', () => {
   expect(weekday('2026-10-31')).toBe('Sat')
 })
 

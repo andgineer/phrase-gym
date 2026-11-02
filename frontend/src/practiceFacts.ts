@@ -23,12 +23,6 @@ const calendarDay = (date: string) => new Date(`${date}T00:00:00Z`)
 
 export const weekday = (date: string) => weekdays[calendarDay(date).getUTCDay()]
 
-export function nextDay(date: string) {
-  const day = calendarDay(date)
-  day.setUTCDate(day.getUTCDate() + 1)
-  return day.toISOString().slice(0, 10)
-}
-
 export function streakLine({ current }: PracticeFacts['streak']) {
   return current ? `🔥 ${current}-day practice streak` : 'No current practice streak'
 }
@@ -60,17 +54,8 @@ export const workLine = ({ work }: PracticeFacts) =>
     `${counted(work.practice_days, 'day')} with practice`,
   ].join(' · ')
 
-export function nextReturnLine(facts: PracticeFacts) {
-  const next = facts.next_return
-  if (!next) return ''
-  const when =
-    next.learning_date === facts.learning_date
-      ? 'Today'
-      : next.learning_date === nextDay(facts.learning_date)
-        ? 'Tomorrow'
-        : next.learning_date
-  return `Next return: ${when} · ${counted(next.phrase_count, 'phrase')} due`
-}
+export const waitingLine = ({ waiting }: PracticeFacts) =>
+  `${counted(waiting.new_count, 'phrase')} new · ${counted(waiting.due_count, 'phrase')} due`
 
 export function studiedLine(item: StudiedPhrase) {
   const outcome =
