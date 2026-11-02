@@ -1,0 +1,1 @@
+Upgraded the Phrase Gym database from schema 5 to 6; the previous version is saved as /tmp/pytest-of-runner/pytest-0/test_failed_upgrade_step_leave0/data/phrase-gym-schema-5-20261102-183325-481393.sqlite3
