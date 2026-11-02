@@ -28,3 +28,12 @@ Start the same compatible Phrase Gym version. In the Library, check lesson and p
 open representative phrase details for due dates and saved recordings. Play a representative
 reference and each saved take you need to confirm.
 If a copy fails, keep the fallback and backup untouched and retry while the app is stopped.
+
+## Automatic copy before an upgrade
+
+When a new Phrase Gym version needs a newer database layout, it upgrades your database in place
+on startup. Just before that, it saves a copy of the database beside it, named
+`phrase-gym-schema-<old version>-<date and time>.sqlite3`. Your references and recordings are not
+changed by an upgrade. To go back to the previous Phrase Gym version, stop the application, move
+`phrase-gym.sqlite3` and any `-wal` and `-shm` files aside, copy the saved file to
+`phrase-gym.sqlite3`, and start the previous version.

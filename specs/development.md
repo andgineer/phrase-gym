@@ -45,6 +45,10 @@ source distribution. Do not publish a wheel built from an outdated client.
 `src/phrase_gym/__about__.py` is the package-version source;
 Hatch reads it for both distributions.
 
+A database schema change adds the next numbered SQL step under the server's schema directory
+and a test that upgrades a database from the previous version while keeping its rows. Never edit
+a step that has reached `main`; correct it with a new step.
+
 `inv build-frontend` rebuilds only the Vue client. `inv run --build` builds the client and starts
 the server; `inv run` starts the server with the existing client build. Pre-commit contains the
 Ruff configuration and runs Pyrefly directly. Invoke provides the build, test and server tasks.

@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 
 from phrase_gym.server import main as cli
-from phrase_gym.server.storage import SCHEMA_VERSION, Database, UnsupportedSchemaError
+from phrase_gym.server.schema_upgrade import SCHEMA_VERSION
+from phrase_gym.server.storage import Database, UnsupportedSchemaError
 
 
 def earlier_directory(path: Path, script: str) -> dict[str, str]:
@@ -38,7 +39,19 @@ def test_earlier_schema_is_rejected_without_changing_the_directory(tmp_path: Pat
     before = earlier_directory(directory, EARLIER)
     with pytest.raises(UnsupportedSchemaError, match="schema 2") as raised:
         Database(directory)
-    assert "new empty --data-dir" in str(raised.value)
+    assert "choose another --data-dir" in str(raised.value)
+    assert fingerprint(directory) == before
+
+
+def test_newer_schema_is_rejected_without_changing_the_directory(tmp_path: Path) -> None:
+    directory = tmp_path / "newer"
+    before = earlier_directory(
+        directory,
+        "CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);"
+        "INSERT INTO meta VALUES ('schema_version','99');",
+    )
+    with pytest.raises(UnsupportedSchemaError, match="schema 99"):
+        Database(directory)
     assert fingerprint(directory) == before
 
 
