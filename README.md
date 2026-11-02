@@ -12,7 +12,7 @@
 | src/phrase\_gym/server/api/coach.py           |       25 |        3 |     88% | 23, 31-32 |
 | src/phrase\_gym/server/api/deletion.py        |       18 |        0 |    100% |           |
 | src/phrase\_gym/server/api/facts.py           |       15 |        0 |    100% |           |
-| src/phrase\_gym/server/api/imports.py         |       30 |        4 |     87% |     36-39 |
+| src/phrase\_gym/server/api/imports.py         |       19 |        0 |    100% |           |
 | src/phrase\_gym/server/api/library.py         |       35 |        1 |     97% |        53 |
 | src/phrase\_gym/server/api/paging.py          |        5 |        0 |    100% |           |
 | src/phrase\_gym/server/api/practice.py        |       58 |        0 |    100% |           |
@@ -29,7 +29,7 @@
 | src/phrase\_gym/server/facts\_contracts.py    |       11 |        0 |    100% |           |
 | src/phrase\_gym/server/file\_cleanup.py       |       44 |        0 |    100% |           |
 | src/phrase\_gym/server/import\_contracts.py   |       91 |        4 |     96% |24, 51, 58, 65 |
-| src/phrase\_gym/server/importer.py            |       85 |        6 |     93% |36, 63, 92, 107, 111, 116 |
+| src/phrase\_gym/server/importer.py            |       74 |        5 |     93% |35, 81, 96, 100, 105 |
 | src/phrase\_gym/server/lesson\_choices.py     |       26 |        0 |    100% |           |
 | src/phrase\_gym/server/library.py             |       38 |        0 |    100% |           |
 | src/phrase\_gym/server/main.py                |       46 |        7 |     85% |17-21, 25, 56 |
@@ -50,7 +50,7 @@
 | src/phrase\_gym/server/storage.py             |       99 |        2 |     98% |  136, 199 |
 | src/phrase\_gym/server/streak.py              |       16 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py       |       51 |        0 |    100% |           |
-| **TOTAL**                                     | **1735** |   **83** | **95%** |           |
+| **TOTAL**                                     | **1713** |   **78** | **95%** |           |
 
 
 ## Setup coverage badge
