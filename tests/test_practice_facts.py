@@ -24,6 +24,13 @@ def facts(practice: Practice) -> dict[str, Any]:
     return response.json()
 
 
+ZERO_TOTALS = dict.fromkeys(
+    ["completions", "first_meetings", "recalls", "skipped", "got_it", "effort", "not_yet"]
+    + ["recordings"],
+    0,
+)
+
+
 def studied(practice: Practice, day: str, offset: int = 0, limit: int = 10) -> dict[str, Any]:
     response = practice.client.get(
         "/api/practice/studied",
@@ -65,21 +72,15 @@ def test_fresh_library_has_no_facts_and_nothing_waiting(practice: Practice) -> N
                 {"learning_date": f"2026-10-{day}", "practiced": False} for day in range(22, 29)
             ],
         },
-        "today": dict.fromkeys(
-            [
-                "completions",
-                "first_meetings",
-                "recalls",
-                "skipped",
-                "got_it",
-                "effort",
-                "not_yet",
-                "recordings",
-            ],
-            0,
-        ),
-        "work": {"completions": 0, "first_meetings": 0, "practice_days": 0},
-        "waiting": {"new_count": 0, "due_count": 0},
+        "today": ZERO_TOTALS,
+        "work": {**ZERO_TOTALS, "practice_days": 0},
+        "library": {
+            "phrase_count": 0,
+            "due_count": 0,
+            "later_count": 0,
+            "new_count": 0,
+            "long_term_count": 0,
+        },
         "notices": [],
     }
 
@@ -101,14 +102,24 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
     assert facts(practice)["today"] == {
         "completions": 8,
         "first_meetings": 1,
-        "recalls": 7,
+        "recalls": 6,
         "skipped": 1,
         "got_it": 3,
         "effort": 2,
         "not_yet": 1,
         "recordings": 0,
     }
-    assert facts(practice)["work"] == {"completions": 13, "first_meetings": 6, "practice_days": 2}
+    assert facts(practice)["work"] == {
+        "completions": 13,
+        "first_meetings": 6,
+        "recalls": 6,
+        "skipped": 1,
+        "got_it": 3,
+        "effort": 2,
+        "not_yet": 1,
+        "recordings": 0,
+        "practice_days": 2,
+    }
     modes = [item["mode"] for item in studied(practice, "2026-10-29")["items"]]
     assert modes == ["daily"] * 6 + ["extra", "practice"]
 
@@ -150,7 +161,12 @@ def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
     assert practice.client.delete(f"/api/phrases/{card['phrase_id']}").status_code == 200
     found = facts(practice)
     assert found["today"]["completions"] == 1 and found["today"]["recordings"] == 0
-    assert found["work"] == {"completions": 1, "first_meetings": 1, "practice_days": 1}
+    assert found["work"] == {
+        **ZERO_TOTALS,
+        "completions": 1,
+        "first_meetings": 1,
+        "practice_days": 1,
+    }
     assert found["streak"]["current"] == 1
     [item] = studied(practice, "2026-10-28")["items"]
     assert item["phrase_id"] is None and item["text"] == "Complete phrase number 0."
@@ -278,26 +294,48 @@ def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None
     assert found["today"]["completions"] == 1 and found["streak"]["current"] == 2
 
 
-def waiting(practice: Practice) -> dict[str, int]:
-    found = facts(practice)["waiting"]
+def library(practice: Practice) -> dict[str, int]:
+    found = facts(practice)["library"]
     lessons = practice.client.get("/api/lessons").json()["all_lessons"]
-    assert found == {"new_count": lessons["new_count"], "due_count": lessons["due_count"]}
-    return found
+    assert (found["phrase_count"], found["new_count"], found["due_count"]) == (
+        lessons["phrase_count"],
+        lessons["new_count"],
+        lessons["due_count"],
+    )
+    assert found["due_count"] + found["later_count"] + found["new_count"] == found["phrase_count"]
+    return {key: found[key] for key in ("due_count", "later_count", "new_count")}
 
 
-def test_waiting_counts_new_and_currently_due_phrases_beyond_the_allowance(
-    practice: Practice,
-) -> None:
+def test_library_splits_phrases_into_due_now_later_and_new(practice: Practice) -> None:
     publish(practice.client, many(4))
-    assert waiting(practice) == {"new_count": 4, "due_count": 0}
+    assert library(practice) == {"due_count": 0, "later_count": 0, "new_count": 4}
     practice.set_limits(1, 2)
     practice.study_all_new()
-    assert waiting(practice) == {"new_count": 2, "due_count": 0}
+    assert library(practice) == {"due_count": 0, "later_count": 2, "new_count": 2}
     practice.later(days=1)
-    assert waiting(practice) == {"new_count": 2, "due_count": 2}
+    assert library(practice) == {"due_count": 2, "later_count": 0, "new_count": 2}
     rate(practice, practice.card(), "got_it")
     # The phrase left beyond today's due allowance still counts as due now.
-    assert waiting(practice) == {"new_count": 2, "due_count": 1}
+    assert library(practice) == {"due_count": 1, "later_count": 1, "new_count": 2}
+
+
+def test_long_term_memory_counts_phrases_whose_fsrs_stability_reaches_21_days(
+    practice: Practice,
+) -> None:
+    publish(practice.client, many(3))
+    practice.study_all_new()
+    practice.later(days=1)
+    rate(practice, practice.card(), "got_it")
+    [rated] = practice.rows("SELECT id FROM phrases WHERE fsrs_json IS NOT NULL")
+    stability = practice.rows(
+        "SELECT json_extract(fsrs_json, '$.stability') AS stability FROM phrases WHERE id=?",
+        rated["id"],
+    )[0]["stability"]
+    assert 0 < stability < 21
+    assert facts(practice)["library"]["long_term_count"] == 0
     with practice.database.write() as connection:
-        connection.execute("UPDATE phrases SET due_at='2026-11-05T09:00:00+00:00'")
-    assert waiting(practice) == {"new_count": 2, "due_count": 0}
+        connection.execute(
+            "UPDATE phrases SET fsrs_json=json_set(fsrs_json, '$.stability', 21) WHERE id=?",
+            (rated["id"],),
+        )
+    assert facts(practice)["library"]["long_term_count"] == 1

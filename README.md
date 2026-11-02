@@ -48,14 +48,15 @@ never reset. Skipped phrases from earlier passes come back; phrases that are not
 If nothing is waiting, Extra says so at once. **Stop** on an Extra card finishes any recording and
 returns to the entry; **Daily** resumes that card later.
 
-When a Daily or Extra pass runs out, the entry says so and shows today's practice above its
-controls, across all lessons: completions, first meetings, Skips and ratings from Daily, Extra and
-Practice; recordings saved today, with takes still uploading from this device counted separately;
-**See today's phrases** with **More**, which keeps the wording of phrases deleted since; the
-current and best practice streak with the last seven days; your cumulative work; and the next date
-phrases are due. Any first meeting, rating or Skip counts the day toward the streak. Until today's
+When a Daily or Extra pass runs out, the entry says so and shows practice facts above its
+controls, across all lessons: the current and best practice streak with the last seven days;
+**Today** with its recalls and new phrases, ratings, Skips and recordings, with takes still
+uploading from this device counted separately, and **See today's phrases** with **More**, which
+keeps the wording of phrases deleted since; **Progress** with the days you practised and
+everything done in them; and **Total** with how many phrases are due now, due later and not seen
+yet, plus how many are in long-term memory. Any first meeting, rating or Skip counts the day toward the streak. Until today's
 first practice the streak still shows the run that ended yesterday; after a missed day it is zero,
-while the personal best and cumulative work remain. An entry left open refreshes when you return to
+while the personal best and your progress remain. An entry left open refreshes when you return to
 it, so it never shows yesterday as today.
 
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and

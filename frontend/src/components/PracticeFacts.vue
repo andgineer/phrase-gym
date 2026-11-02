@@ -4,13 +4,16 @@ import { usePracticeFacts } from '../composables/usePracticeFacts'
 import {
   bestLine,
   counted,
+  libraryLine,
+  progressLine,
+  progressTitle,
   ratingsLine,
+  recordingsLine,
   streakLine,
   studiedLine,
-  todayLine,
-  waitingLine,
+  todayTitle,
+  totalTitle,
   weekday,
-  workLine,
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
@@ -37,7 +40,6 @@ defineExpose({ refresh })
 
 <template>
   <section v-if="visible" class="card practice-facts" aria-label="Practice facts">
-    <h2 v-if="today?.completions">Today’s practice ✦</h2>
     <p v-if="currentMessage" role="status" class="entry-message">{{ currentMessage }}</p>
     <template v-if="facts && practised">
       <div class="streak">
@@ -57,11 +59,10 @@ defineExpose({ refresh })
       </ol>
     </template>
     <div v-if="today && todayShown" class="facts-group">
-      <h3 class="eyebrow">Today · all lessons</h3>
-      <p v-if="today.completions" data-testid="today-counts">{{ todayLine(today) }}</p>
+      <h3 class="eyebrow" data-testid="today-title">{{ todayTitle(today) }}</h3>
       <p v-if="ratingsLine(today)" data-testid="today-ratings">{{ ratingsLine(today) }}</p>
       <p v-if="today.recordings" data-testid="today-recordings">
-        {{ counted(today.recordings, 'recording') }} available
+        {{ recordingsLine(today.recordings) }}
       </p>
       <button v-if="today.completions" :aria-expanded="listing" @click="toggleList">
         See today’s phrases
@@ -80,11 +81,27 @@ defineExpose({ refresh })
     <p v-if="uploadingTakes" class="muted" data-testid="pending-uploads">
       {{ counted(uploadingTakes, 'recording') }} waiting to upload from this device
     </p>
-    <div v-if="facts && practised" class="facts-group">
-      <h3 class="eyebrow">Your work · all lessons</h3>
-      <p data-testid="your-work">{{ workLine(facts) }}</p>
-      <p data-testid="waiting">{{ waitingLine(facts) }}</p>
-    </div>
+    <template v-if="facts && practised">
+      <div class="facts-group">
+        <h3 class="eyebrow" data-testid="progress-title">{{ progressTitle(facts) }}</h3>
+        <p v-if="progressLine(facts)" data-testid="progress">{{ progressLine(facts) }}</p>
+        <p v-if="ratingsLine(facts.work)" data-testid="progress-ratings">
+          {{ ratingsLine(facts.work) }}
+        </p>
+        <p v-if="facts.work.recordings" data-testid="progress-recordings">
+          {{ recordingsLine(facts.work.recordings) }}
+        </p>
+      </div>
+      <div class="facts-group">
+        <h3 class="eyebrow" data-testid="total-title">{{ totalTitle(facts.library) }}</h3>
+        <p v-if="libraryLine(facts.library)" data-testid="library">
+          {{ libraryLine(facts.library) }}
+        </p>
+        <p v-if="facts.library.long_term_count" data-testid="long-term">
+          {{ facts.library.long_term_count }} in long-term memory
+        </p>
+      </div>
+    </template>
     <ul v-if="notices.length" class="import-notices" aria-label="Import problems">
       <li v-for="notice in notices" :key="notice.package_id">
         <p>

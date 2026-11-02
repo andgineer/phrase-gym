@@ -574,10 +574,22 @@ export interface components {
         CumulativeWork: {
             /** Completions */
             completions: number;
+            /** Effort */
+            effort: number;
             /** First Meetings */
             first_meetings: number;
+            /** Got It */
+            got_it: number;
+            /** Not Yet */
+            not_yet: number;
             /** Practice Days */
             practice_days: number;
+            /** Recalls */
+            recalls: number;
+            /** Recordings */
+            recordings: number;
+            /** Skipped */
+            skipped: number;
         };
         /** DeletionResult */
         DeletionResult: {
@@ -700,6 +712,19 @@ export interface components {
             items: components["schemas"]["LessonChoice"][];
             /** Next Offset */
             next_offset: number | null;
+        };
+        /** LibraryCounts */
+        LibraryCounts: {
+            /** Due Count */
+            due_count: number;
+            /** Later Count */
+            later_count: number;
+            /** Long Term Count */
+            long_term_count: number;
+            /** New Count */
+            new_count: number;
+            /** Phrase Count */
+            phrase_count: number;
         };
         /** OpenDaily */
         OpenDaily: {
@@ -890,11 +915,11 @@ export interface components {
         PracticeFacts: {
             /** Learning Date */
             learning_date: string;
+            library: components["schemas"]["LibraryCounts"];
             /** Notices */
             notices: components["schemas"]["ImportNotice"][];
             streak: components["schemas"]["PracticeStreak"];
-            today: components["schemas"]["TodayCounts"];
-            waiting: components["schemas"]["WaitingCounts"];
+            today: components["schemas"]["PracticeTotals"];
             work: components["schemas"]["CumulativeWork"];
         };
         /** PracticeProgress */
@@ -923,6 +948,25 @@ export interface components {
             current: number;
             /** Recent Days */
             recent_days: components["schemas"]["PracticeDay"][];
+        };
+        /** PracticeTotals */
+        PracticeTotals: {
+            /** Completions */
+            completions: number;
+            /** Effort */
+            effort: number;
+            /** First Meetings */
+            first_meetings: number;
+            /** Got It */
+            got_it: number;
+            /** Not Yet */
+            not_yet: number;
+            /** Recalls */
+            recalls: number;
+            /** Recordings */
+            recordings: number;
+            /** Skipped */
+            skipped: number;
         };
         /** RecordingPage */
         RecordingPage: {
@@ -1068,25 +1112,6 @@ export interface components {
             /** Text */
             text: string;
         };
-        /** TodayCounts */
-        TodayCounts: {
-            /** Completions */
-            completions: number;
-            /** Effort */
-            effort: number;
-            /** First Meetings */
-            first_meetings: number;
-            /** Got It */
-            got_it: number;
-            /** Not Yet */
-            not_yet: number;
-            /** Recalls */
-            recalls: number;
-            /** Recordings */
-            recordings: number;
-            /** Skipped */
-            skipped: number;
-        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1111,13 +1136,6 @@ export interface components {
             phrase_id: string;
             /** View Token */
             view_token: string;
-        };
-        /** WaitingCounts */
-        WaitingCounts: {
-            /** Due Count */
-            due_count: number;
-            /** New Count */
-            new_count: number;
         };
     };
     responses: never;

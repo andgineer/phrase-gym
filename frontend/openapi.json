@@ -332,18 +332,48 @@
             "title": "Completions",
             "type": "integer"
           },
+          "effort": {
+            "title": "Effort",
+            "type": "integer"
+          },
           "first_meetings": {
             "title": "First Meetings",
             "type": "integer"
           },
+          "got_it": {
+            "title": "Got It",
+            "type": "integer"
+          },
+          "not_yet": {
+            "title": "Not Yet",
+            "type": "integer"
+          },
           "practice_days": {
             "title": "Practice Days",
+            "type": "integer"
+          },
+          "recalls": {
+            "title": "Recalls",
+            "type": "integer"
+          },
+          "recordings": {
+            "title": "Recordings",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
             "type": "integer"
           }
         },
         "required": [
           "completions",
           "first_meetings",
+          "recalls",
+          "skipped",
+          "got_it",
+          "effort",
+          "not_yet",
+          "recordings",
           "practice_days"
         ],
         "title": "CumulativeWork",
@@ -761,6 +791,40 @@
           "all_lessons"
         ],
         "title": "LessonPage",
+        "type": "object"
+      },
+      "LibraryCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "due_count": {
+            "title": "Due Count",
+            "type": "integer"
+          },
+          "later_count": {
+            "title": "Later Count",
+            "type": "integer"
+          },
+          "long_term_count": {
+            "title": "Long Term Count",
+            "type": "integer"
+          },
+          "new_count": {
+            "title": "New Count",
+            "type": "integer"
+          },
+          "phrase_count": {
+            "title": "Phrase Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "phrase_count",
+          "due_count",
+          "later_count",
+          "new_count",
+          "long_term_count"
+        ],
+        "title": "LibraryCounts",
         "type": "object"
       },
       "OpenDaily": {
@@ -1305,6 +1369,9 @@
             "title": "Learning Date",
             "type": "string"
           },
+          "library": {
+            "$ref": "#/components/schemas/LibraryCounts"
+          },
           "notices": {
             "items": {
               "$ref": "#/components/schemas/ImportNotice"
@@ -1316,10 +1383,7 @@
             "$ref": "#/components/schemas/PracticeStreak"
           },
           "today": {
-            "$ref": "#/components/schemas/TodayCounts"
-          },
-          "waiting": {
-            "$ref": "#/components/schemas/WaitingCounts"
+            "$ref": "#/components/schemas/PracticeTotals"
           },
           "work": {
             "$ref": "#/components/schemas/CumulativeWork"
@@ -1330,7 +1394,7 @@
           "streak",
           "today",
           "work",
-          "waiting",
+          "library",
           "notices"
         ],
         "title": "PracticeFacts",
@@ -1426,6 +1490,55 @@
           "recent_days"
         ],
         "title": "PracticeStreak",
+        "type": "object"
+      },
+      "PracticeTotals": {
+        "additionalProperties": false,
+        "properties": {
+          "completions": {
+            "title": "Completions",
+            "type": "integer"
+          },
+          "effort": {
+            "title": "Effort",
+            "type": "integer"
+          },
+          "first_meetings": {
+            "title": "First Meetings",
+            "type": "integer"
+          },
+          "got_it": {
+            "title": "Got It",
+            "type": "integer"
+          },
+          "not_yet": {
+            "title": "Not Yet",
+            "type": "integer"
+          },
+          "recalls": {
+            "title": "Recalls",
+            "type": "integer"
+          },
+          "recordings": {
+            "title": "Recordings",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "completions",
+          "first_meetings",
+          "recalls",
+          "skipped",
+          "got_it",
+          "effort",
+          "not_yet",
+          "recordings"
+        ],
+        "title": "PracticeTotals",
         "type": "object"
       },
       "RecordingPage": {
@@ -1871,55 +1984,6 @@
         "title": "StudiedPhrase",
         "type": "object"
       },
-      "TodayCounts": {
-        "additionalProperties": false,
-        "properties": {
-          "completions": {
-            "title": "Completions",
-            "type": "integer"
-          },
-          "effort": {
-            "title": "Effort",
-            "type": "integer"
-          },
-          "first_meetings": {
-            "title": "First Meetings",
-            "type": "integer"
-          },
-          "got_it": {
-            "title": "Got It",
-            "type": "integer"
-          },
-          "not_yet": {
-            "title": "Not Yet",
-            "type": "integer"
-          },
-          "recalls": {
-            "title": "Recalls",
-            "type": "integer"
-          },
-          "recordings": {
-            "title": "Recordings",
-            "type": "integer"
-          },
-          "skipped": {
-            "title": "Skipped",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "completions",
-          "first_meetings",
-          "recalls",
-          "skipped",
-          "got_it",
-          "effort",
-          "not_yet",
-          "recordings"
-        ],
-        "title": "TodayCounts",
-        "type": "object"
-      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -2005,25 +2069,6 @@
           "operation_id"
         ],
         "title": "ViewOperation",
-        "type": "object"
-      },
-      "WaitingCounts": {
-        "additionalProperties": false,
-        "properties": {
-          "due_count": {
-            "title": "Due Count",
-            "type": "integer"
-          },
-          "new_count": {
-            "title": "New Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "new_count",
-          "due_count"
-        ],
-        "title": "WaitingCounts",
         "type": "object"
       }
     }

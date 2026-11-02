@@ -14,9 +14,10 @@ class PracticeStreak(StrictModel):
     recent_days: list[PracticeDay]
 
 
-class TodayCounts(StrictModel):
+class PracticeTotals(StrictModel):
     completions: int
     first_meetings: int
+    # Rated recalls only; a Skip is counted in skipped.
     recalls: int
     skipped: int
     got_it: int
@@ -25,15 +26,16 @@ class TodayCounts(StrictModel):
     recordings: int
 
 
-class CumulativeWork(StrictModel):
-    completions: int
-    first_meetings: int
+class CumulativeWork(PracticeTotals):
     practice_days: int
 
 
-class WaitingCounts(StrictModel):
-    new_count: int
+class LibraryCounts(StrictModel):
+    phrase_count: int
     due_count: int
+    later_count: int
+    new_count: int
+    long_term_count: int
 
 
 class ImportNotice(StrictModel):
@@ -45,9 +47,9 @@ class ImportNotice(StrictModel):
 class PracticeFacts(StrictModel):
     learning_date: str
     streak: PracticeStreak
-    today: TodayCounts
+    today: PracticeTotals
     work: CumulativeWork
-    waiting: WaitingCounts
+    library: LibraryCounts
     notices: list[ImportNotice]
 
 

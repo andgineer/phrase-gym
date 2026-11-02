@@ -4,17 +4,19 @@ from datetime import UTC, date, datetime, time, timedelta
 
 from phrase_gym.server.facts_contracts import (
     CumulativeWork,
+    LibraryCounts,
     PracticeFacts,
+    PracticeTotals,
     StudiedPage,
     StudiedPhrase,
-    TodayCounts,
-    WaitingCounts,
 )
 from phrase_gym.server.import_notices import import_notices
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
 from phrase_gym.server.scheduling import learning_day, learning_zone
 from phrase_gym.server.storage import Database
 from phrase_gym.server.streak import practice_streak
+
+LONG_TERM_STABILITY_DAYS = 21
 
 
 def _day_bounds(connection: sqlite3.Connection, day: str) -> tuple[str, str]:
@@ -24,37 +26,53 @@ def _day_bounds(connection: sqlite3.Connection, day: str) -> tuple[str, str]:
     return start.astimezone(UTC).isoformat(), end.astimezone(UTC).isoformat()
 
 
-def _today_counts(connection: sqlite3.Connection, day: str) -> TodayCounts:
-    rows = connection.execute(
-        "SELECT kind, rating, skipped, COUNT(*) AS count FROM practice_log "
-        "WHERE learning_date=? GROUP BY kind, rating, skipped",
-        (day,),
-    ).fetchall()
-    ratings = {row["rating"]: row["count"] for row in rows if row["rating"]}
+def _recordings(connection: sqlite3.Connection, day: str | None) -> int:
+    if day is None:
+        return connection.execute("SELECT COUNT(*) FROM recordings").fetchone()[0]
     # Takes carry the capturing device's offset; julianday compares them as instants.
-    recordings = connection.execute(
+    return connection.execute(
         "SELECT COUNT(*) FROM recordings "
         "WHERE julianday(captured_at)>=julianday(?) AND julianday(captured_at)<julianday(?)",
         _day_bounds(connection, day),
     ).fetchone()[0]
-    return TodayCounts(
+
+
+def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
+    clause, parameters = ("WHERE learning_date=? ", (day,)) if day else ("", ())
+    rows = connection.execute(
+        "SELECT kind, rating, skipped, COUNT(*) AS count FROM practice_log "  # noqa: S608
+        f"{clause}GROUP BY kind, rating, skipped",
+        parameters,
+    ).fetchall()
+    ratings = {row["rating"]: row["count"] for row in rows if row["rating"]}
+    return PracticeTotals(
         completions=sum(row["count"] for row in rows),
         first_meetings=sum(row["count"] for row in rows if row["kind"] == "first_study"),
-        recalls=sum(row["count"] for row in rows if row["kind"] == "recall"),
+        recalls=sum(ratings.values()),
         skipped=sum(row["count"] for row in rows if row["skipped"]),
         got_it=ratings.get("got_it", 0),
         effort=ratings.get("effort", 0),
         not_yet=ratings.get("not_yet", 0),
-        recordings=recordings,
+        recordings=_recordings(connection, day),
     )
 
 
-def _waiting(connection: sqlite3.Connection, now: datetime) -> WaitingCounts:
+def _library(connection: sqlite3.Connection, now: datetime) -> LibraryCounts:
     rows = connection.execute(
         f"SELECT {SCHEDULE_COLUMNS} FROM phrases",  # noqa: S608
     ).fetchall()
     summary = schedule_summary(connection, rows, now)
-    return WaitingCounts(new_count=summary.new_count, due_count=summary.due_count)
+    long_term = connection.execute(
+        "SELECT COUNT(*) FROM phrases WHERE json_extract(fsrs_json, '$.stability')>=?",
+        (LONG_TERM_STABILITY_DAYS,),
+    ).fetchone()[0]
+    return LibraryCounts(
+        phrase_count=summary.phrase_count,
+        due_count=summary.due_count,
+        later_count=summary.phrase_count - summary.due_count - summary.new_count,
+        new_count=summary.new_count,
+        long_term_count=long_term,
+    )
 
 
 class PracticeFactsService:
@@ -70,19 +88,15 @@ class PracticeFactsService:
                 row[0]
                 for row in connection.execute("SELECT DISTINCT learning_date FROM practice_log")
             ]
-            completions, first_meetings = connection.execute(
-                "SELECT COUNT(*), COUNT(*) FILTER (WHERE kind='first_study') FROM practice_log",
-            ).fetchone()
             return PracticeFacts(
                 learning_date=day,
                 streak=practice_streak(dates, day),
-                today=_today_counts(connection, day),
+                today=_totals(connection, day),
                 work=CumulativeWork(
-                    completions=completions,
-                    first_meetings=first_meetings,
+                    **_totals(connection, None).model_dump(),
                     practice_days=len(dates),
                 ),
-                waiting=_waiting(connection, now),
+                library=_library(connection, now),
                 notices=import_notices(connection),
             )
 

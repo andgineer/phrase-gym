@@ -1,4 +1,4 @@
-import type { PracticeFacts, StudiedPhrase, TodayCounts } from './factsTypes'
+import type { LibraryCounts, PracticeFacts, PracticeTotals, StudiedPhrase } from './factsTypes'
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const ratings: Record<NonNullable<StudiedPhrase['rating']>, string> = {
@@ -30,32 +30,46 @@ export function streakLine({ current }: PracticeFacts['streak']) {
 export const bestLine = ({ best }: PracticeFacts['streak']) =>
   `Personal best: ${counted(best, 'day')}`
 
-export function todayLine(today: TodayCounts) {
-  return [
-    counted(today.completions, 'completion'),
-    ...present([
-      [today.first_meetings, counted(today.first_meetings, 'first meeting')],
-      [today.skipped, `${today.skipped} skipped`],
-    ]),
-  ].join(' · ')
-}
+const titled = (label: string, parts: string[]) =>
+  parts.length ? `${label} — ${parts.join(' / ')}` : label
 
-export const ratingsLine = (today: TodayCounts) =>
+export const todayTitle = (today: PracticeTotals) =>
+  titled(
+    'Today',
+    present([
+      [today.recalls, counted(today.recalls, 'recall')],
+      [today.first_meetings, `${today.first_meetings} new`],
+    ]),
+  )
+
+export const ratingsLine = (totals: PracticeTotals) =>
   present([
-    [today.got_it, `${today.got_it} Got it`],
-    [today.effort, `${today.effort} Effort`],
-    [today.not_yet, `${today.not_yet} Not yet`],
+    [totals.got_it, `${totals.got_it} Got it`],
+    [totals.effort, `${totals.effort} Effort`],
+    [totals.not_yet, `${totals.not_yet} Not yet`],
+    [totals.skipped, `${totals.skipped} skipped`],
   ]).join(' · ')
 
-export const workLine = ({ work }: PracticeFacts) =>
-  [
-    counted(work.completions, 'completion'),
-    counted(work.first_meetings, 'first meeting'),
-    `${counted(work.practice_days, 'day')} with practice`,
-  ].join(' · ')
+export const recordingsLine = (count: number) => `${counted(count, 'recording')} made`
 
-export const waitingLine = ({ waiting }: PracticeFacts) =>
-  `${counted(waiting.new_count, 'phrase')} new · ${counted(waiting.due_count, 'phrase')} due`
+export const progressTitle = ({ work }: PracticeFacts) =>
+  titled('Progress', [counted(work.practice_days, 'day')])
+
+export const progressLine = ({ work }: PracticeFacts) =>
+  present([
+    [work.recalls, counted(work.recalls, 'recall')],
+    [work.first_meetings, counted(work.first_meetings, 'new phrase')],
+  ]).join(' · ')
+
+export const totalTitle = (library: LibraryCounts) =>
+  titled('Total', [counted(library.phrase_count, 'phrase')])
+
+export const libraryLine = (library: LibraryCounts) =>
+  present([
+    [library.due_count, `${library.due_count} due now`],
+    [library.later_count, `${library.later_count} later`],
+    [library.new_count, `${library.new_count} new`],
+  ]).join(' · ')
 
 export function studiedLine(item: StudiedPhrase) {
   const outcome =
