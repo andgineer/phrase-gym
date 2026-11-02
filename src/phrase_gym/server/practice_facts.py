@@ -10,6 +10,7 @@ from phrase_gym.server.facts_contracts import (
     StudiedPhrase,
     TodayCounts,
 )
+from phrase_gym.server.import_notices import import_notices
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS
 from phrase_gym.server.scheduling import effective_due, learning_day, learning_zone
 from phrase_gym.server.storage import Database
@@ -85,6 +86,7 @@ class PracticeFactsService:
                     practice_days=len(dates),
                 ),
                 next_return=_next_return(connection, day),
+                notices=import_notices(connection),
             )
 
     def studied(self, learning_date: str, offset: int, limit: int) -> StudiedPage:

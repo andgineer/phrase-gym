@@ -71,10 +71,13 @@ def process_once(api: CoachApi, speech: PiperSpeech) -> bool:
     try:
         references = asyncio.run(prepare(work, speech))
         api.post(f"{package_id}/result", {"result_id": package_id, "references": references})
+        return True
     except urllib.error.HTTPError as error:
-        api.post(f"{package_id}/failure", {"error": refusal(error)[:1000]})
+        reason = refusal(error)[:1000]
     except (OSError, ValueError, RuntimeError) as error:
-        api.post(f"{package_id}/failure", {"error": str(error)[:1000]})
+        reason = str(error)[:1000]
+    print(f"Coach could not prepare {package_id}: {reason}", flush=True)
+    api.post(f"{package_id}/failure", {"error": reason})
     return True
 
 

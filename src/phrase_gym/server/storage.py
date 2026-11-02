@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = "5"
+SCHEMA_VERSION = "6"
 DATABASE_NAME = "phrase-gym.sqlite3"
 SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -12,6 +12,9 @@ CREATE TABLE imports (
   package_id TEXT PRIMARY KEY, content_hash TEXT NOT NULL, payload TEXT NOT NULL,
   status TEXT NOT NULL, error TEXT, added_count INTEGER, created_at TEXT NOT NULL,
   result_id TEXT, result_hash TEXT
+);
+CREATE TABLE import_notices (
+  package_id TEXT PRIMARY KEY REFERENCES imports(package_id), created_at TEXT NOT NULL
 );
 CREATE TABLE lessons (
   id TEXT PRIMARY KEY, source_id TEXT NOT NULL, lesson_key TEXT NOT NULL,

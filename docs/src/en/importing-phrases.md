@@ -9,7 +9,9 @@ If you already have a prepared material file, open **Add material**, choose the 
 its contents, and select **Import**. Phrase Gym saves the material at once, whether or not
 [Coach is running](installation.md). Coach prepares reference audio in the background while both
 are running, and the phrases appear in your library once it finishes. Phrase Gym does not show
-preparation progress. To retry a failed preparation, import the same material again.
+preparation progress. If preparation fails, Coach prints the reason in its terminal and the
+Practice page shows a notice below **Your work**; close it with **×** once you have read it. To
+retry, import the same material again.
 
 Coach currently prepares audio for supplied material; it does not yet extract phrases from
 courses or notes. For that, use your personal AI agent.

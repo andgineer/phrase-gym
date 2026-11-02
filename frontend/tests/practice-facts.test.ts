@@ -28,6 +28,7 @@ const facts = (changes: Partial<PracticeFacts> = {}): PracticeFacts => ({
   today,
   work: { completions: 340, first_meetings: 126, practice_days: 17 },
   next_return: { learning_date: '2026-11-01', phrase_count: 4 },
+  notices: [],
   ...changes,
 })
 const item = (changes: Partial<StudiedPhrase>): StudiedPhrase => ({

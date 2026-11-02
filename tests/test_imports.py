@@ -1,11 +1,8 @@
 import base64
 import io
 import json
-import urllib.error
 import wave
-from email.message import Message
 from pathlib import Path
-from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,6 +14,7 @@ from phrase_gym.server.app import create_app
 from phrase_gym.server.import_contracts import PhrasePackage
 from phrase_gym.server.importer import Importer
 from phrase_gym.server.storage import Database
+from tests.coach_client import ClientCoachApi
 from tests.phrase_packages import (
     Package,
     lesson,
@@ -287,21 +285,6 @@ def test_source_item_conflict_names_existing_phrase_and_deletion(
     assert "“Complete phrase number 3.”" in response.text
     assert "Delete that phrase first" in response.text
     assert table_count(client.app.state.database, "lessons") == 1
-
-
-class ClientCoachApi:
-    """Routes Coach's API calls to the in-process app with urllib's error behavior."""
-
-    def __init__(self, client: TestClient):
-        self.client = client
-
-    def post(self, path: str, payload: dict[str, object] | None = None) -> Any:
-        response = self.client.post(f"/api/imports/{path}", json=payload or {})
-        if response.status_code >= 400:
-            raise urllib.error.HTTPError(
-                path, response.status_code, "Conflict", Message(), io.BytesIO(response.content)
-            )
-        return response.json()
 
 
 def test_coach_reports_the_server_explanation_for_a_conflict(

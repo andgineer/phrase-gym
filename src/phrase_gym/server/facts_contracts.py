@@ -36,12 +36,19 @@ class NextReturn(StrictModel):
     phrase_count: int
 
 
+class ImportNotice(StrictModel):
+    package_id: str
+    source_label: str
+    error: str
+
+
 class PracticeFacts(StrictModel):
     learning_date: str
     streak: PracticeStreak
     today: TodayCounts
     work: CumulativeWork
     next_return: NextReturn | None
+    notices: list[ImportNotice]
 
 
 class StudiedPhrase(StrictModel):

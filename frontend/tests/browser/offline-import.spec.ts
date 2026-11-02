@@ -21,7 +21,9 @@ function silentReference(): string {
   return wav.toString('base64')
 }
 
-test('imports wait for offline Coach without the page reading their status', async ({ page }) => {
+test('imports wait for offline Coach; failures arrive with the facts and can be dismissed', async ({
+  page,
+}) => {
   const phrasePackage = {
     format: 'phrase-gym.package',
     version: 2,
@@ -68,6 +70,23 @@ test('imports wait for offline Coach without the page reading their status', asy
   await page.request.post(`/api/imports/${packageId}/failure`, {
     data: { error: 'Voice unavailable' },
   })
+  await page.reload()
+  const notices = page.getByRole('list', { name: 'Import problems' }).getByRole('listitem')
+  await expect(notices).toHaveCount(1)
+  await expect(notices).toContainText(
+    'Coach could not prepare Offline course (offline-browser-first): Voice unavailable',
+  )
+  await page.getByRole('button', { name: `Dismiss notice about ${packageId}` }).click()
+  await expect(notices).toHaveCount(0)
+  const facts = await (await page.request.get('/api/practice/facts')).json()
+  expect(facts.notices).toEqual([])
+  expect(await importStatus(page, packageId)).toMatchObject({
+    status: 'error',
+    error: 'Voice unavailable',
+  })
+
+  await page.getByRole('button', { name: 'Add material' }).click()
+  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(phrasePackage))
   await importButton.click()
   await expect(page.getByText(savedForCoach)).toBeVisible()
   expect(await importStatus(page, packageId)).toMatchObject({ status: 'pending', error: null })

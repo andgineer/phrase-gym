@@ -36,7 +36,8 @@ PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json phrase-gym coach
 ```
 
 For a source checkout, use `uv run phrase-gym coach`. Coach receives pending imports through
-Phrase Gym's API and generates reference audio. Imports with complete reference audio do not
+Phrase Gym's API and generates reference audio; it prints a line for every preparation that
+fails. Imports with complete reference audio do not
 need Coach. Piper uses the separately pinned private environment described in the voice setup guide.
 
 The `install-coach`, `uninstall-coach`, and `deploy` commands report that they are unavailable.

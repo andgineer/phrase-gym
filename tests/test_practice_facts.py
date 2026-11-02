@@ -80,6 +80,7 @@ def test_fresh_library_has_no_facts_and_no_next_return(practice: Practice) -> No
         ),
         "work": {"completions": 0, "first_meetings": 0, "practice_days": 0},
         "next_return": None,
+        "notices": [],
     }
 
 

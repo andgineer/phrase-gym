@@ -502,6 +502,30 @@
         "title": "ImportLesson",
         "type": "object"
       },
+      "ImportNotice": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "package_id": {
+            "title": "Package Id",
+            "type": "string"
+          },
+          "source_label": {
+            "title": "Source Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "package_id",
+          "source_label",
+          "error"
+        ],
+        "title": "ImportNotice",
+        "type": "object"
+      },
       "ImportPhrase": {
         "additionalProperties": false,
         "properties": {
@@ -1310,6 +1334,13 @@
               }
             ]
           },
+          "notices": {
+            "items": {
+              "$ref": "#/components/schemas/ImportNotice"
+            },
+            "title": "Notices",
+            "type": "array"
+          },
           "streak": {
             "$ref": "#/components/schemas/PracticeStreak"
           },
@@ -1325,7 +1356,8 @@
           "streak",
           "today",
           "work",
-          "next_return"
+          "next_return",
+          "notices"
         ],
         "title": "PracticeFacts",
         "type": "object"
@@ -2217,6 +2249,43 @@
           }
         },
         "summary": "Publish Failure"
+      }
+    },
+    "/api/imports/{package_id}/notice": {
+      "delete": {
+        "operationId": "dismiss_notice_api_imports__package_id__notice_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "package_id",
+            "required": true,
+            "schema": {
+              "title": "Package Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss Notice"
       }
     },
     "/api/imports/{package_id}/result": {

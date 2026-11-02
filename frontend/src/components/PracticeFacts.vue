@@ -14,7 +14,8 @@ import {
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
-const { facts, error, listing, studied, uploadingTakes, refresh, toggleList } = usePracticeFacts()
+const { facts, error, listing, studied, uploadingTakes, refresh, toggleList, dismiss } =
+  usePracticeFacts()
 // Facts of this mount confirm the learning date before an earlier message can be judged current.
 const currentMessage = computed(() => (facts.value || error.value ? props.message : ''))
 const today = computed(() => facts.value?.today)
@@ -22,8 +23,14 @@ const practised = computed(() => (facts.value?.work.completions ?? 0) > 0)
 const todayShown = computed(
   () => !!today.value && (today.value.completions || today.value.recordings),
 )
+const notices = computed(() => facts.value?.notices ?? [])
 const visible = computed(
-  () => currentMessage.value || practised.value || uploadingTakes.value || error.value,
+  () =>
+    currentMessage.value ||
+    practised.value ||
+    uploadingTakes.value ||
+    error.value ||
+    notices.value.length,
 )
 defineExpose({ refresh })
 </script>
@@ -78,6 +85,23 @@ defineExpose({ refresh })
       <p data-testid="your-work">{{ workLine(facts) }}</p>
       <p v-if="facts.next_return" data-testid="next-return">{{ nextReturnLine(facts) }}</p>
     </div>
+    <ul v-if="notices.length" class="import-notices" aria-label="Import problems">
+      <li v-for="notice in notices" :key="notice.package_id">
+        <p>
+          Coach could not prepare <strong>{{ notice.source_label }}</strong> ({{
+            notice.package_id
+          }}): {{ notice.error }}
+        </p>
+        <p class="muted">Import the same material again to retry.</p>
+        <button
+          class="quiet"
+          :aria-label="`Dismiss notice about ${notice.package_id}`"
+          @click="dismiss(notice.package_id)"
+        >
+          ×
+        </button>
+      </li>
+    </ul>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
   </section>
 </template>

@@ -128,6 +128,32 @@
 .facts-group > button {
   justify-self: start;
 }
+.import-notices {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid #deded1;
+  list-style: none;
+}
+.import-notices:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+.import-notices li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 4px 12px;
+  color: #8a3b2b;
+}
+.import-notices button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 4px 10px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
 .studied-list {
   margin: 0;
 }

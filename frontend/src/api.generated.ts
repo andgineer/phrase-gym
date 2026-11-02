@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/imports/{package_id}/notice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Dismiss Notice */
+        delete: operations["dismiss_notice_api_imports__package_id__notice_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/imports/{package_id}/result": {
         parameters: {
             query?: never;
@@ -609,6 +626,15 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** ImportNotice */
+        ImportNotice: {
+            /** Error */
+            error: string;
+            /** Package Id */
+            package_id: string;
+            /** Source Label */
+            source_label: string;
+        };
         /** ImportPhrase */
         ImportPhrase: {
             /** Accepted Variants */
@@ -872,6 +898,8 @@ export interface components {
             /** Learning Date */
             learning_date: string;
             next_return: components["schemas"]["NextReturn"] | null;
+            /** Notices */
+            notices: components["schemas"]["ImportNotice"][];
             streak: components["schemas"]["PracticeStreak"];
             today: components["schemas"]["TodayCounts"];
             work: components["schemas"]["CumulativeWork"];
@@ -1268,6 +1296,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_notice_api_imports__package_id__notice_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                package_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

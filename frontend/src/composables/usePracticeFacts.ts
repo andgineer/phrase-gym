@@ -31,6 +31,20 @@ export function usePracticeFacts() {
     }
   }
 
+  async function dismiss(packageId: string) {
+    try {
+      await api<null>(`/imports/${encodeURIComponent(packageId)}/notice`, { method: 'DELETE' })
+      const current = facts.value
+      if (current)
+        facts.value = {
+          ...current,
+          notices: current.notices.filter((notice) => notice.package_id !== packageId),
+        }
+    } catch (cause) {
+      error.value = String(cause)
+    }
+  }
+
   async function toggleList() {
     listing.value = !listing.value
     // Fresh facts fix the learning date before the list is fetched for it.
@@ -50,5 +64,6 @@ export function usePracticeFacts() {
     uploadingTakes: takeTransfers.uploadingTakes,
     refresh: () => reload(true),
     toggleList,
+    dismiss,
   }
 }

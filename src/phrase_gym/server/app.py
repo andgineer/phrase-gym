@@ -20,6 +20,7 @@ from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.deletion import PhraseDeletion
 from phrase_gym.server.extra import ExtraPractice
 from phrase_gym.server.file_cleanup import FileCleanup
+from phrase_gym.server.import_notices import ImportNotices
 from phrase_gym.server.importer import Importer
 from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
@@ -41,7 +42,7 @@ def create_app() -> FastAPI:
     app.state.database = database
     importer = Importer(database)
     app.state.importer = importer
-    app.include_router(import_routes(importer))
+    app.include_router(import_routes(importer, ImportNotices(database)))
     app.include_router(coach_routes(importer))
     app.include_router(recording_routes(RecordingStore(database)))
     app.state.current = CurrentPractice(database)

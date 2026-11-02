@@ -4,6 +4,7 @@ import sqlite3
 from datetime import UTC, datetime
 
 from phrase_gym.server.import_contracts import PhrasePackage
+from phrase_gym.server.import_notices import clear_notice, record_notice
 from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
 from phrase_gym.server.storage import Database
@@ -40,6 +41,7 @@ class Importer:
                     "UPDATE imports SET status='pending', error=NULL WHERE package_id=?",
                     (package.package_id,),
                 )
+                clear_notice(connection, package.package_id)
             if previous is None:
                 reject_identity_conflicts(connection, package)
                 connection.execute(
@@ -84,6 +86,9 @@ class Importer:
                     "UPDATE imports SET status='error', error=? WHERE package_id=?",
                     (message, package_id),
                 )
+            # A repeated report of the same failure must not revive a dismissed notice.
+            if row["status"] in {"pending", "preparing"}:
+                record_notice(connection, package_id, now())
         return self.status(package_id)
 
     def publish(self, package_id: str, result_id: str, audio: dict[str, str]) -> dict[str, object]:
