@@ -59,7 +59,9 @@ def table_names(connection: sqlite3.Connection) -> set[str]:
     return {row[0] for row in connection.execute("SELECT name FROM sqlite_master")}
 
 
-def test_schema_5_database_is_upgraded_in_place_after_a_backup(tmp_path: Path) -> None:
+def test_schema_5_database_is_upgraded_in_place_after_a_backup(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     directory = schema_5_directory(tmp_path / "data")
     with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
         before = learner_rows(connection)
@@ -69,6 +71,10 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(tmp_path: Path) -
         assert [tuple(row) for row in learner_rows(connection)] == before
         assert "import_notices" in table_names(connection)
     [backup] = directory.glob("phrase-gym-schema-5-*.sqlite3")
+    assert capsys.readouterr().out == (
+        f"Upgraded the Phrase Gym database from schema 5 to {schema_upgrade.SCHEMA_VERSION}; "
+        f"the previous version is saved as {backup}\n"
+    )
     assert stat.S_IMODE(backup.stat().st_mode) == 0o600
     assert not list(directory.glob("phrase-gym-schema-5-*.sqlite3-*"))
     with closing(sqlite3.connect(backup)) as copy:
@@ -77,6 +83,7 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(tmp_path: Path) -
         assert "import_notices" not in table_names(copy)
     Database(directory)
     assert len(list(directory.glob("phrase-gym-schema-*.sqlite3"))) == 1
+    assert capsys.readouterr().out == ""
 
 
 def test_failed_upgrade_step_leaves_the_database_at_its_old_version(
@@ -99,12 +106,15 @@ def test_failed_upgrade_step_leaves_the_database_at_its_old_version(
         assert version(connection) == schema_upgrade.SCHEMA_VERSION
 
 
-def test_fresh_database_is_built_from_every_step_without_a_backup(tmp_path: Path) -> None:
+def test_fresh_database_is_built_from_every_step_without_a_backup(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     with Database(tmp_path / "fresh").read() as connection:
         assert version(connection) == schema_upgrade.SCHEMA_VERSION
         assert {"imports", "phrases", "import_notices"} <= table_names(connection)
         assert connection.execute("SELECT daily_due_limit FROM settings").fetchone()[0] == 20
     assert not list((tmp_path / "fresh").glob("phrase-gym-schema-*"))
+    assert capsys.readouterr().out == ""
 
 
 def test_statements_keep_semicolons_inside_literals() -> None:

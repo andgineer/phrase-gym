@@ -65,8 +65,9 @@ class Database:
         self.path.chmod(0o600)
         with self.read() as connection:
             found = _schema_version(connection)
+        backup = None
         if found not in (None, SCHEMA_VERSION):
-            backup_before_upgrade(self.path, str(found))
+            backup = backup_before_upgrade(self.path, str(found))
         with self.write() as connection:
             current = _schema_version(connection)
             if current is not None and current not in UPGRADABLE_VERSIONS:
@@ -74,6 +75,12 @@ class Database:
             if current != SCHEMA_VERSION:
                 apply_steps(connection, current)
             connection.execute("UPDATE imports SET status='pending' WHERE status='preparing'")
+        if backup is not None:
+            print(
+                f"Upgraded the Phrase Gym database from schema {found} to {SCHEMA_VERSION}; "
+                f"the previous version is saved as {backup}",
+                flush=True,
+            )
 
     def connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.path, timeout=5, check_same_thread=False)
