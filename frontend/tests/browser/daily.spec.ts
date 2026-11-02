@@ -42,7 +42,7 @@ const modeLine = (page: Page) => page.getByTestId('mode-line')
 
 async function studyBothThenReturnTomorrow(page: Page) {
   await page.goto('/')
-  await importPackage(page, dailyPackage, 'Added 2 phrases.')
+  await importPackage(page, dailyPackage, 2)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   for (const text of ['So far, so good.', 'Nice to meet you.']) {
     await expect(card(page).getByRole('heading', { name: text })).toBeVisible()
@@ -60,7 +60,7 @@ test('silent Daily resumes a revealed card, rates and skips with automatic advan
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, dailyPackage, 'Added 2 phrases.')
+  await importPackage(page, dailyPackage, 2)
   await expect(card(page)).toHaveCount(0)
   await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 2 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
@@ -168,7 +168,7 @@ test.describe('mobile', () => {
 
   test('mobile Daily controls fit and respond to taps', async ({ page }) => {
     await page.goto('/')
-    await importPackage(page, dailyPackage, 'Added 2 phrases.', true)
+    await importPackage(page, dailyPackage, 2, true)
     await page.getByRole('button', { name: 'Daily', exact: true }).tap()
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
     await card(page).getByRole('button', { name: 'Stop recording' }).tap()

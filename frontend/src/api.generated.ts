@@ -62,8 +62,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Imports */
-        get: operations["list_imports_api_imports_get"];
+        get?: never;
         put?: never;
         /** Submit Import */
         post: operations["submit_import_api_imports_post"];
@@ -135,23 +134,6 @@ export interface paths {
         put?: never;
         /** Publish Result */
         post: operations["publish_result_api_imports__package_id__result_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/imports/{package_id}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Retry Import */
-        post: operations["retry_import_api_imports__package_id__retry_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1180,26 +1162,6 @@ export interface operations {
             };
         };
     };
-    list_imports_api_imports_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportStatus"][];
-                };
-            };
-        };
-    };
     submit_import_api_imports_post: {
         parameters: {
             query?: never;
@@ -1336,37 +1298,6 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportStatus"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    retry_import_api_imports__package_id__retry_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                package_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            202: {
                 headers: {
                     [name: string]: unknown;
                 };

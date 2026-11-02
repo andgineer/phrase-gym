@@ -6,10 +6,10 @@ individual phrase cards.
 ## Use Phrase Gym and Coach
 
 If you already have a prepared material file, open **Add material**, choose the file or paste
-its contents, and select **Import**. Coach prepares reference audio in the background.
-Keep Phrase Gym and [Coach running](installation.md) until the import is confirmed as added.
-If Coach is stopped, the request stays saved and waits for it. A failed import shows a reason
-and a **Retry** action.
+its contents, and select **Import**. Phrase Gym saves the material at once, whether or not
+[Coach is running](installation.md). Coach prepares reference audio in the background while both
+are running, and the phrases appear in your library once it finishes. Phrase Gym does not show
+preparation progress. To retry a failed preparation, import the same material again.
 
 Coach currently prepares audio for supplied material; it does not yet extract phrases from
 courses or notes. For that, use your personal AI agent.

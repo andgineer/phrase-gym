@@ -62,13 +62,13 @@ def test_offline_restart_retry_and_idempotent_publication(
     assert len(list((tmp_path / "references").iterdir())) == 5
 
 
-def test_interrupted_preparation_can_be_retried_without_server_restart(
+def test_interrupted_preparation_is_claimed_again_without_server_restart(
     client: TestClient, package: Package
 ) -> None:
     package_id = package["package_id"]
     client.post("/api/imports", json={"package": package})
     assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
-    assert client.post(f"/api/imports/{package_id}/retry").json()["status"] == "pending"
+    assert client.post("/api/imports", json={"package": package}).json()["status"] == "preparing"
     assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
     result = {"result_id": package_id, "references": references(package)}
     assert client.post(f"/api/imports/{package_id}/result", json=result).json()["added_count"] == 5
@@ -100,8 +100,10 @@ def test_malformed_audio_and_missing_item_reject_whole_batch(
     assert table_count(client.app.state.database, "lessons") == 0
     failed = client.post(f"/api/imports/{package_id}/failure", json={"error": "Piper unavailable"})
     assert failed.json()["status"] == "error"
-    assert client.get("/api/imports").json()[0]["error"] == "Piper unavailable"
-    assert client.post(f"/api/imports/{package_id}/retry").json()["status"] == "pending"
+    assert client.get(f"/api/imports/{package_id}").json()["error"] == "Piper unavailable"
+    assert client.post("/api/imports/coach/next").json() is None
+    resubmitted = client.post("/api/imports", json={"package": package}).json()
+    assert (resubmitted["status"], resubmitted["error"]) == ("pending", None)
     assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
     assert (
         client.post(
@@ -135,7 +137,7 @@ def test_external_bad_reference_rejects_request_without_pending_work(
     response = client.post("/api/imports", json={"package": package, "references": supplied})
     assert response.status_code == 409
     assert "meeting-2" in response.text
-    assert client.get("/api/imports").json() == []
+    assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
 
 
 def silent_wav(size: int) -> str:
@@ -171,9 +173,7 @@ def test_reference_budget_fits_transport_and_rejects_oversized_batch(client: Tes
     assert rejected.status_code == 409
     assert "9 MiB batch audio budget" in rejected.text
     assert "split the package" in rejected.text
-    assert {row["package_id"] for row in client.get("/api/imports").json()} == {
-        "course-meetings-v1"
-    }
+    assert client.get("/api/imports/over-budget-package").status_code == 404
 
 
 @pytest.mark.parametrize(
@@ -222,7 +222,7 @@ def test_validation_identifies_the_item_and_field(
     response = client.post("/api/imports", json={"package": package})
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"] == ["body", "package", "lessons", 0, *location]
-    assert client.get("/api/imports").json() == []
+    assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
 
 
 def test_earlier_format_and_duplicate_identities_are_rejected(

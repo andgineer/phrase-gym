@@ -2068,26 +2068,6 @@
       }
     },
     "/api/imports": {
-      "get": {
-        "operationId": "list_imports_api_imports_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ImportStatus"
-                  },
-                  "title": "Response List Imports Api Imports Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "List Imports"
-      },
       "post": {
         "operationId": "submit_import_api_imports_post",
         "requestBody": {
@@ -2286,45 +2266,6 @@
           }
         },
         "summary": "Publish Result"
-      }
-    },
-    "/api/imports/{package_id}/retry": {
-      "post": {
-        "operationId": "retry_import_api_imports__package_id__retry_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "package_id",
-            "required": true,
-            "schema": {
-              "title": "Package Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportStatus"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Retry Import"
       }
     },
     "/api/lessons": {

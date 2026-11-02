@@ -57,7 +57,7 @@ function organizedPackage(packageId: string) {
   }
 }
 
-const importPackage = (page: Page, value: object, added: string) =>
+const importPackage = (page: Page, value: { package_id: string }, added: number) =>
   importWith(page, value, added, true)
 
 async function noHorizontalScroll(page: Page) {
@@ -68,7 +68,7 @@ test.beforeEach(async ({ page }) => installFakeMedia(page))
 
 test('mobile import, lesson choice, search, details and confirmed Delete', async ({ page }) => {
   await page.goto('/')
-  await importPackage(page, organizedPackage('mobile-library-v1'), 'Added 4 phrases.')
+  await importPackage(page, organizedPackage('mobile-library-v1'), 4)
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 4 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
@@ -177,7 +177,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   await page.goto('/')
   const single = organizedPackage('mobile-pending-v1')
   single.lessons = [{ ...single.lessons[1], phrases: [single.lessons[1].phrases[1]] }]
-  await importPackage(page, single, 'Added 1 phrases.')
+  await importPackage(page, single, 1)
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   await page.route('**/api/recordings', (route) =>
     route.request().method() === 'POST'

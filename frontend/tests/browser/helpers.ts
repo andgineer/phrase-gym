@@ -1,16 +1,32 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { expect } from './fixtures'
 
-export async function importPackage(page: Page, value: object, added: string, tap = false) {
-  const press = (name: string, exact = false) => {
-    const button = page.getByRole('button', { name, exact })
-    return tap ? button.tap() : button.click()
-  }
-  await press('Add material')
+export const savedForCoach = 'Saved. The phrases appear after Coach prepares audio.'
+
+export async function importStatus(page: Page, packageId: string) {
+  return (await page.request.get(`/api/imports/${packageId}`)).json()
+}
+
+export async function awaitAdded(page: Page, packageId: string, added: number) {
+  await expect
+    .poll(() => importStatus(page, packageId))
+    .toMatchObject({ status: 'added', added_count: added })
+}
+
+export async function importPackage(
+  page: Page,
+  value: { package_id: string },
+  added: number,
+  tap = false,
+) {
+  const press = (button: Locator) => (tap ? button.tap() : button.click())
+  await press(page.getByRole('button', { name: 'Add material' }))
   await page.getByLabel('Phrase package JSON').fill(JSON.stringify(value))
-  await press('Import', true)
-  await expect(page.getByText(added)).toBeVisible()
-  await press('Close')
+  await press(page.getByRole('button', { name: 'Import', exact: true }))
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  await press(page.getByRole('button', { name: 'Close' }))
+  await awaitAdded(page, value.package_id, added)
+  await press(page.getByRole('navigation').getByRole('button', { name: 'Practice' }))
 }
 
 export function playedMedia(page: Page) {

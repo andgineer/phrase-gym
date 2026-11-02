@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures'
+import { importStatus, savedForCoach } from './helpers'
 
 test.use({ coachEnabled: false })
 
@@ -20,7 +21,7 @@ function silentReference(): string {
   return wav.toString('base64')
 }
 
-test('two offline requests retain independent status and retry across reload', async ({ page }) => {
+test('imports wait for offline Coach without the page reading their status', async ({ page }) => {
   const phrasePackage = {
     format: 'phrase-gym.package',
     version: 2,
@@ -47,59 +48,39 @@ test('two offline requests retain independent status and retry across reload', a
       },
     ],
   }
-  const second = {
-    ...phrasePackage,
-    package_id: 'offline-browser-second',
-    source_id: 'offline-browser-second-source',
-  }
-  const requestRow = (id: string) =>
-    page.getByRole('list', { name: 'Import requests' }).locator('li').filter({ hasText: id })
+  const packageId = phrasePackage.package_id
+  const statusReads: string[] = []
+  page.on('request', (request) => {
+    if (request.method() === 'GET' && new URL(request.url()).pathname.startsWith('/api/imports'))
+      statusReads.push(request.url())
+  })
+  await page.clock.install()
   await page.goto('/')
   await page.getByRole('button', { name: 'Add material' }).click()
   await page.getByLabel('Phrase package JSON').fill(JSON.stringify(phrasePackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(requestRow(phrasePackage.package_id)).toContainText('Pending Coach')
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(second))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(requestRow(second.package_id)).toContainText('Pending Coach')
-  await page.getByRole('button', { name: 'Close' }).click()
-  await page.reload()
-  await expect(page.getByText('Pending Coach', { exact: true })).toBeVisible()
-  await expect(page.getByText('Add your first phrase batch', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await expect(requestRow(phrasePackage.package_id)).toContainText('Pending Coach')
-  await expect(requestRow(second.package_id)).toContainText('Pending Coach')
+  const importButton = page.getByRole('button', { name: 'Import', exact: true })
+  await importButton.click()
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  await page.clock.runFor(60_000)
+  expect(await importStatus(page, packageId)).toMatchObject({ status: 'pending' })
 
-  await page.evaluate(
-    async ({ first, second, audio }) => {
-      await fetch(`/api/imports/${first}/failure`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ error: 'Voice unavailable' }),
-      })
-      await fetch(`/api/imports/${second}/result`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ result_id: second, references: { first: audio } }),
-      })
-    },
-    { first: phrasePackage.package_id, second: second.package_id, audio: silentReference() },
-  )
-  await expect(requestRow(phrasePackage.package_id).getByRole('alert')).toContainText(
-    'Voice unavailable',
-  )
-  await expect(requestRow(second.package_id)).toContainText('Added 1 phrases.')
-  await expect(page.getByText('Import needs attention', { exact: true })).toBeVisible()
-  await page.reload()
-  await expect(page.getByText('Import needs attention', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await expect(requestRow(phrasePackage.package_id).getByRole('alert')).toContainText(
-    'Voice unavailable',
-  )
-  await expect(requestRow(second.package_id)).toContainText('Added 1 phrases.')
-  await requestRow(phrasePackage.package_id)
-    .getByRole('button', { name: 'Retry preparation' })
-    .click()
-  await expect(requestRow(phrasePackage.package_id)).toContainText('Pending Coach')
-  await expect(requestRow(second.package_id)).toContainText('Added 1 phrases.')
+  await page.request.post('/api/imports/coach/next')
+  await page.request.post(`/api/imports/${packageId}/failure`, {
+    data: { error: 'Voice unavailable' },
+  })
+  await importButton.click()
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  expect(await importStatus(page, packageId)).toMatchObject({ status: 'pending', error: null })
+
+  await page.request.post('/api/imports/coach/next')
+  await page.request.post(`/api/imports/${packageId}/result`, {
+    data: { result_id: packageId, references: { first: silentReference() } },
+  })
+  await page.clock.runFor(60_000)
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  await importButton.click()
+  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 1 new')
+  expect(statusReads).toEqual([])
 })

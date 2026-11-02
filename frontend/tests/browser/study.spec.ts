@@ -1,6 +1,13 @@
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
-import { phraseId, savedTakes } from './helpers'
+import {
+  awaitAdded,
+  importPackage,
+  importStatus,
+  phraseId,
+  savedForCoach,
+  savedTakes,
+} from './helpers'
 
 const openDaily = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: 'Daily', exact: true }).click()
@@ -145,11 +152,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       return nativePlay.call(this)
     }
   })
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(nativePackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, nativePackage, 1)
   await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await expect
@@ -246,11 +249,16 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
 
   await page.getByLabel('Phrase package JSON').fill(JSON.stringify(phrasePackage))
   await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByRole('alert')).toContainText('Synthetic preparation failure')
-  await page.getByRole('button', { name: 'Retry preparation' }).click()
-  await expect(page.getByText('Added 5 phrases.')).toBeVisible()
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  await expect
+    .poll(() => importStatus(page, phrasePackage.package_id))
+    .toMatchObject({ status: 'error', error: expect.stringContaining('Synthetic preparation') })
+  await page.getByRole('button', { name: 'Import' }).click()
+  await expect(page.getByText(savedForCoach)).toBeVisible()
+  await awaitAdded(page, phrasePackage.package_id, 5)
   await page.getByRole('button', { name: 'Close' }).click()
   await expect(page.locator('article.study')).toHaveCount(0)
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   await openDaily(page)
   await expect(page.getByRole('heading', { name: "Let's get started." })).toBeVisible()
 
@@ -413,7 +421,8 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByRole('button', { name: "Open details: Let's get started." }).click()
   await expect(page.getByRole('button', { name: '▶ Mine' })).toHaveCount(2)
   await page.getByRole('button', { name: '← Back' }).click()
-  await page.request.post('/__test/clock/2026-11-01T10:00:00Z')
+  const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
+  await page.request.post(`/__test/clock/${tomorrow}`)
   await page.reload()
   await expect(page.locator('article.study')).toHaveCount(0)
   await openDaily(page)
@@ -450,11 +459,7 @@ test('restored practice card keeps the original layout and microphone interactio
     lessons: lessons([{ ...cards[1], item_id: 'restored-visual-card' }]),
   }
   await page.goto('/')
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(visualPackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, visualPackage, 1)
   await openDaily(page)
   const card = page.locator('article.practice-card')
   await expect(card.getByRole('heading', { name: cards[1].text })).toBeVisible()
@@ -593,11 +598,7 @@ test('playback rejection clears the current control without stopping a newer pla
     lessons: lessons([{ ...cards[1], item_id: 'playback-rejection-card' }]),
   }
   await page.goto('/')
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(playable))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, playable, 1)
   await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
@@ -647,11 +648,7 @@ test('import modal traps keyboard focus and finishes recording before opening', 
   }
   await page.goto('/')
   const opener = page.getByRole('button', { name: 'Add material' })
-  await opener.click()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(modalPackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, modalPackage, 1)
   await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await expect(page.getByRole('button', { name: 'Stop recording' })).toBeVisible()
@@ -686,11 +683,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
     lessons: lessons([{ ...cards[1], item_id: 'automatic-comparison-stop-card' }]),
   }
   await page.goto('/')
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(comparisonPackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 1 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, comparisonPackage, 1)
   await openDaily(page)
 
   await page.evaluate(() => {

@@ -117,7 +117,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await importPackage(page, factsPackage, 6)
   await expect(facts(page)).toHaveCount(0)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
@@ -212,7 +212,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
   await meet(page, texts[0])
@@ -261,7 +261,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
   await meet(page, texts[0])
@@ -294,7 +294,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await expect(days.nth(5)).toHaveAccessibleName('Mon: practiced')
   await expect(fact(page, 'next-return')).toHaveText('Next return: Today · 1 phrase due')
   await expect(counts).toHaveText('1 due · 5 new')
-  await importPackage(page, latePackage, 'Added 1 phrases.')
+  await importPackage(page, latePackage, 1)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
   await expect(message).toHaveCount(0)
 
@@ -318,8 +318,8 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   )
   const count = (prefix: string) => requests.filter((path) => path.startsWith(prefix)).length
   await page.goto('/')
-  await importPackage(page, pagedPackages[0]!, 'Added 20 phrases.')
-  await importPackage(page, pagedPackages[1]!, 'Added 1 phrases.')
+  await importPackage(page, pagedPackages[0]!, 20)
+  await importPackage(page, pagedPackages[1]!, 1)
   await setLimits(page, 1, 6)
   await press(page, 'Daily')
   for (let step = 1; step <= 6; step++) {
@@ -370,7 +370,7 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
 test('a Daily finished just after midnight shows its own completion message', async ({ page }) => {
   await setClock(page, 13 + 50 / 60)
   await page.goto('/')
-  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
   await meet(page, texts[0])
@@ -391,7 +391,7 @@ test('a Daily finished just after midnight shows its own completion message', as
 
 test('the completion message stays visible when the entry facts cannot load', async ({ page }) => {
   await page.goto('/')
-  await importPackage(page, factsPackage, 'Added 6 phrases.')
+  await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
@@ -406,7 +406,7 @@ test.describe('mobile', () => {
 
   test('mobile Today facts fit above the entry controls', async ({ page }) => {
     await page.goto('/')
-    await importPackage(page, factsPackage, 'Added 6 phrases.', true)
+    await importPackage(page, factsPackage, 6, true)
     await setLimits(page, 1, 1)
     await page.getByRole('button', { name: 'Daily', exact: true }).tap()
     await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()

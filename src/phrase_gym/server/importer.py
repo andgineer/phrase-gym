@@ -31,42 +31,31 @@ class Importer:
                 "SELECT * FROM imports WHERE package_id=?",
                 (package.package_id,),
             ).fetchone()
-            if previous:
-                if previous["content_hash"] != digest:
-                    raise ImportConflictError(
-                        "This package_id has different content; use a new ID.",
-                    )
-                return self._public(previous)
-            reject_identity_conflicts(connection, package)
-            connection.execute(
-                "INSERT INTO imports (package_id, content_hash, payload, status, created_at) "
-                "VALUES (?, ?, ?, 'pending', ?)",
-                (package.package_id, digest, payload, now()),
-            )
-            if decoded is not None and references is not None:
-                publish_batch(
-                    connection,
-                    self.database.data_dir,
-                    package,
-                    decoded,
-                    (package.package_id, self._result_hash(references)),
+            if previous and previous["content_hash"] != digest:
+                raise ImportConflictError(
+                    "This package_id has different content; use a new ID.",
                 )
-        return self.status(package.package_id)
-
-    def retry(self, package_id: str) -> dict[str, object]:
-        with self.database.write() as connection:
-            row = connection.execute(
-                "SELECT * FROM imports WHERE package_id=?",
-                (package_id,),
-            ).fetchone()
-            if row is None:
-                raise KeyError(package_id)
-            if row["status"] in {"error", "preparing"}:
+            if previous and previous["status"] == "error":
                 connection.execute(
                     "UPDATE imports SET status='pending', error=NULL WHERE package_id=?",
-                    (package_id,),
+                    (package.package_id,),
                 )
-        return self.status(package_id)
+            if previous is None:
+                reject_identity_conflicts(connection, package)
+                connection.execute(
+                    "INSERT INTO imports (package_id, content_hash, payload, status, created_at) "
+                    "VALUES (?, ?, ?, 'pending', ?)",
+                    (package.package_id, digest, payload, now()),
+                )
+                if decoded is not None and references is not None:
+                    publish_batch(
+                        connection,
+                        self.database.data_dir,
+                        package,
+                        decoded,
+                        (package.package_id, self._result_hash(references)),
+                    )
+        return self.status(package.package_id)
 
     def next_work(self) -> dict[str, object] | None:
         with self.database.write() as connection:
@@ -141,13 +130,6 @@ class Importer:
         if row is None:
             raise KeyError(package_id)
         return self._public(row)
-
-    def list_statuses(self) -> list[dict[str, object]]:
-        with self.database.read() as connection:
-            rows = connection.execute(
-                "SELECT * FROM imports ORDER BY created_at DESC",
-            ).fetchall()
-        return [self._public(row) for row in rows]
 
     @staticmethod
     def _public(row: sqlite3.Row) -> dict[str, object]:

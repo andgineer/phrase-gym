@@ -26,7 +26,7 @@ test('Extra extends a finished Daily, Stop keeps the take and a repeat press doe
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   await setLimits(page, 1, 1)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(modeLine(page)).toHaveText('Daily · 1 / 1 new')
@@ -72,7 +72,7 @@ test('Practice from details rates or studies one phrase and returns to its detai
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   await page.getByRole('button', { name: 'Next' }).click()
@@ -125,7 +125,7 @@ test.describe('mobile', () => {
 
   test('mobile Extra and Practice capture and replay takes', async ({ page }) => {
     await page.goto('/')
-    await importPackage(page, extraPackage, 'Added 3 phrases.', true)
+    await importPackage(page, extraPackage, 3, true)
     await page.getByRole('button', { name: 'Extra', exact: true }).tap()
     await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
     const stop = stopButton(page)

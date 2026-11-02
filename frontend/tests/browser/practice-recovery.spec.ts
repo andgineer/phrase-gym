@@ -24,7 +24,7 @@ test('failed Extra after Stop stays on entry with a working Retry that reuses th
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   await press(page, 'Extra')
   await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
   await press(page, 'Stop')
@@ -47,7 +47,7 @@ test('failed Practice open after leaving a Practice card stays on details with a
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   await openDetails(page, texts[0])
   await details(page).getByRole('button', { name: 'Practice' }).click()
   await expect(modeLine(page)).toHaveText('Practice')
@@ -70,7 +70,7 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
   context,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   const operations = await loseFirstExtraResponse(page)
   await press(page, 'Extra')
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible()
@@ -100,7 +100,7 @@ test('a completion released after leaving the card never brings a stale card bac
   page,
 }) => {
   await page.goto('/')
-  await importPackage(page, extraPackage, 'Added 3 phrases.')
+  await importPackage(page, extraPackage, 3)
   await press(page, 'Daily')
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   let releaseCompletion!: () => void
