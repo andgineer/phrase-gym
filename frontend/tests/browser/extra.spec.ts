@@ -93,6 +93,7 @@ test('Practice from details rates or studies one phrase and returns to its detai
   await expect(details(page).getByText(/^Next due: /)).not.toHaveText(tomorrow ?? '')
 
   await details(page).getByRole('button', { name: '← Back' }).click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await openDetails(page, texts[1])
   await expect(details(page).getByText('New: not studied yet')).toBeVisible()
   await details(page).getByRole('button', { name: 'Practice' }).click()
@@ -100,6 +101,7 @@ test('Practice from details rates or studies one phrase and returns to its detai
   await page.getByRole('button', { name: 'Next' }).click()
   await expect(details(page).getByText(tomorrow ?? '')).toBeVisible()
   await details(page).getByRole('button', { name: '← Back' }).click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
 
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(modeLine(page)).toHaveText('Daily · 2 / 5 new')

@@ -11,7 +11,6 @@ import {
   studiedLine,
   todayTitle,
   totalTitle,
-  weekday,
 } from '../src/practiceFacts'
 
 const today = {
@@ -85,10 +84,6 @@ it('states the streak factually, including after a missed day', () => {
   const missed = { current: 0, best: 1, recent_days: [] }
   expect(streakLine(missed)).toBe('No current practice streak')
   expect(bestLine(missed)).toBe('Personal best: 1 day')
-})
-
-it('names calendar weekdays regardless of the browser offset', () => {
-  expect(weekday('2026-10-31')).toBe('Sat')
 })
 
 it('labels each studied phrase with its outcome, mode, lesson and deletion', () => {

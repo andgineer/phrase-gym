@@ -2,18 +2,20 @@
 import { ref } from 'vue'
 import type { DeletionResult, DeletionTarget } from '../libraryTypes'
 import type { Recording } from '../studyTypes'
+import LessonPicker from './LessonPicker.vue'
 import DeleteDialog from './DeleteDialog.vue'
 import PhraseDetails from './PhraseDetails.vue'
 import PhraseFinder from './PhraseFinder.vue'
 
 const props = defineProps<{
-  lessonId: string
   disabled: boolean
   play: (url: string) => Promise<void>
   compare: (recording: Recording, referenceUrl: string) => Promise<void>
   stopPlayback: () => void
 }>()
-const emit = defineEmits<{ changed: []; practice: [phraseId: string] }>()
+const emit = defineEmits<{ practice: [phraseId: string] }>()
+const lessonId = defineModel<string>('lessonId', { default: '' })
+const picker = ref<InstanceType<typeof LessonPicker> | null>(null)
 const opened = defineModel<string | null>('opened', { default: null })
 const query = ref('')
 const pendingDelete = ref<DeletionTarget | null>(null)
@@ -30,7 +32,7 @@ async function deleted(result: DeletionResult) {
   props.stopPlayback()
   open(null)
   notice.value = `Deleted “${result.deleted_text}”.`
-  emit('changed')
+  void picker.value?.reload()
   await finder.value?.reload()
 }
 </script>
@@ -49,6 +51,7 @@ async function deleted(result: DeletionResult) {
   />
   <section v-show="!opened" class="card library">
     <h2>Library</h2>
+    <LessonPicker ref="picker" v-model="lessonId" />
     <p v-if="notice" role="status" class="success">{{ notice }}</p>
     <PhraseFinder
       ref="finder"

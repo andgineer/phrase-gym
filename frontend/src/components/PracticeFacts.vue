@@ -13,7 +13,6 @@ import {
   studiedLine,
   todayTitle,
   totalTitle,
-  weekday,
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
@@ -46,17 +45,6 @@ defineExpose({ refresh })
         <p data-testid="streak">{{ streakLine(facts.streak) }}</p>
         <p class="muted" data-testid="best-streak">{{ bestLine(facts.streak) }}</p>
       </div>
-      <ol class="recent-days" aria-label="Last seven days" data-testid="recent-days">
-        <li
-          v-for="day in facts.streak.recent_days"
-          :key="day.learning_date"
-          :class="{ practiced: day.practiced }"
-          :aria-label="`${weekday(day.learning_date)}: ${day.practiced ? 'practiced' : 'no practice'}`"
-        >
-          {{ weekday(day.learning_date) }}
-          <span aria-hidden="true">{{ day.practiced ? '●' : '○' }}</span>
-        </li>
-      </ol>
     </template>
     <div v-if="today && todayShown" class="facts-group">
       <h3 class="eyebrow" data-testid="today-title">{{ todayTitle(today) }}</h3>

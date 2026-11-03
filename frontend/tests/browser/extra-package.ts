@@ -34,6 +34,7 @@ export const stopButton = (page: Page) => page.getByRole('button', { name: 'Stop
 export const details = (page: Page) => page.locator('section.phrase-details')
 
 export async function openDetails(page: Page, text: string, tap = false) {
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   const button = page.getByRole('button', { name: `Open details: ${text}` })
   await (tap ? button.tap() : button.click())
   await expect(details(page).getByRole('heading', { name: text })).toBeVisible()

@@ -69,6 +69,8 @@ test.beforeEach(async ({ page }) => installFakeMedia(page))
 test('mobile import, lesson choice, search, details and confirmed Delete', async ({ page }) => {
   await page.goto('/')
   await importPackage(page, organizedPackage('mobile-library-v1'), 4)
+  await expect(page.getByRole('heading', { name: 'Library', exact: true })).toHaveCount(0)
+  await expect(page.getByLabel('Find a phrase')).toHaveCount(0)
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 4 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
@@ -89,6 +91,8 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   ])
   await lessonChoice.selectOption({ label: 'Meetings · Mobile course' })
   await expect(counts).toHaveText('0 due · 2 new')
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Daily', exact: true })).toHaveCount(0)
   const results = page.getByRole('list', { name: 'Phrases' })
   await expect(results.locator('strong')).toHaveText([
     'Could you walk me through that?',
@@ -164,6 +168,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
     page.getByRole('status').filter({ hasText: 'No phrases in this lesson' }),
   ).toBeVisible()
   await expect(counts).toHaveText('No phrases in this lesson')
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   await expect(page.getByText('No phrases in this lesson.', { exact: true })).toBeVisible()
 
@@ -192,6 +197,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   await page.getByRole('button', { name: 'Practice', exact: true }).tap()
   const waiting = page.getByTestId('pending-uploads')
   await expect(waiting).toHaveText('1 recording waiting to upload from this device')
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: 'Delete: That works for me.' }).tap()
   await page.getByRole('button', { name: 'Delete permanently' }).tap()
   await expect(page.getByText('Deleted “That works for me.”.')).toBeVisible()

@@ -125,10 +125,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
   await expect(fact(page, 'best-streak')).toHaveText('Personal best: 1 day')
-  await expect(fact(page, 'recent-days').getByRole('listitem')).toHaveCount(7)
-  await expect(fact(page, 'recent-days').getByRole('listitem').last()).toHaveAccessibleName(
-    /: practiced$/,
-  )
+  await expect(page.getByRole('list', { name: 'Last seven days' })).toHaveCount(0)
   await expect(fact(page, 'progress-title')).toHaveText('Progress — 1 day')
   await expect(fact(page, 'progress')).toHaveText('1 new phrase')
   await expect(fact(page, 'progress-ratings')).toHaveCount(0)
@@ -141,9 +138,11 @@ test('completion returns to Today facts that continue through limits, Extra and 
 
   await page.getByLabel('Search lessons').fill('Small')
   await expect(page.getByLabel('Lesson to drill')).toContainText('Small talk · Facts course')
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByLabel('Find a phrase').fill(texts[2])
   await expect(page.getByRole('button', { name: `Open details: ${texts[2]}` })).toBeVisible()
   await page.getByLabel('Find a phrase').fill('')
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
 
   await setLimits(page, 1, 2)
   await press(page, 'Daily')
@@ -189,11 +188,14 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(studied).toHaveCount(6)
   await expect(facts(page).getByRole('button', { name: 'More', exact: true })).toHaveCount(0)
 
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: `Delete: ${texts[0]}` }).click()
   await page
     .getByRole('dialog', { name: `Delete “${texts[0]}”?` })
     .getByRole('button', { name: 'Delete permanently' })
     .click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
+  await press(page, 'See today’s phrases')
   await expectStudied(studied.first(), texts[0], 'first meeting · Daily · Small talk · deleted')
   await expect(fact(page, 'today-title')).toHaveText('Today — 6 new')
   await expect(fact(page, 'progress')).toHaveText('6 new phrases')
@@ -225,9 +227,6 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(fact(page, 'streak')).toBeVisible()
   await expect(fact(page, 'today-title')).toHaveCount(0)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
-  const days = fact(page, 'recent-days').getByRole('listitem')
-  await expect(days.last()).toHaveAccessibleName(/: no practice$/)
-  await expect(days.nth(5)).toHaveAccessibleName(/: practiced$/)
   await expect(fact(page, 'library')).toHaveText('1 due now · 5 new')
   await expect(page.getByTestId('lesson-counts')).toHaveText('1 due · 5 new')
 
@@ -244,9 +243,11 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await meet(page, texts[2])
   await expect(page.getByText("Today's Extra practice is complete.", { exact: true })).toBeVisible()
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 recall / 2 new')
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByLabel('Find a phrase').fill(texts[3])
   await expect(page.getByRole('button', { name: `Open details: ${texts[3]}` })).toBeVisible()
 
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await moveClock(page, 72)
   await expect(fact(page, 'streak')).toHaveText('No current practice streak')
   await expect(fact(page, 'today-title')).toHaveCount(0)
@@ -291,9 +292,6 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await expect(message).toHaveCount(0)
   await expect(studied).toHaveCount(0)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
-  const days = fact(page, 'recent-days').getByRole('listitem')
-  await expect(days.last()).toHaveAccessibleName('Tue: no practice')
-  await expect(days.nth(5)).toHaveAccessibleName('Mon: practiced')
   await expect(counts).toHaveText('1 due · 5 new')
   await importPackage(page, latePackage, 1)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')

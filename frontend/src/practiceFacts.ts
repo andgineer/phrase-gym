@@ -1,6 +1,5 @@
 import type { LibraryCounts, PracticeFacts, PracticeTotals, StudiedPhrase } from './factsTypes'
 
-const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const ratings: Record<NonNullable<StudiedPhrase['rating']>, string> = {
   got_it: 'Got it',
   effort: 'Effort',
@@ -17,11 +16,6 @@ export const counted = (count: number, one: string, many = `${one}s`) =>
 
 const present = (parts: [number, string][]) =>
   parts.filter(([count]) => count > 0).map(([, text]) => text)
-
-// Learning dates are calendar days, so they are read in UTC to avoid the browser's offset.
-const calendarDay = (date: string) => new Date(`${date}T00:00:00Z`)
-
-export const weekday = (date: string) => weekdays[calendarDay(date).getUTCDay()]
 
 export function streakLine({ current }: PracticeFacts['streak']) {
   return current ? `🔥 ${current}-day practice streak` : 'No current practice streak'

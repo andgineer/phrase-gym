@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { takeTransfers } from './takeTransfers'
 import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
 import type { DeletionTarget } from './libraryTypes'
+import LibraryPanel from './components/LibraryPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import AddMaterial from './components/AddMaterial.vue'
 import CleanupNotice from './components/CleanupNotice.vue'
@@ -17,11 +18,11 @@ const session = usePracticeSession()
 const { practice, playback, capture } = session
 const initialized = ref(false)
 const startupError = ref('')
-const screen = ref<'entry' | 'card' | 'settings'>('entry')
+const screen = ref<'entry' | 'card' | 'library' | 'settings'>('entry')
 const lessonId = ref('')
 const entryKey = ref(0)
 const pendingDelete = ref<DeletionTarget | null>(null)
-// Owned here so the entry, remounted after a finished Practice card, reopens its details.
+// Owned here so the library, remounted after a finished Practice card, reopens its details.
 const detailsPhrase = ref<string | null>(null)
 const card = computed(() => practice.view.value.card)
 const entryMessage = useDatedMessage(() => practice.view.value)
@@ -30,7 +31,7 @@ const entryMessage = useDatedMessage(() => practice.view.value)
 watch(card, (current, previous) => {
   if (current || screen.value !== 'card') return
   if (previous?.mode === 'practice') detailsPhrase.value = previous.phrase_id
-  screen.value = 'entry'
+  screen.value = previous?.mode === 'practice' ? 'library' : 'entry'
 })
 
 // Only this open's own card counts; a card left in the client is never shown again.
@@ -49,7 +50,7 @@ async function practisePhrase(phraseId: string) {
   await start(() => practice.openPhrase(phraseId))
 }
 
-async function navigate(next: 'entry' | 'settings') {
+async function navigate(next: 'entry' | 'library' | 'settings') {
   await session.leave()
   void takeTransfers.flush()
   detailsPhrase.value = null
@@ -69,7 +70,7 @@ async function deletedCard() {
   await session.settleMedia()
   if (card.value?.mode !== 'practice') return practice.openDaily()
   // The deleted phrase has no details to return to.
-  screen.value = 'entry'
+  screen.value = 'library'
   detailsPhrase.value = null
   practice.closeCard()
 }
@@ -95,6 +96,7 @@ onMounted(initialize)
       <a class="brand" href="/">Phrase Gym<span>◌</span></a>
       <nav v-if="initialized">
         <button @click="navigate('entry')">Practice</button
+        ><button @click="navigate('library')">Library</button
         ><button @click="navigate('settings')">Settings</button>
       </nav>
       <AddMaterial v-if="initialized" :before-open="session.leave" @added="entryKey++" />
@@ -107,6 +109,17 @@ onMounted(initialize)
       </p>
       <p v-else-if="!initialized" role="status">Loading…</p>
       <SettingsPanel v-else-if="screen === 'settings'" />
+      <LibraryPanel
+        v-else-if="screen === 'library'"
+        :key="entryKey"
+        v-model:lesson-id="lessonId"
+        :disabled="practice.busy.value"
+        v-model:opened="detailsPhrase"
+        :play="playback.play"
+        :compare="playback.compare"
+        :stop-playback="playback.stop"
+        @practice="practisePhrase"
+      />
       <template v-else-if="screen === 'card' && card">
         <p class="eyebrow">English</p>
         <StudyCard
@@ -148,16 +161,14 @@ onMounted(initialize)
           :error="practice.error.value"
           :busy="practice.busy.value"
           :can-retry-extra="practice.pendingExtra.value !== null"
-          v-model:details-phrase="detailsPhrase"
-          :play="playback.play"
-          :compare="playback.compare"
-          :stop-playback="playback.stop"
           @daily="daily"
           @extra="extra"
           @retry-extra="retryExtra"
-          @practice="practisePhrase"
         />
       </template>
+      <p v-if="screen === 'library' && practice.error.value" class="error" role="alert">
+        {{ practice.error.value }}
+      </p>
       <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
       <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deletedCard" />
     </main>
