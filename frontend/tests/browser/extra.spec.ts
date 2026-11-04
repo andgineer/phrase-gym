@@ -88,7 +88,7 @@ test('Practice from details rates or studies one phrase and returns to its detai
   await expect(stopButton(page)).toHaveCount(0)
   await expect(card(page).locator('.practice-prompt')).toHaveText(`Situation for ${texts[0]}`)
   await card(page).getByRole('button', { name: 'Show' }).click()
-  await page.getByRole('button', { name: 'Got it' }).click()
+  await page.getByRole('button', { name: 'Good' }).click()
   await expect(details(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   await expect(details(page).getByText(/^Next due: /)).not.toHaveText(tomorrow ?? '')
 

@@ -5,7 +5,12 @@ from zoneinfo import ZoneInfo
 
 from fsrs import Card, Rating, Scheduler
 
-RATINGS = {"not_yet": Rating.Again, "effort": Rating.Hard, "got_it": Rating.Good}
+RATINGS = {
+    "not_yet": Rating.Again,
+    "effort": Rating.Hard,
+    "got_it": Rating.Good,
+    "easy": Rating.Easy,
+}
 SCHEDULER = Scheduler(learning_steps=(), relearning_steps=(), enable_fuzzing=False)
 
 

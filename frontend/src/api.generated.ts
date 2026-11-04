@@ -538,7 +538,7 @@ export interface components {
             /** Phrase Id */
             phrase_id: string;
             /** Rating */
-            rating: ("not_yet" | "effort" | "got_it") | null;
+            rating: ("not_yet" | "effort" | "got_it" | "easy") | null;
             /** Skipped */
             skipped: boolean;
         };
@@ -550,7 +550,7 @@ export interface components {
              * Outcome
              * @enum {string}
              */
-            outcome: "studied" | "not_yet" | "effort" | "got_it" | "skipped";
+            outcome: "studied" | "not_yet" | "effort" | "got_it" | "easy" | "skipped";
             /** Phrase Id */
             phrase_id: string;
             /** View Token */
@@ -574,6 +574,8 @@ export interface components {
         CumulativeWork: {
             /** Completions */
             completions: number;
+            /** Easy */
+            easy: number;
             /** Effort */
             effort: number;
             /** First Meetings */
@@ -953,6 +955,8 @@ export interface components {
         PracticeTotals: {
             /** Completions */
             completions: number;
+            /** Easy */
+            easy: number;
             /** Effort */
             effort: number;
             /** First Meetings */
@@ -1106,7 +1110,7 @@ export interface components {
             /** Phrase Id */
             phrase_id: string | null;
             /** Rating */
-            rating: ("not_yet" | "effort" | "got_it") | null;
+            rating: ("not_yet" | "effort" | "got_it" | "easy") | null;
             /** Skipped */
             skipped: boolean;
             /** Text */

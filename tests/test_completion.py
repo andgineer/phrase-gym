@@ -4,6 +4,9 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
+from fsrs import Card as FsrsCard
+from fsrs import Rating as FsrsRating
+from fsrs import Scheduler
 
 import phrase_gym.server.completion as completion
 from phrase_gym.server.app import create_app
@@ -182,3 +185,30 @@ def test_deleting_the_open_phrase_invalidates_its_view_without_a_log_row(
     kept = practice.log()[0]
     assert kept["phrase_id"] is None
     assert (kept["phrase_text"], kept["lesson_title"]) == ("Complete phrase number 1.", "Unit")
+
+
+@pytest.mark.parametrize(
+    "outcome, rating",
+    [
+        ("not_yet", FsrsRating.Again),
+        ("effort", FsrsRating.Hard),
+        ("got_it", FsrsRating.Good),
+        ("easy", FsrsRating.Easy),
+    ],
+)
+def test_ratings_reach_fsrs_and_survive_in_facts(
+    practice: Practice, outcome: str, rating: FsrsRating
+) -> None:
+    card = recall(practice)
+    practice.reveal(card)
+    receipt = practice.finish(card, outcome)["receipt"]
+    assert receipt["rating"] == outcome and receipt["fsrs_updated"]
+    saved = json.loads(practice.phrase(card["phrase_id"])["fsrs_json"])
+    expected, _ = Scheduler(
+        learning_steps=(), relearning_steps=(), enable_fuzzing=False
+    ).review_card(FsrsCard(), rating, review_datetime=practice.now)
+    assert saved["stability"] == expected.stability
+    assert saved["difficulty"] == expected.difficulty
+    facts = practice.client.get("/api/practice/facts").json()
+    assert facts["today"][outcome] == facts["work"][outcome] == 1
+    assert practice.log()[-1]["rating"] == outcome

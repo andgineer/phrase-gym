@@ -50,6 +50,7 @@ def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
         first_meetings=sum(row["count"] for row in rows if row["kind"] == "first_study"),
         recalls=sum(ratings.values()),
         skipped=sum(row["count"] for row in rows if row["skipped"]),
+        easy=ratings.get("easy", 0),
         got_it=ratings.get("got_it", 0),
         effort=ratings.get("effort", 0),
         not_yet=ratings.get("not_yet", 0),

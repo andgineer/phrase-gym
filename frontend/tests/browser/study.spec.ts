@@ -431,7 +431,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await page.getByRole('button', { name: 'Show' }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
-  await page.getByRole('button', { name: 'Effort' }).click()
+  await page.getByRole('button', { name: 'Hard' }).click()
   await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()

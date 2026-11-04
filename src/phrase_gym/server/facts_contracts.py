@@ -20,6 +20,7 @@ class PracticeTotals(StrictModel):
     # Rated recalls only; a Skip is counted in skipped.
     recalls: int
     skipped: int
+    easy: int
     got_it: int
     effort: int
     not_yet: int

@@ -1,9 +1,10 @@
 import type { LibraryCounts, PracticeFacts, PracticeTotals, StudiedPhrase } from './factsTypes'
 
 const ratings: Record<NonNullable<StudiedPhrase['rating']>, string> = {
-  got_it: 'Got it',
-  effort: 'Effort',
-  not_yet: 'Not yet',
+  easy: 'Easy',
+  got_it: 'Good',
+  effort: 'Hard',
+  not_yet: 'Again',
 }
 const modes: Record<StudiedPhrase['mode'], string> = {
   daily: 'Daily',
@@ -38,9 +39,10 @@ export const todayTitle = (today: PracticeTotals) =>
 
 export const ratingsLine = (totals: PracticeTotals) =>
   present([
-    [totals.got_it, `${totals.got_it} Got it`],
-    [totals.effort, `${totals.effort} Effort`],
-    [totals.not_yet, `${totals.not_yet} Not yet`],
+    [totals.easy, `${totals.easy} Easy`],
+    [totals.got_it, `${totals.got_it} Good`],
+    [totals.effort, `${totals.effort} Hard`],
+    [totals.not_yet, `${totals.not_yet} Again`],
     [totals.skipped, `${totals.skipped} skipped`],
   ]).join(' · ')
 

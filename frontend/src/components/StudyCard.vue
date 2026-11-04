@@ -36,9 +36,10 @@ const emit = defineEmits<{
   stop: []
 }>()
 const ratings: Array<[Outcome, string, string]> = [
-  ['not_yet', 'Not yet', 'not-yet'],
-  ['effort', 'Effort', 'effort'],
-  ['got_it', 'Got it', 'recalled'],
+  ['not_yet', 'Again', 'not-yet'],
+  ['effort', 'Hard', 'effort'],
+  ['got_it', 'Good', 'recalled'],
+  ['easy', 'Easy', 'recalled'],
 ]
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
 const front = computed(() => props.card.kind === 'recall' && !props.card.revealed)

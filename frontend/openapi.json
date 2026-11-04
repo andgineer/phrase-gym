@@ -196,7 +196,8 @@
                 "enum": [
                   "not_yet",
                   "effort",
-                  "got_it"
+                  "got_it",
+                  "easy"
                 ],
                 "type": "string"
               },
@@ -240,6 +241,7 @@
               "not_yet",
               "effort",
               "got_it",
+              "easy",
               "skipped"
             ],
             "title": "Outcome",
@@ -332,6 +334,10 @@
             "title": "Completions",
             "type": "integer"
           },
+          "easy": {
+            "title": "Easy",
+            "type": "integer"
+          },
           "effort": {
             "title": "Effort",
             "type": "integer"
@@ -370,6 +376,7 @@
           "first_meetings",
           "recalls",
           "skipped",
+          "easy",
           "got_it",
           "effort",
           "not_yet",
@@ -1499,6 +1506,10 @@
             "title": "Completions",
             "type": "integer"
           },
+          "easy": {
+            "title": "Easy",
+            "type": "integer"
+          },
           "effort": {
             "title": "Effort",
             "type": "integer"
@@ -1533,6 +1544,7 @@
           "first_meetings",
           "recalls",
           "skipped",
+          "easy",
           "got_it",
           "effort",
           "not_yet",
@@ -1952,7 +1964,8 @@
                 "enum": [
                   "not_yet",
                   "effort",
-                  "got_it"
+                  "got_it",
+                  "easy"
                 ],
                 "type": "string"
               },

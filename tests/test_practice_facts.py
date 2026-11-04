@@ -26,7 +26,7 @@ def facts(practice: Practice) -> dict[str, Any]:
 
 ZERO_TOTALS = dict.fromkeys(
     ["completions", "first_meetings", "recalls", "skipped", "got_it", "effort", "not_yet"]
-    + ["recordings"],
+    + ["easy", "recordings"],
     0,
 )
 
@@ -104,6 +104,7 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
         "first_meetings": 1,
         "recalls": 6,
         "skipped": 1,
+        "easy": 0,
         "got_it": 3,
         "effort": 2,
         "not_yet": 1,
@@ -114,6 +115,7 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
         "first_meetings": 6,
         "recalls": 6,
         "skipped": 1,
+        "easy": 0,
         "got_it": 3,
         "effort": 2,
         "not_yet": 1,

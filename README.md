@@ -38,7 +38,7 @@ continue. A new phrase opens on its answer with meaning help, reference playback
 recording; **Next** completes this first meeting without a rating. From the next learning day a due
 phrase shows an answer-free situation cue with **New cue**, **Hint**, **Show** and **Details**.
 After **Show**, you can still record a rehearsal, then rate the response you gave before help or
-reveal: **Not yet**, **Effort** or **Got it**. A rating or **Skip** saves and advances at once.
+reveal: **Again**, **Hard**, **Good** or **Easy**. A rating or **Skip** saves and advances at once.
 **Delete** on a revealed card asks for confirmation and advances without a grade.
 
 **Extra** starts a fresh pass for more practice today. Once today's completed recalls or first

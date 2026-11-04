@@ -5,8 +5,8 @@ from pydantic import Field
 from phrase_gym.server.contracts import CardKind, PracticeMode, SavedRecording
 from phrase_gym.server.import_contracts import Cue, StrictModel
 
-Rating = Literal["not_yet", "effort", "got_it"]
-Outcome = Literal["studied", "not_yet", "effort", "got_it", "skipped"]
+Rating = Literal["not_yet", "effort", "got_it", "easy"]
+Outcome = Literal["studied", "not_yet", "effort", "got_it", "easy", "skipped"]
 OperationId = Annotated[str, Field(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]
 
 
