@@ -32,11 +32,13 @@ def due_phrases(
 
 def first_new_phrase(connection: sqlite3.Connection, view: sqlite3.Row) -> sqlite3.Row | None:
     clause, parameters = _lesson_filter(view)
-    return connection.execute(
+    skipped = set(json.loads(view["skipped_json"]))
+    rows = connection.execute(
         f"SELECT * FROM phrases WHERE studied_at IS NULL{clause} "  # noqa: S608
-        "ORDER BY created_at, position, id LIMIT 1",
+        "ORDER BY created_at, position, id",
         parameters,
-    ).fetchone()
+    ).fetchall()
+    return next((row for row in rows if row["id"] not in skipped), None)
 
 
 def advance(
@@ -57,6 +59,6 @@ def advance(
     if progress.new_completed < progress.new_allowance:
         fresh = first_new_phrase(connection, view)
         if fresh:
-            show_phrase(connection, fresh, "first_study", rng)
+            show_phrase(connection, fresh, "new", rng)
             return
     clear_phrase(connection)

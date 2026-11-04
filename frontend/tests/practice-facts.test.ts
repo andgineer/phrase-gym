@@ -15,7 +15,8 @@ import {
 
 const today = {
   completions: 27,
-  first_meetings: 5,
+  new_attempts: 5,
+  first_meetings: 0,
   recalls: 20,
   skipped: 2,
   easy: 0,
@@ -35,7 +36,7 @@ const facts = (changes: Partial<PracticeFacts> = {}): PracticeFacts => ({
   learning_date: '2026-10-31',
   streak: { current: 8, best: 12, recent_days: [] },
   today,
-  work: { ...today, recalls: 45, first_meetings: 112, got_it: 39, effort: 6, practice_days: 3 },
+  work: { ...today, recalls: 45, new_attempts: 112, got_it: 39, effort: 6, practice_days: 3 },
   library,
   notices: [],
   ...changes,
@@ -54,8 +55,8 @@ const item = (changes: Partial<StudiedPhrase>): StudiedPhrase => ({
 
 it('titles Today with its recalls and new phrases and lists ratings without empty parts', () => {
   expect(todayTitle(today)).toBe('Today — 20 recalls / 5 new')
-  expect(todayTitle({ ...today, recalls: 1, first_meetings: 0 })).toBe('Today — 1 recall')
-  expect(todayTitle({ ...today, recalls: 0, first_meetings: 0 })).toBe('Today')
+  expect(todayTitle({ ...today, recalls: 1, new_attempts: 0 })).toBe('Today — 1 recall')
+  expect(todayTitle({ ...today, recalls: 0, new_attempts: 0 })).toBe('Today')
   expect(ratingsLine(today)).toBe('18 Good · 2 Hard · 2 skipped')
   expect(ratingsLine({ ...today, got_it: 0, effort: 0, skipped: 0 })).toBe('')
   expect(recordingsLine(30)).toBe('30 recordings made')
@@ -66,7 +67,7 @@ it('titles Progress with practice days and lists what was done', () => {
   expect(progressTitle(facts())).toBe('Progress — 3 days')
   expect(progressLine(facts())).toBe('45 recalls · 112 new phrases')
   const first = facts({
-    work: { ...facts().work, recalls: 0, first_meetings: 1, practice_days: 1 },
+    work: { ...facts().work, recalls: 0, new_attempts: 1, practice_days: 1 },
   })
   expect(progressTitle(first)).toBe('Progress — 1 day')
   expect(progressLine(first)).toBe('1 new phrase')
@@ -89,7 +90,7 @@ it('states the streak factually, including after a missed day', () => {
 
 it('labels each studied phrase with its outcome, mode, lesson and deletion', () => {
   expect(studiedLine(item({ kind: 'first_study', rating: null }))).toBe(
-    'first meeting · Daily · Small talk',
+    'historical first meeting · Daily · Small talk',
   )
   expect(studiedLine(item({ mode: 'extra' }))).toBe('Hard · Extra · Small talk')
   expect(studiedLine(item({ skipped: true, rating: null, phrase_id: null }))).toBe(
@@ -103,4 +104,13 @@ it('labels each studied phrase with its outcome, mode, lesson and deletion', () 
 it('includes Easy in totals and studied history', () => {
   expect(ratingsLine({ ...today, easy: 3 })).toBe('3 Easy · 18 Good · 2 Hard · 2 skipped')
   expect(studiedLine(item({ rating: 'easy' }))).toBe('Easy · Daily · Small talk')
+})
+
+it('keeps historical ungraded first meetings separate from rated new attempts', () => {
+  const history = { ...today, recalls: 0, new_attempts: 1, first_meetings: 2 }
+  expect(todayTitle(history)).toBe('Today — 1 new / 2 historical first meetings')
+  expect(progressLine(facts({ work: { ...history, practice_days: 1 } }))).toBe(
+    '1 new phrase · 2 historical first meetings',
+  )
+  expect(studiedLine(item({ kind: 'new', rating: 'not_yet' }))).toBe('Again · Daily · Small talk')
 })

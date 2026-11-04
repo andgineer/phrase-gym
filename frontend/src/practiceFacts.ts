@@ -33,7 +33,8 @@ export const todayTitle = (today: PracticeTotals) =>
     'Today',
     present([
       [today.recalls, counted(today.recalls, 'recall')],
-      [today.first_meetings, `${today.first_meetings} new`],
+      [today.new_attempts, `${today.new_attempts} new`],
+      [today.first_meetings, counted(today.first_meetings, 'historical first meeting')],
     ]),
   )
 
@@ -54,7 +55,8 @@ export const progressTitle = ({ work }: PracticeFacts) =>
 export const progressLine = ({ work }: PracticeFacts) =>
   present([
     [work.recalls, counted(work.recalls, 'recall')],
-    [work.first_meetings, counted(work.first_meetings, 'new phrase')],
+    [work.new_attempts, counted(work.new_attempts, 'new phrase')],
+    [work.first_meetings, counted(work.first_meetings, 'historical first meeting')],
   ]).join(' · ')
 
 export const totalTitle = (library: LibraryCounts) =>
@@ -70,7 +72,7 @@ export const libraryLine = (library: LibraryCounts) =>
 export function studiedLine(item: StudiedPhrase) {
   const outcome =
     item.kind === 'first_study'
-      ? 'first meeting'
+      ? 'historical first meeting'
       : item.skipped
         ? 'Skip'
         : ratings[item.rating ?? 'not_yet']

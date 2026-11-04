@@ -17,7 +17,8 @@ class PracticeStreak(StrictModel):
 class PracticeTotals(StrictModel):
     completions: int
     first_meetings: int
-    # Rated recalls only; a Skip is counted in skipped.
+    new_attempts: int
+    # Rated attempts only; a Skip is counted in skipped.
     recalls: int
     skipped: int
     easy: int

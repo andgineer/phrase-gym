@@ -125,9 +125,9 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         ),
     )
     practice = Practice(client)
-    card = practice.card()
+    card = practice.reveal(practice.card())
     assert card["answer"]["text"] == "Complete phrase number 1."
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
 
     first = client.get("/api/lessons", params={"limit": 2}).json()
     assert [item["title"] for item in first["items"]] == ["Greetings", "Small talk"]
@@ -185,7 +185,7 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
     take_ids = [str(uuid4()) for _ in range(3)]
     for take_id in take_ids:
         assert upload_take(client, card, take_id).status_code == 200
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
 
     details = client.get(f"/api/phrases/{phrase_id}").json()
     assert details | {"id": "", "lesson_id": ""} == {
@@ -206,7 +206,7 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
     assert client.get(details["reference_url"]).content.startswith(b"RIFF")
     page = client.get(f"/api/phrases/{phrase_id}/recordings", params={"limit": 2}).json()
     assert len(page["items"]) == 2 and page["next_offset"] == 2
-    assert (page["items"][0]["mode"], page["items"][0]["kind"]) == ("daily", "first_study")
+    assert (page["items"][0]["mode"], page["items"][0]["kind"]) == ("daily", "new")
     assert page["items"][0]["answer"] == "So far, so good."
     more = client.get(f"/api/phrases/{phrase_id}/recordings", params={"offset": 2}).json()
     assert len(more["items"]) == 1 and more["next_offset"] is None
@@ -218,7 +218,7 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
 def test_lookup_makes_no_scheduling_writes(client: TestClient, tmp_path: Path) -> None:
     publish(client, make_package())
     practice = Practice(client)
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     review = practice.card()
     assert review["kind"] == "recall"

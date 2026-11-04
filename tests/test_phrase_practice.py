@@ -21,9 +21,12 @@ def ids(practice: Practice) -> list[str]:
 
 
 def test_not_due_practice_grade_reschedules_once_per_learning_day(practice: Practice) -> None:
-    practice.study_all_new()
-    phrase_id = practice.log()[0]["phrase_id"]
+    initial = practice.card()
+    phrase_id = initial["phrase_id"]
+    practice.rate(initial, "easy")
+    practice.later(days=1)
     before = practice.phrase(phrase_id)
+    assert before["due_at"] > practice.now.isoformat()
     progress = practice.daily()["progress"]
     card = practice.practise(phrase_id)
     assert card["kind"] == "recall" and card["answer"] is None and card["cue"]
@@ -56,30 +59,37 @@ def test_due_practice_grade_consumes_no_allowance_and_daily_skips_it_after(
     assert [(row["mode"], row["rating"]) for row in rows] == [("practice", "effort")]
 
 
-def test_new_phrase_practice_is_a_first_meeting_completed_with_next(practice: Practice) -> None:
+def test_new_phrase_practice_hides_answer_and_initializes_fsrs_with_rating(
+    practice: Practice,
+) -> None:
     phrase_id = ids(practice)[2]
     card = practice.practise(phrase_id)
-    assert card["kind"] == "first_study" and card["answer"]["text"] == "Complete phrase number 3."
+    assert card["kind"] == "new" and card["answer"] is None and card["cue"]
     assert practice.complete(card, "got_it").status_code == 409
-    receipt = practice.finish(card, "studied")["receipt"]
+    receipt = practice.rate(card, "not_yet")["receipt"]
     assert (receipt["kind"], receipt["mode"], receipt["fsrs_updated"]) == (
-        "first_study",
+        "new",
         "practice",
-        False,
+        True,
     )
     studied = practice.phrase(phrase_id)
-    assert studied["due_at"] == "2026-10-28T23:00:00+00:00" and studied["last_review"] is None
+    assert studied["due_at"] >= "2026-10-28T23:00:00+00:00"
+    assert studied["last_review"] == practice.now.isoformat() and studied["fsrs_json"]
+    repeated = practice.practise(phrase_id)
+    result = practice.rate(repeated, "got_it")
+    assert result["receipt"]["kind"] == "recall" and not result["receipt"]["fsrs_updated"]
+    assert practice.phrase(phrase_id) == studied
     daily = practice.daily()
     assert daily["progress"]["new_completed"] == 0
     assert daily["card"]["phrase_id"] != phrase_id
 
 
 @pytest.mark.parametrize("same_phrase", [True, False])
-def test_practice_closes_an_unfinished_daily_first_study_view(
+def test_practice_closes_an_unfinished_daily_new_view(
     practice: Practice, same_phrase: bool
 ) -> None:
     daily = practice.card()
-    assert daily["kind"] == "first_study"
+    assert daily["kind"] == "new"
     target = daily["phrase_id"] if same_phrase else ids(practice)[3]
     card = practice.practise(target)
     assert card["view_token"] != daily["view_token"]
@@ -129,7 +139,7 @@ def test_practice_takes_and_late_uploads_keep_their_mode(practice: Practice) -> 
     card = practice.practise(ids(practice)[0])
     early, late = str(uuid4()), str(uuid4())
     assert upload_take(practice.client, card, early).status_code == 200
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
     progress = practice.daily()["progress"]
     log = practice.log()
     assert upload_take(practice.client, card, late).status_code == 200

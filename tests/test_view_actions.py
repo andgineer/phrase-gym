@@ -20,7 +20,7 @@ def practice(client: TestClient, package: Package) -> Practice:
     package["lessons"] = [lesson("small-talk", "Small talk", [item])]
     publish(client, package)
     practice = Practice(client)
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     return practice
 
@@ -45,7 +45,7 @@ def test_new_cue_and_hint_choose_other_values_and_exact_retries_repeat(
     assert practice.choose("hint", card, hint_operation)["hint"] == second_hint["hint"]
     assert practice.card()["hint"] == later["hint"]
     assert practice.action("hint", card, operation_id=operation).status_code == 409
-    assert practice.log()[-1]["kind"] == "first_study"
+    assert practice.log()[-1]["kind"] == "new"
 
 
 def test_next_appearance_avoids_the_last_shown_cue(practice: Practice) -> None:
@@ -58,10 +58,12 @@ def test_next_appearance_avoids_the_last_shown_cue(practice: Practice) -> None:
     assert following["cue"] != shown
 
 
-def test_first_study_offers_no_cue_or_hint(client: TestClient, package: Package) -> None:
+def test_new_phrase_offers_cue_and_hint_without_revealing(
+    client: TestClient, package: Package
+) -> None:
     publish(client, package)
     card = Practice(client).card()
-    assert card["kind"] == "first_study"
+    assert card["kind"] == "new"
     for path in ("cue", "hint"):
         response = client.post(
             f"/api/practice/{path}",
@@ -71,7 +73,8 @@ def test_first_study_offers_no_cue_or_hint(client: TestClient, package: Package)
                 "operation_id": str(uuid4()),
             },
         )
-        assert response.status_code == 409
+        assert response.status_code == 200
+        assert response.json()["answer"] is None
 
 
 def test_takes_keep_their_support_snapshots_and_upload_after_the_view_moves_on(

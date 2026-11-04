@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import { card, details, extraPackage, modeLine, openDetails, texts } from './extra-package'
-import { importPackage } from './helpers'
+import { rateNew, revealAnswer, importPackage } from './helpers'
 
 const press = (page: Page, name: string) => page.getByRole('button', { name, exact: true }).click()
 
@@ -35,11 +35,12 @@ test('failed Extra after Stop stays on entry with a working Retry that reuses th
   await expect(card(page)).toHaveCount(0)
   await press(page, 'Retry')
   await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
   expect(operations).toHaveLength(2)
   expect(operations[1]).toBe(operations[0])
-  await page.getByRole('button', { name: 'Next' }).click()
+  await rateNew(page)
   await expect(modeLine(page)).toHaveText('Extra · 2 / 5 new')
 })
 
@@ -62,6 +63,7 @@ test('failed Practice open after leaving a Practice card stays on details with a
   await page.unroute('**/api/practice/phrase')
   await details(page).getByRole('button', { name: 'Practice' }).click()
   await expect(modeLine(page)).toHaveText('Practice')
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
 })
 
@@ -87,7 +89,7 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
   await expect(card(page)).toHaveCount(0)
   expect(operations).toEqual([operations[0], operations[0]])
 
-  await other.getByRole('button', { name: 'Next' }).click()
+  await rateNew(other)
   await expect(details(other).getByRole('heading', { name: texts[2] })).toBeVisible()
   await expect(details(other).getByText(/^Next due: /)).toBeVisible()
   await expect(other.getByRole('alert')).toHaveCount(0)
@@ -102,6 +104,7 @@ test('a completion released after leaving the card never brings a stale card bac
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
   await press(page, 'Daily')
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   let releaseCompletion!: () => void
   const completionHeld = new Promise<void>((resolve) => (releaseCompletion = resolve))
@@ -110,7 +113,7 @@ test('a completion released after leaving the card never brings a stale card bac
     await route.continue()
   })
   const completed = page.waitForResponse('**/api/practice/complete')
-  await page.getByRole('button', { name: 'Next' }).click()
+  await rateNew(page, false, false)
   await press(page, 'Practice')
   await expect(card(page)).toHaveCount(0)
   releaseCompletion()
@@ -124,6 +127,7 @@ test('a completion released after leaving the card never brings a stale card bac
   await expect(card(page)).toHaveCount(0)
   await press(page, 'Retry')
   await expect(modeLine(page)).toHaveText('Extra · 2 / 5 new')
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
   expect(operations).toEqual([operations[0], operations[0]])
 })

@@ -168,6 +168,7 @@
           "kind": {
             "enum": [
               "first_study",
+              "new",
               "recall"
             ],
             "title": "Kind",
@@ -350,6 +351,10 @@
             "title": "Got It",
             "type": "integer"
           },
+          "new_attempts": {
+            "title": "New Attempts",
+            "type": "integer"
+          },
           "not_yet": {
             "title": "Not Yet",
             "type": "integer"
@@ -374,6 +379,7 @@
         "required": [
           "completions",
           "first_meetings",
+          "new_attempts",
           "recalls",
           "skipped",
           "easy",
@@ -1260,7 +1266,7 @@
           },
           "kind": {
             "enum": [
-              "first_study",
+              "new",
               "recall"
             ],
             "title": "Kind",
@@ -1522,6 +1528,10 @@
             "title": "Got It",
             "type": "integer"
           },
+          "new_attempts": {
+            "title": "New Attempts",
+            "type": "integer"
+          },
           "not_yet": {
             "title": "Not Yet",
             "type": "integer"
@@ -1542,6 +1552,7 @@
         "required": [
           "completions",
           "first_meetings",
+          "new_attempts",
           "recalls",
           "skipped",
           "easy",
@@ -1691,6 +1702,7 @@
           "kind": {
             "enum": [
               "first_study",
+              "new",
               "recall"
             ],
             "title": "Kind",
@@ -1794,6 +1806,7 @@
           "kind": {
             "enum": [
               "first_study",
+              "new",
               "recall"
             ],
             "title": "Kind",
@@ -1929,6 +1942,7 @@
           "kind": {
             "enum": [
               "first_study",
+              "new",
               "recall"
             ],
             "title": "Kind",

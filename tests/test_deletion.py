@@ -52,7 +52,7 @@ def test_delete_removes_phrase_reference_takes_and_open_view(
     assert rows(database, "SELECT * FROM recordings WHERE phrase_id=?", opened["phrase_id"]) == []
     practice = Practice(client)
     assert practice.complete(opened, "studied").status_code == 409
-    assert practice.card()["answer"]["text"] == "Complete phrase number 2."
+    assert practice.reveal(practice.card())["answer"]["text"] == "Complete phrase number 2."
     assert practice.log() == []
     assert client.get(f"/api/phrases/{opened['phrase_id']}").status_code == 404
     assert client.delete(f"/api/phrases/{opened['phrase_id']}").status_code == 404
@@ -85,7 +85,7 @@ def test_reviewed_phrase_deletes_and_keeps_completed_practice(
     publish(client, package)
     practice = Practice(client)
     first = practice.card()
-    practice.finish(first, "studied")
+    practice.rate(first, "not_yet")
     practice.later(days=1)
     review = practice.card()
     practice.reveal(review)

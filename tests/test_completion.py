@@ -21,7 +21,7 @@ def practice(client: TestClient, package: Package) -> Practice:
 
 
 def recall(practice: Practice) -> Card:
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     card = practice.card()
     assert card["kind"] == "recall"
@@ -37,7 +37,7 @@ def test_recall_front_withholds_answer_and_a_rating_needs_reveal(practice: Pract
     revealed = practice.reveal(card)
     assert revealed["answer"]["text"].startswith("Complete phrase number")
     assert revealed["view_token"] == card["view_token"]
-    assert practice.log()[-1]["kind"] == "first_study"
+    assert practice.log()[-1]["kind"] == "new"
 
 
 def test_first_grade_updates_fsrs_due_and_last_review_together(practice: Practice) -> None:
@@ -124,7 +124,7 @@ def test_view_tokens_are_fresh_for_every_appearance(practice: Practice) -> None:
     first = state["card"]
     while state["card"]:
         tokens.append(state["card"]["view_token"])
-        state = practice.finish(state["card"], "studied")["state"]
+        state = practice.rate(state["card"], "not_yet")["state"]
     assert len(tokens) == len(set(tokens)) == 5
     practice.later(days=1)
     again = practice.card()
@@ -134,7 +134,7 @@ def test_view_tokens_are_fresh_for_every_appearance(practice: Practice) -> None:
 
 def test_stale_tab_actions_conflict_even_with_new_ids(practice: Practice) -> None:
     old = practice.card()
-    practice.finish(old, "studied")
+    practice.rate(old, "not_yet")
     current = practice.card()
     rows = practice.log()
     assert practice.complete(old, "studied").status_code == 409
@@ -152,18 +152,18 @@ def test_exact_retry_returns_the_original_receipt_after_advances_and_restart(
 ) -> None:
     first = practice.card()
     completion_id = str(uuid4())
-    original = practice.finish(first, "studied", completion_id)
+    original = practice.rate(first, "not_yet", completion_id)
     state = original["state"]
     for _ in range(2):
-        state = practice.finish(state["card"], "studied")["state"]
+        state = practice.rate(state["card"], "not_yet")["state"]
     current = practice.card()
-    replay = practice.finish(first, "studied", completion_id)
+    replay = practice.finish(first, "not_yet", completion_id)
     assert replay == {"receipt": original["receipt"], "replayed": True, "state": None}
     assert practice.card() == current
     assert len(practice.log()) == 3
     with TestClient(create_app()) as restarted:
         retried = Practice(restarted, practice.now)
-        assert retried.finish(first, "studied", completion_id)["receipt"] == original["receipt"]
+        assert retried.finish(first, "not_yet", completion_id)["receipt"] == original["receipt"]
         assert retried.complete(first, "skipped", completion_id).status_code == 409
         assert retried.complete(current, "studied", completion_id).status_code == 409
         assert len(retried.log()) == 3
@@ -175,7 +175,7 @@ def test_deleting_the_open_phrase_invalidates_its_view_without_a_log_row(
     publish(client, make_package(lessons=[lesson("unit", "Unit", [phrase(1), phrase(2)])]))
     practice = Practice(client)
     first = practice.card()
-    practice.finish(first, "studied")
+    practice.rate(first, "not_yet")
     open_card = practice.card()
     assert client.delete(f"/api/phrases/{open_card['phrase_id']}").status_code == 200
     assert practice.complete(open_card, "studied").status_code == 409
@@ -199,10 +199,10 @@ def test_deleting_the_open_phrase_invalidates_its_view_without_a_log_row(
 def test_ratings_reach_fsrs_and_survive_in_facts(
     practice: Practice, outcome: str, rating: FsrsRating
 ) -> None:
-    card = recall(practice)
+    card = practice.card()
     practice.reveal(card)
     receipt = practice.finish(card, outcome)["receipt"]
-    assert receipt["rating"] == outcome and receipt["fsrs_updated"]
+    assert receipt["kind"] == "new" and receipt["rating"] == outcome and receipt["fsrs_updated"]
     saved = json.loads(practice.phrase(card["phrase_id"])["fsrs_json"])
     expected, _ = Scheduler(
         learning_steps=(), relearning_steps=(), enable_fuzzing=False
@@ -210,5 +210,6 @@ def test_ratings_reach_fsrs_and_survive_in_facts(
     assert saved["stability"] == expected.stability
     assert saved["difficulty"] == expected.difficulty
     facts = practice.client.get("/api/practice/facts").json()
+    assert facts["today"]["new_attempts"] == 1 and facts["today"]["recalls"] == 0
     assert facts["today"][outcome] == facts["work"][outcome] == 1
     assert practice.log()[-1]["rating"] == outcome

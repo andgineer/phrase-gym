@@ -44,11 +44,15 @@ def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
         f"{clause}GROUP BY kind, rating, skipped",
         parameters,
     ).fetchall()
-    ratings = {row["rating"]: row["count"] for row in rows if row["rating"]}
+    ratings: dict[str, int] = {}
+    for row in rows:
+        if row["rating"]:
+            ratings[row["rating"]] = ratings.get(row["rating"], 0) + row["count"]
     return PracticeTotals(
         completions=sum(row["count"] for row in rows),
         first_meetings=sum(row["count"] for row in rows if row["kind"] == "first_study"),
-        recalls=sum(ratings.values()),
+        new_attempts=sum(row["count"] for row in rows if row["kind"] == "new" and row["rating"]),
+        recalls=sum(row["count"] for row in rows if row["kind"] == "recall" and row["rating"]),
         skipped=sum(row["count"] for row in rows if row["skipped"]),
         easy=ratings.get("easy", 0),
         got_it=ratings.get("got_it", 0),

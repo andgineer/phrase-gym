@@ -25,7 +25,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 - Document an export/paste interface first; direct echo-words integration or source changes require their own authorization. Do not make export automation a prerequisite.
 - Use representative new actual model results with a fresh semantic reviewer, plus attended speech listening. Cover an ambiguous word, an accepted variant, a confusable contrast and a failed request separately from structural tests.
 
-**Exit:** a learner-supplied English word batch goes from ordinary intake through preparation to first study, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards. No generalized provider framework is needed.
+**Exit:** a learner-supplied English word batch goes from ordinary intake through preparation to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards. No generalized provider framework is needed.
 
 ## 5. Extend only the content the learner next needs
 

@@ -47,10 +47,6 @@
 .intake-dialog .file input {
   display: none;
 }
-.study-next {
-  display: block;
-  margin-top: 22px;
-}
 .microphone {
   display: inline-flex;
   justify-content: center;

@@ -55,7 +55,7 @@ def test_offline_restart_retry_and_idempotent_publication(
             == first.json()
         )
         assert client.post("/api/imports/coach/next").json() is None
-        assert client.post("/api/practice/daily", json={}).json()["card"]["answer"]["text"]
+        assert client.post("/api/practice/daily", json={}).json()["card"]["cue"]
     assert table_count(Database(tmp_path), "phrases") == 5
     assert len(list((tmp_path / "references").iterdir())) == 5
 
@@ -122,6 +122,9 @@ def test_external_agent_supplies_complete_references_without_coach(
     assert client.post("/api/imports", json=supplied).json() == response.json()
     assert client.post("/api/imports/coach/next").json() is None
     card = client.post("/api/practice/daily", json={}).json()["card"]
+    card = client.post(
+        "/api/practice/reveal", json={key: card[key] for key in ("view_token", "phrase_id")}
+    ).json()
     assert client.get(card["answer"]["reference_url"]).content.startswith(b"RIFF")
     supplied["references"]["meeting-4"] = "invalid"
     assert client.post("/api/imports", json=supplied).status_code == 409

@@ -527,7 +527,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "first_study" | "recall";
+            kind: "first_study" | "new" | "recall";
             /** Learning Date */
             learning_date: string;
             /**
@@ -582,6 +582,8 @@ export interface components {
             first_meetings: number;
             /** Got It */
             got_it: number;
+            /** New Attempts */
+            new_attempts: number;
             /** Not Yet */
             not_yet: number;
             /** Practice Days */
@@ -878,7 +880,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "first_study" | "recall";
+            kind: "new" | "recall";
             /**
              * Mode
              * @enum {string}
@@ -963,6 +965,8 @@ export interface components {
             first_meetings: number;
             /** Got It */
             got_it: number;
+            /** New Attempts */
+            new_attempts: number;
             /** Not Yet */
             not_yet: number;
             /** Recalls */
@@ -1013,7 +1017,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "first_study" | "recall";
+            kind: "first_study" | "new" | "recall";
             /** Mime Type */
             mime_type: string;
             /**
@@ -1047,7 +1051,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "first_study" | "recall";
+            kind: "first_study" | "new" | "recall";
             /** Learning Date */
             learning_date: string;
             /** Mime Type */
@@ -1099,7 +1103,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "first_study" | "recall";
+            kind: "first_study" | "new" | "recall";
             /** Lesson Title */
             lesson_title: string;
             /**

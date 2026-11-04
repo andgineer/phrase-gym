@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
-import { importPackage as importWith } from './helpers'
+import { importPackage as importWith, revealAnswer } from './helpers'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
@@ -75,6 +75,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(counts).toHaveText('0 due · 4 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   const card = page.locator('article.practice-card')
+  await revealAnswer(page, true)
   await expect(card.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
   await card.getByRole('button', { name: 'Record a take' }).tap()
   await card.getByRole('button', { name: 'Stop recording' }).tap()
@@ -114,11 +115,11 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
   await expect(details).toContainText('Used for: small talk · progress update')
   await expect(details).toContainText('Lesson: Small talk · Source: Mobile course')
-  await expect(details).toContainText('New: not studied yet')
+  await expect(details).toContainText('New: not rated yet')
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await details.getByRole('button', { name: 'Details', exact: true }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
-  await expect(details.getByText(/ · Daily · First meeting$/)).toBeVisible()
+  await expect(details.getByText(/ · Daily · New · Cue: Asked: How is it going\?$/)).toBeVisible()
   await expect(details.getByRole('button', { name: '▶ Mine' })).toHaveCount(1)
   await details.getByRole('button', { name: '▶ Phrase' }).tap()
   await expect
@@ -174,6 +175,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
 
   await lessonChoice.selectOption({ label: 'All lessons' })
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await revealAnswer(page, true)
   await expect(card.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
 })

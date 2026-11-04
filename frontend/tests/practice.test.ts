@@ -68,7 +68,7 @@ it('ignores a late card for a superseded appearance and reconciles replayed comp
 
 it('labels progress by mode and card kind', () => {
   expect(progressLine(card('a'), progress)).toBe('Daily · 4 / 20 due')
-  expect(progressLine(card('a', { kind: 'first_study' }), progress)).toBe('Daily · 1 / 5 new')
+  expect(progressLine(card('a', { kind: 'new' }), progress)).toBe('Daily · 1 / 5 new')
 })
 
 it('completes once while saving and advances to the returned card', async () => {

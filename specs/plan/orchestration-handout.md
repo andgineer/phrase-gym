@@ -14,7 +14,7 @@ Implement the stage or checkpoint named by the user. If none is named, take the 
 4. Ask the independent reviewer for targeted re-review of substantive findings and their regressions.
 
 Use one implementer and one independent reviewer per coherent deliverable, reusing them for fixes and targeted re-review.
-Use Opus 5.5 with high effort for implementation, fixes, independent review and targeted re-review.
+Use Opus with high effort inside Claude Code, and Sol with high effort inside Codex, for implementation, fixes, independent review and targeted re-review. Keep delegated sessions in the same host as the root session.
 Supply enough context for agents with no prior conversation. Do not delegate further subagents. Implementers and fixers work on `main`; reviewers use a fresh scratch clone and do not modify the main tree.
 
 Run one session at a time; avoid competing writes and concurrent gates. After interruption, inspect agent status, Git state and outstanding checks, then resume existing work instead of duplicating it. Do not claim a running gate passed or substitute a different model after a usage limit.

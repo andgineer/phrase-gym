@@ -42,7 +42,7 @@ const ratings: Array<[Outcome, string, string]> = [
   ['easy', 'Easy', 'recalled'],
 ]
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
-const front = computed(() => props.card.kind === 'recall' && !props.card.revealed)
+const front = computed(() => !props.card.revealed)
 </script>
 
 <template>
@@ -103,39 +103,24 @@ const front = computed(() => props.card.kind === 'recall' && !props.card.reveale
           <p>{{ card.answer.detailed_explanation ?? 'No detailed explanation was prepared.' }}</p>
           <p class="purpose">Used for: {{ card.answer.usage_contexts.join(' · ') }}</p>
         </div>
-        <template v-if="card.kind === 'recall'">
-          <p>How was your answer before you saw the phrase?</p>
-          <div class="ratings">
-            <button
-              v-for="[outcome, label, style] in ratings"
-              :key="outcome"
-              :class="style"
-              :disabled="busy || requesting || processing"
-              @click="emit('complete', outcome)"
-            >
-              {{ label }}
-            </button>
-            <button
-              :disabled="busy || requesting || processing"
-              @click="emit('complete', 'skipped')"
-            >
-              Skip
-            </button>
-          </div>
-        </template>
+        <p>How was your answer before you saw the phrase?</p>
+        <div class="ratings">
+          <button
+            v-for="[outcome, label, style] in ratings"
+            :key="outcome"
+            :class="style"
+            :disabled="busy || requesting || processing"
+            @click="emit('complete', outcome)"
+          >
+            {{ label }}
+          </button>
+          <button :disabled="busy || requesting || processing" @click="emit('complete', 'skipped')">
+            Skip
+          </button>
+        </div>
         <button class="danger delete-card" :disabled="busy || audioBusy" @click="emit('remove')">
           Delete
         </button>
-        <template v-if="card.kind === 'first_study'">
-          <p class="muted">First meeting · no rating</p>
-          <button
-            class="primary study-next"
-            :disabled="busy || requesting || processing"
-            @click="emit('complete', 'studied')"
-          >
-            Next
-          </button>
-        </template>
       </template>
       <p v-if="capturing" role="status">Tap the microphone again to finish your take.</p>
       <p v-if="requesting" role="status">Waiting for microphone access…</p>

@@ -22,7 +22,7 @@ def ids(practice: Practice) -> list[str]:
 
 
 def completed_today(practice: Practice, due: int, new: int) -> None:
-    rows = [("recall", "got_it")] * due + [("first_study", None)] * new
+    rows = [("recall", "got_it")] * due + [("new", None)] * new
     with practice.database.write() as connection:
         connection.executemany(
             "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, completed_at, "
@@ -116,7 +116,7 @@ def test_extra_opens_a_fresh_traversal_that_offers_skipped_due_again(practice: P
 
 def test_extra_never_cycles_not_due_phrases_and_explains_immediately(practice: Practice) -> None:
     publish(practice.client, many(2))
-    practice.study_all_new()
+    practice.rate_all_new()
     result = practice.extra()["state"]
     assert result["card"] is None
     assert result["message"] == "Nothing waiting today. Next due: 2026-10-29."
@@ -128,13 +128,13 @@ def test_extra_continues_after_the_base_limits_and_ends_with_a_message(
 ) -> None:
     publish(practice.client, many(4))
     practice.set_limits(due=1, new=1)
-    practice.study_all_new()
+    practice.rate_all_new()
     state = practice.extra()["state"]
     studied = []
     while state["card"]:
         assert state["card"]["mode"] == "extra"
         studied.append(state["card"]["phrase_id"])
-        state = practice.finish(state["card"], "studied")["state"]
+        state = practice.rate(state["card"], "not_yet")["state"]
     assert len(studied) == 1
     assert state["progress"]["new_allowance"] == 2
     assert state["message"] == "Today's Extra practice is complete."
@@ -159,12 +159,12 @@ def test_lost_extra_response_retry_never_extends_again_or_replaces_newer_views(
 ) -> None:
     publish(practice.client, many(12))
     practice.set_limits(due=20, new=2)
-    practice.study_all_new()
+    practice.rate_all_new()
     operation = str(uuid4())
     original = practice.extra(operation_id=operation)
     assert targets(original) == (20, 4)
-    state = practice.finish(original["state"]["card"], "studied")["state"]
-    practice.finish(state["card"], "studied")
+    state = practice.rate(original["state"]["card"], "not_yet")["state"]
+    practice.rate(state["card"], "not_yet")
     replay = practice.extra(operation_id=operation)
     assert replay == {"receipt": original["receipt"], "replayed": True, "state": None}
     assert practice.daily()["progress"]["new_allowance"] == 4
@@ -193,7 +193,7 @@ def test_changed_payload_or_another_action_under_one_id_conflicts(practice: Prac
     card = practice.extra(operation_id=operation)["state"]["card"]
     assert practice.press_extra(lesson_id, operation).status_code == 409
     completion = str(uuid4())
-    practice.finish(card, "studied", completion)
+    practice.rate(card, "not_yet", completion)
     assert practice.press_extra(operation_id=completion).status_code == 409
     assert practice.complete(practice.card(), "studied", operation).status_code == 409
     assert practice.press_extra("missing-lesson").status_code == 404

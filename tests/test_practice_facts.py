@@ -25,8 +25,8 @@ def facts(practice: Practice) -> dict[str, Any]:
 
 
 ZERO_TOTALS = dict.fromkeys(
-    ["completions", "first_meetings", "recalls", "skipped", "got_it", "effort", "not_yet"]
-    + ["easy", "recordings"],
+    ["completions", "new_attempts", "recalls", "skipped", "got_it", "effort", "not_yet"]
+    + ["easy", "recordings", "first_meetings"],
     0,
 )
 
@@ -87,13 +87,13 @@ def test_fresh_library_has_no_facts_and_nothing_waiting(practice: Practice) -> N
 
 def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice) -> None:
     publish(practice.client, many(6))
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     state = practice.daily()
     for outcome in ["got_it", "effort", "not_yet", "skipped", "got_it"]:
         state = rate(practice, state["card"], outcome)["state"]
-    assert state["card"]["kind"] == "first_study"
-    practice.finish(state["card"], "studied")
+    assert state["card"]["kind"] == "new"
+    practice.rate(state["card"], "not_yet")
     extra = practice.extra()["state"]
     assert extra["card"]["kind"] == "recall"
     rate(practice, extra["card"], "got_it")
@@ -101,24 +101,26 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
     rate(practice, practice.practise(phrase_id), "effort")
     assert facts(practice)["today"] == {
         "completions": 8,
-        "first_meetings": 1,
+        "new_attempts": 1,
+        "first_meetings": 0,
         "recalls": 6,
         "skipped": 1,
         "easy": 0,
         "got_it": 3,
         "effort": 2,
-        "not_yet": 1,
+        "not_yet": 2,
         "recordings": 0,
     }
     assert facts(practice)["work"] == {
         "completions": 13,
-        "first_meetings": 6,
+        "new_attempts": 6,
+        "first_meetings": 0,
         "recalls": 6,
         "skipped": 1,
         "easy": 0,
         "got_it": 3,
         "effort": 2,
-        "not_yet": 1,
+        "not_yet": 7,
         "recordings": 0,
         "practice_days": 2,
     }
@@ -128,7 +130,7 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
 
 def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Practice) -> None:
     publish(practice.client, many(5))
-    practice.study_all_new()
+    practice.rate_all_new()
     first = studied(practice, "2026-10-28", limit=2)
     assert [item["text"] for item in first["items"]] == [
         "Complete phrase number 0.",
@@ -140,8 +142,8 @@ def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Pr
         "text": "Complete phrase number 0.",
         "lesson_title": "Meetings",
         "mode": "daily",
-        "kind": "first_study",
-        "rating": None,
+        "kind": "new",
+        "rating": "not_yet",
         "skipped": False,
     }
     assert first["next_offset"] == 2
@@ -158,7 +160,7 @@ def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
     publish(practice.client, many(2))
     card = practice.card()
     upload_take(practice.client, card, "deleted-take-0001", captured_at=practice.now.isoformat())
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
     assert facts(practice)["today"]["recordings"] == 1
     assert practice.client.delete(f"/api/phrases/{card['phrase_id']}").status_code == 200
     found = facts(practice)
@@ -166,7 +168,8 @@ def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
     assert found["work"] == {
         **ZERO_TOTALS,
         "completions": 1,
-        "first_meetings": 1,
+        "new_attempts": 1,
+        "not_yet": 1,
         "practice_days": 1,
     }
     assert found["streak"]["current"] == 1
@@ -177,34 +180,34 @@ def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
 
 def test_extra_and_completion_retries_do_not_duplicate_counts(practice: Practice) -> None:
     publish(practice.client, many(8))
-    practice.study_all_new()
+    practice.rate_all_new()
     operation = str(uuid4())
-    assert practice.extra(operation_id=operation)["state"]["card"]["kind"] == "first_study"
+    assert practice.extra(operation_id=operation)["state"]["card"]["kind"] == "new"
     assert practice.extra(operation_id=operation)["replayed"] is True
     practice.extra()
     card = practice.daily()["card"]
     completion = str(uuid4())
-    practice.finish(card, "studied", completion)
-    assert practice.finish(card, "studied", completion)["replayed"] is True
+    practice.rate(card, "not_yet", completion)
+    assert practice.finish(card, "not_yet", completion)["replayed"] is True
     today = facts(practice)["today"]
-    assert (today["completions"], today["first_meetings"]) == (6, 6)
+    assert (today["completions"], today["new_attempts"]) == (6, 6)
     assert len(studied(practice, "2026-10-28")["items"]) == 6
 
 
 def test_live_limit_increase_continues_the_same_daily_entry(practice: Practice) -> None:
     publish(practice.client, many(4))
     practice.set_limits(20, 1)
-    state = practice.finish(practice.card(), "studied")["state"]
+    state = practice.rate(practice.card(), "not_yet")["state"]
     assert state["card"] is None and state["message"] == "Today's Daily practice is complete."
     practice.set_limits(20, 2)
-    state = practice.finish(practice.card(), "studied")["state"]
+    state = practice.rate(practice.card(), "not_yet")["state"]
     assert state["card"] is None
-    assert facts(practice)["today"]["first_meetings"] == 2
+    assert facts(practice)["today"]["new_attempts"] == 2
 
 
 def test_new_eligible_phrase_continues_the_same_daily_entry(practice: Practice) -> None:
     publish(practice.client, many(1))
-    state = practice.finish(practice.card(), "studied")["state"]
+    state = practice.rate(practice.card(), "not_yet")["state"]
     assert state["card"] is None
     assert state["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
     later = make_package(
@@ -214,11 +217,11 @@ def test_new_eligible_phrase_continues_the_same_daily_entry(practice: Practice) 
     )
     publish(practice.client, later)
     card = practice.card()
-    assert card["kind"] == "first_study" and card["mode"] == "daily"
+    assert card["kind"] == "new" and card["mode"] == "daily"
     assert practice.phrase(card["phrase_id"])["text"] == "Complete phrase number 9."
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
     today = facts(practice)["today"]
-    assert (today["completions"], today["first_meetings"]) == (2, 2)
+    assert (today["completions"], today["new_attempts"]) == (2, 2)
     assert [item["lesson_title"] for item in studied(practice, "2026-10-28")["items"]] == [
         "Meetings",
         "Later",
@@ -251,7 +254,7 @@ def test_streak_ends_yesterday_until_first_completion_and_resets_after_a_gap(
     current, best, recent = streak(practice)
     assert (current, best) == (2, 3)
     assert recent == [True, True, True, False, True, True, False]
-    practice.finish(practice.card(), "studied")
+    practice.rate(practice.card(), "not_yet")
     assert streak(practice)[:2] == (3, 3)
     practice.later(days=1)
     assert streak(practice)[:2] == (3, 3)
@@ -264,7 +267,7 @@ def test_streak_ends_yesterday_until_first_completion_and_resets_after_a_gap(
 
 def test_reveal_open_and_abandon_do_not_count_a_day(practice: Practice) -> None:
     publish(practice.client, many(2))
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     card = practice.card()
     practice.choose("hint", card)
@@ -279,7 +282,7 @@ def test_reveal_open_and_abandon_do_not_count_a_day(practice: Practice) -> None:
 def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None:
     publish(practice.client, many(2))
     practice.now = datetime(2026, 10, 28, 22, 30, tzinfo=UTC)
-    practice.finish(practice.card(), "studied")
+    practice.rate(practice.card(), "not_yet")
     assert practice.log()[0]["learning_date"] == "2026-10-28"
     settings = practice.client.get("/api/settings").json()
     settings["learning_timezone"] = "Asia/Tokyo"
@@ -291,7 +294,7 @@ def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None
     assert [item["text"] for item in studied(practice, "2026-10-28")["items"]] == [
         "Complete phrase number 0.",
     ]
-    practice.finish(practice.card(), "studied")
+    practice.rate(practice.card(), "not_yet")
     found = facts(practice)
     assert found["today"]["completions"] == 1 and found["streak"]["current"] == 2
 
@@ -312,7 +315,7 @@ def test_library_splits_phrases_into_due_now_later_and_new(practice: Practice) -
     publish(practice.client, many(4))
     assert library(practice) == {"due_count": 0, "later_count": 0, "new_count": 4}
     practice.set_limits(1, 2)
-    practice.study_all_new()
+    practice.rate_all_new()
     assert library(practice) == {"due_count": 0, "later_count": 2, "new_count": 2}
     practice.later(days=1)
     assert library(practice) == {"due_count": 2, "later_count": 0, "new_count": 2}
@@ -325,10 +328,11 @@ def test_long_term_memory_counts_phrases_whose_fsrs_stability_reaches_21_days(
     practice: Practice,
 ) -> None:
     publish(practice.client, many(3))
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
-    rate(practice, practice.card(), "got_it")
-    [rated] = practice.rows("SELECT id FROM phrases WHERE fsrs_json IS NOT NULL")
+    card = practice.card()
+    rate(practice, card, "got_it")
+    rated = {"id": card["phrase_id"]}
     stability = practice.rows(
         "SELECT json_extract(fsrs_json, '$.stability') AS stability FROM phrases WHERE id=?",
         rated["id"],

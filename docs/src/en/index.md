@@ -4,8 +4,9 @@ Phrase Gym is a local Python application with a browser interface for studying u
 phrases and keeping private recordings. Import a prepared phrase package, listen to its reference
 audio, record optional takes and replay them after reloading the app.
 
-**Daily** offers due recall and new phrases within daily limits. First study is ungraded; on later
-learning days the app offers spoken recall with an honest self-rating and a scheduled return.
+**Daily** offers due recall and new phrases within daily limits. Every phrase starts with its answer hidden,
+including a new phrase. Reveal and rate the attempt; an unknown answer is **Again**. The first
+rating starts its schedule, and later learning days offer due recall.
 **Extra** extends today's limits for another pass without erasing completed practice. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
 return date. The Library finds phrases by lesson or meaning, shows their details and saved

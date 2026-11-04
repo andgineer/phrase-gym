@@ -8,7 +8,8 @@ from phrase_gym.server.import_contracts import Cue, StrictModel
 PAGE_LIMIT = 100
 MAX_DAILY_LIMIT = 500
 PracticeMode = Literal["daily", "extra", "practice"]
-CardKind = Literal["first_study", "recall"]
+ActiveCardKind = Literal["new", "recall"]
+CardKind = Literal["first_study", "new", "recall"]
 # Take identities become file names: no separators or dots, and lowercase so that IDs differing
 # only by case cannot share a file on case-insensitive filesystems.
 STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"

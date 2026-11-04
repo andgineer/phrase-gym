@@ -42,3 +42,18 @@ export async function savedTakes(page: Page, text: string) {
   const id = await phraseId(page, text)
   return (await (await page.request.get(`/api/phrases/${id}/recordings?limit=100`)).json()).items
 }
+
+export async function revealAnswer(page: Page, tap = false) {
+  const show = page.getByRole('button', { name: 'Show', exact: true })
+  const answer = page.getByTestId('practice-phrase')
+  await expect(show.or(answer)).toBeVisible()
+  if (await show.count()) await (tap ? show.tap() : show.click())
+}
+
+export async function rateNew(page: Page, tap = false, wait = true) {
+  await revealAnswer(page, tap)
+  const answer = page.getByTestId('practice-phrase')
+  const again = page.getByRole('button', { name: 'Again', exact: true })
+  await (tap ? again.tap() : again.click())
+  if (wait) await expect(answer).toHaveCount(0)
+}

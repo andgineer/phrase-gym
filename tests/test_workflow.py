@@ -27,7 +27,7 @@ def test_study_recordings_and_restart(
         reference = next((tmp_path / "references").iterdir())
         assert stat.S_IMODE(reference.stat().st_mode) == 0o600
     practice = Practice(client)
-    card = practice.card()
+    card = practice.reveal(practice.card())
     assert card["answer"]["text"] == "Complete phrase number 1."
     phrase_id = card["phrase_id"]
     audio = b"final-encoder-tail"
@@ -37,7 +37,7 @@ def test_study_recordings_and_restart(
         "phrase_id": phrase_id,
         "view_token": card["view_token"],
         "mode": "daily",
-        "kind": "first_study",
+        "kind": "new",
         "captured_at": "2026-10-25T10:00:00Z",
         "mime_type": "audio/webm;codecs=opus",
         "duration_ms": 1200,
@@ -56,19 +56,19 @@ def test_study_recordings_and_restart(
         saved = tmp_path / "recordings" / phrase_id / recording_id
         assert stat.S_IMODE(saved.parent.stat().st_mode) == 0o700
         assert stat.S_IMODE(saved.stat().st_mode) == 0o600
-    completed = practice.finish(card, "studied")
-    assert completed["receipt"]["fsrs_updated"] is False
+    completed = practice.rate(card, "not_yet")
+    assert completed["receipt"]["fsrs_updated"] is True
 
     monkeypatch.setenv("PHRASE_GYM_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("PHRASE_GYM_FAKE_TTS", "1")
     with TestClient(create_app()) as restarted:
         assert restarted.get(f"/api/recordings/{recording_id}/audio").content == audio
         next_card = Practice(restarted, practice.now).card()
-        assert next_card["answer"]["text"] == "Complete phrase number 2."
+        assert next_card["answer"] is None and next_card["cue"]
         history = restarted.get(f"/api/phrases/{phrase_id}/recordings").json()
         assert [item["id"] for item in history["items"]] == [recording_id]
         assert history["items"][0]["mode"] == "daily"
-        assert history["items"][0]["kind"] == "first_study"
+        assert history["items"][0]["kind"] == "new"
         assert history["items"][0]["answer"] == "Complete phrase number 1."
         assert history["items"][0]["cue"] is None
 

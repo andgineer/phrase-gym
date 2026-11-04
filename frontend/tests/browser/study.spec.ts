@@ -2,6 +2,8 @@ import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import {
   awaitAdded,
+  rateNew,
+  revealAnswer,
   importPackage,
   importStatus,
   phraseId,
@@ -9,8 +11,10 @@ import {
   savedTakes,
 } from './helpers'
 
-const openDaily = (page: import('@playwright/test').Page) =>
-  page.getByRole('button', { name: 'Daily', exact: true }).click()
+async function openDaily(page: import('@playwright/test').Page, reveal = true) {
+  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  if (reveal) await revealAnswer(page)
+}
 
 const cards = Array.from({ length: 5 }, (_, index) => ({
   item_id: `meeting-${index + 1}`,
@@ -234,11 +238,11 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       ),
     )
     .toBeGreaterThan(0)
-  await page.getByRole('button', { name: 'Next' }).click()
+  await rateNew(page)
   await expect(page.getByText(/^Today's Daily practice is complete\./)).toBeVisible()
 })
 
-test('imports, retries, studies, and retains complete takes', async ({ page }) => {
+test('imports, retries, rates, and retains complete takes', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('Add your first phrase batch')).toBeVisible()
   await expect(page.locator('article.study')).toHaveCount(0)
@@ -405,15 +409,17 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
     await route.continue()
   })
   for (const [index, card] of cards.entries()) {
+    await revealAnswer(page)
     await expect(
       page.locator('article.study').getByRole('heading', { name: card.text }),
     ).toBeVisible()
-    await expect(page.getByText('First meeting · no rating')).toBeVisible()
-    await page.getByRole('button', { name: 'Next' }).click()
+    await expect(page.getByText('How was your answer before you saw the phrase?')).toBeVisible()
+    await rateNew(page, false, index !== 0)
     if (index === 0) {
       await expect.poll(() => completions).toBe(1)
-      await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+      await expect(page.getByRole('button', { name: 'Again' })).toBeDisabled()
       releaseCompletion()
+      await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
     }
   }
   await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
@@ -426,7 +432,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.request.post(`/__test/clock/${tomorrow}`)
   await page.reload()
   await expect(page.locator('article.study')).toHaveCount(0)
-  await openDaily(page)
+  await openDaily(page, false)
   await expect(page.getByText('Use the useful expression in situation 1.')).toBeVisible()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await page.getByRole('button', { name: 'Show' }).click()
@@ -448,7 +454,7 @@ test('imports, retries, studies, and retains complete takes', async ({ page }) =
   await page.getByLabel('Find a phrase').fill('started')
   await expect(page.getByRole('button', { name: /^Open details/ })).toHaveCount(1)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
-  await openDaily(page)
+  await openDaily(page, false)
   await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
 })

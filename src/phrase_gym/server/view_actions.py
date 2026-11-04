@@ -49,8 +49,6 @@ class ViewActions:
         column, values_column = CHOICES[kind]
         with self.database.write() as connection:
             view = require_view(connection, learning_day(connection, self.clock()), operation)
-            if view["kind"] != "recall":
-                raise PracticeConflictError("Cues and hints are offered only for recall")
             phrase = view_phrase(connection, view)
             values = json.loads(phrase[values_column])
             history = json.loads(view["operations_json"])

@@ -21,7 +21,7 @@ def test_stopped_directory_copy_restores_practice_references_and_takes(
     take = b"complete saved take"
     recording_id = str(uuid4())
     assert upload_take(client, card, recording_id, take).status_code == 200
-    practice.finish(card, "studied")
+    practice.rate(card, "not_yet")
     practice.later(days=1)
     recall = practice.card()
     practice.reveal(recall)
@@ -39,7 +39,7 @@ def test_stopped_directory_copy_restores_practice_references_and_takes(
         assert row["due_at"] and row["last_review"]
         assert Path(row["reference_path"]).is_file()
         log = connection.execute("SELECT kind FROM practice_log ORDER BY completed_at").fetchall()
-        assert [entry["kind"] for entry in log] == ["first_study", "recall"]
+        assert [entry["kind"] for entry in log] == ["new", "recall"]
         saved = connection.execute(
             "SELECT path FROM recordings WHERE id=?", (recording_id,)
         ).fetchone()

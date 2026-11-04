@@ -51,7 +51,7 @@ const paths = () => vi.mocked(api).mock.calls.map(([path]) => path)
 
 it('labels Extra progress and shows Practice alone', () => {
   expect(progressLine(card('a'), progress)).toBe('Extra · 21 / 40 due')
-  expect(progressLine(card('a', { kind: 'first_study' }), progress)).toBe('Extra · 6 / 10 new')
+  expect(progressLine(card('a', { kind: 'new' }), progress)).toBe('Extra · 6 / 10 new')
   expect(progressLine(card('a', { mode: 'practice' }), progress)).toBe('Practice')
 })
 

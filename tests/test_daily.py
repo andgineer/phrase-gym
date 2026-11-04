@@ -23,30 +23,34 @@ def test_empty_library_offers_no_card_and_page_load_starts_nothing(practice: Pra
     assert "/api/study/current" not in practice.client.get("/openapi.json").json()["paths"]
 
 
-def test_first_study_shows_answer_and_next_schedules_tomorrow(
+def test_new_phrase_hides_answer_and_first_grade_initializes_schedule(
     practice: Practice, package: Package
 ) -> None:
     publish(practice.client, package)
     card = practice.card()
-    assert card["kind"] == "first_study" and card["mode"] == "daily" and card["revealed"]
-    assert card["cue"] is None and card["hint"] is None
+    assert card["kind"] == "new" and card["mode"] == "daily" and not card["revealed"]
+    assert card["cue"] and card["hint"] is None
+    assert card["answer"] is None and card["recordings"] == []
+    assert practice.complete(card, "not_yet").status_code == 409
+    assert practice.complete(card, "studied").status_code == 409
+    card = practice.reveal(card)
     assert card["answer"]["text"] == "Complete phrase number 1."
     assert card["answer"]["reference_url"].endswith("/reference")
-    result = practice.finish(card, "studied")
+    result = practice.rate(card, "not_yet")
     assert result["receipt"] | {"completion_id": ""} == {
         "completion_id": "",
         "phrase_id": card["phrase_id"],
         "learning_date": "2026-10-28",
         "mode": "daily",
-        "kind": "first_study",
-        "rating": None,
+        "kind": "new",
+        "rating": "not_yet",
         "skipped": False,
-        "fsrs_updated": False,
+        "fsrs_updated": True,
     }
     studied = practice.phrase(card["phrase_id"])
     assert studied["studied_at"] == practice.now.isoformat()
-    assert studied["due_at"] == "2026-10-28T23:00:00+00:00"
-    assert studied["last_review"] is None and studied["fsrs_json"] is None
+    assert studied["due_at"] >= "2026-10-28T23:00:00+00:00"
+    assert studied["last_review"] == practice.now.isoformat() and studied["fsrs_json"]
     assert result["state"]["card"]["phrase_id"] != card["phrase_id"]
     assert result["state"]["progress"]["new_completed"] == 1
 
@@ -60,14 +64,14 @@ def test_due_and_new_limits_are_independent(practice: Practice) -> None:
     while state["card"]:
         card = state["card"]
         kinds.append(card["kind"])
-        if card["kind"] == "first_study":
-            state = practice.finish(card, "studied")["state"]
+        if card["kind"] == "new":
+            state = practice.rate(card, "not_yet")["state"]
         elif len(kinds) == 3:
             state = practice.finish(card, "skipped")["state"]
         else:
             practice.reveal(card)
             state = practice.finish(card, "got_it")["state"]
-    assert kinds == ["recall"] * 20 + ["first_study"] * 5
+    assert kinds == ["recall"] * 20 + ["new"] * 5
     assert state["progress"] == {
         "due_completed": 20,
         "due_allowance": 20,
@@ -86,19 +90,19 @@ def test_exhausted_due_allowance_still_offers_new_phrases(practice: Practice) ->
     first = practice.card()
     assert first["kind"] == "recall"
     second = practice.finish(first, "skipped")["state"]["card"]
-    assert second["kind"] == "first_study" and second["phrase_id"] == ids[2]
+    assert second["kind"] == "new" and second["phrase_id"] == ids[2]
 
 
 def test_live_limit_increase_after_apparent_exhaustion(practice: Practice) -> None:
     publish(practice.client, many(8))
-    practice.study_all_new()
+    practice.rate_all_new()
     done = practice.daily()
     assert done["card"] is None and done["message"] == "Today's Daily practice is complete."
     practice.set_limits(due=20, new=7)
     more = practice.daily()
-    assert more["card"]["kind"] == "first_study"
+    assert more["card"]["kind"] == "new"
     assert more["progress"]["new_allowance"] == 7
-    practice.study_all_new()
+    practice.rate_all_new()
     assert len(practice.log()) == 7
     practice.set_limits(due=20, new=3)
     assert practice.daily()["card"] is None
@@ -108,7 +112,7 @@ def test_stored_extra_target_extends_but_zero_setting_disables(practice: Practic
     publish(practice.client, many(9))
     with practice.database.write() as connection:
         connection.execute("INSERT INTO extra_targets VALUES ('2026-10-28', 0, 7)")
-    practice.study_all_new()
+    practice.rate_all_new()
     assert len(practice.log()) == 7
     practice.set_limits(due=20, new=0)
     state = practice.daily()
@@ -157,9 +161,9 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
     current = practice.card(lessons["First"])
     resumed = practice.card(lessons["Second"])
     assert resumed == current
-    following = practice.finish(current, "studied")["state"]["card"]
+    following = practice.rate(current, "not_yet")["state"]["card"]
     assert practice.phrase(following["phrase_id"])["item_id"] == "meeting-3"
-    after = practice.finish(following, "studied")["state"]
+    after = practice.rate(following, "not_yet")["state"]
     assert after["card"] is None
     assert after["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
     assert (
@@ -173,7 +177,7 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
 def test_nothing_waiting_and_empty_lesson_messages(practice: Practice) -> None:
     publish(practice.client, make_package(lessons=[lesson("only", "Only", [phrase(1)])]))
     lesson_id = practice.client.get("/api/lessons").json()["items"][0]["id"]
-    practice.study_all_new()
+    practice.rate_all_new()
     practice.later(days=1)
     waiting = practice.card()
     practice.reveal(waiting)
@@ -193,8 +197,10 @@ def test_timezone_change_closes_the_old_view_and_keeps_first_recall_later(
     package["lessons"] = [lesson("unit-1", "Meetings", [phrase(1)])]
     publish(practice.client, package)
     practice.now = datetime(2026, 10, 28, 22, 30, tzinfo=UTC)
-    practice.finish(practice.card(), "studied")
+    practice.rate(practice.card(), "not_yet")
     assert practice.log()[0]["learning_date"] == "2026-10-28"
+    with practice.database.write() as connection:
+        connection.execute("UPDATE phrases SET due_at='2026-10-28T23:00:00+00:00'")
     practice.now = datetime(2026, 10, 28, 23, 5, tzinfo=UTC)
     belgrade = practice.card()
     assert belgrade["kind"] == "recall"
@@ -210,3 +216,26 @@ def test_timezone_change_closes_the_old_view_and_keeps_first_recall_later(
     later = practice.card()
     assert later["kind"] == "recall" and later["view_token"] != belgrade["view_token"]
     assert practice.daily()["progress"]["new_completed"] == 0
+
+
+def test_skipping_new_phrases_consumes_new_slots_without_initializing_or_looping(
+    practice: Practice,
+) -> None:
+    publish(practice.client, many(2))
+    state = practice.daily()
+    skipped = []
+    while state["card"]:
+        card = state["card"]
+        assert card["kind"] == "new" and card["phrase_id"] not in skipped
+        skipped.append(card["phrase_id"])
+        result = practice.finish(card, "skipped")
+        assert result["receipt"]["skipped"] and not result["receipt"]["fsrs_updated"]
+        phrase_row = practice.phrase(card["phrase_id"])
+        assert all(
+            phrase_row[key] is None for key in ("fsrs_json", "studied_at", "last_review", "due_at")
+        )
+        state = result["state"]
+    assert len(skipped) == state["progress"]["new_completed"] == 2
+    assert state["progress"]["due_completed"] == 0
+    assert practice.daily()["card"] is None
+    assert practice.extra()["state"]["card"]["phrase_id"] == skipped[0]

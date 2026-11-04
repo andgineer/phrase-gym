@@ -95,10 +95,14 @@ class Practice:
         assert response.status_code == 200, response.text
         return response.json()
 
-    def study_all_new(self) -> None:
+    def rate(self, card: Card, outcome: str, completion_id: str | None = None) -> dict[str, Any]:
+        self.reveal(card)
+        return self.finish(card, outcome, completion_id)
+
+    def rate_all_new(self) -> None:
         state = self.daily()
-        while state["card"] and state["card"]["kind"] == "first_study":
-            state = self.finish(state["card"], "studied")["state"]
+        while state["card"] and state["card"]["kind"] == "new":
+            state = self.rate(state["card"], "not_yet")["state"]
 
     def rows(self, sql: str, *parameters: object) -> list[dict[str, Any]]:
         with self.database.read() as connection:

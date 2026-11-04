@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import { card, details, modeLine, openDetails } from './extra-package'
-import { importPackage, playedMedia } from './helpers'
+import { rateNew, revealAnswer, importPackage, playedMedia } from './helpers'
 
 const texts = [
   'So far, so good.',
@@ -64,7 +64,11 @@ const latePackage = {
 latePackage.lessons[0]!.phrases = [{ ...factsPackage.lessons[0]!.phrases[0]!, text: 'Late one.' }]
 const facts = (page: Page) => page.getByRole('region', { name: 'Practice facts' })
 const fact = (page: Page, id: string) => page.getByTestId(id)
-const press = (page: Page, name: string) => page.getByRole('button', { name, exact: true }).click()
+async function press(page: Page, name: string) {
+  await page.getByRole('button', { name, exact: true }).click()
+  if (['Again', 'Hard', 'Good', 'Easy', 'Skip'].includes(name))
+    await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+}
 
 async function setLimits(page: Page, due: number, fresh: number) {
   const settings = await (await page.request.get('/api/settings')).json()
@@ -75,8 +79,9 @@ async function setLimits(page: Page, due: number, fresh: number) {
 }
 
 async function meet(page: Page, text: string) {
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: text })).toBeVisible()
-  await press(page, 'Next')
+  await rateNew(page)
 }
 
 async function expectStudied(item: Locator, text: string, outcome: string) {
@@ -128,7 +133,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(page.getByRole('list', { name: 'Last seven days' })).toHaveCount(0)
   await expect(fact(page, 'progress-title')).toHaveText('Progress — 1 day')
   await expect(fact(page, 'progress')).toHaveText('1 new phrase')
-  await expect(fact(page, 'progress-ratings')).toHaveCount(0)
+  await expect(fact(page, 'progress-ratings')).toHaveText('1 Again')
   await expect(fact(page, 'total-title')).toHaveText('Total — 6 phrases')
   await expect(fact(page, 'library')).toHaveText('1 later · 5 new')
   await expect(fact(page, 'long-term')).toHaveCount(0)
@@ -158,6 +163,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   })
   await press(page, 'Extra')
   await expect(modeLine(page)).toHaveText('Extra · 3 / 4 new')
+  await revealAnswer(page)
   await card(page).getByRole('button', { name: 'Record a take' }).click()
   await expect(card(page).getByRole('button', { name: 'Stop recording' })).toBeVisible()
   await meet(page, texts[2])
@@ -182,8 +188,8 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await press(page, 'See today’s phrases')
   const studied = facts(page).getByRole('list', { name: 'Today’s phrases' }).getByRole('listitem')
   await expect(studied).toHaveCount(5)
-  await expectStudied(studied.first(), texts[0], 'first meeting · Daily · Small talk')
-  await expectStudied(studied.nth(2), texts[2], 'first meeting · Extra · Small talk')
+  await expectStudied(studied.first(), texts[0], 'Again · Daily · Small talk')
+  await expectStudied(studied.nth(2), texts[2], 'Again · Extra · Small talk')
   await facts(page).getByRole('button', { name: 'More', exact: true }).click()
   await expect(studied).toHaveCount(6)
   await expect(facts(page).getByRole('button', { name: 'More', exact: true })).toHaveCount(0)
@@ -196,7 +202,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
     .click()
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await press(page, 'See today’s phrases')
-  await expectStudied(studied.first(), texts[0], 'first meeting · Daily · Small talk · deleted')
+  await expectStudied(studied.first(), texts[0], 'Again · Daily · Small talk · deleted')
   await expect(fact(page, 'today-title')).toHaveText('Today — 6 new')
   await expect(fact(page, 'progress')).toHaveText('6 new phrases')
   await expect(fact(page, 'total-title')).toHaveText('Total — 5 phrases')
@@ -205,7 +211,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await openDetails(page, texts[2])
   const history = details(page).locator('.take-history li')
   await expect(history).toHaveCount(1)
-  await expect(history).toContainText('Extra · First meeting')
+  await expect(history).toContainText('Extra · New')
   const before = (await playedMedia(page)).length
   await history.getByRole('button', { name: '▶ Mine' }).click()
   await expect
@@ -237,7 +243,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await meet(page, texts[1])
   await expect(fact(page, 'streak')).toHaveText('🔥 2-day practice streak')
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 recall / 1 new')
-  await expect(fact(page, 'today-ratings')).toHaveText('1 Good')
+  await expect(fact(page, 'today-ratings')).toHaveText('1 Good · 1 Again')
 
   await press(page, 'Extra')
   await meet(page, texts[2])
@@ -254,7 +260,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(fact(page, 'best-streak')).toHaveText('Personal best: 2 days')
   await expect(fact(page, 'progress-title')).toHaveText('Progress — 2 days')
   await expect(fact(page, 'progress')).toHaveText('1 recall · 3 new phrases')
-  await expect(fact(page, 'progress-ratings')).toHaveText('1 Good')
+  await expect(fact(page, 'progress-ratings')).toHaveText('1 Good · 3 Again')
   await expect(fact(page, 'library')).toHaveText('3 due now · 3 new')
   await press(page, 'Daily')
   await expect(modeLine(page)).toHaveText('Daily · 1 / 1 due')
@@ -305,7 +311,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await press(page, 'See today’s phrases')
   await expect(studied).toHaveCount(2)
   await expectStudied(studied.first(), texts[0], 'Good · Daily · Small talk')
-  await expectStudied(studied.last(), texts[1], 'first meeting · Daily · Small talk')
+  await expectStudied(studied.last(), texts[1], 'Again · Daily · Small talk')
 })
 
 test('returning on the same day keeps loaded pages and a later lesson; a new day resets them', async ({
@@ -323,7 +329,7 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   await press(page, 'Daily')
   for (let step = 1; step <= 6; step++) {
     await expect(modeLine(page)).toHaveText(`Daily · ${step} / 6 new`)
-    await press(page, 'Next')
+    await rateNew(page)
   }
   await expect(fact(page, 'today-title')).toHaveText('Today — 6 new')
   await press(page, 'See today’s phrases')
@@ -380,11 +386,9 @@ test('a Daily finished just after midnight shows its own completion message', as
 
   await setClock(page, 14 + 10 / 60)
   await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText('Daily · 1 / 1 due')
-  await card(page).getByRole('button', { name: 'Show' }).click()
-  await press(page, 'Good')
+  await expect(modeLine(page)).toHaveText('Daily · 1 / 1 new')
   await meet(page, texts[1])
-  await expect(fact(page, 'today-title')).toHaveText('Today — 1 recall / 1 new')
+  await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
   await expect(message).toBeVisible()
   await expect(fact(page, 'streak')).toHaveText('🔥 2-day practice streak')
 })
@@ -394,9 +398,10 @@ test('the completion message stays visible when the entry facts cannot load', as
   await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
   await press(page, 'Daily')
+  await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   await page.route('**/api/practice/facts', (route) => route.fulfill({ status: 503, json: {} }))
-  await press(page, 'Next')
+  await rateNew(page)
   await expect(facts(page).getByRole('alert')).toHaveText('Error: Request failed (503)')
   await expect(page.getByText("Today's Daily practice is complete.", { exact: true })).toBeVisible()
 })
@@ -409,8 +414,9 @@ test.describe('mobile', () => {
     await importPackage(page, factsPackage, 6, true)
     await setLimits(page, 1, 1)
     await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+    await revealAnswer(page)
     await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
-    await page.getByRole('button', { name: 'Next', exact: true }).tap()
+    await rateNew(page, true)
     await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
     await facts(page).getByRole('button', { name: 'See today’s phrases' }).tap()
     await expect(facts(page).getByRole('listitem').last()).toContainText(texts[0])

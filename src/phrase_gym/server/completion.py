@@ -22,7 +22,7 @@ from phrase_gym.server.practice_views import (
     view_mode,
     view_phrase,
 )
-from phrase_gym.server.scheduling import graded_today, learning_day, next_day_start, schedule
+from phrase_gym.server.scheduling import graded_today, learning_day, schedule
 from phrase_gym.server.storage import Database
 
 
@@ -33,17 +33,8 @@ def _record_outcome(
     outcome: Outcome,
     now: datetime,
 ) -> tuple[Rating | None, bool, bool]:
-    if view["kind"] == "first_study":
-        if outcome != "studied":
-            raise PracticeConflictError("A first meeting completes with Next, without a rating")
-        # First study schedules tomorrow's recall but is not a review.
-        connection.execute(
-            "UPDATE phrases SET studied_at=COALESCE(studied_at, ?), due_at=? WHERE id=?",
-            (now.isoformat(), next_day_start(connection, now).isoformat(), phrase["id"]),
-        )
-        return None, False, False
     if outcome == "studied":
-        raise PracticeConflictError("Recall completes with a rating or Skip")
+        raise PracticeConflictError("Practice completes with a rating or Skip")
     if outcome == "skipped":
         if view["practice"]:
             return None, True, False
@@ -59,8 +50,9 @@ def _record_outcome(
         return outcome, False, False
     fsrs_json, due = schedule(connection, phrase["fsrs_json"], outcome, now)
     connection.execute(
-        "UPDATE phrases SET fsrs_json=?, due_at=?, last_review=? WHERE id=?",
-        (fsrs_json, due, now.isoformat(), phrase["id"]),
+        "UPDATE phrases SET fsrs_json=?, due_at=?, last_review=?, "
+        "studied_at=COALESCE(studied_at, ?) WHERE id=?",
+        (fsrs_json, due, now.isoformat(), now.isoformat(), phrase["id"]),
     )
     return outcome, False, True
 

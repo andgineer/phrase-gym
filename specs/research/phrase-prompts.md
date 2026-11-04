@@ -39,7 +39,7 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 - **Boers, Demecheleer, Coxhead & Webb (2014)**, [Gauging the effects of exercises on verb–noun collocations](https://doi.org/10.1177/1362168813505389), and **Boers, Dang & Strong (2017)**, [Comparing the effectiveness of phrase-focused exercises](https://doi.org/10.1177/1362168816651464). Checked: abstract. Matching exercises taught wrong pairings despite feedback; working with intact phrases beat choosing or completing the verb.
 - **Metcalfe (2017)**, [Learning from errors](https://wesleyan.edu/ofcd/resources/OFCD%20Resource%20Docs/Learning%20from%20Errors.pdf). Checked: full text. For typical learners, errors followed by corrective feedback can help, and confidently held errors are corrected best. Limit: mostly factual and semantic material.
 
-**For us:** error effects depend on the task, prior knowledge and feedback; there is no categorical boundary between facts and phrase forms. A genuinely unfamiliar phrase benefits from study before recall; already studied material can start with an attempt. The MVP uses a brief ungraded first meeting for all imported cards to avoid inferring prior knowledge. That simplification is a product choice, not a finding that familiar phrases require restudy.
+**For us:** error effects depend on the task, prior knowledge and feedback; there is no categorical boundary between facts and phrase forms. Unfamiliar wording needs study and prompt corrective feedback; already studied material can start with an attempt. The MVP uses the same hidden-answer attempt and reveal for all imported cards, with an unknown answer rated Again. That simplification is a product choice, not a finding that guessing unfamiliar wording is always preferable to studying it first.
 
 ## Least help that still succeeds
 
@@ -55,7 +55,7 @@ No study compares translation prompts, situation prompts and partner-turn prompt
 - **Hashizaki**, [vocalization and formulaic sequence learning](https://doi.org/10.1177/13621688231224040). Checked: abstract. 32 Japanese learners. Reading collocations aloud improved recognition of form and meaning relative to silent reading, including after a week. Limit: recognition, not spoken recall.
 - **Forrin & MacLeod (2018)**, production effect, [university summary](https://uwaterloo.ca/news/news/study-finds-reading-information-aloud-yourself-improves). Checked: secondary. Reading aloud to oneself beat hearing others read and silent reading.
 
-**For us:** saying the phrase aloud belongs in the first meeting and in repair after a wrong or effortful attempt. Nothing shows that an extra say-along after every successful recall adds to memory, and it never counts as recall.
+**For us:** saying the phrase aloud belongs in an initial attempt and in supported repair after a wrong or effortful attempt. Nothing shows that an extra say-along after every successful recall adds to memory, and it never counts as recall.
 
 ## Model-prepared prompts
 

@@ -15,7 +15,11 @@ const modes: Record<Recording['mode'], string> = {
   extra: 'Extra',
   practice: 'Practice',
 }
-const kinds: Record<Recording['kind'], string> = { first_study: 'First meeting', recall: 'Recall' }
+const kinds: Record<Recording['kind'], string> = {
+  first_study: 'Historical first meeting',
+  new: 'New',
+  recall: 'Recall',
+}
 const takes = usePagedList<Recording, RecordingPage>(
   () => `/phrases/${encodeURIComponent(props.phraseId)}/recordings`,
   10,

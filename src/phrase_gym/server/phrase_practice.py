@@ -39,6 +39,6 @@ class PhrasePractice:
                 start_traversal(connection, day, "daily", None)
             # Replacing the active phrase closes any unfinished regular view ungraded while its
             # traversal keeps today's skipped phrases.
-            kind = "recall" if phrase["studied_at"] else "first_study"
+            kind = "recall" if phrase["studied_at"] else "new"
             show_phrase(connection, phrase, kind, self.rng, practice=True)
             return practice_state(connection, now, day)

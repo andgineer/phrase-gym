@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
-import { importPackage, playedMedia, savedTakes } from './helpers'
+import { rateNew, revealAnswer, importPackage, playedMedia, savedTakes } from './helpers'
 
 const cues = [
   { situation: 'Colleague asks: How is it going?' },
@@ -40,13 +40,14 @@ const dailyPackage = {
 const card = (page: Page) => page.locator('article.practice-card')
 const modeLine = (page: Page) => page.getByTestId('mode-line')
 
-async function studyBothThenReturnTomorrow(page: Page) {
+async function rateBothThenReturnTomorrow(page: Page) {
   await page.goto('/')
   await importPackage(page, dailyPackage, 2)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   for (const text of ['So far, so good.', 'Nice to meet you.']) {
+    await revealAnswer(page)
     await expect(card(page).getByRole('heading', { name: text })).toBeVisible()
-    await page.getByRole('button', { name: 'Next' }).click()
+    await rateNew(page)
   }
   await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
   const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
@@ -65,11 +66,13 @@ test('silent Daily resumes a revealed card, rates and skips with automatic advan
   await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 2 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(modeLine(page)).toHaveText('Daily · 1 / 5 new')
-  await expect(card(page).getByText('First meeting · no rating')).toBeVisible()
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+  await expect(card(page).locator('.practice-prompt')).toBeVisible()
+  await expect(card(page).getByRole('button', { name: 'Next' })).toHaveCount(0)
   await expect(card(page).getByRole('button', { name: 'Again' })).toHaveCount(0)
-  await page.getByRole('button', { name: 'Next' }).click()
+  await rateNew(page)
   await expect(modeLine(page)).toHaveText('Daily · 2 / 5 new')
-  await page.getByRole('button', { name: 'Next' }).click()
+  await rateNew(page)
   await expect(page.getByTestId('lesson-counts')).toHaveText(/^Nothing waiting today · Next due: /)
 
   const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
@@ -108,7 +111,7 @@ test('silent Daily resumes a revealed card, rates and skips with automatic advan
 test('recorded Daily keeps front and rehearsal takes and saves late uploads to their phrase', async ({
   page,
 }) => {
-  await studyBothThenReturnTomorrow(page)
+  await rateBothThenReturnTomorrow(page)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await card(page).getByRole('button', { name: 'Record a take' }).click()
@@ -150,7 +153,7 @@ test('recorded Daily keeps front and rehearsal takes and saves late uploads to t
 })
 
 test('Delete on a revealed back confirms, then advances without a grade', async ({ page }) => {
-  await studyBothThenReturnTomorrow(page)
+  await rateBothThenReturnTomorrow(page)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await card(page).getByRole('button', { name: 'Show' }).click()
   await card(page).getByRole('button', { name: 'Delete' }).click()
@@ -170,6 +173,7 @@ test.describe('mobile', () => {
     await page.goto('/')
     await importPackage(page, dailyPackage, 2, true)
     await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+    await revealAnswer(page, true)
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
     await card(page).getByRole('button', { name: 'Stop recording' }).tap()
     await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
@@ -179,10 +183,11 @@ test.describe('mobile', () => {
       .poll(async () => (await playedMedia(page)).slice(before))
       .toEqual([expect.stringMatching(/^blob:/)])
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-    await page.getByRole('button', { name: 'Next' }).tap()
+    await rateNew(page, true)
+    await revealAnswer(page)
     await expect(card(page).getByRole('heading', { name: 'Nice to meet you.' })).toBeVisible()
     const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
-    await page.getByRole('button', { name: 'Next' }).tap()
+    await rateNew(page, true)
     await page.request.post(`/__test/clock/${tomorrow}`)
     await page.getByRole('button', { name: 'Daily', exact: true }).tap()
     await card(page).getByRole('button', { name: 'Show' }).tap()
@@ -195,7 +200,7 @@ test.describe('mobile', () => {
 })
 
 test('Easy uses the fourth FSRS rating and persists in practice facts', async ({ page }) => {
-  await studyBothThenReturnTomorrow(page)
+  await rateBothThenReturnTomorrow(page)
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
   await expect(card(page).getByRole('button', { name: 'Easy', exact: true })).toHaveCount(0)
   await card(page).getByRole('button', { name: 'Show', exact: true }).click()
@@ -209,4 +214,29 @@ test('Easy uses the fourth FSRS rating and persists in practice facts', async ({
   expect(facts.work.easy).toBe(1)
   await page.reload()
   await expect(page.getByTestId('today-ratings')).toHaveText('1 Easy')
+})
+
+test('new-card Skip consumes a new slot and leaves the phrase unrated for a later pass', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await importPackage(page, dailyPackage, 2)
+  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await expect(modeLine(page)).toHaveText('Daily · 1 / 5 new')
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+  await card(page).getByRole('button', { name: 'Details' }).click()
+  await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
+  await card(page).getByRole('button', { name: 'Skip', exact: true }).click()
+  await expect(modeLine(page)).toHaveText('Daily · 2 / 5 new')
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+  await rateNew(page)
+  await expect(card(page)).toHaveCount(0)
+  const response = await page.request.get('/api/practice/facts')
+  const facts = await response.json()
+  expect(facts.today).toMatchObject({ new_attempts: 1, recalls: 0, skipped: 1, not_yet: 1 })
+  expect(facts.library).toMatchObject({ new_count: 1, later_count: 1, due_count: 0 })
+  await page.getByRole('button', { name: 'Extra', exact: true }).click()
+  await expect(modeLine(page)).toHaveText('Extra · 3 / 5 new')
+  await card(page).getByRole('button', { name: 'Show' }).click()
+  await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
 })

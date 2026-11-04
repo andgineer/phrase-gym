@@ -2,10 +2,12 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
-from phrase_gym.server.contracts import CardKind, PracticeMode, SavedRecording
+from phrase_gym.server.contracts import ActiveCardKind, CardKind, PracticeMode, SavedRecording
 from phrase_gym.server.import_contracts import Cue, StrictModel
 
 Rating = Literal["not_yet", "effort", "got_it", "easy"]
+
+# Historical studied requests remain valid only for exact persisted completion retries.
 Outcome = Literal["studied", "not_yet", "effort", "got_it", "easy", "skipped"]
 OperationId = Annotated[str, Field(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]
 
@@ -23,7 +25,7 @@ class PracticeCard(StrictModel):
     view_token: str
     phrase_id: str
     mode: PracticeMode
-    kind: CardKind
+    kind: ActiveCardKind
     revealed: bool
     cue: Cue | None
     other_cue_available: bool

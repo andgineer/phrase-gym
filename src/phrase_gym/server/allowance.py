@@ -28,7 +28,7 @@ def daily_progress(connection: sqlite3.Connection, day: str) -> PracticeProgress
     return PracticeProgress(
         due_completed=completed.get("recall", 0),
         due_allowance=_effective(due_limit, target["due_target"] if target else None),
-        new_completed=completed.get("first_study", 0),
+        new_completed=completed.get("first_study", 0) + completed.get("new", 0),
         new_allowance=_effective(new_limit, target["new_target"] if target else None),
     )
 

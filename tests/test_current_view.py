@@ -49,7 +49,7 @@ def test_current_leaves_an_open_practice_view_and_its_traversal_alone(practice: 
     before = stored(practice)
     assert current(practice)["card"] is None
     assert stored(practice) == before
-    assert practice.finish(card, "studied")["receipt"]["mode"] == "practice"
+    assert practice.rate(card, "not_yet")["receipt"]["mode"] == "practice"
     assert practice.complete(daily, "studied").status_code == 409
 
 

@@ -54,7 +54,7 @@ onMounted(async () => {
         }}</a>
         <template v-else>{{ phrase.source_label }}</template>
       </p>
-      <p>{{ phrase.due_date ? `Next due: ${phrase.due_date}` : 'New: not studied yet' }}</p>
+      <p>{{ phrase.due_date ? `Next due: ${phrase.due_date}` : 'New: not rated yet' }}</p>
       <SavedHistory
         :phrase-id="phrase.id"
         :reference-url="phrase.reference_url"

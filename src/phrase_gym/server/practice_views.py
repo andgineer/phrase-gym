@@ -67,15 +67,13 @@ def show_phrase(
     *,
     practice: bool = False,
 ) -> None:
-    cue_index = None
-    if kind == "recall":
-        cue_index = choose(rng, len(json.loads(phrase["cues_json"])), phrase["last_cue"])
-        connection.execute("UPDATE phrases SET last_cue=? WHERE id=?", (cue_index, phrase["id"]))
+    cue_index = choose(rng, len(json.loads(phrase["cues_json"])), phrase["last_cue"])
+    connection.execute("UPDATE phrases SET last_cue=? WHERE id=?", (cue_index, phrase["id"]))
     # Every appearance gets a fresh token, even when the same phrase is shown again.
     connection.execute(
         "UPDATE current_view SET phrase_id=?, view_token=?, kind=?, practice=?, revealed=?, "
         "cue_index=?, hint_index=NULL, operations_json='{}' WHERE id=1",
-        (phrase["id"], str(uuid4()), kind, int(practice), int(kind == "first_study"), cue_index),
+        (phrase["id"], str(uuid4()), kind, int(practice), 0, cue_index),
     )
 
 
@@ -131,7 +129,7 @@ def practice_card(
         kind=view["kind"],
         revealed=revealed,
         cue=Cue(**cues[view["cue_index"]]) if view["cue_index"] is not None else None,
-        other_cue_available=view["kind"] == "recall" and len(cues) > 1,
+        other_cue_available=len(cues) > 1,
         hint=hints[view["hint_index"]] if view["hint_index"] is not None else None,
         answer=answer,
         # Saved takes carry an answer snapshot, so the hidden front withholds them.
