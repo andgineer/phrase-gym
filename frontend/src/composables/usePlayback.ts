@@ -3,6 +3,8 @@ import { setAudioSession } from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 import type { Recording } from '../studyTypes'
 
+type Clip = { url: string; durationMs?: number | null }
+
 export function usePlayback() {
   let playing: HTMLAudioElement | null = null
   const active = ref(false)
@@ -10,12 +12,16 @@ export function usePlayback() {
   let localUrl: string | null = null
   let comparisonTimer: number | null = null
 
-  function stop() {
+  function clearTimer() {
     if (comparisonTimer !== null) window.clearTimeout(comparisonTimer)
     comparisonTimer = null
-    if (playing) {
-      const current = playing
-      playing = null
+  }
+
+  function stop() {
+    clearTimer()
+    const current = playing
+    playing = null
+    if (current) {
       current.pause()
       current.src = ''
     }
@@ -25,33 +31,35 @@ export function usePlayback() {
     setAudioSession('auto')
   }
 
-  async function play(url: string) {
-    stop()
+  async function playClips([clip, ...remaining]: Clip[]) {
+    if (!clip) return stop()
     error.value = ''
     setAudioSession('playback')
-    const audio = new Audio(url)
+    const audio = new Audio(clip.url)
     playing = audio
     active.value = true
-    audio.onended = () => {
-      if (playing === audio) {
-        playing = null
-        active.value = false
-        setAudioSession('auto')
-      }
+    const advance = () => {
+      if (playing !== audio) return
+      clearTimer()
+      playing = null
+      audio.pause()
+      audio.src = ''
+      void playClips(remaining)
     }
+    audio.onended = advance
     audio.onerror = () => {
       if (playing !== audio) return
       stop()
       error.value = 'Audio playback failed.'
     }
     audio.onpause = () => {
-      if (playing !== audio) return
-      playing = null
-      active.value = false
-      setAudioSession('auto')
+      if (playing === audio && !audio.ended) stop()
     }
     try {
       await audio.play()
+      // Some browser WebM encoders omit duration metadata and never signal the final frame.
+      if (playing === audio && clip.durationMs !== null && clip.durationMs !== undefined)
+        comparisonTimer = window.setTimeout(advance, clip.durationMs + 1000)
     } catch (cause) {
       if (playing !== audio) return
       stop()
@@ -59,39 +67,14 @@ export function usePlayback() {
     }
   }
 
-  async function compareUrl(url: string, referenceUrl?: string, durationMs?: number | null) {
-    error.value = ''
-    setAudioSession('playback')
-    const learner = new Audio(url)
-    playing = learner
-    active.value = true
-    const advance = () => {
-      if (playing !== learner) return
-      if (comparisonTimer !== null) window.clearTimeout(comparisonTimer)
-      comparisonTimer = null
-      playing = null
-      if (!referenceUrl) return stop()
-      void play(referenceUrl)
-    }
-    learner.onended = advance
-    // Some browser WebM encoders omit duration metadata and never signal the final frame.
-    learner.onpause = () => {
-      if (playing === learner && !learner.ended) stop()
-    }
-    learner.onerror = () => {
-      if (playing !== learner) return
-      stop()
-      error.value = 'Audio playback failed.'
-    }
-    try {
-      await learner.play()
-      if (playing === learner && durationMs !== null && durationMs !== undefined)
-        comparisonTimer = window.setTimeout(advance, durationMs + 1000)
-    } catch (cause) {
-      if (playing !== learner) return
-      stop()
-      error.value = `Audio playback failed: ${String(cause)}`
-    }
+  function play(url: string) {
+    stop()
+    return playClips([{ url }])
+  }
+
+  function compareUrl(url: string, referenceUrl?: string, durationMs?: number | null) {
+    const learner = { url, durationMs }
+    return playClips(referenceUrl ? [{ url: referenceUrl }, learner] : [learner])
   }
 
   function compare(recording: Recording, referenceUrl?: string) {

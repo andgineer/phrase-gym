@@ -210,6 +210,7 @@ test('completion returns to Today facts that continue through limits, Extra and 
 
   await openDetails(page, texts[2])
   const history = details(page).locator('.take-history li')
+  await details(page).getByRole('button', { name: 'Recording history' }).click()
   await expect(history).toHaveCount(1)
   await expect(history).toContainText('Extra · New')
   const before = (await playedMedia(page)).length

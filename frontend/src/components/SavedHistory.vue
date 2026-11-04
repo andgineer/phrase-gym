@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { usePagedList } from '../composables/usePagedList'
+import { takeTransfers } from '../takeTransfers'
 import type { Recording, RecordingPage } from '../studyTypes'
 
 const props = defineProps<{
@@ -24,7 +25,10 @@ const takes = usePagedList<Recording, RecordingPage>(
   () => `/phrases/${encodeURIComponent(props.phraseId)}/recordings`,
   10,
 )
-onMounted(() => void takes.reload())
+const expanded = ref(false)
+watch([expanded, takeTransfers.uploadingTakes], () => {
+  if (expanded.value) void takes.refresh()
+})
 
 function describe(take: Recording) {
   const parts = [take.learning_date, modes[take.mode], kinds[take.kind]]
@@ -35,18 +39,21 @@ function describe(take: Recording) {
 </script>
 
 <template>
-  <section class="saved-history" aria-labelledby="saved-history-heading">
-    <h2 id="saved-history-heading">Saved recordings</h2>
-    <ul v-if="takes.items.value.length" class="take-history">
-      <li v-for="take in takes.items.value" :key="take.id" class="take">
-        <p>{{ describe(take) }}</p>
-        <p class="muted">Answer then: {{ take.answer }}</p>
-        <button :disabled="disabled" @click="play(take.url)">▶ Mine</button>
-        <button :disabled="disabled" @click="compare(take, referenceUrl)">Compare</button>
-      </li>
-    </ul>
-    <p v-else-if="takes.loaded.value" class="muted">No saved recordings yet.</p>
-    <button v-if="takes.nextOffset.value !== null" @click="takes.more">More</button>
-    <p v-if="takes.error.value" role="alert" class="error">{{ takes.error.value }}</p>
-  </section>
+  <div class="saved-history">
+    <button :aria-expanded="expanded" @click="expanded = !expanded">Recording history</button>
+    <section v-if="expanded" aria-labelledby="saved-history-heading">
+      <h2 id="saved-history-heading">Saved recordings</h2>
+      <ul v-if="takes.items.value.length" class="take-history">
+        <li v-for="take in takes.items.value" :key="take.id" class="take">
+          <p>{{ describe(take) }}</p>
+          <p class="muted">Answer then: {{ take.answer }}</p>
+          <button :disabled="disabled" @click="play(take.url)">▶ Mine</button>
+          <button :disabled="disabled" @click="compare(take, referenceUrl)">Compare</button>
+        </li>
+      </ul>
+      <p v-else-if="takes.loaded.value" class="muted">No saved recordings yet.</p>
+      <button v-if="takes.nextOffset.value !== null" @click="takes.more">More</button>
+      <p v-if="takes.error.value" role="alert" class="error">{{ takes.error.value }}</p>
+    </section>
+  </div>
 </template>

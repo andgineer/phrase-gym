@@ -118,6 +118,7 @@ const front = computed(() => !props.card.revealed)
             Skip
           </button>
         </div>
+        <slot name="history" />
         <button class="danger delete-card" :disabled="busy || audioBusy" @click="emit('remove')">
           Delete
         </button>

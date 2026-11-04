@@ -116,14 +116,21 @@ test('recorded Daily keeps front and rehearsal takes and saves late uploads to t
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await card(page).getByRole('button', { name: 'Record a take' }).click()
   await card(page).getByRole('button', { name: 'Stop recording' }).click()
-  await expect.poll(() => playedMedia(page)).toEqual([expect.stringMatching(/^blob:/)])
+  await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
+  await expect.poll(() => playedMedia(page)).toEqual([expect.stringMatching(/\/reference$/)])
   await page.evaluate(() =>
     (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia[0]!.dispatchEvent(
       new Event('ended'),
     ),
   )
-  expect(await playedMedia(page)).toHaveLength(1)
-  await card(page).getByRole('button', { name: 'Show' }).click()
+  await expect
+    .poll(() => playedMedia(page))
+    .toEqual([expect.stringMatching(/\/reference$/), expect.stringMatching(/^blob:/)])
+  await page.evaluate(() =>
+    (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia
+      .at(-1)!
+      .dispatchEvent(new Event('ended')),
+  )
   await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
   await expect(card(page).getByRole('button', { name: 'Compare' })).toBeVisible()
 
@@ -181,7 +188,7 @@ test.describe('mobile', () => {
     await card(page).getByRole('button', { name: 'Compare' }).tap()
     await expect
       .poll(async () => (await playedMedia(page)).slice(before))
-      .toEqual([expect.stringMatching(/^blob:/)])
+      .toEqual([expect.stringMatching(/\/reference$/)])
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
     await rateNew(page, true)
     await revealAnswer(page)

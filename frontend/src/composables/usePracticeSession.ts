@@ -42,10 +42,20 @@ export function usePracticeSession() {
       if (sameView) localTakes.value = [...localTakes.value, take]
       const shouldCompare =
         take.complete && compareOnStop === mediaScope && sameView && !document.hidden
+      const scope = mediaScope
       compareOnStop = null
-      // The hidden-answer front replays only the learner's take, never the reference.
-      if (shouldCompare) void playback.compareTake(take, current?.answer?.reference_url)
       void takeTransfers.flush()
+      if (!shouldCompare) return
+      if (!current.revealed) await practice.reveal()
+      const revealed = card.value
+      // Reveal can finish after navigation or cancellation; its old take must stay silent.
+      if (
+        scope === mediaScope &&
+        revealed?.view_token === take.view_token &&
+        revealed.answer &&
+        !document.hidden
+      )
+        void playback.compareTake(take, revealed.answer.reference_url)
     },
     failure: async () => {},
   })

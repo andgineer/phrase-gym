@@ -143,7 +143,7 @@ test.describe('mobile', () => {
     await card(page).getByRole('button', { name: 'Compare' }).tap()
     await expect
       .poll(async () => (await playedMedia(page)).slice(before))
-      .toEqual([expect.stringMatching(/^blob:/)])
+      .toEqual([expect.stringMatching(/\/reference$/)])
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
     await stop.tap()
     await expect(card(page)).toHaveCount(0)
@@ -165,6 +165,8 @@ test.describe('mobile', () => {
     await details(page).getByRole('button', { name: '← Back' }).tap()
     await openDetails(page, texts[0], true)
     const history = details(page).locator('.take-history li')
+    await expect(history).toHaveCount(0)
+    await details(page).getByRole('button', { name: 'Recording history' }).tap()
     await expect(history).toHaveCount(2)
     await expect(history.first()).toContainText('Practice · New')
     const replayed = (await playedMedia(page)).length

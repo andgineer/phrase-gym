@@ -11,6 +11,7 @@ import DeleteDialog from './components/DeleteDialog.vue'
 import PracticeEntry from './components/PracticeEntry.vue'
 import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
+import SavedHistory from './components/SavedHistory.vue'
 import { usePracticeSession } from './composables/usePracticeSession'
 import { useDatedMessage } from './learningDay'
 
@@ -150,7 +151,21 @@ onMounted(initialize)
           @retry-save="takeTransfers.flush"
           @retry-completion="practice.retry"
           @stop="navigate('entry')"
-        />
+        >
+          <template #history>
+            <SavedHistory
+              v-if="card.answer"
+              :key="card.view_token"
+              :phrase-id="card.phrase_id"
+              :reference-url="card.answer.reference_url"
+              :disabled="
+                capture.capturing.value || capture.requesting.value || capture.processing.value
+              "
+              :play="playback.play"
+              :compare="playback.compare"
+            />
+          </template>
+        </StudyCard>
       </template>
       <template v-else>
         <p class="eyebrow">English</p>

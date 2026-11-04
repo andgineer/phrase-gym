@@ -13,6 +13,11 @@ return date. The Library finds phrases by lesson or meaning, shows their details
 recordings, practises one chosen phrase, and deletes a phrase after confirmation. The app does not
 claim to measure fluency.
 
+Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the
+answer and plays the reference followed by your recording; recording on the back uses the same
+playback order. **Recording history** on the card back or in phrase details opens a list of saved
+takes, newest first. It stays collapsed until you open it.
+
 The server works on macOS and Linux. The MVP media player and recording experience target macOS
 browsers. Linux browser audio qualification is planned after the MVP.
 

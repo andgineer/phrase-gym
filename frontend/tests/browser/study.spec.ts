@@ -122,6 +122,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       __playedMedia?: HTMLMediaElement[]
       __playedUrls?: string[]
       __playedBlobBytes?: Promise<number>
+      __dropLearnerEnded?: boolean
     }
     Object.defineProperty(window, 'MediaRecorder', {
       configurable: true,
@@ -149,10 +150,12 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       this.volume = 0
       ;(host.__playedMedia ??= []).push(this)
       ;(host.__playedUrls ??= []).push(this.src)
-      if (this.src.startsWith('blob:'))
+      if (this.src.startsWith('blob:')) {
+        if (host.__dropLearnerEnded) this.onended = null
         host.__playedBlobBytes = fetch(this.src)
           .then((response) => response.arrayBuffer())
           .then((audio) => audio.byteLength)
+      }
       return nativePlay.call(this)
     }
   })
@@ -181,20 +184,23 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   const [saved] = await savedTakes(page, recorded)
   expect(saved.byte_length).toBeGreaterThan(4)
   expect(saved.mime_type).toMatch(/^audio\//)
-  expect(
-    await page.evaluate(
-      () => (window as unknown as { __playedBlobBytes: Promise<number> }).__playedBlobBytes,
-    ),
-  ).toBe(saved.byte_length)
   const reference = `/api/phrases/${await phraseId(page, recorded)}/reference`
   await expect
     .poll(() =>
       page.evaluate(() => (window as unknown as { __playedUrls?: string[] }).__playedUrls ?? []),
     )
-    .toEqual([expect.stringMatching(/^blob:/), expect.stringContaining(reference)])
+    .toEqual([expect.stringContaining(reference), expect.stringMatching(/^blob:/)])
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __playedBlobBytes: Promise<number> }).__playedBlobBytes,
+    ),
+  ).toBe(saved.byte_length)
   const afterAutomatic = await page.evaluate(
     () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
   )
+  await page.evaluate(() => {
+    ;(window as unknown as { __dropLearnerEnded: boolean }).__dropLearnerEnded = true
+  })
   await page.getByRole('button', { name: 'Compare', exact: true }).click()
   await expect
     .poll(() =>
@@ -202,22 +208,13 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
         () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
       ),
     )
-    .toBe(afterAutomatic + 1)
-  await page.evaluate(() => {
-    const learner = (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.at(
-      -1,
-    )
-    if (learner) learner.onended = null
-  })
-  await expect
-    .poll(
-      () =>
-        page.evaluate(
-          () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
-        ),
-      { timeout: 15_000 },
-    )
     .toBe(afterAutomatic + 2)
+  await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible({ timeout: 15_000 })
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
+    ),
+  ).toBe(afterAutomatic + 2)
   await page.getByRole('button', { name: '▶ Mine' }).click()
   await expect
     .poll(() =>
@@ -426,6 +423,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   expect(completions).toBe(cards.length)
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: "Open details: Let's get started." }).click()
+  await page.getByRole('button', { name: 'Recording history' }).click()
   await expect(page.getByRole('button', { name: '▶ Mine' })).toHaveCount(2)
   await page.getByRole('button', { name: '← Back' }).click()
   const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()

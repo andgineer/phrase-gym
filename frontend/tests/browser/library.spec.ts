@@ -119,6 +119,8 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await details.getByRole('button', { name: 'Details', exact: true }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
+  await expect(details.locator('.take')).toHaveCount(0)
+  await details.getByRole('button', { name: 'Recording history' }).tap()
   await expect(details.getByText(/ · Daily · New · Cue: Asked: How is it going\?$/)).toBeVisible()
   await expect(details.getByRole('button', { name: '▶ Mine' })).toHaveCount(1)
   await details.getByRole('button', { name: '▶ Phrase' }).tap()
