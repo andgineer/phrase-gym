@@ -41,7 +41,16 @@ onMounted(async () => {
           Practice
         </button>
         <button :aria-expanded="explained" @click="explained = !explained">Details</button>
-        <button :disabled="disabled" @click="play(phrase.reference_url)">▶ Phrase</button>
+      </div>
+      <div class="audio-controls" role="group" aria-label="Audio controls">
+        <button :disabled="disabled" @click="play(phrase.reference_url)">▶ Reference</button>
+        <SavedHistory
+          :phrase-id="phrase.id"
+          :reference-url="phrase.reference_url"
+          :disabled="disabled"
+          :play="play"
+          :compare="compare"
+        />
       </div>
       <div v-if="explained" class="explanation">
         <h2>Details</h2>
@@ -55,13 +64,6 @@ onMounted(async () => {
         <template v-else>{{ phrase.source_label }}</template>
       </p>
       <p>{{ phrase.due_date ? `Next due: ${phrase.due_date}` : 'New: not rated yet' }}</p>
-      <SavedHistory
-        :phrase-id="phrase.id"
-        :reference-url="phrase.reference_url"
-        :disabled="disabled"
-        :play="play"
-        :compare="compare"
-      />
       <button
         class="danger"
         :disabled="disabled"

@@ -40,7 +40,9 @@ function describe(take: Recording) {
 
 <template>
   <div class="saved-history">
-    <button :aria-expanded="expanded" @click="expanded = !expanded">Recording history</button>
+    <button aria-label="Recording history" :aria-expanded="expanded" @click="expanded = !expanded">
+      History <span aria-hidden="true">{{ expanded ? '▴' : '▾' }}</span>
+    </button>
     <section v-if="expanded" aria-labelledby="saved-history-heading">
       <h2 id="saved-history-heading">Saved recordings</h2>
       <ul v-if="takes.items.value.length" class="take-history">

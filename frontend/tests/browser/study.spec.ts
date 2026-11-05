@@ -489,7 +489,7 @@ test('restored practice card keeps the original layout and microphone interactio
     contentType: 'image/png',
   })
 
-  await card.getByRole('button', { name: '▶ Phrase' }).click()
+  await card.getByRole('button', { name: '▶ Reference' }).click()
   await expect(card.getByRole('button', { name: 'Stop playback' })).toBeVisible()
   await card.getByRole('button', { name: 'Stop playback' }).click()
   await expect(card.getByRole('button', { name: 'Record a take' })).toBeVisible()
@@ -617,7 +617,7 @@ test('playback rejection clears the current control without stopping a newer pla
       throw new Error('blocked')
     }
   })
-  await page.getByRole('button', { name: '▶ Phrase' }).click()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
   await expect(page.getByRole('alert')).toContainText('Audio playback failed')
   await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
   await page.getByRole('button', { name: 'Compare', exact: true }).click()
@@ -636,8 +636,8 @@ test('playback rejection clears the current control without stopping a newer pla
       return Promise.resolve()
     }
   })
-  await page.getByRole('button', { name: '▶ Phrase' }).click()
-  await page.getByRole('button', { name: '▶ Phrase' }).click()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
   await page.evaluate(() =>
     (window as unknown as { __rejectOldPlay: () => void }).__rejectOldPlay(),
   )
@@ -751,7 +751,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
   ).toBe(1)
   releaseUpload()
   await expect(page.getByText('1 take(s) waiting to save.')).toHaveCount(0)
-  await page.getByRole('button', { name: '▶ Phrase' }).click()
+  await page.getByRole('button', { name: '▶ Reference' }).click()
   await expect
     .poll(() =>
       page.evaluate(

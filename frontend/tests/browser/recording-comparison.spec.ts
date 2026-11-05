@@ -70,6 +70,62 @@ test('front and back stops play reference then the full take, with collapsed sav
   await expect(card(page).getByText('No saved recordings yet.')).toBeVisible()
 })
 
+test('phone audio controls keep playback, microphone and expandable history together', async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  const controls = card(page).getByRole('group', { name: 'Audio controls' })
+  await controls.getByRole('button', { name: 'Record a take' }).click()
+  await controls.getByRole('button', { name: 'Stop recording' }).click()
+  await expect.poll(async () => (await playedMedia(page)).length).toBe(1)
+  await finishClip(page)
+  await expect.poll(async () => (await playedMedia(page)).length).toBe(2)
+  await finishClip(page)
+  await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(1)
+
+  const history = controls.getByRole('button', { name: 'Recording history' })
+  await expect(history).toHaveText('History ▾')
+  const reference = controls.getByRole('button', { name: '▶ Reference' })
+  const microphone = controls.getByRole('button', { name: 'Record a take' })
+  const mine = controls.getByRole('button', { name: '▶ Mine' })
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 })
+    const boxes = []
+    for (const button of [reference, microphone, mine, history]) {
+      await expect(button).toBeVisible()
+      const box = (await button.boundingBox())!
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.x + box.width).toBeLessThanOrEqual(width)
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      boxes.push(box)
+    }
+    expect(boxes[0].x + boxes[0].width).toBeLessThanOrEqual(boxes[1].x)
+    expect(boxes[1].x + boxes[1].width).toBeLessThanOrEqual(boxes[2].x)
+    expect(Math.abs(boxes[0].y - boxes[2].y)).toBeLessThan(1)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width)
+  }
+  await page.screenshot({ path: testInfo.outputPath('phone-audio-controls.png') })
+  await reference.click()
+  await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
+  await finishClip(page)
+  await mine.click()
+  await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/^blob:/)
+  await finishClip(page)
+  await history.click()
+  await expect(history).toHaveText('History ▴')
+  await expect(history).toHaveAttribute('aria-expanded', 'true')
+  const recordings = controls.getByRole('region', { name: 'Saved recordings' })
+  await expect(recordings.locator('.take')).toHaveCount(1)
+  const historyBox = (await history.boundingBox())!
+  expect((await recordings.boundingBox())!.y).toBeGreaterThanOrEqual(
+    historyBox.y + historyBox.height,
+  )
+  await history.click()
+  await expect(history).toHaveText('History ▾')
+  await expect(history).toHaveAttribute('aria-expanded', 'false')
+  await expect(recordings).toHaveCount(0)
+})
+
 test('failed automatic reveal retains the take and lets Show retry without playing a hidden answer', async ({
   page,
 }) => {

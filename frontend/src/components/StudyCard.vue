@@ -76,7 +76,10 @@ const front = computed(() => !props.card.revealed)
           Also accepted: {{ card.answer.accepted_variants.join('; ') }}
         </p>
       </template>
-      <div class="audio-controls">
+      <div class="audio-controls" role="group" aria-label="Audio controls">
+        <button v-if="!front && card.answer" :disabled="audioBusy" @click="emit('playPhrase')">
+          ▶ Reference
+        </button>
         <MicrophoneButton
           :capturing="capturing"
           :requesting="requesting"
@@ -84,6 +87,11 @@ const front = computed(() => !props.card.revealed)
           :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
           @control="emit('control')"
         />
+        <template v-if="!front && card.answer">
+          <button v-if="hasTake" :disabled="audioBusy" @click="emit('playMine')">▶ Mine</button>
+          <button v-if="hasTake" :disabled="audioBusy" @click="emit('compare')">Compare</button>
+          <slot name="history" />
+        </template>
       </div>
       <div v-if="front" class="answer-controls">
         <button class="primary" :disabled="busy || audioBusy" @click="emit('show')">Show</button>
@@ -92,11 +100,6 @@ const front = computed(() => !props.card.revealed)
       <template v-else-if="card.answer">
         <div class="answer-controls">
           <button :aria-expanded="detailsOpen" @click="emit('details')">Details</button>
-          <button :disabled="audioBusy" @click="emit('playPhrase')">▶ Phrase</button>
-          <template v-if="hasTake">
-            <button :disabled="audioBusy" @click="emit('playMine')">▶ Mine</button>
-            <button :disabled="audioBusy" @click="emit('compare')">Compare</button>
-          </template>
         </div>
         <div v-if="detailsOpen" class="explanation">
           <h2>Details</h2>
@@ -118,7 +121,6 @@ const front = computed(() => !props.card.revealed)
             Skip
           </button>
         </div>
-        <slot name="history" />
         <button class="danger delete-card" :disabled="busy || audioBusy" @click="emit('remove')">
           Delete
         </button>

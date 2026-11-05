@@ -8,6 +8,25 @@
   gap: 12px;
   align-items: center;
 }
+.audio-controls {
+  gap: 6px;
+}
+.audio-controls > button,
+.audio-controls > .saved-history > button {
+  padding-inline: 6px;
+  white-space: nowrap;
+}
+.audio-controls .microphone {
+  flex-shrink: 0;
+  padding: 0;
+}
+.audio-controls > .saved-history {
+  display: contents;
+}
+.audio-controls > .saved-history > section {
+  flex-basis: 100%;
+  min-width: 0;
+}
 .microphone {
   border-radius: 50%;
   width: 54px;
