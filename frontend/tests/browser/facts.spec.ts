@@ -212,9 +212,9 @@ test('completion returns to Today facts that continue through limits, Extra and 
   const history = details(page).locator('.take-history li')
   await details(page).getByRole('button', { name: 'Recording history' }).click()
   await expect(history).toHaveCount(1)
-  await expect(history).toContainText('Extra · New')
+  await expect(history.locator('time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
   const before = (await playedMedia(page)).length
-  await history.getByRole('button', { name: '▶ Mine' }).click()
+  await history.getByRole('button', { name: 'Mine' }).click()
   await expect
     .poll(async () => (await playedMedia(page)).slice(before))
     .toEqual([expect.stringMatching(/\/api\/recordings\/.+\/audio$/)])

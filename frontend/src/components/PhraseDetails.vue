@@ -1,15 +1,14 @@
 <script setup lang="ts">
+import AudioIcon from './AudioIcon.vue'
 import { onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { DeletionTarget, PhraseDetails } from '../libraryTypes'
-import type { Recording } from '../studyTypes'
 import SavedHistory from './SavedHistory.vue'
 
 const props = defineProps<{
   phraseId: string
   disabled: boolean
   play: (url: string) => Promise<void>
-  compare: (recording: Recording, referenceUrl: string) => Promise<void>
 }>()
 const emit = defineEmits<{ back: []; remove: [DeletionTarget]; practice: [phraseId: string] }>()
 const phrase = ref<PhraseDetails | null>(null)
@@ -43,14 +42,10 @@ onMounted(async () => {
         <button :aria-expanded="explained" @click="explained = !explained">Details</button>
       </div>
       <div class="audio-controls" role="group" aria-label="Audio controls">
-        <button :disabled="disabled" @click="play(phrase.reference_url)">▶ Reference</button>
-        <SavedHistory
-          :phrase-id="phrase.id"
-          :reference-url="phrase.reference_url"
-          :disabled="disabled"
-          :play="play"
-          :compare="compare"
-        />
+        <button :disabled="disabled" @click="play(phrase.reference_url)">
+          <AudioIcon name="reference" /> Ref
+        </button>
+        <SavedHistory :phrase-id="phrase.id" :disabled="disabled" :play="play" />
       </div>
       <div v-if="explained" class="explanation">
         <h2>Details</h2>

@@ -79,7 +79,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(card.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
   await card.getByRole('button', { name: 'Record a take' }).tap()
   await card.getByRole('button', { name: 'Stop recording' }).tap()
-  await expect(card.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(card.getByRole('button', { name: 'Mine' })).toBeVisible()
   await expect(page.getByText(/take\(s\) waiting to save/)).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Practice', exact: true }).tap()
@@ -121,9 +121,9 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
   await expect(details.locator('.take')).toHaveCount(0)
   await details.getByRole('button', { name: 'Recording history' }).tap()
-  await expect(details.getByText(/ · Daily · New · Cue: Asked: How is it going\?$/)).toBeVisible()
-  await expect(details.getByRole('button', { name: '▶ Mine' })).toHaveCount(1)
-  await details.getByRole('button', { name: '▶ Reference' }).tap()
+  await expect(details.locator('.take time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
+  await expect(details.getByRole('button', { name: 'Mine' })).toHaveCount(1)
+  await details.getByRole('button', { name: 'Ref' }).tap()
   await expect
     .poll(() =>
       page.evaluate(() =>

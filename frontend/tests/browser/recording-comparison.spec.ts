@@ -48,14 +48,14 @@ test('front and back stops play reference then the full take, with collapsed sav
   const historyTake = card(page).locator('.take').first()
   const [latest] = await savedTakes(page, texts[0])
   const before = (await playedMedia(page)).length
-  await historyTake.getByRole('button', { name: 'Compare' }).click()
+  await expect(historyTake.locator('time')).toHaveText(latest.learning_date)
+  await expect(historyTake.getByRole('button')).toHaveCount(1)
+  await expect(historyTake).not.toContainText('Cue:')
+  await expect(historyTake).not.toContainText('Answer then:')
+  await historyTake.getByRole('button', { name: 'Mine' }).click()
   await expect
     .poll(async () => (await playedMedia(page)).slice(before))
-    .toEqual([expect.stringMatching(/\/reference$/)])
-  await finishClip(page)
-  await expect
-    .poll(async () => (await playedMedia(page)).slice(before))
-    .toEqual([expect.stringMatching(/\/reference$/), expect.stringContaining(latest.url)])
+    .toEqual([expect.stringContaining(latest.url)])
   await finishClip(page)
   await page.reload()
   await page.getByRole('button', { name: 'Daily', exact: true }).click()
@@ -84,10 +84,10 @@ test('phone audio controls keep playback, microphone and expandable history toge
   await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(1)
 
   const history = controls.getByRole('button', { name: 'Recording history' })
-  await expect(history).toHaveText('History ▾')
-  const reference = controls.getByRole('button', { name: '▶ Reference' })
+  await expect(history).toHaveText('▾')
+  const reference = controls.getByRole('button', { name: 'Ref' })
   const microphone = controls.getByRole('button', { name: 'Record a take' })
-  const mine = controls.getByRole('button', { name: '▶ Mine' })
+  const mine = controls.getByRole('button', { name: 'Mine' })
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 })
     const boxes = []
@@ -112,16 +112,22 @@ test('phone audio controls keep playback, microphone and expandable history toge
   await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/^blob:/)
   await finishClip(page)
   await history.click()
-  await expect(history).toHaveText('History ▴')
+  await expect(history).toHaveText('▴')
   await expect(history).toHaveAttribute('aria-expanded', 'true')
   const recordings = controls.getByRole('region', { name: 'Saved recordings' })
   await expect(recordings.locator('.take')).toHaveCount(1)
+  await expect(recordings.getByRole('heading')).toHaveCount(0)
+  await expect(recordings.getByRole('button', { name: 'Compare' })).toHaveCount(0)
+  expect(await microphone.evaluate((button) => getComputedStyle(button).borderRadius)).toBe(
+    await reference.evaluate((button) => getComputedStyle(button).borderRadius),
+  )
+  expect(await recordings.evaluate((panel) => getComputedStyle(panel).borderTopStyle)).toBe('solid')
   const historyBox = (await history.boundingBox())!
   expect((await recordings.boundingBox())!.y).toBeGreaterThanOrEqual(
     historyBox.y + historyBox.height,
   )
   await history.click()
-  await expect(history).toHaveText('History ▾')
+  await expect(history).toHaveText('▾')
   await expect(history).toHaveAttribute('aria-expanded', 'false')
   await expect(recordings).toHaveCount(0)
 })
@@ -141,7 +147,7 @@ test('failed automatic reveal retains the take and lets Show retry without playi
   await page.unroute('**/api/practice/reveal')
   await card(page).getByRole('button', { name: 'Show', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText(texts[0])
-  await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
 })
 
 test('leaving during automatic reveal prevents late playback', async ({ page }) => {

@@ -138,7 +138,7 @@ test.describe('mobile', () => {
     await revealAnswer(page, true)
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
     await card(page).getByRole('button', { name: 'Stop recording' }).tap()
-    await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
+    await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
     const before = (await playedMedia(page)).length
     await card(page).getByRole('button', { name: 'Compare' }).tap()
     await expect
@@ -154,7 +154,7 @@ test.describe('mobile', () => {
     await revealAnswer(page, true)
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
     await card(page).getByRole('button', { name: 'Stop recording' }).tap()
-    await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
+    await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
     await rateNew(page, true)
     await expect(details(page).getByRole('heading', { name: texts[0] })).toBeVisible()
     await expect
@@ -168,9 +168,9 @@ test.describe('mobile', () => {
     await expect(history).toHaveCount(0)
     await details(page).getByRole('button', { name: 'Recording history' }).tap()
     await expect(history).toHaveCount(2)
-    await expect(history.first()).toContainText('Practice · New')
+    await expect(history.first().locator('time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
     const replayed = (await playedMedia(page)).length
-    await history.first().getByRole('button', { name: '▶ Mine' }).tap()
+    await history.first().getByRole('button', { name: 'Mine' }).tap()
     await expect
       .poll(async () => (await playedMedia(page)).slice(replayed))
       .toEqual([expect.stringMatching(/\/api\/recordings\/.+\/audio$/)])

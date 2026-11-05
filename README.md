@@ -62,12 +62,12 @@ it, so it never shows yesterday as today.
 
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and
 answer it was recorded with; pending uploads remain for retry and never block the next card.
-**▶ Mine** and **Compare** replay the latest take of the open card.
+**Mine** and **Compare** replay the latest take of the open card.
 
 The Library lists the selected lesson's phrases and searches all lessons by wording, meaning,
 situation or use. Phrase details show the answer, what it is used for, the lesson and source,
-reference playback, the next due date and saved recordings with their mode, cue and answer at the
-time. Looking a phrase up never changes its schedule. **Practice** in details opens that phrase on
+reference playback, the next due date and saved recordings with their dates and **Mine** replay
+buttons. Looking a phrase up never changes its schedule. **Practice** in details opens that phrase on
 the same hidden-answer card, including when new, and returns to its details after a rating or **Skip**.
 It does not use the daily limits, but its first rating on a learning day reschedules the
 phrase even before it is due.

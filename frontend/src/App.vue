@@ -117,7 +117,6 @@ onMounted(initialize)
         :disabled="practice.busy.value"
         v-model:opened="detailsPhrase"
         :play="playback.play"
-        :compare="playback.compare"
         :stop-playback="playback.stop"
         @practice="practisePhrase"
       />
@@ -157,12 +156,10 @@ onMounted(initialize)
               v-if="card.answer"
               :key="card.view_token"
               :phrase-id="card.phrase_id"
-              :reference-url="card.answer.reference_url"
               :disabled="
                 capture.capturing.value || capture.requesting.value || capture.processing.value
               "
               :play="playback.play"
-              :compare="playback.compare"
             />
           </template>
         </StudyCard>

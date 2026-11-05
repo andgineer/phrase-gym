@@ -13,7 +13,12 @@
 }
 .audio-controls > button,
 .audio-controls > .saved-history > button {
-  padding-inline: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding-inline: 10px;
   white-space: nowrap;
 }
 .audio-controls .microphone {
@@ -28,9 +33,8 @@
   min-width: 0;
 }
 .microphone {
-  border-radius: 50%;
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   background: #294f43;
   color: white;
@@ -170,4 +174,38 @@
 .studied-list strong {
   font-family: Georgia, serif;
   font-weight: 500;
+}
+
+.audio-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.recording-history-panel {
+  padding: 12px;
+  border: 1px solid #829487;
+  border-radius: 9px;
+}
+.recording-history-panel > p {
+  margin: 0;
+}
+.recording-history-panel .take-history {
+  margin: 0;
+}
+.recording-history-panel .take {
+  justify-content: space-between;
+  margin: 0;
+  padding: 8px 0;
+}
+.recording-history-panel .take:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.recording-history-panel .take:last-child {
+  padding-bottom: 0;
+}
+.recording-history-panel button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }

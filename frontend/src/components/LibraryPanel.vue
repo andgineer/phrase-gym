@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { DeletionResult, DeletionTarget } from '../libraryTypes'
-import type { Recording } from '../studyTypes'
 import LessonPicker from './LessonPicker.vue'
 import DeleteDialog from './DeleteDialog.vue'
 import PhraseDetails from './PhraseDetails.vue'
@@ -10,7 +9,6 @@ import PhraseFinder from './PhraseFinder.vue'
 const props = defineProps<{
   disabled: boolean
   play: (url: string) => Promise<void>
-  compare: (recording: Recording, referenceUrl: string) => Promise<void>
   stopPlayback: () => void
 }>()
 const emit = defineEmits<{ practice: [phraseId: string] }>()
@@ -44,7 +42,6 @@ async function deleted(result: DeletionResult) {
     :phrase-id="opened"
     :disabled="disabled"
     :play="play"
-    :compare="compare"
     @back="open(null)"
     @remove="pendingDelete = $event"
     @practice="emit('practice', $event)"

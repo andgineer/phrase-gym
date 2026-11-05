@@ -178,7 +178,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     )
     .toBeGreaterThan(1.1)
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.locator('article.study').getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(page.locator('article.study').getByRole('button', { name: 'Mine' })).toBeVisible()
   const recorded = 'This recording uses the browser encoder.'
   await expect.poll(async () => (await savedTakes(page, recorded)).length).toBe(1)
   const [saved] = await savedTakes(page, recorded)
@@ -215,7 +215,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
       () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
     ),
   ).toBe(afterAutomatic + 2)
-  await page.getByRole('button', { name: '▶ Mine' }).click()
+  await page.getByRole('button', { name: 'Mine' }).click()
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -352,7 +352,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect.poll(async () => (await savedTakes(page, started)).length).toBe(1)
   await openDaily(page)
   const activeStudy = page.locator('article.study')
-  await expect(activeStudy.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(activeStudy.getByRole('button', { name: 'Mine' })).toBeVisible()
   await activeStudy.getByRole('button', { name: 'Record a take' }).click()
   await activeStudy.getByRole('button', { name: 'Stop recording' }).click()
   await expect.poll(async () => (await savedTakes(page, started)).length).toBe(2)
@@ -360,7 +360,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await page.reload()
   await openDaily(page)
   await expect(activeStudy.getByRole('heading', { name: started })).toBeVisible()
-  await expect(activeStudy.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(activeStudy.getByRole('button', { name: 'Mine' })).toBeVisible()
   expect(await savedTakes(page, started)).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -424,7 +424,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('button', { name: "Open details: Let's get started." }).click()
   await page.getByRole('button', { name: 'Recording history' }).click()
-  await expect(page.getByRole('button', { name: '▶ Mine' })).toHaveCount(2)
+  await expect(page.getByRole('button', { name: 'Mine' })).toHaveCount(2)
   await page.getByRole('button', { name: '← Back' }).click()
   const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
   await page.request.post(`/__test/clock/${tomorrow}`)
@@ -489,7 +489,7 @@ test('restored practice card keeps the original layout and microphone interactio
     contentType: 'image/png',
   })
 
-  await card.getByRole('button', { name: '▶ Reference' }).click()
+  await card.getByRole('button', { name: 'Ref' }).click()
   await expect(card.getByRole('button', { name: 'Stop playback' })).toBeVisible()
   await card.getByRole('button', { name: 'Stop playback' }).click()
   await expect(card.getByRole('button', { name: 'Record a take' })).toBeVisible()
@@ -610,14 +610,14 @@ test('playback rejection clears the current control without stopping a newer pla
   await openDaily(page)
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mine' })).toBeVisible()
 
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = async () => {
       throw new Error('blocked')
     }
   })
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: 'Ref' }).click()
   await expect(page.getByRole('alert')).toContainText('Audio playback failed')
   await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
   await page.getByRole('button', { name: 'Compare', exact: true }).click()
@@ -636,8 +636,8 @@ test('playback rejection clears the current control without stopping a newer pla
       return Promise.resolve()
     }
   })
-  await page.getByRole('button', { name: '▶ Reference' }).click()
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: 'Ref' }).click()
+  await page.getByRole('button', { name: 'Ref' }).click()
   await page.evaluate(() =>
     (window as unknown as { __rejectOldPlay: () => void }).__rejectOldPlay(),
   )
@@ -663,7 +663,7 @@ test('import modal traps keyboard focus and finishes recording before opening', 
   await opener.click()
   const dialog = page.getByRole('dialog', { name: 'Add material' })
   await expect(dialog).toBeVisible()
-  await expect(page.getByText('▶ Mine', { exact: true })).toBeVisible()
+  await expect(page.getByText('Mine', { exact: true })).toBeVisible()
   expect(
     await page.evaluate(
       () =>
@@ -751,7 +751,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
   ).toBe(1)
   releaseUpload()
   await expect(page.getByText('1 take(s) waiting to save.')).toHaveCount(0)
-  await page.getByRole('button', { name: '▶ Reference' }).click()
+  await page.getByRole('button', { name: 'Ref' }).click()
   await expect
     .poll(() =>
       page.evaluate(

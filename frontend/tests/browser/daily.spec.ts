@@ -131,7 +131,7 @@ test('recorded Daily keeps front and rehearsal takes and saves late uploads to t
       .at(-1)!
       .dispatchEvent(new Event('ended')),
   )
-  await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
+  await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
   await expect(card(page).getByRole('button', { name: 'Compare' })).toBeVisible()
 
   let releaseUpload!: () => void
@@ -183,7 +183,7 @@ test.describe('mobile', () => {
     await revealAnswer(page, true)
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
     await card(page).getByRole('button', { name: 'Stop recording' }).tap()
-    await expect(card(page).getByRole('button', { name: '▶ Mine' })).toBeVisible()
+    await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
     const before = (await playedMedia(page)).length
     await card(page).getByRole('button', { name: 'Compare' }).tap()
     await expect

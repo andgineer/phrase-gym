@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AudioIcon from './AudioIcon.vue'
 import { computed } from 'vue'
 import { progressLine } from '../practiceReducer'
 import type { Card, Outcome, Progress } from '../studyTypes'
@@ -78,7 +79,7 @@ const front = computed(() => !props.card.revealed)
       </template>
       <div class="audio-controls" role="group" aria-label="Audio controls">
         <button v-if="!front && card.answer" :disabled="audioBusy" @click="emit('playPhrase')">
-          ▶ Reference
+          <AudioIcon name="reference" /> Ref
         </button>
         <MicrophoneButton
           :capturing="capturing"
@@ -88,8 +89,12 @@ const front = computed(() => !props.card.revealed)
           @control="emit('control')"
         />
         <template v-if="!front && card.answer">
-          <button v-if="hasTake" :disabled="audioBusy" @click="emit('playMine')">▶ Mine</button>
-          <button v-if="hasTake" :disabled="audioBusy" @click="emit('compare')">Compare</button>
+          <button v-if="hasTake" :disabled="audioBusy" @click="emit('playMine')">
+            <AudioIcon name="mine" /> Mine
+          </button>
+          <button v-if="hasTake" :disabled="audioBusy" @click="emit('compare')">
+            <AudioIcon name="compare" /> Compare
+          </button>
           <slot name="history" />
         </template>
       </div>
