@@ -2,6 +2,10 @@
 
 The objective is easier access to useful language when speaking. This MVP loop measures practice and self-reported recall, not spontaneous conversation, pronunciation accuracy or mastery. Later [Extra practice and adult engagement](decision-transfer-and-engagement.md) build on it while keeping their outcomes separate from memory grades. [Research and its limits](research/README.md) distinguish empirical findings from the defaults below.
 
+## Phone-sized controls
+
+Design practice controls for a mobile phone screen. Keep visible button labels short, preferably one clear word; use a familiar icon to convey the action when useful. Reference playback must identify the reference audio and remain distinguishable from the learner's recording. Choose compact wording rather than expanding labels into explanatory phrases; fuller accessible names can clarify the action without taking screen space.
+
 ## New phrases
 
 New and returning phrases use the same hidden-answer recall card, contextual cue, optional recording, **Show** or **Details**, and **Again / Hard / Good / Easy** rating. Importing a course phrase establishes neither prior knowledge nor unfamiliarity. If the learner does not know the answer, revealing it and choosing **Again** is an ordinary first attempt; the first rating initializes FSRS immediately. Feedback and optional back-side rehearsal teach unfamiliar wording. There is no separate ungraded first-meeting step.
