@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PhraseExplanation from './PhraseExplanation.vue'
 import AudioIcon from './AudioIcon.vue'
 import { computed } from 'vue'
 import { progressLine } from '../practiceReducer'
@@ -70,12 +71,6 @@ const front = computed(() => !props.card.revealed)
       </template>
       <template v-else-if="card.answer">
         <h1 tabindex="-1" lang="en" data-testid="practice-phrase">{{ card.answer.text }}</h1>
-        <div class="answer-help">
-          <p>{{ card.answer.explanation }}</p>
-        </div>
-        <p v-if="card.answer.accepted_variants.length" class="muted">
-          Also accepted: {{ card.answer.accepted_variants.join('; ') }}
-        </p>
       </template>
       <div class="audio-controls" role="group" aria-label="Audio controls">
         <button v-if="!front && card.answer" :disabled="audioBusy" @click="emit('playPhrase')">
@@ -100,17 +95,16 @@ const front = computed(() => !props.card.revealed)
       </div>
       <div v-if="front" class="answer-controls">
         <button class="primary" :disabled="busy || audioBusy" @click="emit('show')">Show</button>
-        <button :disabled="busy || audioBusy" @click="emit('details')">Details</button>
       </div>
       <template v-else-if="card.answer">
-        <div class="answer-controls">
-          <button :aria-expanded="detailsOpen" @click="emit('details')">Details</button>
-        </div>
-        <div v-if="detailsOpen" class="explanation">
-          <h2>Details</h2>
-          <p>{{ card.answer.detailed_explanation ?? 'No detailed explanation was prepared.' }}</p>
-          <p class="purpose">Used for: {{ card.answer.usage_contexts.join(' · ') }}</p>
-        </div>
+        <PhraseExplanation
+          :explanation="card.answer.explanation"
+          :usage-contexts="card.answer.usage_contexts"
+          :accepted-variants="card.answer.accepted_variants"
+          :detailed-explanation="card.answer.detailed_explanation"
+          :open="detailsOpen"
+          @toggle="emit('details')"
+        />
         <p>How was your answer before you saw the phrase?</p>
         <div class="ratings">
           <button

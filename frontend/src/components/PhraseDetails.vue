@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PhraseExplanation from './PhraseExplanation.vue'
 import AudioIcon from './AudioIcon.vue'
 import { onMounted, ref } from 'vue'
 import { api } from '../api'
@@ -30,16 +31,10 @@ onMounted(async () => {
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <template v-if="phrase">
       <h1 lang="en">{{ phrase.text }}</h1>
-      <p class="purpose">Used for: {{ phrase.usage_contexts.join(' · ') }}</p>
-      <p>{{ phrase.explanation }}</p>
-      <p v-if="phrase.accepted_variants.length" class="muted">
-        Also accepted: {{ phrase.accepted_variants.join('; ') }}
-      </p>
       <div class="row-actions">
         <button class="primary" :disabled="disabled" @click="emit('practice', phrase.id)">
           Practice
         </button>
-        <button :aria-expanded="explained" @click="explained = !explained">Details</button>
       </div>
       <div class="audio-controls" role="group" aria-label="Audio controls">
         <button :disabled="disabled" @click="play(phrase.reference_url)">
@@ -47,10 +42,14 @@ onMounted(async () => {
         </button>
         <SavedHistory :phrase-id="phrase.id" :disabled="disabled" :play="play" />
       </div>
-      <div v-if="explained" class="explanation">
-        <h2>Details</h2>
-        <p>{{ phrase.detailed_explanation ?? 'No detailed explanation was prepared.' }}</p>
-      </div>
+      <PhraseExplanation
+        :explanation="phrase.explanation"
+        :usage-contexts="phrase.usage_contexts"
+        :accepted-variants="phrase.accepted_variants"
+        :detailed-explanation="phrase.detailed_explanation"
+        :open="explained"
+        @toggle="explained = !explained"
+      />
       <p>
         Lesson: {{ phrase.lesson_title }} · Source:
         <a v-if="phrase.source_link" :href="phrase.source_link" rel="noopener noreferrer">{{

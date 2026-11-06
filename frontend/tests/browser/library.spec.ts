@@ -117,8 +117,10 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details).toContainText('Lesson: Small talk · Source: Mobile course')
   await expect(details).toContainText('New: not rated yet')
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
-  await details.getByRole('button', { name: 'Details', exact: true }).tap()
+  await details.getByRole('button', { name: 'More explanation ▾', exact: true }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
+  await details.getByRole('button', { name: 'Less explanation ▴' }).tap()
+  await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await expect(details.locator('.take')).toHaveCount(0)
   await details.getByRole('button', { name: 'Recording history' }).tap()
   await expect(details.locator('.take time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
@@ -250,4 +252,36 @@ test('outstanding file cleanup stays visible until retry succeeds', async ({ pag
   await page.getByRole('button', { name: 'Retry cleanup' }).tap()
   await expect(notice).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Retry cleanup' })).toHaveCount(0)
+})
+
+test('missing longer explanation disables expansion in the library and practice', async ({
+  page,
+}) => {
+  const value = organizedPackage('no-longer-explanation')
+  const first = value.lessons[0]!.phrases[0]!
+  Reflect.deleteProperty(first, 'detailed_explanation')
+  await page.goto('/')
+  await importPackage(page, value, 4)
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByRole('button', { name: `Open details: ${first.text}` }).click()
+  const library = page.locator('.phrase-details')
+  await expect(library.getByRole('button', { name: 'More explanation ▾' })).toBeDisabled()
+  await expect(library.locator('.answer-help')).toContainText(first.explanation)
+  await expect(library.locator('.answer-help')).toContainText(
+    'Used for: small talk · progress update',
+  )
+  await library.getByRole('button', { name: 'Practice', exact: true }).click()
+  const practice = page.locator('article.practice-card')
+  await expect(practice.getByRole('button', { name: /explanation/ })).toHaveCount(0)
+  await revealAnswer(page)
+  await expect(practice.getByRole('button', { name: 'More explanation ▾' })).toBeDisabled()
+  await expect(practice.locator('.answer-help')).toContainText(first.explanation)
+  await expect(practice.locator('.answer-help')).toContainText(
+    'Used for: small talk · progress update',
+  )
+  const audio = await practice.locator('.audio-controls').boundingBox()
+  const description = await practice.locator('.answer-help').boundingBox()
+  expect(description!.y).toBeGreaterThanOrEqual(audio!.y + audio!.height)
+  await expect(practice).not.toContainText('No detailed explanation was prepared.')
+  await expect(practice.locator('.explanation')).toHaveCount(0)
 })

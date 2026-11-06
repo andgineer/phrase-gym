@@ -472,7 +472,7 @@ test('restored practice card keeps the original layout and microphone interactio
   const card = page.locator('article.practice-card')
   await expect(card.getByRole('heading', { name: cards[1].text })).toBeVisible()
   await expect(page.getByTestId('mode-line')).toHaveText('Daily · 1 / 5 new')
-  await expect(card.locator('.answer-help')).toHaveText(
+  await expect(card.locator('.answer-help > p').first()).toHaveText(
     'A natural phrase for an ordinary conversation.',
   )
   await expect(card).not.toContainText('Browser course · Unit 1')

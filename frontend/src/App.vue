@@ -139,7 +139,7 @@ onMounted(initialize)
           :can-retry="practice.pending.value !== null"
           @control="session.controlAudio"
           @show="practice.reveal()"
-          @details="card.revealed ? practice.toggleDetails() : practice.reveal(true)"
+          @details="practice.toggleDetails()"
           @new-cue="practice.newCue"
           @hint="practice.hint"
           @complete="session.complete"

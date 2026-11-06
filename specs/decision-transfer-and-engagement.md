@@ -23,7 +23,7 @@ This is phrase retrieval in varied contexts. Reusing the cue and requesting a hi
 
 Keep one `practice_log` row for each rated new attempt, later recall or Skip, with a date, mode, wording snapshot and rating/Skip outcome. It supports Today’s paged studied list and factual streak without a separate attempt or review history. Saved recordings keep cue/help snapshots; no FSRS state timeline is claimed.
 
-On every explicit rating in Daily, Extra or phrase-specific Practice, call FSRS if the phrase's `last_review` is not today in the configured timezone; due date limits automatic selection, not this grade. Rating reflects the original attempt before answer reveal or requested help; needing a hint does not remove rating controls and can be reported honestly as **Again**. Search, Details, Show, Hint, recording, Skip, repeated same-day ratings and mission completion do not create another schedule update. Another natural response to a broad cue is not automatically a failure of the target phrase.
+On every explicit rating in Daily, Extra or phrase-specific Practice, call FSRS if the phrase's `last_review` is not today in the configured timezone; due date limits automatic selection, not this grade. Rating reflects the original attempt before answer reveal or requested help; needing a hint does not remove rating controls and can be reported honestly as **Again**. Search, More explanation, Show, Hint, recording, Skip, repeated same-day ratings and mission completion do not create another schedule update. Another natural response to a broad cue is not automatically a failure of the target phrase.
 
 Do not label expressions automatic, fluent or mastered from card intervals, phrase counts, completed missions or recordings. Software checks verify these distinctions and saved state; they do not establish learning effectiveness. No mandatory learner experiment is a delivery gate.
 
@@ -42,7 +42,7 @@ An exhausted Daily or Extra traversal returns to entry with a completion message
 
 Apart from the long-term memory count, no mastery score, per-phrase mastery label, scheduling-history timeline or longest-gap highlight is shown.
 
-Phrase details show the answer, **Used for** contexts, short meaning, lesson and source, reference playback, the current due date, [saved recordings](decision-recording-and-comparison.md#observable-behavior), **Details**, **Practice** and **Delete**. Looking a phrase up never changes its schedule; **Practice** opens it on the shared card and returns to its details. Phrase search, lesson choices and saved recordings are paged with **More** and say when nothing matches.
+Phrase details show the answer, **Used for** contexts, short meaning, lesson and source, reference playback, the current due date, [saved recordings](decision-recording-and-comparison.md#observable-behavior), **More explanation**, **Practice** and **Delete**. Looking a phrase up never changes its schedule; **Practice** opens it on the shared card and returns to its details. Phrase search, lesson choices and saved recordings are paged with **More** and say when nothing matches.
 
 ## Adult engagement
 
