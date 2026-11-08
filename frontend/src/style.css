@@ -263,7 +263,8 @@ form {
   .card,
   button,
   select,
-  input[type='search'] {
+  input[type='search'],
+  input[type='text'] {
     color: #e9eee9;
     background: #25352e;
     border-color: #64776b;

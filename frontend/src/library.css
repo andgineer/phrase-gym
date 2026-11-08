@@ -14,6 +14,67 @@
 .phrase-finder p {
   margin: 0;
 }
+.lesson-combo {
+  position: relative;
+}
+.lesson-combo input {
+  margin-top: 0;
+  padding-right: 36px;
+  text-overflow: ellipsis;
+}
+.combo-arrow {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #637169;
+}
+.combo-panel {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 4px;
+  max-height: min(60vh, 22rem);
+  overflow-y: auto;
+  padding: 4px;
+  background: #fffef9;
+  border: 1px solid #ccd2c7;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #24423420;
+}
+.combo-panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.combo-panel li {
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.combo-panel li.active {
+  background: #edf1e8;
+}
+.combo-source {
+  color: #637169;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+.combo-panel li[aria-selected='true'] {
+  font-weight: 650;
+  box-shadow: inset 3px 0 0 #557669;
+}
+.combo-panel p {
+  padding: 6px 12px;
+}
+.combo-panel button {
+  justify-self: start;
+}
 .library-results {
   margin: 0;
 }
@@ -84,5 +145,16 @@ button.danger {
   }
   .success {
     color: #a5d1b8;
+  }
+  .combo-panel {
+    background: #25352e;
+    border-color: #64776b;
+  }
+  .combo-panel li.active {
+    background: #304339;
+  }
+  .combo-arrow,
+  .combo-source {
+    color: #b9c9bf;
   }
 }

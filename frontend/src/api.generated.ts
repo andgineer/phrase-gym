@@ -716,6 +716,7 @@ export interface components {
             items: components["schemas"]["LessonChoice"][];
             /** Next Offset */
             next_offset: number | null;
+            selected: components["schemas"]["LessonChoice"] | null;
         };
         /** LibraryCounts */
         LibraryCounts: {
@@ -1405,6 +1406,7 @@ export interface operations {
         parameters: {
             query?: {
                 query?: string;
+                lesson_id?: string | null;
                 offset?: number;
                 limit?: number;
             };

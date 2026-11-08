@@ -155,6 +155,16 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         "Small talk"
     )
     assert client.get("/api/lessons", params={"query": "nothing"}).json()["items"] == []
+    assert first["selected"] is None
+    greetings = first["items"][0]
+    hidden = client.get(
+        "/api/lessons",
+        params={"query": "nothing", "lesson_id": greetings["id"], "offset": 2, "limit": 1},
+    ).json()
+    assert hidden["items"] == []
+    assert hidden["selected"] == greetings
+    missing = client.get("/api/lessons", params={"lesson_id": "unknown"}).json()
+    assert missing["selected"] is None
 
     practice.later(days=1)
     tomorrow = client.get("/api/lessons").json()

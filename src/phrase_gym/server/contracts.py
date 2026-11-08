@@ -93,6 +93,7 @@ class LessonPage(StrictModel):
     items: list[LessonChoice]
     next_offset: int | None
     all_lessons: PracticeCounts
+    selected: LessonChoice | None
 
 
 class PhraseSummary(StrictModel):

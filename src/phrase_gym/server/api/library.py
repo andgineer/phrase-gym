@@ -20,8 +20,13 @@ def library_routes(library: LibraryService, lessons: LessonChoices) -> APIRouter
     router = APIRouter(prefix="/api")
 
     @router.get("/lessons")
-    def lesson_choices(query: SearchText = "", offset: Offset = 0, limit: Limit = 20) -> LessonPage:
-        return lessons.page(query, offset, limit)
+    def lesson_choices(
+        query: SearchText = "",
+        lesson_id: str | None = None,
+        offset: Offset = 0,
+        limit: Limit = 20,
+    ) -> LessonPage:
+        return lessons.page(query, lesson_id, offset, limit)
 
     @router.get("/phrases")
     def find_phrases(

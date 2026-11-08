@@ -796,12 +796,23 @@
               }
             ],
             "title": "Next Offset"
+          },
+          "selected": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LessonChoice"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "items",
           "next_offset",
-          "all_lessons"
+          "all_lessons",
+          "selected"
         ],
         "title": "LessonPage",
         "type": "object"
@@ -2415,6 +2426,22 @@
               "maxLength": 200,
               "title": "Query",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lesson_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lesson Id"
             }
           },
           {

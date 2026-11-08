@@ -1,27 +1,44 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import { usePagedList } from '../composables/usePagedList'
 import { onLearningDayChange } from '../learningDay'
 import type { LessonChoice, LessonPage } from '../libraryTypes'
 
 const selected = defineModel<string>({ default: '' })
 const query = ref('')
-const chosen = ref<LessonChoice | null>(null)
-const lessons = usePagedList<LessonChoice, LessonPage>(
-  () => `/lessons?query=${encodeURIComponent(query.value.trim())}`,
-)
-const options = computed(() =>
-  chosen.value && !lessons.items.value.some((lesson) => lesson.id === chosen.value?.id)
-    ? [chosen.value, ...lessons.items.value]
-    : lessons.items.value,
-)
-// Only a freshly loaded lesson has current counts; a lesson hidden by the search may be stale.
-const counts = computed(() =>
-  selected.value
-    ? lessons.items.value.find((lesson) => lesson.id === selected.value)
-    : lessons.page.value?.all_lessons,
-)
+const text = ref('')
+const open = ref(false)
+const active = ref(-1)
+const root = ref<HTMLElement | null>(null)
+const field = ref<HTMLInputElement | null>(null)
+const listId = useId()
+const optionId = (index: number) => `${listId}-${index}`
+const lessons = usePagedList<LessonChoice, LessonPage>(() => {
+  const params = new URLSearchParams({ query: query.value.trim() })
+  if (selected.value) params.set('lesson_id', selected.value)
+  return `/lessons?${params}`
+})
+const label = (lesson: LessonChoice) => `${lesson.title} · ${lesson.source_label}`
+const choices = computed(() => [
+  { id: '', title: 'All lessons', source: '' },
+  ...lessons.items.value.map((lesson) => ({
+    id: lesson.id,
+    title: lesson.title,
+    source: lesson.source_label,
+  })),
+])
+const current = computed(() => {
+  if (!selected.value) return null
+  const page = lessons.page.value
+  if (page?.selected?.id === selected.value) return page.selected
+  return lessons.items.value.find((lesson) => lesson.id === selected.value) ?? null
+})
+const shown = computed(() => (current.value ? label(current.value) : ''))
+const counts = computed(() => (selected.value ? current.value : lessons.page.value?.all_lessons))
 const empty = computed(() => lessons.page.value?.all_lessons.phrase_count === 0)
+const noMatches = computed(
+  () => query.value.trim() && lessons.loaded.value && !lessons.items.value.length,
+)
 const summary = computed(() => {
   const value = counts.value
   if (!value) return ''
@@ -33,20 +50,95 @@ const summary = computed(() => {
 })
 let debounce: number | undefined
 
+function openList() {
+  if (open.value) return
+  open.value = true
+  text.value = ''
+  if (field.value) field.value.value = ''
+  active.value = choices.value.findIndex((choice) => choice.id === selected.value)
+}
+
+function close() {
+  open.value = false
+  active.value = -1
+  text.value = shown.value
+  query.value = ''
+}
+
+function choose(index: number, keepFocus: boolean) {
+  const choice = choices.value[index]
+  if (!choice) return
+  selected.value = choice.id
+  close()
+  if (!keepFocus) field.value?.blur()
+}
+
+function move(step: number) {
+  const last = choices.value.length - 1
+  active.value = Math.min(Math.max(active.value + step, 0), last)
+  void nextTick(() =>
+    document.getElementById(optionId(active.value))?.scrollIntoView({ block: 'nearest' }),
+  )
+}
+
+function key(event: KeyboardEvent) {
+  const typing = event.key.length === 1 || event.key === 'Backspace' || event.key === 'Delete'
+  if (!open.value && typing && !event.ctrlKey && !event.metaKey && !event.altKey) openList()
+  else if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    if (open.value) move(1)
+    else openList()
+  } else if (event.key === 'ArrowUp' && open.value) {
+    event.preventDefault()
+    move(-1)
+  } else if (event.key === 'Enter' && open.value && active.value >= 0) {
+    event.preventDefault()
+    choose(active.value, true)
+  } else if (event.key === 'Escape' && open.value) {
+    event.preventDefault()
+    close()
+  }
+}
+
+function filter() {
+  openList()
+  query.value = text.value
+  // Until the matching lessons arrive, Enter must not pick a lesson from the previous list.
+  active.value = -1
+}
+
+function leave(event: FocusEvent) {
+  if (open.value && !root.value?.contains(event.relatedTarget as Node | null)) close()
+}
+
+// Touch WebKit keeps focus in the field when a non-focusable area is tapped.
+function pressOutside(event: PointerEvent) {
+  if (!open.value || root.value?.contains(event.target as Node | null)) return
+  close()
+  field.value?.blur()
+}
+
+watch(shown, (value) => {
+  if (!open.value) text.value = value
+})
 watch(query, () => {
   window.clearTimeout(debounce)
-  debounce = window.setTimeout(() => void lessons.reload(), 200)
+  debounce = window.setTimeout(async () => {
+    const wanted = query.value
+    await lessons.reload()
+    if (open.value && wanted.trim() && wanted === query.value)
+      active.value = lessons.items.value.length ? 1 : -1
+  }, 200)
 })
-watch(selected, (id) => {
-  chosen.value = lessons.items.value.find((lesson) => lesson.id === id) ?? null
+onMounted(() => {
+  document.addEventListener('pointerdown', pressOutside)
+  void lessons.reload()
 })
-watch(lessons.items, (items) => {
-  const fresh = items.find((lesson) => lesson.id === selected.value)
-  if (fresh) chosen.value = fresh
-})
-onMounted(() => void lessons.reload())
 onLearningDayChange(() => void lessons.refresh())
-onUnmounted(() => window.clearTimeout(debounce))
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', pressOutside)
+  window.clearTimeout(debounce)
+})
 defineExpose({ reload: lessons.reload })
 </script>
 
@@ -55,23 +147,55 @@ defineExpose({ reload: lessons.reload })
     <p>Add your first phrase batch</p>
     <p class="muted">Import 5–10 prepared phrases to begin.</p>
   </div>
-  <div v-else class="lesson-picker">
-    <label for="lesson-search">Search lessons</label>
-    <input id="lesson-search" v-model="query" type="search" placeholder="Lesson or source title" />
-    <label for="lesson-choice">Lesson to drill</label>
-    <select id="lesson-choice" v-model="selected">
-      <option value="">All lessons</option>
-      <option v-for="lesson in options" :key="lesson.id" :value="lesson.id">
-        {{ lesson.title }} · {{ lesson.source_label }}
-      </option>
-    </select>
+  <div v-else ref="root" class="lesson-picker" @focusout="leave">
+    <div class="lesson-combo">
+      <input
+        ref="field"
+        v-model="text"
+        type="text"
+        role="combobox"
+        aria-label="Lesson"
+        aria-autocomplete="list"
+        :aria-expanded="open"
+        :aria-controls="listId"
+        :aria-activedescendant="open && active >= 0 ? optionId(active) : undefined"
+        :placeholder="open ? 'Type to filter lessons' : 'All lessons — select one'"
+        autocomplete="off"
+        spellcheck="false"
+        @focus="openList"
+        @click="openList"
+        @keydown="key"
+        @input="filter"
+      />
+      <span class="combo-arrow" aria-hidden="true">▾</span>
+      <div v-show="open" class="combo-panel" @mousedown.prevent>
+        <ul :id="listId" role="listbox" aria-label="Lessons">
+          <li
+            v-for="(choice, index) in choices"
+            :id="optionId(index)"
+            :key="choice.id"
+            role="option"
+            :aria-selected="choice.id === selected"
+            :class="{ active: index === active }"
+            @click="choose(index, false)"
+            @mousemove="active = index"
+          >
+            {{ choice.title
+            }}<span v-if="choice.source" class="combo-source"> · {{ choice.source }}</span>
+          </li>
+        </ul>
+        <p v-if="noMatches" class="muted">No matches</p>
+        <button
+          v-if="lessons.nextOffset.value !== null"
+          type="button"
+          class="quiet"
+          @click="lessons.more"
+        >
+          More lessons
+        </button>
+      </div>
+    </div>
     <p v-if="summary" class="muted" data-testid="lesson-counts">{{ summary }}</p>
-    <p v-if="query.trim() && lessons.loaded.value && !lessons.items.value.length" class="muted">
-      No matches
-    </p>
-    <button v-if="lessons.nextOffset.value !== null" class="quiet" @click="lessons.more">
-      More lessons
-    </button>
     <p v-if="lessons.error.value" role="alert" class="error">{{ lessons.error.value }}</p>
   </div>
 </template>

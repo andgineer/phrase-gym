@@ -141,8 +141,25 @@ test('completion returns to Today facts that continue through limits, Extra and 
   const daily = await page.getByRole('button', { name: 'Daily', exact: true }).boundingBox()
   expect(daily!.y).toBeGreaterThan(panel!.y + panel!.height)
 
-  await page.getByLabel('Search lessons').fill('Small')
-  await expect(page.getByLabel('Lesson to drill')).toContainText('Small talk · Facts course')
+  const lesson = page.getByRole('combobox', { name: 'Lesson', exact: true })
+  await lesson.click()
+  await lesson.pressSequentially('Small')
+  await expect(page.getByRole('option')).toHaveText(['All lessons', 'Small talk · Facts course'])
+  await expect(lesson).toHaveAttribute('aria-activedescendant', /.+/)
+  await lesson.press('Escape')
+  await expect(page.getByRole('option')).toHaveCount(0)
+  await expect(lesson).toHaveValue('')
+  await lesson.pressSequentially('Sm')
+  await expect(page.getByRole('option')).toHaveText(['All lessons', 'Small talk · Facts course'])
+  await expect(lesson).toHaveAttribute('aria-activedescendant', /.+/)
+  await lesson.press('Enter')
+  await expect(lesson).toHaveValue('Small talk · Facts course')
+  await expect(lesson).toBeFocused()
+  await lesson.press('ArrowDown')
+  await lesson.press('ArrowUp')
+  await lesson.press('Enter')
+  await expect(lesson).toHaveValue('')
+  await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 5 new')
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByLabel('Find a phrase').fill(texts[2])
   await expect(page.getByRole('button', { name: `Open details: ${texts[2]}` })).toBeVisible()
@@ -338,10 +355,14 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   await expect(studied).toHaveCount(5)
   await facts(page).getByRole('button', { name: 'More', exact: true }).click()
   await expect(studied).toHaveCount(6)
+  const lesson = page.getByRole('combobox', { name: 'Lesson', exact: true })
+  const options = page.getByRole('option')
+  await lesson.click()
+  await expect(options).toHaveCount(21)
   await press(page, 'More lessons')
-  const choice = page.getByLabel('Lesson to drill')
-  await expect(choice.locator('option')).toHaveCount(22)
-  await choice.selectOption({ label: 'Unit 21 · Facts course' })
+  await expect(options).toHaveCount(22)
+  await options.filter({ hasText: 'Unit 21' }).click()
+  await expect(lesson).toHaveValue('Unit 21 · Facts course')
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 1 new')
 
@@ -350,10 +371,13 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   const lessons = count('/api/lessons')
   await returnToPage(page)
   await expect.poll(() => count('/api/practice/facts')).toBe(loads + 2)
-  await expect(page.getByRole('button', { name: 'More lessons' })).toHaveCount(0)
-  await expect(choice.locator('option')).toHaveCount(22)
-  await expect(choice).toHaveValue(/.+/)
+  await expect(lesson).toHaveValue('Unit 21 · Facts course')
   await expect(counts).toHaveText('0 due · 1 new')
+  await lesson.click()
+  await expect(options).toHaveCount(22)
+  await expect(page.getByRole('button', { name: 'More lessons' })).toHaveCount(0)
+  await lesson.press('Escape')
+  await expect(lesson).toHaveValue('Unit 21 · Facts course')
   await expect(studied).toHaveCount(6)
   expect([count('/api/practice/studied'), count('/api/lessons')]).toEqual([lists, lessons])
 
@@ -361,17 +385,32 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   const newList = page.waitForRequest((request) =>
     request.url().includes('/api/practice/studied?learning_date=2026-11-03'),
   )
-  const refreshed = page.waitForRequest((request) =>
-    request.url().includes('/api/lessons?query=&offset=0&limit=21'),
-  )
+  const refreshed = page.waitForRequest((request) => {
+    const url = new URL(request.url())
+    return (
+      url.pathname === '/api/lessons' &&
+      url.searchParams.has('lesson_id') &&
+      url.searchParams.get('offset') === '0' &&
+      url.searchParams.get('limit') === '21'
+    )
+  })
   await returnToPage(page)
   await Promise.all([newList, refreshed])
   await expect(fact(page, 'library')).toHaveText('6 due now · 15 new')
   await expect(fact(page, 'total-title')).toHaveText('Total — 21 phrases')
   await expect(fact(page, 'today-title')).toHaveCount(0)
   await expect(studied).toHaveCount(0)
-  await expect(choice.locator('option')).toHaveCount(22)
+  await lesson.click()
+  await expect(options).toHaveCount(22)
+  await lesson.press('Escape')
   await expect(counts).toHaveText('0 due · 1 new')
+
+  // The remounted picker loads only the first page, yet still names the later lesson.
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
+  await expect(lesson).toHaveValue('Unit 21 · Facts course')
+  await expect(counts).toHaveText('0 due · 1 new')
+  await lesson.click()
+  await expect(options).toHaveCount(21)
 })
 
 test('a Daily finished just after midnight shows its own completion message', async ({ page }) => {
