@@ -89,7 +89,7 @@ or guarantees spontaneous conversational transfer.
 
 ## Words after the phrase MVP
 
-Each word-sense entry teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. A raw echo-words entry needs enough context to choose its sense; otherwise the app asks for a short clarification instead of inventing one. Keep source identity so retrying the same entry does not duplicate it.
+Each word-sense entry teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. Choose the intended sense from the supplied context. If the input is insufficient to prepare a coherent entry, retain it as a preparation failure instead of opening a clarification conversation. Keep source identity so retrying the same entry does not duplicate it.
 
 For English at the learner's stated B2 level, use a short English context with the target word missing, plus a sense cue if needed; ask the learner to say the complete chunk. For beginner German, use the Russian meaning of a short chunk and ask for the German chunk. Explain article/plural or another form only when relevant. Grade retrieval of the target sense/form, not an unrelated slip elsewhere in the sentence. Accepted alternatives must fit the intended meaning.
 

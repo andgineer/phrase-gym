@@ -20,7 +20,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 **Learner outcome:** paste words with their source contexts or import a supplied echo-words export and receive useful word-sense cards without manually authoring them.
 
 - Reuse the Phrase Gym submission and publication path with Coach performing preparation. Add a single selected subscription-CLI adapter in Coach, bounded execution and clear errors; retain the source material so that resubmitting it retries preparation.
-- Prepare one sense at a time, a comprehensible definition and two or three contexts under the [word rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp). Ask briefly when meaning is genuinely ambiguous. Do not infer a sense from a bare homograph.
+- Prepare one sense at a time, a comprehensible definition and two or three contexts under the [word rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp). Use the supplied context and agent judgment; insufficient input follows the preparation failure path without a clarification conversation.
 - Keep pending, ready and failed material distinct in Phrase Gym without browser progress tracking. Reuse the small durable Coach handoff; no general distributed queue or second desktop application. Existing ready practice stays usable during generation.
 - Document an export/paste interface first; direct echo-words integration or source changes require their own authorization. Do not make export automation a prerequisite.
 - Use representative new actual model results with a fresh semantic reviewer, plus attended speech listening. Cover an ambiguous word, an accepted variant, a confusable contrast and a failed request separately from structural tests.

@@ -20,7 +20,7 @@ acceptance. Requested hints may supply target words or word fragments, but never
 Usage contexts remain short searchable uses; explanations and alternatives remain answer-side help. No new slot structure or per-cue
 audio is implied by this preparation format.
 
-Validate the whole submission before adding it. Tell the learner which item/field needs correction. Identical input-ID/content retries return the same result; changed content under that ID asks for a new input ID. A new submission containing the same source/item identity must not silently duplicate or overwrite a learned phrase: show the conflict and permit a new phrase after the learner confirms deletion of the old one. No semantic deduplication service is required.
+Validate the whole submission before adding it. The preparation agent corrects validation errors and retries; unresolved failures retain the concrete error through the existing failure path. Identical input-ID/content retries return the same result; changed content under that ID asks for a new input ID. A new submission containing the same source/item identity must not silently duplicate or overwrite a learned phrase: show the conflict and permit a new phrase after the learner confirms deletion of the old one. No semantic deduplication service is required.
 
 ## Reference speech
 
@@ -28,7 +28,7 @@ For the text-only MVP, Coach synthesizes English reference audio with the existi
 
 Preserve submitted text and diagnostic reason on failure. Bound concurrent preparation to personal-app scale. Coach performs expensive work outside Phrase Gym transactions; Phrase Gym validates the returned result and commits the ready batch in one transaction. Retry uses stable identities so a repeated submission or result does not duplicate phrases or references. Do not build a job dashboard, broker or general distributed recovery framework.
 
-External agents trust the supplied source's phrase-to-recording association and report provenance.
+External agents trust the supplied source's phrase-to-recording association and preserve attribution.
 No listening, transcription, ASR or speech-quality analysis is required for routine preparation.
 Do not treat their absence as an import acceptance gap. Preserve supplied recordings without
 trimming, denoising or other content changes unless the learner explicitly requests an edit;
@@ -49,15 +49,18 @@ After the phrase MVP works, add internal AI preparation for supplied echo-words 
 
 One bounded Coach request prepares a small batch under the [content rules](decision-targeted-drilling.md#words-after-the-phrase-mvp) and current language choices. Use the learner-selected, already authenticated subscription CLI through one Coach adapter; do not qualify every provider before delivering this path. Existing selection can be reused, with no silent provider switch or paid API fallback. Internal AI means preparation submitted through Phrase Gym and executed by Coach, not a requirement to run local LLM weights.
 
-Like audio preparation, it runs offline: the browser does not track it, and a failure surfaces as the same dismissible notice. Missing sense/context requires a short clarification; a malformed model response never becomes a phrase. Keep submitted material so that submitting it again retries preparation. Reuse the same validation, audio and import path as external batches. Preparation never reads recordings or changes language preferences.
+Like audio preparation, it runs offline: the browser does not track it, and a failure surfaces as the same dismissible notice. Use the supplied context and agent judgment to choose the sense. If the input is insufficient to prepare a coherent card, fail the batch with the concrete reason; do not open a clarification conversation. A malformed model response never becomes a phrase. Keep submitted material so that submitting it again retries preparation. Reuse the same validation, audio and import path as external batches. Preparation never reads recordings or changes language preferences.
 
 ### Coach prompts and evaluation
 
 When adding AI preparation to Coach, reuse the content rules from the
 [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules).
 Use separate CLI sessions to prepare material and review it. Assess the review findings,
-apply useful corrections and check the changes before publication. Keep development and
-orchestration details in specs, not in the instructions given to external preparation agents.
+apply useful corrections and check the changes before publication. Coach is a headless worker:
+it takes inbox material, prepares it and publishes through the API. Neither Coach nor the external
+preparation agent requests learner opinions or produces preparation reports. Successful API
+publication completes the task; unresolved failures use the existing error path. Keep development
+and orchestration details in specs, not in external-agent instructions.
 
 Test prompt changes on separate development and held-out sets: tune on the development set,
 then check the frozen prompts on untouched test items. If a test finding informs a prompt
