@@ -29,10 +29,16 @@ User launch, Coach setup, private access and backups are documented in the
 
 ## Documentation sources
 
-Keep user and external-agent pages in `docs/src/en/` and list them in `docs/mkdocs.yml`.
-Each language directory is the complete source for that language; the build copies it into
-`build/docs/src/` without injecting pages from elsewhere. Development and release guidance
-belongs in `specs/`, outside the user site.
+Keep user and external-agent pages in `docs/src/<language>/` and list navigable pages in
+`docs/mkdocs.yml`. The build copies each language directory into `build/docs/src/`;
+`pymdownx.snippets` resolves shared includes from `docs/includes/` when rendering the pages.
+Development and release guidance belongs in `specs/`, outside the user site.
+
+The AI agent instructions have one English source: `docs/includes/agent-add-phrases.md`.
+Every language's `agent-add-phrases.md` page must include it with
+`--8<-- "agent-add-phrases.md"`. Translate only the page title and learner-facing introduction;
+do not copy or translate the shared instructions. Keep the shared file outside `docs/src/`
+so the build does not treat it as another language directory.
 
 ## Build a distributable
 
