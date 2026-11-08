@@ -4,7 +4,7 @@
 
 Start with bulk English phrases prepared by an external AI from a course the learner already uses. Extraction, source browsing/login and any source-specific tools remain outside Phrase Gym. The app accepts the result; it does not implement a course importer or host a browsing agent. This gives a useful learning set before internal AI generation is needed.
 
-The browser offers **Add material** with a file drop/selection or pasted structured phrase data and an explicit **Import**. An external agent prepares both text and complete reference audio and submits them together through the Phrase Gym API for immediate publication. Its instructions describe the external workflow and a reusable author/reviewer content contract; Coach execution details remain separate. The browser confirms that the submission is saved; it does not follow preparation afterwards. No manual per-phrase form filling, Coach window or hidden automatic submission is needed. A file picker is learner-triggered.
+The browser offers **Add material** with a file drop/selection or pasted structured phrase data and an explicit **Import**. An external agent prepares both text and complete reference audio and submits them together through the Phrase Gym API for immediate publication. Its instructions describe material preparation, review and submission; Coach execution details remain in this spec. The browser confirms that the submission is saved; it does not follow preparation afterwards. No manual per-phrase form filling, Coach window or hidden automatic submission is needed. A file picker is learner-triggered.
 
 The input is one documented UTF-8 JSON structure containing an input ID, source label/link, learning/card/help languages and phrases with stable item IDs, `text` for the complete wording, short explanation, retrieval cues and optional accepted alternatives/detailed explanation. Phrases also identify their lesson and carry recall hints and usage contexts. Each phrase belongs to one source-scoped lesson with a stable identity. One submission may contain several lessons. `Phrase` is the complete typed record in `phrases`; `phrase.text` is its wording string. Prepared support, reference audio and scheduling fields belong to that same phrase. A Card is only its visual client component, not another data entity. Source links are opaque attribution. Define the exact generated schema and a working external-agent example with implementation; this document does not freeze prototype API fields. Plain unprepared words, URLs alone and slot/dialogue structures are rejected with an explanation of the supported input.
 
@@ -51,39 +51,18 @@ One bounded Coach request prepares a small batch under the [content rules](decis
 
 Like audio preparation, it runs offline: the browser does not track it, and a failure surfaces as the same dismissible notice. Missing sense/context requires a short clarification; a malformed model response never becomes a phrase. Keep submitted material so that submitting it again retries preparation. Reuse the same validation, audio and import path as external batches. Preparation never reads recordings or changes language preferences.
 
-### Shared author and reviewer workflow
+### Coach prompts and evaluation
 
-The [external-agent guide](../docs/src/en/agent-add-phrases.md#authoring-and-independent-review)
-owns the content rules and the required author, independent reviewer, correction and release
-contract. Apply it to each prepared batch now. For future Coach inbox preparation, compose
-separate author and reviewer CLI prompts from that same versioned rule source, plus their
-role-specific task and structured input. Do not maintain divergent copies of the teaching
-rules in a second prompt. This is a design requirement for the later CLI adapter, not a claim
-that the current audio-preparation Coach already generates or reviews text.
+When adding AI preparation to Coach, reuse the content rules from the
+[external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules).
+Use separate CLI sessions to prepare material and review it. Assess the review findings,
+apply useful corrections and check the changes before publication. Keep development and
+orchestration details in specs, not in the instructions given to external preparation agents.
 
-Coach will own the orchestration: retain the inbox source and stable item identities, invoke
-an author for candidate material, invoke a fresh reviewer context for per-item findings, and
-send concrete defects back for bounded correction. Both roles may use the learner-selected
-CLI/model, but the reviewer must not inherit the author's conversation or initial self-rating.
-Carry the candidate digest and instruction revision across the handoff so a verdict cannot
-approve a different draft. A correction must receive a new review; unchanged item verdicts
-may be carried forward only under the guide's content/source/rules identity check.
-
-The text agents return structured candidate or review artifacts and cannot publish, mutate
-learner data, read recordings or generate audio. Coach performs schema/coverage checks and
-requires all final items to pass semantic review before completing reference preparation and
-the existing atomic publication handoff. Keep internal review metadata outside the import
-payload. Bound correction to the guide's two cycles; unresolved content, malformed output or
-an unavailable reviewer leaves the batch failed with its source and actionable diagnostics
-retained for retry through the existing inbox. No partial publication or unbounded agent loop.
-
-Qualify the composed author/reviewer prompts with separate frozen development and held-out
-sets before enabling unattended generation. A test item used to change the prompts is no
-longer held out. Inspect actual outputs for meaning, natural cues, answer leakage and accepted
-variants, and keep human adjudication separate from raw reviewer results. Calibrate reviewer
-findings against learner feedback; a model verdict does not establish learning effectiveness.
-This is bounded content qualification, not an open-ended research programme. Audio acceptance
-continues to follow the reference-speech rules above.
+Test prompt changes on separate development and held-out sets: tune on the development set,
+then check the frozen prompts on untouched test items. If a test finding informs a prompt
+change, move that item into the development set and use fresh held-out items next time.
+Keep actual outputs, reviewer findings and human judgments distinct.
 
 ## Repair and scope
 
