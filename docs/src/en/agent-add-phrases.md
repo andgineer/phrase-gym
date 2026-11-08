@@ -16,17 +16,19 @@ through the Phrase Gym HTTP API. The learner supplies source locations and the s
    preserving source wording, attribution, and stable source, lesson and phrase identities.
 3. Identify the reusable chunk in each source example, then author its gap cues and wording
    hints using the rules below. Keep authored contexts distinct from source quotations.
-4. Prepare one audio reference for every phrase as described below. Reuse supplied source
+4. **Review the prepared material in a fresh AI session against these instructions.**
+   Assess the findings, address those you find useful, and check your changes before submission.
+5. Prepare one audio reference for every phrase as described below. Reuse supplied source
    recordings; when no audio is supplied, choose an available, authorized TTS tool and natural voice.
    Finish both text and audio before submission. Do not submit text-only requests.
-5. Submit `package` and `references` together with `POST /api/imports`. Confirm `status: added`
+6. Submit `package` and `references` together with `POST /api/imports`. Confirm `status: added`
    and `added_count`. The complete batch is then immediately available for learning.
-6. Inspect concrete validation errors and correct the affected material before resubmitting.
+7. Inspect concrete validation errors and correct the affected material before resubmitting.
    Preserve existing material; do not delete phrases or change identities to evade conflicts.
    If the response is lost, check `GET /api/imports/{package_id}` before retrying the identical
    request. An unexpected `pending`, `preparing`, or `error` is not a completed import: report
    it and investigate the submitted request instead of polling indefinitely.
-7. Report the source, lessons, confirmed added count, use of source or generated audio, and any
+8. Report the source, lessons, confirmed added count, use of source or generated audio, and any
    blocked or failed batches in plain language. If access, audio preparation or server access
    is blocked, report the concrete missing prerequisite; do not claim the phrases were added.
 
@@ -194,9 +196,6 @@ The response is completely blank because the entire routine is the target. In th
 examples, visible context does not need to be memorized as part of the expression.
 
 ### Inspect every card before submission
-
-After preparing the material, ask a fresh AI session to review it against these instructions.
-Assess the findings, address those you find useful, and check your changes before submission.
 
 1. **Useful target:** state the selected chunk and why it is worth reusing beyond this example.
    Check the boundaries; hide its complete lexical core rather than only an easy filler word.
