@@ -20,7 +20,12 @@ example context. This uses the current complete-example contract; it does not re
 editor, new target field, generated per-cue answers or automatic speech evaluation.
 
 The default cue is a natural sentence with the whole target chunk replaced by one constant-length
-gap and, when useful, a short meaning gloss. The visible context carries the incidental proposition.
+gap and a short plain-English meaning gloss. The visible context carries the incidental proposition.
+Keep this a quick conversational response, not a scene-reading task. The gloss paraphrases the
+missing expression in ordinary language while preserving its intention and sentence frame;
+shortening must not turn neutral inquiry into positive expectation or preference into advice.
+Vary gloss wording naturally between contexts without changing meaning. The preparation guide
+owns worked examples and the review procedure.
 For example, **We __________ that this approach will set us apart from competitors. (=We truly
 think)** asks for **strongly believe**; **We're __________ that this tool will make data analysis
 more efficient. (=We are completely sure)** asks for **totally convinced**. Grammar distinguishes
@@ -34,18 +39,25 @@ try likely competing chunks from the whole source. Natural alternatives can rema
 wording hint helps identify the studied expression without displaying its complete answer.
 Generated contexts are preparation, not quotations from the course.
 
-The bracketed cue gloss supplies meaning; requested hints help retrieve the exact studied wording
-among natural alternatives or restart recall when the learner is stuck. Choose a diagnostic word,
-a short fragment of the chunk or part of a word, rather than another definition or abstract label.
-For **strongly believe**, **strongly** or **bel…** can activate recall of the rest. Never supply
-the entire selected chunk, even if the source sentence contains additional words. Short targets
-may need partial-word hints so the learner still has something meaningful to retrieve.
+The bracketed cue gloss supplies meaning; requested hints help retrieve the studied wording
+among natural alternatives or restart recall when the learner is stuck. Each hint normally
+combines two diagnostic words or fragments separated by `/`. Provide two to six independent
+alternatives of at most 40 characters each, not one useful pair split into separate entries.
+Alternatives may share a useful anchor while changing the other support. Each ordinary hint
+must retain a diagnostic part of the expression's lexical core; do not diversify by replacing
+all core wording with auxiliaries or peripheral time/location tails. Judge an auxiliary's role
+in the particular expression rather than banning it. Peripheral wording alone, abstract labels
+and permutations of the same pair do not supply adequate alternatives.
 
-Prepare two to six distinct hints of one or two words/fragments. Vary the word or fragment supplied
-so practice does not depend on one fixed hint. Each must work alone with every cue because the
-app chooses randomly and avoids an immediate repeat when possible. They are not an ordered ladder.
-Review each hint's intended memory nudge and what remains to retrieve. This is supported recall,
-not a claim of unaided retrieval or a research-established optimum amount of support.
+The app shows one hint at a time, chosen randomly while avoiding an immediate repeat when
+possible. Every hint must therefore help with every cue independently; these are not steps in
+a ladder. Never give the entire target, even as slash-separated words, or leave only a trivial
+article or pronoun to retrieve. Short targets may need meaningful partial forms with ordinary
+associations instead of lexical pairs. Reserve compact construction reminders for auxiliary
+echo replies; ordinary hints must not become grammar puzzles. Flag unresolved support rather
+than padding the list with arbitrary fragments. Review what
+each hint activates and what remains to retrieve. This is supported recall, not a claim of
+unaided retrieval or a research-established optimum amount of support.
 
 The learner retrieves the missing chunk and may say the completed cue sentence. The self-rating
 concerns the target's form and appropriate use, not exact reproduction of the example's incidental
