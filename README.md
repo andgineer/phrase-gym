@@ -38,7 +38,7 @@
 | src/phrase\_gym/server/phrase\_practice.py    |       28 |        0 |    100% |           |
 | src/phrase\_gym/server/practice\_contracts.py |       26 |        0 |    100% |           |
 | src/phrase\_gym/server/practice\_facts.py     |       46 |        0 |    100% |           |
-| src/phrase\_gym/server/practice\_selection.py |       36 |        1 |     97% |        52 |
+| src/phrase\_gym/server/practice\_selection.py |       42 |        1 |     98% |        74 |
 | src/phrase\_gym/server/practice\_state.py     |       30 |        1 |     97% |        42 |
 | src/phrase\_gym/server/practice\_views.py     |       47 |        0 |    100% |           |
 | src/phrase\_gym/server/publication.py         |       56 |        0 |    100% |           |
@@ -52,7 +52,7 @@
 | src/phrase\_gym/server/storage.py             |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py              |       16 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py       |       49 |        0 |    100% |           |
-| **TOTAL**                                     | **1783** |   **75** | **96%** |           |
+| **TOTAL**                                     | **1789** |   **75** | **96%** |           |
 
 
 ## Setup coverage badge
