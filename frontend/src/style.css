@@ -92,6 +92,7 @@ label {
 }
 input[type='search'],
 input[type='text'],
+input[type='number'],
 select {
   width: 100%;
   border: 1px solid #ccd2c7;

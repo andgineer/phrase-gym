@@ -30,7 +30,7 @@ def due_phrases(
     ]
 
 
-def first_new_phrase(connection: sqlite3.Connection, view: sqlite3.Row) -> sqlite3.Row | None:
+def new_phrases(connection: sqlite3.Connection, view: sqlite3.Row) -> list[sqlite3.Row]:
     clause, parameters = _lesson_filter(view)
     skipped = set(json.loads(view["skipped_json"]))
     rows = connection.execute(
@@ -38,7 +38,29 @@ def first_new_phrase(connection: sqlite3.Connection, view: sqlite3.Row) -> sqlit
         "ORDER BY created_at, position, id",
         parameters,
     ).fetchall()
-    return next((row for row in rows if row["id"] not in skipped), None)
+    return [row for row in rows if row["id"] not in skipped]
+
+
+def draw_phrase(
+    connection: sqlite3.Connection,
+    view: sqlite3.Row,
+    now: datetime,
+    day: str,
+    rng: random.Random,
+) -> tuple[sqlite3.Row, str] | None:
+    progress = daily_progress(connection, day)
+    due_left = max(progress.due_allowance - progress.due_completed, 0)
+    new_left = max(progress.new_allowance - progress.new_completed, 0)
+    # FSRS needs the longest-due phrases reviewed first; only their order within the session varies.
+    due = due_phrases(connection, view, now)[:due_left]
+    fresh = new_phrases(connection, view)
+    new_slots = min(new_left, len(fresh))
+    if not due and not new_slots:
+        return None
+    # Weighting by remaining slots shuffles due and new phrases uniformly through the session.
+    if rng.randrange(len(due) + new_slots) < len(due):
+        return rng.choice(due), "recall"
+    return rng.choice(fresh), "new"
 
 
 def advance(
@@ -50,15 +72,9 @@ def advance(
     view = load_view(connection)
     if view is None:
         return
-    progress = daily_progress(connection, day)
-    if progress.due_completed < progress.due_allowance:
-        due = due_phrases(connection, view, now)
-        if due:
-            show_phrase(connection, due[0], "recall", rng)
-            return
-    if progress.new_completed < progress.new_allowance:
-        fresh = first_new_phrase(connection, view)
-        if fresh:
-            show_phrase(connection, fresh, "new", rng)
-            return
-    clear_phrase(connection)
+    drawn = draw_phrase(connection, view, now, day, rng)
+    if drawn is None:
+        clear_phrase(connection)
+        return
+    phrase, kind = drawn
+    show_phrase(connection, phrase, kind, rng)

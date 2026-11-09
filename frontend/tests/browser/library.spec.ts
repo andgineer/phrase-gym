@@ -78,7 +78,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   const card = page.locator('article.practice-card')
   await revealAnswer(page, true)
-  await expect(card.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
+  const drawn = await card.getByTestId('practice-phrase').innerText()
   await card.getByRole('button', { name: 'Record a take' }).tap()
   await card.getByRole('button', { name: 'Stop recording' }).tap()
   await expect(card.getByRole('button', { name: 'Mine' })).toBeVisible()
@@ -140,10 +140,6 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
   await details.getByRole('button', { name: 'Less explanation ▴' }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
-  await expect(details.locator('.take')).toHaveCount(0)
-  await details.getByRole('button', { name: 'Recording history' }).tap()
-  await expect(details.locator('.take time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
-  await expect(details.getByRole('button', { name: 'Mine' })).toHaveCount(1)
   await details.getByRole('button', { name: 'Ref' }).tap()
   await expect
     .poll(() =>
@@ -155,6 +151,19 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
     )
     .toContainEqual(expect.stringMatching(/^\/api\/phrases\/.+\/reference$/))
   await noHorizontalScroll(page)
+
+  await details.getByRole('button', { name: '← Back' }).tap()
+  await find.fill(drawn)
+  await libraryPhrase(page, drawn).tap()
+  await expect(details.getByRole('heading', { name: drawn })).toBeVisible()
+  await expect(details.locator('.take')).toHaveCount(0)
+  await details.getByRole('button', { name: 'Recording history' }).tap()
+  await expect(details.locator('.take time')).toHaveText(/\d{4}-\d{2}-\d{2}/)
+  await expect(details.getByRole('button', { name: 'Mine' })).toHaveCount(1)
+  await details.getByRole('button', { name: '← Back' }).tap()
+  await find.fill('how is it going')
+  await libraryPhrase(page, 'So far, so good.').tap()
+  await expect(details.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
 
   const phraseId = await page.evaluate(
     async () => (await (await fetch('/api/phrases?query=so%20far')).json()).items[0].id as string,
@@ -214,7 +223,9 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(counts).toHaveText('0 due · 2 new')
   await page.getByRole('button', { name: 'Daily', exact: true }).tap()
   await revealAnswer(page, true)
-  await expect(card.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
+  await expect(card.getByTestId('practice-phrase')).toHaveText(
+    /^(Could you walk me through that\?|That works for me\.)$/,
+  )
   await expect(page.getByRole('alert')).toHaveCount(0)
 })
 

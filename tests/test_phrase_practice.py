@@ -90,7 +90,8 @@ def test_practice_closes_an_unfinished_daily_new_view(
 ) -> None:
     daily = practice.card()
     assert daily["kind"] == "new"
-    target = daily["phrase_id"] if same_phrase else ids(practice)[3]
+    others = [item for item in ids(practice) if item != daily["phrase_id"]]
+    target = daily["phrase_id"] if same_phrase else others[0]
     card = practice.practise(target)
     assert card["view_token"] != daily["view_token"]
     assert practice.complete(daily, "studied").status_code == 409
@@ -100,7 +101,7 @@ def test_practice_closes_an_unfinished_daily_new_view(
     resumed = practice.daily()
     assert resumed["progress"]["new_completed"] == 0
     assert resumed["card"]["view_token"] not in (daily["view_token"], card["view_token"])
-    assert resumed["card"]["mode"] == "daily" and resumed["card"]["phrase_id"] == daily["phrase_id"]
+    assert resumed["card"]["mode"] == "daily" and resumed["card"]["kind"] == "new"
     assert practice.complete(card, "studied").status_code == 409
     assert practice.log() == []
 
@@ -108,17 +109,17 @@ def test_practice_closes_an_unfinished_daily_new_view(
 def test_practice_keeps_the_regular_traversal_skips_and_its_own_skip_is_separate(
     practice: Practice,
 ) -> None:
-    first, second, third, _ = ids(practice)
-    practice.make_due(first, second, third)
+    first, second, _, _ = ids(practice)
+    practice.make_due(first, second)
+    practice.set_limits(due=20, new=0)
     skipped = practice.card()
-    assert skipped["phrase_id"] == first
     following = practice.finish(skipped, "skipped")["state"]["card"]
-    assert following["phrase_id"] == second
-    card = practice.practise(second)
+    assert {skipped["phrase_id"], following["phrase_id"]} == {first, second}
+    card = practice.practise(following["phrase_id"])
     receipt = practice.finish(card, "skipped")["receipt"]
     assert (receipt["mode"], receipt["skipped"]) == ("practice", True)
     resumed = practice.daily()
-    assert resumed["card"]["phrase_id"] == second
+    assert resumed["card"]["phrase_id"] == following["phrase_id"]
     assert resumed["card"]["view_token"] != following["view_token"]
     assert resumed["progress"]["due_completed"] == 1
 

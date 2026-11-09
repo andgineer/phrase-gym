@@ -34,7 +34,7 @@ def test_new_phrase_hides_answer_and_first_grade_initializes_schedule(
     assert practice.complete(card, "not_yet").status_code == 409
     assert practice.complete(card, "studied").status_code == 409
     card = practice.reveal(card)
-    assert card["answer"]["text"] == "Complete phrase number 1."
+    assert card["answer"]["text"] == practice.phrase(card["phrase_id"])["text"]
     assert card["answer"]["reference_url"].endswith("/reference")
     result = practice.rate(card, "not_yet")
     assert result["receipt"] | {"completion_id": ""} == {
@@ -55,23 +55,28 @@ def test_new_phrase_hides_answer_and_first_grade_initializes_schedule(
     assert result["state"]["progress"]["new_completed"] == 1
 
 
-def test_due_and_new_limits_are_independent(practice: Practice) -> None:
+def test_session_takes_oldest_due_and_random_new_phrases_in_random_order(
+    practice: Practice,
+) -> None:
     publish(practice.client, many(30))
     ids = [row["id"] for row in practice.rows("SELECT id FROM phrases ORDER BY position")]
-    practice.make_due(*ids[:25])
-    kinds = []
+    practice.make_due(*ids[:22])
+    shown = []
     state = practice.daily()
     while state["card"]:
         card = state["card"]
-        kinds.append(card["kind"])
-        if card["kind"] == "new":
-            state = practice.rate(card, "not_yet")["state"]
-        elif len(kinds) == 3:
+        shown.append((card["kind"], card["phrase_id"]))
+        if len(shown) == 3:
             state = practice.finish(card, "skipped")["state"]
         else:
-            practice.reveal(card)
-            state = practice.finish(card, "got_it")["state"]
-    assert kinds == ["recall"] * 20 + ["new"] * 5
+            rating = "got_it" if card["kind"] == "recall" else "not_yet"
+            state = practice.rate(card, rating)["state"]
+    recalls = {item for kind, item in shown if kind == "recall"}
+    fresh = {item for kind, item in shown if kind == "new"}
+    assert len(shown) == 25 and len(recalls) == 20 and len(fresh) == 5
+    assert recalls == set(ids[:20])
+    assert fresh < set(ids[22:]) and fresh != set(ids[22:27])
+    assert [kind for kind, _ in shown[:20]] != ["recall"] * 20
     assert state["progress"] == {
         "due_completed": 20,
         "due_allowance": 20,
@@ -87,10 +92,12 @@ def test_exhausted_due_allowance_still_offers_new_phrases(practice: Practice) ->
     ids = [row["id"] for row in practice.rows("SELECT id FROM phrases ORDER BY position")]
     practice.make_due(*ids[:2])
     practice.set_limits(due=1, new=5)
-    first = practice.card()
-    assert first["kind"] == "recall"
-    second = practice.finish(first, "skipped")["state"]["card"]
-    assert second["kind"] == "new" and second["phrase_id"] == ids[2]
+    shown = []
+    state = practice.daily()
+    while state["card"]:
+        shown.append((state["card"]["kind"], state["card"]["phrase_id"]))
+        state = practice.finish(state["card"], "skipped")["state"]
+    assert sorted(shown) == sorted([("recall", ids[0]), ("new", ids[2]), ("new", ids[3])])
 
 
 def test_live_limit_increase_after_apparent_exhaustion(practice: Practice) -> None:
@@ -238,4 +245,4 @@ def test_skipping_new_phrases_consumes_new_slots_without_initializing_or_looping
     assert len(skipped) == state["progress"]["new_completed"] == 2
     assert state["progress"]["due_completed"] == 0
     assert practice.daily()["card"] is None
-    assert practice.extra()["state"]["card"]["phrase_id"] == skipped[0]
+    assert practice.extra()["state"]["card"]["phrase_id"] in skipped

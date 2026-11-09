@@ -130,16 +130,17 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
 
 def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Practice) -> None:
     publish(practice.client, many(5))
-    practice.rate_all_new()
+    rated = []
+    state = practice.daily()
+    while state["card"]:
+        rated.append(practice.phrase(state["card"]["phrase_id"])["text"])
+        state = practice.rate(state["card"], "not_yet")["state"]
     first = studied(practice, "2026-10-28", limit=2)
-    assert [item["text"] for item in first["items"]] == [
-        "Complete phrase number 0.",
-        "Complete phrase number 1.",
-    ]
+    assert [item["text"] for item in first["items"]] == rated[:2]
     assert first["items"][0] | {"completion_id": "", "phrase_id": ""} == {
         "completion_id": "",
         "phrase_id": "",
-        "text": "Complete phrase number 0.",
+        "text": rated[0],
         "lesson_title": "Meetings",
         "mode": "daily",
         "kind": "new",
@@ -149,7 +150,7 @@ def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Pr
     assert first["next_offset"] == 2
     second = studied(practice, "2026-10-28", offset=2, limit=2)
     third = studied(practice, "2026-10-28", offset=4, limit=2)
-    assert [item["text"][-2] for item in second["items"] + third["items"]] == ["2", "3", "4"]
+    assert [item["text"] for item in second["items"] + third["items"]] == rated[2:]
     assert third["next_offset"] is None
     assert studied(practice, "2026-10-27")["items"] == []
     bad = practice.client.get("/api/practice/studied", params={"learning_date": "yesterday"})
@@ -159,6 +160,7 @@ def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Pr
 def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
     publish(practice.client, many(2))
     card = practice.card()
+    text = practice.phrase(card["phrase_id"])["text"]
     upload_take(practice.client, card, "deleted-take-0001", captured_at=practice.now.isoformat())
     practice.rate(card, "not_yet")
     assert facts(practice)["today"]["recordings"] == 1
@@ -174,7 +176,7 @@ def test_deleted_phrase_keeps_its_completed_facts(practice: Practice) -> None:
     }
     assert found["streak"]["current"] == 1
     [item] = studied(practice, "2026-10-28")["items"]
-    assert item["phrase_id"] is None and item["text"] == "Complete phrase number 0."
+    assert item["phrase_id"] is None and item["text"] == text
     assert item["lesson_title"] == "Meetings"
 
 
@@ -282,7 +284,8 @@ def test_reveal_open_and_abandon_do_not_count_a_day(practice: Practice) -> None:
 def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None:
     publish(practice.client, many(2))
     practice.now = datetime(2026, 10, 28, 22, 30, tzinfo=UTC)
-    practice.rate(practice.card(), "not_yet")
+    card = practice.card()
+    practice.rate(card, "not_yet")
     assert practice.log()[0]["learning_date"] == "2026-10-28"
     settings = practice.client.get("/api/settings").json()
     settings["learning_timezone"] = "Asia/Tokyo"
@@ -292,7 +295,7 @@ def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None
     assert found["today"]["completions"] == 0
     assert found["streak"]["current"] == 1
     assert [item["text"] for item in studied(practice, "2026-10-28")["items"]] == [
-        "Complete phrase number 0.",
+        practice.phrase(card["phrase_id"])["text"],
     ]
     practice.rate(practice.card(), "not_yet")
     found = facts(practice)
@@ -319,6 +322,7 @@ def test_library_splits_phrases_into_due_now_later_and_new(practice: Practice) -
     assert library(practice) == {"due_count": 0, "later_count": 2, "new_count": 2}
     practice.later(days=1)
     assert library(practice) == {"due_count": 2, "later_count": 0, "new_count": 2}
+    practice.set_limits(1, 0)
     rate(practice, practice.card(), "got_it")
     # The phrase left beyond today's due allowance still counts as due now.
     assert library(practice) == {"due_count": 1, "later_count": 1, "new_count": 2}

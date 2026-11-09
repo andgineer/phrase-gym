@@ -263,7 +263,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect(page.locator('article.study')).toHaveCount(0)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   await openDaily(page)
-  await expect(page.getByRole('heading', { name: "Let's get started." })).toBeVisible()
+  const started = await page.getByTestId('practice-phrase').innerText()
 
   let failSave = true
   let failedSaves = 0
@@ -350,7 +350,6 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
     ;(window as unknown as { __releaseTakeRace: () => void }).__releaseTakeRace()
     history.replaceState(null, '', '/')
   })
-  const started = "Let's get started."
   await expect.poll(async () => (await savedTakes(page, started)).length).toBe(1)
   await openDaily(page)
   const activeStudy = page.locator('article.study')
@@ -407,11 +406,10 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
     if (completions === 1) await completionHeld
     await route.continue()
   })
-  for (const [index, card] of cards.entries()) {
+  const rated: string[] = []
+  for (const index of cards.keys()) {
     await revealAnswer(page)
-    await expect(
-      page.locator('article.study').getByRole('heading', { name: card.text }),
-    ).toBeVisible()
+    rated.push(await page.locator('article.study').getByTestId('practice-phrase').innerText())
     await expect(page.getByText('How was your answer before you saw the phrase?')).toBeVisible()
     await rateNew(page, false, index !== 0)
     if (index === 0) {
@@ -423,8 +421,10 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   }
   await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
   expect(completions).toBe(cards.length)
+  expect(rated[0]).toBe(started)
+  expect([...rated].sort()).toEqual(cards.map(({ text }) => text).sort())
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await libraryPhrase(page, "Let's get started.").click()
+  await libraryPhrase(page, started).click()
   await page.getByRole('button', { name: 'Recording history' }).click()
   await expect(page.getByRole('button', { name: 'Mine' })).toHaveCount(2)
   await page.getByRole('button', { name: '← Back' }).click()
@@ -433,12 +433,16 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await page.reload()
   await expect(page.locator('article.study')).toHaveCount(0)
   await openDaily(page, false)
-  await expect(page.getByText('Use the useful expression in situation 1.')).toBeVisible()
+  const prompt = page.locator('article.study .practice-prompt')
+  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
+  const hardCue = await prompt.innerText()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await page.getByRole('button', { name: 'Show' }).click()
-  await expect(page.getByTestId('practice-phrase')).toHaveText("Let's get started.")
+  const hardIndex = Number(/situation (\d)\./.exec(hardCue)![1]) - 1
+  await expect(page.getByTestId('practice-phrase')).toHaveText(cards[hardIndex]!.text)
   await page.getByRole('button', { name: 'Hard' }).click()
-  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
+  await expect(prompt).not.toHaveText(hardCue)
+  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await phraseSearch(page).fill('walk me through')
@@ -455,7 +459,8 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect(page.getByRole('list', { name: 'Phrases' }).getByRole('button')).toHaveCount(1)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await openDaily(page, false)
-  await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
+  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
+  await expect(prompt).not.toHaveText(hardCue)
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
 })
 

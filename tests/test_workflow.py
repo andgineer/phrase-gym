@@ -28,7 +28,8 @@ def test_study_recordings_and_restart(
         assert stat.S_IMODE(reference.stat().st_mode) == 0o600
     practice = Practice(client)
     card = practice.reveal(practice.card())
-    assert card["answer"]["text"] == "Complete phrase number 1."
+    text = practice.phrase(card["phrase_id"])["text"]
+    assert card["answer"]["text"] == text
     phrase_id = card["phrase_id"]
     audio = b"final-encoder-tail"
     recording_id = str(uuid4())
@@ -69,7 +70,7 @@ def test_study_recordings_and_restart(
         assert [item["id"] for item in history["items"]] == [recording_id]
         assert history["items"][0]["mode"] == "daily"
         assert history["items"][0]["kind"] == "new"
-        assert history["items"][0]["answer"] == "Complete phrase number 1."
+        assert history["items"][0]["answer"] == text
         assert history["items"][0]["cue"] is None
 
 

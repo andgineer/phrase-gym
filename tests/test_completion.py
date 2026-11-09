@@ -121,14 +121,15 @@ def test_view_tokens_are_fresh_for_every_appearance(practice: Practice) -> None:
     state = practice.daily()
     resumed = practice.daily()["card"]
     assert resumed["view_token"] == state["card"]["view_token"]
-    first = state["card"]
+    shown = set()
     while state["card"]:
         tokens.append(state["card"]["view_token"])
+        shown.add(state["card"]["phrase_id"])
         state = practice.rate(state["card"], "not_yet")["state"]
-    assert len(tokens) == len(set(tokens)) == 5
+    assert len(tokens) == len(set(tokens)) == len(shown) == 5
     practice.later(days=1)
     again = practice.card()
-    assert again["phrase_id"] == first["phrase_id"]
+    assert again["phrase_id"] in shown
     assert again["view_token"] not in tokens
 
 
@@ -175,6 +176,7 @@ def test_deleting_the_open_phrase_invalidates_its_view_without_a_log_row(
     publish(client, make_package(lessons=[lesson("unit", "Unit", [phrase(1), phrase(2)])]))
     practice = Practice(client)
     first = practice.card()
+    first_text = practice.phrase(first["phrase_id"])["text"]
     practice.rate(first, "not_yet")
     open_card = practice.card()
     assert client.delete(f"/api/phrases/{open_card['phrase_id']}").status_code == 200
@@ -184,7 +186,7 @@ def test_deleting_the_open_phrase_invalidates_its_view_without_a_log_row(
     assert client.delete(f"/api/phrases/{first['phrase_id']}").status_code == 200
     kept = practice.log()[0]
     assert kept["phrase_id"] is None
-    assert (kept["phrase_text"], kept["lesson_title"]) == ("Complete phrase number 1.", "Unit")
+    assert (kept["phrase_text"], kept["lesson_title"]) == (first_text, "Unit")
 
 
 @pytest.mark.parametrize(

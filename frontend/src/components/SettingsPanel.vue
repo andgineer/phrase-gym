@@ -42,6 +42,14 @@ async function save() {
         >Learning timezone
         <input v-model="settings.learning_timezone" aria-label="Learning timezone"
       /></label>
+      <label
+        >Due phrases per day
+        <input v-model.number="settings.daily_due_limit" type="number" min="0" inputmode="numeric"
+      /></label>
+      <label
+        >New phrases per day
+        <input v-model.number="settings.daily_new_limit" type="number" min="0" inputmode="numeric"
+      /></label>
       <p>English cards and short English help are selected for this MVP.</p>
       <button @click="save">Save settings</button>
     </template>

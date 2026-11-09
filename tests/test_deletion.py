@@ -39,11 +39,12 @@ def test_delete_removes_phrase_reference_takes_and_open_view(
     database = client.app.state.database
     files = phrase_files(database, str(opened["phrase_id"]))
     assert len(files) == 3 and all(path.is_file() for path in files)
+    [(text,)] = rows(database, "SELECT text FROM phrases WHERE id=?", opened["phrase_id"])
     interrupted = tmp_path / "recordings" / str(opened["phrase_id"]) / "interrupted.pending"
     interrupted.write_bytes(b"partial upload")
     result = client.delete(f"/api/phrases/{opened['phrase_id']}")
     assert result.json() == {
-        "deleted_text": "Complete phrase number 1.",
+        "deleted_text": text,
         "cleanup": {"pending": 0, "error": None},
     }
     assert not any(path.exists() for path in files)
@@ -52,13 +53,12 @@ def test_delete_removes_phrase_reference_takes_and_open_view(
     assert rows(database, "SELECT * FROM recordings WHERE phrase_id=?", opened["phrase_id"]) == []
     practice = Practice(client)
     assert practice.complete(opened, "studied").status_code == 409
-    assert practice.reveal(practice.card())["answer"]["text"] == "Complete phrase number 2."
+    assert practice.reveal(practice.card())["answer"]["text"] != text
     assert practice.log() == []
     assert client.get(f"/api/phrases/{opened['phrase_id']}").status_code == 404
     assert client.delete(f"/api/phrases/{opened['phrase_id']}").status_code == 404
     found = client.get("/api/phrases", params={"query": "phrase number"}).json()["items"]
-    assert [item["text"] for item in found][0] == "Complete phrase number 2."
-    assert len(found) == 4
+    assert len(found) == 4 and text not in [item["text"] for item in found]
     assert client.get("/api/lessons").json()["items"][0]["phrase_count"] == 4
 
 
@@ -136,8 +136,9 @@ def test_restart_after_deletion_commit_before_file_cleanup(
 ) -> None:
     database = Database(tmp_path)
     files = phrase_files(database, str(opened["phrase_id"]))
+    [(text,)] = rows(database, "SELECT text FROM phrases WHERE id=?", opened["phrase_id"])
     deletion = PhraseDeletion(database, FileCleanup(database))
-    assert deletion.commit(str(opened["phrase_id"])) == "Complete phrase number 1."
+    assert deletion.commit(str(opened["phrase_id"])) == text
     assert all(path.is_file() for path in files)
     pending = {str(row[0]) for row in rows(database, "SELECT path FROM cleanup_paths")}
     assert pending == {str(files[0]), str(tmp_path / "recordings" / str(opened["phrase_id"]))}
@@ -155,6 +156,8 @@ def test_replacement_import_uses_fresh_identity_and_paths(
 ) -> None:
     database = client.app.state.database
     old_reference = phrase_files(database, str(opened["phrase_id"]))[0]
+    [(item_id,)] = rows(database, "SELECT item_id FROM phrases WHERE id=?", opened["phrase_id"])
+    number = int(str(item_id).removeprefix("meeting-"))
 
     def refuse(_path: Path) -> None:
         raise PermissionError("still in use")
@@ -163,10 +166,10 @@ def test_replacement_import_uses_fresh_identity_and_paths(
     client.delete(f"/api/phrases/{opened['phrase_id']}")
     replacement = make_package(
         "course-meetings-v2",
-        [lesson("unit-1", "Meetings", [phrase(1, text="Corrected phrase number 1.")])],
+        [lesson("unit-1", "Meetings", [phrase(number, text="Corrected phrase.")])],
     )
     publish(client, replacement)
-    new = rows(database, "SELECT id, reference_path FROM phrases WHERE item_id='meeting-1'")[0]
+    new = rows(database, "SELECT id, reference_path FROM phrases WHERE item_id=?", item_id)[0]
     assert new[0] != opened["phrase_id"]
     assert new[1] != str(old_reference)
     pending = {str(row[0]) for row in rows(database, "SELECT path FROM cleanup_paths")}

@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import tempfile
 import threading
@@ -37,8 +38,12 @@ def main() -> None:
             ).start()
         app = create_app()
         simulated_time: list[datetime | None] = [None]
-        for service in CLOCKED_SERVICES:
-            getattr(app.state, service).clock = lambda: simulated_time[0] or datetime.now(UTC)
+        rng = random.Random(7)
+        for name in CLOCKED_SERVICES:
+            service = getattr(app.state, name)
+            service.clock = lambda: simulated_time[0] or datetime.now(UTC)
+            if hasattr(service, "rng"):
+                service.rng = rng
 
         @app.post("/__test/clock/{iso_time}")
         def set_clock(iso_time: str) -> dict[str, str]:

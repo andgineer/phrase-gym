@@ -32,8 +32,9 @@ See [how to add phrases](docs/src/en/importing-phrases.md) for both workflows.
 
 The Practice entry offers a lesson field (empty means **All lessons**; type in it to narrow the
 list) with its due and new counts, **Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press
-**Daily**, which opens or resumes today's card. Daily offers the oldest due phrases first, up to 20 recalls, then up
-to five new phrases per learning day; the stored limits are read live, so a raised limit lets Daily
+**Daily**, which opens or resumes today's card. Daily takes the longest-due phrases up to your daily due limit and randomly chosen new
+phrases up to your daily new limit (20 and five by default, both editable in **Settings**),
+then offers them mixed in random order; the stored limits are read live, so a raised limit lets Daily
 continue. Every phrase starts with an answer-free situation cue, optional recording, **New cue**,
 **Hint**, **Show** and **Details**, including a new phrase. If you do not know it, reveal and choose
 **Again**; the first rating initializes its schedule immediately.

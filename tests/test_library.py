@@ -125,8 +125,9 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         ),
     )
     practice = Practice(client)
-    card = practice.reveal(practice.card())
-    assert card["answer"]["text"] == "Complete phrase number 1."
+    greetings_id = client.get("/api/lessons").json()["items"][0]["id"]
+    card = practice.reveal(practice.card(greetings_id))
+    assert practice.phrase(card["phrase_id"])["item_id"] in ("meeting-1", "meeting-2")
     practice.rate(card, "not_yet")
 
     first = client.get("/api/lessons", params={"limit": 2}).json()
