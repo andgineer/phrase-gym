@@ -15,7 +15,7 @@ export function usePracticeSession() {
   const completing = ref(false)
   let mediaScope = 0
   let compareOnStop: { scope: number; reference: boolean } | null = null
-  // A learner who just listened with Ref before a take needs only their own take replayed.
+  // A learner who has listened with Ref on this card needs only their own takes replayed.
   let referenceHeard = false
 
   // Any card change, including a reconcile after a conflict, cancels the old phrase's media.
@@ -123,7 +123,6 @@ export function usePracticeSession() {
     if (capture.requesting.value) return capture.release()
     if (capture.capturing.value) {
       compareOnStop = { scope: mediaScope, reference: !referenceHeard }
-      referenceHeard = false
       return capture.stop()
     }
     if (playback.active.value) return playback.stop()

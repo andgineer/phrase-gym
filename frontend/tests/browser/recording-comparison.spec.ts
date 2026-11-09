@@ -70,7 +70,7 @@ test('front and back stops play reference then the full take, with collapsed sav
   await expect(card(page).getByText('No saved recordings yet.')).toBeVisible()
 })
 
-test('Ref before a back take replays only that take; later takes and cards compare reference first', async ({
+test('Ref on a back keeps replaying only each later take on that card; the next card compares reference first', async ({
   page,
 }) => {
   const reference = card(page).getByRole('button', { name: 'Ref' })
@@ -96,20 +96,21 @@ test('Ref before a back take replays only that take; later takes and cards compa
   await reference.click()
   await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
   await finishClip(page)
-  const afterRef = await recordTake()
-  await expect.poll(() => playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
-  await finishClip(page)
-  await expect(microphone).toBeVisible()
-  expect(await playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
-
-  await expectReferenceFirst(await recordTake())
+  for (let take = 0; take < 3; take++) {
+    const afterRef = await recordTake()
+    await expect.poll(() => playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
+    await finishClip(page)
+    await expect(microphone).toBeVisible()
+    expect(await playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
+  }
 
   await reference.click()
   await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
   await card(page).getByRole('button', { name: 'Good', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await expectReferenceFirst(await recordTake())
-  await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(2)
+  await expectReferenceFirst(await recordTake())
+  await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(3)
 })
 
 test('phone audio controls keep playback, microphone and expandable history together', async ({
