@@ -8,7 +8,9 @@ import pytest
 
 from phrase_gym.server import main as cli
 from phrase_gym.server import schema_upgrade
+from phrase_gym.server.contracts import Settings
 from phrase_gym.server.schema_upgrade import STEPS, statements
+from phrase_gym.server.settings_store import read_settings
 from phrase_gym.server.storage import Database
 
 SCHEMA_5_ROWS = """
@@ -47,7 +49,6 @@ def learner_rows(connection: sqlite3.Connection) -> list[tuple[object, ...]]:
         *connection.execute("SELECT id, title FROM lessons"),
         *connection.execute("SELECT id, text, due_at FROM phrases"),
         *connection.execute("SELECT id, phrase_id, learning_date FROM practice_log"),
-        *connection.execute("SELECT daily_due_limit, daily_new_limit FROM settings"),
     ]
 
 
@@ -70,6 +71,15 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(
         assert version(connection) == schema_upgrade.SCHEMA_VERSION
         assert [tuple(row) for row in learner_rows(connection)] == before
         assert "import_notices" in table_names(connection)
+        assert read_settings(connection) == Settings(
+            native_language="ru",
+            learning_timezone="Europe/Belgrade",
+            card_language="en",
+            help_language="en",
+            daily_due_limit=9,
+            daily_new_limit=5,
+            return_pace="balanced",
+        )
     [backup] = directory.glob("phrase-gym-schema-5-*.sqlite3")
     assert capsys.readouterr().out == (
         f"Upgraded the Phrase Gym database from schema 5 to {schema_upgrade.SCHEMA_VERSION}; "
@@ -80,6 +90,7 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(
     with closing(sqlite3.connect(backup)) as copy:
         assert version(copy) == "5"
         assert learner_rows(copy) == before
+        assert copy.execute("SELECT daily_due_limit FROM settings").fetchone()[0] == 9
         assert "import_notices" not in table_names(copy)
     Database(directory)
     assert len(list(directory.glob("phrase-gym-schema-*.sqlite3"))) == 1
@@ -112,7 +123,7 @@ def test_fresh_database_is_built_from_every_step_without_a_backup(
     with Database(tmp_path / "fresh").read() as connection:
         assert version(connection) == schema_upgrade.SCHEMA_VERSION
         assert {"imports", "phrases", "import_notices"} <= table_names(connection)
-        assert connection.execute("SELECT daily_due_limit FROM settings").fetchone()[0] == 20
+        assert read_settings(connection).daily_due_limit == 20
     assert not list((tmp_path / "fresh").glob("phrase-gym-schema-*"))
     assert capsys.readouterr().out == ""
 

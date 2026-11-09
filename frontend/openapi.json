@@ -1307,6 +1307,16 @@
             "title": "Recordings",
             "type": "array"
           },
+          "return_days": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RatingReturnDays"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "revealed": {
             "title": "Revealed",
             "type": "boolean"
@@ -1326,6 +1336,7 @@
           "other_cue_available",
           "hint",
           "answer",
+          "return_days",
           "recordings"
         ],
         "title": "PracticeCard",
@@ -1575,6 +1586,35 @@
         "title": "PracticeTotals",
         "type": "object"
       },
+      "RatingReturnDays": {
+        "additionalProperties": false,
+        "properties": {
+          "easy": {
+            "title": "Easy",
+            "type": "integer"
+          },
+          "effort": {
+            "title": "Effort",
+            "type": "integer"
+          },
+          "got_it": {
+            "title": "Got It",
+            "type": "integer"
+          },
+          "not_yet": {
+            "title": "Not Yet",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "not_yet",
+          "effort",
+          "got_it",
+          "easy"
+        ],
+        "title": "RatingReturnDays",
+        "type": "object"
+      },
       "RecordingPage": {
         "additionalProperties": false,
         "properties": {
@@ -1759,6 +1799,38 @@
         "title": "RecordingUpload",
         "type": "object"
       },
+      "ReturnPaceChoice": {
+        "additionalProperties": false,
+        "properties": {
+          "forget_one_in": {
+            "title": "Forget One In",
+            "type": "integer"
+          },
+          "good_gaps_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Good Gaps Days",
+            "type": "array"
+          },
+          "pace": {
+            "enum": [
+              "often",
+              "balanced",
+              "rarely"
+            ],
+            "title": "Pace",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pace",
+          "good_gaps_days",
+          "forget_one_in"
+        ],
+        "title": "ReturnPaceChoice",
+        "type": "object"
+      },
       "SavedRecording": {
         "additionalProperties": false,
         "properties": {
@@ -1901,6 +1973,15 @@
             ],
             "title": "Native Language",
             "type": "string"
+          },
+          "return_pace": {
+            "enum": [
+              "often",
+              "balanced",
+              "rarely"
+            ],
+            "title": "Return Pace",
+            "type": "string"
           }
         },
         "required": [
@@ -1909,7 +1990,8 @@
           "card_language",
           "help_language",
           "daily_due_limit",
-          "daily_new_limit"
+          "daily_new_limit",
+          "return_pace"
         ],
         "title": "Settings",
         "type": "object"
@@ -3240,6 +3322,28 @@
           }
         },
         "summary": "Update Settings"
+      }
+    },
+    "/api/settings/return-paces": {
+      "get": {
+        "operationId": "return_paces_api_settings_return_paces_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReturnPaceChoice"
+                  },
+                  "title": "Response Return Paces Api Settings Return Paces Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Return Paces"
       }
     }
   }

@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
-import { extraPackage, modeLine } from './extra-package'
-import { importPackage, rateNew } from './helpers'
+import { card, extraPackage, modeLine } from './extra-package'
+import { importPackage, middayTomorrow, rateNew, revealAnswer } from './helpers'
 
 const status = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
 
@@ -39,6 +39,28 @@ test('daily limits are edited in Settings and govern Daily', async ({ page }) =>
   await expect(fresh).toHaveValue('2')
 })
 
+test('return pace choices show their gaps and set the rating forecasts', async ({ page }) => {
+  await page.goto('/')
+  await importPackage(page, extraPackage, 3)
+  await page.request.post(`/__test/clock/${middayTomorrow()}`)
+  await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  await expect(page.getByRole('radio', { name: /^Balanced/ })).toBeChecked()
+  await expect(page.getByTestId('pace-often')).toHaveText('1d, 2d, 4d, 7d · forget 1 in 33')
+  await expect(page.getByTestId('pace-balanced')).toHaveText('1d, 3d, 8d, 19d · forget 1 in 20')
+  await expect(page.getByTestId('pace-rarely')).toHaveText('2d, 11d, 1.5m, 5.4m · forget 1 in 10')
+  await page.getByRole('radio', { name: /^Rarely/ }).check()
+  await page.getByRole('button', { name: 'Save settings' }).click()
+  await expect(status(page, 'Settings saved.')).toBeVisible()
+
+  await page.reload()
+  await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  await expect(page.getByRole('radio', { name: /^Rarely/ })).toBeChecked()
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
+  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await revealAnswer(page)
+  await expect(card(page).locator('.rating-return')).toHaveText(['1d', '1d', '2d', '8d'])
+})
+
 test.describe('mobile', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
@@ -46,6 +68,7 @@ test.describe('mobile', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Settings', exact: true }).tap()
     await expect(page.getByLabel('New phrases per day')).toBeVisible()
+    await expect(page.getByRole('radio', { name: /^Rarely/ })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   })
 })

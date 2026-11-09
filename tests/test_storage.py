@@ -7,6 +7,7 @@ import pytest
 
 from phrase_gym.server import main as cli
 from phrase_gym.server.schema_upgrade import SCHEMA_VERSION
+from phrase_gym.server.settings_store import read_settings, write_settings
 from phrase_gym.server.storage import Database, UnsupportedSchemaError
 
 
@@ -92,10 +93,9 @@ def test_cli_reports_earlier_schema_without_starting(
 def test_snapshot_keeps_one_consistent_view_while_a_write_commits(tmp_path: Path) -> None:
     database = Database(tmp_path / "snapshot")
     with database.snapshot() as reader:
-        first = reader.execute("SELECT daily_due_limit FROM settings").fetchone()[0]
+        first = read_settings(reader)
         with database.write() as writer:
-            writer.execute("UPDATE settings SET daily_due_limit=7")
-        assert reader.execute("SELECT daily_due_limit FROM settings").fetchone()[0] == first
-        assert not reader.execute("SELECT 1 FROM settings WHERE daily_due_limit=7").fetchone()
+            write_settings(writer, first.model_copy(update={"daily_due_limit": 7}))
+        assert read_settings(reader) == first
     with database.read() as connection:
-        assert connection.execute("SELECT daily_due_limit FROM settings").fetchone()[0] == 7
+        assert read_settings(connection).daily_due_limit == 7

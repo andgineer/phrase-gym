@@ -7,7 +7,10 @@ audio, record optional takes and replay them after reloading the app.
 **Daily** offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
 **Settings**, mixed in random order so the next phrase cannot be anticipated. Every phrase starts with its answer hidden,
 including a new phrase. Reveal and rate the attempt; an unknown answer is **Again**. The first
-rating starts its schedule, and later learning days offer due recall.
+rating starts its schedule, and later learning days offer due recall. Each rating button shows when
+that grade brings the phrase back, such as `3d` or `2.5m`; it shows nothing when the phrase was
+already graded that day. **Settings** chooses whether phrases come back **Often**, **Balanced**
+(the default) or **Rarely**, listing the gaps each choice gives.
 **Extra** extends today's limits for another pass without erasing completed practice. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
 return date. The Library finds phrases by lesson or meaning, shows their details and saved

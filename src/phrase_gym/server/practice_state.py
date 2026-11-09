@@ -41,7 +41,7 @@ def practice_state(connection: sqlite3.Connection, now: datetime, day: str) -> P
     if view is None or view["learning_date"] != day:
         return PracticeState(card=None, progress=progress, message=None)
     if view["phrase_id"]:
-        card = practice_card(connection, view, view_phrase(connection, view))
+        card = practice_card(connection, view, view_phrase(connection, view), now)
         return PracticeState(card=card, progress=progress, message=None)
     return PracticeState(
         card=None,

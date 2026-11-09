@@ -1,6 +1,7 @@
 import sqlite3
 
 from phrase_gym.server.practice_contracts import PracticeProgress
+from phrase_gym.server.settings_store import read_settings
 
 ALLOWANCE_MODES = ("daily", "extra")
 
@@ -11,9 +12,8 @@ def _effective(limit: int, target: int | None) -> int:
 
 
 def daily_progress(connection: sqlite3.Connection, day: str) -> PracticeProgress:
-    due_limit, new_limit = connection.execute(
-        "SELECT daily_due_limit, daily_new_limit FROM settings WHERE id=1",
-    ).fetchone()
+    settings = read_settings(connection)
+    due_limit, new_limit = settings.daily_due_limit, settings.daily_new_limit
     target = connection.execute(
         "SELECT due_target, new_target FROM extra_targets WHERE learning_date=?",
         (day,),
@@ -41,9 +41,8 @@ def _extended(limit: int, completed: int, target: int) -> int:
 
 
 def extend_targets(connection: sqlite3.Connection, day: str) -> tuple[int, int]:
-    due_limit, new_limit = connection.execute(
-        "SELECT daily_due_limit, daily_new_limit FROM settings WHERE id=1",
-    ).fetchone()
+    settings = read_settings(connection)
+    due_limit, new_limit = settings.daily_due_limit, settings.daily_new_limit
     stored = connection.execute(
         "SELECT due_target, new_target FROM extra_targets WHERE learning_date=?",
         (day,),

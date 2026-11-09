@@ -10,6 +10,7 @@ MAX_DAILY_LIMIT = 500
 PracticeMode = Literal["daily", "extra", "practice"]
 ActiveCardKind = Literal["new", "recall"]
 CardKind = Literal["first_study", "new", "recall"]
+ReturnPace = Literal["often", "balanced", "rarely"]
 # Take identities become file names: no separators or dots, and lowercase so that IDs differing
 # only by case cannot share a file on case-insensitive filesystems.
 STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
@@ -45,12 +46,19 @@ class Settings(StrictModel):
     help_language: Literal["en"]
     daily_due_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
     daily_new_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
+    return_pace: ReturnPace
 
     @model_validator(mode="after")
     def some_practice_is_allowed(self) -> "Settings":
         if not self.daily_due_limit and not self.daily_new_limit:
             raise ValueError("daily due and new limits cannot both be zero")
         return self
+
+
+class ReturnPaceChoice(StrictModel):
+    pace: ReturnPace
+    good_gaps_days: list[int]
+    forget_one_in: int
 
 
 class RecordingReceipt(StrictModel):

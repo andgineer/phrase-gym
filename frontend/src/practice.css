@@ -54,6 +54,15 @@
   flex: 1;
   min-width: 110px;
 }
+.ratings button:has(.rating-return) {
+  padding-block: 4px;
+}
+.rating-return {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
 .not-yet {
   color: #952c27;
   background: #ffebe8;

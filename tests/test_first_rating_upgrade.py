@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from phrase_gym.server.app import create_app
 from phrase_gym.server.practice_contracts import CompletionReceipt, CompletionRequest
+from phrase_gym.server.schema_upgrade import STEPS, statements
 from tests.phrase_packages import Package, publish, upload_take
 from tests.practice_client import Practice
 
@@ -35,6 +36,11 @@ def test_upgrade_closes_old_study_view_and_preserves_history_retries_and_pending
     )
     with practice.database.write() as connection:
         connection.execute("UPDATE meta SET value='6' WHERE key='schema_version'")
+        # Schema 6 still kept one column per setting.
+        connection.execute("DROP TABLE settings")
+        for statement in statements(STEPS[5]):
+            if statement.lstrip().startswith(("CREATE TABLE settings", "INSERT INTO settings")):
+                connection.execute(statement)
         connection.execute("UPDATE current_view SET kind='first_study', revealed=1, cue_index=NULL")
         connection.execute(
             "INSERT INTO operations VALUES (?, 'completion', ?, ?)",

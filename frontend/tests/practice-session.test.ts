@@ -80,6 +80,7 @@ const card = (token: string, revealed = true): Card => ({
   other_cue_available: false,
   hint: null,
   answer: null,
+  return_days: null,
   recordings: [],
 })
 const state = (current: Card | null): PracticeState => ({ card: current, progress, message: null })

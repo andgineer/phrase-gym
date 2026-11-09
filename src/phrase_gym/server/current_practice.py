@@ -15,8 +15,9 @@ class CurrentPractice:
 
     def read(self) -> PracticeState:
         # Reconciliation only reads, so it never closes another tab's Practice or an old view.
+        now = self.clock()
         with self.database.snapshot() as connection:
-            day = learning_day(connection, self.clock())
+            day = learning_day(connection, now)
             view = load_view(connection)
             phrase = None
             if (
@@ -26,5 +27,5 @@ class CurrentPractice:
                 and not view["practice"]
             ):
                 phrase = view_phrase(connection, view)
-            card = practice_card(connection, view, phrase) if view and phrase else None
+            card = practice_card(connection, view, phrase, now) if view and phrase else None
             return PracticeState(card=card, progress=daily_progress(connection, day), message=None)

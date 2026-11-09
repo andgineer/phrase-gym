@@ -1,12 +1,19 @@
 import json
 import random
 import sqlite3
+from datetime import datetime
 from uuid import uuid4
 
 from phrase_gym.server.contracts import PracticeMode
 from phrase_gym.server.import_contracts import Cue
-from phrase_gym.server.practice_contracts import CardAnswer, PracticeCard, ViewAction
+from phrase_gym.server.practice_contracts import (
+    CardAnswer,
+    PracticeCard,
+    RatingReturnDays,
+    ViewAction,
+)
 from phrase_gym.server.recording_views import view_recordings
+from phrase_gym.server.scheduling import return_days
 
 
 class PracticeConflictError(ValueError):
@@ -108,12 +115,15 @@ def practice_card(
     connection: sqlite3.Connection,
     view: sqlite3.Row,
     phrase: sqlite3.Row,
+    now: datetime,
 ) -> PracticeCard:
     cues = json.loads(phrase["cues_json"])
     hints = json.loads(phrase["hints_json"])
     revealed = bool(view["revealed"])
-    answer = None
+    answer = returns = None
     if revealed:
+        days = return_days(connection, phrase, now)
+        returns = RatingReturnDays(**days) if days else None
         answer = CardAnswer(
             text=phrase["text"],
             explanation=phrase["explanation"],
@@ -132,6 +142,7 @@ def practice_card(
         other_cue_available=len(cues) > 1,
         hint=hints[view["hint_index"]] if view["hint_index"] is not None else None,
         answer=answer,
+        return_days=returns,
         # Saved takes carry an answer snapshot, so the hidden front withholds them.
         recordings=view_recordings(connection, view["view_token"]) if revealed else [],
     )

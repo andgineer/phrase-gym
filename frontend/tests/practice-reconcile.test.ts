@@ -24,6 +24,7 @@ const card = (token: string): Card => ({
   other_cue_available: true,
   hint: null,
   answer: null,
+  return_days: null,
   recordings: [],
 })
 const state = (current: Card | null): PracticeState => ({ card: current, progress, message: null })

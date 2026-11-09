@@ -76,7 +76,9 @@ phrase even before it is due.
 saved recordings after confirmation; completed practice keeps its wording. A recording still
 waiting to upload for that phrase stays on the device until you discard it. If deleted files cannot
 be removed, the app keeps showing the problem with **Retry cleanup** until removal succeeds.
-**Settings** contains the native language and learning timezone.
+**Settings** contains the native language, learning timezone, daily limits and how often phrases
+come back (**Often**, **Balanced** or **Rarely**); each rating button shows when that grade brings
+the phrase back.
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
 

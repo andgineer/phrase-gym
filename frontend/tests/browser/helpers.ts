@@ -63,3 +63,10 @@ export async function rateNew(page: Page, tap = false, wait = true) {
   await (tap ? again.tap() : again.click())
   if (wait) await expect(answer).toHaveCount(0)
 }
+
+// Midday keeps whole-day returns on the same learning day across a daylight-saving change.
+export function middayTomorrow() {
+  const instant = new Date(Date.now() + 24 * 3600 * 1000)
+  instant.setUTCHours(11, 0, 0, 0)
+  return instant.toISOString()
+}

@@ -465,6 +465,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/return-paces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Return Paces */
+        get: operations["return_paces_api_settings_return_paces_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -893,6 +910,7 @@ export interface components {
             phrase_id: string;
             /** Recordings */
             recordings: components["schemas"]["SavedRecording"][];
+            return_days: components["schemas"]["RatingReturnDays"] | null;
             /** Revealed */
             revealed: boolean;
             /** View Token */
@@ -977,6 +995,17 @@ export interface components {
             /** Skipped */
             skipped: number;
         };
+        /** RatingReturnDays */
+        RatingReturnDays: {
+            /** Easy */
+            easy: number;
+            /** Effort */
+            effort: number;
+            /** Got It */
+            got_it: number;
+            /** Not Yet */
+            not_yet: number;
+        };
         /** RecordingPage */
         RecordingPage: {
             /** Items */
@@ -1030,6 +1059,18 @@ export interface components {
             phrase_id: string;
             /** View Token */
             view_token: string;
+        };
+        /** ReturnPaceChoice */
+        ReturnPaceChoice: {
+            /** Forget One In */
+            forget_one_in: number;
+            /** Good Gaps Days */
+            good_gaps_days: number[];
+            /**
+             * Pace
+             * @enum {string}
+             */
+            pace: "often" | "balanced" | "rarely";
         };
         /** SavedRecording */
         SavedRecording: {
@@ -1088,6 +1129,11 @@ export interface components {
              * @enum {string}
              */
             native_language: "ru" | "en";
+            /**
+             * Return Pace
+             * @enum {string}
+             */
+            return_pace: "often" | "balanced" | "rarely";
         };
         /** StudiedPage */
         StudiedPage: {
@@ -2014,6 +2060,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    return_paces_api_settings_return_paces_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReturnPaceChoice"][];
                 };
             };
         };

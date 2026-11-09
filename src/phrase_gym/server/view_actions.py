@@ -33,11 +33,12 @@ class ViewActions:
         self.rng = rng or random.Random()  # noqa: S311
 
     def reveal(self, action: ViewAction) -> PracticeCard:
+        now = self.clock()
         with self.database.write() as connection:
-            view = require_view(connection, learning_day(connection, self.clock()), action)
+            view = require_view(connection, learning_day(connection, now), action)
             connection.execute("UPDATE current_view SET revealed=1 WHERE id=1")
             view = load_view(connection) or view
-            return practice_card(connection, view, view_phrase(connection, view))
+            return practice_card(connection, view, view_phrase(connection, view), now)
 
     def new_cue(self, operation: ViewOperation) -> PracticeCard:
         return self._choose(operation, "cue")
@@ -47,8 +48,9 @@ class ViewActions:
 
     def _choose(self, operation: ViewOperation, kind: str) -> PracticeCard:
         column, values_column = CHOICES[kind]
+        now = self.clock()
         with self.database.write() as connection:
-            view = require_view(connection, learning_day(connection, self.clock()), operation)
+            view = require_view(connection, learning_day(connection, now), operation)
             phrase = view_phrase(connection, view)
             values = json.loads(phrase[values_column])
             history = json.loads(view["operations_json"])
@@ -56,7 +58,7 @@ class ViewActions:
             if prior is not None:
                 if prior["kind"] != kind:
                     raise PracticeConflictError("This operation ID was used for another action")
-                card = practice_card(connection, view, phrase)
+                card = practice_card(connection, view, phrase, now)
                 chosen = values[prior["choice"]]
                 update = {"cue": Cue(**chosen)} if kind == "cue" else {"hint": chosen}
                 return card.model_copy(update=update)
@@ -73,4 +75,4 @@ class ViewActions:
                     (choice, phrase["id"]),
                 )
             view = load_view(connection) or view
-            return practice_card(connection, view, phrase)
+            return practice_card(connection, view, phrase, now)

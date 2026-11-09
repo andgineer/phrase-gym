@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from phrase_gym.server.contracts import Settings
+from phrase_gym.server.contracts import ReturnPaceChoice, Settings
 from phrase_gym.server.settings import SettingsService
 
 
@@ -10,6 +10,10 @@ def settings_routes(service: SettingsService) -> APIRouter:
     @router.get("/settings")
     def settings() -> Settings:
         return service.settings()
+
+    @router.get("/settings/return-paces")
+    def return_paces() -> list[ReturnPaceChoice]:
+        return service.return_paces()
 
     @router.put("/settings")
     def update_settings(settings: Settings) -> Settings:

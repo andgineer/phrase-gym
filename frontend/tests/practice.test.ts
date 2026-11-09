@@ -25,6 +25,7 @@ function card(token: string, changes: Partial<Card> = {}): Card {
     other_cue_available: true,
     hint: null,
     answer: null,
+    return_days: null,
     recordings: [],
     ...changes,
   }

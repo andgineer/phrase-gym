@@ -21,6 +21,13 @@ class CardAnswer(StrictModel):
     reference_url: str
 
 
+class RatingReturnDays(StrictModel):
+    not_yet: int
+    effort: int
+    got_it: int
+    easy: int
+
+
 class PracticeCard(StrictModel):
     view_token: str
     phrase_id: str
@@ -31,6 +38,8 @@ class PracticeCard(StrictModel):
     other_cue_available: bool
     hint: str | None
     answer: CardAnswer | None
+    # Null when another grade on this learning day would not reschedule the phrase.
+    return_days: RatingReturnDays | None
     recordings: list[SavedRecording]
 
 

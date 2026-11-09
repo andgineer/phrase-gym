@@ -91,3 +91,31 @@
     color: #e9eee9;
   }
 }
+.return-paces {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #ccd2c7;
+  border-radius: 9px;
+  min-width: 0;
+}
+.return-paces legend {
+  font-weight: 600;
+  padding-inline: 4px;
+}
+.return-paces p {
+  margin: 0;
+}
+.return-pace {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.return-pace input {
+  margin-top: 4px;
+}
+.return-pace small {
+  display: block;
+  font-weight: 400;
+}

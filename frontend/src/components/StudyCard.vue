@@ -3,7 +3,8 @@ import PhraseExplanation from './PhraseExplanation.vue'
 import AudioIcon from './AudioIcon.vue'
 import { computed } from 'vue'
 import { progressLine } from '../practiceReducer'
-import type { Card, Outcome, Progress } from '../studyTypes'
+import { returnDescription, returnSpan } from '../returnSpan'
+import type { Card, Outcome, Progress, Rating } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
@@ -37,7 +38,7 @@ const emit = defineEmits<{
   retryCompletion: []
   stop: []
 }>()
-const ratings: Array<[Outcome, string, string]> = [
+const ratings: Array<[Rating, string, string]> = [
   ['not_yet', 'Again', 'not-yet'],
   ['effort', 'Hard', 'effort'],
   ['got_it', 'Good', 'recalled'],
@@ -111,9 +112,13 @@ const front = computed(() => !props.card.revealed)
             v-for="[outcome, label, style] in ratings"
             :key="outcome"
             :class="style"
+            :title="card.return_days ? returnDescription(card.return_days[outcome]) : undefined"
             :disabled="busy || requesting || processing"
             @click="emit('complete', outcome)"
           >
+            <span v-if="card.return_days" class="rating-return" aria-hidden="true">{{
+              returnSpan(card.return_days[outcome])
+            }}</span>
             {{ label }}
           </button>
           <button :disabled="busy || requesting || processing" @click="emit('complete', 'skipped')">
