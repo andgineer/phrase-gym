@@ -32,12 +32,12 @@ def revealed_new_card(practice: Practice) -> Card:
     return practice.reveal(card)
 
 
-def test_return_pace_defaults_to_balanced_and_lists_good_gaps(practice: Practice) -> None:
+def test_return_pace_defaults_to_balanced_and_counts_good_returns(practice: Practice) -> None:
     assert practice.client.get("/api/settings").json()["return_pace"] == "balanced"
     assert practice.client.get("/api/settings/return-paces").json() == [
-        {"pace": "often", "good_gaps_days": [1, 2, 4, 7], "forget_one_in": 33},
-        {"pace": "balanced", "good_gaps_days": [1, 3, 8, 19], "forget_one_in": 20},
-        {"pace": "rarely", "good_gaps_days": [2, 11, 46, 163], "forget_one_in": 10},
+        {"pace": "often", "first_month_returns": 5, "first_year_returns": 9},
+        {"pace": "balanced", "first_month_returns": 3, "first_year_returns": 7},
+        {"pace": "rarely", "first_month_returns": 2, "first_year_returns": 4},
     ]
     settings = practice.client.get("/api/settings").json() | {"return_pace": "never"}
     assert practice.client.put("/api/settings", json=settings).status_code == 422

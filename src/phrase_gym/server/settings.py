@@ -1,11 +1,12 @@
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from phrase_gym.server.contracts import ReturnPaceChoice, Settings
-from phrase_gym.server.scheduling import RETENTION, good_gaps
+from phrase_gym.server.scheduling import RETENTION, good_return_days
 from phrase_gym.server.settings_store import read_settings, write_settings
 from phrase_gym.server.storage import Database
 
-SHOWN_GAPS = 4
+MONTH_DAYS = 30
+YEAR_DAYS = 365
 
 
 class SettingsService:
@@ -26,11 +27,14 @@ class SettingsService:
         return settings
 
     def return_paces(self) -> list[ReturnPaceChoice]:
-        return [
-            ReturnPaceChoice(
-                pace=pace,
-                good_gaps_days=good_gaps(pace, SHOWN_GAPS),
-                forget_one_in=round(1 / (1 - retention)),
+        choices = []
+        for pace in RETENTION:
+            days = good_return_days(pace, YEAR_DAYS)
+            choices.append(
+                ReturnPaceChoice(
+                    pace=pace,
+                    first_month_returns=sum(day <= MONTH_DAYS for day in days),
+                    first_year_returns=len(days),
+                ),
             )
-            for pace, retention in RETENTION.items()
-        ]
+        return choices

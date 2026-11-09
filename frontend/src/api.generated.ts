@@ -1062,10 +1062,10 @@ export interface components {
         };
         /** ReturnPaceChoice */
         ReturnPaceChoice: {
-            /** Forget One In */
-            forget_one_in: number;
-            /** Good Gaps Days */
-            good_gaps_days: number[];
+            /** First Month Returns */
+            first_month_returns: number;
+            /** First Year Returns */
+            first_year_returns: number;
             /**
              * Pace
              * @enum {string}

@@ -96,10 +96,13 @@ def return_days(
     return days
 
 
-def good_gaps(pace: ReturnPace, count: int) -> list[int]:
-    scheduler, card, instant, gaps = SCHEDULERS[pace], Card(), datetime.now(UTC), []
-    for _ in range(count):
+def good_return_days(pace: ReturnPace, horizon: int) -> list[int]:
+    scheduler, card, start = SCHEDULERS[pace], Card(), datetime.now(UTC)
+    instant, days = start, []
+    while True:
         card, _ = scheduler.review_card(card, Rating.Good, review_datetime=instant)
-        gaps.append((card.due - instant).days)
         instant = card.due
-    return gaps
+        day = (instant - start).days
+        if day > horizon:
+            return days
+        days.append(day)

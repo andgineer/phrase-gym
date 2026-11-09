@@ -57,8 +57,8 @@ class Settings(StrictModel):
 
 class ReturnPaceChoice(StrictModel):
     pace: ReturnPace
-    good_gaps_days: list[int]
-    forget_one_in: int
+    first_month_returns: int
+    first_year_returns: int
 
 
 class RecordingReceipt(StrictModel):

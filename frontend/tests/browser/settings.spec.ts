@@ -39,15 +39,21 @@ test('daily limits are edited in Settings and govern Daily', async ({ page }) =>
   await expect(fresh).toHaveValue('2')
 })
 
-test('return pace choices show their gaps and set the rating forecasts', async ({ page }) => {
+test('return pace choices show their return counts and set the rating forecasts', async ({
+  page,
+}) => {
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
   await page.request.post(`/__test/clock/${middayTomorrow()}`)
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await expect(page.getByRole('radio', { name: /^Balanced/ })).toBeChecked()
-  await expect(page.getByTestId('pace-often')).toHaveText('1d, 2d, 4d, 7d · forget 1 in 33')
-  await expect(page.getByTestId('pace-balanced')).toHaveText('1d, 3d, 8d, 19d · forget 1 in 20')
-  await expect(page.getByTestId('pace-rarely')).toHaveText('2d, 11d, 1.5m, 5.4m · forget 1 in 10')
+  await expect(page.getByTestId('pace-often')).toHaveText(
+    '5× first month · 9× first year · fewer slip',
+  )
+  await expect(page.getByTestId('pace-balanced')).toHaveText('3× first month · 7× first year')
+  await expect(page.getByTestId('pace-rarely')).toHaveText(
+    '2× first month · 4× first year · more slip',
+  )
   await page.getByRole('radio', { name: /^Rarely/ }).check()
   await page.getByRole('button', { name: 'Save settings' }).click()
   await expect(status(page, 'Settings saved.')).toBeVisible()

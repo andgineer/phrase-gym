@@ -1802,16 +1802,13 @@
       "ReturnPaceChoice": {
         "additionalProperties": false,
         "properties": {
-          "forget_one_in": {
-            "title": "Forget One In",
+          "first_month_returns": {
+            "title": "First Month Returns",
             "type": "integer"
           },
-          "good_gaps_days": {
-            "items": {
-              "type": "integer"
-            },
-            "title": "Good Gaps Days",
-            "type": "array"
+          "first_year_returns": {
+            "title": "First Year Returns",
+            "type": "integer"
           },
           "pace": {
             "enum": [
@@ -1825,8 +1822,8 @@
         },
         "required": [
           "pace",
-          "good_gaps_days",
-          "forget_one_in"
+          "first_month_returns",
+          "first_year_returns"
         ],
         "title": "ReturnPaceChoice",
         "type": "object"

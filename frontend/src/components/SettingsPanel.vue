@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
-import { returnSpan } from '../returnSpan'
 
 type Settings = components['schemas']['Settings']
 type PaceChoice = components['schemas']['ReturnPaceChoice']
@@ -10,6 +9,10 @@ const paceNames: Record<Settings['return_pace'], string> = {
   often: 'Often',
   balanced: 'Balanced',
   rarely: 'Rarely',
+}
+const paceCosts: Partial<Record<Settings['return_pace'], string>> = {
+  often: 'fewer slip',
+  rarely: 'more slip',
 }
 const settings = ref<Settings | null>(null)
 const paces = ref<PaceChoice[]>([])
@@ -24,8 +27,14 @@ onMounted(async () => {
     message.value = String(cause)
   }
 })
-const gaps = (choice: PaceChoice) =>
-  `${choice.good_gaps_days.map(returnSpan).join(', ')} · forget 1 in ${choice.forget_one_in}`
+const summary = (choice: PaceChoice) =>
+  [
+    `${choice.first_month_returns}× first month`,
+    `${choice.first_year_returns}× first year`,
+    paceCosts[choice.pace],
+  ]
+    .filter(Boolean)
+    .join(' · ')
 async function save() {
   if (!settings.value) return
   try {
@@ -64,17 +73,17 @@ async function save() {
         <input v-model.number="settings.daily_new_limit" type="number" min="0" inputmode="numeric"
       /></label>
       <fieldset class="return-paces">
-        <legend>How often phrases come back</legend>
+        <legend>How often a phrase you keep answering Good comes back</legend>
         <label v-for="choice in paces" :key="choice.pace" class="return-pace">
           <input v-model="settings.return_pace" type="radio" :value="choice.pace" />
           <span
             >{{ paceNames[choice.pace] }}
             <small class="muted" :data-testid="`pace-${choice.pace}`">{{
-              gaps(choice)
+              summary(choice)
             }}</small></span
           >
         </label>
-        <p class="muted">Gaps when every answer is Good; applies from each phrase's next grade.</p>
+        <p class="muted">Again or Hard bring it back sooner; each button shows when.</p>
       </fieldset>
       <p>English cards and short English help are selected for this MVP.</p>
       <button @click="save">Save settings</button>

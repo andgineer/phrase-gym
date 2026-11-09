@@ -95,14 +95,14 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  padding: 12px;
-  border: 1px solid #ccd2c7;
-  border-radius: 9px;
+  padding: 0;
+  border: 0;
   min-width: 0;
 }
 .return-paces legend {
   font-weight: 600;
-  padding-inline: 4px;
+  padding: 0;
+  margin-bottom: 6px;
 }
 .return-paces p {
   margin: 0;
