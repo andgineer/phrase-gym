@@ -6,7 +6,9 @@ import {
   revealAnswer,
   importPackage,
   importStatus,
+  libraryPhrase,
   phraseId,
+  phraseSearch,
   savedForCoach,
   savedTakes,
 } from './helpers'
@@ -422,7 +424,7 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
   expect(completions).toBe(cards.length)
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByRole('button', { name: "Open details: Let's get started." }).click()
+  await libraryPhrase(page, "Let's get started.").click()
   await page.getByRole('button', { name: 'Recording history' }).click()
   await expect(page.getByRole('button', { name: 'Mine' })).toHaveCount(2)
   await page.getByRole('button', { name: '← Back' }).click()
@@ -439,8 +441,8 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find a phrase').fill('walk me through')
-  await page.getByRole('button', { name: 'Open details: Could you walk me through that?' }).click()
+  await phraseSearch(page).fill('walk me through')
+  await libraryPhrase(page, 'Could you walk me through that?').click()
   await expect(page.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Practise freely' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
@@ -449,8 +451,8 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
   await expect(page.getByText('Settings saved.')).toBeVisible()
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find a phrase').fill('started')
-  await expect(page.getByRole('button', { name: /^Open details/ })).toHaveCount(1)
+  await phraseSearch(page).fill('started')
+  await expect(page.getByRole('list', { name: 'Phrases' }).getByRole('button')).toHaveCount(1)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await openDaily(page, false)
   await expect(page.getByText('Use the useful expression in situation 2.')).toBeVisible()

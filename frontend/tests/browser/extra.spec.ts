@@ -10,7 +10,14 @@ import {
   stopButton,
   texts,
 } from './extra-package'
-import { rateNew, revealAnswer, importPackage, playedMedia, savedTakes } from './helpers'
+import {
+  rateNew,
+  revealAnswer,
+  importPackage,
+  libraryPhrase,
+  playedMedia,
+  savedTakes,
+} from './helpers'
 
 async function setLimits(page: Page, due: number, fresh: number) {
   const settings = await (await page.request.get('/api/settings')).json()
@@ -121,8 +128,8 @@ test('Practice from details rates one phrase and returns to its details', async 
     .click()
   await expect(card(page)).toHaveCount(0)
   await expect(details(page)).toHaveCount(0)
-  await expect(page.getByRole('button', { name: `Open details: ${texts[1]}` })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: `Open details: ${texts[0]}` })).toBeVisible()
+  await expect(libraryPhrase(page, texts[1])).toHaveCount(0)
+  await expect(libraryPhrase(page, texts[0])).toBeVisible()
 })
 
 test.describe('mobile', () => {

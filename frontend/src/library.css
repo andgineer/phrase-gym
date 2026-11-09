@@ -2,9 +2,6 @@
   display: grid;
   gap: 18px;
 }
-.library h2 {
-  margin: 0;
-}
 .lesson-picker,
 .phrase-finder {
   display: grid;
@@ -79,19 +76,24 @@
   margin: 0;
 }
 .library-results li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 4px;
+  display: grid;
 }
 .phrase-summary {
   display: grid;
   gap: 2px;
   min-width: 0;
-  flex: 1 1 16rem;
+  padding: 14px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
   overflow-wrap: anywhere;
+}
+.phrase-summary:hover:enabled {
+  background: #eef1e8;
+}
+.phrase-summary:focus-visible {
+  outline-offset: -3px;
 }
 .phrase-summary strong {
   font-family: Georgia, serif;
@@ -150,7 +152,8 @@ button.danger {
     background: #25352e;
     border-color: #64776b;
   }
-  .combo-panel li.active {
+  .combo-panel li.active,
+  .phrase-summary:hover:enabled {
     background: #304339;
   }
   .combo-arrow,

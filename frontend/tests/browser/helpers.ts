@@ -43,6 +43,12 @@ export async function savedTakes(page: Page, text: string) {
   return (await (await page.request.get(`/api/phrases/${id}/recordings?limit=100`)).json()).items
 }
 
+export const phraseSearch = (page: Page) =>
+  page.getByRole('searchbox', { name: 'Search phrases or concepts' })
+
+export const libraryPhrase = (page: Page, text: string) =>
+  page.getByRole('list', { name: 'Phrases' }).getByRole('button', { name: text, exact: true })
+
 export async function revealAnswer(page: Page, tap = false) {
   const show = page.getByRole('button', { name: 'Show', exact: true })
   const answer = page.getByTestId('practice-phrase')

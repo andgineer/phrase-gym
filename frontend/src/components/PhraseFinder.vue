@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { usePagedList } from '../composables/usePagedList'
-import type { DeletionTarget, PhrasePage, PhraseSummary } from '../libraryTypes'
+import type { PhrasePage, PhraseSummary } from '../libraryTypes'
 
 const props = defineProps<{ lessonId: string; disabled: boolean }>()
-const emit = defineEmits<{ open: [phraseId: string]; remove: [target: DeletionTarget] }>()
+const emit = defineEmits<{ open: [phraseId: string] }>()
 const query = defineModel<string>('query', { default: '' })
 const searching = computed(() => query.value.trim() !== '')
 const phrases = usePagedList<PhraseSummary, PhrasePage>(() =>
@@ -38,37 +38,28 @@ defineExpose({ reload: phrases.reload })
 
 <template>
   <div class="phrase-finder">
-    <label for="phrase-search">Find a phrase</label>
     <input
-      id="phrase-search"
       v-model="query"
       type="search"
+      aria-label="Search phrases or concepts"
       placeholder="Search phrases or concepts"
     />
     <p v-if="searching" class="muted">Searching all lessons.</p>
     <ul v-if="phrases.items.value.length" class="phrase-list library-results" aria-label="Phrases">
-      <li v-for="phrase in phrases.items.value" :key="phrase.id">
-        <div class="phrase-summary">
-          <strong lang="en">{{ phrase.text }}</strong>
-          <span class="purpose">Used for: {{ phrase.usage_contexts.join(' · ') }}</span>
-          <span class="muted">{{ phrase.lesson_title }}</span>
-        </div>
-        <div class="row-actions">
-          <button
-            :aria-label="`Open details: ${phrase.text}`"
-            :disabled="disabled"
-            @click="emit('open', phrase.id)"
+      <li v-for="(phrase, index) in phrases.items.value" :key="phrase.id">
+        <button
+          class="phrase-summary"
+          :aria-labelledby="`phrase-result-${index}`"
+          :aria-describedby="`phrase-result-${index}-use phrase-result-${index}-lesson`"
+          :disabled="disabled"
+          @click="emit('open', phrase.id)"
+        >
+          <strong :id="`phrase-result-${index}`" lang="en">{{ phrase.text }}</strong>
+          <span :id="`phrase-result-${index}-use`" class="purpose"
+            >Used for: {{ phrase.usage_contexts.join(' · ') }}</span
           >
-            Open details
-          </button>
-          <button
-            :aria-label="`Delete: ${phrase.text}`"
-            :disabled="disabled"
-            @click="emit('remove', { id: phrase.id, text: phrase.text })"
-          >
-            Delete
-          </button>
-        </div>
+          <span :id="`phrase-result-${index}-lesson`" class="muted">{{ phrase.lesson_title }}</span>
+        </button>
       </li>
     </ul>
     <p v-else-if="phrases.loaded.value && !phrases.loading.value" class="muted" role="status">

@@ -2,7 +2,14 @@ import type { Locator, Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import { card, details, modeLine, openDetails } from './extra-package'
-import { rateNew, revealAnswer, importPackage, playedMedia } from './helpers'
+import {
+  rateNew,
+  revealAnswer,
+  importPackage,
+  libraryPhrase,
+  phraseSearch,
+  playedMedia,
+} from './helpers'
 
 const texts = [
   'So far, so good.',
@@ -161,9 +168,9 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(lesson).toHaveValue('')
   await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 5 new')
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find a phrase').fill(texts[2])
-  await expect(page.getByRole('button', { name: `Open details: ${texts[2]}` })).toBeVisible()
-  await page.getByLabel('Find a phrase').fill('')
+  await phraseSearch(page).fill(texts[2])
+  await expect(libraryPhrase(page, texts[2])).toBeVisible()
+  await phraseSearch(page).fill('')
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
 
   await setLimits(page, 1, 2)
@@ -211,8 +218,8 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(studied).toHaveCount(6)
   await expect(facts(page).getByRole('button', { name: 'More', exact: true })).toHaveCount(0)
 
-  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByRole('button', { name: `Delete: ${texts[0]}` }).click()
+  await openDetails(page, texts[0])
+  await details(page).getByRole('button', { name: 'Delete', exact: true }).click()
   await page
     .getByRole('dialog', { name: `Delete “${texts[0]}”?` })
     .getByRole('button', { name: 'Delete permanently' })
@@ -268,8 +275,8 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(page.getByText("Today's Extra practice is complete.", { exact: true })).toBeVisible()
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 recall / 2 new')
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await page.getByLabel('Find a phrase').fill(texts[3])
-  await expect(page.getByRole('button', { name: `Open details: ${texts[3]}` })).toBeVisible()
+  await phraseSearch(page).fill(texts[3])
+  await expect(libraryPhrase(page, texts[3])).toBeVisible()
 
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await moveClock(page, 72)
