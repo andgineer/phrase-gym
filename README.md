@@ -45,15 +45,15 @@
 | src/phrase\_gym/server/recording\_store.py    |       50 |        2 |     96% |    40, 69 |
 | src/phrase\_gym/server/recording\_views.py    |       10 |        0 |    100% |           |
 | src/phrase\_gym/server/reference\_audio.py    |       42 |        3 |     93% |52, 54, 56 |
-| src/phrase\_gym/server/scheduling.py          |       53 |        0 |    100% |           |
+| src/phrase\_gym/server/scheduling.py          |       56 |        0 |    100% |           |
 | src/phrase\_gym/server/schema\_upgrade.py     |       38 |        0 |    100% |           |
 | src/phrase\_gym/server/search\_terms.py       |       10 |        0 |    100% |           |
-| src/phrase\_gym/server/settings.py            |       22 |        2 |     91% |     22-23 |
+| src/phrase\_gym/server/settings.py            |       27 |        2 |     93% |     23-24 |
 | src/phrase\_gym/server/settings\_store.py     |       11 |        0 |    100% |           |
 | src/phrase\_gym/server/storage.py             |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py              |       16 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py       |       51 |        0 |    100% |           |
-| **TOTAL**                                     | **1843** |   **75** | **96%** |           |
+| **TOTAL**                                     | **1851** |   **75** | **96%** |           |
 
 
 ## Setup coverage badge
