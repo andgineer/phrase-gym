@@ -144,7 +144,7 @@ onMounted(initialize)
           @hint="practice.hint"
           @complete="session.complete"
           @remove="removeCard"
-          @play-phrase="card.answer && playback.play(card.answer.reference_url)"
+          @play-phrase="session.playReference"
           @play-mine="session.playMine"
           @compare="session.compareMine"
           @retry-save="takeTransfers.flush"

@@ -15,7 +15,8 @@ claim to measure fluency.
 
 Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the
 answer and plays the reference followed by your recording; recording on the back uses the same
-playback order. The history icon in the audio controls on the card back or in phrase details opens a
+playback order. If you press **Ref** before recording on the back, finishing that take plays only
+your recording. The history icon in the audio controls on the card back or in phrase details opens a
 framed list of saved takes, newest first, with a date and **Mine** replay button for each.
 It stays collapsed until you open it.
 

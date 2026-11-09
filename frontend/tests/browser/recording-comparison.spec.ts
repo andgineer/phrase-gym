@@ -70,6 +70,48 @@ test('front and back stops play reference then the full take, with collapsed sav
   await expect(card(page).getByText('No saved recordings yet.')).toBeVisible()
 })
 
+test('Ref before a back take replays only that take; later takes and cards compare reference first', async ({
+  page,
+}) => {
+  const reference = card(page).getByRole('button', { name: 'Ref' })
+  const microphone = card(page).getByRole('button', { name: 'Record a take' })
+  const playedSince = async (before: number) => (await playedMedia(page)).slice(before)
+  async function recordTake() {
+    const before = (await playedMedia(page)).length
+    await microphone.click()
+    await card(page).getByRole('button', { name: 'Stop recording' }).click()
+    return before
+  }
+  async function expectReferenceFirst(before: number) {
+    await expect.poll(() => playedSince(before)).toEqual([expect.stringMatching(/\/reference$/)])
+    await finishClip(page)
+    await expect
+      .poll(() => playedSince(before))
+      .toEqual([expect.stringMatching(/\/reference$/), expect.stringMatching(/^blob:/)])
+    await finishClip(page)
+    await expect(microphone).toBeVisible()
+  }
+
+  await card(page).getByRole('button', { name: 'Show', exact: true }).click()
+  await reference.click()
+  await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
+  await finishClip(page)
+  const afterRef = await recordTake()
+  await expect.poll(() => playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
+  await finishClip(page)
+  await expect(microphone).toBeVisible()
+  expect(await playedSince(afterRef)).toEqual([expect.stringMatching(/^blob:/)])
+
+  await expectReferenceFirst(await recordTake())
+
+  await reference.click()
+  await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
+  await card(page).getByRole('button', { name: 'Good', exact: true }).click()
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+  await expectReferenceFirst(await recordTake())
+  await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(2)
+})
+
 test('phone audio controls keep playback, microphone and expandable history together', async ({
   page,
 }, testInfo) => {

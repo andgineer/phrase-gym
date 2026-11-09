@@ -14,7 +14,9 @@ export function usePracticeSession() {
   const localTakes = ref<StoredTake[]>([])
   const completing = ref(false)
   let mediaScope = 0
-  let compareOnStop: number | null = null
+  let compareOnStop: { scope: number; reference: boolean } | null = null
+  // A learner who just listened with Ref before a take needs only their own take replayed.
+  let referenceHeard = false
 
   // Any card change, including a reconcile after a conflict, cancels the old phrase's media.
   watch(
@@ -22,6 +24,7 @@ export function usePracticeSession() {
     () => {
       mediaScope++
       compareOnStop = null
+      referenceHeard = false
       playback.stop()
       localTakes.value = []
     },
@@ -40,8 +43,9 @@ export function usePracticeSession() {
       const current = card.value
       const sameView = current?.view_token === take.view_token
       if (sameView) localTakes.value = [...localTakes.value, take]
+      const comparison = compareOnStop
       const shouldCompare =
-        take.complete && compareOnStop === mediaScope && sameView && !document.hidden
+        take.complete && comparison?.scope === mediaScope && sameView && !document.hidden
       const scope = mediaScope
       compareOnStop = null
       void takeTransfers.flush()
@@ -55,7 +59,10 @@ export function usePracticeSession() {
         revealed.answer &&
         !document.hidden
       )
-        void playback.compareTake(take, revealed.answer.reference_url)
+        void playback.compareTake(
+          take,
+          comparison.reference ? revealed.answer.reference_url : undefined,
+        )
     },
     failure: async () => {},
   })
@@ -63,6 +70,13 @@ export function usePracticeSession() {
   const latestTake = computed<StoredTake | Recording | null>(
     () => localTakes.value.at(-1) ?? card.value?.recordings.at(-1) ?? null,
   )
+
+  function playReference() {
+    const reference = card.value?.answer?.reference_url
+    if (!reference) return
+    referenceHeard = true
+    return playback.play(reference)
+  }
 
   function playMine() {
     const take = latestTake.value
@@ -108,7 +122,8 @@ export function usePracticeSession() {
   async function controlAudio() {
     if (capture.requesting.value) return capture.release()
     if (capture.capturing.value) {
-      compareOnStop = mediaScope
+      compareOnStop = { scope: mediaScope, reference: !referenceHeard }
+      referenceHeard = false
       return capture.stop()
     }
     if (playback.active.value) return playback.stop()
@@ -124,6 +139,7 @@ export function usePracticeSession() {
     capture,
     completing,
     latestTake,
+    playReference,
     playMine,
     compareMine,
     complete,
