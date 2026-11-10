@@ -157,9 +157,11 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(fact(page, 'long-term')).toHaveCount(0)
   const panel = await facts(page).boundingBox()
   const daily = await page.getByRole('button', { name: 'Daily', exact: true }).boundingBox()
-  expect(daily!.y).toBeGreaterThan(panel!.y + panel!.height)
-
   const lesson = page.getByRole('combobox', { name: 'Lesson', exact: true })
+  const field = await lesson.boundingBox()
+  expect(field!.y).toBeGreaterThan(daily!.y + daily!.height)
+  expect(panel!.y).toBeGreaterThan(field!.y + field!.height)
+
   await lesson.click()
   await lesson.pressSequentially('Small')
   await expect(page.getByRole('option')).toHaveText(['All lessons', 'Small talk · Facts course'])
@@ -467,7 +469,7 @@ test('the completion message stays visible when the entry facts cannot load', as
 test.describe('mobile', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
-  test('mobile Today facts fit above the entry controls', async ({ page }) => {
+  test('mobile Daily and Extra open above Today facts without scrolling', async ({ page }) => {
     await page.goto('/')
     await importPackage(page, factsPackage, 6, true)
     await setLimits(page, 1, 1)
@@ -475,7 +477,16 @@ test.describe('mobile', () => {
     await revealAnswer(page)
     const drawn = await card(page).getByTestId('practice-phrase').innerText()
     await rateNew(page, true)
+    await page.goto('/')
     await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
+    const panel = await facts(page).boundingBox()
+    for (const name of ['Daily', 'Extra']) {
+      const button = page.getByRole('button', { name, exact: true })
+      await expect(button).toBeInViewport({ ratio: 1 })
+      const box = await button.boundingBox()
+      expect(box!.y + box!.height).toBeLessThan(panel!.y)
+    }
     await facts(page).getByRole('button', { name: 'See today’s phrases' }).tap()
     await expect(facts(page).getByRole('listitem').last()).toContainText(drawn)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)

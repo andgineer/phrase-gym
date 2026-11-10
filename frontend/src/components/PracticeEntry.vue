@@ -17,16 +17,16 @@ const lessonId = defineModel<string>('lessonId', { default: '' })
 </script>
 
 <template>
-  <PracticeFacts :message="message" />
   <section class="card session-entry">
-    <LessonPicker v-model="lessonId" />
     <div class="actions">
       <button class="primary" :disabled="busy" @click="emit('daily')">Daily</button>
       <button :disabled="busy" @click="emit('extra')">Extra</button>
     </div>
+    <LessonPicker v-model="lessonId" />
   </section>
   <p v-if="error" role="alert" class="error">
     {{ error }}
     <button v-if="canRetryExtra" :disabled="busy" @click="emit('retryExtra')">Retry</button>
   </p>
+  <PracticeFacts :message="message" />
 </template>

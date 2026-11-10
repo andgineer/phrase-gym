@@ -49,7 +49,7 @@ never reset. Skipped phrases from earlier passes come back; phrases that are not
 If nothing is waiting, Extra says so at once. **Stop** on an Extra card finishes any recording and
 returns to the entry; **Daily** resumes that card later.
 
-When a Daily or Extra pass runs out, the entry says so and shows practice facts above its
+When a Daily or Extra pass runs out, the entry says so and shows practice facts below its
 controls, across all lessons: the current and best practice streak with the last seven days;
 **Today** with its recalls and new phrases, ratings, Skips and recordings, with takes still
 uploading from this device counted separately, and **See today's phrases** with **More**, which
