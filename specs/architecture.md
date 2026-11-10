@@ -32,6 +32,20 @@ Use one application database and data directory outside the model's workspace. K
 
 Record the prompt, answer and support with each saved take so later edits cannot misdescribe playback. A replacement meaning starts a new phrase. Simple take snapshots suffice; immutable profile registries, publication generations, cross-target dependency graphs and versioned job capabilities are not required.
 
+## Database access
+
+SQL is hand-written against SQLite, without an ORM, query builder or added dependency. Each workflow's transaction takes SQLite's write lock up front, and the queries rely on SQLite's own date comparison, JSON functions, replace-on-insert and backup copy. The application is fixed to SQLite, so database portability buys nothing.
+
+Rows that are read whole or passed between functions are typed records whose fields equal the query's columns. A query returning a column the record lacks, or lacking one it has, fails instead of silently dropping data, and the type checker rejects a misspelled column before commit. A test compares each whole-table record with a freshly created database, so a new upgrade step that changes one of those tables fails the tests until its record matches. Records keep stored values in their stored form: JSON stays text and flags stay integers until the code that uses them decodes them. A read that names a few columns and uses them beside its own SQL text stays a plain row.
+
+A SQLAlchemy 2.1 proof of concept against this codebase (November 2026) found no reason to adopt an ORM:
+
+- The SQL surface is small: 89 SQL calls in 3,160 lines of server code over 13 tables, four upgrade steps and a 61-line upgrade runner, with five runtime dependencies. SQL text is assembled only from fixed fragments (the search, lesson and date filters, the cue-or-hint column name, the shared schedule column list and the phrase insert), and every value is passed as a parameter.
+- The actual weakness was 155 column names read as strings, which the type checker cannot see; it flags the same typo on an ORM class. Tests against a real SQLite file caught such typos. Typed records close this gap for rows read whole or passed between functions, without a dependency.
+- By default the ORM lost updates: two writers read the same phrase and the second save silently overwrote the first. Restoring the up-front write lock took about ten lines of connection hooks, and a first attempt left the database locked.
+- The ported rating save issued four statements where the current code issues two. The ported search took 24 lines against about 15, and table declarations took 59 lines for 3 of the 13 tables while duplicating the schema upgrade steps.
+- It added about 10 MB installed (1.3 MB more if its migration tool replaced the upgrade runner) and about 0.1 s at start-up (93–124 ms warm import against 2–3 ms).
+
 ## Deletion cleanup
 
 Phrase deletion removes visible records and invalidates the phrase's active view in one SQLite transaction. That same transaction durably records the owned reference/take paths awaiting deletion before their records disappear. Filesystem removal follows the commit; SQLite and filesystem changes are not claimed to be atomic. Paths remain pending until removal succeeds, with an already absent file treated as success.

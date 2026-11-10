@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from fsrs import Card, Rating, Scheduler
 
 from phrase_gym.server.contracts import ReturnPace
+from phrase_gym.server.records import PhraseRecord, ScheduleRecord
 from phrase_gym.server.settings_store import read_settings
 
 RATINGS = {
@@ -40,15 +41,17 @@ def next_day_start(connection: sqlite3.Connection, instant: datetime) -> datetim
     return datetime.combine(tomorrow, datetime.min.time(), zone).astimezone(UTC)
 
 
-def effective_due(connection: sqlite3.Connection, phrase: sqlite3.Row) -> datetime:
+def effective_due(connection: sqlite3.Connection, phrase: ScheduleRecord) -> datetime:
     # A changed timezone must not reopen a phrase on the learning day it was studied or graded.
-    latest = phrase["last_review"] or phrase["studied_at"]
-    due = datetime.fromisoformat(phrase["due_at"])
+    latest = phrase.last_review or phrase.studied_at
+    if phrase.due_at is None or latest is None:
+        raise ValueError("A studied phrase must have a due date and a review or study date.")
+    due = datetime.fromisoformat(phrase.due_at)
     return max(due, next_day_start(connection, datetime.fromisoformat(latest)))
 
 
-def graded_today(connection: sqlite3.Connection, phrase: sqlite3.Row, day: str) -> bool:
-    last = phrase["last_review"]
+def graded_today(connection: sqlite3.Connection, phrase: ScheduleRecord, day: str) -> bool:
+    last = phrase.last_review
     return last is not None and learning_day(connection, datetime.fromisoformat(last)) == day
 
 
@@ -81,7 +84,7 @@ def schedule(
 
 def return_days(
     connection: sqlite3.Connection,
-    phrase: sqlite3.Row,
+    phrase: PhraseRecord,
     instant: datetime,
 ) -> dict[str, int] | None:
     day = learning_day(connection, instant)
@@ -91,7 +94,7 @@ def return_days(
     today = date.fromisoformat(day)
     days = {}
     for rating in RATINGS:
-        due = _review(connection, scheduler, phrase["fsrs_json"], rating, instant).due
+        due = _review(connection, scheduler, phrase.fsrs_json, rating, instant).due
         days[rating] = (date.fromisoformat(learning_day(connection, due)) - today).days
     return days
 

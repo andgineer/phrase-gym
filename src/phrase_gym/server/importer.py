@@ -1,11 +1,11 @@
 import hashlib
 import json
-import sqlite3
 from datetime import UTC, datetime
 
 from phrase_gym.server.import_contracts import PhrasePackage
 from phrase_gym.server.import_notices import clear_notice, record_notice
 from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
+from phrase_gym.server.records import ImportRecord, fetch_one
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
 from phrase_gym.server.storage import Database
 
@@ -28,15 +28,17 @@ class Importer:
         digest_data = json.dumps({"package": payload, "references": references}, sort_keys=True)
         digest = hashlib.sha256(digest_data.encode()).hexdigest()
         with self.database.write() as connection:
-            previous = connection.execute(
+            previous = fetch_one(
+                connection,
+                ImportRecord,
                 "SELECT * FROM imports WHERE package_id=?",
                 (package.package_id,),
-            ).fetchone()
-            if previous and previous["content_hash"] != digest:
+            )
+            if previous and previous.content_hash != digest:
                 raise ImportConflictError(
                     "This package_id has different content; use a new ID.",
                 )
-            if previous and previous["status"] == "error":
+            if previous and previous.status == "error":
                 connection.execute(
                     "UPDATE imports SET status='pending', error=NULL WHERE package_id=?",
                     (package.package_id,),
@@ -61,56 +63,62 @@ class Importer:
 
     def next_work(self) -> dict[str, object] | None:
         with self.database.write() as connection:
-            row = connection.execute(
+            row = fetch_one(
+                connection,
+                ImportRecord,
                 "SELECT * FROM imports WHERE status IN ('pending', 'preparing') "
                 "ORDER BY created_at LIMIT 1",
-            ).fetchone()
+            )
             if row is None:
                 return None
             connection.execute(
                 "UPDATE imports SET status='preparing' WHERE package_id=?",
-                (row["package_id"],),
+                (row.package_id,),
             )
-            return {"package_id": row["package_id"], "package": json.loads(row["payload"])}
+            return {"package_id": row.package_id, "package": json.loads(row.payload)}
 
     def fail(self, package_id: str, message: str) -> dict[str, object]:
         with self.database.write() as connection:
-            row = connection.execute(
+            row = fetch_one(
+                connection,
+                ImportRecord,
                 "SELECT * FROM imports WHERE package_id=?",
                 (package_id,),
-            ).fetchone()
+            )
             if row is None:
                 raise KeyError(package_id)
-            if row["status"] != "added":
+            if row.status != "added":
                 connection.execute(
                     "UPDATE imports SET status='error', error=? WHERE package_id=?",
                     (message, package_id),
                 )
             # A repeated report of the same failure must not revive a dismissed notice.
-            if row["status"] in {"pending", "preparing"}:
+            if row.status in {"pending", "preparing"}:
                 record_notice(connection, package_id, now())
         return self.status(package_id)
 
     def publish(self, package_id: str, result_id: str, audio: dict[str, str]) -> dict[str, object]:
         with self.database.write() as connection:
-            row = connection.execute(
+            row = fetch_one(
+                connection,
+                ImportRecord,
                 "SELECT * FROM imports WHERE package_id=?",
                 (package_id,),
-            ).fetchone()
+            )
             if row is None:
                 raise KeyError(package_id)
             result_hash = self._result_hash(audio)
-            if row["status"] == "added":
-                if row["result_id"] != result_id or row["result_hash"] != result_hash:
+            if row.status == "added":
+                if row.result_id != result_id or row.result_hash != result_hash:
                     raise ImportConflictError(
                         "A different result was already published for this package.",
                     )
                 return self._public(row)
-            if row["status"] not in {"pending", "preparing"}:
+            if row.status not in {"pending", "preparing"}:
                 raise ImportConflictError(
                     "This package is not pending preparation.",
                 )
-            package = PhrasePackage.model_validate_json(row["payload"])
+            package = PhrasePackage.model_validate_json(row.payload)
             decoded = decode_references(package, audio)
             reject_identity_conflicts(connection, package)
             publish_batch(
@@ -128,19 +136,21 @@ class Importer:
 
     def status(self, package_id: str) -> dict[str, object]:
         with self.database.read() as connection:
-            row = connection.execute(
+            row = fetch_one(
+                connection,
+                ImportRecord,
                 "SELECT * FROM imports WHERE package_id=?",
                 (package_id,),
-            ).fetchone()
+            )
         if row is None:
             raise KeyError(package_id)
         return self._public(row)
 
     @staticmethod
-    def _public(row: sqlite3.Row) -> dict[str, object]:
+    def _public(row: ImportRecord) -> dict[str, object]:
         return {
-            "package_id": row["package_id"],
-            "status": row["status"],
-            "error": row["error"],
-            "added_count": row["added_count"],
+            "package_id": row.package_id,
+            "status": row.status,
+            "error": row.error,
+            "added_count": row.added_count,
         }

@@ -41,7 +41,7 @@ class PhraseDeletion:
                 [(path, phrase_id, instant) for path in paths],
             )
             connection.execute("DELETE FROM recordings WHERE phrase_id=?", (phrase_id,))
-            if (view := load_view(connection)) and view["phrase_id"] == phrase_id:
+            if (view := load_view(connection)) and view.phrase_id == phrase_id:
                 clear_phrase(connection)
             # Completed practice keeps its wording snapshot; the log's phrase reference is nulled.
             connection.execute("DELETE FROM phrases WHERE id=?", (phrase_id,))

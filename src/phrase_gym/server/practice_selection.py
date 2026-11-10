@@ -5,49 +5,52 @@ from datetime import datetime
 
 from phrase_gym.server.allowance import daily_progress
 from phrase_gym.server.practice_views import clear_phrase, load_view, show_phrase
+from phrase_gym.server.records import PhraseRecord, ViewRecord, fetch_all
 from phrase_gym.server.scheduling import effective_due
 
 
-def _lesson_filter(view: sqlite3.Row) -> tuple[str, tuple[str, ...]]:
-    lesson = view["lesson_id"]
+def _lesson_filter(view: ViewRecord) -> tuple[str, tuple[str, ...]]:
+    lesson = view.lesson_id
     return (" AND lesson_id=?", (lesson,)) if lesson else ("", ())
 
 
 def due_phrases(
     connection: sqlite3.Connection,
-    view: sqlite3.Row,
+    view: ViewRecord,
     now: datetime,
-) -> list[sqlite3.Row]:
+) -> list[PhraseRecord]:
     clause, parameters = _lesson_filter(view)
-    skipped = set(json.loads(view["skipped_json"]))
-    rows = connection.execute(
+    skipped = set(json.loads(view.skipped_json))
+    rows = fetch_all(
+        connection,
+        PhraseRecord,
         "SELECT * FROM phrases WHERE studied_at IS NOT NULL AND due_at<=?"  # noqa: S608
         f"{clause} ORDER BY due_at, created_at, position, id",
         (now.isoformat(), *parameters),
-    ).fetchall()
-    return [
-        row for row in rows if row["id"] not in skipped and effective_due(connection, row) <= now
-    ]
+    )
+    return [row for row in rows if row.id not in skipped and effective_due(connection, row) <= now]
 
 
-def new_phrases(connection: sqlite3.Connection, view: sqlite3.Row) -> list[sqlite3.Row]:
+def new_phrases(connection: sqlite3.Connection, view: ViewRecord) -> list[PhraseRecord]:
     clause, parameters = _lesson_filter(view)
-    skipped = set(json.loads(view["skipped_json"]))
-    rows = connection.execute(
+    skipped = set(json.loads(view.skipped_json))
+    rows = fetch_all(
+        connection,
+        PhraseRecord,
         f"SELECT * FROM phrases WHERE studied_at IS NULL{clause} "  # noqa: S608
         "ORDER BY created_at, position, id",
         parameters,
-    ).fetchall()
-    return [row for row in rows if row["id"] not in skipped]
+    )
+    return [row for row in rows if row.id not in skipped]
 
 
 def draw_phrase(
     connection: sqlite3.Connection,
-    view: sqlite3.Row,
+    view: ViewRecord,
     now: datetime,
     day: str,
     rng: random.Random,
-) -> tuple[sqlite3.Row, str] | None:
+) -> tuple[PhraseRecord, str] | None:
     progress = daily_progress(connection, day)
     due_left = max(progress.due_allowance - progress.due_completed, 0)
     new_left = max(progress.new_allowance - progress.new_completed, 0)

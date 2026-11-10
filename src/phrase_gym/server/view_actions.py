@@ -18,7 +18,7 @@ from phrase_gym.server.storage import Database
 
 # Enough retained choices for a client's exact retries; older operation IDs are forgotten.
 MAX_VIEW_OPERATIONS = 8
-CHOICES = {"cue": ("cue_index", "cues_json"), "hint": ("hint_index", "hints_json")}
+CHOICES = {"cue": "cue_index", "hint": "hint_index"}
 
 
 class ViewActions:
@@ -47,13 +47,13 @@ class ViewActions:
         return self._choose(operation, "hint")
 
     def _choose(self, operation: ViewOperation, kind: str) -> PracticeCard:
-        column, values_column = CHOICES[kind]
+        column = CHOICES[kind]
         now = self.clock()
         with self.database.write() as connection:
             view = require_view(connection, learning_day(connection, now), operation)
             phrase = view_phrase(connection, view)
-            values = json.loads(phrase[values_column])
-            history = json.loads(view["operations_json"])
+            values = json.loads(phrase.cues_json if kind == "cue" else phrase.hints_json)
+            history = json.loads(view.operations_json)
             prior = history.get(operation.operation_id)
             if prior is not None:
                 if prior["kind"] != kind:
@@ -62,7 +62,11 @@ class ViewActions:
                 chosen = values[prior["choice"]]
                 update = {"cue": Cue(**chosen)} if kind == "cue" else {"hint": chosen}
                 return card.model_copy(update=update)
-            choice = choose(self.rng, len(values), view[column])
+            choice = choose(
+                self.rng,
+                len(values),
+                view.cue_index if kind == "cue" else view.hint_index,
+            )
             history[operation.operation_id] = {"kind": kind, "choice": choice}
             retained = dict(list(history.items())[-MAX_VIEW_OPERATIONS:])
             connection.execute(
@@ -72,7 +76,7 @@ class ViewActions:
             if kind == "cue":
                 connection.execute(
                     "UPDATE phrases SET last_cue=? WHERE id=?",
-                    (choice, phrase["id"]),
+                    (choice, phrase.id),
                 )
             view = load_view(connection) or view
             return practice_card(connection, view, phrase, now)

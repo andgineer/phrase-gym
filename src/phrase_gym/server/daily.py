@@ -32,15 +32,15 @@ class DailyPractice:
             now = self.clock()
             day = learning_day(connection, now)
             view = load_view(connection)
-            if view is None or view["learning_date"] != day:
+            if view is None or view.learning_date != day:
                 # A new learning date closes an unfinished earlier view without a grade.
                 start_traversal(connection, day, "daily", lesson_id)
             else:
-                if view["practice"]:
+                if view.practice:
                     # Daily never resumes phrase-specific Practice; it selects a fresh view.
                     clear_phrase(connection)
                 connection.execute("UPDATE current_view SET lesson_id=? WHERE id=1", (lesson_id,))
             view = load_view(connection)
-            if view is not None and not view["phrase_id"]:
+            if view is not None and not view.phrase_id:
                 advance(connection, now, day, self.rng)
             return practice_state(connection, now, day)

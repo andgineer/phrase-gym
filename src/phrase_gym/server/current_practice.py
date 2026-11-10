@@ -3,7 +3,12 @@ from datetime import UTC, datetime
 
 from phrase_gym.server.allowance import daily_progress
 from phrase_gym.server.practice_contracts import PracticeState
-from phrase_gym.server.practice_views import load_view, practice_card, view_phrase
+from phrase_gym.server.practice_views import (
+    StaleViewError,
+    load_view,
+    practice_card,
+    view_phrase,
+)
 from phrase_gym.server.scheduling import learning_day
 from phrase_gym.server.storage import Database
 
@@ -22,10 +27,13 @@ class CurrentPractice:
             phrase = None
             if (
                 view is not None
-                and view["learning_date"] == day
-                and view["phrase_id"]
-                and not view["practice"]
+                and view.learning_date == day
+                and view.phrase_id
+                and not view.practice
             ):
-                phrase = view_phrase(connection, view)
+                try:
+                    phrase = view_phrase(connection, view)
+                except StaleViewError:
+                    phrase = None
             card = practice_card(connection, view, phrase, now) if view and phrase else None
             return PracticeState(card=card, progress=daily_progress(connection, day), message=None)

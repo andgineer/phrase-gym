@@ -12,6 +12,7 @@ from phrase_gym.server.facts_contracts import (
 )
 from phrase_gym.server.import_notices import import_notices
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
+from phrase_gym.server.records import PracticeLogRecord, ScheduleRecord, fetch_all
 from phrase_gym.server.scheduling import learning_day, learning_zone
 from phrase_gym.server.storage import Database
 from phrase_gym.server.streak import practice_streak
@@ -63,9 +64,11 @@ def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
 
 
 def _library(connection: sqlite3.Connection, now: datetime) -> LibraryCounts:
-    rows = connection.execute(
+    rows = fetch_all(
+        connection,
+        ScheduleRecord,
         f"SELECT {SCHEDULE_COLUMNS} FROM phrases",  # noqa: S608
-    ).fetchall()
+    )
     summary = schedule_summary(connection, rows, now)
     long_term = connection.execute(
         "SELECT COUNT(*) FROM phrases WHERE json_extract(fsrs_json, '$.stability')>=?",
@@ -107,22 +110,24 @@ class PracticeFactsService:
 
     def studied(self, learning_date: str, offset: int, limit: int) -> StudiedPage:
         with self.database.read() as connection:
-            rows = connection.execute(
+            rows = fetch_all(
+                connection,
+                PracticeLogRecord,
                 "SELECT * FROM practice_log WHERE learning_date=? "
                 "ORDER BY completed_at, rowid LIMIT ? OFFSET ?",
                 (learning_date, limit + 1, offset),
-            ).fetchall()
+            )
         return StudiedPage(
             items=[
                 StudiedPhrase(
-                    completion_id=row["id"],
-                    phrase_id=row["phrase_id"],
-                    text=row["phrase_text"],
-                    lesson_title=row["lesson_title"],
-                    mode=row["mode"],
-                    kind=row["kind"],
-                    rating=row["rating"],
-                    skipped=bool(row["skipped"]),
+                    completion_id=row.id,
+                    phrase_id=row.phrase_id,
+                    text=row.phrase_text,
+                    lesson_title=row.lesson_title,
+                    mode=row.mode,
+                    kind=row.kind,
+                    rating=row.rating,
+                    skipped=bool(row.skipped),
                 )
                 for row in rows[:limit]
             ],

@@ -13,6 +13,7 @@ from phrase_gym.server.practice_contracts import (
     ViewAction,
 )
 from phrase_gym.server.recording_views import view_recordings
+from phrase_gym.server.records import PhraseRecord, ShownPhraseRecord, ViewRecord, fetch_one
 from phrase_gym.server.scheduling import return_days
 
 
@@ -39,12 +40,12 @@ def require_lesson(connection: sqlite3.Connection, lesson_id: str | None) -> Non
         raise UnknownLessonError(lesson_id)
 
 
-def load_view(connection: sqlite3.Connection) -> sqlite3.Row | None:
-    return connection.execute("SELECT * FROM current_view WHERE id=1").fetchone()
+def load_view(connection: sqlite3.Connection) -> ViewRecord | None:
+    return fetch_one(connection, ViewRecord, "SELECT * FROM current_view WHERE id=1")
 
 
-def view_mode(view: sqlite3.Row) -> PracticeMode:
-    return "practice" if view["practice"] else view["origin"]
+def view_mode(view: ViewRecord) -> PracticeMode:
+    return "practice" if view.practice else view.origin
 
 
 def start_traversal(
@@ -68,19 +69,19 @@ def choose(rng: random.Random, count: int, avoid: int | None) -> int:
 
 def show_phrase(
     connection: sqlite3.Connection,
-    phrase: sqlite3.Row,
+    phrase: PhraseRecord,
     kind: str,
     rng: random.Random,
     *,
     practice: bool = False,
 ) -> None:
-    cue_index = choose(rng, len(json.loads(phrase["cues_json"])), phrase["last_cue"])
-    connection.execute("UPDATE phrases SET last_cue=? WHERE id=?", (cue_index, phrase["id"]))
+    cue_index = choose(rng, len(json.loads(phrase.cues_json)), phrase.last_cue)
+    connection.execute("UPDATE phrases SET last_cue=? WHERE id=?", (cue_index, phrase.id))
     # Every appearance gets a fresh token, even when the same phrase is shown again.
     connection.execute(
         "UPDATE current_view SET phrase_id=?, view_token=?, kind=?, practice=?, revealed=?, "
         "cue_index=?, hint_index=NULL, operations_json='{}' WHERE id=1",
-        (phrase["id"], str(uuid4()), kind, int(practice), 0, cue_index),
+        (phrase.id, str(uuid4()), kind, int(practice), 0, cue_index),
     )
 
 
@@ -91,58 +92,65 @@ def clear_phrase(connection: sqlite3.Connection) -> None:
     )
 
 
-def require_view(connection: sqlite3.Connection, day: str, action: ViewAction) -> sqlite3.Row:
+def require_view(connection: sqlite3.Connection, day: str, action: ViewAction) -> ViewRecord:
     view = load_view(connection)
     if (
         view is None
-        or view["learning_date"] != day
-        or view["view_token"] != action.view_token
-        or view["phrase_id"] != action.phrase_id
+        or view.learning_date != day
+        or view.view_token != action.view_token
+        or view.phrase_id != action.phrase_id
     ):
         raise StaleViewError("This card is no longer current. Open Daily to continue.")
     return view
 
 
-def view_phrase(connection: sqlite3.Connection, view: sqlite3.Row) -> sqlite3.Row:
-    return connection.execute(
+def view_phrase(connection: sqlite3.Connection, view: ViewRecord) -> ShownPhraseRecord:
+    phrase = fetch_one(
+        connection,
+        ShownPhraseRecord,
         "SELECT phrases.*, lessons.title AS lesson_title FROM phrases "
         "JOIN lessons ON lessons.id=phrases.lesson_id WHERE phrases.id=?",
-        (view["phrase_id"],),
-    ).fetchone()
+        (view.phrase_id,),
+    )
+    if phrase is None:
+        raise StaleViewError("This card is no longer current. Open Daily to continue.")
+    return phrase
 
 
 def practice_card(
     connection: sqlite3.Connection,
-    view: sqlite3.Row,
-    phrase: sqlite3.Row,
+    view: ViewRecord,
+    phrase: PhraseRecord,
     now: datetime,
 ) -> PracticeCard:
-    cues = json.loads(phrase["cues_json"])
-    hints = json.loads(phrase["hints_json"])
-    revealed = bool(view["revealed"])
+    if view.view_token is None or view.kind is None:
+        raise StaleViewError("This card is no longer current. Open Daily to continue.")
+    cues = json.loads(phrase.cues_json)
+    hints = json.loads(phrase.hints_json)
+    revealed = bool(view.revealed)
     answer = returns = None
     if revealed:
         days = return_days(connection, phrase, now)
         returns = RatingReturnDays(**days) if days else None
         answer = CardAnswer(
-            text=phrase["text"],
-            explanation=phrase["explanation"],
-            detailed_explanation=phrase["detailed_explanation"],
-            accepted_variants=json.loads(phrase["variants_json"]),
-            usage_contexts=json.loads(phrase["contexts_json"]),
-            reference_url=f"/api/phrases/{phrase['id']}/reference",
+            text=phrase.text,
+            explanation=phrase.explanation,
+            detailed_explanation=phrase.detailed_explanation,
+            accepted_variants=json.loads(phrase.variants_json),
+            usage_contexts=json.loads(phrase.contexts_json),
+            reference_url=f"/api/phrases/{phrase.id}/reference",
         )
     return PracticeCard(
-        view_token=view["view_token"],
-        phrase_id=phrase["id"],
+        view_token=view.view_token,
+        phrase_id=phrase.id,
         mode=view_mode(view),
-        kind=view["kind"],
+        kind=view.kind,
         revealed=revealed,
-        cue=Cue(**cues[view["cue_index"]]) if view["cue_index"] is not None else None,
+        cue=Cue(**cues[view.cue_index]) if view.cue_index is not None else None,
         other_cue_available=len(cues) > 1,
-        hint=hints[view["hint_index"]] if view["hint_index"] is not None else None,
+        hint=hints[view.hint_index] if view.hint_index is not None else None,
         answer=answer,
         return_days=returns,
         # Saved takes carry an answer snapshot, so the hidden front withholds them.
-        recordings=view_recordings(connection, view["view_token"]) if revealed else [],
+        recordings=view_recordings(connection, view.view_token) if revealed else [],
     )

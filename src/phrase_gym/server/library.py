@@ -8,6 +8,7 @@ from phrase_gym.server.contracts import (
     RecordingPage,
 )
 from phrase_gym.server.recording_views import saved_recording
+from phrase_gym.server.records import RecordingRecord, ShownPhraseRecord, fetch_all, fetch_one
 from phrase_gym.server.scheduling import effective_due, learning_day
 from phrase_gym.server.search_terms import query_terms, word_prefix_filter
 from phrase_gym.server.storage import Database
@@ -48,31 +49,31 @@ class LibraryService:
 
     def phrase(self, phrase_id: str) -> PhraseDetails | None:
         with self.database.read() as connection:
-            row = connection.execute(
+            row = fetch_one(
+                connection,
+                ShownPhraseRecord,
                 "SELECT phrases.*, lessons.title AS lesson_title FROM phrases "
                 "JOIN lessons ON lessons.id=phrases.lesson_id WHERE phrases.id=?",
                 (phrase_id,),
-            ).fetchone()
+            )
             if row is None:
                 return None
             due = (
-                learning_day(connection, effective_due(connection, row))
-                if row["studied_at"]
-                else None
+                learning_day(connection, effective_due(connection, row)) if row.studied_at else None
             )
         return PhraseDetails(
-            id=row["id"],
-            text=row["text"],
-            explanation=row["explanation"],
-            detailed_explanation=row["detailed_explanation"],
-            usage_contexts=json.loads(row["contexts_json"]),
-            accepted_variants=json.loads(row["variants_json"]),
-            lesson_id=row["lesson_id"],
-            lesson_title=row["lesson_title"],
-            source_label=row["source_label"],
-            source_link=row["source_link"],
-            reference_url=f"/api/phrases/{row['id']}/reference",
-            studied=bool(row["studied_at"]),
+            id=row.id,
+            text=row.text,
+            explanation=row.explanation,
+            detailed_explanation=row.detailed_explanation,
+            usage_contexts=json.loads(row.contexts_json),
+            accepted_variants=json.loads(row.variants_json),
+            lesson_id=row.lesson_id,
+            lesson_title=row.lesson_title,
+            source_label=row.source_label,
+            source_link=row.source_link,
+            reference_url=f"/api/phrases/{row.id}/reference",
+            studied=bool(row.studied_at),
             due_date=due,
         )
 
@@ -80,11 +81,13 @@ class LibraryService:
         with self.database.read() as connection:
             if not connection.execute("SELECT 1 FROM phrases WHERE id=?", (phrase_id,)).fetchone():
                 return None
-            rows = connection.execute(
+            rows = fetch_all(
+                connection,
+                RecordingRecord,
                 "SELECT * FROM recordings WHERE phrase_id=? "
                 "ORDER BY captured_at DESC, id DESC LIMIT ? OFFSET ?",
                 (phrase_id, limit + 1, offset),
-            ).fetchall()
+            )
             items = [saved_recording(connection, row) for row in rows[:limit]]
         return RecordingPage(
             items=items,

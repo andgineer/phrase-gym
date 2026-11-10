@@ -17,42 +17,44 @@ from phrase_gym.server.practice_selection import advance
 from phrase_gym.server.practice_state import practice_state
 from phrase_gym.server.practice_views import (
     PracticeConflictError,
+    StaleViewError,
     clear_phrase,
     require_view,
     view_mode,
     view_phrase,
 )
+from phrase_gym.server.records import ShownPhraseRecord, ViewRecord
 from phrase_gym.server.scheduling import graded_today, learning_day, schedule
 from phrase_gym.server.storage import Database
 
 
 def _record_outcome(
     connection: sqlite3.Connection,
-    view: sqlite3.Row,
-    phrase: sqlite3.Row,
+    view: ViewRecord,
+    phrase: ShownPhraseRecord,
     outcome: Outcome,
     now: datetime,
 ) -> tuple[Rating | None, bool, bool]:
     if outcome == "studied":
         raise PracticeConflictError("Practice completes with a rating or Skip")
     if outcome == "skipped":
-        if view["practice"]:
+        if view.practice:
             return None, True, False
-        skipped = json.loads(view["skipped_json"])
+        skipped = json.loads(view.skipped_json)
         connection.execute(
             "UPDATE current_view SET skipped_json=? WHERE id=1",
-            (json.dumps([*skipped, phrase["id"]]),),
+            (json.dumps([*skipped, phrase.id]),),
         )
         return None, True, False
-    if not view["revealed"]:
+    if not view.revealed:
         raise PracticeConflictError("Show the phrase before rating your answer")
     if graded_today(connection, phrase, learning_day(connection, now)):
         return outcome, False, False
-    fsrs_json, due = schedule(connection, phrase["fsrs_json"], outcome, now)
+    fsrs_json, due = schedule(connection, phrase.fsrs_json, outcome, now)
     connection.execute(
         "UPDATE phrases SET fsrs_json=?, due_at=?, last_review=?, "
         "studied_at=COALESCE(studied_at, ?) WHERE id=?",
-        (fsrs_json, due, now.isoformat(), now.isoformat(), phrase["id"]),
+        (fsrs_json, due, now.isoformat(), now.isoformat(), phrase.id),
     )
     return outcome, False, True
 
@@ -85,6 +87,8 @@ class PracticeCompletion:
             day = learning_day(connection, now)
             view = require_view(connection, day, request)
             phrase = view_phrase(connection, view)
+            if view.kind is None:
+                raise StaleViewError("This card is no longer current. Open Daily to continue.")
             rating, skipped, fsrs_updated = _record_outcome(
                 connection,
                 view,
@@ -94,10 +98,10 @@ class PracticeCompletion:
             )
             receipt = CompletionReceipt(
                 completion_id=request.completion_id,
-                phrase_id=phrase["id"],
+                phrase_id=phrase.id,
                 learning_date=day,
                 mode=view_mode(view),
-                kind=view["kind"],
+                kind=view.kind,
                 rating=rating,
                 skipped=skipped,
                 fsrs_updated=fsrs_updated,
@@ -108,9 +112,9 @@ class PracticeCompletion:
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     receipt.completion_id,
-                    phrase["id"],
-                    phrase["text"],
-                    phrase["lesson_title"],
+                    phrase.id,
+                    phrase.text,
+                    phrase.lesson_title,
                     now.isoformat(),
                     day,
                     receipt.kind,
@@ -125,7 +129,7 @@ class PracticeCompletion:
                 "VALUES (?, 'completion', ?, ?)",
                 (request.completion_id, payload, receipt.model_dump_json()),
             )
-            if view["practice"]:
+            if view.practice:
                 # Practice returns to details; the next Daily selects a fresh regular view.
                 clear_phrase(connection)
                 state = PracticeState(
