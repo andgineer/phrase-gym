@@ -53,7 +53,10 @@ export async function revealAnswer(page: Page, tap = false) {
   const show = page.getByRole('button', { name: 'Show', exact: true })
   const answer = page.getByTestId('practice-phrase')
   await expect(show.or(answer)).toBeVisible()
-  if (await show.count()) await (tap ? show.tap() : show.click())
+  if (!(await show.count())) return
+  await (tap ? show.tap() : show.click())
+  // The back moves the audio controls; a click aimed at the front could land on Ref instead.
+  await expect(answer).toBeVisible()
 }
 
 export async function rateNew(page: Page, tap = false, wait = true) {
