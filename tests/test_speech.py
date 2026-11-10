@@ -4,6 +4,7 @@ import json
 import os
 import stat
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -21,7 +22,7 @@ import sys, time
 if '-c' in sys.argv:
     print({version!r})
 elif {mode!r} == 'timeout':
-    time.sleep(5)
+    time.sleep(60)
 elif {mode!r} == 'stderr':
     sys.stderr.write('failure')
 elif {mode!r} == 'large-stderr':
@@ -55,7 +56,9 @@ elif {mode!r} == 'success':
     return voice
 
 
-def synthesize(path: Path, timeout: float = 1) -> bytes:
+# The runtime identity check gets min(max(timeout, 1), 10) seconds, so a generous timeout keeps
+# a slow Python child start under load from failing tests that are not about timeouts.
+def synthesize(path: Path, timeout: float = 30) -> bytes:
     return asyncio.run(PiperSpeech(path, timeout=timeout).synthesize("A complete phrase."))
 
 
@@ -68,15 +71,14 @@ def test_verified_runtime_produces_bounded_wav(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("mode", "message"),
     [
-        ("stderr", "failed"),
+        ("stderr", "Piper failed"),
         ("empty", "no audio"),
         ("timeout", "timed out"),
     ],
 )
 def test_child_failures_are_actionable(tmp_path: Path, mode: str, message: str) -> None:
-    timeout = 0.05 if mode == "timeout" else 1
     with pytest.raises(RuntimeError, match=message):
-        synthesize(voice_setup(tmp_path, mode), timeout=timeout)
+        synthesize(voice_setup(tmp_path, mode), timeout=3 if mode == "timeout" else 30)
 
 
 @pytest.mark.parametrize(
@@ -126,7 +128,9 @@ def test_cancellation_kills_and_reaps_stubborn_child(tmp_path: Path) -> None:
         f"""#!{sys.executable}
 import pathlib, signal, sys, time
 signal.signal(signal.SIGTERM, signal.SIG_IGN)
-pathlib.Path(sys.argv[1]).write_text(str(__import__('os').getpid()))
+pending = pathlib.Path(sys.argv[1] + '.pending')
+pending.write_text(str(__import__('os').getpid()))
+pending.replace(sys.argv[1])
 time.sleep(30)
 """
     )
@@ -145,9 +149,9 @@ time.sleep(30)
                 stderr_limit=1_024,
             )
         )
-        for _ in range(100):
-            if pid_path.exists():
-                break
+        # Child start-up is not under test; the pid file appears whole once the child runs.
+        deadline = time.monotonic() + 30
+        while not pid_path.exists() and time.monotonic() < deadline:
             await asyncio.sleep(0.01)
         assert pid_path.exists()
         pid = int(pid_path.read_text())
