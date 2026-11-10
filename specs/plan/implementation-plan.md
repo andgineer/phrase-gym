@@ -6,14 +6,13 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 ## 3. Make adult practice sustainable
 
-**Learner outcome:** choose short meaningful practice missions, see concrete progress and return after a break without penalties.
+**Learner outcome:** keep a forgiving weekly rhythm beside the daily streak and return after a break without penalties.
 
-- Apply the [adult engagement decision](../decision-transfer-and-engagement.md#adult-engagement): chosen missions with varied situations, a clear finish and a learner-selected weekly target.
-- Build on the factual [practice facts](../decision-transfer-and-engagement.md#practice-entry-and-todays-facts) and saved recording comparisons, each distinctly labeled. Do not compute an invented fluency or mastery score.
-- Add optional completion points or achievements, including credit for honest attempts that need correction. They must not depend on favorable self-ratings or reward endless easy-card repetition. Turning them off leaves all practice usable.
-- Preserve accumulated progress across missed days and let the learner pause or adjust the target. Keep the current/best practice streak factual and separate from rewards and memory grades. No public leaderboard, mandatory collectibles, streak-based penalty or virtual economy.
+- Add the learner-chosen [weekly target](../decision-transfer-and-engagement.md#weekly-target): practice days per week, shown on entry against this week's practice days, adjustable and pausable in Settings.
+- Cover a return after a missed week: Daily offers no more than its ordinary allowance, the best streak and accumulated practice facts are intact, and no missed week or shortfall is shown or carried forward.
+- Keep the target and the streak factual and separate from memory grades and daily allowances. Missions, points and achievements are [not planned](../decision-transfer-and-engagement.md#not-planned).
 
-**Exit:** the learner can choose and finish a mission, see accurately labeled progress, disable rewards and return after a missed week without debt or lost progress. Behavioral tests cover these rules and prove that rewards cannot alter memory grades. Enjoyment and sustained participation remain distinct acceptance questions, not inferred learning gains.
+**Exit:** the learner can choose, change and pause a weekly target, see this week's practice days against it, miss a day without losing the week and return after a missed week without debt or lost progress. Behavioral tests cover these rules and prove that the target cannot alter memory grades or allowances. Enjoyment and sustained participation remain distinct acceptance questions, not inferred learning gains.
 
 ## 4. Prepare typed phrases and words in Coach
 

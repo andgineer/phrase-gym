@@ -23,9 +23,9 @@ This is phrase retrieval in varied contexts. Reusing the cue and requesting a hi
 
 Keep one `practice_log` row for each rated new attempt, later recall or Skip, with a date, mode, wording snapshot and rating/Skip outcome. It supports Today’s paged studied list and factual streak without a separate attempt or review history. Saved recordings keep cue/help snapshots; no FSRS state timeline is claimed.
 
-On every explicit rating in Daily, Extra or phrase-specific Practice, call FSRS if the phrase's `last_review` is not today in the configured timezone; due date limits automatic selection, not this grade. Rating reflects the original attempt before answer reveal or requested help; needing a hint does not remove rating controls and can be reported honestly as **Again**. Search, More explanation, Show, Hint, recording, Skip, repeated same-day ratings and mission completion do not create another schedule update. Another natural response to a broad cue is not automatically a failure of the target phrase.
+On every explicit rating in Daily, Extra or phrase-specific Practice, call FSRS if the phrase's `last_review` is not today in the configured timezone; due date limits automatic selection, not this grade. Rating reflects the original attempt before answer reveal or requested help; needing a hint does not remove rating controls and can be reported honestly as **Again**. Search, More explanation, Show, Hint, recording, Skip and repeated same-day ratings do not create another schedule update. Another natural response to a broad cue is not automatically a failure of the target phrase.
 
-Do not label expressions automatic, fluent or mastered from card intervals, phrase counts, completed missions or recordings. Software checks verify these distinctions and saved state; they do not establish learning effectiveness. No mandatory learner experiment is a delivery gate.
+Do not label expressions automatic, fluent or mastered from card intervals, phrase counts, weekly targets or recordings. Software checks verify these distinctions and saved state; they do not establish learning effectiveness. No mandatory learner experiment is a delivery gate.
 
 ## Practice entry and today's facts
 
@@ -48,11 +48,21 @@ Phrase details show the answer, **Used for** contexts, short meaning, lesson and
 
 Adults are the intended audience. [Motivation research](research/motivation.md) supports designing for choice, a sense of progress and meaningful activity, while separating enjoyment from persistence and learning. Engagement is planned product work, not an assumption that adult discipline makes repetitive drills sustainable.
 
-Entry shows a visible **current practice streak** and a personal best, derived from the distinct learning dates of completed practice. A learning day counts when the learner completes a rating or Skip (or has a preserved historical first meeting) in Daily, Extra or phrase-detail Practice, regardless of rating or recording; opening, revealing, abandoning or Stop alone does not count. Each completion keeps the learning date of the timezone in force when it was completed, so a later timezone change affects only which day is today. Before today has practice, the current streak may still show the run ending yesterday; it resets after today ends without practice. Missing a day resets the current consecutive-day count but never erases the best streak or accumulated work. The streak has no effect on FSRS and is never used to shame the learner. Optional points, achievements and a chosen weekly target follow later in the delivery ladder.
+Entry shows a visible **current practice streak** and a personal best, derived from the distinct learning dates of completed practice. A learning day counts when the learner completes a rating or Skip (or has a preserved historical first meeting) in Daily, Extra or phrase-detail Practice, regardless of rating or recording; opening, revealing, abandoning or Stop alone does not count. Each completion keeps the learning date of the timezone in force when it was completed, so a later timezone change affects only which day is today. Before today has practice, the current streak may still show the run ending yesterday; it resets after today ends without practice. Missing a day resets the current consecutive-day count but never erases the best streak or accumulated work. The streak has no effect on FSRS and is never used to shame the learner.
 
-- Offer chosen missions using useful phrase practice with a clear finish and varied cues. Do not label repeated card answers as freer speech.
-- Show concrete progress from durable daily totals and comparable saved recordings, each with its own label. Avoid a single invented fluency score.
-- Let the learner choose a modest weekly target, pause and return without debt, penalties or losing accumulated progress. Short sessions have a clear endpoint.
-- Offer optional points or achievements for completing useful practice, including honest unsuccessful attempts. Rewards never depend on choosing a favorable self-rating, repeating easy cards indefinitely or forcing a phrase into unsuitable speech. Turning rewards off leaves learning available.
+Choice, a clear finish and a sense of progress come from what practice already offers: Daily or Extra on a chosen lesson is a short bounded session with varied cues and a completion message, and the practice facts are an informative record of accumulated work. Progress stays factual, each figure with its own label, with no single invented fluency score.
 
-Weekly targets and rewards are defaults to refine from actual use, not scientifically optimal prescriptions. There is no required public leaderboard, competition, child-oriented presentation, elaborate virtual economy or streak-based penalty.
+### Weekly target
+
+A strict daily streak is the one engagement element the evidence flags as risky: a broken streak leads people to drop off, less so when the break is repairable, and a single missed day does not harm habit formation. The weekly target is the forgiving counterpart to the streak.
+
+- The learner chooses a modest number of practice days per week. Entry shows this week's practice days against it beside the streak. A practice day is counted exactly as for the streak; a week runs Monday to Sunday in the configured timezone.
+- The learner can change the target at any time and pause it. No target is set until the learner chooses one, and practice is fully usable without it.
+- A missed day leaves the week reachable. A missed or paused week leaves no debt: no shortfall is carried forward, no missed-week count is shown, and accumulated progress and the best streak are untouched. Returning after a break offers the ordinary Daily allowance.
+- The target has no effect on FSRS, allowances or card selection, and is never used to shame the learner.
+
+The target is a default to refine from actual use, not a scientifically optimal prescription.
+
+### Not planned
+
+There are no missions, points, achievements or other rewards. Expected rewards for completing a task can reduce intrinsic motivation while informative progress feedback does not; points raised enjoyment without reducing dropout; and gamification effects faded within weeks. A mission would only rename the existing lesson choice, so it is worth adding only as the vehicle for a designed freer-speaking activity. There is likewise no public leaderboard, competition, child-oriented presentation, virtual economy or streak-based penalty.

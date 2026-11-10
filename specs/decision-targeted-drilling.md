@@ -103,6 +103,6 @@ For troublesome near-synonyms or lookalikes, give a short accurate contrast, inc
 
 Spaced spoken retrieval is the MVP's contribution: make useful wording available from meaning, with feedback and varied cues. [Conversational-uptake evidence](research/automatic-use.md) supports instruction combined with meaningful speaking, including increased use in unscripted classroom conversations. It does not guarantee lasting everyday use or automatic speech for this app.
 
-The [practice and engagement decision](decision-transfer-and-engagement.md) defines repeatable bounded Extra phrase sessions and later adult engagement. Freer speech remains a separate design question; the phrase drill does not establish it. A future activity should not force expressions into unsuitable conversations or change FSRS from mission outcomes.
+The [practice and engagement decision](decision-transfer-and-engagement.md) defines repeatable bounded Extra phrase sessions and later adult engagement. Freer speech remains a separate design question; the phrase drill does not establish it. A future activity should not force expressions into unsuitable conversations or change FSRS from its outcomes.
 
 No AI conversation partner, speech scoring, countdown, mandatory scripts, points, streak penalties or effectiveness experiment is part of the planned MVP. The learner can finish a short session and leave.
