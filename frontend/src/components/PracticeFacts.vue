@@ -13,6 +13,7 @@ import {
   studiedLine,
   todayTitle,
   totalTitle,
+  weekLine,
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
@@ -25,11 +26,13 @@ const practised = computed(() => (facts.value?.work.completions ?? 0) > 0)
 const todayShown = computed(
   () => !!today.value && (today.value.completions || today.value.recordings),
 )
+const week = computed(() => (facts.value ? weekLine(facts.value.week) : ''))
 const notices = computed(() => facts.value?.notices ?? [])
 const visible = computed(
   () =>
     currentMessage.value ||
     practised.value ||
+    week.value ||
     uploadingTakes.value ||
     error.value ||
     notices.value.length,
@@ -40,12 +43,13 @@ defineExpose({ refresh })
 <template>
   <section v-if="visible" class="card practice-facts" aria-label="Practice facts">
     <p v-if="currentMessage" role="status" class="entry-message">{{ currentMessage }}</p>
-    <template v-if="facts && practised">
-      <div class="streak">
+    <div v-if="facts && (practised || week)" class="streak">
+      <template v-if="practised">
         <p data-testid="streak">{{ streakLine(facts.streak) }}</p>
         <p class="muted" data-testid="best-streak">{{ bestLine(facts.streak) }}</p>
-      </div>
-    </template>
+      </template>
+      <p v-if="week" data-testid="week">{{ week }}</p>
+    </div>
     <div v-if="today && todayShown" class="facts-group">
       <h3 class="eyebrow" data-testid="today-title">{{ todayTitle(today) }}</h3>
       <p v-if="ratingsLine(today)" data-testid="today-ratings">{{ ratingsLine(today) }}</p>

@@ -56,8 +56,8 @@ Choice, a clear finish and a sense of progress come from what practice already o
 
 A strict daily streak is the one engagement element the evidence flags as risky: a broken streak leads people to drop off, less so when the break is repairable, and a single missed day does not harm habit formation. The weekly target is the forgiving counterpart to the streak.
 
-- The learner chooses a modest number of practice days per week. Entry shows this week's practice days against it beside the streak. A practice day is counted exactly as for the streak; a week runs Monday to Sunday in the configured timezone.
-- The learner can change the target at any time and pause it. No target is set until the learner chooses one, and practice is fully usable without it.
+- The learner chooses a modest number of practice days per week, from one to six: with seven, a single missed day would lose the week. Entry shows this week's practice days against it beside the streak. A practice day is counted exactly as for the streak; a week runs Monday to Sunday in the configured timezone.
+- The learner can change the target at any time and pause it; a pause keeps the chosen number for resuming. No target is set until the learner chooses one, and practice is fully usable without it. Entry shows no weekly line while no target is in force.
 - A missed day leaves the week reachable. A missed or paused week leaves no debt: no shortfall is carried forward, no missed-week count is shown, and accumulated progress and the best streak are untouched. Returning after a break offers the ordinary Daily allowance.
 - The target has no effect on FSRS, allowances or card selection, and is never used to shame the learner.
 

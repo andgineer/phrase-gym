@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
 
@@ -15,6 +15,16 @@ const paceCosts: Partial<Record<Settings['return_pace'], string>> = {
   rarely: 'more slip',
 }
 const settings = ref<Settings | null>(null)
+const targetChoices = [1, 2, 3, 4, 5, 6]
+// Removing the target also lifts a pause, so a later choice starts active.
+const weeklyTarget = computed({
+  get: () => settings.value?.weekly_target ?? null,
+  set: (target: number | null) => {
+    if (!settings.value) return
+    settings.value.weekly_target = target
+    if (target === null) settings.value.weekly_target_paused = false
+  },
+})
 const paces = ref<PaceChoice[]>([])
 const message = ref('')
 onMounted(async () => {
@@ -72,9 +82,9 @@ async function save() {
         >New phrases per day
         <input v-model.number="settings.daily_new_limit" type="number" min="0" inputmode="numeric"
       /></label>
-      <fieldset class="return-paces">
+      <fieldset class="settings-group">
         <legend>How often a phrase you keep answering Good comes back</legend>
-        <label v-for="choice in paces" :key="choice.pace" class="return-pace">
+        <label v-for="choice in paces" :key="choice.pace" class="settings-option">
           <input v-model="settings.return_pace" type="radio" :value="choice.pace" />
           <span
             >{{ paceNames[choice.pace] }}
@@ -84,6 +94,21 @@ async function save() {
           >
         </label>
         <p class="muted">Again or Hard bring it back sooner; each button shows when.</p>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>Weekly target</legend>
+        <label
+          >Practice days per week
+          <select v-model="weeklyTarget">
+            <option :value="null">No target</option>
+            <option v-for="days in targetChoices" :key="days" :value="days">{{ days }}</option>
+          </select></label
+        >
+        <label v-if="settings.weekly_target !== null" class="settings-option">
+          <input v-model="settings.weekly_target_paused" type="checkbox" />
+          <span>Pause weekly target</span>
+        </label>
+        <p class="muted">Any rating or Skip counts the day. A missed day or week owes nothing.</p>
       </fieldset>
       <p>English cards and short English help are selected for this MVP.</p>
       <button @click="save">Save settings</button>

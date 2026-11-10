@@ -91,7 +91,7 @@
     color: #e9eee9;
   }
 }
-.return-paces {
+.settings-group {
   display: grid;
   gap: 10px;
   margin: 0;
@@ -99,23 +99,23 @@
   border: 0;
   min-width: 0;
 }
-.return-paces legend {
+.settings-group legend {
   font-weight: 600;
   padding: 0;
   margin-bottom: 6px;
 }
-.return-paces p {
+.settings-group p {
   margin: 0;
 }
-.return-pace {
+.settings-option {
   display: flex;
   gap: 10px;
   align-items: flex-start;
 }
-.return-pace input {
+.settings-option input {
   margin-top: 4px;
 }
-.return-pace small {
+.settings-option small {
   display: block;
   font-weight: 400;
 }

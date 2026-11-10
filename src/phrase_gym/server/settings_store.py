@@ -4,7 +4,7 @@ import sqlite3
 from phrase_gym.server.contracts import Settings
 
 # A stored document lacks settings added after it was saved and may keep retired ones.
-DEFAULTS = {"return_pace": "balanced"}
+DEFAULTS = {"return_pace": "balanced", "weekly_target": None, "weekly_target_paused": False}
 
 
 def read_settings(connection: sqlite3.Connection) -> Settings:

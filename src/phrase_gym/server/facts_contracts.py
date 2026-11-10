@@ -14,6 +14,12 @@ class PracticeStreak(StrictModel):
     recent_days: list[PracticeDay]
 
 
+class PracticeWeek(StrictModel):
+    practice_days: int
+    # None while no target is chosen or the chosen one is paused.
+    target: int | None
+
+
 class PracticeTotals(StrictModel):
     completions: int
     first_meetings: int
@@ -49,6 +55,7 @@ class ImportNotice(StrictModel):
 class PracticeFacts(StrictModel):
     learning_date: str
     streak: PracticeStreak
+    week: PracticeWeek
     today: PracticeTotals
     work: CumulativeWork
     library: LibraryCounts

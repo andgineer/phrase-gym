@@ -22,6 +22,13 @@ export function streakLine({ current }: PracticeFacts['streak']) {
   return current ? `🔥 ${current}-day practice streak` : 'No current practice streak'
 }
 
+export function weekLine({ practice_days, target }: PracticeFacts['week']) {
+  if (target === null) return ''
+  return practice_days < target
+    ? `This week: ${practice_days} of ${counted(target, 'day')}`
+    : `This week: ${counted(practice_days, 'day')} · target reached`
+}
+
 export const bestLine = ({ best }: PracticeFacts['streak']) =>
   `Personal best: ${counted(best, 'day')}`
 

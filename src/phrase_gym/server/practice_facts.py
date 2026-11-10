@@ -14,8 +14,9 @@ from phrase_gym.server.import_notices import import_notices
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
 from phrase_gym.server.records import PracticeLogRecord, ScheduleRecord, fetch_all
 from phrase_gym.server.scheduling import learning_day, learning_zone
+from phrase_gym.server.settings_store import read_settings
 from phrase_gym.server.storage import Database
-from phrase_gym.server.streak import practice_streak
+from phrase_gym.server.streak import practice_streak, practice_week
 
 LONG_TERM_STABILITY_DAYS = 21
 
@@ -99,6 +100,7 @@ class PracticeFactsService:
             return PracticeFacts(
                 learning_date=day,
                 streak=practice_streak(dates, day),
+                week=practice_week(dates, day, read_settings(connection)),
                 today=_totals(connection, day),
                 work=CumulativeWork(
                     **_totals(connection, None).model_dump(),

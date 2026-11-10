@@ -79,6 +79,8 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(
             daily_due_limit=9,
             daily_new_limit=5,
             return_pace="balanced",
+            weekly_target=None,
+            weekly_target_paused=False,
         )
     [backup] = directory.glob("phrase-gym-schema-5-*.sqlite3")
     assert capsys.readouterr().out == (

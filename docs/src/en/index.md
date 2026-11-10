@@ -14,9 +14,12 @@ already graded that day. **Settings** chooses whether phrases come back **Often*
 its first month and year.
 **Extra** extends today's limits for another pass without erasing completed practice. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
-return date. The Library finds phrases by lesson or meaning, shows their details and saved
-recordings, practises one chosen phrase, and deletes a phrase after confirmation. The app does not
-claim to measure fluency.
+return date. An optional weekly target in **Settings**, one to six practice days from Monday to
+Sunday, adds this week's practice days beside the streak; it can be changed or paused at any time,
+a missed day or week carries nothing forward, and it never changes schedules or daily limits.
+The Library finds phrases by lesson or meaning, shows their details and saved recordings,
+practises one chosen phrase, and deletes a phrase after confirmation. The app does not claim to
+measure fluency.
 
 Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the
 answer and plays the reference followed by your recording; recording on the back uses the same

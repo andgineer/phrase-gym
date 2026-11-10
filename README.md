@@ -6,7 +6,8 @@
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
 keeping private learner recordings. It supports package import, Daily and Extra practice with spoken
 recall from the first attempt, phrase-specific Practice, self-rating, scheduled return, reference
-playback, comparison, saved replay, and today's practice facts with a factual streak.
+playback, comparison, saved replay, and today's practice facts with a factual streak and an
+optional weekly target.
 
 ## Install and launch
 
@@ -58,7 +59,10 @@ everything done in them (with older ungraded first meetings labeled separately);
 with how many phrases are due now, due later and new, plus how many are in long-term memory.
 Any rating or Skip counts the day toward the streak. Until today's
 first practice the streak still shows the run that ended yesterday; after a missed day it is zero,
-while the personal best and your progress remain. An entry left open refreshes when you return to
+while the personal best and your progress remain. If you choose a weekly target in **Settings**,
+the streak is joined by this week's practice days against it, such as **This week: 2 of 3 days**;
+a week runs Monday to Sunday, counts days the same way as the streak and starts afresh each Monday
+without carrying a shortfall forward. An entry left open refreshes when you return to
 it, so it never shows yesterday as today.
 
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and
@@ -76,9 +80,11 @@ phrase even before it is due.
 saved recordings after confirmation; completed practice keeps its wording. A recording still
 waiting to upload for that phrase stays on the device until you discard it. If deleted files cannot
 be removed, the app keeps showing the problem with **Retry cleanup** until removal succeeds.
-**Settings** contains the native language, learning timezone, daily limits and how often phrases
-come back (**Often**, **Balanced** or **Rarely**); each rating button shows when that grade brings
-the phrase back.
+**Settings** contains the native language, learning timezone, daily limits, how often phrases
+come back (**Often**, **Balanced** or **Rarely**) and an optional weekly target of one to six
+practice days, which you can change or pause at any time; each rating button shows when that grade
+brings the phrase back. The weekly target never changes schedules, daily limits or which phrases
+Daily offers.
 
 For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
 

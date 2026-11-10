@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -7,6 +7,8 @@ from phrase_gym.server.import_contracts import Cue, StrictModel
 
 PAGE_LIMIT = 100
 MAX_DAILY_LIMIT = 500
+# A seven-day target would turn one missed day into a lost week.
+MAX_WEEKLY_TARGET = 6
 PracticeMode = Literal["daily", "extra", "practice"]
 ActiveCardKind = Literal["new", "recall"]
 CardKind = Literal["first_study", "new", "recall"]
@@ -47,6 +49,8 @@ class Settings(StrictModel):
     daily_due_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
     daily_new_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
     return_pace: ReturnPace
+    weekly_target: Annotated[int, Field(ge=1, le=MAX_WEEKLY_TARGET)] | None
+    weekly_target_paused: bool
 
     @model_validator(mode="after")
     def some_practice_is_allowed(self) -> "Settings":

@@ -1,7 +1,8 @@
 from collections.abc import Iterable
 from datetime import date, timedelta
 
-from phrase_gym.server.facts_contracts import PracticeDay, PracticeStreak
+from phrase_gym.server.contracts import Settings
+from phrase_gym.server.facts_contracts import PracticeDay, PracticeStreak, PracticeWeek
 
 RECENT_DAYS = 7
 ONE_DAY = timedelta(days=1)
@@ -26,4 +27,15 @@ def practice_streak(learning_dates: Iterable[str], today: str) -> PracticeStreak
         recent_days=[
             PracticeDay(learning_date=day.isoformat(), practiced=day in days) for day in recent
         ],
+    )
+
+
+def practice_week(learning_dates: Iterable[str], today: str, settings: Settings) -> PracticeWeek:
+    current_day = date.fromisoformat(today)
+    monday = current_day - current_day.weekday() * ONE_DAY
+    week = {monday + offset * ONE_DAY for offset in range(7)}
+    target = None if settings.weekly_target_paused else settings.weekly_target
+    return PracticeWeek(
+        practice_days=sum(date.fromisoformat(value) in week for value in learning_dates),
+        target=target,
     )

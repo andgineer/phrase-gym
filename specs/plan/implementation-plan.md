@@ -1,18 +1,8 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results and a streak; next, make practice sustainable before expanding content sources. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target; next, Coach prepares typed phrases and words before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
-
-## 3. Make adult practice sustainable
-
-**Learner outcome:** keep a forgiving weekly rhythm beside the daily streak and return after a break without penalties.
-
-- Add the learner-chosen [weekly target](../decision-transfer-and-engagement.md#weekly-target): practice days per week, shown on entry against this week's practice days, adjustable and pausable in Settings.
-- Cover a return after a missed week: Daily offers no more than its ordinary allowance, the best streak and accumulated practice facts are intact, and no missed week or shortfall is shown or carried forward.
-- Keep the target and the streak factual and separate from memory grades and daily allowances. Missions, points and achievements are [not planned](../decision-transfer-and-engagement.md#not-planned).
-
-**Exit:** the learner can choose, change and pause a weekly target, see this week's practice days against it, miss a day without losing the week and return after a missed week without debt or lost progress. Behavioral tests cover these rules and prove that the target cannot alter memory grades or allowances. Enjoyment and sustained participation remain distinct acceptance questions, not inferred learning gains.
 
 ## 4. Prepare typed phrases and words in Coach
 

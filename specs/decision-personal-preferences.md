@@ -1,6 +1,6 @@
 # Language choices
 
-Keep a small Settings page in Vue. The learner can read and change native language, learning timezone, per-language card/help language, the daily due and new phrase limits and [how often phrases come back](decision-core-trainer.md#scheduling-choices); no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. The daily limits start at 20 due and five new phrases. Daily and Extra read their current values for allowance decisions; an increase can make more work available today. Each limit is a nonnegative integer, and both cannot be zero.
+Keep a small Settings page in Vue. The learner can read and change native language, learning timezone, per-language card/help language, the daily due and new phrase limits, [how often phrases come back](decision-core-trainer.md#scheduling-choices) and the [weekly target](decision-transfer-and-engagement.md#weekly-target); no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. The daily limits start at 20 due and five new phrases. Daily and Extra read their current values for allowance decisions; an increase can make more work available today. Each limit is a nonnegative integer, and both cannot be zero.
 
 The learner's current choices are:
 

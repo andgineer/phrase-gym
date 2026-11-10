@@ -1420,6 +1420,9 @@
           "today": {
             "$ref": "#/components/schemas/PracticeTotals"
           },
+          "week": {
+            "$ref": "#/components/schemas/PracticeWeek"
+          },
           "work": {
             "$ref": "#/components/schemas/CumulativeWork"
           }
@@ -1427,6 +1430,7 @@
         "required": [
           "learning_date",
           "streak",
+          "week",
           "today",
           "work",
           "library",
@@ -1584,6 +1588,32 @@
           "recordings"
         ],
         "title": "PracticeTotals",
+        "type": "object"
+      },
+      "PracticeWeek": {
+        "additionalProperties": false,
+        "properties": {
+          "practice_days": {
+            "title": "Practice Days",
+            "type": "integer"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "practice_days",
+          "target"
+        ],
+        "title": "PracticeWeek",
         "type": "object"
       },
       "RatingReturnDays": {
@@ -1979,6 +2009,23 @@
             ],
             "title": "Return Pace",
             "type": "string"
+          },
+          "weekly_target": {
+            "anyOf": [
+              {
+                "maximum": 6.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Target"
+          },
+          "weekly_target_paused": {
+            "title": "Weekly Target Paused",
+            "type": "boolean"
           }
         },
         "required": [
@@ -1988,7 +2035,9 @@
           "help_language",
           "daily_due_limit",
           "daily_new_limit",
-          "return_pace"
+          "return_pace",
+          "weekly_target",
+          "weekly_target_paused"
         ],
         "title": "Settings",
         "type": "object"

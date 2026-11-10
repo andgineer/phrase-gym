@@ -943,6 +943,7 @@ export interface components {
             notices: components["schemas"]["ImportNotice"][];
             streak: components["schemas"]["PracticeStreak"];
             today: components["schemas"]["PracticeTotals"];
+            week: components["schemas"]["PracticeWeek"];
             work: components["schemas"]["CumulativeWork"];
         };
         /** PracticeProgress */
@@ -994,6 +995,13 @@ export interface components {
             recordings: number;
             /** Skipped */
             skipped: number;
+        };
+        /** PracticeWeek */
+        PracticeWeek: {
+            /** Practice Days */
+            practice_days: number;
+            /** Target */
+            target: number | null;
         };
         /** RatingReturnDays */
         RatingReturnDays: {
@@ -1134,6 +1142,10 @@ export interface components {
              * @enum {string}
              */
             return_pace: "often" | "balanced" | "rarely";
+            /** Weekly Target */
+            weekly_target: number | null;
+            /** Weekly Target Paused */
+            weekly_target_paused: boolean;
         };
         /** StudiedPage */
         StudiedPage: {

@@ -72,6 +72,7 @@ def test_fresh_library_has_no_facts_and_nothing_waiting(practice: Practice) -> N
                 {"learning_date": f"2026-10-{day}", "practiced": False} for day in range(22, 29)
             ],
         },
+        "week": {"practice_days": 0, "target": None},
         "today": ZERO_TOTALS,
         "work": {**ZERO_TOTALS, "practice_days": 0},
         "library": {

@@ -11,6 +11,7 @@ import {
   studiedLine,
   todayTitle,
   totalTitle,
+  weekLine,
 } from '../src/practiceFacts'
 
 const today = {
@@ -35,6 +36,7 @@ const library = {
 const facts = (changes: Partial<PracticeFacts> = {}): PracticeFacts => ({
   learning_date: '2026-10-31',
   streak: { current: 8, best: 12, recent_days: [] },
+  week: { practice_days: 2, target: 3 },
   today,
   work: { ...today, recalls: 45, new_attempts: 112, got_it: 39, effort: 6, practice_days: 3 },
   library,
@@ -86,6 +88,16 @@ it('states the streak factually, including after a missed day', () => {
   const missed = { current: 0, best: 1, recent_days: [] }
   expect(streakLine(missed)).toBe('No current practice streak')
   expect(bestLine(missed)).toBe('Personal best: 1 day')
+})
+
+it('states this week’s practice days against a chosen, unpaused target without debt', () => {
+  expect(weekLine(facts().week)).toBe('This week: 2 of 3 days')
+  expect(weekLine({ practice_days: 0, target: 1 })).toBe('This week: 0 of 1 day')
+  expect(weekLine({ practice_days: 3, target: 3 })).toBe('This week: 3 days · target reached')
+  expect(weekLine({ practice_days: 1, target: 1 })).toBe('This week: 1 day · target reached')
+  expect(weekLine({ practice_days: 5, target: 3 })).toBe('This week: 5 days · target reached')
+  // No target chosen, or the chosen one paused: nothing is shown.
+  expect(weekLine({ practice_days: 4, target: null })).toBe('')
 })
 
 it('labels each studied phrase with its outcome, mode, lesson and deletion', () => {
