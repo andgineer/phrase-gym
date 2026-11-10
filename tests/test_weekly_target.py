@@ -99,6 +99,52 @@ def test_target_is_chosen_changed_paused_and_resumed(practice: Practice) -> None
     assert week(practice) == {"practice_days": 1, "target": None}
 
 
+def test_a_pause_without_a_target_is_saved_and_read_as_not_paused(practice: Practice) -> None:
+    response = put_target(practice.client, None, paused=True)
+    assert response.status_code == 200, response.text
+    assert response.json()["weekly_target_paused"] is False
+    assert practice.client.get("/api/settings").json()["weekly_target_paused"] is False
+    with practice.database.write() as connection:
+        connection.execute(
+            "UPDATE settings SET document=json_set(document, '$.weekly_target', json('null'), "
+            "'$.weekly_target_paused', json('true'))"
+        )
+    stored = practice.client.get("/api/settings").json()
+    assert (stored["weekly_target"], stored["weekly_target_paused"]) == (None, False)
+    set_target(practice.client, 4)
+    assert week(practice) == {"practice_days": 0, "target": 4}
+
+
+def test_a_skip_a_historical_first_meeting_or_a_practice_rating_alone_counts_a_day(
+    practice: Practice,
+) -> None:
+    publish(practice.client, many(3))
+    set_target(practice.client, 3)
+    card = practice.card()
+    complete(practice, card, "skipped")
+    practice.later(days=1)
+    with practice.database.write() as connection:
+        connection.execute(
+            "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, completed_at, "
+            "learning_date, kind, rating, skipped, fsrs_updated, mode) VALUES (?, NULL, "
+            "'Earlier phrase.', 'Earlier', '2026-11-03T09:00:00+00:00', '2026-11-03', "
+            "'first_study', NULL, 0, 0, 'daily')",
+            (str(uuid4()),),
+        )
+    practice.later(days=1)
+    complete(practice, practice.practise(card["phrase_id"]), "got_it")
+    assert [
+        (row["kind"], row["rating"], row["skipped"], row["mode"]) for row in practice.log()
+    ] == [
+        ("new", None, 1, "daily"),
+        ("first_study", None, 0, "daily"),
+        ("new", "got_it", 0, "practice"),
+    ]
+    found = facts(practice)
+    assert found["week"] == {"practice_days": 3, "target": 3}
+    assert found["streak"]["current"] == 3
+
+
 @pytest.mark.parametrize("target", [0, 7, 2.5])
 def test_target_outside_one_to_six_days_is_rejected(practice: Practice, target: object) -> None:
     set_target(practice.client, 2)

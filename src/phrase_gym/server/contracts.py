@@ -58,6 +58,13 @@ class Settings(StrictModel):
             raise ValueError("daily due and new limits cannot both be zero")
         return self
 
+    @model_validator(mode="after")
+    def pause_needs_a_target(self) -> "Settings":
+        # Normalized rather than rejected so that an already stored document still loads.
+        if self.weekly_target is None:
+            self.weekly_target_paused = False
+        return self
+
 
 class ReturnPaceChoice(StrictModel):
     pace: ReturnPace
