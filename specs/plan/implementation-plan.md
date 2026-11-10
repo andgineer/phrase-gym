@@ -54,6 +54,10 @@ Routine inspection of supplied external-AI material and local English synthesis 
 
 The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
+## Maintenance: typed database rows
+
+Independent of the stages above: make rows read from the database typed records so the type checker rejects a misspelled column, following the [typed rows handout](typed-rows-handout.md).
+
 ## Delivery discipline
 
 Use the [implementation handout](orchestration-handout.md) and the repository [done gate](../../AGENTS.md#done-gate). Tests establish software behavior, semantic review establishes the inspected content, and learner interaction establishes actual-device acceptance. Report these separately. Remove accepted work from this ladder; do not accumulate completed-stage logs or let optional later stages redefine the MVP.
