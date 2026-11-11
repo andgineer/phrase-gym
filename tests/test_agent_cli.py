@@ -168,3 +168,53 @@ def test_agent_failure_reports_timeout_and_empty_output(tmp_path: Path) -> None:
     assert agent_failure(empty, "Claude", ERROR_LINE) == "Claude: no output produced"
     empty.stdout_path.write_text("{}")
     assert agent_failure(empty, "Claude", ERROR_LINE) is None
+
+
+def test_custom_cli_homes_reach_the_agent_but_other_claude_state_does_not(tmp_path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", "/custom/codex")
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", "/custom/claude")
+    monkeypatch.setenv("CLAUDE_CODE_SSE_PORT", "1234")
+    monkeypatch.setenv("ANTHROPIC_MODEL", "pinned")
+    env = _run_and_capture_env(tmp_path, api_key_vars=[])
+    assert env["CODEX_HOME"] == "/custom/codex"
+    assert env["CLAUDE_CONFIG_DIR"] == "/custom/claude"
+    assert not {"CLAUDE_CODE_SSE_PORT", "ANTHROPIC_MODEL"} & set(env)
+
+
+def test_codex_given_as_a_full_path_still_skips_the_git_check(tmp_path):
+    captured: list[list[str]] = []
+
+    def fake_run_subprocess(**kw):
+        captured.append(kw["run_args"])
+        return _fake_result(tmp_path)
+
+    with patch("phrase_gym.coach.agents.ai_agent.run_subprocess", side_effect=fake_run_subprocess):
+        _run_agent_cli(
+            prompt_file=tmp_path / "step-prompt.md",
+            stdout_path=tmp_path / "step-stdout.log",
+            stderr_path=tmp_path / "step-stderr.log",
+            cwd=tmp_path,
+            timeout_seconds=10,
+            command_template='/opt/homebrew/bin/codex exec {model} "{prompt_file}"',
+            values={},
+        )
+    assert captured[0][:3] == ["/opt/homebrew/bin/codex", "exec", "--skip-git-repo-check"]
+
+
+def test_unrecognised_failures_keep_the_cli_error_text_but_not_the_prompt(tmp_path: Path) -> None:
+    claude_errors = re.compile(r'^(?:Error|API Error)\b.*$|^.*"is_error":\s*true.*$', re.M)
+    result = _fake_result(tmp_path, exit_code=1)
+    result.stdout_path.write_text("")
+    result.stderr_path.write_text(
+        "prompt echo: please quote\nAPI Error: 500 Internal server error\n"
+    )
+    assert agent_failure(result, "Claude", claude_errors) == (
+        "Claude: agent exit code 1: API Error: 500 Internal server error"
+    )
+    result.stderr_path.write_text("")
+    result.stdout_path.write_text(
+        '{"type": "result", "is_error": true, "result": "Something unexpected broke"}\n'
+    )
+    assert agent_failure(result, "Claude", claude_errors) == (
+        "Claude: agent exit code 1: Something unexpected broke"
+    )

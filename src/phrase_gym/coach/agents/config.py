@@ -14,7 +14,8 @@ _DEFAULT_CLAUDE_CMD = (
     "claude -p {model} --output-format json --json-schema {schema} --no-session-persistence "
     "--tools Read --allowed-tools {read_scope} "
     '--disallowed-tools "Read(~/**)" "Read(//**/.env)" "Read(//**/.env.*)" '
-    "--permission-prompts none --strict-mcp-config --setting-sources user "
+    "--permission-mode manual --permission-prompts none --strict-mcp-config "
+    "--setting-sources user "
     '-- "Read your task from {prompt_file} and execute it."'
 )
 
@@ -34,4 +35,6 @@ INHERITED_ENVIRONMENT = (
     "HTTP_PROXY",
     "HTTPS_PROXY",
     "NO_PROXY",
+    "CODEX_HOME",
+    "CLAUDE_CONFIG_DIR",
 )

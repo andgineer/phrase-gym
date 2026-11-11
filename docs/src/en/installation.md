@@ -35,8 +35,8 @@ It needs two things on the same Mac:
   once with your Claude subscription (run `claude` and log in). Coach uses your normal Claude
   login, default model and settings and never uses an API key. The model gets only a file-reading
   tool that works inside the current preparation's folder; reading `.env` files, your home
-  directory and your learning data is refused. Tools and servers you add in your own Claude
-  settings are not covered by that restriction; Coach does not isolate them.
+  directory and your learning data is refused. Read-allow rules, tools and servers you add in
+  your own Claude settings can widen that restriction; Coach does not isolate them.
 - A local English [Piper voice](piper-voice.md) for the reference audio.
 
 Run Coach in another terminal:

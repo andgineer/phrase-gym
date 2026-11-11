@@ -135,6 +135,7 @@ def main() -> None:
     typed = typed_input(prompt)
     fail(vendor, typed, prompt)
     if "slow" in typed:
+        print(os.getpid(), file=sys.stderr, flush=True)
         time.sleep(30)
     respond(vendor, arguments, None if "malformed" in typed else answer(typed, step), step)
 

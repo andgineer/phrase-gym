@@ -1,5 +1,7 @@
 import asyncio
 import json
+import os
+import time
 from dataclasses import replace
 from pathlib import Path
 
@@ -232,16 +234,17 @@ def test_claude_reads_only_the_attempt_with_home_and_env_files_denied(tmp_path: 
     for flag, value in [
         ("--tools", "Read"),
         ("--allowed-tools", f"Read(/{attempt}/**)"),
+        ("--permission-mode", "manual"),
         ("--permission-prompts", "none"),
         ("--setting-sources", "user"),
     ]:
         assert arguments[arguments.index(flag) + 1] == value
     denied = arguments[
-        arguments.index("--disallowed-tools") + 1 : arguments.index("--permission-prompts")
+        arguments.index("--disallowed-tools") + 1 : arguments.index("--permission-mode")
     ]
     assert denied == ["Read(~/**)", "Read(//**/.env)", "Read(//**/.env.*)"]
     assert {"--strict-mcp-config", "--no-session-persistence"} <= set(arguments)
-    unwanted = {"--bare", "--model", "--permission-mode", "--dangerously-skip-permissions"}
+    unwanted = {"--bare", "--model", "--dangerously-skip-permissions", "dontAsk", "auto"}
     assert not unwanted & set(arguments)
     assert arguments[-2:] == [
         "--",
@@ -291,3 +294,37 @@ def test_workspace_is_the_override_then_the_source_checkout_then_a_private_cache
     monkeypatch.setattr(codex_cli, "__file__", str(installed))
     monkeypatch.setattr(codex_cli, "user_cache_path", lambda name: tmp_path / "cache" / name)
     assert codex_cli.coach_workspace() == tmp_path / "cache" / "phrase-gym-coach"
+
+
+def test_cancelling_a_step_stops_the_cli_child_promptly(tmp_path: Path, cli: Cli) -> None:
+    attempt = tmp_path / "stop"
+    prompt = '<learner_input>\n"slow"\n</learner_input>'
+
+    async def cancel_while_running() -> None:
+        task = asyncio.create_task(cli.ask(attempt, "prepare", prompt, {}))
+        stderr = attempt / "prepare-stderr.log"
+        for _ in range(100):
+            await asyncio.sleep(0.1)
+            if stderr.exists() and stderr.read_text().strip():
+                break
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    started = time.monotonic()
+    asyncio.run(cancel_while_running())
+    # Without the stop event, shutdown waits for the step timeout (10 s) instead.
+    assert time.monotonic() - started < 5
+    pid = int((attempt / "prepare-stderr.log").read_text().split()[0])
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline and process_exists(pid):
+        time.sleep(0.1)
+    assert not process_exists(pid)
+
+
+def process_exists(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    return True

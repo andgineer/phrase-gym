@@ -1,6 +1,8 @@
+import json
 import os
 import re
 import shlex
+import threading
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -139,7 +141,24 @@ def agent_failure(
         return f"{agent}: agent exceeded the output limit"
     if summary:
         return f"{agent}: {summary}"
-    return f"{agent}: agent exit code {result.exit_code}"
+    detail = _error_detail(result, error_line)
+    return f"{agent}: agent exit code {result.exit_code}{f': {detail}' if detail else ''}"
+
+
+# Only the CLI's own error lines are shown; a JSON result envelope contributes its message.
+def _error_detail(result: SubprocessResult, error_line: re.Pattern[str]) -> str:
+    for path in (result.stderr_path, result.stdout_path):
+        for line in error_line.findall(_read_stderr_safe(path)):
+            try:
+                envelope = json.loads(line)
+            except ValueError:
+                envelope = None
+            text = line
+            if isinstance(envelope, dict):
+                text = str(envelope.get("result") or envelope.get("error") or "")
+            if text.strip():
+                return text.strip()[:300]
+    return ""
 
 
 def _child_env() -> dict[str, str]:
@@ -159,6 +178,7 @@ def _run_agent_cli(  # noqa: PLR0913
     api_key_vars: list[str] | None = None,
     log_label: str = "",
     error_line: re.Pattern[str] | None = None,
+    stop_event: threading.Event | None = None,
 ) -> SubprocessResult:
     run_args, command_head = build_run_args(
         command_template,
@@ -168,7 +188,8 @@ def _run_agent_cli(  # noqa: PLR0913
         **values,
     )
 
-    if command_head == "codex":
+    # Coach may run Codex from a full path, so its base name decides.
+    if Path(command_head).name == "codex":
         run_args = _inject_skip_git_flag(run_args)
 
     cmd_line = run_args if isinstance(run_args, str) else shlex.join(run_args)
@@ -190,6 +211,7 @@ def _run_agent_cli(  # noqa: PLR0913
             stdout_path=stdout_path,
             stderr_path=stderr_path,
             log_label=log_label,
+            stop_event=stop_event,
             max_output_bytes=MAX_OUTPUT_BYTES,
             error_line=error_line,
         )

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,7 @@ async def run_step(  # noqa: PLR0913
     api_key_vars: list[str],
     error_line: re.Pattern[str],
 ) -> SubprocessResult:
+    stop_event = threading.Event()
     try:
         result = await asyncio.to_thread(
             _run_agent_cli,
@@ -49,7 +51,12 @@ async def run_step(  # noqa: PLR0913
             api_key_vars=api_key_vars,
             log_label=f"{agent} {step}",
             error_line=error_line,
+            stop_event=stop_event,
         )
+    except asyncio.CancelledError:
+        # The worker thread outlives the cancelled await; the event makes it stop the child.
+        stop_event.set()
+        raise
     except SubprocessError as error:
         raise CliError(f"{agent}: {error} (during {step})") from error
     if failure := agent_failure(result, agent, error_line):
