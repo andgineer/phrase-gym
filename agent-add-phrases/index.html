@@ -479,6 +479,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#prepare-a-word-sense-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Prepare a word-sense card
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#inspect-every-card-before-submission" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -584,10 +595,12 @@ items or exclude phrases. Identify the reusable chunk in each phrase. Use versio
 normally 5–10 cards per batch; batch size controls delivery, not source coverage. Split larger
 sources across packages and continue until all source phrases are covered. Group them into the
 course's lessons and preserve attribution and stable identities. A preparation or access failure
-leaves the affected batch incomplete; do not silently omit the item.
-The learning goal is to retrieve reusable wording in speech: for example, <strong>strongly believe</strong>,
+leaves the affected batch incomplete; do not silently omit the item. Reuse the recording
+supplied with each source example as its reference audio.</p>
+<p>The learning goal is to retrieve reusable wording in speech: for example, <strong>strongly believe</strong>,
 <strong>totally convinced</strong>, <strong>Trust me</strong>, or <strong>Here's another great thing about that</strong>. An entire
-sentence about AI or onboarding is a study example, not automatically the learning target.</p>
+sentence about AI or onboarding is a study example, not automatically the learning target.
+A single word is prepared as one word-sense card, described after the phrase rules.</p>
 <h3 id="select-the-chunk-before-writing-the-cue">Select the chunk before writing the cue</h3>
 <p>For every source sentence, identify the useful conventional expression and its boundaries.
 Choose a coherent chunk that serves a transferable purpose, such as expressing confidence,
@@ -595,7 +608,7 @@ adding a benefit or referring to evidence. Keep its essential collocation and gr
 Do not select an arbitrary substring or make the learner reconstruct incidental product details.
 Prefer one target per card; other useful expressions in the sentence can remain visible context.
 A self-contained routine such as <strong>So far, so good.</strong> can itself be the whole target.</p>
-<p>Keep <code>text</code> as the complete original source sentence and reuse its matching audio. In
+<p>Keep <code>text</code> as the complete source example, unchanged; the card's reference audio speaks it. In
 <code>explanation</code>, name the target chunk explicitly and explain its meaning/use briefly. Keep this
 learner-facing help short; distinguish example context without repeating preparation boilerplate.
 Do not add a <code>target_chunk</code> field or other undocumented fields.
@@ -766,10 +779,37 @@ are effective. Requested help remains supported retrieval, not successful unaide
 "We could replace the training with an email" or "Would a two-day workshop suit your team?".
 The response is completely blank because the entire routine is the target. In the other
 examples, visible context does not need to be memorized as part of the expression.</p>
+<h3 id="prepare-a-word-sense-card">Prepare a word-sense card</h3>
+<p>A word-sense card teaches one sense of one word through short comprehensible chunks. It uses
+the same fields as a phrase card; there is no separate word structure or extra field.</p>
+<p>Choose the intended sense from the supplied context, such as the sentence the word came from.
+Without context, choose the most common useful sense for a B2 learner. Teach only that sense on
+the card; another sense needs its own card.</p>
+<ul>
+<li><code>text</code>: the supplied source sentence unchanged when there is one; otherwise one short,
+  natural sentence that uses the word in the chosen sense. It is the revealed example.</li>
+<li><code>explanation</code>: name the word and its part of speech, then define the chosen sense in plain
+  English that is easier than the word itself, for example <strong>reluctant</strong> (adjective):
+  unwilling and slow to do something because you do not want to. Mention article, plural or
+  another form only when it matters for using the word.</li>
+<li><code>cues</code>: two or three short contexts with different propositions. Each replaces the target
+  word, in the form that context needs, with one <code>__________</code> gap and adds a short sense gloss
+  in <code>(=...)</code> when the context alone would allow other words. The learner says the completed
+  chunk; rating concerns the target sense and form, not unrelated slips elsewhere.</li>
+<li><code>recall_hints</code>: meaningful partial forms with an ordinary associated word, such as
+  <code>relu... / to admit</code> or <code>reluc... / unwilling</code>; never the complete word.</li>
+<li><code>accepted_variants</code>: only words that fit the intended sense in every cue.</li>
+<li><code>detailed_explanation</code>: for a troublesome near-synonym or lookalike, a short accurate
+  contrast that includes their overlap, such as <strong>reluctant</strong> versus <strong>reticent</strong>.</li>
+<li><code>usage_contexts</code>: short searchable uses, as for phrases.</li>
+</ul>
+<p>Do not introduce a batch of confusable words together on one card. Two or three contexts is a
+practical default; a definition the learner understands is not yet spoken retrieval.</p>
 <h3 id="inspect-every-card-before-submission">Inspect every card before submission</h3>
 <ol>
 <li><strong>Useful target:</strong> check that the selected chunk is worth reusing beyond this example.
-   Check the boundaries; hide its complete lexical core rather than only an easy filler word.</li>
+   Check the boundaries; hide its complete lexical core rather than only an easy filler word.
+   For a word-sense card, check that every cue, the definition and the example use one sense.</li>
 <li><strong>Completion:</strong> insert the target into every cue and read the whole sentence. Check grammar,
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
@@ -784,9 +824,13 @@ examples, visible context does not need to be memorized as part of the expressio
    Check short-target exceptions carefully and correct weak hints.</li>
 <li><strong>Transferable context:</strong> keep the target constant across cues while changing useful context;
    do not demand memorization of the original sentence's business claim or technical vocabulary.</li>
-<li><strong>Honest support:</strong> identify the chunk in the explanation, keep suitable alternatives only,
-   and preserve the source's phrase-to-recording association. Do not append repeated disclaimers
-   to learner explanations. Study precedes recall; requested help is supported retrieval.</li>
+<li><strong>Honest support:</strong> identify the chunk or word in the explanation and keep suitable
+   alternatives only. Do not append repeated disclaimers to learner explanations. Study precedes
+   recall; requested help is supported retrieval.</li>
+</ol>
+<p>For a course batch, also check:</p>
+<ol>
+<li><strong>Recordings:</strong> preserve the source's phrase-to-recording association.</li>
 <li><strong>Coverage:</strong> map every source phrase to its prepared card and package. All supplied phrases
    must be represented; a smaller batch is not permission to leave the rest out.</li>
 </ol>
@@ -872,7 +916,7 @@ One package may contain several lessons; every phrase belongs to exactly one of 
 </tr>
 <tr>
 <td><code>cues</code></td>
-<td>One or two contextual gap cues in <code>situation</code>; optional <code>partner_line</code></td>
+<td>One to three contextual gap cues in <code>situation</code>; optional <code>partner_line</code>. Phrase cards normally have one or two, word-sense cards two or three</td>
 </tr>
 <tr>
 <td><code>recall_hints</code></td>

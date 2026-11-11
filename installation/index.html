@@ -285,10 +285,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#audio-preparation-with-coach" class="md-nav__link">
+  <a href="#preparation-with-coach" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Audio preparation with Coach
+        Preparation with Coach
       </span>
     </span>
   </a>
@@ -474,10 +474,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#audio-preparation-with-coach" class="md-nav__link">
+  <a href="#preparation-with-coach" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Audio preparation with Coach
+        Preparation with Coach
       </span>
     </span>
   </a>
@@ -519,15 +519,26 @@ npm<span class="w"> </span>--prefix<span class="w"> </span>frontend<span class="
 Use <code>phrase-gym run --help</code> for the port and data-directory options. Keep voice files and learner
 recordings outside the source checkout. Actual microphone and headset acceptance requires
 attended testing on the learner's MacBook.</p>
-<h2 id="audio-preparation-with-coach">Audio preparation with Coach</h2>
-<p>Coach is the application's separate preparation process. For text-only imports, configure a local English <a href="../piper-voice/">Piper voice</a>
-and run Coach in another terminal:</p>
+<h2 id="preparation-with-coach">Preparation with Coach</h2>
+<p>Coach is the application's separate preparation process for text typed into the <strong>Coach</strong> field.
+It needs two things on the same Mac:</p>
+<ul>
+<li>The <a href="https://developers.openai.com/codex/cli">Codex CLI</a>, installed and logged in once with your
+  ChatGPT subscription (<code>codex login</code>). Coach uses your normal Codex login, model and settings and
+  never uses an API key. It runs Codex in its own restricted sandbox, which can read only the
+  current preparation's files and cannot read <code>.env</code> files, your home directory or your learning
+  data.</li>
+<li>A local English <a href="../piper-voice/">Piper voice</a> for the reference audio.</li>
+</ul>
+<p>Run Coach in another terminal:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
 </code></pre></div>
-<p>For a source checkout, use <code>uv run phrase-gym coach</code>. Coach receives pending imports through
-Phrase Gym's API and generates reference audio; it prints a line for every preparation that
-fails. Imports with complete reference audio do not
-need Coach. Piper uses the separately pinned private environment described in the voice setup guide.</p>
+<p>For a source checkout, use <code>uv run phrase-gym coach</code>. Coach receives typed text through Phrase
+Gym's API, prepares a card with Codex in separate preparation and review sessions, generates its
+reference audio and publishes it. A card usually takes a minute or two. Coach prints a line for
+every preparation that fails, with the folder that keeps that attempt's prompts and answers.
+Imports from an external AI agent arrive with complete audio and do not need Coach. Piper uses
+the separately pinned private environment described in the voice setup guide.</p>
 <p>The <code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
 The optional <code>coach</code> and <code>deploy</code> extras are reserved for future preparation and provisioning
 features. The core server and help need only the lean installation.</p>
