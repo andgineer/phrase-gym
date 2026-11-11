@@ -35,19 +35,15 @@ class PiperSpeech:
         config_path: Path | None,
         fake: bool = False,
         fake_failures: int = 0,
-        fake_failure_text: str | None = None,
         timeout: float = 60,
     ):
         self.config_path = config_path
         self.fake = fake
         self.fake_failures = fake_failures
-        self.fake_failure_text = fake_failure_text
         self.timeout = timeout
 
     async def synthesize(self, text: str) -> bytes:
-        if self.fake_failures and (
-            self.fake_failure_text is None or text == self.fake_failure_text
-        ):
+        if self.fake_failures:
             self.fake_failures -= 1
             raise RuntimeError("Synthetic preparation failure; correct the setup and retry")
         if self.fake:
@@ -169,6 +165,4 @@ def configured_speech() -> PiperSpeech:
     return PiperSpeech(
         Path(config) if config else None,
         os.environ.get("PHRASE_GYM_FAKE_TTS") == "1",
-        int(os.environ.get("PHRASE_GYM_FAKE_TTS_FAILURES", "0")),
-        os.environ.get("PHRASE_GYM_FAKE_TTS_FAIL_TEXT"),
     )

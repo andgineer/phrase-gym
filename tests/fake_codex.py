@@ -83,6 +83,12 @@ def main() -> None:
         output.write_text(json.dumps({"environment": sorted(os.environ)}))
         return
     typed = json.loads(re.search(r"<learner_input>\n(.*?)\n</learner_input>", prompt, re.S)[1])
+    if "echo-transcript" in typed:
+        print(f"user\n{prompt}\ncodex\nI could not finish.", file=sys.stderr)
+        sys.exit(1)
+    if "logged-out" in typed:
+        print("ERROR: Not logged in. Run `codex login` first.", file=sys.stderr)
+        sys.exit(1)
     if "usage-limit" in typed:
         print("ERROR: unexpected status 429 Too Many Requests", file=sys.stderr)
         sys.exit(1)

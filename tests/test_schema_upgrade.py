@@ -45,7 +45,7 @@ def schema_5_directory(path: Path) -> Path:
 
 def learner_rows(connection: sqlite3.Connection) -> list[tuple[object, ...]]:
     return [
-        *connection.execute("SELECT package_id, status, error FROM imports"),
+        *connection.execute("SELECT package_id, status, payload FROM imports"),
         *connection.execute("SELECT id, title FROM lessons"),
         *connection.execute("SELECT id, text, due_at FROM phrases"),
         *connection.execute("SELECT id, phrase_id, learning_date FROM practice_log"),
@@ -70,6 +70,8 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(
     with database.read() as connection:
         assert version(connection) == schema_upgrade.SCHEMA_VERSION
         assert [tuple(row) for row in learner_rows(connection)] == before
+        [error] = connection.execute("SELECT error FROM imports").fetchone()
+        assert "saved without reference audio" in error
         assert "import_notices" in table_names(connection)
         assert read_settings(connection) == Settings(
             native_language="ru",
@@ -186,9 +188,36 @@ def test_audio_less_package_submissions_become_kept_failures_with_notices(tmp_pa
         "failed": ("package", "error", '{"source_label": "Failed course"}'),
         "added": ("package", "added", '{"source_label": "Added course"}'),
     }
-    assert errors["failed"] == "Voice missing"
     assert errors["added"] is None
-    for package_id in ("waiting", "claimed"):
+    for package_id in ("waiting", "claimed", "failed"):
         assert "without reference audio" in errors[package_id]
         assert "new package_id" in errors[package_id]
     assert noticed == {"waiting", "claimed", "failed"}
+
+
+def test_coach_failures_keep_their_reason_when_old_package_failures_are_explained(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "data"
+    directory.mkdir()
+    rows = """
+INSERT INTO meta VALUES ('schema_version', '9');
+INSERT INTO imports (package_id, content_hash, payload, status, error, created_at, kind)
+  VALUES ('old-package', 'h1', '{"source_label": "Course"}', 'error', 'Piper is not configured',
+          '2026-11-01T10:00:00+00:00', 'package'),
+         ('coach-1', 'h2', '{"text": "by and large"}', 'error', 'Codex is not logged in',
+          '2026-11-01T10:01:00+00:00', 'coach');
+"""
+    with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
+        script = "".join(STEPS[version] for version in range(5, 10)) + rows
+        for statement in statements(script):
+            connection.execute(statement)
+        connection.commit()
+    with Database(directory).read() as connection:
+        errors = dict(connection.execute("SELECT package_id, error FROM imports"))
+        payload = connection.execute(
+            "SELECT payload FROM imports WHERE package_id='old-package'"
+        ).fetchone()[0]
+    assert errors["coach-1"] == "Codex is not logged in"
+    assert "saved without reference audio" in errors["old-package"]
+    assert payload == '{"source_label": "Course"}'

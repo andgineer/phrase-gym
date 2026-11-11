@@ -32,15 +32,16 @@ INHERITED_ENVIRONMENT = (
     "HTTPS_PROXY",
     "NO_PROXY",
 )
-NOT_LOGGED_IN = re.compile(r"not logged in|codex login|401 unauthorized|unauthorized", re.I)
+NOT_LOGGED_IN = re.compile(r"\bnot logged in\b|\bcodex login\b|\bunauthorized\b", re.I)
 # A bare 429 also matches process and trace ids in CLI logs.
 USAGE_LIMIT = re.compile(
-    r"usage limit|quota|rate.?limit|too many requests|\b(status|code|http)\b\W{0,10}429",
+    r"\busage limit\b|\bquota\b|\brate.?limit\b|\btoo many requests\b"
+    r"|\b(status|code|http)\b\W{0,10}429\b",
     re.I,
 )
-
-
 RESET_AT = re.compile(r"try again at ([^.\n]{1,60})")
+# The transcript echoes the prompt and learner text, so only Codex's own error lines count.
+ERROR_LINE = re.compile(r"^ERROR:.*$", re.M)
 
 
 class CliError(RuntimeError):
@@ -77,7 +78,8 @@ def permission_profile(workspace: Path, attempt: Path) -> str:
     return f"permissions.{PROFILE}.filesystem={{{body}}}"
 
 
-def failure_reason(text: str) -> str | None:
+def failure_reason(log: str) -> str | None:
+    text = "\n".join(ERROR_LINE.findall(log))
     if NOT_LOGGED_IN.search(text):
         return "Codex is not logged in; run `codex login` in a terminal, then submit the text again"
     if USAGE_LIMIT.search(text):

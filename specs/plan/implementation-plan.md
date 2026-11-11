@@ -1,8 +1,21 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target, and Coach prepares typed phrases and words; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. The Coach field and its preparation path are in place; Coach's model preparation still needs tuning on actual outputs and a fresh semantic review before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
+
+## 4. Prepare typed phrases and words in Coach
+
+**Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
+
+The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words), the Codex adapter and the preparation path are in place. Remaining work needs actual model results:
+
+- After the Codex usage limit resets, finish tuning the prompts on the development items that have not yet run, within the remaining real-call budget and under the [prompt evaluation rule](../decision-external-preparation-agent.md#coach-prompts-and-evaluation).
+- Freeze the prompts, run the untouched held-out items the orchestrator supplies, and have a fresh reviewer assess those outputs semantically.
+- Make one real-Codex run from the Coach field to a first rated attempt for a typed phrase and for a typed word, and one insufficient input that fails with its concrete reason.
+- Listen, attended, to Coach's Piper references.
+
+**Exit:** a typed English phrase and a typed word each go from the Coach field through actual Codex preparation to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.
 
 ## 5. Extend only the content the learner next needs
 

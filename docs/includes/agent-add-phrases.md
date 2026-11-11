@@ -41,8 +41,10 @@ supplied with each source example as its reference audio.
 
 For a course batch, also check:
 
-1. **Recordings:** preserve the source's phrase-to-recording association.
-2. **Coverage:** map every source phrase to its prepared card and package. All supplied phrases
+1. **Competing chunks:** try likely competing chunks from the entire source, not just this
+   batch, against every cue.
+2. **Recordings:** preserve the source's phrase-to-recording association.
+3. **Coverage:** map every source phrase to its prepared card and package. All supplied phrases
    must be represented; a smaller batch is not permission to leave the rest out.
 
 Phrase Gym validates structure, not teaching quality. Structural acceptance cannot certify chunk

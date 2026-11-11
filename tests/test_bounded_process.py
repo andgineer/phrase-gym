@@ -41,3 +41,9 @@ def test_oversized_output_stops_the_child(tmp_path: Path) -> None:
     with pytest.raises(OutputLimitError):
         run(tmp_path, code, limit=100_000)
     assert (tmp_path / "out.log").stat().st_size > 100_000
+
+
+def test_child_stdin_is_closed_so_a_reader_returns_at_once(tmp_path: Path) -> None:
+    code = "import sys; data = sys.stdin.read(); print(f'read {len(data)} characters')"
+    assert run(tmp_path, code, timeout=5) == 0
+    assert (tmp_path / "out.log").read_text() == "read 0 characters\n"

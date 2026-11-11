@@ -33,9 +33,10 @@ It needs two things on the same Mac:
 
 - The [Codex CLI](https://developers.openai.com/codex/cli), installed and logged in once with your
   ChatGPT subscription (`codex login`). Coach uses your normal Codex login, model and settings and
-  never uses an API key. It runs Codex in its own restricted sandbox, which can read only the
-  current preparation's files and cannot read `.env` files, your home directory or your learning
-  data.
+  never uses an API key. Commands the model runs go through a restricted Codex sandbox that can
+  read only the current preparation's files and cannot read `.env` files, your home directory or
+  your learning data. Tools and servers you add in your own Codex settings are not covered by
+  that sandbox; Coach does not isolate them.
 - A local English [Piper voice](piper-voice.md) for the reference audio.
 
 Run Coach in another terminal:

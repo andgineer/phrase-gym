@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from phrase_gym.coach import codex_cli
 from phrase_gym.coach.codex_cli import CliError, CodexCli, child_environment
 from phrase_gym.coach.main import CoachApi, process_once
 from phrase_gym.coach.preparation import CardPreparer
@@ -112,6 +113,11 @@ def test_review_findings_are_applied_before_publication(client: TestClient, cli:
             "Codex reported a usage limit; submit the text again after Nov 13th, 2026 4:58 PM",
         ),
         ("stubborn", "The prepared card failed its checks: recall_hints.0: the hint gives"),
+        (
+            "logged-out",
+            "Codex is not logged in; run `codex login` in a terminal, then submit the text again",
+        ),
+        ("unauthorized quota echo-transcript", "Codex exited with code 1 (during prepare)"),
     ],
 )
 def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
@@ -183,3 +189,17 @@ def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(
     assert "danger" not in " ".join(arguments)
     assert arguments[-1] == f"Read your task from {attempt}/review-prompt.md and execute it."
     assert arguments[arguments.index("--cd") + 1] == str(cli.workspace)
+
+
+def test_workspace_is_the_override_then_the_source_checkout_then_a_private_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PHRASE_GYM_COACH_WORKSPACE", str(tmp_path / "chosen"))
+    assert codex_cli.coach_workspace() == tmp_path / "chosen"
+    monkeypatch.delenv("PHRASE_GYM_COACH_WORKSPACE")
+    assert codex_cli.coach_workspace() == Path(__file__).resolve().parents[1]
+    installed = tmp_path / "lib" / "site-packages" / "phrase_gym" / "coach" / "codex_cli.py"
+    installed.parent.mkdir(parents=True)
+    monkeypatch.setattr(codex_cli, "__file__", str(installed))
+    monkeypatch.setattr(codex_cli, "user_cache_path", lambda name: tmp_path / "cache" / name)
+    assert codex_cli.coach_workspace() == tmp_path / "cache" / "phrase-gym-coach"

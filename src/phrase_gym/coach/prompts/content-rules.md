@@ -5,7 +5,7 @@ A single word is prepared as one word-sense card, described after the phrase rul
 
 ### Select the chunk before writing the cue
 
-For every source sentence, identify the useful conventional expression and its boundaries.
+In each source example, identify the useful conventional expression and its boundaries.
 Choose a coherent chunk that serves a transferable purpose, such as expressing confidence,
 adding a benefit or referring to evidence. Keep its essential collocation and grammar together.
 Do not select an arbitrary substring or make the learner reconstruct incidental product details.
@@ -180,7 +180,7 @@ the card; another sense needs its own card.
   contrast that includes their overlap, such as **reluctant** versus **reticent**.
 - `usage_contexts`: short searchable uses, as for phrases.
 
-Do not introduce a batch of confusable words together on one card. Two or three contexts is a
+Do not introduce several confusable words together on one card. Two or three contexts is a
 practical default; a definition the learner understands is not yet spoken retrieval.
 
 ### Inspect every card before submission
@@ -192,7 +192,7 @@ practical default; a definition the learner understands is not yet spoken retrie
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
-3. **Discrimination:** try likely competing chunks from the entire source, not just this batch.
+3. **Discrimination:** try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.
 4. **Hints:** check every hint separately against every cue. Consider which part of the exact wording
