@@ -523,23 +523,27 @@ attended testing on the learner's MacBook.</p>
 <p>Coach is the application's separate preparation process for text typed into the <strong>Coach</strong> field.
 It needs two things on the same Mac:</p>
 <ul>
-<li>The <a href="https://developers.openai.com/codex/cli">Codex CLI</a>, installed and logged in once with your
-  ChatGPT subscription (<code>codex login</code>). Coach uses your normal Codex login, model and settings and
-  never uses an API key. Commands the model runs go through a restricted Codex sandbox that can
-  read only the current preparation's files and cannot read <code>.env</code> files, your home directory or
-  your learning data. Tools and servers you add in your own Codex settings are not covered by
-  that sandbox; Coach does not isolate them.</li>
+<li>The <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code CLI</a>, installed and logged in
+  once with your Claude subscription (run <code>claude</code> and log in). Coach uses your normal Claude
+  login, default model and settings and never uses an API key. The model gets only a file-reading
+  tool that works inside the current preparation's folder; reading <code>.env</code> files, your home
+  directory and your learning data is refused. Tools and servers you add in your own Claude
+  settings are not covered by that restriction; Coach does not isolate them.</li>
 <li>A local English <a href="../piper-voice/">Piper voice</a> for the reference audio.</li>
 </ul>
 <p>Run Coach in another terminal:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
 </code></pre></div>
 <p>For a source checkout, use <code>uv run phrase-gym coach</code>. Coach receives typed text through Phrase
-Gym's API, prepares a card with Codex in separate preparation and review sessions, generates its
+Gym's API, prepares a card with Claude in separate preparation and review sessions, generates its
 reference audio and publishes it. A card usually takes a minute or two. Coach prints a line for
 every preparation that fails, with the folder that keeps that attempt's prompts and answers.
 Imports from an external AI agent arrive with complete audio and do not need Coach. Piper uses
 the separately pinned private environment described in the voice setup guide.</p>
+<p>To prepare with the <a href="https://developers.openai.com/codex/cli">Codex CLI</a> instead, log in to it
+with <code>codex login</code> and start Coach with <code>phrase-gym coach --cli codex</code>. Codex is not yet
+qualified for Coach; Coach never switches between the two on its own. Each CLI keeps its own
+model and settings, and Phrase Gym does not choose a model.</p>
 <p>The <code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
 The optional <code>coach</code> and <code>deploy</code> extras are reserved for future preparation and provisioning
 features. The core server and help need only the lean installation.</p>
