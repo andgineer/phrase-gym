@@ -1,0 +1,107 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "outcome",
+    "reason",
+    "kind",
+    "target",
+    "card"
+  ],
+  "properties": {
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "insufficient"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "phrase",
+        "word"
+      ]
+    },
+    "target": {
+      "type": "string"
+    },
+    "card": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text",
+            "explanation",
+            "cues",
+            "recall_hints",
+            "usage_contexts",
+            "accepted_variants",
+            "detailed_explanation"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "explanation": {
+              "type": "string"
+            },
+            "cues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "situation",
+                  "partner_line"
+                ],
+                "properties": {
+                  "situation": {
+                    "type": "string"
+                  },
+                  "partner_line": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            },
+            "recall_hints": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "usage_contexts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "accepted_variants": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "detailed_explanation": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

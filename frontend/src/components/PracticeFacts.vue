@@ -94,17 +94,21 @@ defineExpose({ refresh })
         </p>
       </div>
     </template>
-    <ul v-if="notices.length" class="import-notices" aria-label="Import problems">
+    <ul v-if="notices.length" class="import-notices" aria-label="Preparation problems">
       <li v-for="notice in notices" :key="notice.package_id">
-        <p>
-          Coach could not prepare <strong>{{ notice.source_label }}</strong> ({{
-            notice.package_id
-          }}): {{ notice.error }}
+        <p v-if="notice.kind === 'coach'">
+          Coach could not prepare <strong>“{{ notice.label }}”</strong>: {{ notice.error }}
         </p>
-        <p class="muted">Import the same material again to retry.</p>
+        <p v-else>
+          Could not add <strong>{{ notice.label }}</strong> ({{ notice.package_id }}):
+          {{ notice.error }}
+        </p>
+        <p v-if="notice.kind === 'coach'" class="muted">
+          Type the same text into the Coach field to retry.
+        </p>
         <button
           class="quiet"
-          :aria-label="`Dismiss notice about ${notice.package_id}`"
+          :aria-label="`Dismiss notice about ${notice.label}`"
           @click="dismiss(notice.package_id)"
         >
           ×

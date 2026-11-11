@@ -23,7 +23,9 @@ def _message(
         parameters,
     )
     if not phrases:
-        return "No phrases in this lesson." if lesson else "Add your first phrase batch to begin."
+        return (
+            "No phrases in this lesson." if lesson else "Add your first phrase with Coach to begin."
+        )
     summary = schedule_summary(connection, phrases, now)
     if view.origin == "extra":
         waiting = (summary.due_count and progress.due_allowance) or (

@@ -14,6 +14,7 @@ from phrase_gym.server.api.practice import practice_card_routes, practice_entry_
 from phrase_gym.server.api.recordings import recording_routes
 from phrase_gym.server.api.settings import settings_routes
 from phrase_gym.server.boundary import LocalBoundary, trusted_hosts
+from phrase_gym.server.coach_requests import CoachRequests
 from phrase_gym.server.completion import PracticeCompletion
 from phrase_gym.server.current_practice import CurrentPractice
 from phrase_gym.server.daily import DailyPractice
@@ -43,7 +44,7 @@ def create_app() -> FastAPI:
     importer = Importer(database)
     app.state.importer = importer
     app.include_router(import_routes(importer, ImportNotices(database)))
-    app.include_router(coach_routes(importer))
+    app.include_router(coach_routes(CoachRequests(database)))
     app.include_router(recording_routes(RecordingStore(database)))
     app.state.current = CurrentPractice(database)
     app.state.daily = DailyPractice(database)

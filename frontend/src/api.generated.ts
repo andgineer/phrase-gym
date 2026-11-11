@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/coach/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Text */
+        post: operations["submit_text_api_coach_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -513,26 +530,35 @@ export interface components {
             /** Error */
             error: string;
         };
+        /** CoachRequest */
+        CoachRequest: {
+            /** Text */
+            text: string;
+        };
         /** CoachResult */
         CoachResult: {
-            /** References */
-            references: {
-                [key: string]: string;
-            };
+            phrase: components["schemas"]["ImportPhrase"];
+            /** Reference */
+            reference: string;
             /** Result Id */
             result_id: string;
         };
-        /** CoachWork */
-        "CoachWork-Input": {
-            package: components["schemas"]["PhrasePackage-Input"];
-            /** Package Id */
-            package_id: string;
+        /** CoachSubmission */
+        CoachSubmission: {
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "saved" | "waiting" | "in_library";
+            /** Request Id */
+            request_id: string;
         };
         /** CoachWork */
-        "CoachWork-Output": {
-            package: components["schemas"]["PhrasePackage-Output"];
+        CoachWork: {
             /** Package Id */
             package_id: string;
+            /** Text */
+            text: string;
         };
         /** CompletionReceipt */
         CompletionReceipt: {
@@ -642,16 +668,7 @@ export interface components {
             detail?: components["schemas"]["ValidationError"][];
         };
         /** ImportLesson */
-        "ImportLesson-Input": {
-            /** Lesson Id */
-            lesson_id: string;
-            /** Phrases */
-            phrases: components["schemas"]["ImportPhrase"][];
-            /** Title */
-            title: string;
-        };
-        /** ImportLesson */
-        "ImportLesson-Output": {
+        ImportLesson: {
             /** Lesson Id */
             lesson_id: string;
             /** Phrases */
@@ -663,10 +680,15 @@ export interface components {
         ImportNotice: {
             /** Error */
             error: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "coach" | "package";
+            /** Label */
+            label: string;
             /** Package Id */
             package_id: string;
-            /** Source Label */
-            source_label: string;
         };
         /** ImportPhrase */
         ImportPhrase: {
@@ -689,11 +711,11 @@ export interface components {
         };
         /** ImportRequest */
         ImportRequest: {
-            package: components["schemas"]["PhrasePackage-Input"];
+            package: components["schemas"]["PhrasePackage"];
             /** References */
-            references?: {
+            references: {
                 [key: string]: string;
-            } | null;
+            };
         };
         /** ImportStatus */
         ImportStatus: {
@@ -795,7 +817,7 @@ export interface components {
             usage_contexts: string[];
         };
         /** PhrasePackage */
-        "PhrasePackage-Input": {
+        PhrasePackage: {
             /**
              * Card Language
              * @constant
@@ -817,45 +839,7 @@ export interface components {
              */
             learning_language: "en";
             /** Lessons */
-            lessons: components["schemas"]["ImportLesson-Input"][];
-            /** Package Id */
-            package_id: string;
-            /** Source Id */
-            source_id: string;
-            /** Source Label */
-            source_label: string;
-            /** Source Link */
-            source_link?: string | null;
-            /**
-             * Version
-             * @constant
-             */
-            version: 2;
-        };
-        /** PhrasePackage */
-        "PhrasePackage-Output": {
-            /**
-             * Card Language
-             * @constant
-             */
-            card_language: "en";
-            /**
-             * Format
-             * @constant
-             */
-            format: "phrase-gym.package";
-            /**
-             * Help Language
-             * @constant
-             */
-            help_language: "en";
-            /**
-             * Learning Language
-             * @constant
-             */
-            learning_language: "en";
-            /** Lessons */
-            lessons: components["schemas"]["ImportLesson-Output"][];
+            lessons: components["schemas"]["ImportLesson"][];
             /** Package Id */
             package_id: string;
             /** Source Id */
@@ -1253,6 +1237,39 @@ export interface operations {
             };
         };
     };
+    submit_text_api_coach_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoachRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoachSubmission"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
@@ -1323,7 +1340,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CoachWork-Output"] | null;
+                    "application/json": components["schemas"]["CoachWork"] | null;
                 };
             };
         };

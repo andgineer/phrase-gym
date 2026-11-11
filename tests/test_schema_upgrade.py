@@ -147,3 +147,48 @@ def test_cli_starts_on_an_upgradable_directory(
     monkeypatch.setattr(sys, "argv", ["phrase-gym", "run", "--data-dir", str(directory)])
     cli.main()
     assert len(started) == 1
+
+
+SCHEMA_8_IMPORTS = """
+INSERT INTO meta VALUES ('schema_version', '8');
+INSERT INTO imports (package_id, content_hash, payload, status, created_at)
+  VALUES ('waiting', 'h1', '{"source_label": "Waiting course"}', 'pending',
+          '2026-11-01T10:00:00+00:00'),
+         ('claimed', 'h2', '{"source_label": "Claimed course"}', 'preparing',
+          '2026-11-01T10:01:00+00:00'),
+         ('failed', 'h3', '{"source_label": "Failed course"}', 'error',
+          '2026-11-01T10:02:00+00:00'),
+         ('added', 'h4', '{"source_label": "Added course"}', 'added',
+          '2026-11-01T10:03:00+00:00');
+UPDATE imports SET error='Voice missing' WHERE package_id='failed';
+INSERT INTO import_notices VALUES ('failed', '2026-11-01T11:00:00+00:00');
+"""
+
+
+def test_audio_less_package_submissions_become_kept_failures_with_notices(tmp_path: Path) -> None:
+    directory = tmp_path / "data"
+    directory.mkdir()
+    with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
+        script = "".join(STEPS[version] for version in range(5, 9)) + SCHEMA_8_IMPORTS
+        for statement in statements(script):
+            connection.execute(statement)
+        connection.commit()
+    with Database(directory).read() as connection:
+        rows = {
+            row["package_id"]: (row["kind"], row["status"], row["payload"])
+            for row in connection.execute("SELECT * FROM imports")
+        }
+        errors = dict(connection.execute("SELECT package_id, error FROM imports"))
+        noticed = {row[0] for row in connection.execute("SELECT package_id FROM import_notices")}
+    assert rows == {
+        "waiting": ("package", "error", '{"source_label": "Waiting course"}'),
+        "claimed": ("package", "error", '{"source_label": "Claimed course"}'),
+        "failed": ("package", "error", '{"source_label": "Failed course"}'),
+        "added": ("package", "added", '{"source_label": "Added course"}'),
+    }
+    assert errors["failed"] == "Voice missing"
+    assert errors["added"] is None
+    for package_id in ("waiting", "claimed"):
+        assert "without reference audio" in errors[package_id]
+        assert "new package_id" in errors[package_id]
+    assert noticed == {"waiting", "claimed", "failed"}

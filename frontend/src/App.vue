@@ -5,7 +5,7 @@ import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
 import type { DeletionTarget } from './libraryTypes'
 import LibraryPanel from './components/LibraryPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
-import AddMaterial from './components/AddMaterial.vue'
+import CoachField from './components/CoachField.vue'
 import CleanupNotice from './components/CleanupNotice.vue'
 import DeleteDialog from './components/DeleteDialog.vue'
 import PracticeEntry from './components/PracticeEntry.vue'
@@ -100,7 +100,7 @@ onMounted(initialize)
         ><button @click="navigate('library')">Library</button
         ><button @click="navigate('settings')">Settings</button>
       </nav>
-      <AddMaterial v-if="initialized" :before-open="session.leave" @added="entryKey++" />
+      <CoachField v-if="initialized" />
     </header>
     <main>
       <CleanupNotice v-if="initialized" />

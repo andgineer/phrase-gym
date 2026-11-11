@@ -123,6 +123,7 @@ class ImportRecord:
     created_at: str
     result_id: str | None
     result_hash: str | None
+    kind: str
 
 
 # The record's fields must equal the query's columns; a mismatch raises instead of dropping data.

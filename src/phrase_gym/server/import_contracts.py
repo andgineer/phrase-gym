@@ -32,7 +32,7 @@ class ImportPhrase(StrictModel):
     item_id: str = Field(pattern=IDENTITY_PATTERN)
     text: str = Field(min_length=2, max_length=500)
     explanation: str = Field(min_length=5, max_length=1000)
-    cues: list[Cue] = Field(min_length=1, max_length=2)
+    cues: list[Cue] = Field(min_length=1, max_length=3)
     recall_hints: list[str] = Field(min_length=2, max_length=6)
     usage_contexts: list[str] = Field(min_length=1, max_length=6)
     accepted_variants: list[str] = Field(default_factory=list, max_length=8)
@@ -110,7 +110,7 @@ class PhrasePackage(StrictModel):
 
 class ImportRequest(StrictModel):
     package: PhrasePackage
-    references: dict[str, str] | None = None
+    references: dict[str, str]
 
 
 class ImportStatus(StrictModel):
@@ -118,17 +118,3 @@ class ImportStatus(StrictModel):
     status: Literal["pending", "preparing", "added", "error"]
     error: str | None = None
     added_count: int | None = None
-
-
-class CoachWork(StrictModel):
-    package_id: str
-    package: PhrasePackage
-
-
-class CoachResult(StrictModel):
-    result_id: str = Field(pattern=IDENTITY_PATTERN)
-    references: dict[str, str]
-
-
-class CoachFailure(StrictModel):
-    error: str = Field(min_length=1, max_length=1000)

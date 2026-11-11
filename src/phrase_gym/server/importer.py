@@ -1,9 +1,10 @@
 import hashlib
 import json
+import sqlite3
 from datetime import UTC, datetime
 
+from phrase_gym.server.coach_contracts import COACH_SOURCE_ID
 from phrase_gym.server.import_contracts import PhrasePackage
-from phrase_gym.server.import_notices import clear_notice, record_notice
 from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
 from phrase_gym.server.records import ImportRecord, fetch_one
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
@@ -14,143 +15,65 @@ def now() -> str:
     return datetime.now(UTC).isoformat()
 
 
+def result_hash(value: object) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
+def import_row(connection: sqlite3.Connection, package_id: str) -> ImportRecord | None:
+    return fetch_one(
+        connection,
+        ImportRecord,
+        "SELECT * FROM imports WHERE package_id=?",
+        (package_id,),
+    )
+
+
+def public_status(row: ImportRecord) -> dict[str, object]:
+    return {
+        "package_id": row.package_id,
+        "status": row.status,
+        "error": row.error,
+        "added_count": row.added_count,
+    }
+
+
 class Importer:
     def __init__(self, database: Database):
         self.database = database
 
-    def submit(
-        self,
-        package: PhrasePackage,
-        references: dict[str, str] | None = None,
-    ) -> dict[str, object]:
-        payload = package.model_dump_json(exclude_none=True)
-        decoded = decode_references(package, references) if references is not None else None
-        digest_data = json.dumps({"package": payload, "references": references}, sort_keys=True)
-        digest = hashlib.sha256(digest_data.encode()).hexdigest()
-        with self.database.write() as connection:
-            previous = fetch_one(
-                connection,
-                ImportRecord,
-                "SELECT * FROM imports WHERE package_id=?",
-                (package.package_id,),
+    def submit(self, package: PhrasePackage, references: dict[str, str]) -> dict[str, object]:
+        if package.source_id == COACH_SOURCE_ID:
+            raise ImportConflictError(
+                f"source_id {COACH_SOURCE_ID} is reserved for the Coach field; use another.",
             )
+        payload = package.model_dump_json(exclude_none=True)
+        decoded = decode_references(package, references)
+        digest = result_hash({"package": payload, "references": references})
+        with self.database.write() as connection:
+            previous = import_row(connection, package.package_id)
             if previous and previous.content_hash != digest:
                 raise ImportConflictError(
                     "This package_id has different content; use a new ID.",
                 )
-            if previous and previous.status == "error":
-                connection.execute(
-                    "UPDATE imports SET status='pending', error=NULL WHERE package_id=?",
-                    (package.package_id,),
-                )
-                clear_notice(connection, package.package_id)
             if previous is None:
                 reject_identity_conflicts(connection, package)
                 connection.execute(
-                    "INSERT INTO imports (package_id, content_hash, payload, status, created_at) "
-                    "VALUES (?, ?, ?, 'pending', ?)",
+                    "INSERT INTO imports (package_id, content_hash, payload, status, created_at, "
+                    "kind) VALUES (?, ?, ?, 'pending', ?, 'package')",
                     (package.package_id, digest, payload, now()),
                 )
-                if decoded is not None and references is not None:
-                    publish_batch(
-                        connection,
-                        self.database.data_dir,
-                        package,
-                        decoded,
-                        (package.package_id, self._result_hash(references)),
-                    )
+                publish_batch(
+                    connection,
+                    self.database.data_dir,
+                    package,
+                    decoded,
+                    (package.package_id, result_hash(references)),
+                )
         return self.status(package.package_id)
-
-    def next_work(self) -> dict[str, object] | None:
-        with self.database.write() as connection:
-            row = fetch_one(
-                connection,
-                ImportRecord,
-                "SELECT * FROM imports WHERE status IN ('pending', 'preparing') "
-                "ORDER BY created_at LIMIT 1",
-            )
-            if row is None:
-                return None
-            connection.execute(
-                "UPDATE imports SET status='preparing' WHERE package_id=?",
-                (row.package_id,),
-            )
-            return {"package_id": row.package_id, "package": json.loads(row.payload)}
-
-    def fail(self, package_id: str, message: str) -> dict[str, object]:
-        with self.database.write() as connection:
-            row = fetch_one(
-                connection,
-                ImportRecord,
-                "SELECT * FROM imports WHERE package_id=?",
-                (package_id,),
-            )
-            if row is None:
-                raise KeyError(package_id)
-            if row.status != "added":
-                connection.execute(
-                    "UPDATE imports SET status='error', error=? WHERE package_id=?",
-                    (message, package_id),
-                )
-            # A repeated report of the same failure must not revive a dismissed notice.
-            if row.status in {"pending", "preparing"}:
-                record_notice(connection, package_id, now())
-        return self.status(package_id)
-
-    def publish(self, package_id: str, result_id: str, audio: dict[str, str]) -> dict[str, object]:
-        with self.database.write() as connection:
-            row = fetch_one(
-                connection,
-                ImportRecord,
-                "SELECT * FROM imports WHERE package_id=?",
-                (package_id,),
-            )
-            if row is None:
-                raise KeyError(package_id)
-            result_hash = self._result_hash(audio)
-            if row.status == "added":
-                if row.result_id != result_id or row.result_hash != result_hash:
-                    raise ImportConflictError(
-                        "A different result was already published for this package.",
-                    )
-                return self._public(row)
-            if row.status not in {"pending", "preparing"}:
-                raise ImportConflictError(
-                    "This package is not pending preparation.",
-                )
-            package = PhrasePackage.model_validate_json(row.payload)
-            decoded = decode_references(package, audio)
-            reject_identity_conflicts(connection, package)
-            publish_batch(
-                connection,
-                self.database.data_dir,
-                package,
-                decoded,
-                (result_id, result_hash),
-            )
-        return self.status(package_id)
-
-    @staticmethod
-    def _result_hash(audio: dict[str, str]) -> str:
-        return hashlib.sha256(json.dumps(audio, sort_keys=True).encode()).hexdigest()
 
     def status(self, package_id: str) -> dict[str, object]:
         with self.database.read() as connection:
-            row = fetch_one(
-                connection,
-                ImportRecord,
-                "SELECT * FROM imports WHERE package_id=?",
-                (package_id,),
-            )
+            row = import_row(connection, package_id)
         if row is None:
             raise KeyError(package_id)
-        return self._public(row)
-
-    @staticmethod
-    def _public(row: ImportRecord) -> dict[str, object]:
-        return {
-            "package_id": row.package_id,
-            "status": row.status,
-            "error": row.error,
-            "added_count": row.added_count,
-        }
+        return public_status(row)

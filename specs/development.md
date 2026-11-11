@@ -38,7 +38,10 @@ The AI agent instructions have one English source: `docs/includes/agent-add-phra
 Every language's `agent-add-phrases.md` page must include it with
 `--8<-- "agent-add-phrases.md"`. Translate only the page title and learner-facing introduction;
 do not copy or translate the shared instructions. Keep the shared file outside `docs/src/`
-so the build does not treat it as another language directory.
+so the build does not treat it as another language directory. The card content rules inside it
+come from `src/phrase_gym/coach/prompts/content-rules.md`, which the Coach prompts also use;
+the snippets base path includes that package folder so the installed Coach and the guide read
+one file.
 
 ## Build a distributable
 

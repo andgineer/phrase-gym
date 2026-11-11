@@ -1,8 +1,9 @@
 # Phrase Gym
 
 Phrase Gym is a local Python application with a browser interface for studying useful English
-phrases and keeping private recordings. Import a prepared phrase package, listen to its reference
-audio, record optional takes and replay them after reloading the app.
+phrases and keeping private recordings. Type a phrase or word for Coach to prepare, or let an AI
+agent add a course batch, then listen to reference audio, record optional takes and replay them
+after reloading the app.
 
 **Daily** offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
 **Settings**, mixed in random order so the next phrase cannot be anticipated. Every phrase starts with its answer hidden,

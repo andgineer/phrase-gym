@@ -1,3 +1,5 @@
+from typing import Literal
+
 from phrase_gym.server.contracts import CardKind, PracticeMode
 from phrase_gym.server.import_contracts import StrictModel
 from phrase_gym.server.practice_contracts import Rating
@@ -48,7 +50,8 @@ class LibraryCounts(StrictModel):
 
 class ImportNotice(StrictModel):
     package_id: str
-    source_label: str
+    kind: Literal["coach", "package"]
+    label: str
     error: str
 
 

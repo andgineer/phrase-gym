@@ -1,50 +1,53 @@
 from fastapi.testclient import TestClient
 
-from tests.phrase_packages import Package
+TYPED = "by and large"
 
 
-def fail_preparation(client: TestClient, package_id: str, error: str) -> None:
-    assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
-    client.post(f"/api/imports/{package_id}/failure", json={"error": error})
+def fail_preparation(client: TestClient, error: str) -> str:
+    work = client.post("/api/imports/coach/next").json()
+    client.post(f"/api/imports/{work['package_id']}/failure", json={"error": error})
+    return work["package_id"]
 
 
 def notices(client: TestClient) -> list[dict[str, str]]:
     return client.get("/api/practice/facts").json()["notices"]
 
 
-def test_failure_notice_arrives_with_practice_facts_until_dismissed(
-    client: TestClient, package: Package
-) -> None:
-    package_id = package["package_id"]
+def test_failure_notice_arrives_with_practice_facts_until_dismissed(client: TestClient) -> None:
     assert notices(client) == []
-    client.post("/api/imports", json={"package": package})
+    package_id = client.post("/api/coach/requests", json={"text": TYPED}).json()["request_id"]
     assert notices(client) == []
-    fail_preparation(client, package_id, "Piper unavailable")
+    fail_preparation(client, "Codex is not logged in")
     assert notices(client) == [
         {
             "package_id": package_id,
-            "source_label": package["source_label"],
-            "error": "Piper unavailable",
+            "kind": "coach",
+            "label": TYPED,
+            "error": "Codex is not logged in",
         }
     ]
     assert client.delete(f"/api/imports/{package_id}/notice").status_code == 200
     assert notices(client) == []
-    client.post(f"/api/imports/{package_id}/failure", json={"error": "Piper unavailable"})
+    client.post(f"/api/imports/{package_id}/failure", json={"error": "Codex is not logged in"})
     assert notices(client) == []
     status = client.get(f"/api/imports/{package_id}").json()
-    assert (status["status"], status["error"]) == ("error", "Piper unavailable")
+    assert (status["status"], status["error"]) == ("error", "Codex is not logged in")
 
 
-def test_resubmission_clears_the_notice_and_a_new_failure_shows_again(
-    client: TestClient, package: Package
-) -> None:
-    package_id = package["package_id"]
-    client.post("/api/imports", json={"package": package})
-    fail_preparation(client, package_id, "Piper unavailable")
-    assert client.post("/api/imports", json={"package": package}).json()["status"] == "pending"
+def test_resubmission_clears_the_notice_and_a_new_failure_shows_again(client: TestClient) -> None:
+    client.post("/api/coach/requests", json={"text": TYPED})
+    package_id = fail_preparation(client, "Piper unavailable")
+    resubmitted = client.post("/api/coach/requests", json={"text": TYPED}).json()
+    assert resubmitted == {"request_id": package_id, "outcome": "saved"}
+    assert client.get(f"/api/imports/{package_id}").json() == {
+        "package_id": package_id,
+        "status": "pending",
+        "error": None,
+        "added_count": None,
+    }
     assert notices(client) == []
-    fail_preparation(client, package_id, "Voice file missing")
-    assert [notice["error"] for notice in notices(client)] == ["Voice file missing"]
+    fail_preparation(client, "The input is not English")
+    assert [notice["error"] for notice in notices(client)] == ["The input is not English"]
 
 
 def test_dismissing_an_absent_notice_changes_nothing(client: TestClient) -> None:

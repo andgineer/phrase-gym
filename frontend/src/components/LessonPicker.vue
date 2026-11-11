@@ -144,8 +144,10 @@ defineExpose({ reload: lessons.reload })
 
 <template>
   <div v-if="empty" class="lesson-picker">
-    <p>Add your first phrase batch</p>
-    <p class="muted">Import 5–10 prepared phrases to begin.</p>
+    <p>Add your first phrase</p>
+    <p class="muted">
+      Type a phrase or word into the Coach field, or ask your AI agent to add a course batch.
+    </p>
   </div>
   <div v-else ref="root" class="lesson-picker" @focusout="leave">
     <div class="lesson-combo">

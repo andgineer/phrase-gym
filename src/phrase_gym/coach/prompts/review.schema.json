@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findings"
+  ],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "problem",
+          "correction"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "correction": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

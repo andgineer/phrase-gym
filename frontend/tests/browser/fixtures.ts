@@ -10,7 +10,7 @@ export const test = base.extend<{ server: void; coachEnabled: boolean }>({
       if (!baseURL) throw new Error('Browser tests require a baseURL')
       const server = spawn(
         'uv',
-        ['run', 'python', 'tests/browser_server.py', new URL(baseURL).port],
+        ['run', 'python', '-m', 'tests.browser_server', new URL(baseURL).port],
         {
           cwd: resolve(import.meta.dirname, '../../..'),
           env: { ...process.env, PHRASE_GYM_BROWSER_NO_COACH: coachEnabled ? '0' : '1' },

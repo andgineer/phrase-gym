@@ -1,13 +1,3 @@
-.phrase-drop {
-  margin-left: auto;
-}
-.add-phrase {
-  border-radius: 50%;
-  width: 44px;
-  padding: 0;
-  font-size: 1.6rem;
-  line-height: 1;
-}
 .intake-dialog {
   position: fixed;
   inset: 5vh max(1rem, calc((100vw - 38rem) / 2));
@@ -25,12 +15,6 @@
 .intake-dialog::backdrop {
   background: #0008;
 }
-.intake-dialog textarea {
-  width: 100%;
-  min-height: 10rem;
-  padding: 0.7rem;
-  font: inherit;
-}
 .intake-dialog .actions {
   display: flex;
   flex-wrap: wrap;
@@ -38,14 +22,47 @@
   align-items: center;
   margin: 1rem 0;
 }
-.intake-dialog .file {
-  border: 1px solid #ccd2c7;
-  border-radius: 9px;
-  padding: 11px 18px;
-  cursor: pointer;
+.coach-field {
+  position: relative;
+  display: block;
+  margin-left: auto;
+  min-width: 0;
 }
-.intake-dialog .file input {
-  display: none;
+.coach-input {
+  display: flex;
+  gap: 8px;
+}
+.coach-input input[type='text'] {
+  width: 12rem;
+  margin-top: 0;
+  padding: 10px 12px;
+}
+/* Floating below the field keeps the page from shifting while a confirmation shows. */
+.coach-message {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  width: max-content;
+  max-width: min(24rem, 90vw);
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background: #fffef9;
+  border: 1px solid #deded1;
+  border-radius: 8px;
+}
+.coach-message.error {
+  background: #fff0eb;
+}
+@media (max-width: 540px) {
+  .coach-field {
+    width: 100%;
+  }
+  .coach-input input[type='text'] {
+    flex: 1;
+    width: auto;
+  }
 }
 .microphone {
   display: inline-flex;
@@ -86,9 +103,13 @@
   margin-top: 16px;
 }
 @media (prefers-color-scheme: dark) {
-  .intake-dialog {
+  .intake-dialog,
+  .coach-message {
     background: #25352e;
     color: #e9eee9;
+  }
+  .coach-message.error {
+    background: #512e27;
   }
 }
 .settings-group {

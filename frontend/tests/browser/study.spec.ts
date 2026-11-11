@@ -1,15 +1,12 @@
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import {
-  awaitAdded,
   rateNew,
   revealAnswer,
   importPackage,
-  importStatus,
   libraryPhrase,
   phraseId,
   phraseSearch,
-  savedForCoach,
   savedTakes,
 } from './helpers'
 
@@ -241,27 +238,12 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   await expect(page.getByText(/^Today's Daily practice is complete\./)).toBeVisible()
 })
 
-test('imports, retries, rates, and retains complete takes', async ({ page }) => {
+test('imports, rates, and retains complete takes', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('Add your first phrase batch')).toBeVisible()
+  await expect(page.getByText('Add your first phrase', { exact: true })).toBeVisible()
   await expect(page.locator('article.study')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Phrase package JSON').fill('{ bad json')
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByRole('alert')).toContainText('Invalid JSON')
-
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(phrasePackage))
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText(savedForCoach)).toBeVisible()
-  await expect
-    .poll(() => importStatus(page, phrasePackage.package_id))
-    .toMatchObject({ status: 'error', error: expect.stringContaining('Synthetic preparation') })
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText(savedForCoach)).toBeVisible()
-  await awaitAdded(page, phrasePackage.package_id, 5)
-  await page.getByRole('button', { name: 'Close' }).click()
+  await importPackage(page, phrasePackage, 5)
   await expect(page.locator('article.study')).toHaveCount(0)
-  await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   await openDaily(page)
   const started = await page.getByTestId('practice-phrase').innerText()
 
@@ -385,16 +367,6 @@ test('imports, retries, rates, and retains complete takes', async ({ page }) => 
       () => (window as unknown as { __playedMedia: HTMLMediaElement[] }).__playedMedia.length,
     ),
   ).toBe(beforePause)
-
-  await page.getByRole('button', { name: 'Add material' }).click()
-  await page.getByLabel('Choose JSON file').setInputFiles({
-    name: 'phrases.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(phrasePackage)),
-  })
-  await page.getByRole('button', { name: 'Import' }).click()
-  await expect(page.getByText('Added 5 phrases.')).toBeVisible()
-  await page.getByRole('button', { name: 'Close' }).click()
 
   let releaseCompletion!: () => void
   const completionHeld = new Promise<void>((resolve) => {
@@ -544,7 +516,7 @@ test('restored practice card keeps the original layout and microphone interactio
 
 test('one-time discarded-data reset completes before pending take recovery', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('button', { name: 'Add material' })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Phrase or word for Coach' })).toBeVisible()
   await page.evaluate(async () => {
     localStorage.setItem('phrase-gym.reference-exposure.v1.old', 'old')
     localStorage.setItem('phrase-gym.last-learning-language.v1', 'de')
@@ -580,7 +552,7 @@ test('one-time discarded-data reset completes before pending take recovery', asy
     await route.continue()
   })
   await page.reload()
-  await expect(page.getByRole('button', { name: 'Add material' })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Phrase or word for Coach' })).toBeVisible()
   expect(uploads).toBe(0)
   expect(
     await page.evaluate(async () => {
@@ -650,42 +622,6 @@ test('playback rejection clears the current control without stopping a newer pla
   )
   await expect(page.getByRole('button', { name: 'Stop playback' })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
-})
-
-test('import modal traps keyboard focus and finishes recording before opening', async ({
-  page,
-}) => {
-  const modalPackage = {
-    ...phrasePackage,
-    package_id: 'modal-recording-v1',
-    source_id: 'modal-recording-source',
-    lessons: lessons([{ ...cards[1], item_id: 'modal-recording-card' }]),
-  }
-  await page.goto('/')
-  const opener = page.getByRole('button', { name: 'Add material' })
-  await importPackage(page, modalPackage, 1)
-  await openDaily(page)
-  await page.getByRole('button', { name: 'Record a take' }).click()
-  await expect(page.getByRole('button', { name: 'Stop recording' })).toBeVisible()
-  await opener.click()
-  const dialog = page.getByRole('dialog', { name: 'Add material' })
-  await expect(dialog).toBeVisible()
-  await expect(page.getByText('Mine', { exact: true })).toBeVisible()
-  expect(
-    await page.evaluate(
-      () =>
-        (window as unknown as { __playedMedia?: HTMLMediaElement[] }).__playedMedia?.length ?? 0,
-    ),
-  ).toBe(0)
-  await expect(page.getByRole('button', { name: 'Record a take' })).toBeVisible()
-  await dialog.getByRole('button', { name: 'Close' }).focus()
-  await page.keyboard.press('Tab')
-  expect(
-    await page.evaluate(() => document.querySelector('dialog')?.contains(document.activeElement)),
-  ).toBe(true)
-  await page.keyboard.press('Escape')
-  await expect(dialog).not.toBeVisible()
-  await expect(opener).toBeFocused()
 })
 
 test('automatic comparison can be stopped while upload is pending and late end cannot restart it', async ({

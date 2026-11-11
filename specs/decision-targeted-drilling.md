@@ -2,7 +2,7 @@
 
 Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a phrase prompt is an intermediate outcome, not evidence that a phrase was used naturally.
 
-The first MVP accepts externally prepared English phrase batches. Coach preparation of typed phrases and words and further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
+Phrase Gym accepts externally prepared English phrase batches and Coach preparation of typed phrases and words. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
 
 ## Phrases
 

@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from phrase_gym.server.app import create_app
 from phrase_gym.server.storage import Database
-from tests.phrase_packages import Package, prepare_with_coach
+from tests.phrase_packages import Package, publish
 from tests.practice_client import Practice
 
 
@@ -20,7 +20,7 @@ def test_study_recordings_and_restart(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    assert prepare_with_coach(client, package)["added_count"] == 5
+    assert publish(client, package)["added_count"] == 5
     if os.name != "nt":
         assert stat.S_IMODE(tmp_path.stat().st_mode) == 0o700
         assert stat.S_IMODE((tmp_path / "phrase-gym.sqlite3").stat().st_mode) == 0o600

@@ -8,20 +8,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 import phrase_gym.server.publication as publication
-from phrase_gym.coach.main import process_once
-from phrase_gym.coach.speech import PiperSpeech
-from phrase_gym.server.app import create_app
 from phrase_gym.server.import_contracts import PhrasePackage
 from phrase_gym.server.importer import Importer
 from phrase_gym.server.storage import Database
-from tests.coach_client import ClientCoachApi
 from tests.phrase_packages import (
     Package,
     lesson,
     make_package,
     phrase,
-    phrases_of,
-    prepare_with_coach,
     publish,
     references,
 )
@@ -30,85 +24,6 @@ from tests.phrase_packages import (
 def table_count(database: Database, table: str) -> int:
     with database.read() as connection:
         return connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-
-
-def test_offline_restart_retry_and_idempotent_publication(
-    tmp_path: Path, package: Package, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("PHRASE_GYM_DATA_DIR", str(tmp_path))
-    with TestClient(create_app()) as client:
-        accepted = client.post("/api/imports", json={"package": package})
-        assert accepted.status_code == 202
-        assert accepted.json()["status"] == "pending"
-        assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
-        assert client.post("/api/imports", json={"package": package}).json() == accepted.json()
-        work = client.post("/api/imports/coach/next").json()
-        assert work["package_id"] == package["package_id"]
-    with TestClient(create_app()) as client:
-        assert client.get(f"/api/imports/{package['package_id']}").json()["status"] == "pending"
-        assert client.post("/api/imports/coach/next").json()["package_id"] == package["package_id"]
-        result = {"result_id": package["package_id"], "references": references(package)}
-        first = client.post(f"/api/imports/{package['package_id']}/result", json=result)
-        assert first.json()["added_count"] == 5
-        assert (
-            client.post(f"/api/imports/{package['package_id']}/result", json=result).json()
-            == first.json()
-        )
-        assert client.post("/api/imports/coach/next").json() is None
-        assert client.post("/api/practice/daily", json={}).json()["card"]["cue"]
-    assert table_count(Database(tmp_path), "phrases") == 5
-    assert len(list((tmp_path / "references").iterdir())) == 5
-
-
-def test_interrupted_preparation_is_claimed_again_without_server_restart(
-    client: TestClient, package: Package
-) -> None:
-    package_id = package["package_id"]
-    client.post("/api/imports", json={"package": package})
-    assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
-    assert client.post("/api/imports", json={"package": package}).json()["status"] == "preparing"
-    assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
-    result = {"result_id": package_id, "references": references(package)}
-    assert client.post(f"/api/imports/{package_id}/result", json=result).json()["added_count"] == 5
-    assert client.post(f"/api/imports/{package_id}/result", json=result).json()["added_count"] == 5
-
-
-def test_malformed_audio_and_missing_item_reject_whole_batch(
-    client: TestClient, package: Package
-) -> None:
-    package_id = package["package_id"]
-    client.post("/api/imports", json={"package": package})
-    client.post("/api/imports/coach/next")
-    valid = references(package)
-    missing = valid.copy()
-    missing.pop("meeting-3")
-    response = client.post(
-        f"/api/imports/{package_id}/result", json={"result_id": package_id, "references": missing}
-    )
-    assert response.status_code == 409
-    assert "meeting-3" in response.text
-    malformed = valid.copy()
-    malformed["meeting-3"] = base64.b64encode(b"not wave").decode()
-    response = client.post(
-        f"/api/imports/{package_id}/result", json={"result_id": package_id, "references": malformed}
-    )
-    assert response.status_code == 409
-    assert "phrases.meeting-3" in response.text
-    assert table_count(client.app.state.database, "phrases") == 0
-    assert table_count(client.app.state.database, "lessons") == 0
-    failed = client.post(f"/api/imports/{package_id}/failure", json={"error": "Piper unavailable"})
-    assert failed.json()["status"] == "error"
-    assert client.get(f"/api/imports/{package_id}").json()["error"] == "Piper unavailable"
-    assert client.post("/api/imports/coach/next").json() is None
-    resubmitted = client.post("/api/imports", json={"package": package}).json()
-    assert (resubmitted["status"], resubmitted["error"]) == ("pending", None)
-    assert client.post("/api/imports/coach/next").json()["package_id"] == package_id
-    assert (
-        client.post(
-            f"/api/imports/{package_id}/result", json={"result_id": package_id, "references": valid}
-        ).json()["added_count"]
-        == 5
-    )
 
 
 def test_external_agent_supplies_complete_references_without_coach(
@@ -139,6 +54,30 @@ def test_external_bad_reference_rejects_request_without_pending_work(
     assert response.status_code == 409
     assert "meeting-2" in response.text
     assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
+
+
+def test_package_without_references_is_rejected(client: TestClient, package: Package) -> None:
+    response = client.post("/api/imports", json={"package": package})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", "references"]
+    assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
+
+
+def test_word_sense_card_accepts_three_contexts(client: TestClient) -> None:
+    contexts = [
+        {"situation": f"Context {i}: she was __________ to go. (=unwilling)"} for i in range(3)
+    ]
+    single = make_package(lessons=[lesson("words", "Words", [phrase(1, cues=contexts)])])
+    assert publish(client, single)["added_count"] == 1
+
+
+def test_coach_source_is_reserved_for_the_coach_field(client: TestClient) -> None:
+    reserved = make_package(source_id="phrase-gym-coach")
+    response = client.post(
+        "/api/imports", json={"package": reserved, "references": references(reserved)}
+    )
+    assert response.status_code == 409
+    assert "reserved for the Coach field" in response.text
 
 
 def silent_wav(size: int) -> str:
@@ -209,6 +148,12 @@ def test_reference_budget_fits_transport_and_rejects_oversized_batch(client: Tes
             lambda p: p["lessons"][0]["phrases"][0].pop("recall_hints"),
             ["phrases", 0, "recall_hints"],
         ),
+        (
+            lambda p: p["lessons"][0]["phrases"][1].update(
+                cues=[{"situation": f"Context number {i}."} for i in range(4)]
+            ),
+            ["phrases", 1, "cues"],
+        ),
         (lambda p: p["lessons"][0].pop("lesson_id"), ["lesson_id"]),
         (
             lambda p: p["lessons"][0]["phrases"][0].update(answer="old field"),
@@ -220,7 +165,7 @@ def test_validation_identifies_the_item_and_field(
     client: TestClient, package: Package, change, location
 ) -> None:
     change(package)
-    response = client.post("/api/imports", json={"package": package})
+    response = client.post("/api/imports", json={"package": package, "references": {}})
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"] == ["body", "package", "lessons", 0, *location]
     assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
@@ -230,18 +175,20 @@ def test_earlier_format_and_duplicate_identities_are_rejected(
     client: TestClient, package: Package
 ) -> None:
     package["version"] = 1
-    assert client.post("/api/imports", json={"package": package}).status_code == 422
+    assert (
+        client.post("/api/imports", json={"package": package, "references": {}}).status_code == 422
+    )
     package["version"] = 2
     duplicate_lessons = make_package(
         lessons=[lesson("unit-1", "A", [phrase(1)]), lesson("unit-1", "B", [phrase(2)])]
     )
-    response = client.post("/api/imports", json={"package": duplicate_lessons})
+    response = client.post("/api/imports", json={"package": duplicate_lessons, "references": {}})
     assert response.status_code == 422
     assert "lesson_id values must be unique" in response.text
     duplicate_items = make_package(
         lessons=[lesson("unit-1", "A", [phrase(1)]), lesson("unit-2", "B", [phrase(1)])]
     )
-    response = client.post("/api/imports", json={"package": duplicate_items})
+    response = client.post("/api/imports", json={"package": duplicate_items, "references": {}})
     assert "item_id values must be unique" in response.text
     oversized = make_package(
         lessons=[
@@ -249,7 +196,7 @@ def test_earlier_format_and_duplicate_identities_are_rejected(
             for block in range(2)
         ]
     )
-    response = client.post("/api/imports", json={"package": oversized})
+    response = client.post("/api/imports", json={"package": oversized, "references": {}})
     assert response.status_code == 422
     assert "at most 50 phrases" in response.text
 
@@ -270,7 +217,9 @@ def test_mixed_lessons_publish_together_and_reuse_lesson_identity(client: TestCl
         ("Meetings", 1),
     ]
     renamed = make_package("course-meetings-v3", [lesson("meetings", "Renamed", [phrase(5)])])
-    response = client.post("/api/imports", json={"package": renamed})
+    response = client.post(
+        "/api/imports", json={"package": renamed, "references": references(renamed)}
+    )
     assert response.status_code == 409
     assert "lessons.meetings" in response.text and "“Meetings”" in response.text
     assert client.get("/api/imports/course-meetings-v3").status_code == 404
@@ -282,25 +231,12 @@ def test_source_item_conflict_names_existing_phrase_and_deletion(
 ) -> None:
     publish(client, package)
     other = make_package("other-package", [lesson("unit-9", "Other", [phrase(3)])])
-    response = client.post("/api/imports", json={"package": other})
+    response = client.post("/api/imports", json={"package": other, "references": references(other)})
     assert response.status_code == 409
     assert "phrases.meeting-3" in response.text
     assert "“Complete phrase number 3.”" in response.text
     assert "Delete that phrase first" in response.text
     assert table_count(client.app.state.database, "lessons") == 1
-
-
-def test_coach_reports_the_server_explanation_for_a_conflict(
-    client: TestClient, package: Package
-) -> None:
-    assert client.post("/api/imports", json={"package": package}).status_code == 202
-    publish(client, make_package("rival-package", [lesson("unit-1", "Meetings", [phrase(5)])]))
-    assert process_once(ClientCoachApi(client), PiperSpeech(None, fake=True))
-    status = client.get(f"/api/imports/{package['package_id']}").json()
-    assert status["status"] == "error"
-    assert "phrases.meeting-5" in status["error"]
-    assert "“Complete phrase number 5.”" in status["error"]
-    assert "Delete that phrase first" in status["error"]
 
 
 def test_same_lesson_and_item_ids_under_another_source_are_separate(
@@ -318,30 +254,11 @@ def test_same_lesson_and_item_ids_under_another_source_are_separate(
     assert table_count(client.app.state.database, "phrases") == 6
 
 
-def test_conflict_appearing_while_coach_prepares_fails_without_partial_publication(
-    client: TestClient, package: Package
-) -> None:
-    assert client.post("/api/imports", json={"package": package}).status_code == 202
-    work = client.post("/api/imports/coach/next").json()
-    rival = make_package("rival-package", [lesson("unit-1", "Meetings", [phrase(5)])])
-    publish(client, rival)
-    response = client.post(
-        f"/api/imports/{work['package_id']}/result",
-        json={"result_id": work["package_id"], "references": references(package)},
-    )
-    assert response.status_code == 409
-    assert "phrases.meeting-5" in response.text
-    assert table_count(client.app.state.database, "phrases") == 1
-    assert client.get(f"/api/imports/{package['package_id']}").json()["status"] == "preparing"
-
-
 def test_reference_write_failure_rolls_back_phrases_lessons_and_files(
     tmp_path: Path, package: Package, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     importer = Importer(Database(tmp_path))
     parsed = PhrasePackage.model_validate(package)
-    importer.submit(parsed)
-    importer.next_work()
     original = publication.write_private
     calls = 0
 
@@ -354,11 +271,11 @@ def test_reference_write_failure_rolls_back_phrases_lessons_and_files(
 
     monkeypatch.setattr(publication, "write_private", fail_second)
     with pytest.raises(OSError, match="disk failed"):
-        importer.publish(parsed.package_id, parsed.package_id, references(package))
+        importer.submit(parsed, references(package))
     assert table_count(importer.database, "phrases") == 0
     assert table_count(importer.database, "lessons") == 0
+    assert table_count(importer.database, "imports") == 0
     assert list((tmp_path / "references").iterdir()) == []
-    assert importer.status(parsed.package_id)["status"] == "preparing"
 
 
 def test_case_only_item_ids_keep_distinct_audio(tmp_path: Path) -> None:
@@ -372,10 +289,7 @@ def test_case_only_item_ids_keep_distinct_audio(tmp_path: Path) -> None:
         ]
     )
     importer = Importer(Database(tmp_path))
-    parsed = PhrasePackage.model_validate(package)
-    importer.submit(parsed)
-    importer.next_work()
-    importer.publish(parsed.package_id, parsed.package_id, references(package))
+    importer.submit(PhrasePackage.model_validate(package), references(package))
     with importer.database.read() as connection:
         rows = connection.execute(
             "SELECT id, item_id, reference_path FROM phrases ORDER BY item_id"
@@ -383,14 +297,6 @@ def test_case_only_item_ids_keep_distinct_audio(tmp_path: Path) -> None:
     assert len({row["reference_path"] for row in rows}) == 2
     assert len({row["id"] for row in rows}) == 2
     assert all(Path(row["reference_path"]).read_bytes().startswith(b"RIFF") for row in rows)
-
-
-def test_coach_prepares_every_lesson_through_the_api(client: TestClient) -> None:
-    package = make_package(
-        lessons=[lesson("a", "First", [phrase(1)]), lesson("b", "Second", [phrase(2), phrase(3)])]
-    )
-    assert prepare_with_coach(client, package)["added_count"] == 3
-    assert len(phrases_of(package)) == 3
 
 
 def test_documented_example_imports_three_lessons(client: TestClient) -> None:

@@ -2,7 +2,13 @@ import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import { openDetails } from './extra-package'
-import { importPackage as importWith, libraryPhrase, phraseSearch, revealAnswer } from './helpers'
+import {
+  importPackage as importWith,
+  libraryPhrase,
+  phraseSearch,
+  revealAnswer,
+  type ExternalPackage,
+} from './helpers'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
@@ -58,7 +64,7 @@ function organizedPackage(packageId: string) {
   }
 }
 
-const importPackage = (page: Page, value: { package_id: string }, added: number) =>
+const importPackage = (page: Page, value: ExternalPackage, added: number) =>
   importWith(page, value, added, true)
 
 async function noHorizontalScroll(page: Page) {

@@ -17,14 +17,17 @@ def clear_notice(connection: sqlite3.Connection, package_id: str) -> None:
 
 def import_notices(connection: sqlite3.Connection) -> list[ImportNotice]:
     rows = connection.execute(
-        "SELECT i.package_id, json_extract(i.payload, '$.source_label') AS source_label, "
-        "i.error FROM import_notices n JOIN imports i USING (package_id) "
+        "SELECT i.package_id, i.kind, i.error, CASE i.kind WHEN 'coach' "
+        "THEN json_extract(i.payload, '$.text') "
+        "ELSE json_extract(i.payload, '$.source_label') END AS label "
+        "FROM import_notices n JOIN imports i USING (package_id) "
         "ORDER BY n.created_at, n.package_id",
     ).fetchall()
     return [
         ImportNotice(
             package_id=row["package_id"],
-            source_label=row["source_label"],
+            kind=row["kind"],
+            label=row["label"],
             error=row["error"] or "",
         )
         for row in rows

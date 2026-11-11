@@ -1,32 +1,45 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { expect } from './fixtures'
-
-export const savedForCoach = 'Saved. The phrases appear after Coach prepares audio.'
 
 export async function importStatus(page: Page, packageId: string) {
   return (await page.request.get(`/api/imports/${packageId}`)).json()
 }
 
-export async function awaitAdded(page: Page, packageId: string, added: number) {
-  await expect
-    .poll(() => importStatus(page, packageId))
-    .toMatchObject({ status: 'added', added_count: added })
+export function silentReference(): string {
+  const samples = 2205
+  const wav = Buffer.alloc(44 + samples * 2)
+  wav.write('RIFF', 0)
+  wav.writeUInt32LE(wav.length - 8, 4)
+  wav.write('WAVEfmt ', 8)
+  wav.writeUInt32LE(16, 16)
+  wav.writeUInt16LE(1, 20)
+  wav.writeUInt16LE(1, 22)
+  wav.writeUInt32LE(22050, 24)
+  wav.writeUInt32LE(44100, 28)
+  wav.writeUInt16LE(2, 32)
+  wav.writeUInt16LE(16, 34)
+  wav.write('data', 36)
+  wav.writeUInt32LE(samples * 2, 40)
+  return wav.toString('base64')
 }
 
+export type ExternalPackage = { package_id: string; lessons: { phrases: { item_id: string }[] }[] }
+
+// External agents submit complete packages with audio through the API; the browser has no import.
 export async function importPackage(
   page: Page,
-  value: { package_id: string },
+  value: ExternalPackage,
   added: number,
   tap = false,
 ) {
-  const press = (button: Locator) => (tap ? button.tap() : button.click())
-  await press(page.getByRole('button', { name: 'Add material' }))
-  await page.getByLabel('Phrase package JSON').fill(JSON.stringify(value))
-  await press(page.getByRole('button', { name: 'Import', exact: true }))
-  await expect(page.getByText(savedForCoach)).toBeVisible()
-  await press(page.getByRole('button', { name: 'Close' }))
-  await awaitAdded(page, value.package_id, added)
-  await press(page.getByRole('navigation').getByRole('button', { name: 'Practice' }))
+  const items = value.lessons.flatMap((lesson) => lesson.phrases)
+  const references = Object.fromEntries(items.map((item) => [item.item_id, silentReference()]))
+  const response = await page.request.post('/api/imports', {
+    data: { package: value, references },
+  })
+  expect(await response.json()).toMatchObject({ status: 'added', added_count: added })
+  const practice = page.getByRole('navigation').getByRole('button', { name: 'Practice' })
+  await (tap ? practice.tap() : practice.click())
 }
 
 export function playedMedia(page: Page) {

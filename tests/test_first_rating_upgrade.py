@@ -36,7 +36,8 @@ def test_upgrade_closes_old_study_view_and_preserves_history_retries_and_pending
     )
     with practice.database.write() as connection:
         connection.execute("UPDATE meta SET value='6' WHERE key='schema_version'")
-        # Schema 6 still kept one column per setting.
+        # Schema 6 still kept one column per setting and had no submission kind.
+        connection.execute("ALTER TABLE imports DROP COLUMN kind")
         connection.execute("DROP TABLE settings")
         for statement in statements(STEPS[5]):
             if statement.lstrip().startswith(("CREATE TABLE settings", "INSERT INTO settings")):

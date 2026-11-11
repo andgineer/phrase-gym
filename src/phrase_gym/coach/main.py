@@ -1,14 +1,15 @@
-"""Foreground Coach that prepares only work obtained from the Phrase Gym API."""
-
 import asyncio
 import base64
 import json
+import os
 import time
 import urllib.error
 import urllib.request
 from typing import Any
 from urllib.parse import urlsplit
 
+from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
+from phrase_gym.coach.preparation import CardPreparer, PreparationError
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
 
 MAX_TCP_PORT = 65_535
@@ -47,11 +48,19 @@ class CoachApi:
             return json.load(response)
 
 
-async def prepare(work: dict[str, Any], speech: PiperSpeech) -> dict[str, str]:
+def configured_preparer() -> CardPreparer:
+    workspace = coach_workspace()
+    cli = CodexCli(workspace, os.environ.get("PHRASE_GYM_CODEX", "codex"))
+    return CardPreparer(cli, workspace / ".phrase-gym-coach" / "attempts")
+
+
+async def prepare(text: str, package_id: str, preparer: CardPreparer, speech: PiperSpeech) -> dict:
+    phrase = await preparer.prepare(text, package_id)
+    audio = await speech.synthesize(phrase.text)
     return {
-        phrase["item_id"]: base64.b64encode(await speech.synthesize(phrase["text"])).decode()
-        for lesson in work["package"]["lessons"]
-        for phrase in lesson["phrases"]
+        "result_id": package_id,
+        "phrase": phrase.model_dump(mode="json", exclude_none=True),
+        "reference": base64.b64encode(audio).decode(),
     }
 
 
@@ -60,33 +69,45 @@ def refusal(error: urllib.error.HTTPError) -> str:
         detail = json.loads(error.read() or b"{}").get("detail")
     except (OSError, ValueError, AttributeError):
         detail = None
+    if isinstance(detail, list):
+        detail = "; ".join(
+            f"{'.'.join(str(part) for part in item.get('loc', []))}: {item.get('msg')}"
+            for item in detail
+            if isinstance(item, dict)
+        )
     return detail if isinstance(detail, str) and detail else str(error)
 
 
-def process_once(api: CoachApi, speech: PiperSpeech) -> bool:
+def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> bool:
     work = api.post("coach/next")
     if work is None:
         return False
     package_id = work["package_id"]
+    details = ""
     try:
-        references = asyncio.run(prepare(work, speech))
-        api.post(f"{package_id}/result", {"result_id": package_id, "references": references})
+        api.post(
+            f"{package_id}/result",
+            asyncio.run(prepare(work["text"], package_id, preparer, speech)),
+        )
         return True
     except urllib.error.HTTPError as error:
         reason = refusal(error)[:1000]
     except (OSError, ValueError, RuntimeError) as error:
         reason = str(error)[:1000]
-    print(f"Coach could not prepare {package_id}: {reason}", flush=True)
+        if isinstance(error, PreparationError) and error.attempt:
+            details = f" (details: {error.attempt})"
+    print(f"Coach could not prepare “{work['text']}”: {reason}{details}", flush=True)
     api.post(f"{package_id}/failure", {"error": reason})
     return True
 
 
 def run_coach(url: str, *, once: bool = False) -> None:
     api = CoachApi(url)
+    preparer = configured_preparer()
     speech = configured_speech()
     while True:
         try:
-            found = process_once(api, speech)
+            found = process_once(api, preparer, speech)
         except (OSError, urllib.error.HTTPError) as error:
             print(f"Coach cannot reach Phrase Gym: {error}", flush=True)
             found = False

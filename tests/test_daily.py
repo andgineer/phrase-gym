@@ -19,7 +19,7 @@ def many(count: int) -> Package:
 def test_empty_library_offers_no_card_and_page_load_starts_nothing(practice: Practice) -> None:
     state = practice.daily()
     assert state["card"] is None
-    assert state["message"] == "Add your first phrase batch to begin."
+    assert state["message"] == "Add your first phrase with Coach to begin."
     assert "/api/study/current" not in practice.client.get("/openapi.json").json()["paths"]
 
 

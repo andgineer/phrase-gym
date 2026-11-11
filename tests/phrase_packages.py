@@ -68,13 +68,37 @@ def publish(client: TestClient, package: Package) -> dict[str, Any]:
     return response.json()
 
 
-def prepare_with_coach(client: TestClient, package: Package) -> dict[str, Any]:
-    assert client.post("/api/imports", json={"package": package}).status_code == 202
+def silent_reference() -> str:
+    return base64.b64encode(asyncio.run(PiperSpeech(None, fake=True).synthesize("x"))).decode()
+
+
+def coach_card(item_id: str, **changes: object) -> dict[str, object]:
+    return {
+        "item_id": item_id,
+        "text": "We strongly believe this will help.",
+        "explanation": "Target chunk: strongly believe. Say you are sure about an opinion.",
+        "cues": [
+            {"situation": "We __________ that the plan will work. (=We truly think)"},
+            {"situation": "I __________ she is right about this. (=I am sure)"},
+        ],
+        "recall_hints": ["strong / bel...", "strongly / be..."],
+        "usage_contexts": ["opinions"],
+        "accepted_variants": ["firmly believe"],
+        **changes,
+    }
+
+
+def prepare_typed(client: TestClient, typed: str, **changes: object) -> dict[str, Any]:
+    submitted = client.post("/api/coach/requests", json={"text": typed}).json()
     work = client.post("/api/imports/coach/next").json()
-    assert work["package_id"] == package["package_id"]
+    assert work == {"package_id": submitted["request_id"], "text": typed.strip()}
     response = client.post(
-        f"/api/imports/{package['package_id']}/result",
-        json={"result_id": package["package_id"], "references": references(package)},
+        f"/api/imports/{work['package_id']}/result",
+        json={
+            "result_id": work["package_id"],
+            "phrase": coach_card(work["package_id"], **changes),
+            "reference": silent_reference(),
+        },
     )
     assert response.status_code == 200, response.text
     return response.json()

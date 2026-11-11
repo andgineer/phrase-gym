@@ -24,7 +24,10 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.snippets:
-      base_path: docs/includes
+      base_path:
+        - docs/includes
+        - src/phrase_gym/coach/prompts
+      check_paths: true
 nav:
   - Overview: index.md
   - Installation: installation.md

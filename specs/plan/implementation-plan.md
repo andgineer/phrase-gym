@@ -1,22 +1,8 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target; next, Coach prepares typed phrases and words before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target, and Coach prepares typed phrases and words; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
-
-## 4. Prepare typed phrases and words in Coach
-
-**Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
-
-- Replace the header's **+** button and its package dialog with the [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words). Remove the browser package import, file picker and paste dialog. External agents remain the only package senders and always supply complete audio, so Coach's inbox holds only learner-typed text. Update the empty-library hint, README and user guide with the change.
-- Reuse the Phrase Gym submission and publication path with Coach performing preparation. Add a single selected subscription-CLI adapter in Coach, bounded execution and clear errors; retain the typed text so that submitting it again retries preparation.
-- Prepare a phrase as a chunk card under the [phrase rules](../decision-targeted-drilling.md#phrases) and a word as one sense with a comprehensible definition and two or three contexts under the [word rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp). Use the supplied context and agent judgment; insufficient input follows the preparation failure path without a clarification conversation.
-- When implementing Coach AI preparation, consider extracting applicable rules from the [external-agent instructions](../../docs/src/en/agent-add-phrases.md) into a separate shared file that both Coach prompts and the external-agent instructions include, avoiding copy-and-paste duplication. This is an option to evaluate against Coach's actual needs, not a decided prompt structure; defer any extraction until that implementation.
-- Keep pending, ready and failed material distinct in Phrase Gym without browser progress tracking. Reuse the small durable Coach handoff; no general distributed queue or second desktop application. Existing ready practice stays usable during generation.
-- Words from echo-words arrive through the same field or an external agent; there is no export-file import. Direct echo-words integration or source changes require their own authorization.
-- Use representative new actual model results with a fresh semantic reviewer, plus attended speech listening. Cover a typed phrase, an ambiguous word, an accepted variant, a confusable contrast and a failed request separately from structural tests.
-
-**Exit:** a typed English phrase and a typed word each go from the Coach field through preparation to a first rated attempt, later productive recall and saved replay in the same app, and the browser offers no package import. Stated failures remain actionable and do not damage existing cards. No generalized provider framework is needed.
 
 ## 5. Extend only the content the learner next needs
 

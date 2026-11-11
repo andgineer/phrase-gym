@@ -95,15 +95,31 @@
         "title": "CoachFailure",
         "type": "object"
       },
+      "CoachRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "CoachRequest",
+        "type": "object"
+      },
       "CoachResult": {
         "additionalProperties": false,
         "properties": {
-          "references": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "References",
-            "type": "object"
+          "phrase": {
+            "$ref": "#/components/schemas/ImportPhrase"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
           },
           "result_id": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
@@ -113,43 +129,51 @@
         },
         "required": [
           "result_id",
-          "references"
+          "phrase",
+          "reference"
         ],
         "title": "CoachResult",
         "type": "object"
       },
-      "CoachWork-Input": {
+      "CoachSubmission": {
         "additionalProperties": false,
         "properties": {
-          "package": {
-            "$ref": "#/components/schemas/PhrasePackage-Input"
+          "outcome": {
+            "enum": [
+              "saved",
+              "waiting",
+              "in_library"
+            ],
+            "title": "Outcome",
+            "type": "string"
           },
-          "package_id": {
-            "title": "Package Id",
+          "request_id": {
+            "title": "Request Id",
             "type": "string"
           }
         },
         "required": [
-          "package_id",
-          "package"
+          "request_id",
+          "outcome"
         ],
-        "title": "CoachWork",
+        "title": "CoachSubmission",
         "type": "object"
       },
-      "CoachWork-Output": {
+      "CoachWork": {
         "additionalProperties": false,
         "properties": {
-          "package": {
-            "$ref": "#/components/schemas/PhrasePackage-Output"
-          },
           "package_id": {
             "title": "Package Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
             "type": "string"
           }
         },
         "required": [
           "package_id",
-          "package"
+          "text"
         ],
         "title": "CoachWork",
         "type": "object"
@@ -481,39 +505,7 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
-      "ImportLesson-Input": {
-        "additionalProperties": false,
-        "properties": {
-          "lesson_id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
-            "title": "Lesson Id",
-            "type": "string"
-          },
-          "phrases": {
-            "items": {
-              "$ref": "#/components/schemas/ImportPhrase"
-            },
-            "maxItems": 50,
-            "minItems": 1,
-            "title": "Phrases",
-            "type": "array"
-          },
-          "title": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "lesson_id",
-          "title",
-          "phrases"
-        ],
-        "title": "ImportLesson",
-        "type": "object"
-      },
-      "ImportLesson-Output": {
+      "ImportLesson": {
         "additionalProperties": false,
         "properties": {
           "lesson_id": {
@@ -552,18 +544,27 @@
             "title": "Error",
             "type": "string"
           },
-          "package_id": {
-            "title": "Package Id",
+          "kind": {
+            "enum": [
+              "coach",
+              "package"
+            ],
+            "title": "Kind",
             "type": "string"
           },
-          "source_label": {
-            "title": "Source Label",
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "package_id": {
+            "title": "Package Id",
             "type": "string"
           }
         },
         "required": [
           "package_id",
-          "source_label",
+          "kind",
+          "label",
           "error"
         ],
         "title": "ImportNotice",
@@ -584,7 +585,7 @@
             "items": {
               "$ref": "#/components/schemas/Cue"
             },
-            "maxItems": 2,
+            "maxItems": 3,
             "minItems": 1,
             "title": "Cues",
             "type": "array"
@@ -652,25 +653,19 @@
         "additionalProperties": false,
         "properties": {
           "package": {
-            "$ref": "#/components/schemas/PhrasePackage-Input"
+            "$ref": "#/components/schemas/PhrasePackage"
           },
           "references": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "References"
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "References",
+            "type": "object"
           }
         },
         "required": [
-          "package"
+          "package",
+          "references"
         ],
         "title": "ImportRequest",
         "type": "object"
@@ -1016,7 +1011,7 @@
         "title": "PhraseDetails",
         "type": "object"
       },
-      "PhrasePackage-Input": {
+      "PhrasePackage": {
         "additionalProperties": false,
         "properties": {
           "card_language": {
@@ -1041,89 +1036,7 @@
           },
           "lessons": {
             "items": {
-              "$ref": "#/components/schemas/ImportLesson-Input"
-            },
-            "maxItems": 20,
-            "minItems": 1,
-            "title": "Lessons",
-            "type": "array"
-          },
-          "package_id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
-            "title": "Package Id",
-            "type": "string"
-          },
-          "source_id": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
-            "title": "Source Id",
-            "type": "string"
-          },
-          "source_label": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Source Label",
-            "type": "string"
-          },
-          "source_link": {
-            "anyOf": [
-              {
-                "format": "uri",
-                "maxLength": 2083,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Link"
-          },
-          "version": {
-            "const": 2,
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "format",
-          "version",
-          "package_id",
-          "source_id",
-          "source_label",
-          "learning_language",
-          "card_language",
-          "help_language",
-          "lessons"
-        ],
-        "title": "PhrasePackage",
-        "type": "object"
-      },
-      "PhrasePackage-Output": {
-        "additionalProperties": false,
-        "properties": {
-          "card_language": {
-            "const": "en",
-            "title": "Card Language",
-            "type": "string"
-          },
-          "format": {
-            "const": "phrase-gym.package",
-            "title": "Format",
-            "type": "string"
-          },
-          "help_language": {
-            "const": "en",
-            "title": "Help Language",
-            "type": "string"
-          },
-          "learning_language": {
-            "const": "en",
-            "title": "Learning Language",
-            "type": "string"
-          },
-          "lessons": {
-            "items": {
-              "$ref": "#/components/schemas/ImportLesson-Output"
+              "$ref": "#/components/schemas/ImportLesson"
             },
             "maxItems": 20,
             "minItems": 1,
@@ -2281,6 +2194,44 @@
         "summary": "Retry Cleanup"
       }
     },
+    "/api/coach/requests": {
+      "post": {
+        "operationId": "submit_text_api_coach_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoachRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachSubmission"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Text"
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "health_api_health_get",
@@ -2351,7 +2302,7 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/CoachWork-Output"
+                      "$ref": "#/components/schemas/CoachWork"
                     },
                     {
                       "type": "null"

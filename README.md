@@ -4,7 +4,7 @@
 [![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 Phrase Gym is a small local Python/Vue application for studying useful English phrases and
-keeping private learner recordings. It supports package import, Daily and Extra practice with spoken
+keeping private learner recordings. It supports typed phrases and words prepared by Coach, external-agent batches, Daily and Extra practice with spoken
 recall from the first attempt, phrase-specific Practice, self-rating, scheduled return, reference
 playback, comparison, saved replay, and today's practice facts with a factual streak and an
 optional weekly target.
@@ -26,10 +26,12 @@ it stops with an explanation and leaves the directory unchanged.
 
 ## Add and study material
 
-An external AI agent can prepare phrases and their reference audio from course material, then
-submit the complete batch for immediate study. Alternatively, import a prepared text package
-through **Add material** and let the application's Coach prepare its audio.
-See [how to add phrases](docs/src/en/importing-phrases.md) for both workflows.
+Type a phrase or word, optionally followed by the sentence it came from, into the field at the
+top right and press **Coach**. The application's Coach prepares a complete card with reference
+audio using your logged-in Codex CLI and local Piper voice, and adds it to the **Added with
+Coach** lesson. An external AI agent can instead prepare a course batch with its reference audio
+and submit it for immediate study. See [how to add phrases](docs/src/en/importing-phrases.md) for
+both workflows.
 
 The Practice entry offers a lesson field (empty means **All lessons**; type in it to narrow the
 list) with its due and new counts, **Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press

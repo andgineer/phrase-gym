@@ -17,7 +17,7 @@ const empty = computed(() =>
     ? 'No matches'
     : props.lessonId
       ? 'No phrases in this lesson'
-      : 'No phrases yet. Use Add material to import a package.',
+      : 'No phrases yet. Type a phrase or word into the Coach field to add one.',
 )
 let debounce: number | undefined
 
