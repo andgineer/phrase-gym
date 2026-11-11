@@ -5,14 +5,14 @@
 | Name                                              |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/phrase\_gym/\_\_about\_\_.py                  |        1 |        0 |    100% |           |
-| src/phrase\_gym/coach/agents/ai\_agent.py         |       98 |        9 |     91% |18-19, 55, 129-130, 139, 172, 201-202 |
-| src/phrase\_gym/coach/agents/command\_template.py |       72 |       50 |     31% |18, 24-34, 41-42, 49, 54-76, 85-96, 100-111, 115 |
+| src/phrase\_gym/coach/agents/ai\_agent.py         |      114 |        8 |     93% |20-21, 57, 131-132, 141, 223-224 |
+| src/phrase\_gym/coach/agents/command\_template.py |       72 |       14 |     81% |18, 29, 41-42, 49, 66-67, 86, 88, 92, 95, 106-107, 109 |
 | src/phrase\_gym/coach/agents/config.py            |        4 |        0 |    100% |           |
 | src/phrase\_gym/coach/agents/subprocess.py        |       94 |       22 |     77% |119-134, 137-146, 149-151, 157-158, 174, 179-180, 194-195, 198-203 |
 | src/phrase\_gym/coach/bounded\_process.py         |       46 |        3 |     93% | 28, 79-80 |
 | src/phrase\_gym/coach/card\_checks.py             |       49 |        1 |     98% |        61 |
 | src/phrase\_gym/coach/claude\_cli.py              |       42 |        4 |     90% |66-67, 79-80 |
-| src/phrase\_gym/coach/cli\_steps.py               |       35 |        2 |     94% |    62, 68 |
+| src/phrase\_gym/coach/cli\_steps.py               |       40 |        2 |     95% |    69, 75 |
 | src/phrase\_gym/coach/codex\_cli.py               |       46 |        1 |     98% |        96 |
 | src/phrase\_gym/coach/main.py                     |       80 |       31 |     61% |41-49, 56-60, 74-84, 90, 100, 111-123 |
 | src/phrase\_gym/coach/preparation.py              |       66 |        2 |     97% |    56, 63 |
@@ -65,7 +65,7 @@
 | src/phrase\_gym/server/storage.py                 |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                  |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py           |       51 |        0 |    100% |           |
-| **TOTAL**                                         | **2505** |  **182** | **93%** |           |
+| **TOTAL**                                         | **2526** |  **145** | **94%** |           |
 
 
 ## Setup coverage badge
