@@ -22,7 +22,7 @@ Typing the same text again never adds a second card. The field tells you when th
 prepared again.
 
 If Coach cannot prepare a card, for example because the text contains no English phrase or word
-or because Codex is not logged in, it prints the reason in its terminal and the Practice page
+or because the Claude CLI is not logged in, it prints the reason in its terminal and the Practice page
 shows a notice below **Total**. Close it with **×** once you have read it. To retry, type the
 same text into the field again.
 

@@ -51,7 +51,7 @@ Coach prepares a phrase as a chunk card under the [phrase rules](decision-target
 
 The typed text, compared without regard to letter case or repeated spaces, is the item's identity, so typing it again never creates a second card. The field confirms what happened: **Saved for Coach** for new text, for a failed preparation it retries and for text whose card the learner has since deleted; **Already waiting for Coach** while the same text is still waiting or being prepared; **Already in your Library** while its card exists. A different wording or a different source sentence is new material. Words from echo-words arrive the same way, typed into the field or inside an external agent's package; there is no export-file import. Direct integration with that project's storage or code requires separate authorization. Its source stays read-only.
 
-One bounded Coach request prepares the item under the content rules and current language choices. Cards are English with English help, like current course batches. Use the learner-selected, already authenticated subscription CLI through one Coach adapter; do not qualify every provider before delivering this path. Existing selection can be reused, with no silent provider switch or paid API fallback. Internal AI means preparation submitted through Phrase Gym and executed by Coach, not a requirement to run local LLM weights.
+One bounded Coach request prepares the item under the content rules and current language choices. Cards are English with English help, like current course batches. The learner-selected, already authenticated Claude Code CLI is Coach's qualified preparation CLI and its default. Codex remains an explicit, unqualified alternative chosen on the Coach command line until its own qualification; there is no silent provider switch, automatic fallback or paid API fallback. Internal AI means preparation submitted through Phrase Gym and executed by Coach, not a requirement to run local LLM weights.
 
 Like audio preparation, it runs offline: the browser does not track it, and a failure surfaces as the same dismissible notice. Use the supplied context and agent judgment to choose the sense. If the input is insufficient to prepare a coherent card, fail the batch with the concrete reason; do not open a clarification conversation. A malformed model response never becomes a phrase. Keep submitted material so that submitting it again retries preparation. Reuse the same validation, audio and import path as external batches. Preparation never reads recordings or changes language preferences.
 
@@ -61,6 +61,11 @@ The card content rules live in one shared file that both the Coach prompts and t
 [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) include,
 so the two preparers follow one text. Batch coverage, source recordings and the API handoff stay
 in the external guide; how to read the learner's typed input stays in the Coach prompts.
+One vendor-neutral prompt set, the prepare, review and revise prompts with the shared content
+rules, serves every Coach CLI and the external guide. Prompts state content rules only; how a CLI
+reads the task file, returns structured output, restricts tools and reports errors belongs in
+its adapter. A prompt changes only to state a content rule more clearly for any capable agent,
+and a deterministic structural check is preferred where one can catch the problem.
 Use separate CLI sessions to prepare material and review it. Assess the review findings,
 apply useful corrections and check the changes before publication. Coach is a headless worker:
 it takes inbox material, prepares it and publishes through the API. Neither Coach nor the external

@@ -2,7 +2,7 @@
 
 Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a phrase prompt is an intermediate outcome, not evidence that a phrase was used naturally.
 
-Phrase Gym accepts externally prepared English phrase batches, and the Coach field with its preparation path for typed phrases and words is in place; Coach's model preparation still needs tuning on actual outputs and a semantic review. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
+Phrase Gym accepts externally prepared English phrase batches, and the Coach field with its preparation path for typed phrases and words is in place; Coach's Claude preparation still needs a semantic review of held-out outputs and a real end-to-end run. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
 
 ## Phrases
 

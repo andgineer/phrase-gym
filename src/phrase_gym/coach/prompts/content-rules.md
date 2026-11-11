@@ -174,8 +174,11 @@ the card; another sense needs its own card.
   in `(=...)` when the context alone would allow other words. The learner says the completed
   chunk; rating concerns the target sense and form, not unrelated slips elsewhere.
 - `recall_hints`: meaningful partial forms with an ordinary associated word, such as
-  `relu... / to admit` or `reluc... / unwilling`; never the complete word.
-- `accepted_variants`: only words that fit the intended sense in every cue.
+  `relu... / to admit` or `reluc... / to leave`; never the complete word. Prefer a collocate
+  or context word to a synonym: a synonym in a hint is a different answer the learner can
+  simply read out.
+- `accepted_variants`: words that fit the intended sense in every cue, such as **hesitant**
+  for **reluctant**. List a natural synonym here rather than in a hint.
 - `detailed_explanation`: for a troublesome near-synonym or lookalike, a short accurate
   contrast that includes their overlap, such as **reluctant** versus **reticent**.
 - `usage_contexts`: short searchable uses, as for phrases.

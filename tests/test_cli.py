@@ -18,14 +18,26 @@ def test_run_dispatches_loopback_and_data_dir(monkeypatch, tmp_path):
     ]
 
 
-def test_coach_dispatches_to_separate_api_worker(monkeypatch):
+@pytest.mark.parametrize(("options", "selected"), [([], "claude"), (["--cli", "codex"], "codex")])
+def test_coach_dispatches_to_separate_api_worker_with_the_chosen_cli(
+    monkeypatch, options, selected
+):
     called = []
-    monkeypatch.setattr(cli, "run_coach", lambda url, once: called.append((url, once)))
+    monkeypatch.setattr(cli, "run_coach", lambda url, once, cli: called.append((url, once, cli)))
     monkeypatch.setattr(
-        sys, "argv", ["phrase-gym", "coach", "--url", "http://127.0.0.1:8941", "--once"]
+        sys,
+        "argv",
+        ["phrase-gym", "coach", "--url", "http://127.0.0.1:8941", "--once", *options],
     )
     cli.main()
-    assert called == [("http://127.0.0.1:8941", True)]
+    assert called == [("http://127.0.0.1:8941", True, selected)]
+
+
+def test_coach_refuses_an_unknown_cli(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["phrase-gym", "coach", "--cli", "gemini"])
+    with pytest.raises(SystemExit):
+        cli.main()
+    assert "invalid choice: 'gemini'" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("command", ["install-coach", "uninstall-coach", "deploy"])

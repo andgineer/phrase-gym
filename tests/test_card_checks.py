@@ -60,6 +60,13 @@ def test_a_well_formed_phrase_card_has_no_problems() -> None:
             "cues: a word card needs 2 to 3 cues",
         ),
         (answer(recall_hints=["only one"]), "recall_hints: List should have at least 2 items"),
+        (
+            answer(
+                accepted_variants=["firmly believe"],
+                recall_hints=["firmly / believe", "strong / bel..."],
+            ),
+            "recall_hints.0: the hint shows the accepted variant “firmly believe”",
+        ),
         (answer(target=""), "target: missing"),
         ({**answer(), "card": None}, "card: missing"),
         (answer(unexpected="field"), "unexpected: Extra inputs are not permitted"),

@@ -8,6 +8,7 @@ import urllib.request
 from typing import Any
 from urllib.parse import urlsplit
 
+from phrase_gym.coach.claude_cli import ClaudeCli
 from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
 from phrase_gym.coach.preparation import CardPreparer, PreparationError
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
@@ -48,10 +49,15 @@ class CoachApi:
             return json.load(response)
 
 
-def configured_preparer() -> CardPreparer:
-    workspace = coach_workspace()
-    cli = CodexCli(workspace, os.environ.get("PHRASE_GYM_CODEX", "codex"))
-    return CardPreparer(cli, workspace / ".phrase-gym-coach" / "attempts")
+CLI_CHOICES = ("claude", "codex")
+
+
+def configured_preparer(choice: str) -> CardPreparer:
+    if choice == "codex":
+        codex = CodexCli(coach_workspace(), os.environ.get("PHRASE_GYM_CODEX", "codex"))
+        return CardPreparer(codex, codex.attempts)
+    claude = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"))
+    return CardPreparer(claude, claude.attempts)
 
 
 async def prepare(text: str, package_id: str, preparer: CardPreparer, speech: PiperSpeech) -> dict:
@@ -101,9 +107,9 @@ def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> 
     return True
 
 
-def run_coach(url: str, *, once: bool = False) -> None:
+def run_coach(url: str, *, once: bool = False, cli: str = "claude") -> None:
     api = CoachApi(url)
-    preparer = configured_preparer()
+    preparer = configured_preparer(cli)
     speech = configured_speech()
     while True:
         try:

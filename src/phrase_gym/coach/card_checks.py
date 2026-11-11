@@ -72,4 +72,11 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
         for index, hint in enumerate(phrase.recall_hints)
         if contains_words(hint, target)
     ]
+    problems += [
+        f"recall_hints.{index}: the hint shows the accepted variant “{variant}”; "
+        "keep the variant and use another anchor in the hint"
+        for index, hint in enumerate(phrase.recall_hints)
+        for variant in phrase.accepted_variants
+        if contains_words(hint, words(variant))
+    ]
     return problems
