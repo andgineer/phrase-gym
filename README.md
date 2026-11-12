@@ -10,12 +10,13 @@
 | src/phrase\_gym/coach/agents/config.py            |        4 |        0 |    100% |           |
 | src/phrase\_gym/coach/agents/subprocess.py        |       94 |       22 |     77% |119-134, 137-146, 149-151, 157-158, 174, 179-180, 194-195, 198-203 |
 | src/phrase\_gym/coach/bounded\_process.py         |       46 |        3 |     93% | 28, 79-80 |
-| src/phrase\_gym/coach/card\_checks.py             |       49 |        1 |     98% |        61 |
+| src/phrase\_gym/coach/card\_checks.py             |       47 |        1 |     98% |        52 |
 | src/phrase\_gym/coach/claude\_cli.py              |       42 |        4 |     90% |66-67, 79-80 |
 | src/phrase\_gym/coach/cli\_steps.py               |       40 |        2 |     95% |    69, 75 |
 | src/phrase\_gym/coach/codex\_cli.py               |       46 |        1 |     98% |        96 |
-| src/phrase\_gym/coach/main.py                     |       80 |       31 |     61% |41-49, 56-60, 74-84, 90, 100, 111-123 |
-| src/phrase\_gym/coach/preparation.py              |       66 |        2 |     97% |    56, 63 |
+| src/phrase\_gym/coach/hint\_checks.py             |       61 |        1 |     98% |        49 |
+| src/phrase\_gym/coach/main.py                     |       82 |       31 |     62% |41-49, 56-60, 74-84, 90, 101, 113-125 |
+| src/phrase\_gym/coach/preparation.py              |       69 |        2 |     97% |    61, 68 |
 | src/phrase\_gym/coach/speech.py                   |       86 |        8 |     91% |97, 113, 119, 134, 157-158, 164-165 |
 | src/phrase\_gym/server/allowance.py               |       24 |        0 |    100% |           |
 | src/phrase\_gym/server/api/coach.py               |       33 |        3 |     91% |     22-24 |
@@ -29,7 +30,7 @@
 | src/phrase\_gym/server/api/settings.py            |       18 |        2 |     89% |     22-23 |
 | src/phrase\_gym/server/app.py                     |       69 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py                |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
-| src/phrase\_gym/server/coach\_contracts.py        |       15 |        0 |    100% |           |
+| src/phrase\_gym/server/coach\_contracts.py        |       16 |        0 |    100% |           |
 | src/phrase\_gym/server/coach\_requests.py         |       82 |        3 |     96% |72, 77, 141 |
 | src/phrase\_gym/server/completion.py              |       59 |        1 |     98% |        91 |
 | src/phrase\_gym/server/contracts.py               |       54 |        0 |    100% |           |
@@ -65,7 +66,7 @@
 | src/phrase\_gym/server/storage.py                 |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                  |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py           |       51 |        0 |    100% |           |
-| **TOTAL**                                         | **2526** |  **145** | **94%** |           |
+| **TOTAL**                                         | **2591** |  **146** | **94%** |           |
 
 
 ## Setup coverage badge
