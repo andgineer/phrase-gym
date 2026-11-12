@@ -21,7 +21,7 @@ def answer(kind: str = "phrase", target: str = "strongly believe", **card: Any) 
             "text": "We strongly believe it works.",
             "explanation": "Target chunk: strongly believe. Say you are sure.",
             "cues": GOOD_CUES,
-            "recall_hints": ["strong / bel...", "strongly / be..."],
+            "recall_hints": ["firm / bel...", "strongly / be..."],
             "usage_contexts": ["opinions"],
             "accepted_variants": [],
             "detailed_explanation": None,
@@ -128,6 +128,9 @@ def test_measured_hints_from_the_rules_pass(target: str, hint: str) -> None:
         ("charge", "char... / extra"),
         ("charge", "ch...ge / for a service"),
         ("reach out", "reach / o..."),
+        ("reluctant", "relucta / admit"),
+        ("reluctant", "reluctan"),
+        ("reluctant", "...luctan... / admit"),
     ],
 )
 def test_hints_that_give_away_short_targets_are_rejected(target: str, hint: str) -> None:

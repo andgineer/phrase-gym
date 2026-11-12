@@ -129,7 +129,7 @@ Do not supply an almost-complete response with only a trivial article or pronoun
 Check this after ignoring slashes: leaving out only "that" is not meaningful retrieval. Replace
 one revealing anchor with a useful fragment or choose another pair so the learner must recover
 substantial wording. Do this check separately for every hint, not just the first.
-Measure it: a shortened word written with `...` shows at most half of that word's letters
+Measure it: any shortened word, written with `...` or not, shows at most half of that word's letters
 (`cha...` for **charge**, `fe...` for **fence**, `relu...` for **reluctant**); ignoring
 slashes, more than a quarter of the target's letters stay hidden; and a hint's other words are
 not already visible in a cue, where they would add nothing.

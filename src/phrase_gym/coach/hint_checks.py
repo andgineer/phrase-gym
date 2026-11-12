@@ -22,17 +22,33 @@ def letters(text: str) -> str:
     return re.sub(r"[^a-z]", "", text.casefold())
 
 
+def _fragment(token: str) -> tuple[re.Pattern[str], int] | None:
+    pieces = [letters(piece) for piece in ELLIPSIS.split(token)]
+    shown = [piece for piece in pieces if piece]
+    if not shown:
+        return None
+    if len(pieces) == 1:
+        # A shortened word counts even without "...": any proper part of a target word.
+        return (
+            (re.compile(f".*{re.escape(shown[0])}.*"), len(shown[0])) if len(shown[0]) > 1 else None
+        )
+    body = ".+".join(re.escape(piece) for piece in shown)
+    pattern = (".+" if not pieces[0] else "") + body + (".+" if not pieces[-1] else "")
+    return re.compile(pattern), sum(len(piece) for piece in shown)
+
+
 def _match(token: str, target: list[str], free: list[int]) -> tuple[int, int] | None:
-    parts = ELLIPSIS.split(token, maxsplit=1)
-    if len(parts) == 1:
-        whole = letters(token)
+    whole = letters(token)
+    if not ELLIPSIS.search(token):
         found = next((index for index in free if whole and target[index] == whole), None)
-        return None if found is None else (found, len(whole))
-    prefix, suffix = letters(parts[0]), letters(parts[1])
+        if found is not None:
+            return found, len(whole)
+    fragment = _fragment(token)
+    if fragment is None:
+        return None
+    pattern, shown = fragment
     for index in free:
-        word = target[index]
-        shown = len(prefix) + len(suffix)
-        if word.startswith(prefix) and word.endswith(suffix) and shown < len(word):
+        if shown < len(target[index]) and pattern.fullmatch(target[index]):
             return index, shown
     return None
 

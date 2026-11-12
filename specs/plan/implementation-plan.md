@@ -8,7 +8,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 **Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
 
-The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words), the Claude Code CLI adapter and the preparation path are in place. A held-out run produced usable cards for every typed phrase and word and a concrete failure for insufficient input; its recurring minor flaws are now covered by structural checks and clarified content rules. Remaining:
+The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words) path runs end to end on actual Claude preparation: typed phrases and words become published cards that reach a first rated attempt with saved replay, and insufficient input fails with a concrete reason. Structural checks and the content rules cover the recurring minor flaws a held-out review found. Remaining:
 
 - Run a fresh set of untouched held-out items, supplied by the orchestrator, on the frozen prompts and have a fresh reviewer assess the outputs semantically.
 - Listen, attended, to Coach's Piper references.
