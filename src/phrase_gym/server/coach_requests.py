@@ -54,7 +54,7 @@ def _in_library(connection: sqlite3.Connection, package_id: str) -> bool:
 def _requeue(connection: sqlite3.Connection, package_id: str) -> None:
     connection.execute(
         "UPDATE imports SET status='pending', error=NULL, added_count=NULL, result_id=NULL, "
-        "result_hash=NULL WHERE package_id=?",
+        "result_hash=NULL, retry_helps=1 WHERE package_id=?",
         (package_id,),
     )
     clear_notice(connection, package_id)
@@ -107,13 +107,13 @@ class CoachRequests:
             )
             return {"package_id": row.package_id, "text": json.loads(row.payload)["text"]}
 
-    def fail(self, package_id: str, message: str) -> dict[str, object]:
+    def fail(self, package_id: str, message: str, retry_helps: bool = True) -> dict[str, object]:
         with self.database.write() as connection:
             row = self._coach_row(connection, package_id)
             if row.status in PENDING:
                 connection.execute(
-                    "UPDATE imports SET status='error', error=? WHERE package_id=?",
-                    (message, package_id),
+                    "UPDATE imports SET status='error', error=?, retry_helps=? WHERE package_id=?",
+                    (message, int(retry_helps), package_id),
                 )
                 record_notice(connection, package_id, now())
             return public_status(self._coach_row(connection, package_id))

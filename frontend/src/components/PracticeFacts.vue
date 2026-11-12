@@ -103,7 +103,7 @@ defineExpose({ refresh })
           Could not add <strong>{{ notice.label }}</strong> ({{ notice.package_id }}):
           {{ notice.error }}
         </p>
-        <p v-if="notice.kind === 'coach'" class="muted">
+        <p v-if="notice.kind === 'coach' && notice.retry_helps" class="muted">
           Type the same text into the Coach field to retry.
         </p>
         <button

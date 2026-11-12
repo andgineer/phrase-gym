@@ -15,6 +15,8 @@ A self-contained routine such as **So far, so good.** can itself be the whole ta
 Keep `text` as the complete source example, unchanged; the card's reference audio speaks it. In
 `explanation`, name the target chunk explicitly and explain its meaning/use briefly. Keep this
 learner-facing help short; distinguish example context without repeating preparation boilerplate.
+Help text is plain text: in `explanation` and `detailed_explanation`, bold written as `**...**`
+around the target or a contrasted expression is the only formatting allowed.
 Do not add a `target_chunk` field or other undocumented fields.
 A changed context in a cue is an authored exercise, never a quotation attributed to the source.
 
@@ -77,6 +79,8 @@ alternatives. Do not paste one generic gloss into every context by default. Repe
 acceptable for a very short routine when a different gloss would become strained or change
 meaning. Common words shared with the target are not automatically a leak, but copying the
 complete target or giving its sentence opening as a wording scaffold is not a meaning gloss.
+A gloss must not contain the target or any accepted variant: the learner could read it into the
+gap and give an accepted answer without retrieving the target.
 
 The learner retrieves the chunk and may say the completed cue sentence. Self-rating concerns
 that chunk's form and appropriate use, not the original example's incidental content. Revealed
@@ -125,6 +129,10 @@ Do not supply an almost-complete response with only a trivial article or pronoun
 Check this after ignoring slashes: leaving out only "that" is not meaningful retrieval. Replace
 one revealing anchor with a useful fragment or choose another pair so the learner must recover
 substantial wording. Do this check separately for every hint, not just the first.
+Measure it: a shortened word written with `...` shows at most half of that word's letters
+(`cha...` for **charge**, `fe...` for **fence**, `relu...` for **reluctant**); ignoring
+slashes, more than a quarter of the target's letters stay hidden; and a hint's other words are
+not already visible in a cue, where they would add nothing.
 For short chunks, meaningful word fragments can preserve useful work: `sounds / f...` and
 `that / fun` help retrieve **That sounds fun!**. For a two-word echo such as **Is it?**, lexical
 pairs would reveal the answer; a compact construction reminder such as `be -> question` or
@@ -174,11 +182,11 @@ the card; another sense needs its own card.
   in `(=...)` when the context alone would allow other words. The learner says the completed
   chunk; rating concerns the target sense and form, not unrelated slips elsewhere.
 - `recall_hints`: meaningful partial forms with an ordinary associated word, such as
-  `relu... / to admit` or `reluc... / to leave`; never the complete word. Prefer a collocate
+  `relu... / to admit` or `relu... / to leave`; never the complete word. Prefer a collocate
   or context word to a synonym: a synonym in a hint is a different answer the learner can
   simply read out.
-- `accepted_variants`: words that fit the intended sense in every cue, such as **hesitant**
-  for **reluctant**. List a natural synonym here rather than in a hint.
+- `accepted_variants`: words that fit the intended sense and register in every cue, such as
+  **hesitant** for **reluctant**. List a natural synonym here rather than in a hint.
 - `detailed_explanation`: for a troublesome near-synonym or lookalike, a short accurate
   contrast that includes their overlap, such as **reluctant** versus **reticent**.
 - `usage_contexts`: short searchable uses, as for phrases.
@@ -195,6 +203,7 @@ practical default; a definition the learner understands is not yet spoken retrie
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
+   Check that no gloss contains the target or an accepted variant.
 3. **Discrimination:** try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.
@@ -202,9 +211,12 @@ practical default; a definition the learner understands is not yet spoken retrie
    it should activate and what the learner must still recall. Reject full-chunk answers, repeated
    meaning glosses, generic labels, peripheral words alone and one useful pair split into separate
    entries. Check that every hint is a complete alternative, not a permutation or a dependent step.
-   Check short-target exceptions carefully and correct weak hints.
+   Check short-target exceptions carefully and correct weak hints. Apply the measured hint
+   limits to every hint of every card, however short the target.
 5. **Transferable context:** keep the target constant across cues while changing useful context;
    do not demand memorization of the original sentence's business claim or technical vocabulary.
 6. **Honest support:** identify the chunk or word in the explanation and keep suitable
-   alternatives only. Do not append repeated disclaimers to learner explanations. Study precedes
-   recall; requested help is supported retrieval.
+   alternatives only. Every accepted variant must fit every cue in meaning and register and
+   agree with the card's own explanation and contrast; leave out a variant that does not.
+   Do not append repeated disclaimers to learner explanations. Study precedes recall;
+   requested help is supported retrieval.

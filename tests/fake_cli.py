@@ -23,6 +23,8 @@ def executable(directory: Path, vendor: str = "codex") -> Path:
 def card(typed: str, step: str) -> dict[str, object]:
     target, _, source = typed.partition(SOURCE_SEPARATOR)
     word = len(target.split()) == 1
+    first = target.split()[0]
+    half = max(1, len(first) // 2)
     leaky = "stubborn" in typed or ("leaky" in typed and step == "prepare")
     cues = [
         {"situation": f"Context {index}: __________ here. (=sense {index})", "partner_line": None}
@@ -38,8 +40,8 @@ def card(typed: str, step: str) -> dict[str, object]:
             "explanation": f"Target: {target}. A useful way to say it.",
             "cues": cues,
             "recall_hints": [
-                target if leaky else f"{target[:3]}... / one",
-                f"{target[:4]}... / two",
+                target if leaky else f"{first[:half]}... / one",
+                f"{first[: max(1, half - 1)]}... / two",
             ],
             "usage_contexts": ["coach test"],
             "accepted_variants": [],

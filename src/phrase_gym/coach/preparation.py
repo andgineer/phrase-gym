@@ -14,9 +14,10 @@ PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 
 
 class PreparationError(RuntimeError):
-    def __init__(self, reason: str, attempt: Path | None = None):
+    def __init__(self, reason: str, attempt: Path | None = None, *, retry_helps: bool = True):
         super().__init__(reason)
         self.attempt = attempt
+        self.retry_helps = retry_helps
 
 
 class Cli(Protocol):
@@ -51,7 +52,11 @@ def _shown(value: object) -> str:
 def _ready(answer: dict[str, Any]) -> dict[str, Any]:
     if answer.get("outcome") == "insufficient":
         reason = str(answer.get("reason") or "").strip()
-        raise PreparationError(reason or "Coach could not prepare a card from this input")
+        # The model judged the input itself unusable, so typing it again cannot help.
+        raise PreparationError(
+            reason or "Coach could not prepare a card from this input",
+            retry_helps=False,
+        )
     if answer.get("outcome") != "ready":
         raise PreparationError("Codex returned an answer without a ready card")
     return answer
@@ -104,6 +109,8 @@ class CardPreparer:
         attempt = self.attempts / f"{stamp}-{item_id}"
         try:
             phrase = await prepare_card(text, item_id, self.cli, attempt)
+        except PreparationError as error:
+            raise PreparationError(str(error), attempt, retry_helps=error.retry_helps) from error
         except (RuntimeError, OSError) as error:
             raise PreparationError(str(error), attempt) from error
         # Failed attempts stay for diagnosis; a published card needs no private trail.

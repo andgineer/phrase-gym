@@ -166,7 +166,10 @@ def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
     assert printed.startswith(f"Coach could not prepare “{text}”: {reason}")
     assert f"(details: {attempt})" in printed
     notices = client.get("/api/practice/facts").json()["notices"]
-    assert [(notice["label"], notice["kind"]) for notice in notices] == [(text, "coach")]
+    retry_helps = not text.startswith("insufficient")
+    assert [(notice["label"], notice["kind"], notice["retry_helps"]) for notice in notices] == [
+        (text, "coach", retry_helps)
+    ]
 
 
 def test_piper_failure_after_preparation_is_reported(

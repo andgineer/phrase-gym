@@ -1,6 +1,6 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. The Coach field and its preparation path are in place; Coach's Claude preparation still needs a semantic review of held-out outputs and a real end-to-end run before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. The Coach field and its preparation path are in place; Coach's Claude preparation still needs a fresh held-out confirmation with semantic review before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
 
@@ -8,10 +8,9 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 **Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
 
-The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words), the Claude Code CLI adapter and the preparation path are in place, and the prompts are tuned on the development set. Remaining work needs actual Claude results:
+The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words), the Claude Code CLI adapter and the preparation path are in place. A held-out run produced usable cards for every typed phrase and word and a concrete failure for insufficient input; its recurring minor flaws are now covered by structural checks and clarified content rules. Remaining:
 
-- Freeze the prompts, run the untouched held-out items the orchestrator supplies, and have a fresh reviewer assess those outputs semantically.
-- Make one real Claude run from the Coach field to a first rated attempt for a typed phrase and for a typed word, and one insufficient input that fails with its concrete reason.
+- Run a fresh set of untouched held-out items, supplied by the orchestrator, on the frozen prompts and have a fresh reviewer assess the outputs semantically.
 - Listen, attended, to Coach's Piper references.
 
 **Exit:** a typed English phrase and a typed word each go from the Coach field through actual Claude preparation to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.

@@ -124,6 +124,7 @@ class ImportRecord:
     result_id: str | None
     result_hash: str | None
     kind: str
+    retry_helps: int
 
 
 # The record's fields must equal the query's columns; a mismatch raises instead of dropping data.

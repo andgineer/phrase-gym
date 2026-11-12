@@ -529,6 +529,11 @@ export interface components {
         CoachFailure: {
             /** Error */
             error: string;
+            /**
+             * Retry Helps
+             * @default true
+             */
+            retry_helps: boolean;
         };
         /** CoachRequest */
         CoachRequest: {
@@ -689,6 +694,8 @@ export interface components {
             label: string;
             /** Package Id */
             package_id: string;
+            /** Retry Helps */
+            retry_helps: boolean;
         };
         /** ImportPhrase */
         ImportPhrase: {

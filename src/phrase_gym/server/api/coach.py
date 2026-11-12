@@ -42,7 +42,9 @@ def coach_routes(requests: CoachRequests) -> APIRouter:
     @router.post("/imports/{package_id}/failure")
     def publish_failure(package_id: str, failure: CoachFailure) -> ImportStatus:
         try:
-            return ImportStatus.model_validate(requests.fail(package_id, failure.error))
+            return ImportStatus.model_validate(
+                requests.fail(package_id, failure.error, failure.retry_helps),
+            )
         except KeyError as error:
             raise HTTPException(404, "Coach request not found") from error
 

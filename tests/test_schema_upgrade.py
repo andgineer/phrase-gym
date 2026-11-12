@@ -221,3 +221,22 @@ INSERT INTO imports (package_id, content_hash, payload, status, error, created_a
     assert errors["coach-1"] == "Codex is not logged in"
     assert "saved without reference audio" in errors["old-package"]
     assert payload == '{"source_label": "Course"}'
+
+
+def test_existing_failures_keep_their_retry_line_after_the_upgrade(tmp_path: Path) -> None:
+    directory = tmp_path / "data"
+    directory.mkdir()
+    rows = """
+INSERT INTO meta VALUES ('schema_version', '10');
+INSERT INTO imports (package_id, content_hash, payload, status, error, created_at, kind)
+  VALUES ('coach-1', 'h', '{"text": "by and large"}', 'error', 'Codex is not logged in',
+          '2026-11-01T10:01:00+00:00', 'coach');
+"""
+    with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
+        script = "".join(STEPS[version] for version in range(5, 11)) + rows
+        for statement in statements(script):
+            connection.execute(statement)
+        connection.commit()
+    with Database(directory).read() as connection:
+        row = connection.execute("SELECT error, retry_helps FROM imports").fetchone()
+    assert tuple(row) == ("Codex is not logged in", 1)

@@ -24,6 +24,7 @@ def test_failure_notice_arrives_with_practice_facts_until_dismissed(client: Test
             "kind": "coach",
             "label": TYPED,
             "error": "Codex is not logged in",
+            "retry_helps": True,
         }
     ]
     assert client.delete(f"/api/imports/{package_id}/notice").status_code == 200
@@ -53,3 +54,18 @@ def test_resubmission_clears_the_notice_and_a_new_failure_shows_again(client: Te
 def test_dismissing_an_absent_notice_changes_nothing(client: TestClient) -> None:
     assert client.delete("/api/imports/unknown-package/notice").status_code == 200
     assert notices(client) == []
+
+
+def test_a_failure_retyping_cannot_fix_says_so_and_a_resubmission_resets_it(
+    client: TestClient,
+) -> None:
+    package_id = client.post("/api/coach/requests", json={"text": TYPED}).json()["request_id"]
+    client.post("/api/imports/coach/next")
+    client.post(
+        f"/api/imports/{package_id}/failure",
+        json={"error": "No English word or expression was found.", "retry_helps": False},
+    )
+    assert [notice["retry_helps"] for notice in notices(client)] == [False]
+    client.post("/api/coach/requests", json={"text": TYPED})
+    fail_preparation(client, "Claude reported a usage limit")
+    assert [notice["retry_helps"] for notice in notices(client)] == [True]

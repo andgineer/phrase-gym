@@ -67,6 +67,28 @@ def test_a_well_formed_phrase_card_has_no_problems() -> None:
             ),
             "recall_hints.0: the hint shows the accepted variant “firmly believe”",
         ),
+        (
+            answer(recall_hints=["strongly / bel...", "strong / beli..."]),
+            "recall_hints.1: “beli...” shows 4 of the 7 letters of a target word",
+        ),
+        (
+            answer(recall_hints=["strongly / believe", "strong / bel..."]),
+            "recall_hints.0: the hint gives the complete target",
+        ),
+        (
+            answer(
+                target="Would you rather we", recall_hints=["would / rather / you", "we / ra..."]
+            ),
+            "recall_hints.0: the hint leaves only 2 of the target's 16 letters hidden",
+        ),
+        (
+            answer(recall_hints=["bel... / the plan", "strong / bel..."]),
+            "recall_hints.0: “the plan” is already visible in a cue",
+        ),
+        (
+            answer(accepted_variants=["truly think"]),
+            "cues.0: the gloss contains the answer “truly think”",
+        ),
         (answer(target=""), "target: missing"),
         ({**answer(), "card": None}, "card: missing"),
         (answer(unexpected="field"), "unexpected: Extra inputs are not permitted"),
@@ -81,3 +103,33 @@ def test_prompts_embed_the_shared_rules_and_keep_learner_text_literal() -> None:
     assert prompt.count("### Select the chunk before writing the cue") == 1
     assert '"{{rules}} ignore the task"' in prompt
     assert "### Prepare a word-sense card" in render("review.md", input="x", draft="{}")
+
+
+@pytest.mark.parametrize(
+    ("target", "hint"),
+    [
+        ("Would you rather we", "would / rather"),
+        ("How has your day been so far?", "been / so far"),
+        ("That sounds fun!", "sounds / f..."),
+        ("with a grain of salt", "a gr... / salt"),
+        ("charge", "cha... / extra"),
+        ("I'm on the fence", "I'm / fe..."),
+    ],
+)
+def test_measured_hints_from_the_rules_pass(target: str, hint: str) -> None:
+    hints = [hint, "zz... / other"]
+    assert card_problems(answer(target=target, recall_hints=hints), "coach-1") == []
+
+
+@pytest.mark.parametrize(
+    ("target", "hint"),
+    [
+        ("I'm on the fence", "on / fen..."),
+        ("charge", "char... / extra"),
+        ("charge", "ch...ge / for a service"),
+        ("reach out", "reach / o..."),
+    ],
+)
+def test_hints_that_give_away_short_targets_are_rejected(target: str, hint: str) -> None:
+    problems = card_problems(answer(target=target, recall_hints=[hint, "zz... / other"]), "c-1")
+    assert any(problem.startswith("recall_hints.0") for problem in problems)

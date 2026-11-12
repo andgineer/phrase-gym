@@ -53,6 +53,7 @@ class ImportNotice(StrictModel):
     kind: Literal["coach", "package"]
     label: str
     error: str
+    retry_helps: bool
 
 
 class PracticeFacts(StrictModel):

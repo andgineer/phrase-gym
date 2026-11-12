@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import EmphasisText from './EmphasisText.vue'
 
 const props = defineProps<{
   explanation: string
@@ -14,7 +15,7 @@ const longerExplanation = computed(() => props.detailedExplanation?.trim())
 
 <template>
   <div class="answer-help">
-    <p>{{ explanation }}</p>
+    <p><EmphasisText :text="explanation" /></p>
     <p v-if="usageContexts.length" class="purpose">Used for: {{ usageContexts.join(' · ') }}</p>
     <p v-if="acceptedVariants.length" class="muted">
       Also accepted: {{ acceptedVariants.join('; ') }}
@@ -27,7 +28,7 @@ const longerExplanation = computed(() => props.detailedExplanation?.trim())
       {{ longerExplanation && open ? 'Less explanation ▴' : 'More explanation ▾' }}
     </button>
     <div v-if="longerExplanation && open" class="explanation">
-      <p>{{ longerExplanation }}</p>
+      <p><EmphasisText :text="longerExplanation" /></p>
     </div>
   </div>
 </template>

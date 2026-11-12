@@ -8,7 +8,7 @@ const typed = 'by and large'
 const card = (packageId: string) => ({
   item_id: packageId,
   text: 'By and large, the plan worked.',
-  explanation: 'Target chunk: by and large. Use it to mean “mostly” or “in general”.',
+  explanation: '**by and large** means “mostly” or “in general”.',
   cues: [
     { situation: '__________, the trip went well. (=On the whole)' },
     { situation: '__________, people liked the change. (=Mostly)' },
@@ -79,4 +79,35 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
     page.getByRole('status').filter({ hasText: 'Already in your Library.' }),
   ).toBeVisible()
   expect(statusReads).toEqual([])
+})
+
+test('a content failure has no retry line and bold help renders without asterisks', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const field = page.getByRole('textbox', { name: 'Phrase or word for Coach' })
+  const coach = page.getByRole('button', { name: 'Coach', exact: true })
+  for (const text of ['https://example.com/lesson', typed]) {
+    await field.fill(text)
+    await coach.click()
+    await expect(page.getByRole('status').filter({ hasText: 'Saved for Coach.' })).toBeVisible()
+  }
+  const url = (await (await page.request.post('/api/imports/coach/next')).json()).package_id
+  await page.request.post(`/api/imports/${url}/failure`, {
+    data: { error: 'This is a web address, not an English word.', retry_helps: false },
+  })
+  const phrase = (await (await page.request.post('/api/imports/coach/next')).json()).package_id
+  await page.request.post(`/api/imports/${phrase}/result`, {
+    data: { result_id: phrase, phrase: card(phrase), reference: silentReference() },
+  })
+  await page.reload()
+  const notices = page.getByRole('list', { name: 'Preparation problems' }).getByRole('listitem')
+  await expect(notices).toContainText('This is a web address, not an English word.')
+  await expect(notices).not.toContainText('Type the same text into the Coach field to retry.')
+
+  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
+  await page.getByRole('list', { name: 'Phrases' }).getByRole('button').first().click()
+  const details = page.locator('section.phrase-details')
+  await expect(details.locator('.answer-help strong')).toHaveText('by and large')
+  await expect(details.locator('.answer-help')).not.toContainText('**')
 })

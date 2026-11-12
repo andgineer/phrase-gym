@@ -17,7 +17,7 @@ def clear_notice(connection: sqlite3.Connection, package_id: str) -> None:
 
 def import_notices(connection: sqlite3.Connection) -> list[ImportNotice]:
     rows = connection.execute(
-        "SELECT i.package_id, i.kind, i.error, CASE i.kind WHEN 'coach' "
+        "SELECT i.package_id, i.kind, i.error, i.retry_helps, CASE i.kind WHEN 'coach' "
         "THEN json_extract(i.payload, '$.text') "
         "ELSE json_extract(i.payload, '$.source_label') END AS label "
         "FROM import_notices n JOIN imports i USING (package_id) "
@@ -29,6 +29,7 @@ def import_notices(connection: sqlite3.Connection) -> list[ImportNotice]:
             kind=row["kind"],
             label=row["label"],
             error=row["error"] or "",
+            retry_helps=bool(row["retry_helps"]),
         )
         for row in rows
     ]

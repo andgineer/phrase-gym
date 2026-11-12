@@ -2,7 +2,7 @@
 
 Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a phrase prompt is an intermediate outcome, not evidence that a phrase was used naturally.
 
-Phrase Gym accepts externally prepared English phrase batches, and the Coach field with its preparation path for typed phrases and words is in place; Coach's Claude preparation still needs a semantic review of held-out outputs and a real end-to-end run. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
+Phrase Gym accepts externally prepared English phrase batches, and the Coach field with its preparation path for typed phrases and words is in place; Coach's Claude preparation still needs a fresh held-out confirmation with semantic review. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
 
 ## Phrases
 
@@ -67,7 +67,8 @@ distinct from the original unaided attempt. An acceptable alternative is not a l
 revise or replace a misleading card rather than treating ambiguous preparation as forgetting.
 
 Prepared records also carry short searchable `usage_contexts`, useful accepted alternatives and
-optional detailed native-language help. The short explanation appears during study and after
+optional detailed native-language help. Help text is plain text; bold around the target or a
+contrasted expression is its only formatting, and the app shows it as bold. The short explanation appears during study and after
 reveal; detailed help is available on request. Neither reveals the target before an independent
 attempt. A card's scheduling identity is shared across its cues; new contexts do not create
 duplicate cards. Daily and Extra use the same cues and hints. Phrase lookup searches the answer,

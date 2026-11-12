@@ -90,6 +90,7 @@ def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> 
         return False
     package_id = work["package_id"]
     details = ""
+    retry_helps = True
     try:
         api.post(
             f"{package_id}/result",
@@ -100,10 +101,11 @@ def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> 
         reason = refusal(error)[:1000]
     except (OSError, ValueError, RuntimeError) as error:
         reason = str(error)[:1000]
-        if isinstance(error, PreparationError) and error.attempt:
-            details = f" (details: {error.attempt})"
+        if isinstance(error, PreparationError):
+            retry_helps = error.retry_helps
+            details = f" (details: {error.attempt})" if error.attempt else ""
     print(f"Coach could not prepare “{work['text']}”: {reason}{details}", flush=True)
-    api.post(f"{package_id}/failure", {"error": reason})
+    api.post(f"{package_id}/failure", {"error": reason, "retry_helps": retry_helps})
     return True
 
 

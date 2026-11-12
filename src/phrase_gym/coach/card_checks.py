@@ -3,21 +3,12 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from phrase_gym.coach.hint_checks import contains_words, gloss_problems, hint_problems, words
 from phrase_gym.server.import_contracts import ImportPhrase
 
 GAP = "__________"
 GAP_RUN = re.compile(r"_{2,}")
-WORD = re.compile(r"[\w']+")
 CUE_COUNTS = {"phrase": (1, 2), "word": (2, 3)}
-
-
-def words(text: str) -> list[str]:
-    return [word.casefold() for word in WORD.findall(text.replace("’", "'"))]
-
-
-def contains_words(text: str, target: list[str]) -> bool:
-    found = words(text)
-    return any(found[index : index + len(target)] == target for index in range(len(found)))
 
 
 def phrase_of(card: dict[str, Any], item_id: str) -> ImportPhrase:
@@ -72,6 +63,9 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
         for index, hint in enumerate(phrase.recall_hints)
         if contains_words(hint, target)
     ]
+    for index, hint in enumerate(phrase.recall_hints):
+        problems += hint_problems(index, hint, str(answer["target"]), phrase.cues)
+    problems += gloss_problems(phrase.cues, str(answer["target"]), phrase.accepted_variants)
     problems += [
         f"recall_hints.{index}: the hint shows the accepted variant “{variant}”; "
         "keep the variant and use another anchor in the hint"

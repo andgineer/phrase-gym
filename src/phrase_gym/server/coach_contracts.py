@@ -32,3 +32,4 @@ class CoachResult(StrictModel):
 
 class CoachFailure(StrictModel):
     error: str = Field(min_length=1, max_length=1000)
+    retry_helps: bool = True

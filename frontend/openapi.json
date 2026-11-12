@@ -87,6 +87,11 @@
             "minLength": 1,
             "title": "Error",
             "type": "string"
+          },
+          "retry_helps": {
+            "default": true,
+            "title": "Retry Helps",
+            "type": "boolean"
           }
         },
         "required": [
@@ -559,13 +564,18 @@
           "package_id": {
             "title": "Package Id",
             "type": "string"
+          },
+          "retry_helps": {
+            "title": "Retry Helps",
+            "type": "boolean"
           }
         },
         "required": [
           "package_id",
           "kind",
           "label",
-          "error"
+          "error",
+          "retry_helps"
         ],
         "title": "ImportNotice",
         "type": "object"
