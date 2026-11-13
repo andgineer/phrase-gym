@@ -213,3 +213,24 @@ def test_bold_parts_of_the_target_are_not_treated_as_contrasts() -> None:
         explanation="**It's up to you** means you decide; **up to** marks whose choice it is.",
     )
     assert card_problems(card, "coach-1") == []
+
+
+@pytest.mark.parametrize(
+    ("target", "hint"),
+    [
+        ("pitch", "make a pi... / investors"),
+        ("pitch", "a pi... / sales"),
+        ("fence", "the fe... / garden"),
+    ],
+)
+def test_function_words_that_introduce_the_target_are_not_dangling(target: str, hint: str) -> None:
+    card = short_answer(target, "word", [hint, "zz... / other"])
+    assert card_problems(card, "coach-1") == []
+
+
+@pytest.mark.parametrize(
+    ("target", "hint"), [("pitch", "pi... / edit a"), ("draft", "dr... / edit a")]
+)
+def test_a_hint_that_really_ends_on_an_article_still_fails(target: str, hint: str) -> None:
+    problems = card_problems(short_answer(target, "word", [hint, "zz... / other"]), "coach-1")
+    assert any("ends with the bare word “a”" in problem for problem in problems)

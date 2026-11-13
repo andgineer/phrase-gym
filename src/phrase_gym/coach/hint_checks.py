@@ -86,20 +86,23 @@ class HintParts:
     shown: int = 0
     companions: list[list[str]] = field(default_factory=list)
     problems: list[str] = field(default_factory=list)
+    dangling: list[str] = field(default_factory=list)
 
 
 def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
     parts = HintParts()
     free = list(range(len(target)))
     for chunk in re.split(r"[/,]", hint):
-        companions = []
-        for token in chunk.split():
-            if not letters(token):
-                continue
+        companions: list[str] = []
+        tokens = [token for token in chunk.split() if letters(token)]
+        for token in tokens:
             matched = _match(token, target, free)
             if matched is None:
                 companions.append(token)
                 continue
+            # Function words right before a target word belong to it ("make a pi...").
+            while companions and _bare(companions[-1]):
+                companions.pop()
             word, shown = matched
             free.remove(word)
             parts.shown += shown
@@ -111,7 +114,13 @@ def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
                     "letters of a target word; show at most half",
                 )
         parts.companions.append(companions)
+        if tokens and companions and tokens[-1] == companions[-1] and _bare(tokens[-1]):
+            parts.dangling.append(" ".join(companions))
     return parts
+
+
+def _bare(token: str) -> bool:
+    return token.casefold().replace("’", "'").strip("'\"") in FUNCTION_WORDS
 
 
 def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> list[str]:
@@ -125,11 +134,11 @@ def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> l
             problems.append(
                 f"recall_hints.{index}: “{' '.join(companions)}” is already visible in a cue",
             )
-        if companion and companion[-1].strip("'") in FUNCTION_WORDS:
-            problems.append(
-                f"recall_hints.{index}: “{' '.join(companions)}” ends with the bare word "
-                f"“{companions[-1]}”; end on a word that carries meaning",
-            )
+    problems += [
+        f"recall_hints.{index}: “{chunk}” ends with the bare word “{chunk.split()[-1]}”; "
+        "end on a word that carries meaning"
+        for chunk in parts.dangling
+    ]
     total = sum(len(word) for word in target)
     if total and total - parts.shown <= total * MIN_HIDDEN_SHARE:
         problems.append(
