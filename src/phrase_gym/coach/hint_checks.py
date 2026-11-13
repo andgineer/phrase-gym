@@ -1,10 +1,37 @@
 import re
+from dataclasses import dataclass, field
 
 from phrase_gym.server.import_contracts import Cue
 
 ELLIPSIS = re.compile(r"\.\.\.|…")
 WORD = re.compile(r"[\w']+")
 GLOSS = re.compile(r"\(=([^)]*)\)")
+BOLD = re.compile(r"\*\*(.+?)\*\*")
+MIN_OPENING_WORDS = 2
+# Words that dangle at a hint's end; prepositions such as "to" or "about" may still end one.
+FUNCTION_WORDS = frozenset(
+    [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "my",
+        "your",
+        "his",
+        "her",
+        "its",
+        "our",
+        "their",
+        "this",
+        "that",
+        "these",
+        "those",
+        "some",
+        "any",
+    ],
+)
 # A shortened word may show at most half its letters; over a quarter of the target stays hidden.
 MIN_HIDDEN_SHARE = 0.25
 
@@ -53,11 +80,17 @@ def _match(token: str, target: list[str], free: list[int]) -> tuple[int, int] | 
     return None
 
 
-def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> list[str]:
-    target = [letters(word) for word in words(target_text) if letters(word)]
+@dataclass
+class HintParts:
+    whole_words: list[int] = field(default_factory=list)
+    shown: int = 0
+    companions: list[list[str]] = field(default_factory=list)
+    problems: list[str] = field(default_factory=list)
+
+
+def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
+    parts = HintParts()
     free = list(range(len(target)))
-    problems: list[str] = []
-    shown_total = 0
     for chunk in re.split(r"[/,]", hint):
         companions = []
         for token in chunk.split():
@@ -69,24 +102,74 @@ def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> l
                 continue
             word, shown = matched
             free.remove(word)
-            shown_total += shown
-            if shown != len(target[word]) and shown * 2 > len(target[word]):
-                problems.append(
+            parts.shown += shown
+            if shown == len(target[word]):
+                parts.whole_words.append(word)
+            elif shown * 2 > len(target[word]):
+                parts.problems.append(
                     f"recall_hints.{index}: “{token}” shows {shown} of the {len(target[word])} "
                     "letters of a target word; show at most half",
                 )
+        parts.companions.append(companions)
+    return parts
+
+
+def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> list[str]:
+    target = [letters(word) for word in words(target_text) if letters(word)]
+    parts = parse_hint(index, hint, target)
+    problems = parts.problems
+    visible = [f"{cue.situation} {cue.partner_line or ''}" for cue in cues]
+    for companions in parts.companions:
         companion = words(" ".join(companions))
-        visible = [f"{cue.situation} {cue.partner_line or ''}" for cue in cues]
         if companion and any(contains_words(text, companion) for text in visible):
             problems.append(
                 f"recall_hints.{index}: “{' '.join(companions)}” is already visible in a cue",
             )
+        if companion and companion[-1].strip("'") in FUNCTION_WORDS:
+            problems.append(
+                f"recall_hints.{index}: “{' '.join(companions)}” ends with the bare word "
+                f"“{companions[-1]}”; end on a word that carries meaning",
+            )
     total = sum(len(word) for word in target)
-    if total and total - shown_total <= total * MIN_HIDDEN_SHARE:
+    if total and total - parts.shown <= total * MIN_HIDDEN_SHARE:
         problems.append(
-            f"recall_hints.{index}: the hint leaves only {total - shown_total} of the target's "
+            f"recall_hints.{index}: the hint leaves only {total - parts.shown} of the target's "
             f"{total} letters hidden; keep more than a quarter hidden",
         )
+    opening = parts.whole_words
+    if len(opening) >= MIN_OPENING_WORDS and opening == list(range(len(opening))):
+        problems.append(
+            f"recall_hints.{index}: the hint is the target's opening words in order; "
+            "anchor on words from different parts of it",
+        )
+    return problems
+
+
+def bold_expressions(*texts: str | None) -> list[str]:
+    return [found.strip() for text in texts if text for found in BOLD.findall(text)]
+
+
+def hint_set_problems(hints: list[str], target_text: str, contrasted: list[str]) -> list[str]:
+    target = [letters(word) for word in words(target_text) if letters(word)]
+    problems = []
+    seen: dict[tuple[str, ...], int] = {}
+    for index, hint in enumerate(hints):
+        parts = parse_hint(index, hint, target)
+        companion = tuple(sorted(words(" ".join(sum(parts.companions, [])))))
+        if companion and companion in seen:
+            problems.append(
+                f"recall_hints.{index}: it repeats the companion words of recall_hints."
+                f"{seen[companion]}; give a different kind of support",
+            )
+        seen.setdefault(companion, index)
+        for expression in contrasted:
+            other = words(expression)
+            own = set(words(target_text)) | FUNCTION_WORDS
+            if other and not set(other) <= own and contains_words(hint, other):
+                problems.append(
+                    f"recall_hints.{index}: it contains “{expression}”, the expression this "
+                    "card contrasts; point to the target instead",
+                )
     return problems
 
 

@@ -136,3 +136,80 @@ def test_measured_hints_from_the_rules_pass(target: str, hint: str) -> None:
 def test_hints_that_give_away_short_targets_are_rejected(target: str, hint: str) -> None:
     problems = card_problems(answer(target=target, recall_hints=[hint, "zz... / other"]), "c-1")
     assert any(problem.startswith("recall_hints.0") for problem in problems)
+
+
+def short_answer(target: str, kind: str, hints: list[str], **card: Any) -> dict[str, Any]:
+    cues = [
+        {"situation": f"Context {index}: __________ there. (=sense {index})", "partner_line": None}
+        for index in range(1, 3)
+    ]
+    return answer(kind=kind, target=target, cues=cues, recall_hints=hints, **card)
+
+
+@pytest.mark.parametrize(
+    ("target", "kind", "hints"),
+    [
+        ("go", "word", ["g... / home", "g... / for a walk"]),
+        ("owe", "word", ["o... / the bank", "o... / a favour"]),
+        ("lend", "word", ["le... / me your pen", "le... / a hand"]),
+        ("touch base", "phrase", ["touch / next week", "base / short call"]),
+        ("reach out", "phrase", ["re... / to someone", "re... / with questions"]),
+        ("It's up to you", "phrase", ["up to / choose", "up / either way"]),
+    ],
+)
+def test_short_targets_can_still_meet_every_hint_rule(
+    target: str, kind: str, hints: list[str]
+) -> None:
+    assert card_problems(short_answer(target, kind, hints), "coach-1") == []
+
+
+@pytest.mark.parametrize(
+    ("changes", "problem"),
+    [
+        (
+            {
+                "target": "It's up to you",
+                "kind": "phrase",
+                "hints": ["it's / up", "up to / choose"],
+            },
+            "recall_hints.0: the hint is the target's opening words in order",
+        ),
+        (
+            {"target": "draft", "kind": "word", "hints": ["dr... / edit a", "dr... / rough"]},
+            "recall_hints.0: “edit a” ends with the bare word “a”",
+        ),
+        (
+            {"target": "owe", "kind": "word", "hints": ["o... / money", "o... / money"]},
+            "",
+        ),
+        (
+            {"target": "owe", "kind": "word", "hints": ["o... / the bank", "ow... / the bank"]},
+            "recall_hints.1: it repeats the companion words of recall_hints.0",
+        ),
+        (
+            {
+                "target": "remind",
+                "kind": "word",
+                "hints": ["rem... / remember", "rem... / me about"],
+                "explanation": "**remind** (verb): make someone remember. Compare **remember**.",
+            },
+            "recall_hints.0: it contains “remember”, the expression this card contrasts",
+        ),
+    ],
+)
+def test_hint_set_rules_name_the_problem(changes: dict[str, Any], problem: str) -> None:
+    extra = {key: value for key, value in changes.items() if key not in {"target", "kind", "hints"}}
+    found = card_problems(
+        short_answer(changes["target"], changes["kind"], changes["hints"], **extra), "coach-1"
+    )
+    assert found and any(item.startswith(problem) for item in found)
+
+
+def test_bold_parts_of_the_target_are_not_treated_as_contrasts() -> None:
+    card = short_answer(
+        "It's up to you",
+        "phrase",
+        ["up to / choose", "you / either way"],
+        explanation="**It's up to you** means you decide; **up to** marks whose choice it is.",
+    )
+    assert card_problems(card, "coach-1") == []

@@ -68,7 +68,9 @@ revise or replace a misleading card rather than treating ambiguous preparation a
 
 Prepared records also carry short searchable `usage_contexts`, useful accepted alternatives and
 optional detailed native-language help. Help text is plain text; bold around the target or a
-contrasted expression is its only formatting, and the app shows it as bold. The short explanation appears during study and after
+contrasted expression is its only formatting, and the app shows it as bold. Any card, phrase or
+word, contrasts its target with at most one likely confusable, briefly, accurately and with the
+overlap stated. The short explanation appears during study and after
 reveal; detailed help is available on request. Neither reveals the target before an independent
 attempt. A card's scheduling identity is shared across its cues; new contexts do not create
 duplicate cards. Daily and Extra use the same cues and hints. Phrase lookup searches the answer,

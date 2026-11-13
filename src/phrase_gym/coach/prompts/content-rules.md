@@ -17,6 +17,9 @@ Keep `text` as the complete source example, unchanged; the card's reference audi
 learner-facing help short; distinguish example context without repeating preparation boilerplate.
 Help text is plain text: in `explanation` and `detailed_explanation`, bold written as `**...**`
 around the target or a contrasted expression is the only formatting allowed.
+On any card, phrase or word, contrast the target with at most one likely confusable expression:
+keep the contrast short and accurate, state where the two overlap, and check each of its claims
+separately.
 Do not add a `target_chunk` field or other undocumented fields.
 A changed context in a cue is an authored exercise, never a quotation attributed to the source.
 
@@ -80,7 +83,9 @@ acceptable for a very short routine when a different gloss would become strained
 meaning. Common words shared with the target are not automatically a leak, but copying the
 complete target or giving its sentence opening as a wording scaffold is not a meaning gloss.
 A gloss must not contain the target or any accepted variant: the learner could read it into the
-gap and give an accepted answer without retrieving the target.
+gap and give an accepted answer without retrieving the target. A gloss adds no meaning the target
+lacks, such as a purpose or a result, and uses no idiom or word harder than the target. On a
+word-sense card, no single word in a gloss may itself fit the gap.
 
 The learner retrieves the chunk and may say the completed cue sentence. Self-rating concerns
 that chunk's form and appropriate use, not the original example's incidental content. Revealed
@@ -132,7 +137,14 @@ substantial wording. Do this check separately for every hint, not just the first
 Measure it: any shortened word, written with `...` or not, shows at most half of that word's letters
 (`cha...` for **charge**, `fe...` for **fence**, `relu...` for **reluctant**); ignoring
 slashes, more than a quarter of the target's letters stay hidden; and a hint's other words are
-not already visible in a cue, where they would add nothing.
+not already visible in a cue, where they would add nothing. A hint is not the target's opening
+words in order (`it's / up` for **It's up to you**) and does not end on a bare article,
+possessive, demonstrative or conjunction (`edit a`). Two hints never repeat the same companion
+words; each companion gives a different kind of support, such as a collocate, a situation or a
+grammatical frame, rather than a synonym of another hint's companion. A hint never contains the
+expression the card contrasts; when a fragment or word in a hint also fits that expression, its
+companion must tell the two apart (`rem... / me about`, not `rem... / alarm`, for **remind**
+against **remember**), and no companion may pull against the target's meaning.
 For short chunks, meaningful word fragments can preserve useful work: `sounds / f...` and
 `that / fun` help retrieve **That sounds fun!**. For a two-word echo such as **Is it?**, lexical
 pairs would reveal the answer; a compact construction reminder such as `be -> question` or
@@ -187,8 +199,8 @@ the card; another sense needs its own card.
   simply read out.
 - `accepted_variants`: words that fit the intended sense and register in every cue, such as
   **hesitant** for **reluctant**. List a natural synonym here rather than in a hint.
-- `detailed_explanation`: for a troublesome near-synonym or lookalike, a short accurate
-  contrast that includes their overlap, such as **reluctant** versus **reticent**.
+- `detailed_explanation`: for a troublesome near-synonym or lookalike, the one short contrast
+  described above, such as **reluctant** versus **reticent**.
 - `usage_contexts`: short searchable uses, as for phrases.
 
 Do not introduce several confusable words together on one card. Two or three contexts is a
@@ -203,7 +215,8 @@ practical default; a definition the learner understands is not yet spoken retrie
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
-   Check that no gloss contains the target or an accepted variant.
+   Check that no gloss contains the target or an accepted variant, adds meaning, is harder than
+   the target, or, on a word-sense card, contains a word that itself fits the gap.
 3. **Discrimination:** try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.
@@ -212,11 +225,14 @@ practical default; a definition the learner understands is not yet spoken retrie
    meaning glosses, generic labels, peripheral words alone and one useful pair split into separate
    entries. Check that every hint is a complete alternative, not a permutation or a dependent step.
    Check short-target exceptions carefully and correct weak hints. Apply the measured hint
-   limits to every hint of every card, however short the target.
+   limits to every hint of every card, however short the target. Check that the companions give
+   different kinds of support and that a hint sharing a fragment or word with the contrasted
+   expression still points only to the target.
 5. **Transferable context:** keep the target constant across cues while changing useful context;
    do not demand memorization of the original sentence's business claim or technical vocabulary.
 6. **Honest support:** identify the chunk or word in the explanation and keep suitable
-   alternatives only. Every accepted variant must fit every cue in meaning and register and
+   alternatives only. Check every claim in the contrast on its own, including the stated overlap.
+   Every accepted variant must fit every cue in meaning and register and
    agree with the card's own explanation and contrast; leave out a variant that does not.
    Do not append repeated disclaimers to learner explanations. Study precedes recall;
    requested help is supported retrieval.

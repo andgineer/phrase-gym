@@ -3,7 +3,14 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from phrase_gym.coach.hint_checks import contains_words, gloss_problems, hint_problems, words
+from phrase_gym.coach.hint_checks import (
+    bold_expressions,
+    contains_words,
+    gloss_problems,
+    hint_problems,
+    hint_set_problems,
+    words,
+)
 from phrase_gym.server.import_contracts import ImportPhrase
 
 GAP = "__________"
@@ -65,6 +72,8 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
     ]
     for index, hint in enumerate(phrase.recall_hints):
         problems += hint_problems(index, hint, str(answer["target"]), phrase.cues)
+    contrasted = bold_expressions(phrase.explanation, phrase.detailed_explanation)
+    problems += hint_set_problems(phrase.recall_hints, str(answer["target"]), contrasted)
     problems += gloss_problems(phrase.cues, str(answer["target"]), phrase.accepted_variants)
     problems += [
         f"recall_hints.{index}: the hint shows the accepted variant “{variant}”; "
