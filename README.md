@@ -14,7 +14,7 @@
 | src/phrase\_gym/coach/claude\_cli.py              |       42 |        4 |     90% |66-67, 79-80 |
 | src/phrase\_gym/coach/cli\_steps.py               |       40 |        2 |     95% |    69, 75 |
 | src/phrase\_gym/coach/codex\_cli.py               |       46 |        1 |     98% |        96 |
-| src/phrase\_gym/coach/hint\_checks.py             |      112 |        2 |     98% |    56, 98 |
+| src/phrase\_gym/coach/hint\_checks.py             |      117 |        1 |     99% |        56 |
 | src/phrase\_gym/coach/main.py                     |       82 |       31 |     62% |41-49, 56-60, 74-84, 90, 101, 113-125 |
 | src/phrase\_gym/coach/preparation.py              |       69 |        2 |     97% |    61, 68 |
 | src/phrase\_gym/coach/speech.py                   |       86 |        8 |     91% |97, 113, 119, 134, 157-158, 164-165 |
@@ -66,7 +66,7 @@
 | src/phrase\_gym/server/storage.py                 |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                  |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py           |       51 |        0 |    100% |           |
-| **TOTAL**                                         | **2644** |  **147** | **94%** |           |
+| **TOTAL**                                         | **2649** |  **146** | **94%** |           |
 
 
 ## Setup coverage badge
