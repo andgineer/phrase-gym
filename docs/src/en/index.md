@@ -32,8 +32,8 @@ It stays collapsed until you open it.
 The server works on macOS and Linux. The MVP media player and recording experience target macOS
 browsers. Linux browser audio qualification is planned after the MVP.
 
-Start with [installation](installation.md), then [add your phrases](importing-phrases.md).
+Start with [installation](https://andgineer.github.io/phrase-gym/installation/), then [add your phrases](https://andgineer.github.io/phrase-gym/importing-phrases/).
 The service listens only on loopback and keeps learner data in its local application-data directory.
 
-See also [private access](private-access.md), [backup and restore](backup-and-restore.md),
-and the [HTTP API reference](reference.md).
+See also [private access](https://andgineer.github.io/phrase-gym/private-access/), [backup and restore](https://andgineer.github.io/phrase-gym/backup-and-restore/),
+and the [HTTP API reference](https://andgineer.github.io/phrase-gym/reference/).

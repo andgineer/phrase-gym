@@ -14,9 +14,9 @@ optional weekly target.
 The server runs on macOS and Linux. Use a macOS browser for the MVP media player and recording;
 Linux browser audio support is planned after the MVP.
 
-Follow the [installation guide](docs/src/en/installation.md) to install and launch the application,
+Follow the [installation guide](https://andgineer.github.io/phrase-gym/installation/) to install and launch the application,
 including its optional material-preparation process. For another device, see
-[private access](docs/src/en/private-access.md).
+[private access](https://andgineer.github.io/phrase-gym/private-access/).
 
 Open <http://127.0.0.1:8000> on the Mac. The app listens only on loopback and stores its database,
 references, and recordings in the operating system's Phrase Gym application-data directory.
@@ -31,7 +31,7 @@ top right and press **Coach**. The application's Coach prepares a complete card 
 audio using your logged-in Claude Code CLI and local Piper voice, and adds it to the **Added with
 Coach** lesson. `phrase-gym coach --cli codex` uses the Codex CLI instead, which is not yet
 qualified for Coach. An external AI agent can instead prepare a course batch with its reference audio
-and submit it for immediate study. See [how to add phrases](docs/src/en/importing-phrases.md) for
+and submit it for immediate study. See [how to add phrases](https://andgineer.github.io/phrase-gym/importing-phrases/) for
 both workflows.
 
 The Practice entry offers a lesson field (empty means **All lessons**; type in it to narrow the
@@ -89,7 +89,7 @@ practice days, which you can change or pause at any time; each rating button sho
 brings the phrase back. The weekly target never changes schedules, daily limits or which phrases
 Daily offers.
 
-For a private stopped-app backup and restore, follow [the maintenance procedure](docs/src/en/backup-and-restore.md).
+For a private stopped-app backup and restore, follow [the maintenance procedure](https://andgineer.github.io/phrase-gym/backup-and-restore/).
 
 ## Development
 
