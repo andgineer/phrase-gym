@@ -25,7 +25,7 @@ Configure GitHub Pages to serve the root of that branch. CI also provides covera
 Codecov and Coveralls integration; external coverage services require their repository setup.
 
 User launch, Coach setup, private access and backups are documented in the
-[user guide](https://andgineer.github.io/phrase-gym/installation/).
+[user guide](../docs/src/en/installation.md).
 
 ## Documentation sources
 
@@ -33,10 +33,6 @@ Keep user and external-agent pages in `docs/src/<language>/` and list navigable 
 `docs/mkdocs.yml`. The build copies each language directory into `build/docs/src/`;
 `pymdownx.snippets` resolves shared includes from `docs/includes/` when rendering the pages.
 Development and release guidance belongs in `specs/`, outside the user site.
-Links to user and external-agent guides must use their rendered
-`https://andgineer.github.io/phrase-gym/` URLs, including links in README, specs, agent
-instructions and other guide pages. Keep MkDocs includes as includes; do not link readers
-to raw documentation source files.
 
 The AI agent instructions have one English source: `docs/includes/agent-add-phrases.md`.
 Every language's `agent-add-phrases.md` page must include it with

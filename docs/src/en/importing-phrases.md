@@ -10,7 +10,7 @@ sentence it came from after it, for example
 `take it with a grain of salt — I'd take his estimate with a grain of salt`. The sentence helps
 Coach choose the right meaning; without it, Coach uses the most common useful one.
 
-Phrase Gym saves the text at once, whether or not [Coach is running](https://andgineer.github.io/phrase-gym/installation/), clears the
+Phrase Gym saves the text at once, whether or not [Coach is running](installation.md), clears the
 field and briefly confirms. Your practice continues meanwhile. Coach later prepares a complete
 card: a phrase becomes a card for its reusable chunk, and a single word becomes a card for one of
 its meanings with two or three example contexts. Each card gets reference audio and appears in

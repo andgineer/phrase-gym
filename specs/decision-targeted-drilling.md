@@ -76,7 +76,7 @@ attempt. A card's scheduling identity is shared across its cues; new contexts do
 duplicate cards. Daily and Extra use the same cues and hints. Phrase lookup searches the answer,
 explanations, cues and usage contexts, shown as **Used for** in details.
 
-The [external-agent guide](https://andgineer.github.io/phrase-gym/agent-add-phrases/#content-preparation-rules) owns the
+The [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) owns the
 preparation procedure, worked examples, rejection checks and schema mapping. Review every card's
 source coverage, chunk boundaries, cue completions and varied wording hints before publication.
 A semantic review is separate from API acceptance; no fixed example establishes quality for an entire course.

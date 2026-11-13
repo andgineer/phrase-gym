@@ -37,7 +37,7 @@ It needs two things on the same Mac:
   tool that works inside the current preparation's folder; reading `.env` files, your home
   directory and your learning data is refused. Read-allow rules, tools and servers you add in
   your own Claude settings can widen that restriction; Coach does not isolate them.
-- A local English [Piper voice](https://andgineer.github.io/phrase-gym/piper-voice/) for the reference audio.
+- A local English [Piper voice](piper-voice.md) for the reference audio.
 
 Run Coach in another terminal:
 
@@ -61,5 +61,5 @@ The `install-coach`, `uninstall-coach`, and `deploy` commands report that they a
 The optional `coach` and `deploy` extras are reserved for future preparation and provisioning
 features. The core server and help need only the lean installation.
 
-For access from another device, see [private Tailscale access](https://andgineer.github.io/phrase-gym/private-access/).
-Keep a private [backup of your learning data](https://andgineer.github.io/phrase-gym/backup-and-restore/).
+For access from another device, see [private Tailscale access](private-access.md).
+Keep a private [backup of your learning data](backup-and-restore.md).

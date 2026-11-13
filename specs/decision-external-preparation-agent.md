@@ -9,7 +9,7 @@ The learner never handles packages or JSON: material comes either from an extern
 The external agent's submission is one documented UTF-8 JSON structure containing an input ID, source label/link, learning/card/help languages and phrases with stable item IDs, `text` for the complete wording, short explanation, retrieval cues and optional accepted alternatives/detailed explanation. Phrases also identify their lesson and carry recall hints and usage contexts. Each phrase belongs to one source-scoped lesson with a stable identity. One submission may contain several lessons. `Phrase` is the complete typed record in `phrases`; `phrase.text` is its wording string. Prepared support, reference audio and scheduling fields belong to that same phrase. A Card is only its visual client component, not another data entity. Source links are opaque attribution. Define the exact generated schema and a working external-agent example with implementation; this document does not freeze prototype API fields. Plain unprepared words, URLs alone and slot/dialogue structures are rejected with an explanation of the supported input.
 
 External preparation and later Coach prompts follow the [chunk content decision](decision-targeted-drilling.md#phrases)
-and the worked preparation rules in the [external-agent guide](https://andgineer.github.io/phrase-gym/agent-add-phrases/#content-preparation-rules).
+and the worked preparation rules in the [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules).
 Cover every supplied source phrase. Select its transferable chunk first, then create natural
 gap cues and varied requested wording hints that help retrieve the exact studied expression.
 Keep the complete source example in `text` with matching audio;
@@ -58,7 +58,7 @@ Like audio preparation, it runs offline: the browser does not track it, and a fa
 ### Coach prompts and evaluation
 
 The card content rules live in one shared file that both the Coach prompts and the
-[external-agent guide](https://andgineer.github.io/phrase-gym/agent-add-phrases/#content-preparation-rules) include,
+[external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) include,
 so the two preparers follow one text. Batch coverage, source recordings and the API handoff stay
 in the external guide; how to read the learner's typed input stays in the Coach prompts.
 One vendor-neutral prompt set, the prepare, review and revise prompts with the shared content
