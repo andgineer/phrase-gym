@@ -28,7 +28,7 @@ same text into the field again.
 
 ## Ask your personal AI agent
 
-Pass [the agent instructions](agent-add-phrases.md) to your AI agent; you do not need to read them.
+Pass [the agent instructions](https://andgineer.github.io/phrase-gym/agent-add-phrases/) to your AI agent; you do not need to read them.
 Tell it where to find your material and give it your Phrase Gym server address. It prepares the
 text, reuses suitable source recordings or generates missing audio, and submits the complete
 material directly to Phrase Gym. Once the server confirms the import, the phrases are immediately

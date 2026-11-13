@@ -34,14 +34,14 @@ Keep user and external-agent pages in `docs/src/<language>/` and list navigable 
 `pymdownx.snippets` resolves shared includes from `docs/includes/` when rendering the pages.
 Development and release guidance belongs in `specs/`, outside the user site.
 
-The AI agent instructions have one English source: `docs/src/en/agent-add-phrases.md`.
-Keep that page readable directly on GitHub as well as on the documentation site: GitHub does
-not expand MkDocs snippet directives. Other language pages should translate only the title
-and learner-facing introduction, then link to the English instructions rather than copying
-or translating them. The instructions require agents to read the shared card content rules
-at `src/phrase_gym/coach/prompts/content-rules.md`, which the Coach prompts also use. Link to
-that source on GitHub so both readers and agents can follow it without a documentation build;
-do not duplicate the rules in the guide.
+The AI agent instructions have one English source: `docs/includes/agent-add-phrases.md`.
+Every language's `agent-add-phrases.md` page must include it with
+`--8<-- "agent-add-phrases.md"`. Translate only the page title and learner-facing introduction;
+do not copy or translate the shared instructions. Keep the shared file outside `docs/src/`
+so the build does not treat it as another language directory. The card content rules inside it
+come from `src/phrase_gym/coach/prompts/content-rules.md`, which the Coach prompts also use;
+the snippets base path includes that package folder so the installed Coach and the guide read
+one file.
 
 ## Build a distributable
 
