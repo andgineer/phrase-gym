@@ -629,7 +629,9 @@ answer in the cue body; requested wording support belongs in hints. A subject or
 remain visible only when it is outside the selected chunk.</p>
 <p>Prefer two natural contexts with different propositions that accept the same unchanged chunk.
 One good cue is better than a forced second. Changing only a greeting or person's name is not
-a different context; add a genuinely different conversational proposition or keep one cue.
+a different context, and neither are two cues that repeat one sentence frame with another object
+or time (<code>__________ while I restart my laptop</code> and <code>__________ while I find the total</code>); add a
+genuinely different conversational proposition or keep one cue.
 For example, a greeting and "You've had a busy morning" provide different lead-ins to a day
 question. Insert the chunk into each cue and read the result, including any partner turn:
 grammar, punctuation, meaning and referents must all work. If a response refers to "the repairs"
@@ -671,10 +673,9 @@ alternatives. Do not paste one generic gloss into every context by default. Repe
 acceptable for a very short routine when a different gloss would become strained or change
 meaning. Common words shared with the target are not automatically a leak, but copying the
 complete target or giving its sentence opening as a wording scaffold is not a meaning gloss.
-A gloss must not contain the target or any accepted variant: the learner could read it into the
-gap and give an accepted answer without retrieving the target. A gloss adds no meaning the target
-lacks, such as a purpose or a result, and uses no idiom or word harder than the target. On a
-word-sense card, no single word in a gloss may itself fit the gap. A gloss fits the gap's
+A gloss must not contain the target: the learner could read it into the gap without retrieving
+anything. A gloss adds no meaning the target lacks, such as a purpose or a result, and uses
+plain wording with no idiom or word harder than the target. A gloss fits the gap's
 grammatical frame: the sentence still reads correctly with the gloss in the gap, so an
 adjective slot gets an adjective phrase, the subject stays the one who acts, and a gloss does
 not end on a preposition when the cue continues with its own preposition (<code>=told more about</code>
@@ -684,7 +685,10 @@ before <code>on the results</code>). A phrasal verb's particle may end a gloss (
 that chunk's form and appropriate use, not the original example's incidental content. Revealed
 <code>text</code> and audio remain the original source example; they need not repeat a cue's new proposition.
 The API has one example/reference per card, not generated answer/audio pairs for every cue.
-Do not create duplicate cards per context or claim automatic evaluation.</p>
+Do not create duplicate cards per context or claim automatic evaluation. The learner rates their
+own answer against the revealed target, and cards list no alternative answers. When a close form
+matters, such as <strong>Bear with us</strong> for <strong>Bear with me</strong>, mention it in one sentence of the
+explanation; a hint or gloss still never gives away the target.</p>
 <h3 id="write-varied-hints-for-recalling-the-exact-wording">Write varied hints for recalling the exact wording</h3>
 <p>The gloss supplies meaning. Each requested <code>recall_hints</code> entry must independently help the
 learner reconstruct the studied wording. Normally combine two diagnostic words or short
@@ -828,10 +832,6 @@ the card; another sense needs its own card.</p>
   <code>relu... / to admit</code> or <code>relu... / to leave</code>; never the complete word. Prefer a collocate
   or context word to a synonym: a synonym in a hint is a different answer the learner can
   simply read out.</li>
-<li><code>accepted_variants</code>: words that fit the intended sense and register in every cue, such as
-  <strong>hesitant</strong> for <strong>reluctant</strong>. List a natural synonym here rather than in a hint. Do not accept
-  a broad synonym that would let the learner avoid the target in every cue, or one that the
-  card's own contrast describes as different.</li>
 <li><code>detailed_explanation</code>: for a troublesome near-synonym or lookalike, the one short contrast
   described above, such as <strong>reluctant</strong> versus <strong>reticent</strong>.</li>
 <li><code>usage_contexts</code>: short searchable uses, as for phrases.</li>
@@ -847,9 +847,8 @@ practical default; a definition the learner understands is not yet spoken retrie
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
-   Check that no gloss contains the target or an accepted variant, adds meaning, is harder than
-   the target, breaks the gap's grammatical frame, or, on a word-sense card, contains a word
-   that itself fits the gap.</li>
+   Check that no gloss contains the target, adds meaning, is harder than the target or breaks
+   the gap's grammatical frame.</li>
 <li><strong>Discrimination:</strong> try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.</li>
@@ -862,11 +861,10 @@ practical default; a definition the learner understands is not yet spoken retrie
    a collocate, situation or sentence frame in the target's own sense, and that a hint sharing a
    fragment or word with the contrasted expression still points only to the target.</li>
 <li><strong>Transferable context:</strong> keep the target constant across cues while changing useful context;
-   do not demand memorization of the original sentence's business claim or technical vocabulary.</li>
-<li><strong>Honest support:</strong> identify the chunk or word in the explanation and keep suitable
-   alternatives only. Check every claim in the contrast on its own, including the stated overlap.
-   Every accepted variant must fit every cue in meaning and register and
-   agree with the card's own explanation and contrast; leave out a variant that does not.
+   two cues that repeat one sentence frame are not different contexts. Do not demand
+   memorization of the original sentence's business claim or technical vocabulary.</li>
+<li><strong>Honest support:</strong> identify the chunk or word in the explanation. Check every claim in the
+   contrast on its own, including the stated overlap.
    Do not append repeated disclaimers to learner explanations. Study precedes recall;
    requested help is supported retrieval.</li>
 </ol>
@@ -969,10 +967,6 @@ One package may contain several lessons; every phrase belongs to exactly one of 
 <tr>
 <td><code>usage_contexts</code></td>
 <td>One to six distinct short searchable uses, such as <code>small talk</code> or <code>greetings</code></td>
-</tr>
-<tr>
-<td><code>accepted_variants</code></td>
-<td>Optional genuinely suitable alternatives for the same intention</td>
 </tr>
 <tr>
 <td><code>detailed_explanation</code></td>
