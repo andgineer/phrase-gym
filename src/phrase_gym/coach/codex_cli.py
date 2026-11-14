@@ -2,6 +2,7 @@ import json
 import os
 import re
 import shlex
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -39,8 +40,9 @@ def permission_profile(workspace: Path, attempt: Path) -> str:
     """Reads stay inside the system minimum and this attempt; .env files are denied outright."""
     entries = {
         ":minimal": "read",
-        # The minimal set lets commands write to /tmp; this read-only entry withdraws that.
-        "/tmp": "read",  # noqa: S108 - a restriction, not a temporary file
+        # The minimal set opens /tmp, where other attempts may be kept; a nested attempt still wins.
+        "/tmp": "none",  # noqa: S108 - a restriction, not a temporary file
+        str(Path(tempfile.gettempdir()).resolve()): "none",
         str(attempt): "read",
         str(workspace / ".env"): "none",
         str(workspace / "**" / ".env"): "none",

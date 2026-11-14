@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import tempfile
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -261,7 +262,11 @@ def test_claude_attempts_live_outside_the_checkout_so_no_repository_instructions
     assert not attempts_root().is_relative_to(Path.home())
 
 
-def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(tmp_path: Path) -> None:
+def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    system_temp = tmp_path.resolve() / "system-temp"
+    monkeypatch.setattr(tempfile, "tempdir", str(system_temp))
     workspace = tmp_path / "workspace"
     attempt = tmp_path / "attempt"
     codex = CodexCli(workspace)
@@ -277,7 +282,7 @@ def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(tmp_p
     profile = arguments[arguments.index('default_permissions="phrase-gym-coach"') + 2]
     assert profile == (
         "permissions.phrase-gym-coach.filesystem={"
-        f'":minimal"="read", "/tmp"="read", "{attempt}"="read", '
+        f'":minimal"="read", "/tmp"="none", "{system_temp}"="none", "{attempt}"="read", '
         f'"{workspace}/.env"="none", "{workspace}/**/.env"="none"}}'
     )
     assert "danger" not in " ".join(arguments)
