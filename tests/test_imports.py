@@ -171,6 +171,17 @@ def test_validation_identifies_the_item_and_field(
     assert client.get(f"/api/imports/{package['package_id']}").status_code == 404
 
 
+def test_a_package_listing_alternative_answers_is_told_to_remove_the_field(
+    client: TestClient, package: Package
+) -> None:
+    package["lessons"][0]["phrases"][0]["accepted_variants"] = ["Let's begin."]
+    response = client.post("/api/imports", json={"package": package, "references": {}})
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["loc"] == ["body", "package", "lessons", 0, "phrases", 0, "accepted_variants"]
+    assert error["msg"] == "Extra inputs are not permitted"
+
+
 def test_earlier_format_and_duplicate_identities_are_rejected(
     client: TestClient, package: Package
 ) -> None:

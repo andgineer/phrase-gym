@@ -5,7 +5,6 @@ import EmphasisText from './EmphasisText.vue'
 const props = defineProps<{
   explanation: string
   usageContexts: string[]
-  acceptedVariants: string[]
   detailedExplanation?: string | null
   open: boolean
 }>()
@@ -17,9 +16,6 @@ const longerExplanation = computed(() => props.detailedExplanation?.trim())
   <div class="answer-help">
     <p><EmphasisText :text="explanation" /></p>
     <p v-if="usageContexts.length" class="purpose">Used for: {{ usageContexts.join(' · ') }}</p>
-    <p v-if="acceptedVariants.length" class="muted">
-      Also accepted: {{ acceptedVariants.join('; ') }}
-    </p>
     <button
       :disabled="!longerExplanation"
       :aria-expanded="!!longerExplanation && open"

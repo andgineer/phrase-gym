@@ -4,13 +4,6 @@
       "CardAnswer": {
         "additionalProperties": false,
         "properties": {
-          "accepted_variants": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Accepted Variants",
-            "type": "array"
-          },
           "detailed_explanation": {
             "anyOf": [
               {
@@ -46,7 +39,6 @@
           "text",
           "explanation",
           "detailed_explanation",
-          "accepted_variants",
           "usage_contexts",
           "reference_url"
         ],
@@ -583,14 +575,6 @@
       "ImportPhrase": {
         "additionalProperties": false,
         "properties": {
-          "accepted_variants": {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 8,
-            "title": "Accepted Variants",
-            "type": "array"
-          },
           "cues": {
             "items": {
               "$ref": "#/components/schemas/Cue"
@@ -923,13 +907,6 @@
       "PhraseDetails": {
         "additionalProperties": false,
         "properties": {
-          "accepted_variants": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Accepted Variants",
-            "type": "array"
-          },
           "detailed_explanation": {
             "anyOf": [
               {
@@ -1009,7 +986,6 @@
           "explanation",
           "detailed_explanation",
           "usage_contexts",
-          "accepted_variants",
           "lesson_id",
           "lesson_title",
           "source_label",

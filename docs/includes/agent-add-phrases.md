@@ -83,7 +83,6 @@ Each phrase requires:
 | `cues` | One to three contextual gap cues in `situation`; optional `partner_line`. Phrase cards normally have one or two, word-sense cards two or three |
 | `recall_hints` | Two to six independent alternative hints, normally two diagnostic anchors separated by `/`; at most 40 characters each; never the entire selected chunk |
 | `usage_contexts` | One to six distinct short searchable uses, such as `small talk` or `greetings` |
-| `accepted_variants` | Optional genuinely suitable alternatives for the same intention |
 | `detailed_explanation` | Optional longer native-language help shown on request |
 
 Unknown fields are rejected, and validation names the lesson, phrase and field to correct.

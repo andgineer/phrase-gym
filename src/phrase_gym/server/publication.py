@@ -80,7 +80,7 @@ def _content(package: PhrasePackage, phrase: ImportPhrase) -> dict[str, object]:
         "cues_json": json.dumps([cue.model_dump(exclude_none=True) for cue in phrase.cues]),
         "hints_json": json.dumps(phrase.recall_hints),
         "contexts_json": json.dumps(phrase.usage_contexts),
-        "variants_json": json.dumps(phrase.accepted_variants),
+        "variants_json": "[]",
         "search_primary": search_key(phrase.text, *phrase.usage_contexts),
         "search_text": search_key(
             phrase.text,

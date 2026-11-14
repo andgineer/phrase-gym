@@ -185,7 +185,6 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
         usage_contexts=["small talk", "progress update"],
         explanation="Things have gone well up to now.",
         detailed_explanation="«Пока всё хорошо».",
-        accepted_variants=["So far so good."],
     )
     publish(client, make_package(lessons=[lesson("small-talk", "Small talk", [details_phrase])]))
     practice = Practice(client)
@@ -206,7 +205,6 @@ def test_details_show_lesson_source_reference_due_and_paged_recordings(
         "explanation": "Things have gone well up to now.",
         "detailed_explanation": "«Пока всё хорошо».",
         "usage_contexts": ["small talk", "progress update"],
-        "accepted_variants": ["So far so good."],
         "lesson_title": "Small talk",
         "source_label": "Course · Meetings",
         "source_link": "https://example.test/meetings",
@@ -252,3 +250,21 @@ def test_recording_dates_use_the_learning_timezone(client: TestClient) -> None:
     assert naive.status_code == 422
     item = client.get(f"/api/phrases/{card['phrase_id']}/recordings").json()["items"][0]
     assert item["learning_date"] == "2026-10-29"
+
+
+def test_alternative_answers_stored_on_earlier_cards_stay_but_are_not_shown(
+    client: TestClient, tmp_path: Path
+) -> None:
+    publish(client, make_package())
+    database = tmp_path / "phrase-gym.sqlite3"
+    with closing(sqlite3.connect(database)) as connection, connection:
+        connection.execute("""UPDATE phrases SET variants_json='["Let''s begin."]'""")
+    practice = Practice(client)
+    card = practice.card()
+    revealed = practice.reveal(card)
+    details = client.get(f"/api/phrases/{card['phrase_id']}").json()
+    assert "accepted_variants" not in details
+    assert "accepted_variants" not in revealed["answer"]
+    with closing(sqlite3.connect(database)) as connection:
+        stored = {row[0] for row in connection.execute("SELECT variants_json FROM phrases")}
+    assert stored == {'["Let\'s begin."]'}

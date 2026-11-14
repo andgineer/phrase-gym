@@ -18,12 +18,11 @@ The preparing session followed the card format and content rules below.
 
 Inspect the draft strictly against the content rules below, especially the inspection checklist:
 target choice and sense, every completed cue, every gloss, every hint on its own with every cue,
-competing answers, explanation, variants and help. Apply the measured hint limits and the gloss
-rule to every card, however short the target, and check each accepted variant against every cue
-in meaning and register and against the card's own contrast. Check that every hint companion is
-a collocate, situation or sentence frame in the target's own sense. Report only concrete problems
-that would mislead or weaken the learner's practice, each with the field, the problem and a
-specific correction. Do not report matters of taste or rewrite fields that already work. Return
+competing answers, explanation and help. Apply the measured hint limits and the gloss rules to
+every card, however short the target. Check that every hint companion is a collocate, situation
+or sentence frame in the target's own sense, and that no two cues repeat one sentence frame.
+Report only concrete problems that would mislead or weaken the learner's practice, each with the
+field, the problem and a specific correction that itself satisfies the content rules. Do not report matters of taste or rewrite fields that already work. Return
 an empty `findings` list when the card needs no change.
 
 ## Content rules

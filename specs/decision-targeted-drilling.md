@@ -66,8 +66,8 @@ it is not necessarily the full answer to a newly authored cue. Supported recall 
 distinct from the original unaided attempt. An acceptable alternative is not a language error;
 revise or replace a misleading card rather than treating ambiguous preparation as forgetting.
 
-Prepared records also carry short searchable `usage_contexts`, useful accepted alternatives and
-optional detailed native-language help. Help text is plain text; bold around the target or a
+Prepared records also carry short searchable `usage_contexts` and optional detailed
+native-language help. Help text is plain text; bold around the target or a
 contrasted expression is its only formatting, and the app shows it as bold. Any card, phrase or
 word, contrasts its target with at most one likely confusable, briefly, accurately and with the
 overlap stated. The short explanation appears during study and after
@@ -94,7 +94,7 @@ or guarantees spontaneous conversational transfer.
 
 Each word-sense entry teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. Choose the intended sense from the supplied context. If the input is insufficient to prepare a coherent entry, retain it as a preparation failure instead of opening a clarification conversation. Keep source identity so retrying the same entry does not duplicate it.
 
-For English at the learner's stated B2 level, use a short English context with the target word missing, plus a sense cue if needed; ask the learner to say the complete chunk. For beginner German, use the Russian meaning of a short chunk and ask for the German chunk. Explain article/plural or another form only when relevant. Grade retrieval of the target sense/form, not an unrelated slip elsewhere in the sentence. Accepted alternatives must fit the intended meaning.
+For English at the learner's stated B2 level, use a short English context with the target word missing, plus a sense cue if needed; ask the learner to say the complete chunk. For beginner German, use the Russian meaning of a short chunk and ask for the German chunk. Explain article/plural or another form only when relevant. Grade retrieval of the target sense/form, not an unrelated slip elsewhere in the sentence. The learner rates their own answer against the revealed target, and cards list no alternative answers; a close form that matters is mentioned in the explanation.
 
 Use one productive schedule per word sense. Understanding a definition is not successful retrieval of the spoken form. Contexts and explanations follow [personal preferences](decision-personal-preferences.md); English-only help is a learner choice, not a universal teaching rule.
 

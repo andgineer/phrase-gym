@@ -505,8 +505,6 @@ export interface components {
     schemas: {
         /** CardAnswer */
         CardAnswer: {
-            /** Accepted Variants */
-            accepted_variants: string[];
             /** Detailed Explanation */
             detailed_explanation: string | null;
             /** Explanation */
@@ -699,8 +697,6 @@ export interface components {
         };
         /** ImportPhrase */
         ImportPhrase: {
-            /** Accepted Variants */
-            accepted_variants?: string[];
             /** Cues */
             cues: components["schemas"]["Cue"][];
             /** Detailed Explanation */
@@ -796,8 +792,6 @@ export interface components {
         };
         /** PhraseDetails */
         PhraseDetails: {
-            /** Accepted Variants */
-            accepted_variants: string[];
             /** Detailed Explanation */
             detailed_explanation: string | null;
             /** Due Date */

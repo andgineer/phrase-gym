@@ -44,7 +44,6 @@ def card(typed: str, step: str) -> dict[str, object]:
                 f"{first[: max(1, half - 1)]}... / two",
             ],
             "usage_contexts": ["coach test"],
-            "accepted_variants": [],
             "detailed_explanation": None,
         },
     }

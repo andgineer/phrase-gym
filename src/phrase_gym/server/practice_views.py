@@ -136,7 +136,6 @@ def practice_card(
             text=phrase.text,
             explanation=phrase.explanation,
             detailed_explanation=phrase.detailed_explanation,
-            accepted_variants=json.loads(phrase.variants_json),
             usage_contexts=json.loads(phrase.contexts_json),
             reference_url=f"/api/phrases/{phrase.id}/reference",
         )

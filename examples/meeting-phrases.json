@@ -22,8 +22,7 @@
             { "situation": "The workshop room is full and it is time to begin." }
           ],
           "recall_hints": ["get …", "let us"],
-          "usage_contexts": ["meetings", "starting a call"],
-          "accepted_variants": ["Let's begin."]
+          "usage_contexts": ["meetings", "starting a call"]
         },
         {
           "item_id": "clarify-process",
@@ -85,8 +84,7 @@
             { "situation": "Friend asks: How's the new job?" }
           ],
           "explanation": "Things have gone well up to now.",
-          "detailed_explanation": "«Пока всё хорошо». Короткий ответ о том, как идут дела сейчас. Он говорит о результате до этого момента, а не обещает, что дальше всё будет так же.",
-          "accepted_variants": []
+          "detailed_explanation": "«Пока всё хорошо». Короткий ответ о том, как идут дела сейчас. Он говорит о результате до этого момента, а не обещает, что дальше всё будет так же."
         }
       ]
     }

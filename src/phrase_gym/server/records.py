@@ -32,6 +32,7 @@ class PhraseRecord(ScheduleRecord):
     cues_json: str
     hints_json: str
     contexts_json: str
+    # Kept unread: earlier cards may hold alternative answers that are no longer shown.
     variants_json: str
     search_primary: str
     search_text: str

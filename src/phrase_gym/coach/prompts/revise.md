@@ -22,7 +22,9 @@ questions. Do not read or change other files.
 </automatic_check_findings>
 
 Assess each review finding against the content rules below. Apply the corrections that make the
-card better for the learner, and ignore findings that are wrong or would weaken it. Automatic
+card better for the learner, and ignore findings that are wrong or would weaken it. A suggested
+correction must itself satisfy the content rules before you apply it; when it does not, fix the
+reported problem with wording that does. Automatic
 check findings are mandatory: the card cannot be published until they are fixed. Then inspect
 the whole card again with the checklist, because a correction can break another field. Change
 only what the findings and the checklist require; leave every other field exactly as it was.

@@ -133,7 +133,6 @@ class PhraseDetails(StrictModel):
     explanation: str
     detailed_explanation: str | None
     usage_contexts: list[str]
-    accepted_variants: list[str]
     lesson_id: str
     lesson_title: str
     source_label: str

@@ -173,14 +173,11 @@ def hint_set_problems(hints: list[str], target_text: str, contrasted: list[str])
     return problems
 
 
-def gloss_problems(cues: list[Cue], target_text: str, variants: list[str]) -> list[str]:
-    problems = []
-    for index, cue in enumerate(cues):
-        for gloss in GLOSS.findall(cue.situation):
-            for answer in [target_text, *variants]:
-                if words(answer) and contains_words(gloss, words(answer)):
-                    problems.append(
-                        f"cues.{index}: the gloss contains the answer “{answer}”; "
-                        "paraphrase it instead",
-                    )
-    return problems
+def gloss_problems(cues: list[Cue], target_text: str) -> list[str]:
+    target = words(target_text)
+    return [
+        f"cues.{index}: the gloss contains the answer “{target_text}”; paraphrase it instead"
+        for index, cue in enumerate(cues)
+        for gloss in GLOSS.findall(cue.situation)
+        if target and contains_words(gloss, target)
+    ]

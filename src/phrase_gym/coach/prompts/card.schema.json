@@ -40,7 +40,6 @@
             "cues",
             "recall_hints",
             "usage_contexts",
-            "accepted_variants",
             "detailed_explanation"
           ],
           "properties": {
@@ -79,12 +78,6 @@
               }
             },
             "usage_contexts": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "accepted_variants": {
               "type": "array",
               "items": {
                 "type": "string"

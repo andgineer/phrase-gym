@@ -45,7 +45,6 @@ onMounted(async () => {
       <PhraseExplanation
         :explanation="phrase.explanation"
         :usage-contexts="phrase.usage_contexts"
-        :accepted-variants="phrase.accepted_variants"
         :detailed-explanation="phrase.detailed_explanation"
         :open="explained"
         @toggle="explained = !explained"

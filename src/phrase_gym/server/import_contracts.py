@@ -35,7 +35,6 @@ class ImportPhrase(StrictModel):
     cues: list[Cue] = Field(min_length=1, max_length=3)
     recall_hints: list[str] = Field(min_length=2, max_length=6)
     usage_contexts: list[str] = Field(min_length=1, max_length=6)
-    accepted_variants: list[str] = Field(default_factory=list, max_length=8)
     detailed_explanation: str | None = Field(default=None, max_length=2000)
 
     @field_validator("cues")
@@ -57,13 +56,6 @@ class ImportPhrase(StrictModel):
         if any(len(value) > MAX_CONTEXT_LENGTH for value in values):
             raise ValueError(f"usage contexts must be at most {MAX_CONTEXT_LENGTH} characters")
         return _distinct(values, "usage contexts")
-
-    @field_validator("accepted_variants")
-    @classmethod
-    def variants_are_nonempty(cls, values: list[str]) -> list[str]:
-        if any(not value.strip() for value in values):
-            raise ValueError("accepted variants cannot be empty")
-        return values
 
     @model_validator(mode="after")
     def hints_do_not_repeat_the_answer(self) -> "ImportPhrase":

@@ -17,7 +17,6 @@ def phrase(index: int, **changes: object) -> dict[str, object]:
         "cues": [{"situation": f"Meeting situation number {index}."}],
         "recall_hints": [f"hint {index}", f"clue {index}"],
         "usage_contexts": ["meetings"],
-        "accepted_variants": [],
         **changes,
     }
 
@@ -83,7 +82,6 @@ def coach_card(item_id: str, **changes: object) -> dict[str, object]:
         ],
         "recall_hints": ["strong / bel...", "strongly / be..."],
         "usage_contexts": ["opinions"],
-        "accepted_variants": ["firmly believe"],
         **changes,
     }
 

@@ -81,12 +81,5 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
     problems += hint_set_problems(phrase.recall_hints, target_text, contrasted)
     problems += companion_problems(phrase.recall_hints, target_text, phrase.cues, phrase.text)
     problems += gloss_frame_problems(phrase.cues)
-    problems += gloss_problems(phrase.cues, str(answer["target"]), phrase.accepted_variants)
-    problems += [
-        f"recall_hints.{index}: the hint shows the accepted variant “{variant}”; "
-        "keep the variant and use another anchor in the hint"
-        for index, hint in enumerate(phrase.recall_hints)
-        for variant in phrase.accepted_variants
-        if contains_words(hint, words(variant))
-    ]
+    problems += gloss_problems(phrase.cues, target_text)
     return problems

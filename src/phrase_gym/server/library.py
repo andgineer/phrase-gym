@@ -67,7 +67,6 @@ class LibraryService:
             explanation=row.explanation,
             detailed_explanation=row.detailed_explanation,
             usage_contexts=json.loads(row.contexts_json),
-            accepted_variants=json.loads(row.variants_json),
             lesson_id=row.lesson_id,
             lesson_title=row.lesson_title,
             source_label=row.source_label,

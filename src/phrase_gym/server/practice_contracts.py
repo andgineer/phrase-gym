@@ -16,7 +16,6 @@ class CardAnswer(StrictModel):
     text: str
     explanation: str
     detailed_explanation: str | None
-    accepted_variants: list[str]
     usage_contexts: list[str]
     reference_url: str
 

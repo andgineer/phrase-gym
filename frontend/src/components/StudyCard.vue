@@ -101,7 +101,6 @@ const front = computed(() => !props.card.revealed)
         <PhraseExplanation
           :explanation="card.answer.explanation"
           :usage-contexts="card.answer.usage_contexts"
-          :accepted-variants="card.answer.accepted_variants"
           :detailed-explanation="card.answer.detailed_explanation"
           :open="detailsOpen"
           @toggle="emit('details')"

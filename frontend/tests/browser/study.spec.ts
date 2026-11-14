@@ -28,7 +28,6 @@ const cards = Array.from({ length: 5 }, (_, index) => ({
   cues: [{ situation: `Use the useful expression in situation ${index + 1}.` }],
   recall_hints: [`hint ${index + 1}`, `clue ${index + 1}`],
   usage_contexts: ['meetings'],
-  accepted_variants: index === 0 ? ["Let's begin."] : [],
 }))
 type Phrase = (typeof cards)[number]
 const lessons = (phrases: Phrase[]) => [{ lesson_id: 'unit-1', title: 'Meetings', phrases }]

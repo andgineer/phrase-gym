@@ -26,11 +26,10 @@ Otherwise set `outcome` to `ready`, `reason` to an empty string and fill `card`.
 
 ## Card fields
 
-- `text`, `explanation`, `cues`, `recall_hints`, `usage_contexts`, `accepted_variants` and
-  `detailed_explanation` follow the content rules below.
+- `text`, `explanation`, `cues`, `recall_hints`, `usage_contexts` and `detailed_explanation`
+  follow the content rules below.
 - Every cue `situation` contains exactly one `__________` gap (ten underscores) hiding the
   whole target. Use `partner_line` for an optional short line by the other speaker, or null.
-- `accepted_variants` lists genuinely suitable alternatives for the same meaning, or is empty.
 - `detailed_explanation` is null unless longer English help is useful, such as a contrast with
   a confusable word or expression.
 - Write all help in English.

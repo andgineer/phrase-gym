@@ -25,7 +25,6 @@ def answer(kind: str = "phrase", target: str = "strongly believe", **card: Any) 
             "cues": GOOD_CUES,
             "recall_hints": ["firm / bel...", "strongly / be..."],
             "usage_contexts": ["opinions"],
-            "accepted_variants": [],
             "detailed_explanation": None,
             **card,
         },
@@ -63,13 +62,6 @@ def test_a_well_formed_phrase_card_has_no_problems() -> None:
         ),
         (answer(recall_hints=["only one"]), "recall_hints: List should have at least 2 items"),
         (
-            answer(
-                accepted_variants=["firmly believe"],
-                recall_hints=["firmly / believe", "strong / bel..."],
-            ),
-            "recall_hints.0: the hint shows the accepted variant “firmly believe”",
-        ),
-        (
             answer(recall_hints=["strongly / bel...", "strong / beli..."]),
             "recall_hints.1: “beli...” shows 4 of the 7 letters of a target word",
         ),
@@ -88,8 +80,16 @@ def test_a_well_formed_phrase_card_has_no_problems() -> None:
             "recall_hints.0: “the plan” is already visible in a cue",
         ),
         (
-            answer(accepted_variants=["truly think"]),
-            "cues.0: the gloss contains the answer “truly think”",
+            answer(
+                cues=[
+                    {"situation": "We __________ it. (=strongly believe)", "partner_line": None},
+                ]
+            ),
+            "cues.0: the gloss contains the answer “strongly believe”",
+        ),
+        (
+            answer(accepted_variants=["firmly believe"]),
+            "accepted_variants: Extra inputs are not permitted",
         ),
         (answer(target=""), "target: missing"),
         ({**answer(), "card": None}, "card: missing"),
