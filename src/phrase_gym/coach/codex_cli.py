@@ -39,6 +39,8 @@ def permission_profile(workspace: Path, attempt: Path) -> str:
     """Reads stay inside the system minimum and this attempt; .env files are denied outright."""
     entries = {
         ":minimal": "read",
+        # The minimal set lets commands write to /tmp; this read-only entry withdraws that.
+        "/tmp": "read",  # noqa: S108 - a restriction, not a temporary file
         str(attempt): "read",
         str(workspace / ".env"): "none",
         str(workspace / "**" / ".env"): "none",

@@ -3,7 +3,9 @@ from typing import Any
 import pytest
 
 from phrase_gym.coach.card_checks import card_problems
+from phrase_gym.coach.companion_checks import companion_problems, gloss_frame_problems
 from phrase_gym.coach.preparation import render
+from phrase_gym.server.import_contracts import Cue
 
 GOOD_CUES = [
     {"situation": "We __________ that the plan will work. (=We truly think)", "partner_line": None},
@@ -291,6 +293,18 @@ RISE_CUES = [
             ),
             "cues.1: the gloss ends with “about” before “on”",
         ),
+        (
+            word_card(
+                "unwilling",
+                "She was unwilling to help.",
+                ["unw... / help", "unw... / at first"],
+                [
+                    "He seemed __________ to change. (=not willing to)",
+                    "They were __________ partners. (=reluctant)",
+                ],
+            ),
+            "cues.0: the gloss ends with “to” before “to”",
+        ),
     ],
 )
 def test_companion_and_gloss_frame_rules_name_the_problem(
@@ -314,3 +328,20 @@ def test_very_short_words_can_meet_the_companion_rules(
         target, text, hints, ["We __________ there. (=one)", "They __________ again. (=two)"]
     )
     assert card_problems(card, "coach-1") == []
+
+
+@pytest.mark.parametrize(
+    ("target", "cue"),
+    [
+        ("carry on", "Let's __________ with the plan. (=carry on)"),
+        ("get on", "I __________ with my boss. (=get on)"),
+    ],
+)
+def test_a_phrasal_verb_gloss_may_end_on_its_particle(target: str, cue: str) -> None:
+    assert gloss_frame_problems([Cue(situation=cue, partner_line=None)]) == []
+
+
+def test_an_empty_gloss_is_not_repeated_by_every_companion() -> None:
+    cues = [Cue(situation="Prices __________ again. (=)", partner_line=None)]
+    hints = ["ri... / sharp increase", "ri... / sea levels"]
+    assert companion_problems(hints, "rise", cues, "Prices rise.") == []

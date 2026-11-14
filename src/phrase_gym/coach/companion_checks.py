@@ -42,9 +42,10 @@ MINOR_WORDS = FUNCTION_WORDS | frozenset(
         "do",
     ],
 )
-PREPOSITIONS = frozenset(
-    ["about", "on", "of", "for", "to", "with", "in", "at", "by", "from", "into", "over"],
-)
+# Words that are also verb particles ("carry on", "get on", "take over") are left out, because a
+# phrasal-verb gloss may legitimately end on one before a prepositional continuation.
+FINAL_PREPOSITIONS = frozenset(["about", "of", "for", "to", "with", "at", "by", "from", "into"])
+PREPOSITIONS = FINAL_PREPOSITIONS | {"on", "in", "over"}
 
 
 def _content(companions: list[str]) -> set[str]:
@@ -59,7 +60,7 @@ def _companions(hints: list[str], target_text: str) -> list[list[str]]:
 def companion_problems(hints: list[str], target_text: str, cues: list[Cue], text: str) -> list[str]:
     problems = []
     companions = _companions(hints, target_text)
-    glosses = [gloss for cue in cues for gloss in GLOSS.findall(cue.situation)]
+    glosses = [gloss for cue in cues for gloss in GLOSS.findall(cue.situation) if words(gloss)]
     seen: dict[str, int] = {}
     for index, own in enumerate(companions):
         phrase = words(" ".join(own))
@@ -95,7 +96,7 @@ def gloss_frame_problems(cues: list[Cue]) -> list[str]:
         after = words(GLOSS.sub(" ", tail))
         for gloss in GLOSS.findall(cue.situation):
             last = words(gloss)[-1:] if words(gloss) else []
-            if last and after and last[0] in PREPOSITIONS and after[0] in PREPOSITIONS:
+            if last and after and last[0] in FINAL_PREPOSITIONS and after[0] in PREPOSITIONS:
                 problems.append(
                     f"cues.{index}: the gloss ends with “{last[0]}” before “{after[0]}” in the "
                     "cue; make it fit the sentence frame",

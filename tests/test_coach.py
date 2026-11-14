@@ -277,7 +277,7 @@ def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(tmp_p
     profile = arguments[arguments.index('default_permissions="phrase-gym-coach"') + 2]
     assert profile == (
         "permissions.phrase-gym-coach.filesystem={"
-        f'":minimal"="read", "{attempt}"="read", '
+        f'":minimal"="read", "/tmp"="read", "{attempt}"="read", '
         f'"{workspace}/.env"="none", "{workspace}/**/.env"="none"}}'
     )
     assert "danger" not in " ".join(arguments)
