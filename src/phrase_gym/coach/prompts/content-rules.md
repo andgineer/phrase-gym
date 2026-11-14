@@ -85,7 +85,10 @@ complete target or giving its sentence opening as a wording scaffold is not a me
 A gloss must not contain the target or any accepted variant: the learner could read it into the
 gap and give an accepted answer without retrieving the target. A gloss adds no meaning the target
 lacks, such as a purpose or a result, and uses no idiom or word harder than the target. On a
-word-sense card, no single word in a gloss may itself fit the gap.
+word-sense card, no single word in a gloss may itself fit the gap. A gloss fits the gap's
+grammatical frame: the sentence still reads correctly with the gloss in the gap, so an
+adjective slot gets an adjective phrase, the subject stays the one who acts, and a gloss does
+not end on a preposition that the cue's continuation already supplies.
 
 The learner retrieves the chunk and may say the completed cue sentence. Self-rating concerns
 that chunk's form and appropriate use, not the original example's incidental content. Revealed
@@ -139,9 +142,12 @@ Measure it: any shortened word, written with `...` or not, shows at most half of
 slashes, more than a quarter of the target's letters stay hidden; and a hint's other words are
 not already visible in a cue, where they would add nothing. A hint is not the target's opening
 words in order (`it's / up` for **It's up to you**) and does not end on a bare article,
-possessive, demonstrative or conjunction (`edit a`). Two hints never repeat the same companion
-words; each companion gives a different kind of support, such as a collocate, a situation or a
-grammatical frame, rather than a synonym of another hint's companion. A hint never contains the
+possessive, demonstrative or conjunction (`edit a`). Each companion is a word that goes with the
+target (a collocate), a situation, or a sentence frame, always in the target's own sense: never a
+paraphrase that repeats a gloss and never a memory trick from another sense of the word. No two
+hints share a companion word other than small grammatical words, and on a card with two or more
+hints at least one companion comes from outside the example sentence in `text`. A hint never
+contains the
 expression the card contrasts; when a fragment or word in a hint also fits that expression, its
 companion must tell the two apart (`rem... / me about`, not `rem... / alarm`, for **remind**
 against **remember**), and no companion may pull against the target's meaning.
@@ -198,7 +204,9 @@ the card; another sense needs its own card.
   or context word to a synonym: a synonym in a hint is a different answer the learner can
   simply read out.
 - `accepted_variants`: words that fit the intended sense and register in every cue, such as
-  **hesitant** for **reluctant**. List a natural synonym here rather than in a hint.
+  **hesitant** for **reluctant**. List a natural synonym here rather than in a hint. Do not accept
+  a broad synonym that would let the learner avoid the target in every cue, or one that the
+  card's own contrast describes as different.
 - `detailed_explanation`: for a troublesome near-synonym or lookalike, the one short contrast
   described above, such as **reluctant** versus **reticent**.
 - `usage_contexts`: short searchable uses, as for phrases.
@@ -216,7 +224,8 @@ practical default; a definition the learner understands is not yet spoken retrie
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
    Check that no gloss contains the target or an accepted variant, adds meaning, is harder than
-   the target, or, on a word-sense card, contains a word that itself fits the gap.
+   the target, breaks the gap's grammatical frame, or, on a word-sense card, contains a word
+   that itself fits the gap.
 3. **Discrimination:** try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.
@@ -225,9 +234,9 @@ practical default; a definition the learner understands is not yet spoken retrie
    meaning glosses, generic labels, peripheral words alone and one useful pair split into separate
    entries. Check that every hint is a complete alternative, not a permutation or a dependent step.
    Check short-target exceptions carefully and correct weak hints. Apply the measured hint
-   limits to every hint of every card, however short the target. Check that the companions give
-   different kinds of support and that a hint sharing a fragment or word with the contrasted
-   expression still points only to the target.
+   limits to every hint of every card, however short the target. Check that every companion is
+   a collocate, situation or sentence frame in the target's own sense, and that a hint sharing a
+   fragment or word with the contrasted expression still points only to the target.
 5. **Transferable context:** keep the target constant across cues while changing useful context;
    do not demand memorization of the original sentence's business claim or technical vocabulary.
 6. **Honest support:** identify the chunk or word in the explanation and keep suitable

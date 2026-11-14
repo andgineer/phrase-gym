@@ -8,12 +8,12 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 **Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
 
-The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words) path runs end to end on actual Claude preparation: typed phrases and words become published cards that reach a first rated attempt with saved replay, and insufficient input fails with a concrete reason. Structural checks and the content rules cover the recurring minor flaws a held-out review found. Remaining:
+The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words) path runs end to end on actual Claude preparation: typed phrases and words become published cards that reach a first rated attempt with saved replay, and insufficient input fails with a concrete reason. Codex, selected with `--cli codex`, prepares cards from the same prompts and passes the same checks. Structural checks and the content rules cover the recurring minor flaws a held-out review found. Remaining:
 
-- Run a fresh set of untouched held-out items, supplied by the orchestrator, on the frozen prompts and have a fresh reviewer assess the outputs semantically.
+- Run a fresh set of untouched held-out items, supplied by the orchestrator, on the frozen prompts with both Claude and Codex, and have a fresh reviewer assess the outputs semantically.
 - Listen, attended, to Coach's Piper references.
 
-**Exit:** a typed English phrase and a typed word each go from the Coach field through actual Claude preparation to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.
+**Exit:** a typed English phrase and a typed word each go from the Coach field through actual preparation with each Coach CLI to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.
 
 ## 5. Extend only the content the learner next needs
 
@@ -26,8 +26,6 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 ## 6. Add convenience after actual use
 
 Choose improvements from observed friction: a settings editor for the stored daily due/new limits, a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
-
-Qualify Codex as an alternative Coach CLI with real development and held-out outputs and a fresh semantic review, using the same frozen vendor-neutral prompts with no Codex-specific variant. This is not a prerequisite for Stage 5 or any other stage.
 
 Implement the [per-user Coach service commands](../architecture.md#package-and-commands) after the local MVP: `install-coach` registers and starts Coach, and `uninstall-coach` removes the registration while preserving data. Verify startup and removal on macOS launchd and Linux systemd user services; neither command requires the cloud `deploy` extra.
 

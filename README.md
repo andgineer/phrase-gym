@@ -29,8 +29,8 @@ it stops with an explanation and leaves the directory unchanged.
 Type a phrase or word, optionally followed by the sentence it came from, into the field at the
 top right and press **Coach**. The application's Coach prepares a complete card with reference
 audio using your logged-in Claude Code CLI and local Piper voice, and adds it to the **Added with
-Coach** lesson. `phrase-gym coach --cli codex` uses the Codex CLI instead, which is not yet
-qualified for Coach. An external AI agent can instead prepare a course batch with its reference audio
+Coach** lesson. `phrase-gym coach --cli codex` uses the logged-in Codex CLI instead; Coach never
+switches between the two on its own. An external AI agent can instead prepare a course batch with its reference audio
 and submit it for immediate study. See [how to add phrases](https://andgineer.github.io/phrase-gym/importing-phrases/) for
 both workflows.
 

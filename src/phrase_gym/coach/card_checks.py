@@ -3,6 +3,10 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from phrase_gym.coach.companion_checks import (
+    companion_problems,
+    gloss_frame_problems,
+)
 from phrase_gym.coach.hint_checks import (
     bold_expressions,
     contains_words,
@@ -73,7 +77,10 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
     for index, hint in enumerate(phrase.recall_hints):
         problems += hint_problems(index, hint, str(answer["target"]), phrase.cues)
     contrasted = bold_expressions(phrase.explanation, phrase.detailed_explanation)
-    problems += hint_set_problems(phrase.recall_hints, str(answer["target"]), contrasted)
+    target_text = str(answer["target"])
+    problems += hint_set_problems(phrase.recall_hints, target_text, contrasted)
+    problems += companion_problems(phrase.recall_hints, target_text, phrase.cues, phrase.text)
+    problems += gloss_frame_problems(phrase.cues)
     problems += gloss_problems(phrase.cues, str(answer["target"]), phrase.accepted_variants)
     problems += [
         f"recall_hints.{index}: the hint shows the accepted variant “{variant}”; "

@@ -6,6 +6,7 @@ from phrase_gym.server.import_contracts import Cue
 ELLIPSIS = re.compile(r"\.\.\.|…")
 WORD = re.compile(r"[\w']+")
 GLOSS = re.compile(r"\(=([^)]*)\)")
+GAP_TEXT = "__________"
 BOLD = re.compile(r"\*\*(.+?)\*\*")
 MIN_OPENING_WORDS = 2
 # Words that dangle at a hint's end; prepositions such as "to" or "about" may still end one.
@@ -159,18 +160,8 @@ def bold_expressions(*texts: str | None) -> list[str]:
 
 
 def hint_set_problems(hints: list[str], target_text: str, contrasted: list[str]) -> list[str]:
-    target = [letters(word) for word in words(target_text) if letters(word)]
     problems = []
-    seen: dict[tuple[str, ...], int] = {}
     for index, hint in enumerate(hints):
-        parts = parse_hint(index, hint, target)
-        companion = tuple(sorted(words(" ".join(sum(parts.companions, [])))))
-        if companion and companion in seen:
-            problems.append(
-                f"recall_hints.{index}: it repeats the companion words of recall_hints."
-                f"{seen[companion]}; give a different kind of support",
-            )
-        seen.setdefault(companion, index)
         for expression in contrasted:
             other = words(expression)
             own = set(words(target_text)) | FUNCTION_WORDS

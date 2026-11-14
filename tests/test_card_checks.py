@@ -184,7 +184,7 @@ def test_short_targets_can_still_meet_every_hint_rule(
         ),
         (
             {"target": "owe", "kind": "word", "hints": ["o... / the bank", "ow... / the bank"]},
-            "recall_hints.1: it repeats the companion words of recall_hints.0",
+            "recall_hints.1: it shares “bank” with recall_hints.0",
         ),
         (
             {
@@ -234,3 +234,83 @@ def test_function_words_that_introduce_the_target_are_not_dangling(target: str, 
 def test_a_hint_that_really_ends_on_an_article_still_fails(target: str, hint: str) -> None:
     problems = card_problems(short_answer(target, "word", [hint, "zz... / other"]), "coach-1")
     assert any("ends with the bare word “a”" in problem for problem in problems)
+
+
+def word_card(target: str, text: str, hints: list[str], cues: list[str]) -> dict[str, Any]:
+    return answer(
+        kind="word",
+        target=target,
+        text=text,
+        cues=[{"situation": cue, "partner_line": None} for cue in cues],
+        recall_hints=hints,
+    )
+
+
+RISE_CUES = [
+    "Fuel costs keep __________ every month. (=getting higher)",
+    "Our rent __________ by 10% last year. (=got higher)",
+]
+
+
+@pytest.mark.parametrize(
+    ("card", "problem"),
+    [
+        (
+            word_card(
+                "rise",
+                "Prices rise fast.",
+                ["ri... / getting higher", "ri... / sharply"],
+                RISE_CUES,
+            ),
+            "recall_hints.0: “getting higher” repeats a cue gloss",
+        ),
+        (
+            word_card(
+                "rise",
+                "Prices rise fast.",
+                ["ri... / sharply", "ri... / sharply upward"],
+                RISE_CUES,
+            ),
+            "recall_hints.1: it shares “sharply” with recall_hints.0",
+        ),
+        (
+            word_card(
+                "rise", "Prices rise sharply.", ["ri... / prices", "ri... / sharply"], RISE_CUES
+            ),
+            "recall_hints: every companion comes from the example sentence",
+        ),
+        (
+            word_card(
+                "posted",
+                "Keep me posted.",
+                ["pos... / waiting for news", "pos... / job interview"],
+                [
+                    "Good luck! Keep me __________. (=updated)",
+                    "Keep me __________ on the results. (=told more about)",
+                ],
+            ),
+            "cues.1: the gloss ends with “about” before “on”",
+        ),
+    ],
+)
+def test_companion_and_gloss_frame_rules_name_the_problem(
+    card: dict[str, Any], problem: str
+) -> None:
+    assert any(found.startswith(problem) for found in card_problems(card, "coach-1"))
+
+
+@pytest.mark.parametrize(
+    ("target", "text", "hints"),
+    [
+        ("rise", "Prices rise sharply.", ["ri... / prices", "ri... / by itself"]),
+        ("go", "Let's go.", ["g... / home", "g... / for a walk"]),
+        ("fit", "These shoes fit.", ["f... / like a glove", "f... / the lock"]),
+    ],
+)
+def test_very_short_words_can_meet_the_companion_rules(
+    target: str, text: str, hints: list[str]
+) -> None:
+    card = word_card(
+        target, text, hints, ["We __________ there. (=one)", "They __________ again. (=two)"]
+    )
+    assert card_problems(card, "coach-1") == []

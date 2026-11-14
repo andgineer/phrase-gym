@@ -53,8 +53,11 @@ Imports from an external AI agent arrive with complete audio and do not need Coa
 the separately pinned private environment described in the voice setup guide.
 
 To prepare with the [Codex CLI](https://developers.openai.com/codex/cli) instead, log in to it
-with `codex login` and start Coach with `phrase-gym coach --cli codex`. Codex is not yet
-qualified for Coach; Coach never switches between the two on its own. Each CLI keeps its own
+with `codex login` and start Coach with `phrase-gym coach --cli codex`. Both CLIs prepare cards
+from the same rules; Coach never switches between the two on its own. Commands Codex's model runs
+go through a restricted Codex sandbox that can read only the current preparation's files and
+cannot read `.env` files, your home directory or your learning data, write files or reach the
+network; tools and servers from your own Codex settings are not covered. Each CLI keeps its own
 model and settings, and Phrase Gym does not choose a model.
 
 The `install-coach`, `uninstall-coach`, and `deploy` commands report that they are unavailable.

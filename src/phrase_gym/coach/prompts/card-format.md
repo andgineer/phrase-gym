@@ -19,10 +19,10 @@ audio, so keep it a complete, natural spoken unit.
 Use the supplied context and your judgment to choose the sense or meaning. Set `outcome` to
 `insufficient` only when no coherent English card can be prepared, for example when the input
 has no English word or expression, mixes several unrelated targets, or is unreadable. Then give
-a short concrete `reason` addressed to the learner, such as "No English word or expression was
-found.". The learner sees the reason next to their text, so do not quote the input in it. Set
-`card` to null. Otherwise set `outcome` to `ready`, `reason` to an
-empty string and fill `card`.
+a short concrete `reason` addressed to the learner that says what went wrong and what to do,
+such as "No English word or expression was found. Type an English word or phrase.". The learner
+sees the reason next to their text, so do not quote the input in it. Set `card` to null.
+Otherwise set `outcome` to `ready`, `reason` to an empty string and fill `card`.
 
 ## Card fields
 

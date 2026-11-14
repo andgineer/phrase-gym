@@ -24,7 +24,8 @@ questions. Do not read or change other files.
 Assess each review finding against the content rules below. Apply the corrections that make the
 card better for the learner, and ignore findings that are wrong or would weaken it. Automatic
 check findings are mandatory: the card cannot be published until they are fixed. Then inspect
-the whole card again with the checklist, because a correction can break another field.
+the whole card again with the checklist, because a correction can break another field. Change
+only what the findings and the checklist require; leave every other field exactly as it was.
 
 Keep `kind` and `target` unless a finding shows the target was chosen wrongly. When the input
 supplies a source sentence, keep it unchanged in `text`. If the input turns out to be
