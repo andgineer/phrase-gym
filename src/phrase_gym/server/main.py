@@ -45,7 +45,7 @@ def main() -> None:
         "--cli",
         choices=CLI_CHOICES,
         default="claude",
-        help="Preparation CLI; codex is an unqualified alternative",
+        help="Preparation CLI (default: claude)",
     )
     for name in ("install-coach", "uninstall-coach", "deploy"):
         commands.add_parser(name, help="Planned command; not available yet")
