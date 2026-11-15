@@ -4,7 +4,15 @@ The adult learner's goal is to bring useful expressions from courses and videos 
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
 
-## 4. Prepare typed phrases and words in Coach
+## 4. Phone-first interface
+
+**Learner outcome:** use Phrase Gym as a home-screen app on a phone: one bar for Practice, Library, Coach and Settings, a **Start** button with today's counts, a practice card whose controls never move, and the app version on every page.
+
+The [phone-first interface plan](phone-first-interface.md) owns the approved screens, server reads, spec updates, checkpoints and tests.
+
+**Exit:** on a 390 px screen in both browser engines every page fits without horizontal scrolling, the microphone sits in the same place on both card sides, and hints, recording history and explanations never move a control. A phrase can be sent to Coach from the Coach page and from a Library search that finds nothing. Home-screen use on the learner's iPhone is attended acceptance, reported separately.
+
+## 5. Prepare typed phrases and words in Coach
 
 **Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
 
@@ -15,7 +23,7 @@ The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-ph
 
 **Exit:** a typed English phrase and a typed word each go from the Coach field through actual preparation with each Coach CLI to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.
 
-## 5. Extend only the content the learner next needs
+## 6. Extend only the content the learner next needs
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.
 
@@ -23,7 +31,7 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 **Exit:** one representative batch in the selected extension works through the existing complete loop. No all-language/platform matrix gates delivery.
 
-## 6. Add convenience after actual use
+## 7. Add convenience after actual use
 
 Choose improvements from observed friction: a settings editor for the stored daily due/new limits, a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
