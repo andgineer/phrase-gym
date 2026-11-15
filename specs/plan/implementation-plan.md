@@ -1,6 +1,6 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. The Coach field and its preparation path are in place; Coach's Claude preparation still needs a fresh held-out confirmation with semantic review before content sources expand. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. Coach prepares typed phrases and words into complete cards with Claude or Codex; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
 
@@ -12,18 +12,7 @@ The [phone-first interface plan](phone-first-interface.md) owns the approved scr
 
 **Exit:** on a 390 px screen in both browser engines every page fits without horizontal scrolling, the microphone sits in the same place on both card sides, and hints, recording history and explanations never move a control. A phrase can be sent to Coach from the Coach page and from a Library search that finds nothing. Home-screen use on the learner's iPhone is attended acceptance, reported separately.
 
-## 5. Prepare typed phrases and words in Coach
-
-**Learner outcome:** type a phrase or word into the header field, press **Coach** and later practice a complete card for it, without handling any file or JSON.
-
-The [Coach field](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words) path runs end to end on actual Claude preparation: typed phrases and words become published cards that reach a first rated attempt with saved replay, and insufficient input fails with a concrete reason. Codex, selected with `--cli codex`, prepares cards from the same prompts and passes the same checks. Structural checks and the content rules cover the recurring minor flaws a held-out review found. Remaining:
-
-- Run a fresh set of untouched held-out items, supplied by the orchestrator, on the frozen prompts with both Claude and Codex, and have a fresh reviewer assess the outputs semantically.
-- Listen, attended, to Coach's Piper references.
-
-**Exit:** a typed English phrase and a typed word each go from the Coach field through actual preparation with each Coach CLI to a first rated attempt, later productive recall and saved replay in the same app. Stated failures remain actionable and do not damage existing cards.
-
-## 6. Extend only the content the learner next needs
+## 5. Extend only the content the learner next needs
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.
 
@@ -31,7 +20,7 @@ Choose one concrete need at a time: German chunks with Russian cues/help; Serbia
 
 **Exit:** one representative batch in the selected extension works through the existing complete loop. No all-language/platform matrix gates delivery.
 
-## 7. Add convenience after actual use
+## 6. Add convenience after actual use
 
 Choose improvements from observed friction: a settings editor for the stored daily due/new limits, a launcher, simpler export/import, an explicit Recreate action after internal preparation exists, or a button for the same stopped-app backup/restore. Keep the architecture small even in personal production use.
 
