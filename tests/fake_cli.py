@@ -25,7 +25,11 @@ def card(typed: str, step: str) -> dict[str, object]:
     word = len(target.split()) == 1
     first = target.split()[0]
     half = max(1, len(first) // 2)
-    leaky = "stubborn" in typed or ("leaky" in typed and step == "prepare")
+    leaky = (
+        "stubborn" in typed
+        or ("leaky" in typed and step == "prepare")
+        or ("sticky" in typed and step in ("prepare", "revise"))
+    )
     cues = [
         {"situation": f"Context {index}: __________ here. (=sense {index})", "partner_line": None}
         for index in range(1, 4 if word else 3)
@@ -52,8 +56,11 @@ def card(typed: str, step: str) -> dict[str, object]:
 def answer(typed: str, step: str) -> dict[str, object]:
     if step.startswith("review"):
         findings = []
-        # "leaky" is fixed by the first revision; "picky" and "stubborn" keep drawing findings.
-        if ("leaky" in typed and step == "review") or "stubborn" in typed or "picky" in typed:
+        # "leaky" is fixed by the first revision; "picky" and "stubborn" keep drawing findings;
+        # "sticky" keeps its leak through the first revision while the second review stays silent.
+        first_only = ("leaky", "sticky", "giveup")
+        first = step == "review" and any(word in typed for word in first_only)
+        if first or "stubborn" in typed or "picky" in typed:
             findings = [
                 {
                     "field": "recall_hints.0",
@@ -62,7 +69,7 @@ def answer(typed: str, step: str) -> dict[str, object]:
                 }
             ]
         return {"findings": findings}
-    if "insufficient" in typed:
+    if "insufficient" in typed or ("giveup" in typed and step.startswith("revise")):
         return {
             "outcome": "insufficient",
             "reason": "No English word or expression was found in the input.",

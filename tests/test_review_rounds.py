@@ -33,8 +33,14 @@ def calls(attempt: Path) -> list[str]:
         ("clean", ["prepare", "review"]),
         ("leaky", ["prepare", "review", "revise", "review-2"]),
         ("picky", ["prepare", "review", "revise", "review-2", "revise-2"]),
+        ("sticky", ["prepare", "review", "revise", "review-2", "revise-2"]),
     ],
-    ids=["clean first review", "clean second review", "two revisions"],
+    ids=[
+        "clean first review",
+        "clean second review",
+        "two revisions",
+        "first revision fails its checks",
+    ],
 )
 def test_a_corrected_card_is_reviewed_again_before_publication(
     cli: Cli, tmp_path: Path, typed: str, steps: list[str]
@@ -61,3 +67,14 @@ def test_the_second_review_judges_the_corrected_card_without_earlier_findings(
     second = (attempt / "review-2-prompt.md").read_text()
     assert "The hint gives the whole target." not in second
     assert '"le... / one"' in second
+
+
+def test_a_revision_that_finds_the_input_insufficient_ends_without_a_retry(
+    cli: Cli, tmp_path: Path
+) -> None:
+    attempt = tmp_path / "attempt"
+    with pytest.raises(PreparationError) as raised:
+        asyncio.run(prepare_card("giveup", "coach-1", cli, attempt))
+    assert raised.value.retry_helps is False
+    assert str(raised.value) == "No English word or expression was found in the input."
+    assert calls(attempt) == ["prepare", "review", "revise"]
