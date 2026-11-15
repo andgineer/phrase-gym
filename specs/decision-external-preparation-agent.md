@@ -67,7 +67,9 @@ reads the task file, returns structured output, restricts tools and reports erro
 its adapter. A prompt changes only to state a content rule more clearly for any capable agent,
 and a deterministic structural check is preferred where one can catch the problem.
 Use separate CLI sessions to prepare material and review it. Assess the review findings,
-apply useful corrections and check the changes before publication. Coach is a headless worker:
+apply useful corrections and check the changes before publication. A corrected card is reviewed
+again by a fresh session that sees only the card as it stands; Coach makes at most two reviews
+and two corrections per card and publishes only a card that passes its automatic checks. Coach is a headless worker:
 it takes inbox material, prepares it and publishes through the API. Neither Coach nor the external
 preparation agent requests learner opinions or produces preparation reports. Successful API
 publication completes the task; unresolved failures use the existing error path. Keep development

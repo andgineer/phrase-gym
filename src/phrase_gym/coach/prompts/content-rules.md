@@ -78,11 +78,9 @@ meaning rather than replacing it with a broader nearby idea.
 Paraphrase the chunk, not a new claim about a subject or action already supplied outside the gap.
 For a connector, give a connector-like gloss rather than another complete content statement.
 
-Vary gloss wording between the two cues when natural, while preserving the same intention.
-For **This would allow you to**, `=This would let you` and `=You would be able to` are clear
-alternatives. Do not paste one generic gloss into every context by default. Repetition is
-acceptable for a very short routine when a different gloss would become strained or change
-meaning. Common words shared with the target are not automatically a leak, but copying the
+Word each cue's gloss differently while preserving the same intention: two cues of one card never
+share a gloss. For **This would allow you to**, `=This would let you` and `=You would be able to`
+are clear alternatives. Common words shared with the target are not automatically a leak, but copying the
 complete target or giving its sentence opening as a wording scaffold is not a meaning gloss.
 A gloss must not contain the target: the learner could read it into the gap without retrieving
 anything. A gloss adds no meaning the target lacks, such as a purpose or a result, and uses
@@ -225,8 +223,10 @@ practical default; a definition the learner understands is not yet spoken retrie
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.
-   Check that no gloss contains the target, adds meaning, is harder than the target or breaks
-   the gap's grammatical frame.
+   Check that no gloss contains the target, adds meaning, is harder than the target, breaks
+   the gap's grammatical frame or repeats another cue's gloss, and that each gloss agrees with
+   its own cue's visible context: a zipped pocket keeps keys from being lost, so a gloss about
+   forgetting where they are contradicts that cue.
 3. **Discrimination:** try likely competing expressions for every cue.
    Check whether syntax and meaning distinguish them; allow natural alternatives.
    Assess how each requested wording hint helps identify the intended chunk without giving it all.
@@ -241,7 +241,9 @@ practical default; a definition the learner understands is not yet spoken retrie
 5. **Transferable context:** keep the target constant across cues while changing useful context;
    two cues that repeat one sentence frame are not different contexts. Do not demand
    memorization of the original sentence's business claim or technical vocabulary.
-6. **Honest support:** identify the chunk or word in the explanation. Check every claim in the
-   contrast on its own, including the stated overlap.
+6. **Honest support:** identify the chunk or word in the explanation. When the target has a
+   well-known lookalike or near-synonym that learners confuse, such as **lose** and **loose**,
+   make that the card's one contrast. Check every claim in the contrast on its own, including
+   the stated overlap.
    Do not append repeated disclaimers to learner explanations. Study precedes recall;
    requested help is supported retrieval.

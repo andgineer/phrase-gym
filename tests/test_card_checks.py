@@ -305,6 +305,18 @@ RISE_CUES = [
             ),
             "cues.0: the gloss ends with “to” before “to”",
         ),
+        (
+            word_card(
+                "keen",
+                "She's keen to start.",
+                ["ke... / to help", "ke... / on football"],
+                [
+                    "I'm __________ to learn. (=Eager)",
+                    "Are you __________ to come? (=eager.)",
+                ],
+            ),
+            "cues.1: it repeats the gloss of cues.0",
+        ),
     ],
 )
 def test_companion_and_gloss_frame_rules_name_the_problem(

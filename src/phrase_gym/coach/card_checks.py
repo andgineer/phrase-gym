@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from phrase_gym.coach.companion_checks import (
     companion_problems,
     gloss_frame_problems,
+    repeated_gloss_problems,
 )
 from phrase_gym.coach.hint_checks import (
     bold_expressions,
@@ -81,5 +82,6 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
     problems += hint_set_problems(phrase.recall_hints, target_text, contrasted)
     problems += companion_problems(phrase.recall_hints, target_text, phrase.cues, phrase.text)
     problems += gloss_frame_problems(phrase.cues)
+    problems += repeated_gloss_problems(phrase.cues)
     problems += gloss_problems(phrase.cues, target_text)
     return problems

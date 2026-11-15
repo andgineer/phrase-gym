@@ -50,9 +50,10 @@ def card(typed: str, step: str) -> dict[str, object]:
 
 
 def answer(typed: str, step: str) -> dict[str, object]:
-    if step == "review":
+    if step.startswith("review"):
         findings = []
-        if "leaky" in typed or "stubborn" in typed:
+        # "leaky" is fixed by the first revision; "picky" and "stubborn" keep drawing findings.
+        if ("leaky" in typed and step == "review") or "stubborn" in typed or "picky" in typed:
             findings = [
                 {
                     "field": "recall_hints.0",

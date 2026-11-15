@@ -102,3 +102,19 @@ def gloss_frame_problems(cues: list[Cue]) -> list[str]:
                     "cue; make it fit the sentence frame",
                 )
     return problems
+
+
+def repeated_gloss_problems(cues: list[Cue]) -> list[str]:
+    problems = []
+    seen: dict[tuple[str, ...], int] = {}
+    for index, cue in enumerate(cues):
+        for gloss in GLOSS.findall(cue.situation):
+            key = tuple(words(gloss))
+            if key in seen:
+                problems.append(
+                    f"cues.{index}: it repeats the gloss of cues.{seen[key]}; "
+                    "word each cue's gloss for its own context",
+                )
+            elif key:
+                seen[key] = index
+    return problems

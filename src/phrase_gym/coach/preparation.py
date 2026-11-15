@@ -58,41 +58,50 @@ def _ready(answer: dict[str, Any]) -> dict[str, Any]:
             retry_helps=False,
         )
     if answer.get("outcome") != "ready":
-        raise PreparationError("Codex returned an answer without a ready card")
+        raise PreparationError("The preparation CLI returned an answer without a ready card")
     return answer
 
 
 def _findings(review: dict[str, Any]) -> list[dict[str, Any]]:
     findings = review.get("findings")
     if not isinstance(findings, list):
-        raise PreparationError("Codex returned a review without findings")
+        raise PreparationError("The preparation CLI returned a review without findings")
     return [finding for finding in findings if isinstance(finding, dict)]
+
+
+# A corrected card is reviewed once more; at most two reviews and two revisions per card.
+REVISION_ROUNDS = (("review", "revise"), ("review-2", "revise-2"))
+
+
+async def _review(cli: Cli, attempt: Path, step: str, typed: str, card: dict[str, Any]) -> list:
+    review = await cli.ask(
+        attempt,
+        step,
+        render("review.md", input=typed, draft=_shown(card)),
+        _schema("review.schema.json"),
+    )
+    return _findings(review)
 
 
 async def prepare_card(text: str, item_id: str, cli: Cli, attempt: Path) -> ImportPhrase:
     typed = _shown(text)
     card_schema = _schema("card.schema.json")
-    draft = _ready(
+    final = _ready(
         await cli.ask(attempt, "prepare", render("prepare.md", input=typed), card_schema),
     )
-    problems = card_problems(draft, item_id)
-    review = await cli.ask(
-        attempt,
-        "review",
-        render("review.md", input=typed, draft=_shown(draft)),
-        _schema("review.schema.json"),
-    )
-    findings = _findings(review)
-    final = draft
-    if findings or problems:
+    for review_step, revise_step in REVISION_ROUNDS:
+        problems = card_problems(final, item_id)
+        findings = await _review(cli, attempt, review_step, typed, final)
+        if not findings and not problems:
+            break
         prompt = render(
             "revise.md",
             input=typed,
-            draft=_shown(draft),
+            draft=_shown(final),
             findings=_shown(findings),
             problems=_shown(problems),
         )
-        final = _ready(await cli.ask(attempt, "revise", prompt, card_schema))
+        final = _ready(await cli.ask(attempt, revise_step, prompt, card_schema))
     problems = card_problems(final, item_id)
     if problems:
         raise PreparationError("The prepared card failed its checks: " + "; ".join(problems))
