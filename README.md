@@ -51,8 +51,8 @@ reveal: **Again**, **Hard**, **Good** or **Easy**. A rating or **Skip** saves an
 attempts reach a daily limit, each press extends that category by one more limit (for example 20
 recalls become 40); pressing again without further practice adds nothing, and completed practice is
 never reset. Skipped phrases from earlier passes come back; phrases that are not yet due never do.
-When today's allowance is used, Start stays disabled and Extra appears if more eligible phrases
-remain. When nothing remains, only disabled Start and the finished message show. The tabs return
+When the traversal finishes, Start stays disabled and Extra appears if a fresh pass would offer
+eligible phrases, including skipped phrases or those beyond today's allowance. When nothing remains, only disabled Start and the finished message show. The tabs return
 to a page and retain any recording; **Start** resumes the regular card later. On either card side
 the full-width microphone stays in the same position. Ratings and Skip stay at the bottom.
 

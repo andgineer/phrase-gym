@@ -1,5 +1,6 @@
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
 
 from tests.phrase_packages import lesson, make_package, phrase, publish
@@ -36,7 +37,7 @@ def test_today_caps_counts_and_extra_extension_without_opening_a_view(client: Te
     assert today(practice)["extra_available"]
     practice.extra()
     assert today(practice)["due_count"] == today(practice)["new_count"] == 2
-    assert not today(practice)["extra_available"]
+    assert today(practice)["extra_available"]
 
 
 def test_today_skips_lesson_resume_phrase_practice_and_rollover(client: TestClient) -> None:
@@ -83,3 +84,31 @@ def test_today_zero_limits_and_no_extra_when_nothing_remains(client: TestClient)
     assert today(practice)["new_count"] == today(practice)["due_count"] == 0
     assert not today(practice)["extra_available"]
     assert today(practice)["message"].startswith("Today's practice is complete.")
+
+
+@pytest.mark.parametrize("kind", ["new", "recall"])
+def test_extra_restores_skipped_phrases_before_the_allowance_is_used(
+    client: TestClient, kind: str
+) -> None:
+    practice = Practice(client)
+    publish(client, make_package(lessons=[lesson("one", "One", [phrase(1), phrase(2)])]))
+    ids = [row["id"] for row in practice.rows("SELECT id FROM phrases ORDER BY position")]
+    if kind == "recall":
+        practice.make_due(*ids)
+    practice.set_limits(due=5, new=5)
+    state = practice.daily()
+    while state["card"]:
+        state = practice.finish(state["card"], "skipped")["state"]
+    waiting = today(practice)
+    assert waiting["due_count"] == waiting["new_count"] == 0
+    assert waiting["extra_available"]
+    before = practice.rows("SELECT * FROM phrases ORDER BY position")
+    extra = practice.extra()["state"]
+    assert extra["card"]["phrase_id"] in ids
+    assert extra["card"]["kind"] == kind
+    assert extra["progress"]["due_allowance"] == extra["progress"]["new_allowance"] == 5
+    assert len(practice.log()) == 2
+    after = practice.rows("SELECT * FROM phrases ORDER BY position")
+    assert [row | {"last_cue": None} for row in after] == [
+        row | {"last_cue": None} for row in before
+    ]

@@ -18,7 +18,7 @@ The learner approved the layout on a design canvas: <https://claude.ai/artifact/
 
 - The **English** eyebrow, then the Start card, then the existing practice-facts panel with its content unchanged.
 - While something is waiting, the Start card shows two large numbers, **due** and **new**: exactly what Start will offer today for the selected lesson, meaning phrases eligible under Daily's selection, capped by today's remaining allowance including any Extra extension, excluding phrases skipped in the current traversal. The lesson selector sits at the card's top right as a compact chip naming the selection (**All lessons**); opening it keeps the existing lesson-field behaviour (list, typing narrows, leaving keeps the selection). Below, one full-width primary **Start** button opens or resumes Daily exactly as the Daily button does now. There is no **Today** label, and Extra is hidden.
-- When nothing is waiting, the numbers give way to the existing finished wording (**Nothing waiting today** or **Today's practice is complete**, with **Next due: …** when known). Start stays in place, greyed and disabled. **Extra** appears beside it as the primary button, but only when Extra would find phrases: some eligible due or new phrase in the selection lies beyond today's allowance. When nothing is left at all, only the greyed Start and the message show.
+- When nothing is waiting, the numbers give way to the existing finished wording (**Nothing waiting today** or **Today's practice is complete**, with **Next due: …** when known). Start stays in place, greyed and disabled. **Extra** appears beside it as the primary button, but only when Extra would find phrases: a fresh traversal can offer an eligible due or new phrase in the selection, including phrases skipped in the current traversal or beyond today's allowance. When nothing is left at all, only the greyed Start and the message show.
 - An empty library says **Add your first phrase with Coach to begin.**, with Coach linking to the Coach page.
 - Errors and the Extra retry stay below the card as now.
 
@@ -105,7 +105,7 @@ Each checkpoint is one coherent deliverable under the [handout](orchestration-ha
   - the microphone's bounding box is identical on the front and back of the same card;
   - opening Hint, Recording history and More explanation leaves every control's bounding box unchanged;
   - Practice, Library, Coach, Settings and both card sides have no horizontal overflow;
-  - Start alone while phrases wait; greyed Start with Extra once the allowance is used and phrases remain; greyed Start without Extra when nothing remains;
+  - Start alone while phrases wait; greyed Start with Extra when eligible phrases remain beyond the allowance or after traversal skips; greyed Start without Extra when nothing remains;
   - the Coach page submits and shows each of the three confirmations; a Library search with no match sends;
   - the shown version equals the server's;
   - `/#coach` opens the Coach page.

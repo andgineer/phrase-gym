@@ -85,8 +85,8 @@ class TodayPractice:
             extra_due = due_phrases(connection, extra_view, now)
             extra_new = new_phrases(connection, extra_view)
             extra_available = bool(
-                (settings.daily_due_limit and len(extra_due) > due_left)
-                or (settings.daily_new_limit and len(extra_new) > new_left),
+                (settings.daily_due_limit and extra_due)
+                or (settings.daily_new_limit and extra_new),
             )
             return PracticeToday(
                 learning_date=day,

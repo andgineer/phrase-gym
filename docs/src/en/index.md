@@ -21,7 +21,8 @@ already graded that day. **Settings** chooses whether phrases come back **Often*
 (the default) or **Rarely**, with how many times a phrase you keep answering **Good** returns in
 its first month and year.
 The Start card shows the lesson's due and new phrases within today's remaining allowance. Start stays
-disabled when none wait; **Extra** appears only if eligible phrases remain beyond the allowance, and
+disabled when none wait; **Extra** appears only if a fresh pass can offer eligible phrases, including
+skipped phrases or those beyond the allowance, and
 extends today's limits for another pass without erasing completed practice. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
 return date. An optional weekly target in **Settings**, one to six practice days from Monday to

@@ -197,7 +197,7 @@
   color: #59645d;
   border-color: transparent;
 }
-@media (max-width: 360px) {
+@media (max-width: 540px) {
   .back-controls button:nth-child(3) .audio-icon {
     display: none;
   }

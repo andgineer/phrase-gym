@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures'
 import { extraPackage } from './extra-package'
-import { importPackage, rateNew } from './helpers'
+import { importPackage, rateNew, revealAnswer } from './helpers'
 import { installFakeMedia } from './fake-media'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
@@ -39,6 +39,24 @@ test('phone card keeps controls still across reveal, hint, history and explanati
   await page.getByRole('button', { name: 'Reveal', exact: true }).tap()
   await expect(page.getByTestId('practice-phrase')).toBeVisible()
   expect(await mic.boundingBox()).toEqual(front)
+  const contained = await page.locator('.back-controls button').evaluateAll((buttons) =>
+    buttons.map((button) => {
+      const bounds = button.getBoundingClientRect()
+      const text = document.createRange()
+      text.selectNodeContents(button)
+      const contents = [...text.getClientRects()].filter((rect) => rect.width && rect.height)
+      return {
+        height: bounds.height,
+        width: bounds.width,
+        contained: contents.every((rect) => rect.left >= bounds.left && rect.right <= bounds.right),
+      }
+    }),
+  )
+  for (const button of contained) {
+    expect(button.height).toBe(48)
+    expect(button.width).toBeGreaterThanOrEqual(44)
+    expect(button.contained).toBe(true)
+  }
   const backControls = await row.boundingBox()
   const backBounds = await fixedBounds()
   const ratings = page.locator('.rating-dock')
@@ -102,4 +120,28 @@ test('Start and Extra reflect real remaining allowances', async ({ page }) => {
   await rateNew(page, true)
   await expect(start).toBeDisabled()
   await expect(extra).toHaveCount(0)
+})
+
+test('Extra reopens two skipped phrases below the five-new allowance', async ({ page }) => {
+  await page.goto('/')
+  const value = structuredClone(extraPackage)
+  value.lessons[0]!.phrases = value.lessons[0]!.phrases.slice(0, 2)
+  await importPackage(page, value, 2)
+  await page.getByRole('button', { name: 'Start', exact: true }).tap()
+  for (let card = 0; card < 2; card++) {
+    await revealAnswer(page, true)
+    await page.getByRole('button', { name: 'Skip', exact: true }).tap()
+    if (card === 0) await expect(page.getByTestId('mode-line')).toHaveText('2 / 5 new')
+  }
+  await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeDisabled()
+  const extra = page.getByRole('button', { name: 'Extra', exact: true })
+  await expect(extra).toBeEnabled()
+  expect(await (await page.request.get('/api/practice/today')).json()).toMatchObject({
+    new_count: 0,
+    due_count: 0,
+    extra_available: true,
+  })
+  await extra.tap()
+  await expect(page.getByTestId('mode-line')).toHaveText('Extra · 3 / 5 new')
+  await expect(page.locator('.practice-prompt')).toBeVisible()
 })
