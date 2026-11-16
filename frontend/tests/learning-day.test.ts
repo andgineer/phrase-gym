@@ -3,7 +3,7 @@ import { beforeEach, expect, test, vi } from 'vitest'
 
 beforeEach(() => vi.resetModules())
 const fresh = () => import('../src/learningDay')
-const complete = "Today's Daily practice is complete."
+const complete = "Today's practice is complete."
 
 test('a date change is signalled once, never for the first known or same date', async () => {
   const { observeLearningDay, onLearningDayChange } = await fresh()

@@ -1,0 +1,210 @@
+.session-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 44px;
+  margin-bottom: 6px;
+}
+.menu-space,
+.card-menu > button {
+  width: 44px;
+  height: 44px;
+}
+.card-menu {
+  position: relative;
+}
+.card-menu-panel {
+  position: absolute;
+  z-index: 12;
+  top: 100%;
+  right: 0;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fffef9;
+  box-shadow: 0 4px 20px #0003;
+  white-space: nowrap;
+}
+.practice-progress {
+  height: 3px;
+  background: #deded1;
+  margin-bottom: 16px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.practice-progress > span {
+  display: block;
+  height: 100%;
+  background: #527a69;
+}
+.card-controls {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.front-controls {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.back-controls {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.card-controls button {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  height: 48px;
+  min-width: 0;
+  padding: 0 3px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.tinted {
+  background: #e8eee4;
+  color: #294f43;
+  border-color: #e8eee4;
+}
+.practice-card .microphone {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  height: 64px;
+  border-radius: 16px;
+}
+.practice-card .microphone svg {
+  width: 30px;
+  height: 30px;
+}
+.card-content {
+  border-top: 1px solid #deded1;
+  margin-top: 18px;
+  padding-top: 18px;
+}
+.card-content > :first-child {
+  margin-top: 0;
+}
+.practice-prompt {
+  font-size: 18px;
+}
+.practice-card h2 {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.22;
+  margin: 0 0 14px;
+  overflow-wrap: anywhere;
+}
+.rating-dock {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 680px);
+  background: #f7f4ec;
+  z-index: 9;
+  padding: 8px 0 12px;
+  box-shadow: 0 -12px 18px #f7f4ec;
+}
+.rating-dock p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  text-align: center;
+}
+.rating-dock .ratings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+.rating-dock .ratings button {
+  min-width: 0;
+  padding: 5px 2px;
+}
+.skip-rating {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  margin-top: 4px;
+}
+.has-ratings {
+  padding-bottom: 0;
+}
+.waiting-counts {
+  display: flex;
+  gap: 40px;
+}
+.waiting-counts span {
+  display: grid;
+}
+.waiting-counts strong {
+  font-size: 38px;
+  line-height: 1.2;
+}
+.start-actions {
+  display: flex;
+  gap: 10px;
+}
+.start-actions button {
+  flex: 1;
+}
+.lesson-picker.compact {
+  justify-self: end;
+  max-width: 100%;
+  width: 220px;
+}
+.lesson-picker.compact input {
+  border-radius: 24px;
+  padding-block: 7px;
+  min-height: 44px;
+  background: #edf1e8;
+}
+@media (prefers-color-scheme: dark) {
+  .card-menu-panel {
+    background: #25352e;
+  }
+  .tinted,
+  .lesson-picker.compact input {
+    background: #304339;
+    color: #c4efd1;
+  }
+  .rating-dock {
+    background: #18221f;
+    box-shadow: 0 -12px 18px #18221f;
+  }
+}
+.has-ratings .practice-card {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 380px);
+  min-height: 230px;
+}
+.has-ratings .card-controls,
+.has-ratings .microphone {
+  flex-shrink: 0;
+}
+.has-ratings .card-content {
+  overflow-y: auto;
+  min-height: 0;
+}
+.start-summary {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+}
+.start-actions button:disabled {
+  background: #e0e2dc;
+  color: #59645d;
+  border-color: transparent;
+}
+@media (max-width: 360px) {
+  .back-controls button:nth-child(3) .audio-icon {
+    display: none;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .start-actions button:disabled {
+    background: #35463c;
+    color: #bdc9c0;
+  }
+}

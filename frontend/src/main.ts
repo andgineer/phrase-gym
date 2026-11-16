@@ -5,5 +5,6 @@ import './shell.css'
 import './practice.css'
 import './study.css'
 import './library.css'
+import './card.css'
 
 createApp(App).mount('#app')

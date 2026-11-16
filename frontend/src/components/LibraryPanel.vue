@@ -55,7 +55,7 @@ async function deleted(result: DeletionResult) {
       :disabled="disabled"
       @open="open"
     >
-      <template #lesson><LessonPicker ref="picker" v-model="lessonId" /></template>
+      <template #lesson><LessonPicker ref="picker" v-model="lessonId" compact /></template>
     </PhraseFinder>
   </section>
   <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deleted" />

@@ -4,6 +4,7 @@ import { usePagedList } from '../composables/usePagedList'
 import { onLearningDayChange } from '../learningDay'
 import type { LessonChoice, LessonPage } from '../libraryTypes'
 
+defineProps<{ compact?: boolean }>()
 const selected = defineModel<string>({ default: '' })
 const query = ref('')
 const text = ref('')
@@ -146,7 +147,7 @@ defineExpose({ reload: lessons.reload })
   <div v-if="empty" class="lesson-picker">
     <p>Add your first phrase with <a href="#coach">Coach</a> to begin.</p>
   </div>
-  <div v-else ref="root" class="lesson-picker" @focusout="leave">
+  <div v-else ref="root" :class="['lesson-picker', { compact }]" @focusout="leave">
     <div class="lesson-combo">
       <input
         ref="field"
@@ -158,7 +159,7 @@ defineExpose({ reload: lessons.reload })
         :aria-expanded="open"
         :aria-controls="listId"
         :aria-activedescendant="open && active >= 0 ? optionId(active) : undefined"
-        :placeholder="open ? 'Type to filter lessons' : 'All lessons — select one'"
+        :placeholder="open ? 'Type to filter lessons' : 'All lessons'"
         autocomplete="off"
         spellcheck="false"
         @focus="openList"
@@ -194,7 +195,15 @@ defineExpose({ reload: lessons.reload })
         </button>
       </div>
     </div>
-    <p v-if="summary" class="muted" data-testid="lesson-counts">{{ summary }}</p>
+    <p
+      v-if="summary"
+      :class="{ 'visually-hidden': compact }"
+      class="muted"
+      :aria-hidden="compact || undefined"
+      data-testid="lesson-counts"
+    >
+      {{ summary }}
+    </p>
     <p v-if="lessons.error.value" role="alert" class="error">{{ lessons.error.value }}</p>
   </div>
 </template>

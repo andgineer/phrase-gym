@@ -201,7 +201,7 @@ def test_live_limit_increase_continues_the_same_daily_entry(practice: Practice) 
     publish(practice.client, many(4))
     practice.set_limits(20, 1)
     state = practice.rate(practice.card(), "not_yet")["state"]
-    assert state["card"] is None and state["message"] == "Today's Daily practice is complete."
+    assert state["card"] is None and state["message"] == "Today's practice is complete."
     practice.set_limits(20, 2)
     state = practice.rate(practice.card(), "not_yet")["state"]
     assert state["card"] is None
@@ -212,7 +212,7 @@ def test_new_eligible_phrase_continues_the_same_daily_entry(practice: Practice) 
     publish(practice.client, many(1))
     state = practice.rate(practice.card(), "not_yet")["state"]
     assert state["card"] is None
-    assert state["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
+    assert state["message"] == "Today's practice is complete. Next due: 2026-10-29."
     later = make_package(
         package_id="course-later-v1",
         source_id="course-later",

@@ -14,6 +14,7 @@ from tests import fake_cli
 
 CLOCKED_SERVICES = (
     "current",
+    "today",
     "daily",
     "extra",
     "phrase_practice",

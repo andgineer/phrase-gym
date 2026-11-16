@@ -81,7 +81,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(phraseSearch(page)).toHaveCount(0)
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 4 new')
-  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start', exact: true }).tap()
   const card = page.locator('article.practice-card')
   await revealAnswer(page, true)
   const drawn = await card.getByTestId('practice-phrase').innerText()
@@ -95,7 +95,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   const options = page.getByRole('option')
   await expect(counts).toHaveText('0 due · 4 new')
   await expect(lesson).toHaveValue('')
-  await expect(lesson).toHaveAttribute('placeholder', 'All lessons — select one')
+  await expect(lesson).toHaveAttribute('placeholder', 'All lessons')
   await expect(page.getByText('Search lessons')).toHaveCount(0)
   await expect(options).toHaveCount(0)
   await lesson.tap()
@@ -113,7 +113,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(counts).toHaveText('0 due · 2 new')
   await noHorizontalScroll(page)
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Daily', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Start', exact: true })).toHaveCount(0)
   const results = page.getByRole('list', { name: 'Phrases' })
   await expect(results.locator('strong')).toHaveText([
     'Could you walk me through that?',
@@ -144,7 +144,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await details.getByRole('button', { name: 'More explanation ▾', exact: true }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toBeVisible()
-  await details.getByRole('button', { name: 'Less explanation ▴' }).tap()
+  await details.getByRole('button', { name: 'More explanation ▴' }).tap()
   await expect(details.getByText('Longer help for So far, so good.')).toHaveCount(0)
   await details.getByRole('button', { name: 'Ref' }).tap()
   await expect
@@ -220,14 +220,14 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   ).toBeVisible()
   await expect(counts).toHaveText('No phrases in this lesson')
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
-  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeDisabled()
   await expect(page.getByText('No phrases in this lesson.', { exact: true })).toBeVisible()
 
   await lesson.tap()
   await options.filter({ hasText: 'All lessons' }).tap()
   await expect(lesson).toHaveValue('')
   await expect(counts).toHaveText('0 due · 2 new')
-  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start', exact: true }).tap()
   await revealAnswer(page, true)
   await expect(card.getByTestId('practice-phrase')).toHaveText(
     /^(Could you walk me through that\?|That works for me\.)$/,
@@ -240,7 +240,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   const single = organizedPackage('mobile-pending-v1')
   single.lessons = [{ ...single.lessons[1], phrases: [single.lessons[1].phrases[1]] }]
   await importPackage(page, single, 1)
-  await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+  await page.getByRole('button', { name: 'Start', exact: true }).tap()
   await page.route('**/api/recordings', (route) =>
     route.request().method() === 'POST'
       ? route.fulfill({ status: 503, json: { detail: 'Temporary save failure' } })
@@ -330,7 +330,7 @@ test('missing longer explanation disables expansion in the library and practice'
   await expect(practice.locator('.answer-help')).toContainText(
     'Used for: small talk · progress update',
   )
-  const audio = await practice.locator('.audio-controls').boundingBox()
+  const audio = await practice.locator('.microphone').boundingBox()
   const description = await practice.locator('.answer-help').boundingBox()
   expect(description!.y).toBeGreaterThanOrEqual(audio!.y + audio!.height)
   await expect(practice).not.toContainText('No detailed explanation was prepared.')

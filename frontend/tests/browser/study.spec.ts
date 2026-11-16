@@ -11,7 +11,7 @@ import {
 } from './helpers'
 
 async function openDaily(page: import('@playwright/test').Page, reveal = true) {
-  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
   if (reveal) await revealAnswer(page)
 }
 
@@ -234,7 +234,7 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
     )
     .toBeGreaterThan(0)
   await rateNew(page)
-  await expect(page.getByText(/^Today's Daily practice is complete\./)).toBeVisible()
+  await expect(page.getByText(/^Today's practice is complete\./)).toBeVisible()
 })
 
 test('imports, rates, and retains complete takes', async ({ page }) => {
@@ -392,7 +392,7 @@ test('imports, rates, and retains complete takes', async ({ page }) => {
       await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
     }
   }
-  await expect(page.getByText(/^Today's Daily practice is complete\. Next due: /)).toBeVisible()
+  await expect(page.getByText(/^Today's practice is complete\. Next due: /)).toBeVisible()
   expect(completions).toBe(cards.length)
   expect(rated[0]).toBe(started)
   expect([...rated].sort()).toEqual(cards.map(({ text }) => text).sort())
@@ -414,7 +414,7 @@ test('imports, rates, and retains complete takes', async ({ page }) => {
   await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
   const hardCue = await prompt.innerText()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Show' }).click()
+  await page.getByRole('button', { name: 'Reveal' }).click()
   const hardIndex = Number(/situation (\d)\./.exec(hardCue)![1]) - 1
   await expect(page.getByTestId('practice-phrase')).toHaveText(cards[hardIndex]!.text)
   await page.getByRole('button', { name: 'Hard' }).click()
@@ -455,16 +455,16 @@ test('restored practice card keeps the original layout and microphone interactio
   await openDaily(page)
   const card = page.locator('article.practice-card')
   await expect(card.getByRole('heading', { name: cards[1].text })).toBeVisible()
-  await expect(page.getByTestId('mode-line')).toHaveText('Daily · 1 / 5 new')
+  await expect(page.getByTestId('mode-line')).toHaveText('1 / 5 new')
   await expect(card.locator('.answer-help > p').first()).toHaveText(
     'A natural phrase for an ordinary conversation.',
   )
   await expect(card).not.toContainText('Browser course · Unit 1')
   await expect(card.locator('.microphone svg')).toBeVisible()
   expect(await card.evaluate((node) => getComputedStyle(node).borderRadius)).toBe('18px')
-  expect(await card.locator('h1').evaluate((node) => getComputedStyle(node).fontFamily)).toContain(
-    'Georgia',
-  )
+  expect(
+    await card.getByTestId('practice-phrase').evaluate((node) => getComputedStyle(node).fontFamily),
+  ).toContain('Georgia')
   expect(await page.locator('.shell').evaluate((node) => getComputedStyle(node).maxWidth)).toBe(
     '880px',
   )

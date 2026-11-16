@@ -36,24 +36,25 @@ switches between the two on its own. An external AI agent can instead prepare a 
 and submit it for immediate study. See [how to add phrases](https://andgineer.github.io/phrase-gym/importing-phrases/) for
 both workflows.
 
-The Practice entry offers a lesson field (empty means **All lessons**; type in it to narrow the
-list) with its due and new counts, **Daily**, **Extra**, and the Library with **Find a phrase**. Nothing starts until you press
-**Daily**, which opens or resumes today's card. Daily takes the longest-due phrases up to your daily due limit and randomly chosen new
+The Practice home shows today's waiting **due** and **new** counts and a lesson chip (**All lessons**;
+type to narrow its list). **Start** opens or resumes today's Daily card. Daily takes the longest-due phrases up to your daily due limit and randomly chosen new
 phrases up to your daily new limit (20 and five by default, both editable in **Settings**),
 then offers them mixed in random order; the stored limits are read live, so a raised limit lets Daily
 continue. Every phrase starts with an answer-free situation cue, optional recording, **New cue**,
-**Hint**, **Show** and **Details**, including a new phrase. If you do not know it, reveal and choose
+**Hint**, **Reveal** and **More explanation**, including a new phrase. If you do not know it, reveal and choose
 **Again**; the first rating initializes its schedule immediately.
-After **Show**, you can still record a rehearsal, then rate the response you gave before help or
+After **Reveal**, you can still record a rehearsal, then rate the response you gave before help or
 reveal: **Again**, **Hard**, **Good** or **Easy**. A rating or **Skip** saves and advances at once.
-**Delete** on a revealed card asks for confirmation and advances without a grade.
+**Delete phrase…** in the revealed card’s **More actions** menu asks for confirmation and advances without a grade.
 
 **Extra** starts a fresh pass for more practice today. Once today's completed recalls or new
 attempts reach a daily limit, each press extends that category by one more limit (for example 20
 recalls become 40); pressing again without further practice adds nothing, and completed practice is
 never reset. Skipped phrases from earlier passes come back; phrases that are not yet due never do.
-If nothing is waiting, Extra says so at once. **Stop** on an Extra card finishes any recording and
-returns to the entry; **Daily** resumes that card later.
+When today's allowance is used, Start stays disabled and Extra appears if more eligible phrases
+remain. When nothing remains, only disabled Start and the finished message show. The tabs return
+to a page and retain any recording; **Start** resumes the regular card later. On either card side
+the full-width microphone stays in the same position. Ratings and Skip stay at the bottom.
 
 When a Daily or Extra pass runs out, the entry says so and shows practice facts below its
 controls, across all lessons: the current and best practice streak with the last seven days;
@@ -76,7 +77,7 @@ answer it was recorded with; pending uploads remain for retry and never block th
 
 A Library search with no match offers **Send “…” to Coach**; matching results also offer a quiet
 **Not it?** link. Both use the same request and confirmation as the Coach page. Opening any tab
-finishes and keeps a recording; **Daily** resumes the regular card later.
+finishes and keeps a recording; **Start** resumes the regular card later.
 
 The Library lists the selected lesson's phrases and searches all lessons by wording, meaning,
 situation or use. Phrase details show the answer, what it is used for, the lesson and source,

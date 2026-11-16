@@ -28,7 +28,7 @@ async function saveAndReturn(page: Page) {
 }
 
 async function practiseOnce(page: Page) {
-  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
   await rateNew(page)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
 }
@@ -53,7 +53,7 @@ test('a chosen weekly target shows this week’s days and can be changed, paused
   await saveAndReturn(page)
   await expect(fact(page, 'week')).toHaveText('This week: 0 of 3 days')
   await expect(fact(page, 'streak')).toHaveCount(0)
-  const daily = await page.getByRole('button', { name: 'Daily', exact: true }).boundingBox()
+  const daily = await page.getByRole('button', { name: 'Start', exact: true }).boundingBox()
   const week = await fact(page, 'week').boundingBox()
   expect(daily!.y).toBeLessThan(week!.y)
 
@@ -115,7 +115,7 @@ test.describe('mobile', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
     await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).tap()
     await expect(fact(page, 'week')).toHaveText('This week: 0 of 4 days')
-    await expect(page.getByRole('button', { name: 'Daily', exact: true })).toBeInViewport()
+    await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeInViewport()
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   })
 })

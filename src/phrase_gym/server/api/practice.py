@@ -20,6 +20,7 @@ from phrase_gym.server.practice_contracts import (
     ViewAction,
     ViewOperation,
 )
+from phrase_gym.server.practice_today import PracticeToday, TodayPractice
 from phrase_gym.server.practice_views import PracticeConflictError, UnknownLessonError
 from phrase_gym.server.view_actions import ViewActions
 
@@ -38,11 +39,17 @@ def conflicts() -> Iterator[None]:
 
 def practice_entry_routes(
     current: CurrentPractice,
+    today: TodayPractice,
     daily: DailyPractice,
     extra: ExtraPractice,
     phrase: PhrasePractice,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/practice")
+
+    @router.get("/today")
+    def today_counts(lesson_id: str | None = None) -> PracticeToday:
+        with conflicts():
+            return today.read(lesson_id)
 
     @router.get("/current")
     def current_view() -> PracticeState:

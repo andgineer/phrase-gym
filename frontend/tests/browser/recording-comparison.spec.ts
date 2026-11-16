@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await installFakeMedia(page)
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
-  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
 })
 
 test('front and back stops play reference then the full take, with collapsed saved history', async ({
@@ -58,13 +58,13 @@ test('front and back stops play reference then the full take, with collapsed sav
     .toEqual([expect.stringContaining(latest.url)])
   await finishClip(page)
   await page.reload()
-  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
   await expect(history).toHaveAttribute('aria-expanded', 'false')
   await history.click()
   await expect(card(page).locator('.take')).toHaveCount(2)
   await card(page).getByRole('button', { name: 'Good', exact: true }).click()
   await expect(history).toHaveCount(0)
-  await card(page).getByRole('button', { name: 'Show', exact: true }).click()
+  await card(page).getByRole('button', { name: 'Reveal', exact: true }).click()
   await expect(history).toHaveAttribute('aria-expanded', 'false')
   await history.click()
   await expect(card(page).getByText('No saved recordings yet.')).toBeVisible()
@@ -92,7 +92,7 @@ test('Ref on a back keeps replaying only each later take on that card; the next 
     await expect(microphone).toBeVisible()
   }
 
-  await card(page).getByRole('button', { name: 'Show', exact: true }).click()
+  await card(page).getByRole('button', { name: 'Reveal', exact: true }).click()
   await reference.click()
   await expect.poll(async () => (await playedMedia(page)).at(-1)).toMatch(/\/reference$/)
   await finishClip(page)
@@ -117,7 +117,7 @@ test('phone audio controls keep playback, microphone and expandable history toge
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 740 })
-  const controls = card(page).getByRole('group', { name: 'Audio controls' })
+  const controls = card(page)
   await controls.getByRole('button', { name: 'Record a take' }).click()
   await controls.getByRole('button', { name: 'Stop recording' }).click()
   await expect.poll(async () => (await playedMedia(page)).length).toBe(1)
@@ -142,8 +142,8 @@ test('phone audio controls keep playback, microphone and expandable history toge
       expect(box.height).toBeGreaterThanOrEqual(44)
       boxes.push(box)
     }
-    expect(boxes[0].x + boxes[0].width).toBeLessThanOrEqual(boxes[1].x)
-    expect(boxes[1].x + boxes[1].width).toBeLessThanOrEqual(boxes[2].x)
+    expect(boxes[1].y).toBeGreaterThanOrEqual(boxes[0].y + boxes[0].height)
+    expect(boxes[1].width).toBeGreaterThan(boxes[0].width)
     expect(Math.abs(boxes[0].y - boxes[2].y)).toBeLessThan(1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width)
   }
@@ -161,9 +161,7 @@ test('phone audio controls keep playback, microphone and expandable history toge
   await expect(recordings.locator('.take')).toHaveCount(1)
   await expect(recordings.getByRole('heading')).toHaveCount(0)
   await expect(recordings.getByRole('button', { name: 'Compare' })).toHaveCount(0)
-  expect(await microphone.evaluate((button) => getComputedStyle(button).borderRadius)).toBe(
-    await reference.evaluate((button) => getComputedStyle(button).borderRadius),
-  )
+  expect(await microphone.evaluate((button) => getComputedStyle(button).borderRadius)).toBe('16px')
   expect(await recordings.evaluate((panel) => getComputedStyle(panel).borderTopStyle)).toBe('solid')
   const historyBox = (await history.boundingBox())!
   expect((await recordings.boundingBox())!.y).toBeGreaterThanOrEqual(
@@ -188,7 +186,7 @@ test('failed automatic reveal retains the take and lets Show retry without playi
   await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(1)
   expect(await playedMedia(page)).toEqual([])
   await page.unroute('**/api/practice/reveal')
-  await card(page).getByRole('button', { name: 'Show', exact: true }).click()
+  await card(page).getByRole('button', { name: 'Reveal', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText(texts[0])
   await expect(card(page).getByRole('button', { name: 'Mine' })).toBeVisible()
 })

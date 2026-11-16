@@ -46,7 +46,7 @@ it('acknowledges a replayed completion without a current card and opens nothing'
   await practice.complete('got_it')
   expect(paths()).toEqual(['/practice/complete', '/practice/current'])
   expect(practice.view.value.card).toBeNull()
-  expect(practice.view.value.message).toBe('Your answer was saved. Press Daily to continue.')
+  expect(practice.view.value.message).toBe('Your answer was saved. Press Start to continue.')
   expect(practice.error.value).toBe('')
 })
 
@@ -65,7 +65,7 @@ it('acknowledges a replayed Extra when another tab owns the view', async () => {
   expect(operation(1)).toBe(operation(0))
   expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current'])
   expect(practice.view.value.card).toBeNull()
-  expect(practice.view.value.message).toBe('Extra was saved. Press Daily to continue.')
+  expect(practice.view.value.message).toBe('Extra was saved. Press Start to continue.')
 })
 
 it('a conflicting hint shows the current card read without changing it', async () => {

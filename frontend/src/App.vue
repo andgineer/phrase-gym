@@ -13,7 +13,6 @@ import DeleteDialog from './components/DeleteDialog.vue'
 import PracticeEntry from './components/PracticeEntry.vue'
 import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
-import SavedHistory from './components/SavedHistory.vue'
 import { usePracticeSession } from './composables/usePracticeSession'
 import { useDatedMessage } from './learningDay'
 
@@ -114,9 +113,9 @@ onMounted(initialize)
       @practice="practisePhrase"
     />
     <template v-else-if="screen === 'card' && card">
-      <p class="eyebrow">English</p>
       <StudyCard
         :card="card"
+        :play="playback.play"
         :progress="practice.view.value.progress"
         :details-open="practice.view.value.detailsOpen"
         :capturing="capture.capturing.value"
@@ -142,20 +141,7 @@ onMounted(initialize)
         @compare="session.compareMine"
         @retry-save="takeTransfers.flush"
         @retry-completion="practice.retry"
-        @stop="select('entry')"
-      >
-        <template #history>
-          <SavedHistory
-            v-if="card.answer"
-            :key="card.view_token"
-            :phrase-id="card.phrase_id"
-            :disabled="
-              capture.capturing.value || capture.requesting.value || capture.processing.value
-            "
-            :play="playback.play"
-          />
-        </template>
-      </StudyCard>
+      />
     </template>
     <template v-else>
       <p class="eyebrow">English</p>

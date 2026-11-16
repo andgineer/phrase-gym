@@ -10,17 +10,19 @@ Practice, and the installed app version stays visible on every page. Open **Coac
 or word and optionally its source sentence, then press **Send** or Enter. Pasted line breaks become
 spaces. Coach prepares the card later for **Added with Coach** in Library. A Library search offers
 to send missing material to Coach, with the same confirmations. Switching tabs finishes and keeps
-any recording, and **Daily** resumes the regular card. Reloading keeps the selected page.
+any recording, and **Start** resumes the regular card. Reloading keeps the selected page.
 
-**Daily** offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
+**Start** offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
 **Settings**, mixed in random order so the next phrase cannot be anticipated. Every phrase starts with its answer hidden,
-including a new phrase. Reveal and rate the attempt; an unknown answer is **Again**. The first
+including a new phrase. Press **Reveal** and rate the attempt; an unknown answer is **Again**. The first
 rating starts its schedule, and later learning days offer due recall. Each rating button shows when
 that grade brings the phrase back, such as `3d` or `2.5m`; it shows nothing when the phrase was
 already graded that day. **Settings** chooses whether phrases come back **Often**, **Balanced**
 (the default) or **Rarely**, with how many times a phrase you keep answering **Good** returns in
 its first month and year.
-**Extra** extends today's limits for another pass without erasing completed practice. The entry
+The Start card shows the lesson's due and new phrases within today's remaining allowance. Start stays
+disabled when none wait; **Extra** appears only if eligible phrases remain beyond the allowance, and
+extends today's limits for another pass without erasing completed practice. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
 return date. An optional weekly target in **Settings**, one to six practice days from Monday to
 Sunday, adds this week's practice days beside the streak; it can be changed or paused at any time,
@@ -29,7 +31,9 @@ The Library finds phrases by lesson or meaning, shows their details and saved re
 practises one chosen phrase, and deletes a phrase after confirmation. The app does not claim to
 measure fluency.
 
-Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the
+The full-width microphone stays in the same place on both sides, above the text. Ratings and Skip
+stay at the bottom while the text scrolls. The back’s **More actions** menu offers **Delete phrase…**
+with confirmation. Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the
 answer and plays the reference followed by your recording; recording on the back uses the same
 playback order. Once you press **Ref** on the back, finishing each later take on that card
 plays only your recording. The history icon in the audio controls on the card back or in phrase details opens a

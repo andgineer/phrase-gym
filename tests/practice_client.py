@@ -11,6 +11,7 @@ from phrase_gym.server.storage import Database
 Card = dict[str, Any]
 CLOCKED = (
     "current",
+    "today",
     "daily",
     "extra",
     "phrase_practice",

@@ -78,9 +78,9 @@ export function extendedPractice(view: PracticeView, result: ExtraResult): Compl
 }
 
 export function progressLine(card: Card, progress: Progress | null): string {
-  const mode = { daily: 'Daily', extra: 'Extra', practice: 'Practice' }[card.mode]
+  const mode = { daily: '', extra: 'Extra', practice: 'Practice' }[card.mode]
   if (!progress || card.mode === 'practice') return mode
   return card.kind === 'recall'
-    ? `${mode} · ${progress.due_completed + 1} / ${progress.due_allowance} due`
-    : `${mode} · ${progress.new_completed + 1} / ${progress.new_allowance} new`
+    ? `${mode ? `${mode} · ` : ''}${progress.due_completed + 1} / ${progress.due_allowance} due`
+    : `${mode ? `${mode} · ` : ''}${progress.new_completed + 1} / ${progress.new_allowance} new`
 }

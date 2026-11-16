@@ -96,7 +96,6 @@ Make each update in the same commit as the code it describes.
 
 Each checkpoint is one coherent deliverable under the [handout](orchestration-handout.md), with the full gate and CI.
 
-2. **Practice home and card:** the waiting-counts read, the Start and Extra states, the finished wording, the front and back card layout, the microphone, Reveal, the history placement, **⋯** Delete, the docked ratings and removal of Stop, with their spec and documentation updates.
 3. **Home-screen app:** manifest, icons, safe areas, input sizes, Apple meta tags, the Coach shortcut and the dark-mode pass.
 
 ## Tests

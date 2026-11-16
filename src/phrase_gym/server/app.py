@@ -29,6 +29,7 @@ from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
 from phrase_gym.server.phrase_practice import PhrasePractice
 from phrase_gym.server.practice_facts import PracticeFactsService
+from phrase_gym.server.practice_today import TodayPractice
 from phrase_gym.server.recording_store import RecordingStore
 from phrase_gym.server.settings import SettingsService
 from phrase_gym.server.storage import Database
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(coach_routes(CoachRequests(database)))
     app.include_router(recording_routes(RecordingStore(database)))
     app.state.current = CurrentPractice(database)
+    app.state.today = TodayPractice(database)
     app.state.daily = DailyPractice(database)
     app.state.extra = ExtraPractice(database)
     app.state.phrase_practice = PhrasePractice(database)
@@ -62,6 +64,7 @@ def create_app() -> FastAPI:
     app.include_router(
         practice_entry_routes(
             app.state.current,
+            app.state.today,
             app.state.daily,
             app.state.extra,
             app.state.phrase_practice,

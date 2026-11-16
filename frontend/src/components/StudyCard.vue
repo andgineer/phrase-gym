@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import PhraseExplanation from './PhraseExplanation.vue'
-import AudioIcon from './AudioIcon.vue'
-import { computed } from 'vue'
+import FrontControls from './FrontControls.vue'
+import BackControls from './BackControls.vue'
+import CardMenu from './CardMenu.vue'
+import SavedHistoryPanel from './SavedHistoryPanel.vue'
+import { computed, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
 import { returnDescription, returnSpan } from '../returnSpan'
 import type { Card, Outcome, Progress, Rating } from '../studyTypes'
@@ -21,6 +24,7 @@ const props = defineProps<{
   captureError: string
   takeError: string
   practiceError: string
+  play: (url: string) => Promise<void>
   canRetry: boolean
 }>()
 const emit = defineEmits<{
@@ -36,7 +40,6 @@ const emit = defineEmits<{
   compare: []
   retrySave: []
   retryCompletion: []
-  stop: []
 }>()
 const ratings: Array<[Rating, string, string]> = [
   ['not_yet', 'Again', 'not-yet'],
@@ -46,65 +49,92 @@ const ratings: Array<[Rating, string, string]> = [
 ]
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
 const front = computed(() => !props.card.revealed)
+const historyOpen = ref(false)
+watch(
+  () => props.card.view_token,
+  () => {
+    historyOpen.value = false
+  },
+)
+const progressValue = computed(() => {
+  const p = props.progress
+  if (!p || props.card.mode === 'practice') return 0
+  return props.card.kind === 'recall'
+    ? p.due_completed / (p.due_allowance || 1)
+    : p.new_completed / (p.new_allowance || 1)
+})
 </script>
 
 <template>
-  <section class="practice-panel">
+  <section class="practice-panel" :class="{ 'has-ratings': !front }">
     <div class="session-toolbar">
       <span data-testid="mode-line">{{ progressLine(card, progress) }}</span>
-      <button v-if="card.mode === 'extra'" @click="emit('stop')">Stop</button>
+      <CardMenu v-if="!front" :disabled="busy || audioBusy" @remove="emit('remove')" />
+      <span v-else class="menu-space" />
+    </div>
+    <div class="practice-progress" aria-hidden="true">
+      <span :style="{ width: `${Math.min(progressValue * 100, 100)}%` }" />
     </div>
     <article class="card practice-card study">
-      <template v-if="front">
-        <p class="practice-prompt">{{ card.cue?.situation }}</p>
-        <p v-if="card.cue?.partner_line" class="partner-line">“{{ card.cue.partner_line }}”</p>
-        <div class="answer-controls">
-          <button
-            v-if="card.other_cue_available"
-            :disabled="busy || audioBusy"
-            @click="emit('newCue')"
-          >
-            New cue
-          </button>
-          <button :disabled="busy || audioBusy" @click="emit('hint')">Hint</button>
-        </div>
-        <p v-if="card.hint" class="hint" role="status">Hint: {{ card.hint }}</p>
-      </template>
-      <template v-else-if="card.answer">
-        <h1 tabindex="-1" lang="en" data-testid="practice-phrase">{{ card.answer.text }}</h1>
-      </template>
-      <div class="audio-controls" role="group" aria-label="Audio controls">
-        <button v-if="!front && card.answer" :disabled="audioBusy" @click="emit('playPhrase')">
-          <AudioIcon name="reference" /> Ref
-        </button>
-        <MicrophoneButton
-          :capturing="capturing"
-          :requesting="requesting"
-          :playing="playing"
-          :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
-          @control="emit('control')"
+      <FrontControls
+        v-if="front"
+        :disabled="busy || audioBusy"
+        :other-cue="card.other_cue_available"
+        @hint="emit('hint')"
+        @new-cue="emit('newCue')"
+        @reveal="emit('show')"
+      />
+      <BackControls
+        v-else
+        :disabled="audioBusy"
+        :has-take="hasTake"
+        :history-open="historyOpen"
+        @reference="emit('playPhrase')"
+        @mine="emit('playMine')"
+        @compare="emit('compare')"
+        @history="historyOpen = !historyOpen"
+      />
+      <MicrophoneButton
+        :capturing="capturing"
+        :requesting="requesting"
+        :playing="playing"
+        :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
+        @control="emit('control')"
+      />
+      <div class="card-content">
+        <SavedHistoryPanel
+          v-if="!front && historyOpen"
+          :phrase-id="card.phrase_id"
+          :disabled="audioBusy"
+          :play="play"
         />
-        <template v-if="!front && card.answer">
-          <button v-if="hasTake" :disabled="audioBusy" @click="emit('playMine')">
-            <AudioIcon name="mine" /> Mine
-          </button>
-          <button v-if="hasTake" :disabled="audioBusy" @click="emit('compare')">
-            <AudioIcon name="compare" /> Compare
-          </button>
-          <slot name="history" />
+        <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
+        <p v-if="pendingTakes" role="status">
+          {{ pendingTakes }} take(s) waiting to save.
+          <button @click="emit('retrySave')">Retry save</button>
+        </p>
+        <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
+        <p v-if="practiceError" role="alert" class="error">
+          {{ practiceError }}
+          <button v-if="canRetry" :disabled="busy" @click="emit('retryCompletion')">Retry</button>
+        </p>
+        <template v-if="front">
+          <p class="practice-prompt">{{ card.cue?.situation }}</p>
+          <p v-if="card.cue?.partner_line" class="partner-line">“{{ card.cue.partner_line }}”</p>
+          <p v-if="card.hint" class="hint" role="status">Hint: {{ card.hint }}</p>
+        </template>
+        <template v-else-if="card.answer">
+          <h2 tabindex="-1" lang="en" data-testid="practice-phrase">{{ card.answer.text }}</h2>
+          <PhraseExplanation
+            :explanation="card.answer.explanation"
+            :usage-contexts="card.answer.usage_contexts"
+            :detailed-explanation="card.answer.detailed_explanation"
+            :open="detailsOpen"
+            @toggle="emit('details')"
+          />
         </template>
       </div>
-      <div v-if="front" class="answer-controls">
-        <button class="primary" :disabled="busy || audioBusy" @click="emit('show')">Show</button>
-      </div>
-      <template v-else-if="card.answer">
-        <PhraseExplanation
-          :explanation="card.answer.explanation"
-          :usage-contexts="card.answer.usage_contexts"
-          :detailed-explanation="card.answer.detailed_explanation"
-          :open="detailsOpen"
-          @toggle="emit('details')"
-        />
+      <div v-if="!front" class="rating-dock">
         <p>How was your answer before you saw the phrase?</p>
         <div class="ratings">
           <button
@@ -117,30 +147,18 @@ const front = computed(() => !props.card.revealed)
           >
             <span v-if="card.return_days" class="rating-return" aria-hidden="true">{{
               returnSpan(card.return_days[outcome])
-            }}</span>
-            {{ label }}
-          </button>
-          <button :disabled="busy || requesting || processing" @click="emit('complete', 'skipped')">
-            Skip
+            }}</span
+            >{{ label }}
           </button>
         </div>
-        <button class="danger delete-card" :disabled="busy || audioBusy" @click="emit('remove')">
-          Delete
+        <button
+          class="skip-rating"
+          :disabled="busy || requesting || processing"
+          @click="emit('complete', 'skipped')"
+        >
+          Skip
         </button>
-      </template>
-      <p v-if="capturing" role="status">Tap the microphone again to finish your take.</p>
-      <p v-if="requesting" role="status">Waiting for microphone access…</p>
-      <p v-if="processing" role="status">Finishing and saving the complete take…</p>
-      <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
-      <p v-if="pendingTakes" role="status">
-        {{ pendingTakes }} take(s) waiting to save.
-        <button @click="emit('retrySave')">Retry save</button>
-      </p>
-      <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
-      <p v-if="practiceError" role="alert" class="error">
-        {{ practiceError }}
-        <button v-if="canRetry" :disabled="busy" @click="emit('retryCompletion')">Retry</button>
-      </p>
+      </div>
     </article>
   </section>
 </template>

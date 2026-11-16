@@ -83,6 +83,9 @@ async function setLimits(page: Page, due: number, fresh: number) {
     data: { ...settings, daily_due_limit: due, daily_new_limit: fresh },
   })
   expect(response.ok()).toBe(true)
+  const refreshed = page.waitForResponse('**/api/practice/today*')
+  await page.evaluate(() => window.dispatchEvent(new Event('pageshow')))
+  await refreshed
 }
 
 async function meet(page: Page) {
@@ -141,9 +144,9 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await importPackage(page, factsPackage, 6)
   await expect(facts(page)).toHaveCount(0)
   await setLimits(page, 1, 1)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   const met = [await meet(page)]
-  await expect(page.getByText("Today's Daily practice is complete.", { exact: true })).toBeVisible()
+  await expect(page.getByText("Today's practice is complete.", { exact: true })).toBeVisible()
   await expect(facts(page).getByRole('heading', { name: 'Today’s practice ✦' })).toHaveCount(0)
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
@@ -156,10 +159,10 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await expect(fact(page, 'library')).toHaveText('1 later · 5 new')
   await expect(fact(page, 'long-term')).toHaveCount(0)
   const panel = await facts(page).boundingBox()
-  const daily = await page.getByRole('button', { name: 'Daily', exact: true }).boundingBox()
+  const daily = await page.getByRole('button', { name: 'Start', exact: true }).boundingBox()
   const lesson = page.getByRole('combobox', { name: 'Lesson', exact: true })
   const field = await lesson.boundingBox()
-  expect(field!.y).toBeGreaterThan(daily!.y + daily!.height)
+  expect(field!.y + field!.height).toBeLessThan(daily!.y)
   expect(panel!.y).toBeGreaterThan(field!.y + field!.height)
 
   await lesson.click()
@@ -187,8 +190,8 @@ test('completion returns to Today facts that continue through limits, Extra and 
   await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
 
   await setLimits(page, 1, 2)
-  await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText('Daily · 2 / 2 new')
+  await press(page, 'Start')
+  await expect(modeLine(page)).toHaveText('2 / 2 new')
   met.push(await meet(page))
   await expect(fact(page, 'today-title')).toHaveText('Today — 2 new')
 
@@ -264,7 +267,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await page.goto('/')
   await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   await meet(page)
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
 
@@ -275,7 +278,7 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(fact(page, 'library')).toHaveText('1 due now · 5 new')
   await expect(page.getByTestId('lesson-counts')).toHaveText('1 due · 5 new')
 
-  await press(page, 'Daily')
+  await press(page, 'Start')
   const ratings = [(await rateDrawn(page)).rating, (await rateDrawn(page)).rating]
   expect(ratings.sort()).toEqual(['Again', 'Good'])
   await expect(fact(page, 'streak')).toHaveText('🔥 2-day practice streak')
@@ -299,8 +302,8 @@ test('next-day entry keeps yesterday’s streak until practice and resets after 
   await expect(fact(page, 'progress')).toHaveText('1 recall · 3 new phrases')
   await expect(fact(page, 'progress-ratings')).toHaveText('1 Good · 3 Again')
   await expect(fact(page, 'library')).toHaveText('3 due now · 3 new')
-  await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText(/^Daily · 1 \/ 1 (due|new)$/)
+  await press(page, 'Start')
+  await expect(modeLine(page)).toHaveText(/^1 \/ 1 (due|new)$/)
 })
 
 test('an open entry recomputes facts and counts when it returns on a new learning day', async ({
@@ -309,9 +312,9 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await page.goto('/')
   await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   const first = await meet(page)
-  const message = page.getByText("Today's Daily practice is complete.", { exact: true })
+  const message = page.getByText("Today's practice is complete.", { exact: true })
   await expect(message).toBeVisible()
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
   await expect(fact(page, 'library')).toHaveText('1 later · 5 new')
@@ -340,7 +343,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
   await expect(fact(page, 'streak')).toHaveText('🔥 1-day practice streak')
   await expect(message).toHaveCount(0)
 
-  await press(page, 'Daily')
+  await press(page, 'Start')
   const drawn = [await rateDrawn(page), await rateDrawn(page)]
   expect(drawn.find(({ rating }) => rating === 'Good')?.text).toBe(first)
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 recall / 1 new')
@@ -362,9 +365,9 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
   await page.goto('/')
   await importPackage(page, pagedPackages[0]!, 20)
   await setLimits(page, 1, 6)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   for (let step = 1; step <= 6; step++) {
-    await expect(modeLine(page)).toHaveText(`Daily · ${step} / 6 new`)
+    await expect(modeLine(page)).toHaveText(`${step} / 6 new`)
     await rateNew(page)
   }
   // Daily draws new phrases at random, so the later lesson arrives once Daily is done.
@@ -438,15 +441,16 @@ test('a Daily finished just after midnight shows its own completion message', as
   await page.goto('/')
   await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   await meet(page)
-  const message = page.getByText("Today's Daily practice is complete.", { exact: true })
+  const message = page.getByText("Today's practice is complete.", { exact: true })
   await expect(message).toBeVisible()
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
 
   await setClock(page, 14 + 10 / 60)
-  await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText('Daily · 1 / 1 new')
+  await page.evaluate(() => window.dispatchEvent(new Event('pageshow')))
+  await press(page, 'Start')
+  await expect(modeLine(page)).toHaveText('1 / 1 new')
   await meet(page)
   await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
   await expect(message).toBeVisible()
@@ -457,13 +461,13 @@ test('the completion message stays visible when the entry facts cannot load', as
   await page.goto('/')
   await importPackage(page, factsPackage, 6)
   await setLimits(page, 1, 1)
-  await press(page, 'Daily')
+  await press(page, 'Start')
   await revealAnswer(page)
   await expect(card(page).getByTestId('practice-phrase')).toBeVisible()
   await page.route('**/api/practice/facts', (route) => route.fulfill({ status: 503, json: {} }))
   await rateNew(page)
   await expect(facts(page).getByRole('alert')).toHaveText('Error: Request failed (503)')
-  await expect(page.getByText("Today's Daily practice is complete.", { exact: true })).toBeVisible()
+  await expect(page.getByText("Today's practice is complete.", { exact: true })).toBeVisible()
 })
 
 test.describe('mobile', () => {
@@ -473,7 +477,7 @@ test.describe('mobile', () => {
     await page.goto('/')
     await importPackage(page, factsPackage, 6, true)
     await setLimits(page, 1, 1)
-    await page.getByRole('button', { name: 'Daily', exact: true }).tap()
+    await page.getByRole('button', { name: 'Start', exact: true }).tap()
     await revealAnswer(page)
     const drawn = await card(page).getByTestId('practice-phrase').innerText()
     await rateNew(page, true)
@@ -481,7 +485,7 @@ test.describe('mobile', () => {
     await expect(fact(page, 'today-title')).toHaveText('Today — 1 new')
     expect(await page.evaluate(() => window.scrollY)).toBe(0)
     const panel = await facts(page).boundingBox()
-    for (const name of ['Daily', 'Extra']) {
+    for (const name of ['Start', 'Extra']) {
       const button = page.getByRole('button', { name, exact: true })
       await expect(button).toBeInViewport({ ratio: 1 })
       const box = await button.boundingBox()

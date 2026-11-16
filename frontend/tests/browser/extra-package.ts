@@ -31,7 +31,8 @@ export const extraPackage = {
 }
 export const card = (page: Page) => page.locator('article.practice-card')
 export const modeLine = (page: Page) => page.getByTestId('mode-line')
-export const stopButton = (page: Page) => page.getByRole('button', { name: 'Stop', exact: true })
+export const stopButton = (page: Page) =>
+  page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true })
 export const details = (page: Page) => page.locator('section.phrase-details')
 
 export async function openDetails(page: Page, text: string, tap = false) {

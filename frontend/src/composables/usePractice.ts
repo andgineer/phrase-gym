@@ -99,7 +99,7 @@ export function usePractice() {
       const step = extendedPractice(view.value, result)
       pendingExtra.value = null
       busy.value = false
-      if (step.reconcile) return await resync(false, 'Extra was saved. Press Daily to continue.')
+      if (step.reconcile) return await resync(false, 'Extra was saved. Press Start to continue.')
       view.value = step.view
       return step.view.card !== null
     } catch (cause) {
@@ -156,7 +156,7 @@ export function usePractice() {
       const step = completedPractice(view.value, request, result)
       pending.value = null
       busy.value = false
-      if (step.reconcile) await resync(false, 'Your answer was saved. Press Daily to continue.')
+      if (step.reconcile) await resync(false, 'Your answer was saved. Press Start to continue.')
       else view.value = step.view
     } catch (cause) {
       if (mine !== epoch) return

@@ -22,7 +22,8 @@ export function usePracticeFacts() {
     try {
       const next = await api<PracticeFacts>('/practice/facts')
       if (request !== sequence) return
-      const newDay = observeLearningDay(next.learning_date)
+      const newDay = facts.value !== null && facts.value.learning_date !== next.learning_date
+      observeLearningDay(next.learning_date)
       facts.value = next
       error.value = ''
       if (listing.value && (list || newDay)) await studied.reload()

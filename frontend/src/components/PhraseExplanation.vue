@@ -17,11 +17,12 @@ const longerExplanation = computed(() => props.detailedExplanation?.trim())
     <p><EmphasisText :text="explanation" /></p>
     <p v-if="usageContexts.length" class="purpose">Used for: {{ usageContexts.join(' · ') }}</p>
     <button
+      class="explain-link"
       :disabled="!longerExplanation"
       :aria-expanded="!!longerExplanation && open"
       @click="$emit('toggle')"
     >
-      {{ longerExplanation && open ? 'Less explanation ▴' : 'More explanation ▾' }}
+      More explanation <span>{{ open ? '▴' : '▾' }}</span>
     </button>
     <div v-if="longerExplanation && open" class="explanation">
       <p><EmphasisText :text="longerExplanation" /></p>

@@ -33,5 +33,8 @@ const emit = defineEmits<{ control: [] }>()
       <rect x="9" y="2" width="6" height="12" rx="3" />
       <path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8" />
     </svg>
+    <span v-if="capturing">Recording · tap to stop</span>
+    <span v-else-if="requesting">Waiting for microphone access…</span>
+    <span v-else-if="playing">Playback · tap to stop</span>
   </button>
 </template>

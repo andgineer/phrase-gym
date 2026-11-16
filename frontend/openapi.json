@@ -1448,6 +1448,40 @@
         "title": "PracticeStreak",
         "type": "object"
       },
+      "PracticeToday": {
+        "additionalProperties": false,
+        "properties": {
+          "due_count": {
+            "title": "Due Count",
+            "type": "integer"
+          },
+          "extra_available": {
+            "title": "Extra Available",
+            "type": "boolean"
+          },
+          "learning_date": {
+            "title": "Learning Date",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "new_count": {
+            "title": "New Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "learning_date",
+          "due_count",
+          "new_count",
+          "extra_available",
+          "message"
+        ],
+        "title": "PracticeToday",
+        "type": "object"
+      },
       "PracticeTotals": {
         "additionalProperties": false,
         "properties": {
@@ -3190,6 +3224,52 @@
           }
         },
         "summary": "Studied Phrases"
+      }
+    },
+    "/api/practice/today": {
+      "get": {
+        "operationId": "today_counts_api_practice_today_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lesson_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeToday"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Today Counts"
       }
     },
     "/api/recordings": {

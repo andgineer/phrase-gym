@@ -63,7 +63,7 @@ export const libraryPhrase = (page: Page, text: string) =>
   page.getByRole('list', { name: 'Phrases' }).getByRole('button', { name: text, exact: true })
 
 export async function revealAnswer(page: Page, tap = false) {
-  const show = page.getByRole('button', { name: 'Show', exact: true })
+  const show = page.getByRole('button', { name: 'Reveal', exact: true })
   const answer = page.getByTestId('practice-phrase')
   await expect(show.or(answer)).toBeVisible()
   if (!(await show.count())) return

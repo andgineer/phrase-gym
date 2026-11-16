@@ -1,0 +1,45 @@
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue'
+defineProps<{ disabled: boolean }>()
+const emit = defineEmits<{ remove: [] }>()
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+const toggle = ref<HTMLButtonElement | null>(null)
+function remove() {
+  open.value = false
+  emit('remove')
+}
+function outside(event: PointerEvent) {
+  if (!root.value?.contains(event.target as Node)) open.value = false
+}
+function key(event: KeyboardEvent) {
+  if (event.key === 'Escape' && open.value) {
+    open.value = false
+    toggle.value?.focus()
+  }
+}
+onMounted(() => {
+  document.addEventListener('pointerdown', outside)
+  document.addEventListener('keydown', key)
+})
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', outside)
+  document.removeEventListener('keydown', key)
+})
+</script>
+<template>
+  <div ref="root" class="card-menu">
+    <button
+      ref="toggle"
+      aria-label="More actions"
+      :aria-expanded="open"
+      :disabled="disabled"
+      @click="open = !open"
+    >
+      ⋯
+    </button>
+    <div v-if="open" class="card-menu-panel">
+      <button class="danger" @click="remove">Delete phrase…</button>
+    </div>
+  </div>
+</template>

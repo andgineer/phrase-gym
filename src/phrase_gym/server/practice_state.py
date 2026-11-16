@@ -8,7 +8,7 @@ from phrase_gym.server.practice_views import load_view, practice_card, view_phra
 from phrase_gym.server.records import ScheduleRecord, ViewRecord, fetch_all
 
 
-def _message(
+def finished_message(
     connection: sqlite3.Connection,
     view: ViewRecord,
     now: datetime,
@@ -34,7 +34,7 @@ def _message(
         finished = "Today's Extra practice is complete." if waiting else "Nothing waiting today."
     else:
         completed = progress.due_completed + progress.new_completed
-        finished = "Today's Daily practice is complete." if completed else "Nothing waiting today."
+        finished = "Today's practice is complete." if completed else "Nothing waiting today."
     if summary.due_count or summary.new_count or not summary.next_due:
         return finished
     return f"{finished} Next due: {summary.next_due}."
@@ -51,5 +51,5 @@ def practice_state(connection: sqlite3.Connection, now: datetime, day: str) -> P
     return PracticeState(
         card=None,
         progress=progress,
-        message=_message(connection, view, now, progress),
+        message=finished_message(connection, view, now, progress),
     )

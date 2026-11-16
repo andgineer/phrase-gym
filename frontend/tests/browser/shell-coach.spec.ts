@@ -31,7 +31,7 @@ test('phone pages, card sides, version and hash stay in the retained shell', asy
     await expect(tab(page, name)).toHaveAttribute('aria-current', 'page')
   }
   await importPackage(page, extraPackage, 3)
-  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
   await expect(card(page)).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
   await revealAnswer(page)

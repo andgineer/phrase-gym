@@ -18,30 +18,38 @@ async function loseFirstExtraResponse(page: Page): Promise<string[]> {
   return operations
 }
 
+async function limitNewToOne(page: Page) {
+  const settings = await (await page.request.get('/api/settings')).json()
+  await page.request.put('/api/settings', { data: { ...settings, daily_new_limit: 1 } })
+}
+async function finishDaily(page: Page) {
+  await limitNewToOne(page)
+  await press(page, 'Start')
+  await rateNew(page)
+}
+
 test.beforeEach(async ({ page }) => installFakeMedia(page))
 
-test('failed Extra after Stop stays on entry with a working Retry that reuses the operation ID', async ({
+test('failed Extra stays on entry with a working Retry that reuses the operation ID', async ({
   page,
 }) => {
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
-  await press(page, 'Extra')
-  await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
-  await press(page, 'Stop')
-  await expect(card(page)).toHaveCount(0)
+  await finishDaily(page)
   const operations = await loseFirstExtraResponse(page)
   await press(page, 'Extra')
   await expect(page.getByRole('alert')).toContainText('Extra was not confirmed; retry it.')
   await expect(card(page)).toHaveCount(0)
   await press(page, 'Retry')
-  await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
+  await expect(modeLine(page)).toHaveText('Extra · 2 / 2 new')
   await revealAnswer(page)
-  await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
+  await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
   expect(operations).toHaveLength(2)
   expect(operations[1]).toBe(operations[0])
   await rateNew(page)
-  await expect(modeLine(page)).toHaveText('Extra · 2 / 5 new')
+  await expect(card(page)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Extra', exact: true })).toBeEnabled()
 })
 
 test('failed Practice open after leaving a Practice card stays on details with an error', async ({
@@ -73,6 +81,7 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
 }) => {
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
+  await finishDaily(page)
   const operations = await loseFirstExtraResponse(page)
   await press(page, 'Extra')
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible()
@@ -85,7 +94,7 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
   await expect(modeLine(other)).toHaveText('Practice')
 
   await press(page, 'Retry')
-  await expect(page.getByText('Extra was saved. Press Daily to continue.')).toBeVisible()
+  await expect(page.getByText('Extra was saved. Press Start to continue.')).toBeVisible()
   await expect(card(page)).toHaveCount(0)
   expect(operations).toEqual([operations[0], operations[0]])
 
@@ -94,8 +103,8 @@ test('tab A Extra retry after tab B opened Practice leaves tab B Practice comple
   await expect(details(other).getByText(/^Next due: /)).toBeVisible()
   await expect(other.getByRole('alert')).toHaveCount(0)
 
-  await press(page, 'Daily')
-  await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')
+  await press(page, 'Start')
+  await expect(modeLine(page)).toHaveText('Extra · 2 / 2 new')
 })
 
 test('a completion released after leaving the card never brings a stale card back', async ({
@@ -103,7 +112,8 @@ test('a completion released after leaving the card never brings a stale card bac
 }) => {
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
-  await press(page, 'Daily')
+  await limitNewToOne(page)
+  await press(page, 'Start')
   await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
   let releaseCompletion!: () => void
@@ -126,7 +136,7 @@ test('a completion released after leaving the card never brings a stale card bac
   await expect(page.getByRole('alert')).toContainText('Extra was not confirmed; retry it.')
   await expect(card(page)).toHaveCount(0)
   await press(page, 'Retry')
-  await expect(modeLine(page)).toHaveText('Extra · 2 / 5 new')
+  await expect(modeLine(page)).toHaveText('Extra · 2 / 2 new')
   await revealAnswer(page)
   await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
   expect(operations).toEqual([operations[0], operations[0]])

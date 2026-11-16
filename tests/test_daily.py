@@ -83,7 +83,7 @@ def test_session_takes_oldest_due_and_random_new_phrases_in_random_order(
         "new_completed": 5,
         "new_allowance": 5,
     }
-    assert state["message"] == "Today's Daily practice is complete."
+    assert state["message"] == "Today's practice is complete."
     assert len([row for row in practice.log() if row["skipped"]]) == 1
 
 
@@ -104,7 +104,7 @@ def test_live_limit_increase_after_apparent_exhaustion(practice: Practice) -> No
     publish(practice.client, many(8))
     practice.rate_all_new()
     done = practice.daily()
-    assert done["card"] is None and done["message"] == "Today's Daily practice is complete."
+    assert done["card"] is None and done["message"] == "Today's practice is complete."
     practice.set_limits(due=20, new=7)
     more = practice.daily()
     assert more["card"]["kind"] == "new"
@@ -147,7 +147,7 @@ def test_skip_leaves_due_and_excludes_phrase_until_a_new_traversal(practice: Pra
     assert practice.phrase(first["phrase_id"]) == before
     practice.reveal(second)
     assert practice.finish(second, "got_it")["state"]["card"] is None
-    assert practice.daily()["message"] == "Today's Daily practice is complete."
+    assert practice.daily()["message"] == "Today's practice is complete."
     practice.later(days=1)
     assert practice.card()["phrase_id"] == first["phrase_id"]
 
@@ -172,7 +172,7 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
     assert practice.phrase(following["phrase_id"])["item_id"] == "meeting-3"
     after = practice.rate(following, "not_yet")["state"]
     assert after["card"] is None
-    assert after["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
+    assert after["message"] == "Today's practice is complete. Next due: 2026-10-29."
     assert (
         practice.client.post(
             "/api/practice/daily", json={"lesson_id": "missing-lesson"}
@@ -218,7 +218,7 @@ def test_timezone_change_closes_the_old_view_and_keeps_first_recall_later(
     london = practice.daily()
     assert london["card"] is None
     assert london["progress"]["new_completed"] == 1
-    assert london["message"] == "Today's Daily practice is complete. Next due: 2026-10-29."
+    assert london["message"] == "Today's practice is complete. Next due: 2026-10-29."
     practice.now = datetime(2026, 10, 29, 0, 5, tzinfo=UTC)
     later = practice.card()
     assert later["kind"] == "recall" and later["view_token"] != belgrade["view_token"]

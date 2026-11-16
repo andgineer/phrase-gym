@@ -68,8 +68,8 @@ it('ignores a late card for a superseded appearance and reconciles replayed comp
 })
 
 it('labels progress by mode and card kind', () => {
-  expect(progressLine(card('a'), progress)).toBe('Daily · 4 / 20 due')
-  expect(progressLine(card('a', { kind: 'new' }), progress)).toBe('Daily · 1 / 5 new')
+  expect(progressLine(card('a'), progress)).toBe('4 / 20 due')
+  expect(progressLine(card('a', { kind: 'new' }), progress)).toBe('1 / 5 new')
 })
 
 it('completes once while saving and advances to the returned card', async () => {
@@ -107,12 +107,12 @@ it('keeps the card after a failed save and retries with the same completion ID',
   vi.mocked(api).mockResolvedValueOnce({
     receipt: { completion_id: id },
     replayed: false,
-    state: state(null, "Today's Daily practice is complete."),
+    state: state(null, "Today's practice is complete."),
   })
   await practice.retry()
   expect(body(1)).toEqual(body(0))
   expect(practice.view.value.card).toBeNull()
-  expect(practice.view.value.message).toBe("Today's Daily practice is complete.")
+  expect(practice.view.value.message).toBe("Today's practice is complete.")
   expect(practice.pending.value).toBeNull()
 })
 
