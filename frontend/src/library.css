@@ -148,6 +148,11 @@ button.danger {
   .success {
     color: #a5d1b8;
   }
+  .phrase-list,
+  .phrase-list li,
+  .take-history li {
+    border-color: #64776b;
+  }
   .combo-panel {
     background: #25352e;
     border-color: #64776b;

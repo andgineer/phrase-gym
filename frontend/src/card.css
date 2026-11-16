@@ -96,12 +96,12 @@
 .rating-dock {
   position: fixed;
   bottom: 0;
-  left: 50%;
+  left: calc(50% + (var(--safe-left) - var(--safe-right)) / 2);
   transform: translateX(-50%);
-  width: min(calc(100% - 32px), 680px);
+  width: min(calc(100% - 32px - var(--safe-left) - var(--safe-right)), 680px);
   background: #f7f4ec;
   z-index: 9;
-  padding: 8px 0 12px;
+  padding: 8px 0 calc(12px + var(--safe-bottom));
   box-shadow: 0 -12px 18px #f7f4ec;
 }
 .rating-dock p {
@@ -176,7 +176,7 @@
 .has-ratings .practice-card {
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - 380px);
+  max-height: calc(100dvh - 380px - var(--safe-top) - var(--safe-bottom));
   min-height: 230px;
 }
 .has-ratings .card-controls,
@@ -206,5 +206,29 @@
   .start-actions button:disabled {
     background: #35463c;
     color: #bdc9c0;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .practice-progress {
+    background: #40574a;
+  }
+  .practice-progress > span {
+    background: #a5d1b8;
+  }
+  .card-content {
+    border-color: #64776b;
+  }
+  .rating-dock .not-yet {
+    color: #ffd1cb;
+    background: #522c29;
+  }
+  .rating-dock .effort {
+    color: #ffe6a0;
+    background: #493c1b;
+  }
+  .rating-dock .recalled {
+    color: #c4efd1;
+    background: #244932;
   }
 }

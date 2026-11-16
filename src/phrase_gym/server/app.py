@@ -1,3 +1,4 @@
+import mimetypes
 import os
 from pathlib import Path
 
@@ -89,6 +90,7 @@ def create_app() -> FastAPI:
     def health() -> Health:
         return Health(status="ok", version=__version__)
 
+    mimetypes.add_type("application/manifest+json", ".webmanifest")
     static = Path(__file__).parent / "static"
     if static.is_dir():
         app.mount("/", StaticFiles(directory=static, html=True), name="client")

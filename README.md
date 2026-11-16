@@ -26,6 +26,8 @@ it stops with an explanation and leaves the directory unchanged.
 
 ## Add and study material
 
+On an iPhone, open the private HTTPS address in Safari and choose **Share → Add to Home Screen**. The icon opens the same app without browser chrome and still needs the running server. See the [user guide](https://andgineer.github.io/phrase-gym/) for phone use.
+
 Use the **Practice**, **Library**, **Coach** and **Settings** tabs to switch pages; the brand
 returns to Practice and the installed app version appears on every page. Open **Coach**, type a phrase
 or word, optionally followed by the sentence it came from, and press **Send** or Enter. Pasted line

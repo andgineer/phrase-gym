@@ -6,5 +6,6 @@ import './practice.css'
 import './study.css'
 import './library.css'
 import './card.css'
+import './theme.css'
 
 createApp(App).mount('#app')

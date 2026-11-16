@@ -94,3 +94,17 @@
   display: block;
   font-weight: 400;
 }
+
+@media (prefers-color-scheme: dark) {
+  .hint {
+    color: #a5d1b8;
+  }
+  .facts-group,
+  .import-notices,
+  .recording-history-panel {
+    border-color: #64776b;
+  }
+  .import-notices li {
+    color: #ffcec1;
+  }
+}

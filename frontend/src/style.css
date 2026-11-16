@@ -1,4 +1,8 @@
 :root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   font-family:
     system-ui,
     -apple-system,
@@ -17,7 +21,8 @@ body {
 .shell {
   max-width: 880px;
   margin: auto;
-  padding: 24px 28px 64px;
+  padding: calc(24px + var(--safe-top)) calc(28px + var(--safe-right))
+    calc(64px + var(--safe-bottom)) calc(28px + var(--safe-left));
 }
 .brand {
   font-size: 1.3rem;
@@ -78,6 +83,7 @@ select {
   background: white;
   color: #233431;
   font: inherit;
+  font-size: max(1rem, 16px);
   min-width: 0;
 }
 input[type='search'] {
@@ -202,7 +208,8 @@ form {
 }
 @media (max-width: 540px) {
   .shell {
-    padding: 18px 16px;
+    padding: calc(18px + var(--safe-top)) calc(16px + var(--safe-right))
+      calc(18px + var(--safe-bottom)) calc(16px + var(--safe-left));
   }
   main {
     margin-top: 24px;
@@ -216,56 +223,4 @@ form {
 .phrase-list a {
   overflow-wrap: anywhere;
   min-width: 0;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #e9eee9;
-    background: #18221f;
-  }
-  .card,
-  button,
-  select,
-  input[type='search'],
-  input[type='text'] {
-    color: #e9eee9;
-    background: #25352e;
-    border-color: #64776b;
-  }
-  .brand,
-  .phrase-list a {
-    color: #e9eee9;
-  }
-  a,
-  .explain-link {
-    color: #9dcff0;
-  }
-  .muted,
-  .purpose,
-  .lesson-links span,
-  .eyebrow,
-  .explanation h2 {
-    color: #b9c9bf;
-  }
-  .session-banner {
-    background: #304339;
-  }
-  .gap {
-    color: #a5d1b8;
-  }
-  .not-yet {
-    color: #ffd1cb;
-    background: #522c29;
-  }
-  .effort {
-    color: #ffe6a0;
-    background: #493c1b;
-  }
-  .recalled {
-    color: #c4efd1;
-    background: #244932;
-  }
-  .error {
-    color: #ffcec1;
-    background: #512e27;
-  }
 }

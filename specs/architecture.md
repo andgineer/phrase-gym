@@ -2,9 +2,11 @@
 
 ## Application boundary
 
-Phrase Gym is a lightweight local Python service serving the retained Vue frontend and an HTTP API, with SQLite and local audio storage. The browser is the GUI. Use the normal browser on the learner's MacBook; no Qt, native Coach window or Electron bundle is required. A launcher can open the browser later if starting the application proves inconvenient.
+Phrase Gym is a lightweight local Python service serving the retained Vue frontend and an HTTP API, with SQLite and local audio storage. The browser is the GUI. Use the normal browser on the learner's MacBook; no Qt, native Coach window or Electron bundle is required. On a phone, the same client can open from the Home Screen in standalone mode. A launcher can open the desktop browser later if starting the application proves inconvenient.
 
 Retain the original Vue visual and interaction design while replacing backend workflows. The brand row with installed version, Practice / Library / Coach / Settings tab bar, warm page, centered practice card, serif phrase heading, prominent microphone control and responsive spacing are established interface choices. Every page keeps a visually hidden heading; the highlighted tab names it. The brand returns to Practice. Page hashes select Coach, Library or Settings on load; tabs replace the hash without adding history entries. Leaving a card through any tab finishes and retains capture, flushes uploads and closes only the client card, so Daily can resume the server view. Show only controls supported by the current Python API; later practice and library workflows can return within this interface when implemented.
+
+The home-screen client uses the existing dotted brand icon, a web manifest and Apple installation metadata. The shell and rating dock reserve the device safe areas; the scrolling card content clears both the header and dock. Text fields use at least 16 px, and the interface follows the system dark palette. The manifest opens Practice and offers a Coach shortcut where the browser supports shortcuts. Installation does not add offline availability; the [local availability decision](decision-online-only.md) still applies.
 
 The Python server must work on both macOS and Linux. The MVP media player and recording experience target browsers on macOS; Linux browser audio support is deferred until after the MVP. Server portability does not expand the local-only access boundary.
 

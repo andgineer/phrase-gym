@@ -4,14 +4,6 @@ The adult learner's goal is to bring useful expressions from courses and videos 
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
 
-## 4. Phone-first interface
-
-**Learner outcome:** use Phrase Gym as a home-screen app on a phone: one bar for Practice, Library, Coach and Settings, a **Start** button with today's counts, a practice card whose controls never move, and the app version on every page.
-
-The [phone-first interface plan](phone-first-interface.md) owns the approved screens, server reads, spec updates, checkpoints and tests.
-
-**Exit:** on a 390 px screen in both browser engines every page fits without horizontal scrolling, the microphone sits in the same place on both card sides, and hints, recording history and explanations never move a control. A phrase can be sent to Coach from the Coach page and from a Library search that finds nothing. Home-screen use on the learner's iPhone is attended acceptance, reported separately.
-
 ## 5. Extend only the content the learner next needs
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.

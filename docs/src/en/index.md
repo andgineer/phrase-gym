@@ -41,6 +41,8 @@ plays only your recording. The history icon in the audio controls on the card ba
 framed list of saved takes, newest first, with a date and **Mine** replay button for each.
 It stays collapsed until you open it.
 
+On an iPhone, open your [private HTTPS address](private-access.md) in Safari and use **Share → Add to Home Screen**. The icon opens Phrase Gym as a standalone app. It still needs the running server; installation does not cache the library for offline use. Android browsers that support app shortcuts also offer **Coach** from the icon. The pages follow your device’s light or dark appearance.
+
 The server works on macOS and Linux. The MVP media player and recording experience target macOS
 browsers. Linux browser audio qualification is planned after the MVP.
 
