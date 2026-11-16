@@ -56,6 +56,7 @@ def test_scaffold_commands_remain_available() -> None:
 
 @pytest.mark.parametrize("build", [False, True])
 def test_server_builds_frontend_only_when_requested(monkeypatch, build):
+    monkeypatch.setattr(tasks, "existing_tailscale_origin", lambda _context: "")
     commands = []
     context = Context()
     monkeypatch.setattr(context, "run", commands.append)
@@ -65,6 +66,17 @@ def test_server_builds_frontend_only_when_requested(monkeypatch, build):
         if build
         else ["uv run phrase-gym run"]
     )
+
+
+def test_plain_run_reuses_private_access_without_reconfiguring_tailscale(monkeypatch):
+    monkeypatch.setattr(
+        tasks, "existing_tailscale_origin", lambda _context: "https://macbook.example.ts.net"
+    )
+    commands = []
+    context = Context()
+    monkeypatch.setattr(context, "run", commands.append)
+    tasks.run(context)
+    assert commands == ["uv run phrase-gym run --tailscale-origin https://macbook.example.ts.net"]
 
 
 def test_distribution_build_includes_the_client(monkeypatch):

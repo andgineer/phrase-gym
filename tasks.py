@@ -9,6 +9,7 @@ from invoke import Collection, Context, task
 
 from phrase_gym.__about__ import __version__
 from phrase_gym.server.boundary import tailscale_host
+from scripts.private_access import existing_tailscale_origin
 
 DOCS_PATH = Path("docs")
 DOCS_SRC_PATH = DOCS_PATH / "src"
@@ -129,7 +130,7 @@ def build(context: Context):
 
 @task
 def run(context: Context, build=False, tailscale=False):
-    """Run the server; optionally build the client and connect private Tailscale HTTPS."""
+    """Run the server, reusing private Tailscale HTTPS; --tailscale sets up its route."""
     if build:
         build_frontend(context)
     command = "uv run phrase-gym run"
@@ -139,6 +140,9 @@ def run(context: Context, build=False, tailscale=False):
         origin = f"https://{hostname}"
         tailscale_host(origin)
         context.run("tailscale serve --bg --yes http://127.0.0.1:8000")
+    else:
+        origin = existing_tailscale_origin(context)
+    if origin:
         command += f" --tailscale-origin {shlex.quote(origin)}"
     context.run(command)
 
