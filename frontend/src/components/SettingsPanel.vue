@@ -61,7 +61,6 @@ async function save() {
 
 <template>
   <section class="card history">
-    <h2>Settings</h2>
     <template v-if="settings">
       <label
         >Native language

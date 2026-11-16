@@ -5,6 +5,13 @@ phrases and keeping private recordings. Type a phrase or word for Coach to prepa
 agent add a course batch, then listen to reference audio, record optional takes and replay them
 after reloading the app.
 
+The **Practice**, **Library**, **Coach** and **Settings** tabs switch pages. The brand returns to
+Practice, and the installed app version stays visible on every page. Open **Coach**, type a phrase
+or word and optionally its source sentence, then press **Send** or Enter. Pasted line breaks become
+spaces. Coach prepares the card later for **Added with Coach** in Library. A Library search offers
+to send missing material to Coach, with the same confirmations. Switching tabs finishes and keeps
+any recording, and **Daily** resumes the regular card. Reloading keeps the selected page.
+
 **Daily** offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
 **Settings**, mixed in random order so the next phrase cannot be anticipated. Every phrase starts with its answer hidden,
 including a new phrase. Reveal and rate the attempt; an unknown answer is **Again**. The first

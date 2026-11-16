@@ -5,7 +5,9 @@ import { resetDiscardedLearnerDataOnce } from './discardedLearnerData'
 import type { DeletionTarget } from './libraryTypes'
 import LibraryPanel from './components/LibraryPanel.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
-import CoachField from './components/CoachField.vue'
+import AppShell from './components/AppShell.vue'
+import CoachPage from './components/CoachPage.vue'
+import { useAppNavigation, type Page } from './composables/useAppNavigation'
 import CleanupNotice from './components/CleanupNotice.vue'
 import DeleteDialog from './components/DeleteDialog.vue'
 import PracticeEntry from './components/PracticeEntry.vue'
@@ -19,7 +21,7 @@ const session = usePracticeSession()
 const { practice, playback, capture } = session
 const initialized = ref(false)
 const startupError = ref('')
-const screen = ref<'entry' | 'card' | 'library' | 'settings'>('entry')
+const { screen, show, select } = useAppNavigation(navigate)
 const lessonId = ref('')
 const entryKey = ref(0)
 const pendingDelete = ref<DeletionTarget | null>(null)
@@ -32,14 +34,14 @@ const entryMessage = useDatedMessage(() => practice.view.value)
 watch(card, (current, previous) => {
   if (current || screen.value !== 'card') return
   if (previous?.mode === 'practice') detailsPhrase.value = previous.phrase_id
-  screen.value = previous?.mode === 'practice' ? 'library' : 'entry'
+  show(previous?.mode === 'practice' ? 'library' : 'entry')
 })
 
 // Only this open's own card counts; a card left in the client is never shown again.
 async function start(open: () => Promise<boolean>) {
   if (!(await open())) return
   detailsPhrase.value = null
-  screen.value = 'card'
+  show('card')
 }
 
 const daily = () => start(() => practice.openDaily(lessonId.value || null))
@@ -51,12 +53,12 @@ async function practisePhrase(phraseId: string) {
   await start(() => practice.openPhrase(phraseId))
 }
 
-async function navigate(next: 'entry' | 'library' | 'settings') {
+async function navigate(next: Page) {
   await session.leave()
   void takeTransfers.flush()
   detailsPhrase.value = null
   if (next === 'entry') entryKey.value++
-  screen.value = next
+  show(next)
   // The entry never holds a card, so a failed open cannot fall back to a stale one.
   practice.closeCard()
 }
@@ -71,7 +73,7 @@ async function deletedCard() {
   await session.settleMedia()
   if (card.value?.mode !== 'practice') return practice.openDaily()
   // The deleted phrase has no details to return to.
-  screen.value = 'library'
+  show('library')
   detailsPhrase.value = null
   practice.closeCard()
 }
@@ -92,97 +94,87 @@ onMounted(initialize)
 </script>
 
 <template>
-  <div class="shell">
-    <header>
-      <a class="brand" href="/">Phrase Gym<span>◌</span></a>
-      <nav v-if="initialized">
-        <button @click="navigate('entry')">Practice</button
-        ><button @click="navigate('library')">Library</button
-        ><button @click="navigate('settings')">Settings</button>
-      </nav>
-      <CoachField v-if="initialized" />
-    </header>
-    <main>
-      <CleanupNotice v-if="initialized" />
-      <TakeRejections />
-      <p v-if="startupError" class="error" role="alert">
-        {{ startupError }} <button @click="initialize">Retry connection</button>
-      </p>
-      <p v-else-if="!initialized" role="status">Loading…</p>
-      <SettingsPanel v-else-if="screen === 'settings'" />
-      <LibraryPanel
-        v-else-if="screen === 'library'"
+  <AppShell :screen="screen" :initialized="initialized" @navigate="select">
+    <CleanupNotice v-if="initialized" />
+    <TakeRejections />
+    <p v-if="startupError" class="error" role="alert">
+      {{ startupError }} <button @click="initialize">Retry connection</button>
+    </p>
+    <p v-else-if="!initialized" role="status">Loading…</p>
+    <CoachPage v-else-if="screen === 'coach'" />
+    <SettingsPanel v-else-if="screen === 'settings'" />
+    <LibraryPanel
+      v-else-if="screen === 'library'"
+      :key="entryKey"
+      v-model:lesson-id="lessonId"
+      :disabled="practice.busy.value"
+      v-model:opened="detailsPhrase"
+      :play="playback.play"
+      :stop-playback="playback.stop"
+      @practice="practisePhrase"
+    />
+    <template v-else-if="screen === 'card' && card">
+      <p class="eyebrow">English</p>
+      <StudyCard
+        :card="card"
+        :progress="practice.view.value.progress"
+        :details-open="practice.view.value.detailsOpen"
+        :capturing="capture.capturing.value"
+        :requesting="capture.requesting.value"
+        :processing="capture.processing.value"
+        :playing="playback.active.value"
+        :busy="practice.busy.value || session.completing.value"
+        :has-take="session.latestTake.value !== null"
+        :pending-takes="takeTransfers.uploadingTakes.value"
+        :capture-error="capture.error.value"
+        :take-error="takeTransfers.error.value"
+        :practice-error="practice.error.value"
+        :can-retry="practice.pending.value !== null"
+        @control="session.controlAudio"
+        @show="practice.reveal()"
+        @details="practice.toggleDetails()"
+        @new-cue="practice.newCue"
+        @hint="practice.hint"
+        @complete="session.complete"
+        @remove="removeCard"
+        @play-phrase="session.playReference"
+        @play-mine="session.playMine"
+        @compare="session.compareMine"
+        @retry-save="takeTransfers.flush"
+        @retry-completion="practice.retry"
+        @stop="select('entry')"
+      >
+        <template #history>
+          <SavedHistory
+            v-if="card.answer"
+            :key="card.view_token"
+            :phrase-id="card.phrase_id"
+            :disabled="
+              capture.capturing.value || capture.requesting.value || capture.processing.value
+            "
+            :play="playback.play"
+          />
+        </template>
+      </StudyCard>
+    </template>
+    <template v-else>
+      <p class="eyebrow">English</p>
+      <PracticeEntry
         :key="entryKey"
         v-model:lesson-id="lessonId"
-        :disabled="practice.busy.value"
-        v-model:opened="detailsPhrase"
-        :play="playback.play"
-        :stop-playback="playback.stop"
-        @practice="practisePhrase"
+        :message="entryMessage"
+        :error="practice.error.value"
+        :busy="practice.busy.value"
+        :can-retry-extra="practice.pendingExtra.value !== null"
+        @daily="daily"
+        @extra="extra"
+        @retry-extra="retryExtra"
       />
-      <template v-else-if="screen === 'card' && card">
-        <p class="eyebrow">English</p>
-        <StudyCard
-          :card="card"
-          :progress="practice.view.value.progress"
-          :details-open="practice.view.value.detailsOpen"
-          :capturing="capture.capturing.value"
-          :requesting="capture.requesting.value"
-          :processing="capture.processing.value"
-          :playing="playback.active.value"
-          :busy="practice.busy.value || session.completing.value"
-          :has-take="session.latestTake.value !== null"
-          :pending-takes="takeTransfers.uploadingTakes.value"
-          :capture-error="capture.error.value"
-          :take-error="takeTransfers.error.value"
-          :practice-error="practice.error.value"
-          :can-retry="practice.pending.value !== null"
-          @control="session.controlAudio"
-          @show="practice.reveal()"
-          @details="practice.toggleDetails()"
-          @new-cue="practice.newCue"
-          @hint="practice.hint"
-          @complete="session.complete"
-          @remove="removeCard"
-          @play-phrase="session.playReference"
-          @play-mine="session.playMine"
-          @compare="session.compareMine"
-          @retry-save="takeTransfers.flush"
-          @retry-completion="practice.retry"
-          @stop="navigate('entry')"
-        >
-          <template #history>
-            <SavedHistory
-              v-if="card.answer"
-              :key="card.view_token"
-              :phrase-id="card.phrase_id"
-              :disabled="
-                capture.capturing.value || capture.requesting.value || capture.processing.value
-              "
-              :play="playback.play"
-            />
-          </template>
-        </StudyCard>
-      </template>
-      <template v-else>
-        <p class="eyebrow">English</p>
-        <PracticeEntry
-          :key="entryKey"
-          v-model:lesson-id="lessonId"
-          :message="entryMessage"
-          :error="practice.error.value"
-          :busy="practice.busy.value"
-          :can-retry-extra="practice.pendingExtra.value !== null"
-          @daily="daily"
-          @extra="extra"
-          @retry-extra="retryExtra"
-        />
-      </template>
-      <p v-if="screen === 'library' && practice.error.value" class="error" role="alert">
-        {{ practice.error.value }}
-      </p>
-      <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
-      <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deletedCard" />
-    </main>
-  </div>
+    </template>
+    <p v-if="screen === 'library' && practice.error.value" class="error" role="alert">
+      {{ practice.error.value }}
+    </p>
+    <p v-if="playback.error.value" class="error" role="alert">{{ playback.error.value }}</p>
+    <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deletedCard" />
+  </AppShell>
 </template>

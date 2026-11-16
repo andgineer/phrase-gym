@@ -670,6 +670,13 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** Health */
+        Health: {
+            /** Status */
+            status: string;
+            /** Version */
+            version: string;
+        };
         /** ImportLesson */
         ImportLesson: {
             /** Lesson Id */
@@ -1286,9 +1293,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
+                    "application/json": components["schemas"]["Health"];
                 };
             };
         };

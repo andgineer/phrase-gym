@@ -19,22 +19,6 @@ body {
   margin: auto;
   padding: 24px 28px 64px;
 }
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding-bottom: 28px;
-  border-bottom: 1px solid #deded1;
-}
-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-header nav button {
-  padding-inline: 10px;
-}
 .brand {
   font-size: 1.3rem;
   font-weight: 780;
@@ -46,14 +30,6 @@ header nav button {
 .brand span {
   color: #557669;
   margin-left: 10px;
-}
-.header-controls {
-  display: flex;
-  align-items: end;
-  gap: 14px;
-}
-.header-controls label {
-  font-size: 0.75rem;
 }
 main {
   max-width: 680px;
@@ -228,15 +204,6 @@ form {
   .shell {
     padding: 18px 16px;
   }
-  header {
-    flex-wrap: wrap;
-  }
-  .header-controls {
-    width: 100%;
-  }
-  .header-controls label {
-    flex: 1;
-  }
   main {
     margin-top: 24px;
   }
@@ -248,12 +215,6 @@ form {
 .card,
 .phrase-list a {
   overflow-wrap: anywhere;
-  min-width: 0;
-}
-.header-controls {
-  flex-wrap: wrap;
-}
-.header-controls label {
   min-width: 0;
 }
 @media (prefers-color-scheme: dark) {

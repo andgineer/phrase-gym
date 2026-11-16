@@ -3,8 +3,10 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from phrase_gym.__about__ import __version__
 from phrase_gym.server.api.coach import coach_routes
 from phrase_gym.server.api.deletion import deletion_routes
 from phrase_gym.server.api.facts import practice_facts_routes
@@ -33,13 +35,18 @@ from phrase_gym.server.storage import Database
 from phrase_gym.server.view_actions import ViewActions
 
 
+class Health(BaseModel):
+    status: str
+    version: str
+
+
 def create_app() -> FastAPI:
     remote_origin = os.environ.get("PHRASE_GYM_TAILSCALE_ORIGIN", "")
     data_dir = Path(os.environ.get("PHRASE_GYM_DATA_DIR", ".data")).resolve()
     database = Database(data_dir)
     cleanup = FileCleanup(database)
     cleanup.retry()
-    app = FastAPI(title="Phrase Gym", version="1.0.0")
+    app = FastAPI(title="Phrase Gym", version=__version__)
     app.state.database = database
     importer = Importer(database)
     app.state.importer = importer
@@ -75,9 +82,9 @@ def create_app() -> FastAPI:
         allowed_hosts=trusted_hosts(remote_origin),
     )
 
-    @app.get("/api/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
+    @app.get("/api/health", response_model=Health)
+    def health() -> Health:
+        return Health(status="ok", version=__version__)
 
     static = Path(__file__).parent / "static"
     if static.is_dir():

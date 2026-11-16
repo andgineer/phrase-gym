@@ -132,7 +132,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(results.locator('strong')).toHaveText(['So far, so good.'])
   await expect(results).toContainText('Used for: small talk · progress update')
   await find.fill('zzz')
-  await expect(page.getByText('No matches', { exact: true })).toBeVisible()
+  await expect(page.getByText('Not in your Library yet.', { exact: true })).toBeVisible()
 
   await find.fill('how is it going')
   await libraryPhrase(page, 'So far, so good.').tap()
@@ -186,7 +186,7 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(page.getByText('Deleted “So far, so good.”.')).toBeVisible()
   expect((await page.request.get(`/api/phrases/${phraseId}`)).status()).toBe(404)
   await find.fill('so far')
-  await expect(page.getByText('No matches', { exact: true })).toBeVisible()
+  await expect(page.getByText('Not in your Library yet.', { exact: true })).toBeVisible()
 
   await find.fill('')
   await expect(lesson).toHaveValue('Meetings · Mobile course')

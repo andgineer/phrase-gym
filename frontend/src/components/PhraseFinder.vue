@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { usePagedList } from '../composables/usePagedList'
+import LibraryCoach from './LibraryCoach.vue'
 import type { PhrasePage, PhraseSummary } from '../libraryTypes'
 
 const props = defineProps<{ lessonId: string; disabled: boolean }>()
@@ -12,18 +13,17 @@ const phrases = usePagedList<PhraseSummary, PhrasePage>(() =>
     ? `/phrases?query=${encodeURIComponent(query.value.trim())}`
     : `/phrases${props.lessonId ? `?lesson_id=${encodeURIComponent(props.lessonId)}` : ''}`,
 )
-const empty = computed(() =>
-  searching.value
-    ? 'No matches'
-    : props.lessonId
-      ? 'No phrases in this lesson'
-      : 'No phrases yet. Type a phrase or word into the Coach field to add one.',
-)
+const queryPending = ref(false)
 let debounce: number | undefined
 
 watch(query, () => {
+  queryPending.value = true
   window.clearTimeout(debounce)
-  debounce = window.setTimeout(() => void phrases.reload(), 200)
+  const current = query.value
+  debounce = window.setTimeout(async () => {
+    await phrases.reload()
+    if (query.value === current) queryPending.value = false
+  }, 200)
 })
 watch(
   () => props.lessonId,
@@ -38,14 +38,22 @@ defineExpose({ reload: phrases.reload })
 
 <template>
   <div class="phrase-finder">
-    <input
-      v-model="query"
-      type="search"
-      aria-label="Search phrases or concepts"
-      placeholder="Search phrases or concepts"
-    />
+    <div class="phrase-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        v-model="query"
+        type="search"
+        aria-label="Search phrases or concepts"
+        placeholder="Search phrases or concepts"
+      />
+    </div>
+    <slot v-if="!searching" name="lesson" />
     <p v-if="searching" class="muted">Searching all lessons.</p>
-    <ul v-if="phrases.items.value.length" class="phrase-list library-results" aria-label="Phrases">
+    <ul
+      v-if="!queryPending && phrases.items.value.length"
+      class="phrase-list library-results"
+      aria-label="Phrases"
+    >
       <li v-for="(phrase, index) in phrases.items.value" :key="phrase.id">
         <button
           class="phrase-summary"
@@ -62,10 +70,33 @@ defineExpose({ reload: phrases.reload })
         </button>
       </li>
     </ul>
-    <p v-else-if="phrases.loaded.value && !phrases.loading.value" class="muted" role="status">
-      {{ empty }}
+    <p
+      v-else-if="
+        (searching || lessonId) &&
+        !queryPending &&
+        phrases.loaded.value &&
+        !phrases.loading.value &&
+        !phrases.error.value
+      "
+      class="muted"
+      role="status"
+    >
+      {{ searching ? 'Not in your Library yet.' : 'No phrases in this lesson' }}
     </p>
-    <button v-if="phrases.nextOffset.value !== null" @click="phrases.more">More</button>
+    <LibraryCoach
+      v-if="
+        searching &&
+        !queryPending &&
+        phrases.loaded.value &&
+        !phrases.loading.value &&
+        !phrases.error.value
+      "
+      :text="query.trim()"
+      :has-results="phrases.items.value.length > 0"
+    />
+    <button v-if="!queryPending && phrases.nextOffset.value !== null" @click="phrases.more">
+      More
+    </button>
     <p v-if="phrases.error.value" role="alert" class="error">{{ phrases.error.value }}</p>
   </div>
 </template>

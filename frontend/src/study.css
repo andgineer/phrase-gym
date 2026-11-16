@@ -22,48 +22,6 @@
   align-items: center;
   margin: 1rem 0;
 }
-.coach-field {
-  position: relative;
-  display: block;
-  margin-left: auto;
-  min-width: 0;
-}
-.coach-input {
-  display: flex;
-  gap: 8px;
-}
-.coach-input input[type='text'] {
-  width: 12rem;
-  margin-top: 0;
-  padding: 10px 12px;
-}
-/* Floating below the field keeps the page from shifting while a confirmation shows. */
-.coach-message {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 10;
-  width: max-content;
-  max-width: min(24rem, 90vw);
-  margin: 0;
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  background: #fffef9;
-  border: 1px solid #deded1;
-  border-radius: 8px;
-}
-.coach-message.error {
-  background: #fff0eb;
-}
-@media (max-width: 540px) {
-  .coach-field {
-    width: 100%;
-  }
-  .coach-input input[type='text'] {
-    flex: 1;
-    width: auto;
-  }
-}
 .microphone {
   display: inline-flex;
   justify-content: center;
@@ -103,13 +61,9 @@
   margin-top: 16px;
 }
 @media (prefers-color-scheme: dark) {
-  .intake-dialog,
-  .coach-message {
+  .intake-dialog {
     background: #25352e;
     color: #e9eee9;
-  }
-  .coach-message.error {
-    background: #512e27;
   }
 }
 .settings-group {

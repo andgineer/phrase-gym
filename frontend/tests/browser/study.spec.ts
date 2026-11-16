@@ -239,7 +239,9 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
 
 test('imports, rates, and retains complete takes', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('Add your first phrase', { exact: true })).toBeVisible()
+  await expect(
+    page.getByText('Add your first phrase with Coach to begin.', { exact: true }),
+  ).toBeVisible()
   await expect(page.locator('article.study')).toHaveCount(0)
   await importPackage(page, phrasePackage, 5)
   await expect(page.locator('article.study')).toHaveCount(0)
@@ -403,6 +405,10 @@ test('imports, rates, and retains complete takes', async ({ page }) => {
   await page.request.post(`/__test/clock/${tomorrow}`)
   await page.reload()
   await expect(page.locator('article.study')).toHaveCount(0)
+  await expect(
+    page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }),
+  ).toHaveAttribute('aria-current', 'page')
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
   await openDaily(page, false)
   const prompt = page.locator('article.study .practice-prompt')
   await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
@@ -515,7 +521,7 @@ test('restored practice card keeps the original layout and microphone interactio
 
 test('one-time discarded-data reset completes before pending take recovery', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('textbox', { name: 'Phrase or word for Coach' })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('button', { name: 'Coach' })).toBeVisible()
   await page.evaluate(async () => {
     localStorage.setItem('phrase-gym.reference-exposure.v1.old', 'old')
     localStorage.setItem('phrase-gym.last-learning-language.v1', 'de')
@@ -551,7 +557,7 @@ test('one-time discarded-data reset completes before pending take recovery', asy
     await route.continue()
   })
   await page.reload()
-  await expect(page.getByRole('textbox', { name: 'Phrase or word for Coach' })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('button', { name: 'Coach' })).toBeVisible()
   expect(uploads).toBe(0)
   expect(
     await page.evaluate(async () => {

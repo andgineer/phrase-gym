@@ -80,7 +80,7 @@ Make each update in the same commit as the code it describes.
 - [Architecture](../architecture.md), first paragraph: the brand row and tab bar replace the compact header as the established shell.
 - [Core trainer](../decision-core-trainer.md): under phone-sized controls, add the card rules (controls above the text in fixed positions on both sides, a full-width microphone in the same place on both sides, Hint / New cue / Reveal, docked ratings). Replace **Show** with **Reveal** throughout. State that the entry button opening Daily is labelled **Start**; specs keep the mode name Daily.
 - [Practice and engagement](../decision-transfer-and-engagement.md#practice-entry-and-todays-facts): rewrite the entry paragraph for the Start card, the waiting counts, the Start and Extra states, the lesson chip, the tab bar, the empty library pointing to the Coach page, leaving a card through the tabs instead of Stop, and the progress line text.
-- [External preparation](../decision-external-preparation-agent.md#coach-field-typed-phrases-and-words): the Coach page replaces the header field (retitle the section and update its links); sending from a Library search with no match; opening Coach leaves a card and Start resumes it; Enter sends and line breaks become spaces.
+- [External preparation](../decision-external-preparation-agent.md#coach-page-typed-phrases-and-words): the Coach page replaces the header field (retitle the section and update its links); sending from a Library search with no match; opening Coach leaves a card and Start resumes it; Enter sends and line breaks become spaces.
 - [Recording and comparison](../decision-recording-and-comparison.md): the grouping bullet takes the new back-side rows, the history position, the microphone's shared position on both sides and capture state inside the microphone.
 - [Implementation plan](implementation-plan.md): the Coach stage's learner outcome names the Coach page. When this stage is accepted, delete it and this plan.
 - [README](../../README.md) and the [user guide](../../docs/src/en/index.md): Start, Reveal, the Coach page, the tab bar, no Stop.
@@ -96,7 +96,6 @@ Make each update in the same commit as the code it describes.
 
 Each checkpoint is one coherent deliverable under the [handout](orchestration-handout.md), with the full gate and CI.
 
-1. **Shell and Coach:** brand row with version, tab bar, Coach page, sending from a Library search with no match, the empty-library text, hash page selection, with their spec and documentation updates.
 2. **Practice home and card:** the waiting-counts read, the Start and Extra states, the finished wording, the front and back card layout, the microphone, Reveal, the history placement, **⋯** Delete, the docked ratings and removal of Stop, with their spec and documentation updates.
 3. **Home-screen app:** manifest, icons, safe areas, input sizes, Apple meta tags, the Coach shortcut and the dark-mode pass.
 

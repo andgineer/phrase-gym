@@ -26,8 +26,10 @@ it stops with an explanation and leaves the directory unchanged.
 
 ## Add and study material
 
-Type a phrase or word, optionally followed by the sentence it came from, into the field at the
-top right and press **Coach**. The application's Coach prepares a complete card with reference
+Use the **Practice**, **Library**, **Coach** and **Settings** tabs to switch pages; the brand
+returns to Practice and the installed app version appears on every page. Open **Coach**, type a phrase
+or word, optionally followed by the sentence it came from, and press **Send** or Enter. Pasted line
+breaks become spaces. The application's Coach prepares a complete card with reference
 audio using your logged-in Claude Code CLI and local Piper voice, and adds it to the **Added with
 Coach** lesson. `phrase-gym coach --cli codex` uses the logged-in Codex CLI instead; Coach never
 switches between the two on its own. An external AI agent can instead prepare a course batch with its reference audio
@@ -71,6 +73,10 @@ it, so it never shows yesterday as today.
 Every stopped take is retained in the browser and uploads in the background with the cue, hint and
 answer it was recorded with; pending uploads remain for retry and never block the next card.
 **Mine** and **Compare** replay the latest take of the open card.
+
+A Library search with no match offers **Send “…” to Coach**; matching results also offer a quiet
+**Not it?** link. Both use the same request and confirmation as the Coach page. Opening any tab
+finishes and keeps a recording; **Daily** resumes the regular card later.
 
 The Library lists the selected lesson's phrases and searches all lessons by wording, meaning,
 situation or use. Phrase details show the answer, what it is used for, the lesson and source,

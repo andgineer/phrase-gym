@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures'
 import { importStatus, silentReference } from './helpers'
 
-test.use({ coachEnabled: false })
+test.use({ coachEnabled: false, viewport: { width: 390, height: 844 } })
 
 const typed = 'by and large'
 
@@ -27,9 +27,12 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
   })
   await page.clock.install()
   await page.goto('/')
-  await expect(page.getByText('Add your first phrase', { exact: true })).toBeVisible()
+  await expect(
+    page.getByText('Add your first phrase with Coach to begin.', { exact: true }),
+  ).toBeVisible()
+  await page.getByRole('link', { name: 'Coach', exact: true }).click()
   const field = page.getByRole('textbox', { name: 'Phrase or word for Coach' })
-  const coach = page.getByRole('button', { name: 'Coach', exact: true })
+  const coach = page.getByRole('button', { name: 'Send', exact: true })
   await field.fill(typed)
   const response = page.waitForResponse('**/api/coach/requests')
   await field.press('Enter')
@@ -51,18 +54,19 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
   await page.request.post(`/api/imports/${requestId}/failure`, {
     data: { error: 'Codex is not logged in' },
   })
-  await page.reload()
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   const notices = page.getByRole('list', { name: 'Preparation problems' }).getByRole('listitem')
   await expect(notices).toHaveCount(1)
   await expect(notices).toContainText(
     'Coach could not prepare “by and large”: Codex is not logged in',
   )
-  await expect(notices).toContainText('Type the same text into the Coach field to retry.')
+  await expect(notices).toContainText('Send the same text from the Coach page to retry.')
   await page.getByRole('button', { name: `Dismiss notice about ${typed}` }).click()
   await expect(notices).toHaveCount(0)
   const facts = await (await page.request.get('/api/practice/facts')).json()
   expect(facts.notices).toEqual([])
 
+  await page.getByRole('navigation').getByRole('button', { name: 'Coach', exact: true }).click()
   await field.fill(typed)
   await coach.click()
   await expect(saved).toBeVisible()
@@ -73,6 +77,7 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
   })
   await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   await expect(page.getByTestId('lesson-counts')).toHaveText('0 due · 1 new')
+  await page.getByRole('navigation').getByRole('button', { name: 'Coach', exact: true }).click()
   await field.fill(typed)
   await coach.click()
   await expect(
@@ -84,9 +89,9 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
 test('a content failure has no retry line and bold help renders without asterisks', async ({
   page,
 }) => {
-  await page.goto('/')
+  await page.goto('/#coach')
   const field = page.getByRole('textbox', { name: 'Phrase or word for Coach' })
-  const coach = page.getByRole('button', { name: 'Coach', exact: true })
+  const coach = page.getByRole('button', { name: 'Send', exact: true })
   for (const text of ['https://example.com/lesson', typed]) {
     await field.fill(text)
     await coach.click()
@@ -100,10 +105,10 @@ test('a content failure has no retry line and bold help renders without asterisk
   await page.request.post(`/api/imports/${phrase}/result`, {
     data: { result_id: phrase, phrase: card(phrase), reference: silentReference() },
   })
-  await page.reload()
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   const notices = page.getByRole('list', { name: 'Preparation problems' }).getByRole('listitem')
   await expect(notices).toContainText('This is a web address, not an English word.')
-  await expect(notices).not.toContainText('Type the same text into the Coach field to retry.')
+  await expect(notices).not.toContainText('Send the same text from the Coach page to retry.')
 
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('list', { name: 'Phrases' }).getByRole('button').first().click()

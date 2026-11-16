@@ -47,7 +47,6 @@ async function deleted(result: DeletionResult) {
     @practice="emit('practice', $event)"
   />
   <section v-show="!opened" class="card library" aria-label="Library">
-    <LessonPicker ref="picker" v-model="lessonId" />
     <p v-if="notice" role="status" class="success">{{ notice }}</p>
     <PhraseFinder
       ref="finder"
@@ -55,7 +54,9 @@ async function deleted(result: DeletionResult) {
       :lesson-id="lessonId"
       :disabled="disabled"
       @open="open"
-    />
+    >
+      <template #lesson><LessonPicker ref="picker" v-model="lessonId" /></template>
+    </PhraseFinder>
   </section>
   <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deleted" />
 </template>

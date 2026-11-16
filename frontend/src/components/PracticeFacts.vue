@@ -42,7 +42,12 @@ defineExpose({ refresh })
 
 <template>
   <section v-if="visible" class="card practice-facts" aria-label="Practice facts">
-    <p v-if="currentMessage" role="status" class="entry-message">{{ currentMessage }}</p>
+    <p v-if="currentMessage" role="status" class="entry-message">
+      <template v-if="currentMessage === 'Add your first phrase with Coach to begin.'"
+        >Add your first phrase with <a href="#coach">Coach</a> to begin.</template
+      >
+      <template v-else>{{ currentMessage }}</template>
+    </p>
     <div v-if="facts && (practised || week)" class="streak">
       <template v-if="practised">
         <p data-testid="streak">{{ streakLine(facts.streak) }}</p>
@@ -104,7 +109,7 @@ defineExpose({ refresh })
           {{ notice.error }}
         </p>
         <p v-if="notice.kind === 'coach' && notice.retry_helps" class="muted">
-          Type the same text into the Coach field to retry.
+          Send the same text from the Coach page to retry.
         </p>
         <button
           class="quiet"

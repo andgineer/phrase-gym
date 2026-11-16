@@ -16,11 +16,12 @@ const typedWord = 'reluctant'
 const wordText = 'She felt reluctant today.'
 
 const field = (page: Page) => page.getByRole('textbox', { name: 'Phrase or word for Coach' })
-const coachButton = (page: Page) => page.getByRole('button', { name: 'Coach', exact: true })
+const coachButton = (page: Page) => page.getByRole('button', { name: 'Send', exact: true })
 const confirmation = (page: Page, text: string) =>
   page.getByRole('status').filter({ hasText: text })
 
 async function submitToCoach(page: Page, typed: string): Promise<string> {
+  await page.getByRole('navigation').getByRole('button', { name: 'Coach', exact: true }).click()
   await field(page).fill(typed)
   const response = page.waitForResponse('**/api/coach/requests')
   await coachButton(page).click()
@@ -42,6 +43,7 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   page,
 }) => {
   await page.goto('/')
+  await page.getByRole('navigation').getByRole('button', { name: 'Coach', exact: true }).click()
   await expect(coachButton(page)).toBeDisabled()
   await field(page).fill('   ')
   await expect(coachButton(page)).toBeDisabled()
@@ -54,11 +56,16 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   const stop = card.getByRole('button', { name: 'Stop recording' })
   await expect(stop).toBeVisible()
 
+  const beforeLeave = (await (await page.request.get('/api/practice/current')).json()).card
   const wordRequest = await submitToCoach(page, typedWord)
-  await expect(stop).toBeVisible()
-  await stop.click()
-  await expect(card.getByRole('heading', { name: phraseText })).toBeVisible()
+  await expect(card).toHaveCount(0)
   await expect.poll(async () => (await savedTakes(page, phraseText)).length).toBe(1)
+  await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
+  await page.getByRole('button', { name: 'Daily', exact: true }).click()
+  const resumed = (await (await page.request.get('/api/practice/current')).json()).card
+  expect(resumed.view_token).toBe(beforeLeave.view_token)
+  await revealAnswer(page)
+  await expect(card.getByRole('heading', { name: phraseText })).toBeVisible()
   await card.getByRole('button', { name: 'Again', exact: true }).click()
 
   await awaitPublished(page, wordRequest)
@@ -91,22 +98,4 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   await expect
     .poll(async () => (await playedMedia(page)).slice(before))
     .toEqual([expect.stringContaining(take.url)])
-})
-
-test('the phone header gives the Coach field its own row above Daily and Extra', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/')
-  const brand = await page.locator('.brand').boundingBox()
-  const input = await field(page).boundingBox()
-  expect(input!.y).toBeGreaterThan(brand!.y + brand!.height)
-  for (const name of ['Daily', 'Extra']) {
-    const box = await page.getByRole('button', { name, exact: true }).boundingBox()
-    expect(box!.y + box!.height).toBeLessThanOrEqual(844)
-  }
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-  await field(page).fill(typedWord)
-  await coachButton(page).click()
-  await expect(confirmation(page, 'Saved for Coach.')).toBeVisible()
 })
