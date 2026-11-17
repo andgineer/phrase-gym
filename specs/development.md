@@ -17,6 +17,13 @@ If migrating from the temporary custom hook, first run `git config --unset core.
 module sizes and client formatting. Run `uv run inv test` for the full
 macOS gate. CI also runs the server tests on Linux. Tests use fake speech and silent browser audio.
 
+Browser tests reuse one Python server per worker. Before each test, the harness waits for
+in-flight preparation and creates a fresh app with its own data directory, clock and random
+generator; browser contexts remain fresh too. The harness wakes Coach on submission instead
+of waiting for its production idle poll, while retaining the real HTTP preparation and fake
+CLI/TTS boundaries. Offline-Coach tests disable that wake-up. Playwright logs individual test
+timings so slow cases remain visible in CI.
+
 `inv reqs` upgrades the dependency lock and pre-commit hook revisions. Review and commit both
 changes. `inv uv` installs or upgrades uv. `inv docs-en` serves a local documentation preview at
 <http://127.0.0.1:8001>; `inv build-docs` builds the site in `build/docs/site/`.

@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 const port = Number(process.env.PHRASE_GYM_BROWSER_TEST_PORT ?? 8941)
 export default defineConfig({
   testDir: './tests/browser',
+  reporter: 'list',
   fullyParallel: false,
   workers: 2,
   use: { trace: 'retain-on-failure' },
