@@ -16,6 +16,7 @@ test('phone card keeps controls still across reveal, hint, history and explanati
   await importPackage(page, value, 3)
   await page.getByRole('button', { name: 'Start', exact: true }).tap()
   const mic = page.getByRole('button', { name: 'Record a take' })
+  await expect(mic).toBeVisible()
   const fixedBounds = () =>
     page
       .locator(
@@ -28,6 +29,7 @@ test('phone card keeps controls still across reveal, hint, history and explanati
         }),
       )
   const frontBounds = await fixedBounds()
+  expect(frontBounds).toHaveLength(4)
   const front = await mic.boundingBox()
   const row = page.locator('.card-controls')
   const controls = await row.boundingBox()
