@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
+import { completeCard, startDaily } from './practice-api'
 import { expect, test } from './fixtures'
 import {
   card,
@@ -80,13 +81,8 @@ test('Extra extends a finished Daily, Stop keeps the take and a repeat press doe
 test('Practice from details rates one phrase and returns to its details', async ({ page }) => {
   await page.goto('/')
   await importPackage(page, extraPackage, 3)
-  await page.getByRole('button', { name: 'Start', exact: true }).click()
-  await revealAnswer(page)
-  await expect(card(page).getByRole('heading', { name: texts[0] })).toBeVisible()
-  await rateNew(page)
-  await revealAnswer(page)
-  await expect(card(page).getByRole('heading', { name: texts[1] })).toBeVisible()
-  await page.getByRole('button', { name: 'Practice', exact: true }).click()
+  const state = await completeCard(page, (await startDaily(page)).card!)
+  expect(state.card).not.toBeNull()
 
   await openDetails(page, texts[0])
   const tomorrow = await details(page)

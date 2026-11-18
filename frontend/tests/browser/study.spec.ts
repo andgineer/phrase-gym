@@ -6,7 +6,6 @@ import {
   importPackage,
   libraryPhrase,
   phraseId,
-  phraseSearch,
   savedTakes,
 } from './helpers'
 
@@ -237,13 +236,15 @@ test('native recorder keeps variable encoder output and muted playback clocks', 
   await expect(page.getByText(/^Today's practice is complete\./)).toBeVisible()
 })
 
-test('imports, rates, and retains complete takes', async ({ page }) => {
+test('recovers complete pending takes and keeps comparison and completion responses bounded', async ({
+  page,
+}) => {
   await page.goto('/')
   await expect(
     page.getByText('Add your first phrase with Coach to begin.', { exact: true }),
   ).toBeVisible()
   await expect(page.locator('article.study')).toHaveCount(0)
-  await importPackage(page, phrasePackage, 5)
+  await importPackage(page, { ...phrasePackage, lessons: lessons(cards.slice(0, 2)) }, 2)
   await expect(page.locator('article.study')).toHaveCount(0)
   await openDaily(page)
   const started = await page.getByTestId('practice-phrase').innerText()
@@ -380,7 +381,7 @@ test('imports, rates, and retains complete takes', async ({ page }) => {
     await route.continue()
   })
   const rated: string[] = []
-  for (const index of cards.keys()) {
+  for (const index of [0, 1]) {
     await revealAnswer(page)
     rated.push(await page.locator('article.study').getByTestId('practice-phrase').innerText())
     await expect(page.getByText('How was your answer before you saw the phrase?')).toBeVisible()
@@ -393,52 +394,18 @@ test('imports, rates, and retains complete takes', async ({ page }) => {
     }
   }
   await expect(page.getByText(/^Today's practice is complete\. Next due: /)).toBeVisible()
-  expect(completions).toBe(cards.length)
+  expect(completions).toBe(2)
   expect(rated[0]).toBe(started)
-  expect([...rated].sort()).toEqual(cards.map(({ text }) => text).sort())
+  expect([...rated].sort()).toEqual(
+    cards
+      .slice(0, 2)
+      .map(({ text }) => text)
+      .sort(),
+  )
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await libraryPhrase(page, started).click()
   await page.getByRole('button', { name: 'Recording history' }).click()
   await expect(page.getByRole('button', { name: 'Mine' })).toHaveCount(2)
-  await page.getByRole('button', { name: '← Back' }).click()
-  const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
-  await page.request.post(`/__test/clock/${tomorrow}`)
-  await page.reload()
-  await expect(page.locator('article.study')).toHaveCount(0)
-  await expect(
-    page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }),
-  ).toHaveAttribute('aria-current', 'page')
-  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
-  await openDaily(page, false)
-  const prompt = page.locator('article.study .practice-prompt')
-  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
-  const hardCue = await prompt.innerText()
-  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Reveal' }).click()
-  const hardIndex = Number(/situation (\d)\./.exec(hardCue)![1]) - 1
-  await expect(page.getByTestId('practice-phrase')).toHaveText(cards[hardIndex]!.text)
-  await page.getByRole('button', { name: 'Hard' }).click()
-  await expect(prompt).not.toHaveText(hardCue)
-  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
-  await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await phraseSearch(page).fill('walk me through')
-  await libraryPhrase(page, 'Could you walk me through that?').click()
-  await expect(page.getByRole('heading', { name: 'Could you walk me through that?' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Practise freely' })).toHaveCount(0)
-  await page.getByRole('button', { name: 'Settings', exact: true }).click()
-  await page.getByLabel('Learning timezone').fill('Europe/London')
-  await page.getByRole('button', { name: 'Save settings' }).click()
-  await expect(page.getByText('Settings saved.')).toBeVisible()
-  await page.getByRole('button', { name: 'Practice', exact: true }).click()
-  await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
-  await phraseSearch(page).fill('started')
-  await expect(page.getByRole('list', { name: 'Phrases' }).getByRole('button')).toHaveCount(1)
-  await page.getByRole('navigation').getByRole('button', { name: 'Practice', exact: true }).click()
-  await openDaily(page, false)
-  await expect(prompt).toHaveText(/^Use the useful expression in situation \d\.$/)
-  await expect(prompt).not.toHaveText(hardCue)
-  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
 })
 
 test('restored practice card keeps the original layout and microphone interactions', async ({

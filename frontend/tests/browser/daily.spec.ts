@@ -1,7 +1,15 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
+import { finishDaily } from './practice-api'
 import { expect, test } from './fixtures'
-import { rateNew, revealAnswer, importPackage, playedMedia, savedTakes } from './helpers'
+import {
+  rateNew,
+  revealAnswer,
+  importPackage,
+  publishPackage,
+  playedMedia,
+  savedTakes,
+} from './helpers'
 
 const cues = [
   { situation: 'Colleague asks: How is it going?' },
@@ -41,18 +49,11 @@ const card = (page: Page) => page.locator('article.practice-card')
 const modeLine = (page: Page) => page.getByTestId('mode-line')
 
 async function rateBothThenReturnTomorrow(page: Page) {
-  await page.goto('/')
-  await importPackage(page, dailyPackage, 2)
-  await page.getByRole('button', { name: 'Start', exact: true }).click()
-  for (const text of ['So far, so good.', 'Nice to meet you.']) {
-    await revealAnswer(page)
-    await expect(card(page).getByRole('heading', { name: text })).toBeVisible()
-    await rateNew(page)
-  }
-  await expect(page.getByText(/^Today's practice is complete\. Next due: /)).toBeVisible()
+  await publishPackage(page, dailyPackage, 2)
+  await finishDaily(page)
   const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
   await page.request.post(`/__test/clock/${tomorrow}`)
-  await page.reload()
+  await page.goto('/')
 }
 
 test.beforeEach(async ({ page }) => installFakeMedia(page))
@@ -180,8 +181,7 @@ test.describe('mobile', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
 
   test('mobile Daily controls fit and respond to taps', async ({ page }) => {
-    await page.goto('/')
-    await importPackage(page, dailyPackage, 2, true)
+    await rateBothThenReturnTomorrow(page)
     await page.getByRole('button', { name: 'Start', exact: true }).tap()
     await revealAnswer(page, true)
     await card(page).getByRole('button', { name: 'Record a take' }).tap()
@@ -194,15 +194,7 @@ test.describe('mobile', () => {
       .poll(async () => (await playedMedia(page)).slice(before))
       .toEqual([expect.stringMatching(/\/reference$/)])
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
-    await rateNew(page, true)
-    await revealAnswer(page)
-    await expect(card(page).getByRole('heading', { name: 'Nice to meet you.' })).toBeVisible()
-    const tomorrow = new Date(Date.now() + 26 * 3600 * 1000).toISOString()
-    await rateNew(page, true)
-    await page.request.post(`/__test/clock/${tomorrow}`)
-    await page.reload()
-    await page.getByRole('button', { name: 'Start', exact: true }).tap()
-    await card(page).getByRole('button', { name: 'Reveal' }).tap()
+    await card(page).getByRole('button', { name: 'Stop playback' }).tap()
     for (const name of ['Again', 'Hard', 'Good', 'Easy', 'Skip', 'Record a take'])
       await expect(card(page).getByRole('button', { name })).toBeInViewport({ ratio: 0.5 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)

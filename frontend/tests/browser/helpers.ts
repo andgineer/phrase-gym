@@ -26,18 +26,22 @@ export function silentReference(): string {
 export type ExternalPackage = { package_id: string; lessons: { phrases: { item_id: string }[] }[] }
 
 // External agents submit complete packages with audio through the API; the browser has no import.
-export async function importPackage(
-  page: Page,
-  value: ExternalPackage,
-  added: number,
-  tap = false,
-) {
+export async function publishPackage(page: Page, value: ExternalPackage, added: number) {
   const items = value.lessons.flatMap((lesson) => lesson.phrases)
   const references = Object.fromEntries(items.map((item) => [item.item_id, silentReference()]))
   const response = await page.request.post('/api/imports', {
     data: { package: value, references },
   })
   expect(await response.json()).toMatchObject({ status: 'added', added_count: added })
+}
+
+export async function importPackage(
+  page: Page,
+  value: ExternalPackage,
+  added: number,
+  tap = false,
+) {
+  await publishPackage(page, value, added)
   const practice = page.getByRole('navigation').getByRole('button', { name: 'Practice' })
   await (tap ? practice.tap() : practice.click())
 }

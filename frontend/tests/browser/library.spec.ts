@@ -2,8 +2,10 @@ import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
 import { expect, test } from './fixtures'
 import { openDetails } from './extra-package'
+import { seedTake, startDaily } from './practice-api'
 import {
   importPackage as importWith,
+  publishPackage,
   libraryPhrase,
   phraseSearch,
   revealAnswer,
@@ -74,23 +76,17 @@ async function noHorizontalScroll(page: Page) {
 test.beforeEach(async ({ page }) => installFakeMedia(page))
 
 test('mobile import, lesson choice, search, details and confirmed Delete', async ({ page }) => {
+  await publishPackage(page, organizedPackage('mobile-library-v1'), 4)
+  const active = (await startDaily(page)).card!
+  await seedTake(page, active)
+  const drawn = (await (await page.request.get(`/api/phrases/${active.phrase_id}`)).json()).text
   await page.goto('/')
-  await importPackage(page, organizedPackage('mobile-library-v1'), 4)
+  const card = page.locator('article.practice-card')
   const library = page.getByRole('region', { name: 'Library', exact: true })
   await expect(library).toHaveCount(0)
   await expect(phraseSearch(page)).toHaveCount(0)
   const counts = page.getByTestId('lesson-counts')
   await expect(counts).toHaveText('0 due · 4 new')
-  await page.getByRole('button', { name: 'Start', exact: true }).tap()
-  const card = page.locator('article.practice-card')
-  await revealAnswer(page, true)
-  const drawn = await card.getByTestId('practice-phrase').innerText()
-  await card.getByRole('button', { name: 'Record a take' }).tap()
-  await card.getByRole('button', { name: 'Stop recording' }).tap()
-  await expect(card.getByRole('button', { name: 'Mine' })).toBeVisible()
-  await expect(page.getByText(/take\(s\) waiting to save/)).toHaveCount(0)
-
-  await page.getByRole('button', { name: 'Practice', exact: true }).tap()
   const lesson = page.getByRole('combobox', { name: 'Lesson', exact: true })
   const options = page.getByRole('option')
   await expect(counts).toHaveText('0 due · 4 new')

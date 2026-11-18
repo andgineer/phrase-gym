@@ -22,6 +22,7 @@ test('daily limits are edited in Settings and govern Daily', async ({ page }) =>
   await save.click()
   await expect(status(page, 'cannot both be zero')).toBeVisible()
   await fresh.fill('2')
+  await page.getByLabel('Learning timezone').fill('Europe/London')
   await save.click()
   await expect(status(page, 'Settings saved.')).toBeVisible()
 
@@ -37,6 +38,7 @@ test('daily limits are edited in Settings and govern Daily', async ({ page }) =>
   await page.getByRole('button', { name: 'Settings', exact: true }).click()
   await expect(due).toHaveValue('0')
   await expect(fresh).toHaveValue('2')
+  await expect(page.getByLabel('Learning timezone')).toHaveValue('Europe/London')
 })
 
 test('return pace choices show their return counts and set the rating forecasts', async ({

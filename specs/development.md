@@ -24,6 +24,14 @@ of waiting for its production idle poll, while retaining the real HTTP preparati
 CLI/TTS boundaries. Offline-Coach tests disable that wake-up. Playwright logs individual test
 timings so slow cases remain visible in CI.
 
+Keep business-rule matrices in Python service/API tests and client units. Vue render tests
+check presentation branches without browser startup; real browsers verify event handling,
+navigation, recovery, layout and native media against the built client and real server. Seed
+prerequisite history through the public API before opening the page instead of replaying the
+same practice journey in every browser case. Retain representative complete journeys and
+both engines' browser-specific coverage; moving assertions to faster layers must preserve the
+behavior they protect.
+
 `inv reqs` upgrades the dependency lock and pre-commit hook revisions. Review and commit both
 changes. `inv uv` installs or upgrades uv. `inv docs-en` serves a local documentation preview at
 <http://127.0.0.1:8001>; `inv build-docs` builds the site in `build/docs/site/`.

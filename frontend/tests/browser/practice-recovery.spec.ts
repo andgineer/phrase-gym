@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { installFakeMedia } from './fake-media'
+import { finishDaily as finishDailyApi } from './practice-api'
 import { expect, test } from './fixtures'
 import { card, details, extraPackage, modeLine, openDetails, texts } from './extra-package'
 import { rateNew, revealAnswer, importPackage } from './helpers'
@@ -24,8 +25,8 @@ async function limitNewToOne(page: Page) {
 }
 async function finishDaily(page: Page) {
   await limitNewToOne(page)
-  await press(page, 'Start')
-  await rateNew(page)
+  await finishDailyApi(page)
+  await page.reload()
 }
 
 test.beforeEach(async ({ page }) => installFakeMedia(page))
