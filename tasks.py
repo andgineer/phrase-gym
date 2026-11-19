@@ -107,10 +107,16 @@ def check_sizes(_context: Context):
 
 
 @task
-def check_api(context: Context):
-    """Regenerate the API contract and reject uncommitted drift."""
+def generate_api(context: Context):
+    """Regenerate OpenAPI and the client API types."""
     context.run("uv run python scripts/generate_api.py")
     context.run("npm --prefix frontend run api-types")
+
+
+@task
+def check_api(context: Context):
+    """Regenerate the API contract and check it against the Git index."""
+    generate_api(context)
     context.run("git diff --exit-code -- frontend/openapi.json frontend/src/api.generated.ts")
 
 

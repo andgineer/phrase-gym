@@ -69,12 +69,20 @@ def test_release_updates_lock_checks_then_pushes_branch_and_tag_atomically(repos
     version_file, _, commands = repository
     release.release("bug")
     assert version_file.read_text() == '__version__ = "0.10.1"\n'
-    assert ("uv", "lock") in commands
-    pre = commands.index(("uv", "run", "inv", "pre"))
-    test = commands.index(("uv", "run", "inv", "test"))
-    commit = commands.index(("git", "commit", "-m", "Version v0.10.1"))
-    assert pre < test < commit
-    assert commands[-2:] == [
+    assert commands[commands.index(("uv", "lock")) :] == [
+        ("uv", "lock"),
+        ("uv", "run", "inv", "generate-api"),
+        (
+            "git",
+            "add",
+            release.VERSION_FILE,
+            "uv.lock",
+            "frontend/openapi.json",
+            "frontend/src/api.generated.ts",
+        ),
+        ("uv", "run", "inv", "pre"),
+        ("uv", "run", "inv", "test"),
+        ("git", "commit", "-m", "Version v0.10.1"),
         ("git", "tag", "-a", "v0.10.1", "-m", "Release 0.10.1"),
         ("git", "push", "--atomic", "origin", "main", "v0.10.1"),
     ]
@@ -112,11 +120,14 @@ def test_short_tag_helper_keeps_full_package_version(repository) -> None:
     assert commands[-1] == ("git", "push", "--atomic", "origin", "main", "v0.11")
 
 
-def test_failed_gate_never_commits_or_tags(repository, monkeypatch) -> None:
+@pytest.mark.parametrize("task", ["generate-api", "pre", "test"])
+def test_failed_release_step_never_commits_or_tags(repository, monkeypatch, task) -> None:
     _, _, commands = repository
 
     def fail(command, **_kwargs):
-        raise subprocess.CalledProcessError(1, command)
+        commands.append(tuple(command))
+        if command == ["uv", "run", "inv", task]:
+            raise subprocess.CalledProcessError(1, command)
 
     monkeypatch.setattr(release.subprocess, "run", fail)
     with pytest.raises(subprocess.CalledProcessError):

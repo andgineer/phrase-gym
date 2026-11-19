@@ -92,8 +92,9 @@ inv ver-feature   # minor
 inv ver-release   # major
 ```
 
-The version task asks for confirmation, updates the version and `uv.lock`, runs the local gates,
-commits, creates an annotated `vMAJOR.MINOR.PATCH` tag, and atomically pushes the branch and tag.
+The version task asks for confirmation, updates the version and `uv.lock`, and regenerates the
+API contract. It stages those files for the local gates, then commits, creates an annotated
+`vMAJOR.MINOR.PATCH` tag, and atomically pushes the branch and tag.
 The tag workflow verifies tag/version agreement, runs CI for that exact tag, builds the package,
 publishes to PyPI using `PYPI_USERNAME` and `PYPI_PASSWORD` repository secrets, and creates a GitHub
 release with the same tag. Ordinary branch pushes do not publish a package.
