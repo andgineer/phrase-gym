@@ -3,28 +3,36 @@
 [![CI](https://github.com/andgineer/phrase-gym/workflows/CI/badge.svg)](https://github.com/andgineer/phrase-gym/actions)
 [![Coverage](https://raw.githubusercontent.com/andgineer/phrase-gym/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/phrase-gym/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-**Make the English you hear part of the English you speak.**
+**One phrase in. A speaking exercise out.**
 
-Bring in phrases from a lesson, a video, or a conversation. Get a situation, try saying the phrase
-from memory, then hear how it sounds alongside your own take.
+You hear “Could you walk me through it?” and want to use it yourself. Send it to Coach, with
+the original sentence if you have it. Coach builds a card with an explanation, situations that
+call for the phrase, hints for when you get stuck, and reference audio.
+
+Working through an English course? Give your AI agent a lesson and the Phrase Gym import guide.
+It picks useful expressions, builds the exercises, reuses suitable recordings from the course,
+and generates audio where it’s missing. The finished lesson goes straight into your library.
 
 <table>
 <tr>
 <td align="center" valign="top"><b>Say it from a situation</b><br><img src="docs/images/practice-cue.png" width="300" alt="Practice card with a fill-in-the-blank cue, parenthetical meaning, partner line, and hint"></td>
-<td align="center" valign="top"><b>Reveal, compare, and rate</b><br><img src="docs/images/practice-compare.png" width="300" alt="The same card revealed as So far, so good, with reference and recording playback and review intervals"></td>
+<td align="center" valign="top"><b>Reveal and compare</b><br><img src="docs/images/practice-compare.png" width="300" alt="The same card revealed as So far, so good, with reference and recording playback controls"></td>
 </tr>
 </table>
 
-- **Practise your own material.** Give Coach a phrase or word and it builds a card with
-  context, hints, and reference audio. An AI agent can bring in a whole lesson at once.
-- **Hear the difference.** Record a take, play the reference and your voice back to back,
-  and revisit saved recordings in your Library.
-- **Come back when it’s due.** Rate your recall to schedule the next review. Do a short daily
-  session, get extra practice when you want it, or pick a phrase to rehearse.
+- **Use the phrase in different situations.** The same expression can come up in a meeting,
+  a phone call, or a chat with a friend. Say it from the prompt and ask for a hint if the wording
+  escapes you.
+- **Hear how you said it.** Record your reply and play it back alongside the reference.
+  Your takes stay with the phrase so you can revisit them later.
+- **Go back to what you need.** Open a lesson from your course or search for a phrase by wording,
+  meaning, or situation. Practise it on the spot.
+
+[Add a phrase with Coach](https://andgineer.github.io/phrase-gym/importing-phrases/#type-a-phrase-or-word-for-coach) ·
+[Import a lesson with your AI agent](https://andgineer.github.io/phrase-gym/importing-phrases/#ask-your-personal-ai-agent)
 
 [Install Phrase Gym](https://andgineer.github.io/phrase-gym/installation/) ·
 [User guide](https://andgineer.github.io/phrase-gym/) ·
-[Add your phrases](https://andgineer.github.io/phrase-gym/importing-phrases/) ·
 [Use it on your phone](https://andgineer.github.io/phrase-gym/private-access/)
 
 ## Built on second-language learning research
