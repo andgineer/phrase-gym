@@ -36,8 +36,11 @@ behavior they protect.
 changes. `inv uv` installs or upgrades uv. `inv docs-en` serves a local documentation preview at
 <http://127.0.0.1:8001>; `inv build-docs` builds the site in `build/docs/site/`.
 Documentation and Allure reports are published to the `gh-pages` branch by their workflows.
-Configure GitHub Pages to serve the root of that branch. CI also provides coverage comments,
-Codecov and Coveralls integration; external coverage services require their repository setup.
+Configure GitHub Pages to serve the root of that branch. CI provides coverage comments and
+integrations with [Codecov](https://app.codecov.io/gh/andgineer/phrase-gym) and
+[Coveralls](https://coveralls.io/github/andgineer/phrase-gym). External coverage
+services require their repository setup. The repository scaffold originated with
+[cookiecutter-python-package](https://github.com/andgineer/cookiecutter-python-package).
 
 User launch, Coach setup, private access and backups are documented in the
 [user guide](../docs/src/en/installation.md).

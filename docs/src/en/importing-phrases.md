@@ -5,13 +5,13 @@ filling in individual phrase cards or handling any file.
 
 ## Type a phrase or word for Coach
 
-Type one phrase or word into the field at the top right and press **Coach**. You can add the
-sentence it came from after it, for example
+Open the **Coach** tab and type a phrase or word, optionally followed by the sentence it came
+from. Press **Send** or Enter. Pasted line breaks become spaces. For example, try
 `take it with a grain of salt — I'd take his estimate with a grain of salt`. The sentence helps
 Coach choose the right meaning; without it, Coach uses the most common useful one.
 
-Phrase Gym saves the text at once, whether or not [Coach is running](installation.md), clears the
-field and briefly confirms. Your practice continues meanwhile. Coach later prepares a complete
+Phrase Gym saves the text at once, even if [Coach is offline](installation.md#preparation-with-coach).
+It clears the field and briefly confirms. Your practice continues meanwhile. Coach later prepares a complete
 card: a phrase becomes a card for its reusable chunk, and a single word becomes a card for one of
 its meanings with two or three example contexts. Each card gets reference audio and appears in
 the **Added with Coach** lesson, apart from your course lessons. Phrase Gym does not show
@@ -24,7 +24,7 @@ prepared again.
 If Coach cannot prepare a card, for example because the text contains no English phrase or word
 or because the Claude CLI is not logged in, it prints the reason in its terminal and the Practice page
 shows a notice below **Total**. Close it with **×** once you have read it. To retry, type the
-same text into the field again.
+same text into Coach again.
 
 ## Ask your personal AI agent
 

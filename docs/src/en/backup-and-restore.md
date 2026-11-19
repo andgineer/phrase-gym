@@ -32,7 +32,9 @@ If a copy fails, keep the fallback and backup untouched and retry while the app 
 ## Automatic copy before an upgrade
 
 When a new Phrase Gym version needs a newer database layout, it upgrades your database in place
-on startup. Just before that, it saves a copy of the database beside it, named
+on startup. An unknown or newer database version stops startup with an explanation and leaves
+the data directory unchanged. Before a supported upgrade, Phrase Gym saves a copy of the
+database beside it, named
 `phrase-gym-schema-<old version>-<date and time>.sqlite3`. Your references and recordings are not
 changed by an upgrade. To go back to the previous Phrase Gym version, stop the application, move
 `phrase-gym.sqlite3` and any `-wal` and `-shm` files aside, copy the saved file to
