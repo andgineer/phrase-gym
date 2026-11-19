@@ -115,8 +115,9 @@ onMounted(initialize)
     <template v-else-if="screen === 'card' && card">
       <StudyCard
         :card="card"
-        :previous-card="practice.previousCard.value"
+        :reviewed-cards="practice.reviewedCards.value"
         :play="playback.play"
+        :compare-saved="playback.compare"
         :progress="practice.view.value.progress"
         :details-open="practice.view.value.detailsOpen"
         :capturing="capture.capturing.value"
@@ -131,6 +132,7 @@ onMounted(initialize)
         :practice-error="practice.error.value"
         :can-retry="practice.pending.value !== null"
         @control="session.controlAudio"
+        @stop-playback="playback.stop"
         @show="practice.reveal()"
         @details="practice.toggleDetails()"
         @new-cue="practice.newCue"

@@ -6,14 +6,14 @@ import CardMenu from './CardMenu.vue'
 import PracticeDialog from './PracticeDialog.vue'
 import SavedHistoryPanel from './SavedHistoryPanel.vue'
 import RatingButtons from './RatingButtons.vue'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
-import type { Card, Outcome, Progress, ReviewedCard } from '../studyTypes'
+import type { Card, Outcome, Progress, Recording, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
   card: Card
-  previousCard: ReviewedCard | null
+  reviewedCards: ReviewedCard[]
   progress: Progress | null
   detailsOpen: boolean
   capturing: boolean
@@ -27,6 +27,7 @@ const props = defineProps<{
   takeError: string
   practiceError: string
   play: (url: string) => Promise<void>
+  compareSaved: (take: Recording, referenceUrl?: string) => Promise<void>
   canRetry: boolean
 }>()
 const emit = defineEmits<{
@@ -42,39 +43,82 @@ const emit = defineEmits<{
   compare: []
   retrySave: []
   retryCompletion: []
+  stopPlayback: []
 }>()
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
-const front = computed(() => !props.card.revealed)
-const panel = ref<'history' | 'previous' | null>(null)
+const historyOpen = ref(false)
+const reviewIndex = ref<number | null>(null)
 const previousDetailsOpen = ref(false)
-function reviewPrevious(event: MouseEvent) {
-  if (event.currentTarget instanceof HTMLButtonElement) event.currentTarget.focus()
+const reviewed = computed(() =>
+  reviewIndex.value === null ? null : props.reviewedCards[reviewIndex.value],
+)
+const activeCard = computed(() => reviewed.value?.card ?? props.card)
+const activeProgress = computed(() => (reviewed.value ? reviewed.value.progress : props.progress))
+const front = computed(() => !activeCard.value.revealed)
+const showDock = computed(() => !front.value || props.reviewedCards.length > 0)
+const previousIndex = computed(() => (reviewIndex.value ?? props.reviewedCards.length) - 1)
+const savedTake = computed(() => reviewed.value?.card.recordings.at(-1))
+const phraseHeading = ref<HTMLElement | null>(null)
+
+async function browse(index: number | null) {
+  emit('stopPlayback')
+  historyOpen.value = false
   previousDetailsOpen.value = false
-  panel.value = 'previous'
+  reviewIndex.value = index
+  await nextTick()
+  phraseHeading.value?.focus()
 }
+
+function forward() {
+  const current = reviewIndex.value
+  if (current === null) return emit('complete', 'skipped')
+  const next = current + 1
+  void browse(next < props.reviewedCards.length ? next : null)
+}
+
+function playReference() {
+  if (!reviewed.value) return emit('playPhrase')
+  const url = activeCard.value.answer?.reference_url
+  if (url) void props.play(url)
+}
+
+function playMine() {
+  if (!reviewed.value) return emit('playMine')
+  if (savedTake.value) void props.play(savedTake.value.url)
+}
+
+function compare() {
+  if (!reviewed.value) return emit('compare')
+  if (savedTake.value)
+    void props.compareSaved(savedTake.value, activeCard.value.answer?.reference_url)
+}
+
 watch(
   () => props.card.view_token,
   () => {
-    panel.value = null
+    historyOpen.value = false
+    reviewIndex.value = null
   },
 )
 const progressValue = computed(() => {
-  const p = props.progress
-  if (!p || props.card.mode === 'practice') return 0
-  return props.card.kind === 'recall'
+  const p = activeProgress.value
+  if (!p || activeCard.value.mode === 'practice') return 0
+  return activeCard.value.kind === 'recall'
     ? p.due_completed / (p.due_allowance || 1)
     : p.new_completed / (p.new_allowance || 1)
 })
 </script>
 
 <template>
-  <section class="practice-panel" :class="{ 'has-ratings': !front }">
+  <section class="practice-panel" :class="{ 'has-ratings': showDock }">
     <div class="session-toolbar">
-      <span data-testid="mode-line">{{ progressLine(card, progress) }}</span>
+      <span data-testid="mode-line">{{ progressLine(activeCard, activeProgress) }}</span>
       <CardMenu
         v-if="!front"
+        :key="activeCard.view_token"
+        :read-only="!!reviewed"
         :disabled="busy || audioBusy"
-        @history="panel = 'history'"
+        @history="historyOpen = true"
         @remove="emit('remove')"
       />
       <span v-else class="menu-space" />
@@ -94,89 +138,91 @@ const progressValue = computed(() => {
       <BackControls
         v-else
         :disabled="audioBusy"
-        :has-take="hasTake"
-        @reference="emit('playPhrase')"
-        @mine="emit('playMine')"
-        @compare="emit('compare')"
+        :has-take="reviewed ? !!savedTake : hasTake"
+        @reference="playReference"
+        @mine="playMine"
+        @compare="compare"
       />
       <MicrophoneButton
         :capturing="capturing"
         :requesting="requesting"
         :playing="playing"
-        :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
-        @control="emit('control')"
+        :disabled="
+          (reviewed && !playing) ||
+          (processing && !playing) ||
+          (busy && !capturing && !requesting && !playing)
+        "
+        @control="reviewed ? emit('stopPlayback') : emit('control')"
       />
-      <div class="card-content">
-        <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
-        <p v-if="pendingTakes" role="status">
-          {{ pendingTakes }} take(s) waiting to save.
-          <button @click="emit('retrySave')">Retry save</button>
-        </p>
-        <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
-        <p v-if="practiceError" role="alert" class="error">
-          {{ practiceError }}
-          <button v-if="canRetry" :disabled="busy" @click="emit('retryCompletion')">Retry</button>
-        </p>
+      <div class="card-content" :key="activeCard.view_token">
+        <template v-if="!reviewed">
+          <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
+          <p v-if="pendingTakes" role="status">
+            {{ pendingTakes }} take(s) waiting to save.
+            <button @click="emit('retrySave')">Retry save</button>
+          </p>
+          <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
+          <p v-if="practiceError" role="alert" class="error">
+            {{ practiceError }}
+            <button v-if="canRetry" :disabled="busy" @click="emit('retryCompletion')">Retry</button>
+          </p>
+        </template>
         <template v-if="front">
-          <p class="practice-prompt">{{ card.cue?.situation }}</p>
+          <p ref="phraseHeading" tabindex="-1" class="practice-prompt">{{ card.cue?.situation }}</p>
           <p v-if="card.cue?.partner_line" class="partner-line">“{{ card.cue.partner_line }}”</p>
           <p v-if="card.hint" class="hint" role="status">Hint: {{ card.hint }}</p>
         </template>
-        <template v-else-if="card.answer">
-          <h2 tabindex="-1" lang="en" data-testid="practice-phrase">{{ card.answer.text }}</h2>
+        <template v-else-if="activeCard.answer">
+          <h2 ref="phraseHeading" tabindex="-1" lang="en" data-testid="practice-phrase">
+            {{ activeCard.answer.text }}
+          </h2>
+          <p v-if="reviewed?.outcome === 'skipped'" class="muted">Skipped without a grade</p>
           <PhraseExplanation
-            :explanation="card.answer.explanation"
-            :usage-contexts="card.answer.usage_contexts"
-            :detailed-explanation="card.answer.detailed_explanation"
-            :open="detailsOpen"
-            @toggle="emit('details')"
+            :explanation="activeCard.answer.explanation"
+            :usage-contexts="activeCard.answer.usage_contexts"
+            :detailed-explanation="activeCard.answer.detailed_explanation"
+            :open="reviewed ? previousDetailsOpen : detailsOpen"
+            @toggle="reviewed ? (previousDetailsOpen = !previousDetailsOpen) : emit('details')"
           />
         </template>
       </div>
-      <div v-if="!front" class="rating-dock">
+      <div v-if="showDock" class="rating-dock">
         <div class="ratings">
           <button
             class="rating-navigation"
             aria-label="Previous card"
             title="Previous card"
-            aria-haspopup="dialog"
-            :disabled="!previousCard || busy || audioBusy"
-            @click="reviewPrevious"
+            :disabled="previousIndex < 0 || busy || audioBusy"
+            @click="browse(previousIndex)"
           >
             <span class="rating-chevron previous-chevron" aria-hidden="true" />
           </button>
           <RatingButtons
-            :disabled="busy || requesting || processing"
-            :return-days="card.return_days"
+            v-if="!front"
+            :disabled="!!reviewed || busy || requesting || processing"
+            :return-days="reviewed ? null : card.return_days"
+            :selected="reviewed?.outcome"
             @complete="emit('complete', $event)"
           />
+          <button
+            v-if="!front"
+            class="rating-navigation"
+            :aria-label="reviewed ? 'Next card' : 'Skip'"
+            :title="reviewed ? 'Next card' : 'Skip'"
+            :disabled="!reviewed && (busy || requesting || processing)"
+            @click="forward"
+          >
+            <span class="rating-chevron" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </article>
     <PracticeDialog
-      v-if="!front && panel === 'history'"
+      v-if="!front && historyOpen"
       title="Recording history"
-      @close="panel = null"
+      @close="historyOpen = false"
     >
-      <SavedHistoryPanel :phrase-id="card.phrase_id" :disabled="audioBusy" :play="play" />
-    </PracticeDialog>
-    <PracticeDialog
-      v-else-if="!front && panel === 'previous' && previousCard"
-      title="Previous card"
-      @close="panel = null"
-    >
-      <h3 class="review-phrase" lang="en">{{ previousCard.answer.text }}</h3>
-      <PhraseExplanation
-        :explanation="previousCard.answer.explanation"
-        :usage-contexts="previousCard.answer.usage_contexts"
-        :detailed-explanation="previousCard.answer.detailed_explanation"
-        :open="previousDetailsOpen"
-        @toggle="previousDetailsOpen = !previousDetailsOpen"
-      />
-      <div class="ratings review-ratings">
-        <RatingButtons disabled :selected="previousCard.outcome" />
-      </div>
-      <p v-if="previousCard.outcome === 'skipped'" class="muted">Skipped without a grade</p>
+      <SavedHistoryPanel :phrase-id="activeCard.phrase_id" :disabled="audioBusy" :play="play" />
     </PracticeDialog>
   </section>
 </template>

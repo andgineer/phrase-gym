@@ -28,14 +28,4 @@ const ratings: Array<[Rating, string, string]> = [
     }}</span
     >{{ label }}
   </button>
-  <button
-    class="rating-navigation"
-    aria-label="Skip"
-    title="Skip"
-    :aria-pressed="selected === undefined ? undefined : selected === 'skipped'"
-    :disabled="disabled"
-    @click="$emit('complete', 'skipped')"
-  >
-    <span class="rating-chevron" aria-hidden="true" />
-  </button>
 </template>
