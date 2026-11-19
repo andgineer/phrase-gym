@@ -157,3 +157,57 @@ test('Extra reopens two skipped phrases below the five-new allowance', async ({ 
   await expect(page.getByTestId('mode-line')).toHaveText('Extra · 3 / 5 new')
   await expect(page.locator('.practice-prompt')).toBeVisible()
 })
+
+test('previous card review shows the saved grade or skip without advancing practice', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto('/')
+  await importPackage(page, extraPackage, 3)
+  await page.getByRole('button', { name: 'Start', exact: true }).tap()
+  await revealAnswer(page, true)
+  const phrase = page.getByTestId('practice-phrase')
+  const first = await phrase.innerText()
+  const dock = page.locator('.rating-dock')
+  const previous = dock.getByRole('button', { name: 'Previous card' })
+  await expect(previous).toBeDisabled()
+  await dock.getByRole('button', { name: 'Good', exact: true }).tap()
+
+  await revealAnswer(page, true)
+  const second = await phrase.innerText()
+  const boxes = await dock.getByRole('button').evaluateAll((buttons) =>
+    buttons.map((button) => {
+      const { left, right, top, width } = button.getBoundingClientRect()
+      return { left, right, top, width }
+    }),
+  )
+  expect(boxes).toHaveLength(6)
+  expect(boxes[0]!.width).toBe(44)
+  expect(boxes[0]!.right).toBeLessThan(boxes[1]!.left)
+  expect(new Set(boxes.map(({ top }) => top)).size).toBe(1)
+  expect(boxes.at(-1)!.right).toBeLessThanOrEqual(320)
+  const review = page.getByRole('dialog', { name: 'Previous card' })
+  const current = async () => (await page.request.get('/api/practice/current')).json()
+  const totals = async () => (await (await page.request.get('/api/practice/facts')).json()).today
+  const before = await current()
+  const graded = await totals()
+
+  await previous.tap()
+  await expect(review.getByRole('heading', { name: first })).toBeVisible()
+  await expect(review.getByRole('button', { name: 'Good', pressed: true })).toBeDisabled()
+  await expect(review.getByRole('button', { name: 'Skip', pressed: false })).toBeDisabled()
+  await review.getByRole('button', { name: 'Close previous card' }).tap()
+  await expect(previous).toBeFocused()
+  await expect(phrase).toHaveText(second)
+  expect(await current()).toEqual(before)
+  expect(await totals()).toEqual(graded)
+
+  await dock.getByRole('button', { name: 'Skip', exact: true }).tap()
+  await revealAnswer(page, true)
+  await previous.tap()
+  await expect(review.getByRole('heading', { name: second })).toBeVisible()
+  await expect(review.getByText('Skipped without a grade')).toBeVisible()
+  await expect(review.getByRole('button', { name: 'Skip', pressed: true })).toBeDisabled()
+  await expect(review.getByRole('button', { name: 'Good', pressed: false })).toBeDisabled()
+  expect(await totals()).toMatchObject({ completions: 2, got_it: 1, skipped: 1 })
+})

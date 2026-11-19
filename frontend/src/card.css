@@ -83,7 +83,8 @@
 .practice-prompt {
   font-size: 18px;
 }
-.practice-card h2 {
+.practice-card h2,
+.review-phrase {
   font-family: Georgia, serif;
   font-size: 30px;
   font-weight: 500;
@@ -102,22 +103,35 @@
   padding: 8px 0 calc(12px + var(--safe-bottom));
   box-shadow: 0 -12px 18px #f7f4ec;
 }
-.rating-dock .ratings {
+.rating-dock .ratings,
+.review-ratings {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) 44px;
   align-items: stretch;
-  gap: 6px;
+  gap: 4px;
+}
+.rating-dock .ratings {
+  grid-template-columns: 44px repeat(4, minmax(0, 1fr)) 44px;
   margin: 0;
 }
-.rating-dock .ratings button {
+.review-ratings {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 44px;
+}
+.rating-dock .ratings button,
+.review-ratings button {
   min-width: 0;
   padding: 5px 2px;
+  overflow-wrap: anywhere;
 }
-.skip-rating {
+.review-ratings button[aria-pressed='true'] {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+  opacity: 1;
+}
+.rating-navigation {
   display: grid;
   place-items: center;
 }
-.skip-chevron {
+.rating-chevron {
   width: 11px;
   height: 11px;
   border-top: 2px solid currentColor;
@@ -125,14 +139,23 @@
   border-top-right-radius: 1px;
   transform: translateX(-2px) rotate(45deg);
 }
-.recording-history-dialog {
+.previous-chevron {
+  transform: translateX(2px) rotate(225deg);
+}
+@media (max-width: 360px) {
+  .rating-dock .ratings button,
+  .review-ratings button {
+    font-size: 0.875rem;
+  }
+}
+.practice-dialog {
   bottom: auto;
   max-height: calc(90dvh - var(--safe-top) - var(--safe-bottom));
   top: calc(5dvh + var(--safe-top));
   left: max(calc(1rem + var(--safe-left)), calc((100vw - 38rem) / 2));
   right: max(calc(1rem + var(--safe-right)), calc((100vw - 38rem) / 2));
 }
-.recording-history-dialog header {
+.practice-dialog header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -140,7 +163,7 @@
   gap: 8px;
   margin-bottom: 12px;
 }
-.recording-history-dialog h2 {
+.practice-dialog h2 {
   margin: 0;
 }
 .has-ratings {

@@ -115,6 +115,7 @@ onMounted(initialize)
     <template v-else-if="screen === 'card' && card">
       <StudyCard
         :card="card"
+        :previous-card="practice.previousCard.value"
         :play="playback.play"
         :progress="practice.view.value.progress"
         :details-open="practice.view.value.detailsOpen"

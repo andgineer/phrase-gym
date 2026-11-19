@@ -3,15 +3,17 @@ import PhraseExplanation from './PhraseExplanation.vue'
 import FrontControls from './FrontControls.vue'
 import BackControls from './BackControls.vue'
 import CardMenu from './CardMenu.vue'
-import RecordingHistoryDialog from './RecordingHistoryDialog.vue'
+import PracticeDialog from './PracticeDialog.vue'
+import SavedHistoryPanel from './SavedHistoryPanel.vue'
+import RatingButtons from './RatingButtons.vue'
 import { computed, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
-import { returnDescription, returnSpan } from '../returnSpan'
-import type { Card, Outcome, Progress, Rating } from '../studyTypes'
+import type { Card, Outcome, Progress, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
   card: Card
+  previousCard: ReviewedCard | null
   progress: Progress | null
   detailsOpen: boolean
   capturing: boolean
@@ -41,19 +43,19 @@ const emit = defineEmits<{
   retrySave: []
   retryCompletion: []
 }>()
-const ratings: Array<[Rating, string, string]> = [
-  ['not_yet', 'Again', 'not-yet'],
-  ['effort', 'Hard', 'effort'],
-  ['got_it', 'Good', 'recalled'],
-  ['easy', 'Easy', 'recalled'],
-]
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
 const front = computed(() => !props.card.revealed)
-const historyOpen = ref(false)
+const panel = ref<'history' | 'previous' | null>(null)
+const previousDetailsOpen = ref(false)
+function reviewPrevious(event: MouseEvent) {
+  if (event.currentTarget instanceof HTMLButtonElement) event.currentTarget.focus()
+  previousDetailsOpen.value = false
+  panel.value = 'previous'
+}
 watch(
   () => props.card.view_token,
   () => {
-    historyOpen.value = false
+    panel.value = null
   },
 )
 const progressValue = computed(() => {
@@ -72,7 +74,7 @@ const progressValue = computed(() => {
       <CardMenu
         v-if="!front"
         :disabled="busy || audioBusy"
-        @history="historyOpen = true"
+        @history="panel = 'history'"
         @remove="emit('remove')"
       />
       <span v-else class="menu-space" />
@@ -134,36 +136,47 @@ const progressValue = computed(() => {
       <div v-if="!front" class="rating-dock">
         <div class="ratings">
           <button
-            v-for="[outcome, label, style] in ratings"
-            :key="outcome"
-            :class="style"
-            :title="card.return_days ? returnDescription(card.return_days[outcome]) : undefined"
-            :disabled="busy || requesting || processing"
-            @click="emit('complete', outcome)"
+            class="rating-navigation"
+            aria-label="Previous card"
+            title="Previous card"
+            aria-haspopup="dialog"
+            :disabled="!previousCard || busy || audioBusy"
+            @click="reviewPrevious"
           >
-            <span v-if="card.return_days" class="rating-return" aria-hidden="true">{{
-              returnSpan(card.return_days[outcome])
-            }}</span
-            >{{ label }}
+            <span class="rating-chevron previous-chevron" aria-hidden="true" />
           </button>
-          <button
-            class="skip-rating"
-            aria-label="Skip"
-            title="Skip"
+          <RatingButtons
             :disabled="busy || requesting || processing"
-            @click="emit('complete', 'skipped')"
-          >
-            <span class="skip-chevron" aria-hidden="true" />
-          </button>
+            :return-days="card.return_days"
+            @complete="emit('complete', $event)"
+          />
         </div>
       </div>
     </article>
-    <RecordingHistoryDialog
-      v-if="!front && historyOpen"
-      :phrase-id="card.phrase_id"
-      :disabled="audioBusy"
-      :play="play"
-      @close="historyOpen = false"
-    />
+    <PracticeDialog
+      v-if="!front && panel === 'history'"
+      title="Recording history"
+      @close="panel = null"
+    >
+      <SavedHistoryPanel :phrase-id="card.phrase_id" :disabled="audioBusy" :play="play" />
+    </PracticeDialog>
+    <PracticeDialog
+      v-else-if="!front && panel === 'previous' && previousCard"
+      title="Previous card"
+      @close="panel = null"
+    >
+      <h3 class="review-phrase" lang="en">{{ previousCard.answer.text }}</h3>
+      <PhraseExplanation
+        :explanation="previousCard.answer.explanation"
+        :usage-contexts="previousCard.answer.usage_contexts"
+        :detailed-explanation="previousCard.answer.detailed_explanation"
+        :open="previousDetailsOpen"
+        @toggle="previousDetailsOpen = !previousDetailsOpen"
+      />
+      <div class="ratings review-ratings">
+        <RatingButtons disabled :selected="previousCard.outcome" />
+      </div>
+      <p v-if="previousCard.outcome === 'skipped'" class="muted">Skipped without a grade</p>
+    </PracticeDialog>
   </section>
 </template>

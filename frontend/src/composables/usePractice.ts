@@ -10,13 +10,21 @@ import {
   type PendingCompletion,
   type PendingExtra,
 } from '../practiceReducer'
-import type { Card, CompletionResult, ExtraResult, Outcome, PracticeState } from '../studyTypes'
+import type {
+  Card,
+  CompletionResult,
+  ExtraResult,
+  Outcome,
+  PracticeState,
+  ReviewedCard,
+} from '../studyTypes'
 
 const changed = 'This card changed in another tab or a new day began.'
 const practiceClosed = 'This Practice card changed in another tab or a new day began.'
 
 export function usePractice() {
   const view = ref(initialView())
+  const previousCard = ref<ReviewedCard | null>(null)
   const busy = ref(false)
   const error = ref('')
   const pending = ref<PendingCompletion | null>(null)
@@ -39,6 +47,7 @@ export function usePractice() {
       const state = await post<PracticeState>(path, body)
       if (mine !== epoch) return false
       view.value = openedState(state)
+      previousCard.value = null
       pending.value = null
       return state.card !== null
     } catch (cause) {
@@ -76,6 +85,7 @@ export function usePractice() {
 
   // Practice never falls back to Daily; closing its card returns to the phrase's details.
   async function resync(conflict: boolean, acknowledged = ''): Promise<boolean> {
+    if (conflict) previousCard.value = null
     if (view.value.card?.mode === 'practice') {
       view.value = initialView()
       pending.value = null
@@ -97,6 +107,7 @@ export function usePractice() {
       const result = await post<ExtraResult>('extra', request)
       if (mine !== epoch) return false
       const step = extendedPractice(view.value, result)
+      previousCard.value = null
       pendingExtra.value = null
       busy.value = false
       if (step.reconcile) return await resync(false, 'Extra was saved. Press Start to continue.')
@@ -153,11 +164,22 @@ export function usePractice() {
       const result = await post<CompletionResult>('complete', request)
       // The server kept this completion; a card the learner already left stays closed.
       if (mine !== epoch) return
+      const completed = view.value.card
       const step = completedPractice(view.value, request, result)
       pending.value = null
       busy.value = false
       if (step.reconcile) await resync(false, 'Your answer was saved. Press Start to continue.')
       else view.value = step.view
+      const next = view.value.card
+      if (mine !== epoch || !next || next.view_token === completed?.view_token) return
+      const outcome = result.receipt.skipped ? 'skipped' : result.receipt.rating
+      previousCard.value =
+        completed?.view_token === request.view_token &&
+        completed.answer &&
+        result.receipt.completion_id === request.completion_id &&
+        outcome
+          ? { answer: completed.answer, outcome }
+          : null
     } catch (cause) {
       if (mine !== epoch) return
       if (cause instanceof ApiError && cause.status === 409) {
@@ -173,6 +195,7 @@ export function usePractice() {
   function closeCard() {
     epoch++
     view.value = initialView()
+    previousCard.value = null
     pending.value = null
   }
 
@@ -188,6 +211,7 @@ export function usePractice() {
 
   return {
     view,
+    previousCard,
     busy,
     error,
     pending,

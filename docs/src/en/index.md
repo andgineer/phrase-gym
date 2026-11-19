@@ -33,11 +33,14 @@ practises one chosen phrase, and deletes a phrase after confirmation. The app do
 measure fluency.
 
 The full-width microphone stays in the same place on both sides, above the text. Ratings share a
-bottom row with the **Skip** arrow while the text scrolls. The back’s **More actions** menu offers
-**Recording history** and **Delete phrase…** with confirmation for deletion. Tap the microphone to
-record, then tap it again to finish. Finishing on the front reveals the answer and plays the
-reference followed by your recording. Recording on the back uses the same playback order. Once you press **Ref** on the back, finishing each later take on that card
-plays only your recording. **Recording history** opens a separate panel during practice. Use **Close**
+bottom row with the **Previous card** and **Skip** chevrons while the text scrolls. **Previous card**
+opens the last card you graded or skipped during this run. Its saved choice is highlighted in the
+disabled grading row. A skipped card shows **Skipped without a grade**. The back’s **More actions**
+menu offers **Recording history** and **Delete phrase…** with confirmation for deletion. Tap the
+microphone to record, then tap it again to finish. Finishing on the front reveals the answer and
+plays the reference followed by your recording. Recording on the back uses the same playback
+order. Once you press **Ref** on the back, finishing each later take on that card plays only your
+recording. **Recording history** opens a separate panel during practice. Use **Close**
 or Escape to return to the card. In Library phrase details, use the history icon. Both show saved
 takes newest first, with a date and **Mine** replay button for each.
 
