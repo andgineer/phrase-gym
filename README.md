@@ -71,8 +71,6 @@ a card shows and when it offers help.
 <details>
 <summary><b>Contributing</b></summary>
 
-Use Python 3.13, uv, and Node 22.12+ on an LTS release.
-
 ```bash
 uv sync --frozen
 npm --prefix frontend ci
@@ -81,7 +79,7 @@ uv run pre-commit install
 
 uv run inv run --build  # Start the app at http://127.0.0.1:8000
 uv run inv pre          # Run static checks
-uv run inv test         # Run Python, Vue, Chromium, and WebKit checks on macOS
+uv run inv test         # Run the test suite
 ```
 
 [Development and releases](specs/development.md) ·
