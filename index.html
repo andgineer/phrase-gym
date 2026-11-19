@@ -207,6 +207,23 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Overview
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="" class="md-nav__link md-nav__link--active">
         
   
@@ -222,6 +239,81 @@
   
 
       </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#daily-and-extra-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Daily and extra practice
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#record-and-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Record and compare
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#find-and-practise-one-phrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Find and practise one phrase
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#track-practice-and-adjust-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Track practice and adjust settings
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-another-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Use another device
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -400,6 +492,11 @@
                       
                     
                     
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
                   
                   <div class="md-sidebar__inner">
                     
@@ -411,6 +508,69 @@
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#daily-and-extra-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Daily and extra practice
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#record-and-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Record and compare
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#find-and-practise-one-phrase" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Find and practise one phrase
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#track-practice-and-adjust-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Track practice and adjust settings
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-another-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Use another device
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -429,55 +589,83 @@
 
 
 <h1 id="phrase-gym">Phrase Gym</h1>
-<p>Phrase Gym is a local Python application with a browser interface for studying useful English
-phrases and keeping private recordings. Type a phrase or word for Coach to prepare, or let an AI
-agent add a course batch, then listen to reference audio, record optional takes and replay them
-after reloading the app.</p>
-<p>The <strong>Practice</strong>, <strong>Library</strong>, <strong>Coach</strong> and <strong>Settings</strong> tabs switch pages. The brand returns to
-Practice, and the installed app version stays visible on every page. Open <strong>Coach</strong>, type a phrase
-or word and optionally its source sentence, then press <strong>Send</strong> or Enter. Pasted line breaks become
-spaces. Coach prepares the card later for <strong>Added with Coach</strong> in Library. A Library search offers
-to send missing material to Coach, with the same confirmations. Switching tabs finishes and keeps
-any recording, and <strong>Start</strong> resumes the regular card. Reloading keeps the selected page.</p>
-<p><strong>Start</strong> offers the longest-due phrases and randomly chosen new phrases within the daily limits set in
-<strong>Settings</strong>, mixed in random order so the next phrase cannot be anticipated. Every phrase starts with its answer hidden,
-including a new phrase. Press <strong>Reveal</strong> and rate the attempt; an unknown answer is <strong>Again</strong>. The first
-rating starts its schedule, and later learning days offer due recall. Each rating button shows when
-that grade brings the phrase back, such as <code>3d</code> or <code>2.5m</code>; it shows nothing when the phrase was
-already graded that day. <strong>Settings</strong> chooses whether phrases come back <strong>Often</strong>, <strong>Balanced</strong>
-(the default) or <strong>Rarely</strong>, with how many times a phrase you keep answering <strong>Good</strong> returns in
-its first month and year.
-The Start card shows the lesson's due and new phrases within today's remaining allowance. Start stays
-disabled when none wait. <strong>Extra</strong> extends today's limits when eligible phrases remain beyond the
-allowance. The entry
-shows today's completed practice, the phrases studied today, a factual practice streak and the next
-return date. An optional weekly target in <strong>Settings</strong>, one to six practice days from Monday to
-Sunday, adds this week's practice days beside the streak; it can be changed or paused at any time,
-a missed day or week carries nothing forward, and it never changes schedules or daily limits.
-The Library finds phrases by lesson or meaning, shows their details and saved recordings,
-practises one chosen phrase, and deletes a phrase after confirmation. The app does not claim to
-measure fluency.</p>
-<p>The full-width microphone stays in the same place on both sides, above the text. Ratings share a
-bottom row with the <strong>Previous card</strong> and <strong>Skip</strong> chevrons while the text scrolls. <strong>Previous card</strong>
-steps back through cards you graded or skipped during this run. Each saved grade is highlighted in
-the disabled grading row. You can record another take while reviewing a graded card. A skipped
-card shows <strong>Skipped without a grade</strong> and can still be graded during the same pass. Skipping uses no allowance or practice credit. A fresh pass can offer the
-phrase again. The right chevron steps forward through the session and returns to the current
-card. The <strong>More actions</strong> menu on either side lets you delete the displayed phrase after
-confirmation, including a phrase you already graded. The menu offers <strong>Recording history</strong> after
-reveal. Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the answer and
-plays the reference followed by your recording. Recording on the back uses the same playback
-order. Once you press <strong>Ref</strong> on the back, finishing each later take on that card plays only your
-recording. <strong>Recording history</strong> opens a separate panel during practice. Use <strong>Close</strong>
-or Escape to return to the card. In Library phrase details, use the history icon. Both show saved
-takes newest first, with a date and <strong>Mine</strong> replay button for each.</p>
-<p>On an iPhone, open your <a href="private-access/">private HTTPS address</a> in Safari and use <strong>Share → Add to Home Screen</strong>. The icon opens Phrase Gym as a standalone app. It still needs the running server; installation does not cache the library for offline use. Android browsers that support app shortcuts also offer <strong>Coach</strong> from the icon. The pages follow your device’s light or dark appearance.</p>
-<p>The server works on macOS and Linux. The MVP media player and recording experience target macOS
-browsers. Linux browser audio qualification is planned after the MVP.</p>
+<p>Practise saying useful English phrases from your lessons, videos, and conversations. Each card
+starts with a situation and a hidden answer. Say the phrase from memory, hear the reference,
+and rate your recall to schedule the next review.</p>
 <p>Start with <a href="installation/">installation</a>, then <a href="importing-phrases/">add your phrases</a>.
-The service listens only on loopback and keeps learner data in its local application-data directory.</p>
-<p>See also <a href="private-access/">private access</a>, <a href="backup-and-restore/">backup and restore</a>,
-and the <a href="reference/">HTTP API reference</a>.</p>
+The <strong>Practice</strong>, <strong>Library</strong>, <strong>Coach</strong>, and <strong>Settings</strong> tabs switch pages. The Phrase Gym name
+returns to Practice. Reloading keeps the selected page, and every page shows the installed version.</p>
+<h2 id="daily-and-extra-practice">Daily and extra practice</h2>
+<p>On the <strong>Practice</strong> page, choose <strong>All lessons</strong> or select a lesson. You can type to narrow the
+lesson list. The due and new counts show what is available within today's remaining limits.
+<strong>Start</strong> begins or resumes Daily. It mixes the longest-overdue phrases and a random selection of
+new phrases, up to the two daily limits. The defaults are 20 due and five new. Changing a limit in
+<strong>Settings</strong> takes effect when you return to practice.</p>
+<ul>
+<li>Try saying the phrase, even when the card is new. Use <strong>New cue</strong>, <strong>Hint</strong>, or <strong>More
+  explanation</strong> where available. <strong>Reveal</strong> shows the answer and reference audio.</li>
+<li>Rate what you said before looking at the answer or asking for help. If you could not recall
+  the phrase, choose <strong>Again</strong>. The first rating starts its schedule. <strong>Again</strong>, <strong>Hard</strong>,
+  <strong>Good</strong>, and <strong>Easy</strong> show when the phrase would come back, such as <code>3d</code> or <code>2.5m</code>.
+  A phrase already graded today has no new interval to preview.</li>
+<li>Use <strong>Skip</strong> to continue without an assessment or practice credit. <strong>Previous card</strong> lets you
+  revisit earlier revealed cards from this run. A skipped card can still be graded, and a graded card
+  shows its saved rating and accepts another take. The right chevron moves back toward the
+  current card. <strong>More actions</strong> lets you delete the displayed phrase after confirmation.</li>
+</ul>
+<p>After a pass, <strong>Extra</strong> starts a fresh one when there is more eligible material beyond today's
+allowance. A press extends each reached limit by one increment. For example, a limit of 20 due
+reviews becomes 40 once you've completed 20. Pressing again without further practice gives no
+additional allowance. A fresh pass can offer skipped cards again. Phrases scheduled for a future
+date stay out of Daily and Extra. When no phrases are available, <strong>Start</strong> is disabled and
+Practice can show the next due date.</p>
+<h2 id="record-and-compare">Record and compare</h2>
+<p>Tap the microphone to record, then tap it again to finish. Finishing a take on the front reveals
+the answer and plays the reference followed by your recording. Rehearsing on the back uses the
+same order. After you press <strong>Ref</strong> on that card, subsequent takes on its answer side play only
+your recording automatically. Use <strong>Mine</strong> for your latest take or <strong>Compare</strong> to hear both.</p>
+<p>Every completed take stays in the browser while it uploads in the background. You can rate or
+move on while it uploads. Switching tabs finishes and keeps the take, and <strong>Start</strong> resumes the
+regular card. A failed upload stays on the device for retry. The saved take includes the cue,
+help, and answer shown during the attempt.</p>
+<p>Choose <strong>Recording history</strong> in the revealed card's <strong>More actions</strong> menu or use the history icon
+in Library phrase details. Takes appear newest first, with the date and a <strong>Mine</strong> button.
+Close the practice history with <strong>Close</strong> or Escape.</p>
+<h2 id="find-and-practise-one-phrase">Find and practise one phrase</h2>
+<p>The <strong>Library</strong> lists phrases by lesson. Search across lessons by wording, meaning, situation, or
+use. Open a phrase to see its meaning, lesson, source, reference audio, next due date, and saved
+takes. Looking up a phrase leaves its schedule alone. If you are looking for new material, use
+<strong>Send “…” to Coach</strong> or <strong>Not it?</strong> from the search results.</p>
+<p>Choose <strong>Practice</strong> in phrase details to open the same hidden-answer card, then rate or skip to
+return to the details. This practice is available outside the daily allowance. The first rating
+of the phrase on a learning day can reschedule it even before its due date.</p>
+<p><strong>Delete</strong> removes the phrase, reference audio, and saved recordings after confirmation.
+Practice history keeps the wording of completed phrases. A take still waiting to upload stays
+on the device until you discard it. If deleting files fails, use <strong>Retry cleanup</strong>.</p>
+<h2 id="track-practice-and-adjust-settings">Track practice and adjust settings</h2>
+<p>Below the Practice controls, <strong>Today</strong> shows completed recalls, new phrases, ratings, and
+recordings, with pending takes counted separately. <strong>See today’s phrases</strong> includes wording
+from cards you completed and later deleted. <strong>Progress</strong> adds up your practice days, ratings,
+and recordings. <strong>Total</strong> shows how many phrases are due now, due later, or new. It also shows
+a long-term memory count based on the scheduler's estimate of each phrase's stability.</p>
+<p>A day with at least one rating counts toward the streak. The current streak still shows
+yesterday's run until you practise today. Missing a full day resets the current streak. The
+best streak and practice history stay visible.
+Set a weekly target of one to six days in <strong>Settings</strong> and pause or change it any time. Each
+Monday starts a fresh week. The target affects only the progress display.</p>
+<p><strong>Settings</strong> also holds your native language, learning timezone, daily limits, and return pace.
+Pick <strong>Often</strong>, <strong>Balanced</strong>, or <strong>Rarely</strong>. The choices show how often a phrase rated <strong>Good</strong>
+each time would come back in its first month and year.</p>
+<h2 id="use-another-device">Use another device</h2>
+<p>On an iPhone, open your <a href="private-access/">private HTTPS address</a> in Safari and use
+<strong>Share → Add to Home Screen</strong>. The icon opens Phrase Gym without the browser toolbar and
+still needs the running server. Android browsers that support app shortcuts also offer
+<strong>Coach</strong> from the icon. The pages follow your device's light or dark appearance.</p>
+<p>The server runs on macOS and Linux. Use a macOS browser for the currently supported audio
+playback and recording workflow. The server listens only on loopback by default and keeps
+learner data in its local application-data directory.</p>
+<p>See <a href="backup-and-restore/">backup and restore</a> for maintenance and the
+<a href="reference/">HTTP API reference</a> for external agents.</p>
 
 
 
