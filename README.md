@@ -10,8 +10,8 @@ from memory, then hear how it sounds alongside your own take.
 
 <table>
 <tr>
-<td align="center" valign="top"><b>Say it from a situation</b><br><img src="docs/images/practice-cue.png" width="300" alt="Mobile practice card with a situation cue, hidden answer, and microphone"></td>
-<td align="center" valign="top"><b>Reveal, compare, and rate</b><br><img src="docs/images/practice-compare.png" width="300" alt="Revealed phrase with reference and recording playback, comparison, and review intervals"></td>
+<td align="center" valign="top"><b>Say it from a situation</b><br><img src="docs/images/practice-cue.png" width="300" alt="Practice card with a fill-in-the-blank cue, parenthetical meaning, partner line, and hint"></td>
+<td align="center" valign="top"><b>Reveal, compare, and rate</b><br><img src="docs/images/practice-compare.png" width="300" alt="The same card revealed as So far, so good, with reference and recording playback and review intervals"></td>
 </tr>
 </table>
 
