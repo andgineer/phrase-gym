@@ -9,7 +9,7 @@ You hear “Could you walk me through it?” and want to use it yourself. Send i
 the original sentence if you have it. Coach builds a card with an explanation, situations that
 call for the phrase, hints for when you get stuck, and reference audio.
 
-Working through an English course? Give your AI agent a lesson and the Phrase Gym import guide.
+Working through a language course? Give your AI agent a lesson and the Phrase Gym import guide.
 It picks useful expressions, builds the exercises, reuses suitable recordings from the course,
 and generates audio where it’s missing. The finished lesson goes straight into your library.
 
@@ -34,6 +34,8 @@ and generates audio where it’s missing. The finished lesson goes straight into
 [Install Phrase Gym](https://andgineer.github.io/phrase-gym/installation/) ·
 [User guide](https://andgineer.github.io/phrase-gym/) ·
 [Use it on your phone](https://andgineer.github.io/phrase-gym/private-access/)
+
+English is available now, with more languages planned.
 
 ## Built on second-language learning research
 
