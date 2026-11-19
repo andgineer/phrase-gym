@@ -18,7 +18,7 @@ it('titles Today with its recalls and new phrases and lists ratings without empt
   expect(todayTitle(today)).toBe('Today — 20 recalls / 5 new')
   expect(todayTitle({ ...today, recalls: 1, new_attempts: 0 })).toBe('Today — 1 recall')
   expect(todayTitle({ ...today, recalls: 0, new_attempts: 0 })).toBe('Today')
-  expect(ratingsLine(today)).toBe('18 Good · 2 Hard · 2 skipped')
+  expect(ratingsLine(today)).toBe('18 Good · 2 Hard')
   expect(ratingsLine({ ...today, got_it: 0, effort: 0, skipped: 0 })).toBe('')
   expect(recordingsLine(30)).toBe('30 recordings made')
   expect(recordingsLine(1)).toBe('1 recording made')
@@ -73,7 +73,7 @@ it('labels each studied phrase with its outcome, mode, lesson and deletion', () 
 })
 
 it('includes Easy in totals and studied history', () => {
-  expect(ratingsLine({ ...today, easy: 3 })).toBe('3 Easy · 18 Good · 2 Hard · 2 skipped')
+  expect(ratingsLine({ ...today, easy: 3 })).toBe('3 Easy · 18 Good · 2 Hard')
   expect(studiedLine(item({ rating: 'easy' }))).toBe('Easy · Daily · Small talk')
 })
 

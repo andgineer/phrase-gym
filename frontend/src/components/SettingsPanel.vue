@@ -107,7 +107,7 @@ async function save() {
           <input v-model="settings.weekly_target_paused" type="checkbox" />
           <span>Pause weekly target</span>
         </label>
-        <p class="muted">Any rating or Skip counts the day. A missed day or week owes nothing.</p>
+        <p class="muted">Any rating counts the day. A missed day or week owes nothing.</p>
       </fieldset>
       <p>English cards and short English help are selected for this MVP.</p>
       <button @click="save">Save settings</button>

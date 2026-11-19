@@ -26,8 +26,9 @@ class PracticeTotals(StrictModel):
     completions: int
     first_meetings: int
     new_attempts: int
-    # Rated attempts only; a Skip is counted in skipped.
+    # Rated attempts only.
     recalls: int
+    # Retained for response compatibility; navigation is excluded from practice facts.
     skipped: int
     easy: int
     got_it: int

@@ -134,28 +134,33 @@ test('Start and Extra reflect real remaining allowances', async ({ page }) => {
   await expect(extra).toHaveCount(0)
 })
 
-test('Extra reopens two skipped phrases below the five-new allowance', async ({ page }) => {
+test('Start offers both passed phrases again without using either slot', async ({ page }) => {
   await page.goto('/')
   const value = structuredClone(extraPackage)
   value.lessons[0]!.phrases = value.lessons[0]!.phrases.slice(0, 2)
   await importPackage(page, value, 2)
-  await page.getByRole('button', { name: 'Start', exact: true }).tap()
+  const start = page.getByRole('button', { name: 'Start', exact: true })
+  const phrase = page.getByTestId('practice-phrase')
+  const passed = []
+  await start.tap()
   for (let card = 0; card < 2; card++) {
     await revealAnswer(page, true)
+    passed.push(await phrase.innerText())
     await page.getByRole('button', { name: 'Skip', exact: true }).tap()
-    if (card === 0) await expect(page.getByTestId('mode-line')).toHaveText('2 / 5 new')
+    await expect(phrase).toHaveCount(0)
   }
-  await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeDisabled()
-  const extra = page.getByRole('button', { name: 'Extra', exact: true })
-  await expect(extra).toBeEnabled()
-  expect(await (await page.request.get('/api/practice/today')).json()).toMatchObject({
-    new_count: 0,
-    due_count: 0,
-    extra_available: true,
-  })
-  await extra.tap()
-  await expect(page.getByTestId('mode-line')).toHaveText('Extra · 3 / 5 new')
-  await expect(page.locator('.practice-prompt')).toBeVisible()
+  expect(new Set(passed).size).toBe(2)
+  await expect(start).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Extra', exact: true })).toHaveCount(0)
+  const counts = await (await page.request.get('/api/practice/today')).json()
+  expect(counts).toMatchObject({ new_count: 2, due_count: 0 })
+  const facts = await (await page.request.get('/api/practice/facts')).json()
+  expect(facts.today).toMatchObject({ completions: 0, skipped: 0 })
+  expect(facts.streak.current).toBe(0)
+  await start.tap()
+  await expect(page.getByTestId('mode-line')).toHaveText('1 / 5 new')
+  await revealAnswer(page, true)
+  expect(passed).toContain(await phrase.innerText())
 })
 
 test('session navigation lets a skipped card be graded without advancing the current card', async ({
@@ -212,7 +217,7 @@ test('session navigation lets a skipped card be graded without advancing the cur
 
   await dock.getByRole('button', { name: 'Skip', exact: true }).tap()
   await expect(phrase).toHaveCount(0)
-  await expect(page.getByTestId('mode-line')).toHaveText('3 / 5 new')
+  await expect(page.getByTestId('mode-line')).toHaveText('2 / 5 new')
   await previous.tap()
   await expect(phrase).toHaveText(second)
   await expect(dialog).toHaveCount(0)
@@ -227,7 +232,7 @@ test('session navigation lets a skipped card be graded without advancing the cur
   await expect(phrase).toHaveText(second)
   await expect(page.getByText('Skipped without a grade')).toBeVisible()
   const currentCue = await current()
-  expect(await totals()).toMatchObject({ completions: 2, got_it: 1, skipped: 1 })
+  expect(await totals()).toMatchObject({ completions: 1, got_it: 1, skipped: 0 })
   await dock.getByRole('button', { name: 'Hard', exact: true }).tap()
   await expect(dock.getByRole('button', { name: 'Hard', pressed: true })).toBeDisabled()
   await expect(page.getByText('Skipped without a grade')).toHaveCount(0)
@@ -236,6 +241,7 @@ test('session navigation lets a skipped card be graded without advancing the cur
   await expect(phrase).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Reveal', exact: true })).toBeEnabled()
   await expect(page.getByText('Skipped without a grade')).toHaveCount(0)
-  expect(await current()).toEqual(currentCue)
+  expect((await current()).card).toEqual(currentCue.card)
+  await expect(page.getByTestId('mode-line')).toHaveText('3 / 5 new')
   expect(await totals()).toMatchObject({ completions: 2, got_it: 1, effort: 1, skipped: 0 })
 })

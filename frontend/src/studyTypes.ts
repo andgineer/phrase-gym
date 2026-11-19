@@ -5,6 +5,7 @@ export type Card = components['schemas']['PracticeCard']
 export type Rating = keyof components['schemas']['RatingReturnDays']
 export type PracticeState = components['schemas']['PracticeState']
 export type Progress = components['schemas']['PracticeProgress']
+export type GradeSkippedResult = components['schemas']['GradeSkippedResult']
 export type CompletionResult = components['schemas']['CompletionResult']
 export type Outcome = Exclude<components['schemas']['CompletionRequest']['outcome'], 'studied'>
 export type ReviewedCard = {

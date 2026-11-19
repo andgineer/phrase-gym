@@ -70,7 +70,8 @@ def daily_completions(practice: Practice) -> int:
     while state["card"]:
         state = complete(practice, state["card"], OUTCOMES[count % len(OUTCOMES)])
         count += 1
-    return count
+    progress = state["progress"]
+    return progress["new_completed"] + progress["due_completed"]
 
 
 def test_no_target_until_chosen_and_practice_is_fully_usable(practice: Practice) -> None:
@@ -115,13 +116,15 @@ def test_a_pause_without_a_target_is_saved_and_read_as_not_paused(practice: Prac
     assert week(practice) == {"practice_days": 0, "target": 4}
 
 
-def test_a_skip_a_historical_first_meeting_or_a_practice_rating_alone_counts_a_day(
+def test_first_meetings_and_grades_count_as_practice_days_but_passing_does_not(
     practice: Practice,
 ) -> None:
     publish(practice.client, many(3))
     set_target(practice.client, 3)
     card = practice.card()
     complete(practice, card, "skipped")
+    assert facts(practice)["streak"]["current"] == 0
+    assert week(practice) == {"practice_days": 0, "target": 3}
     practice.later(days=1)
     with practice.database.write() as connection:
         connection.execute(
@@ -136,13 +139,12 @@ def test_a_skip_a_historical_first_meeting_or_a_practice_rating_alone_counts_a_d
     assert [
         (row["kind"], row["rating"], row["skipped"], row["mode"]) for row in practice.log()
     ] == [
-        ("new", None, 1, "daily"),
         ("first_study", None, 0, "daily"),
         ("new", "got_it", 0, "practice"),
     ]
     found = facts(practice)
-    assert found["week"] == {"practice_days": 3, "target": 3}
-    assert found["streak"]["current"] == 3
+    assert found["week"] == {"practice_days": 2, "target": 3}
+    assert found["streak"]["current"] == 2
 
 
 @pytest.mark.parametrize("target", [0, 7, 2.5])

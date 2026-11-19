@@ -101,11 +101,11 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
     phrase_id = practice.log()[0]["phrase_id"]
     rate(practice, practice.practise(phrase_id), "effort")
     assert facts(practice)["today"] == {
-        "completions": 8,
+        "completions": 7,
         "new_attempts": 1,
         "first_meetings": 0,
         "recalls": 6,
-        "skipped": 1,
+        "skipped": 0,
         "easy": 0,
         "got_it": 3,
         "effort": 2,
@@ -113,11 +113,11 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
         "recordings": 0,
     }
     assert facts(practice)["work"] == {
-        "completions": 13,
+        "completions": 12,
         "new_attempts": 6,
         "first_meetings": 0,
         "recalls": 6,
-        "skipped": 1,
+        "skipped": 0,
         "easy": 0,
         "got_it": 3,
         "effort": 2,
@@ -126,7 +126,7 @@ def test_today_counts_cover_daily_extra_and_practice_outcomes(practice: Practice
         "practice_days": 2,
     }
     modes = [item["mode"] for item in studied(practice, "2026-10-29")["items"]]
-    assert modes == ["daily"] * 6 + ["extra", "practice"]
+    assert modes == ["daily"] * 5 + ["extra", "practice"]
 
 
 def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Practice) -> None:
@@ -350,3 +350,21 @@ def test_long_term_memory_counts_phrases_whose_fsrs_stability_reaches_21_days(
             (rated["id"],),
         )
     assert facts(practice)["library"]["long_term_count"] == 1
+
+
+def test_legacy_skip_is_excluded_from_allowance_history_and_streak(practice: Practice) -> None:
+    publish(practice.client, many(1))
+    practice.set_limits(due=0, new=1)
+    with practice.database.write() as connection:
+        connection.execute(
+            "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, completed_at, "
+            "learning_date, kind, rating, skipped, fsrs_updated, mode) "
+            "VALUES (?, NULL, 'Passed phrase.', 'Earlier', ?, "
+            "'2026-10-28', 'new', NULL, 1, 0, 'daily')",
+            (str(uuid4()), practice.now.isoformat()),
+        )
+    assert practice.daily()["progress"]["new_completed"] == 0
+    assert practice.card()["kind"] == "new"
+    assert facts(practice)["today"] == ZERO_TOTALS
+    assert facts(practice)["streak"]["current"] == 0
+    assert studied(practice, "2026-10-28")["items"] == []

@@ -217,7 +217,7 @@ def test_ratings_reach_fsrs_and_survive_in_facts(
     assert practice.log()[-1]["rating"] == outcome
 
 
-def test_grading_revealed_skip_replaces_it_without_advancing_or_consuming_a_slot(
+def test_grading_a_passed_card_logs_the_grade_without_advancing(
     practice: Practice,
 ) -> None:
     card = practice.card()
@@ -227,23 +227,28 @@ def test_grading_revealed_skip_replaces_it_without_advancing_or_consuming_a_slot
     payload = {"completion_id": completion_id, "rating": "effort"}
     path = "/api/practice/grade-skipped"
     assert practice.phrase(card["phrase_id"])["last_review"] is None
+    assert practice.log() == []
+    assert skipped["state"]["progress"]["new_completed"] == 0
 
     result = practice.client.post(path, json=payload)
     assert result.status_code == 200
-    receipt = result.json()
-    assert receipt == skipped["receipt"] | {
+    grade = result.json()
+    assert grade["receipt"] == skipped["receipt"] | {
         "rating": "effort",
         "skipped": False,
         "fsrs_updated": True,
     }
-    assert practice.client.get("/api/practice/current").json() == skipped["state"]
+    assert grade["progress"]["new_completed"] == 1
+    assert practice.client.get("/api/practice/current").json() == skipped["state"] | {
+        "progress": grade["progress"],
+    }
     [logged] = practice.log()
     assert (logged["id"], logged["rating"], logged["skipped"]) == (completion_id, "effort", 0)
     scheduled = practice.phrase(card["phrase_id"])
     assert scheduled["last_review"] == practice.now.isoformat()
     assert scheduled["fsrs_json"]
     practice.later(minutes=10)
-    assert practice.client.post(path, json=payload).json() == receipt
+    assert practice.client.post(path, json=payload).json() == grade
     assert practice.client.post(path, json=payload | {"rating": "easy"}).status_code == 409
     assert practice.phrase(card["phrase_id"]) == scheduled
     assert practice.finish(card, "skipped", completion_id)["receipt"] == skipped["receipt"]
@@ -265,5 +270,4 @@ def test_grading_skip_requires_reveal_and_the_same_learning_day(
     )
     assert response.status_code == 409
     assert practice.phrase(card["phrase_id"])["last_review"] is None
-    [logged] = practice.log()
-    assert (logged["rating"], logged["skipped"]) == (None, 1)
+    assert practice.log() == []

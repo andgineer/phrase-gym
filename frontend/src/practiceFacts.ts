@@ -51,7 +51,6 @@ export const ratingsLine = (totals: PracticeTotals) =>
     [totals.got_it, `${totals.got_it} Good`],
     [totals.effort, `${totals.effort} Hard`],
     [totals.not_yet, `${totals.not_yet} Again`],
-    [totals.skipped, `${totals.skipped} skipped`],
   ]).join(' · ')
 
 export const recordingsLine = (count: number) => `${counted(count, 'recording')} made`

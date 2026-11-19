@@ -106,7 +106,7 @@ def test_extra_opens_a_fresh_traversal_that_offers_skipped_due_again(practice: P
     again = extra["card"]
     assert again["phrase_id"] == first_id and again["mode"] == "extra"
     assert again["view_token"] not in (first["view_token"], second["view_token"])
-    assert extra["progress"]["due_completed"] == 2
+    assert extra["progress"]["due_completed"] == 1
     assert practice.card() == again
     practice.reveal(again)
     receipt = practice.finish(again, "effort")["receipt"]

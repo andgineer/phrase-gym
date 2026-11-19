@@ -73,8 +73,10 @@ def test_session_takes_oldest_due_and_random_new_phrases_in_random_order(
             state = practice.rate(card, rating)["state"]
     recalls = {item for kind, item in shown if kind == "recall"}
     fresh = {item for kind, item in shown if kind == "new"}
-    assert len(shown) == 25 and len(recalls) == 20 and len(fresh) == 5
-    assert recalls == set(ids[:20])
+    assert len(shown) == 26 and len(set(shown)) == len(shown)
+    recall_count = 20 + (shown[2][0] == "recall")
+    assert len(recalls) == recall_count and len(fresh) == 26 - recall_count
+    assert recalls == set(ids[:recall_count])
     assert fresh < set(ids[22:]) and fresh != set(ids[22:27])
     assert [kind for kind, _ in shown[:20]] != ["recall"] * 20
     assert state["progress"] == {
@@ -84,7 +86,8 @@ def test_session_takes_oldest_due_and_random_new_phrases_in_random_order(
         "new_allowance": 5,
     }
     assert state["message"] == "Today's practice is complete."
-    assert len([row for row in practice.log() if row["skipped"]]) == 1
+    assert len(practice.log()) == 25
+    assert not any(row["skipped"] for row in practice.log())
 
 
 def test_exhausted_due_allowance_still_offers_new_phrases(practice: Practice) -> None:
@@ -96,7 +99,12 @@ def test_exhausted_due_allowance_still_offers_new_phrases(practice: Practice) ->
     state = practice.daily()
     while state["card"]:
         shown.append((state["card"]["kind"], state["card"]["phrase_id"]))
-        state = practice.finish(state["card"], "skipped")["state"]
+        card = state["card"]
+        state = (
+            practice.rate(card, "got_it")
+            if card["kind"] == "recall"
+            else practice.finish(card, "skipped")
+        )["state"]
     assert sorted(shown) == sorted([("recall", ids[0]), ("new", ids[2]), ("new", ids[3])])
 
 
@@ -147,9 +155,8 @@ def test_skip_leaves_due_and_excludes_phrase_until_a_new_traversal(practice: Pra
     assert practice.phrase(first["phrase_id"]) == before
     practice.reveal(second)
     assert practice.finish(second, "got_it")["state"]["card"] is None
-    assert practice.daily()["message"] == "Today's practice is complete."
-    practice.later(days=1)
     assert practice.card()["phrase_id"] == first["phrase_id"]
+    assert practice.daily()["progress"]["due_completed"] == 1
 
 
 def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Practice) -> None:
@@ -225,7 +232,7 @@ def test_timezone_change_closes_the_old_view_and_keeps_first_recall_later(
     assert practice.daily()["progress"]["new_completed"] == 0
 
 
-def test_skipping_new_phrases_consumes_new_slots_without_initializing_or_looping(
+def test_passing_new_phrases_uses_no_slots_and_reopens_them_in_a_new_pass(
     practice: Practice,
 ) -> None:
     publish(practice.client, many(2))
@@ -242,7 +249,8 @@ def test_skipping_new_phrases_consumes_new_slots_without_initializing_or_looping
             phrase_row[key] is None for key in ("fsrs_json", "studied_at", "last_review", "due_at")
         )
         state = result["state"]
-    assert len(skipped) == state["progress"]["new_completed"] == 2
-    assert state["progress"]["due_completed"] == 0
-    assert practice.daily()["card"] is None
-    assert practice.extra()["state"]["card"]["phrase_id"] in skipped
+    assert len(skipped) == 2
+    assert state["progress"]["new_completed"] == state["progress"]["due_completed"] == 0
+    assert practice.log() == []
+    assert practice.card()["phrase_id"] in skipped
+    assert practice.rows("SELECT id FROM operations WHERE kind='pass'") == []

@@ -106,7 +106,7 @@ def test_practice_closes_an_unfinished_daily_new_view(
     assert practice.log() == []
 
 
-def test_practice_keeps_the_regular_traversal_skips_and_its_own_skip_is_separate(
+def test_passing_in_practice_and_daily_leaves_the_phrases_available(
     practice: Practice,
 ) -> None:
     first, second, _, _ = ids(practice)
@@ -119,9 +119,10 @@ def test_practice_keeps_the_regular_traversal_skips_and_its_own_skip_is_separate
     receipt = practice.finish(card, "skipped")["receipt"]
     assert (receipt["mode"], receipt["skipped"]) == ("practice", True)
     resumed = practice.daily()
-    assert resumed["card"]["phrase_id"] == following["phrase_id"]
+    assert resumed["card"]["phrase_id"] in {first, second}
     assert resumed["card"]["view_token"] != following["view_token"]
-    assert resumed["progress"]["due_completed"] == 1
+    assert resumed["progress"]["due_completed"] == 0
+    assert practice.log() == []
 
 
 def test_daily_closes_an_open_practice_view_and_unknown_phrases_are_not_found(

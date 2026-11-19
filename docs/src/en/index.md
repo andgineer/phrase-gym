@@ -21,9 +21,8 @@ already graded that day. **Settings** chooses whether phrases come back **Often*
 (the default) or **Rarely**, with how many times a phrase you keep answering **Good** returns in
 its first month and year.
 The Start card shows the lesson's due and new phrases within today's remaining allowance. Start stays
-disabled when none wait; **Extra** appears only if a fresh pass can offer eligible phrases, including
-skipped phrases or those beyond the allowance, and
-extends today's limits for another pass without erasing completed practice. The entry
+disabled when none wait. **Extra** extends today's limits when eligible phrases remain beyond the
+allowance. The entry
 shows today's completed practice, the phrases studied today, a factual practice streak and the next
 return date. An optional weekly target in **Settings**, one to six practice days from Monday to
 Sunday, adds this week's practice days beside the streak; it can be changed or paused at any time,
@@ -36,7 +35,8 @@ The full-width microphone stays in the same place on both sides, above the text.
 bottom row with the **Previous card** and **Skip** chevrons while the text scrolls. **Previous card**
 steps back through cards you graded or skipped during this run. Each saved grade is highlighted in
 the disabled grading row. A skipped card shows **Skipped without a grade** and can still be graded
-when you return to it. The right chevron steps forward through the session and returns to the current
+during the same pass. Skipping uses no allowance or practice credit. A fresh pass can offer the
+phrase again. The right chevron steps forward through the session and returns to the current
 card. The back’s **More actions** menu offers **Recording history** and **Delete phrase…** with confirmation for deletion. Tap the
 microphone to record, then tap it again to finish. Finishing on the front reveals the answer and
 plays the reference followed by your recording. Recording on the back uses the same playback

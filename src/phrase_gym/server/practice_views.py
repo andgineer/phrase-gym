@@ -54,6 +54,8 @@ def start_traversal(
     origin: str,
     lesson_id: str | None,
 ) -> None:
+    # Pass receipts only support retries and grading within their traversal.
+    connection.execute("DELETE FROM operations WHERE kind IN ('pass', 'revealed_pass')")
     connection.execute(
         "INSERT OR REPLACE INTO current_view (id, traversal_id, learning_date, origin, "
         "lesson_id, skipped_json, phrase_id, view_token, kind, practice, revealed, cue_index, "

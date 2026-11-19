@@ -62,7 +62,7 @@ def test_today_skips_lesson_resume_phrase_practice_and_rollover(client: TestClie
     state = practice.finish(card, "skipped")["state"]
     assert today(practice, lessons["One"])["new_count"] == 1
     practice.finish(state["card"], "skipped")
-    assert today(practice, lessons["One"])["new_count"] == 0
+    assert today(practice, lessons["One"])["new_count"] == 2
     practice.extra(lessons["One"])
     assert today(practice, lessons["One"])["new_count"] == 2
     practice.practise(card["phrase_id"])
@@ -100,14 +100,14 @@ def test_extra_restores_skipped_phrases_before_the_allowance_is_used(
     while state["card"]:
         state = practice.finish(state["card"], "skipped")["state"]
     waiting = today(practice)
-    assert waiting["due_count"] == waiting["new_count"] == 0
+    assert (waiting["new_count"], waiting["due_count"]) == ((2, 0) if kind == "new" else (0, 2))
     assert waiting["extra_available"]
     before = practice.rows("SELECT * FROM phrases ORDER BY position")
     extra = practice.extra()["state"]
     assert extra["card"]["phrase_id"] in ids
     assert extra["card"]["kind"] == kind
     assert extra["progress"]["due_allowance"] == extra["progress"]["new_allowance"] == 5
-    assert len(practice.log()) == 2
+    assert practice.log() == []
     after = practice.rows("SELECT * FROM phrases ORDER BY position")
     assert [row | {"last_cue": None} for row in after] == [
         row | {"last_cue": None} for row in before

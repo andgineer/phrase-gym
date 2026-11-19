@@ -517,6 +517,23 @@
         "title": "GradeSkippedRequest",
         "type": "object"
       },
+      "GradeSkippedResult": {
+        "additionalProperties": false,
+        "properties": {
+          "progress": {
+            "$ref": "#/components/schemas/PracticeProgress"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/CompletionReceipt"
+          }
+        },
+        "required": [
+          "receipt",
+          "progress"
+        ],
+        "title": "GradeSkippedResult",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3095,7 +3112,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompletionReceipt"
+                  "$ref": "#/components/schemas/GradeSkippedResult"
                 }
               }
             },

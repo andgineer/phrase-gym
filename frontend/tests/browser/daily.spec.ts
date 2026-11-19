@@ -106,7 +106,7 @@ test('silent Daily resumes a revealed card, rates and skips with automatic advan
   await expect(page.getByTestId('practice-phrase')).toHaveText('Nice to meet you.')
   await expect(card(page).getByText('Longer help for Nice to meet you.')).toBeVisible()
   await page.getByRole('button', { name: 'Skip' }).click()
-  await expect(page.getByText("Today's practice is complete.", { exact: true })).toBeVisible()
+  await expect(card(page)).toHaveCount(0)
   await expect(page.getByTestId('lesson-counts')).toHaveText('1 due · 0 new')
 })
 
@@ -220,9 +220,7 @@ test('Easy uses the fourth FSRS rating and persists in practice facts', async ({
   await expect(page.getByTestId('today-ratings')).toHaveText('1 Easy')
 })
 
-test('new-card Skip consumes a new slot and leaves the phrase unrated for a later pass', async ({
-  page,
-}) => {
+test('passing a new card leaves its slot free and offers it again on Start', async ({ page }) => {
   await page.goto('/')
   await importPackage(page, dailyPackage, 2)
   await page.getByRole('button', { name: 'Start', exact: true }).click()
@@ -232,16 +230,16 @@ test('new-card Skip consumes a new slot and leaves the phrase unrated for a late
   await card(page).getByRole('button', { name: 'More explanation ▾' }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
   await card(page).getByRole('button', { name: 'Skip', exact: true }).click()
-  await expect(modeLine(page)).toHaveText('2 / 5 new')
+  await expect(modeLine(page)).toHaveText('1 / 5 new')
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await rateNew(page)
   await expect(card(page)).toHaveCount(0)
   const response = await page.request.get('/api/practice/facts')
   const facts = await response.json()
-  expect(facts.today).toMatchObject({ new_attempts: 1, recalls: 0, skipped: 1, not_yet: 1 })
+  expect(facts.today).toMatchObject({ new_attempts: 1, recalls: 0, skipped: 0, not_yet: 1 })
   expect(facts.library).toMatchObject({ new_count: 1, later_count: 1, due_count: 0 })
-  await page.getByRole('button', { name: 'Extra', exact: true }).click()
-  await expect(modeLine(page)).toHaveText('Extra · 3 / 5 new')
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(modeLine(page)).toHaveText('2 / 5 new')
   await card(page).getByRole('button', { name: 'Reveal' }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
 })

@@ -10,7 +10,7 @@ from phrase_gym.server.practice_contracts import (
     CompletionRequest,
     CompletionResult,
     GradeSkippedRequest,
-    Outcome,
+    GradeSkippedResult,
     PracticeState,
     Rating,
 )
@@ -29,27 +29,13 @@ from phrase_gym.server.scheduling import graded_today, learning_day, schedule
 from phrase_gym.server.storage import Database
 
 
-def _record_outcome(
-    connection: sqlite3.Connection,
-    view: ViewRecord,
-    phrase: ShownPhraseRecord,
-    outcome: Outcome,
-    now: datetime,
-) -> tuple[Rating | None, bool, bool]:
-    if outcome == "studied":
-        raise PracticeConflictError("Practice completes with a rating or Skip")
-    if outcome == "skipped":
-        if view.practice:
-            return None, True, False
-        skipped = json.loads(view.skipped_json)
+def _pass_card(connection: sqlite3.Connection, view: ViewRecord, phrase_id: str) -> None:
+    if not view.practice:
+        passed = json.loads(view.skipped_json)
         connection.execute(
             "UPDATE current_view SET skipped_json=? WHERE id=1",
-            (json.dumps([*skipped, phrase.id]),),
+            (json.dumps([*passed, phrase_id]),),
         )
-        return None, True, False
-    if not view.revealed:
-        raise PracticeConflictError("Show the phrase before rating your answer")
-    return outcome, False, _apply_rating(connection, phrase, outcome, now)
 
 
 def _apply_rating(
@@ -67,6 +53,33 @@ def _apply_rating(
         (fsrs_json, due, now.isoformat(), now.isoformat(), phrase.id),
     )
     return True
+
+
+def _log_grade(
+    connection: sqlite3.Connection,
+    receipt: CompletionReceipt,
+    phrase: ShownPhraseRecord,
+    now: datetime,
+) -> None:
+    connection.execute(
+        "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, "
+        "completed_at, learning_date, kind, rating, skipped, fsrs_updated, mode) "
+        "VALUES (?,?,?,?,?,?,?,?,0,?,?) ON CONFLICT(id) DO UPDATE SET "
+        "completed_at=excluded.completed_at, rating=excluded.rating, skipped=0, "
+        "fsrs_updated=excluded.fsrs_updated",
+        (
+            receipt.completion_id,
+            phrase.id,
+            phrase.text,
+            phrase.lesson_title,
+            now.isoformat(),
+            receipt.learning_date,
+            receipt.kind,
+            receipt.rating,
+            int(receipt.fsrs_updated),
+            receipt.mode,
+        ),
+    )
 
 
 class PracticeCompletion:
@@ -90,7 +103,7 @@ class PracticeCompletion:
             ).fetchone()
             if previous:
                 if (
-                    previous["kind"] not in {"completion", "revealed_skip"}
+                    previous["kind"] not in {"completion", "revealed_skip", "pass", "revealed_pass"}
                     or previous["request_json"] != payload
                 ):
                     raise PracticeConflictError("This completion ID was used for another action")
@@ -102,13 +115,19 @@ class PracticeCompletion:
             phrase = view_phrase(connection, view)
             if view.kind is None:
                 raise StaleViewError("This card is no longer current. Open Daily to continue.")
-            rating, skipped, fsrs_updated = _record_outcome(
-                connection,
-                view,
-                phrase,
-                request.outcome,
-                now,
-            )
+            outcome = request.outcome
+            if outcome == "studied":
+                raise PracticeConflictError("Practice completes with a rating or Skip")
+            rating = None if outcome == "skipped" else outcome
+            if rating is None:
+                _pass_card(connection, view, phrase.id)
+                kind = "revealed_pass" if view.revealed and not view.practice else "pass"
+                fsrs_updated = False
+            else:
+                if not view.revealed:
+                    raise PracticeConflictError("Show the phrase before rating your answer")
+                kind = "completion"
+                fsrs_updated = _apply_rating(connection, phrase, rating, now)
             receipt = CompletionReceipt(
                 completion_id=request.completion_id,
                 phrase_id=phrase.id,
@@ -116,37 +135,14 @@ class PracticeCompletion:
                 mode=view_mode(view),
                 kind=view.kind,
                 rating=rating,
-                skipped=skipped,
+                skipped=rating is None,
                 fsrs_updated=fsrs_updated,
             )
-            connection.execute(
-                "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, "
-                "completed_at, learning_date, kind, rating, skipped, fsrs_updated, mode) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                (
-                    receipt.completion_id,
-                    phrase.id,
-                    phrase.text,
-                    phrase.lesson_title,
-                    now.isoformat(),
-                    day,
-                    receipt.kind,
-                    rating,
-                    int(skipped),
-                    int(fsrs_updated),
-                    receipt.mode,
-                ),
-            )
+            if rating is not None:
+                _log_grade(connection, receipt, phrase, now)
             connection.execute(
                 "INSERT INTO operations (id, kind, request_json, result_json) VALUES (?, ?, ?, ?)",
-                (
-                    request.completion_id,
-                    "revealed_skip"
-                    if skipped and view.revealed and not view.practice
-                    else "completion",
-                    payload,
-                    receipt.model_dump_json(),
-                ),
+                (request.completion_id, kind, payload, receipt.model_dump_json()),
             )
             if view.practice:
                 # Practice returns to details; the next Daily selects a fresh regular view.
@@ -161,40 +157,39 @@ class PracticeCompletion:
                 state = practice_state(connection, now, day)
             return CompletionResult(receipt=receipt, replayed=False, state=state)
 
-    def grade_skipped(self, request: GradeSkippedRequest) -> CompletionReceipt:
+    def grade_skipped(self, request: GradeSkippedRequest) -> GradeSkippedResult:
         with self.database.write() as connection:
             row = connection.execute(
-                "SELECT practice_log.phrase_id, practice_log.skipped, practice_log.rating, "
-                "practice_log.fsrs_updated, operations.result_json "
-                "FROM practice_log JOIN operations ON operations.id=practice_log.id "
-                "WHERE practice_log.id=? AND operations.kind='revealed_skip'",
+                "SELECT practice_log.rating, practice_log.fsrs_updated, operations.result_json "
+                "FROM operations LEFT JOIN practice_log ON practice_log.id=operations.id "
+                "WHERE operations.id=? AND operations.kind IN ('revealed_pass', 'revealed_skip')",
                 (request.completion_id,),
             ).fetchone()
             if row is None:
                 raise PracticeConflictError("This skipped card cannot be graded.")
             receipt = CompletionReceipt.model_validate_json(row["result_json"])
-            if not row["skipped"]:
-                if row["rating"] != request.rating:
-                    raise PracticeConflictError("This card already has a saved grade.")
-                updated = bool(row["fsrs_updated"])
-            else:
-                now = self.clock()
+            now = self.clock()
+            day = learning_day(connection, now)
+            if row["rating"] and row["rating"] != request.rating:
+                raise PracticeConflictError("This card already has a saved grade.")
+            updated = bool(row["fsrs_updated"])
+            phrase = None
+            if not row["rating"]:
                 phrase = fetch_one(
                     connection,
-                    PhraseRecord,
-                    "SELECT * FROM phrases WHERE id=?",
-                    (row["phrase_id"],),
+                    ShownPhraseRecord,
+                    "SELECT phrases.*, lessons.title AS lesson_title FROM phrases "
+                    "JOIN lessons ON lessons.id=phrases.lesson_id WHERE phrases.id=?",
+                    (receipt.phrase_id,),
                 )
-                if phrase is None or receipt.learning_date != learning_day(connection, now):
+                if phrase is None or receipt.learning_date != day:
                     raise PracticeConflictError(
                         "This skipped card is no longer available to grade.",
                     )
                 updated = _apply_rating(connection, phrase, request.rating, now)
-                # Replace the skip in place so the appearance consumes only one slot.
-                connection.execute(
-                    "UPDATE practice_log SET rating=?, skipped=0, fsrs_updated=? WHERE id=?",
-                    (request.rating, int(updated), request.completion_id),
-                )
-            return receipt.model_copy(
+            grade = receipt.model_copy(
                 update={"rating": request.rating, "skipped": False, "fsrs_updated": updated},
             )
+            if phrase is not None:
+                _log_grade(connection, grade, phrase, now)
+            return GradeSkippedResult(receipt=grade, progress=daily_progress(connection, day))

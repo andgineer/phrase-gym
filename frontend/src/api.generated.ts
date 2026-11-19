@@ -709,6 +709,11 @@ export interface components {
              */
             rating: "not_yet" | "effort" | "got_it" | "easy";
         };
+        /** GradeSkippedResult */
+        GradeSkippedResult: {
+            progress: components["schemas"]["PracticeProgress"];
+            receipt: components["schemas"]["CompletionReceipt"];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1926,7 +1931,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CompletionReceipt"];
+                    "application/json": components["schemas"]["GradeSkippedResult"];
                 };
             };
             /** @description Validation Error */

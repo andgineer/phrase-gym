@@ -38,10 +38,9 @@ class PhrasePractice:
             now = self.clock()
             day = learning_day(connection, now)
             view = load_view(connection)
-            if view is None or view.learning_date != day:
-                start_traversal(connection, day, "daily", None)
-            # Replacing the active phrase closes any unfinished regular view ungraded while its
-            # traversal keeps today's skipped phrases.
+            origin = view.origin if view is not None and view.learning_date == day else "daily"
+            start_traversal(connection, day, origin, None)
+            # Replacing the active phrase closes any unfinished regular view ungraded.
             kind = "recall" if phrase.studied_at else "new"
             show_phrase(connection, phrase, kind, self.rng, practice=True)
             return practice_state(connection, now, day)

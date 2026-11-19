@@ -9,11 +9,11 @@ from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.extra import ExtraPractice
 from phrase_gym.server.phrase_practice import PhrasePractice, UnknownPhraseError
 from phrase_gym.server.practice_contracts import (
-    CompletionReceipt,
     CompletionRequest,
     CompletionResult,
     ExtraResult,
     GradeSkippedRequest,
+    GradeSkippedResult,
     OpenDaily,
     OpenExtra,
     OpenPhrasePractice,
@@ -99,7 +99,7 @@ def practice_card_routes(actions: ViewActions, completion: PracticeCompletion) -
             return completion.complete(request)
 
     @router.post("/grade-skipped")
-    def grade_skipped(request: GradeSkippedRequest) -> CompletionReceipt:
+    def grade_skipped(request: GradeSkippedRequest) -> GradeSkippedResult:
         with conflicts():
             return completion.grade_skipped(request)
 

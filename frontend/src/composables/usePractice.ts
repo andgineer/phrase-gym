@@ -14,6 +14,7 @@ import type {
   Card,
   CompletionResult,
   ExtraResult,
+  GradeSkippedResult,
   Outcome,
   PracticeState,
   Rating,
@@ -207,11 +208,14 @@ export function usePractice() {
     gradingSkipped.value = true
     error.value = ''
     try {
-      const receipt = await post<CompletionResult['receipt']>('grade-skipped', {
+      const result = await post<GradeSkippedResult>('grade-skipped', {
         completion_id: completionId,
         rating,
       })
-      if (mine === epoch && receipt.rating) skipped.outcome = receipt.rating
+      if (mine === epoch && result.receipt.rating) {
+        skipped.outcome = result.receipt.rating
+        view.value = { ...view.value, progress: result.progress }
+      }
     } catch (cause) {
       if (mine === epoch) error.value = String(cause)
     } finally {

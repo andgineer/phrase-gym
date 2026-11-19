@@ -40,10 +40,10 @@ def _recordings(connection: sqlite3.Connection, day: str | None) -> int:
 
 
 def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
-    clause, parameters = ("WHERE learning_date=? ", (day,)) if day else ("", ())
+    clause, parameters = ("AND learning_date=? ", (day,)) if day else ("", ())
     rows = connection.execute(
-        "SELECT kind, rating, skipped, COUNT(*) AS count FROM practice_log "  # noqa: S608
-        f"{clause}GROUP BY kind, rating, skipped",
+        "SELECT kind, rating, COUNT(*) AS count FROM practice_log "  # noqa: S608
+        f"WHERE skipped=0 {clause}GROUP BY kind, rating",
         parameters,
     ).fetchall()
     ratings: dict[str, int] = {}
@@ -55,7 +55,7 @@ def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
         first_meetings=sum(row["count"] for row in rows if row["kind"] == "first_study"),
         new_attempts=sum(row["count"] for row in rows if row["kind"] == "new" and row["rating"]),
         recalls=sum(row["count"] for row in rows if row["kind"] == "recall" and row["rating"]),
-        skipped=sum(row["count"] for row in rows if row["skipped"]),
+        skipped=0,
         easy=ratings.get("easy", 0),
         got_it=ratings.get("got_it", 0),
         effort=ratings.get("effort", 0),
@@ -95,7 +95,9 @@ class PracticeFactsService:
             day = learning_day(connection, now)
             dates = [
                 row[0]
-                for row in connection.execute("SELECT DISTINCT learning_date FROM practice_log")
+                for row in connection.execute(
+                    "SELECT DISTINCT learning_date FROM practice_log WHERE skipped=0",
+                )
             ]
             return PracticeFacts(
                 learning_date=day,
@@ -115,7 +117,7 @@ class PracticeFactsService:
             rows = fetch_all(
                 connection,
                 PracticeLogRecord,
-                "SELECT * FROM practice_log WHERE learning_date=? "
+                "SELECT * FROM practice_log WHERE learning_date=? AND skipped=0 "
                 "ORDER BY completed_at, rowid LIMIT ? OFFSET ?",
                 (learning_date, limit + 1, offset),
             )

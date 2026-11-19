@@ -95,6 +95,11 @@ class CompletionResult(StrictModel):
     state: PracticeState | None
 
 
+class GradeSkippedResult(StrictModel):
+    receipt: CompletionReceipt
+    progress: PracticeProgress
+
+
 class OpenExtra(StrictModel):
     operation_id: OperationId
     lesson_id: str | None = Field(default=None, max_length=100)

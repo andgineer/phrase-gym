@@ -21,7 +21,7 @@ def daily_progress(connection: sqlite3.Connection, day: str) -> PracticeProgress
     completed = dict(
         connection.execute(
             "SELECT kind, COUNT(*) FROM practice_log WHERE learning_date=? "
-            "AND mode IN (?, ?) GROUP BY kind",
+            "AND skipped=0 AND mode IN (?, ?) GROUP BY kind",
             (day, *ALLOWANCE_MODES),
         ).fetchall(),
     )

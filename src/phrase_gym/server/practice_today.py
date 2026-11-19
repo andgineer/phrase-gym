@@ -49,7 +49,10 @@ class TodayPractice:
                 "{}",
             )
             if current is not None and current.learning_date == day:
-                view = replace(current, lesson_id=lesson_id)
+                passed = (
+                    current.skipped_json if current.phrase_id and not current.practice else "[]"
+                )
+                view = replace(current, lesson_id=lesson_id, skipped_json=passed)
             progress = daily_progress(connection, day)
             due_left = max(progress.due_allowance - progress.due_completed, 0)
             new_left = max(progress.new_allowance - progress.new_completed, 0)
