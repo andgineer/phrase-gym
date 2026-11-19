@@ -35,8 +35,6 @@ and generates audio where it’s missing. The finished lesson goes straight into
 [User guide](https://andgineer.github.io/phrase-gym/) ·
 [Use it on your phone](https://andgineer.github.io/phrase-gym/private-access/)
 
-English is available now, with more languages planned.
-
 ## Built on second-language learning research
 
 Before designing Phrase Gym, I reviewed studies on how people learn, recall, and use expressions
