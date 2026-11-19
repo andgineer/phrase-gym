@@ -33,7 +33,8 @@ It needs two things on the same Mac:
 
 - The [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), installed and logged in
   once with your Claude subscription (run `claude` and log in). Coach uses your normal Claude
-  login, default model and settings and never uses an API key. The model gets only a file-reading
+  login and settings, always runs Claude Opus 5.5 at medium effort whatever model you use
+  elsewhere, and never uses an API key. The model gets only a file-reading
   tool that works inside the current preparation's folder; reading `.env` files, your home
   directory and your learning data is refused. Read-allow rules, tools and servers you add in
   your own Claude settings can widen that restriction; Coach does not isolate them.
@@ -47,18 +48,25 @@ PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json phrase-gym coach
 
 For a source checkout, use `uv run phrase-gym coach`. Coach receives typed text through Phrase
 Gym's API, prepares a card with Claude in separate preparation and review sessions, generates its
-reference audio and publishes it. A card usually takes a minute or two. Coach prints a line for
+reference audio and publishes it. A card usually takes a few minutes. Coach prints a line for
 every preparation that fails, with the folder that keeps that attempt's prompts and answers.
 Imports from an external AI agent arrive with complete audio and do not need Coach. Piper uses
 the separately pinned private environment described in the voice setup guide.
 
 To prepare with the [Codex CLI](https://developers.openai.com/codex/cli) instead, log in to it
-with `codex login` and start Coach with `phrase-gym coach --cli codex`. Both CLIs prepare cards
-from the same rules; Coach never switches between the two on its own. Commands Codex's model runs
-go through a restricted Codex sandbox that can read only the current preparation's files and
+with `codex login` and start Coach with `phrase-gym coach --cli codex`. Coach uses the same card rules for each CLI and keeps the CLI you select. Commands from the
+Codex model run in a restricted sandbox that can read only the current preparation's files and
 cannot read `.env` files, your home directory or your learning data, write files or reach the
-network; tools and servers from your own Codex settings are not covered. Each CLI keeps its own
-model and settings, and Phrase Gym does not choose a model.
+network; tools and servers from your own Codex settings are not covered. Coach runs Codex on
+GPT-6.1 Sol at medium effort.
+
+Without a Claude or Codex subscription, `phrase-gym coach --cli gemini` uses the free tier of
+the [Antigravity CLI](https://antigravity.google/) (`agy`, logged in once with a Google account)
+on its strongest free model, Gemini Flash at high effort. Treat it as experimental: it has yet to pass
+the card-quality checks. The initial phrase run took over ten minutes and failed during revision
+when the service ran out of capacity. Free-tier usage is also subject to a quota. Antigravity
+blocks direct reads outside the attempt folder. Other tools have broader access, so prefer
+Claude or Codex when available.
 
 The `install-coach`, `uninstall-coach`, and `deploy` commands report that they are unavailable.
 The optional `coach` and `deploy` extras are reserved for future preparation and provisioning

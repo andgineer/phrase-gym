@@ -1,16 +1,21 @@
 import json
 import re
 import shlex
-import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from phrase_gym.coach.agents.config import _DEFAULT_AGENT_API_KEY_VARS, _DEFAULT_CLAUDE_CMD
+from phrase_gym.coach.agents.config import (
+    _DEFAULT_AGENT_API_KEY_VARS,
+    _DEFAULT_CLAUDE_CMD,
+    CLAUDE_MODEL,
+)
 from phrase_gym.coach.cli_steps import (
     STEP_TIMEOUT,
     CliError,
+    attempts_root,
     decode_object,
+    json_envelope,
     run_step,
     write_step_files,
 )
@@ -19,13 +24,10 @@ from phrase_gym.coach.cli_steps import (
 ERROR_LINE = re.compile(r'^(?:Error|API Error)\b.*$|^.*"is_error":\s*true.*$', re.M)
 
 
-def attempts_root() -> Path:
-    return Path(tempfile.gettempdir()).resolve() / "phrase-gym-coach"
-
-
 def template_values(attempt: Path, schema: dict[str, Any]) -> dict[str, str | Path]:
     """Only Read exists: allowed inside this attempt; home and .env files are denied by rule."""
     return {
+        "model": CLAUDE_MODEL,
         "schema": shlex.quote(json.dumps(schema)),
         "read_scope": shlex.quote(f"Read(/{attempt}/**)"),
     }
@@ -61,7 +63,7 @@ class ClaudeCli:
             api_key_vars=_DEFAULT_AGENT_API_KEY_VARS["claude"],
             error_line=ERROR_LINE,
         )
-        envelope = _envelope(result.stdout_path.read_text(errors="replace"))
+        envelope = json_envelope(result.stdout_path.read_text(errors="replace"))
         if envelope.get("is_error") or envelope.get("subtype") not in (None, "success"):
             detail = str(envelope.get("result") or envelope.get("subtype"))[:300]
             raise CliError(f"Claude: {detail} (during {step})")
@@ -71,11 +73,3 @@ class ClaudeCli:
         content = json.dumps(answer, ensure_ascii=False)
         (attempt / f"{step}-answer.json").write_text(content, encoding="utf-8")
         return decode_object(content, "Claude", step)
-
-
-def _envelope(stdout: str) -> dict[str, Any]:
-    try:
-        decoded = json.loads(stdout)
-    except ValueError:
-        return {}
-    return decoded if isinstance(decoded, dict) else {}

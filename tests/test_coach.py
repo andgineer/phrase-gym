@@ -12,9 +12,11 @@ from fastapi.testclient import TestClient
 from phrase_gym.coach import codex_cli
 from phrase_gym.coach.agents.ai_agent import _inject_skip_git_flag
 from phrase_gym.coach.agents.command_template import build_run_args
-from phrase_gym.coach.claude_cli import ClaudeCli, attempts_root, template_values
-from phrase_gym.coach.cli_steps import CliError
+from phrase_gym.coach.agents.config import CLAUDE_MODEL, CODEX_MODEL
+from phrase_gym.coach.claude_cli import ClaudeCli, template_values
+from phrase_gym.coach.cli_steps import CliError, attempts_root
 from phrase_gym.coach.codex_cli import CodexCli
+from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.main import CoachApi, process_once
 from phrase_gym.coach.preparation import CardPreparer
 from phrase_gym.coach.speech import PiperSpeech
@@ -49,15 +51,17 @@ def test_coach_rejects_non_loopback_or_ambiguous_url(url: str) -> None:
         CoachApi(url)
 
 
-Cli = ClaudeCli | CodexCli
-LABEL = {ClaudeCli: "Claude", CodexCli: "Codex"}
+Cli = ClaudeCli | CodexCli | GeminiCli
+LABEL = {ClaudeCli: "Claude", CodexCli: "Codex", GeminiCli: "Gemini"}
 
 
-@pytest.fixture(params=["claude", "codex"])
+@pytest.fixture(params=["claude", "codex", "gemini"])
 def cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
     fake = str(fake_cli.executable(tmp_path, request.param))
     if request.param == "claude":
         return ClaudeCli(fake, timeout=10, attempts=tmp_path / "attempts")
+    if request.param == "gemini":
+        return GeminiCli(fake, timeout=10, attempts=tmp_path / "attempts")
     workspace = tmp_path / "workspace"
     workspace.mkdir()
     return CodexCli(workspace, fake, timeout=10)
@@ -128,6 +132,12 @@ REASONS = {
         "subscription-limit": "Claude: usage limit reached; submit the text again after "
         "6pm (Europe/Belgrade) (during prepare)",
         "logged-out": f"Claude: {LOGIN} (during prepare)",
+    },
+    "Gemini": {
+        "malformed": "Gemini returned no structured answer during prepare",
+        "usage-limit": "Gemini: rate limit hit; submit the text again later (during prepare)",
+        "subscription-limit": "Gemini: usage limit reached; submit the text again after ",
+        "logged-out": f"Gemini: {LOGIN} (during prepare)",
     },
 }
 
@@ -222,14 +232,17 @@ def test_claude_reads_only_the_attempt_with_home_and_env_files_denied(tmp_path: 
     attempt = tmp_path / "attempt"
     arguments, head = build_run_args(
         ClaudeCli().command_template,
-        model="",
         prompt_file=attempt / "review-prompt.md",
         **template_values(attempt, {"type": "object"}),
     )
     assert isinstance(arguments, list) and head == "claude"
-    assert arguments[:6] == [
+    assert arguments[:10] == [
         "claude",
         "-p",
+        "--model",
+        "claude-opus-5-5",
+        "--effort",
+        "medium",
         "--output-format",
         "json",
         "--json-schema",
@@ -248,7 +261,7 @@ def test_claude_reads_only_the_attempt_with_home_and_env_files_denied(tmp_path: 
     ]
     assert denied == ["Read(~/**)", "Read(//**/.env)", "Read(//**/.env.*)"]
     assert {"--strict-mcp-config", "--no-session-persistence"} <= set(arguments)
-    unwanted = {"--bare", "--model", "--dangerously-skip-permissions", "dontAsk", "auto"}
+    unwanted = {"--bare", "--dangerously-skip-permissions", "dontAsk", "auto"}
     assert not unwanted & set(arguments)
     assert arguments[-2:] == [
         "--",
@@ -272,13 +285,25 @@ def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(
     codex = CodexCli(workspace)
     arguments, _ = build_run_args(
         codex.command_template,
-        model="",
         prompt_file=attempt / "review-prompt.md",
         **codex.template_values(attempt, "review"),
     )
     assert isinstance(arguments, list)
     arguments = _inject_skip_git_flag(arguments)
-    assert arguments[:4] == ["codex", "exec", "--skip-git-repo-check", "--ephemeral"]
+    assert arguments[:8] == [
+        "codex",
+        "exec",
+        "--skip-git-repo-check",
+        "--model",
+        "gpt-6.1-sol",
+        "-c",
+        "model_reasoning_effort=medium",
+        "--ephemeral",
+    ]
+    assert (CLAUDE_MODEL, CODEX_MODEL) == (
+        "--model claude-opus-5-5 --effort medium",
+        "--model gpt-6.1-sol -c model_reasoning_effort=medium",
+    )
     profile = arguments[arguments.index('default_permissions="phrase-gym-coach"') + 2]
     assert profile == (
         "permissions.phrase-gym-coach.filesystem={"

@@ -1,8 +1,16 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. Coach prepares typed phrases and words into complete cards with Claude or Codex; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. Coach prepares typed phrases and words into complete cards with Claude, Codex or the free Antigravity tier; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
+
+## Coach models and calls
+
+**Learner outcome:** a typed phrase becomes a card sooner and for less subscription quota, and a learner without a subscription knows whether the free Antigravity tier is worth using.
+
+The [model and call experiments](coach-model-and-call-experiments.md) own the measurements that choose the cheapest adequate Claude and Codex models, judge the free tier and cut the calls spent on one card. This work is independent of the interface stage and may run beside it.
+
+**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, and the preparation flow makes only the calls the measurements showed to matter.
 
 ## 5. Extend only the content the learner next needs
 
@@ -24,11 +32,11 @@ After the MVP, qualify Linux browser media playback and recording under the [pla
 
 ## Standing authorization for the local English demo
 
-Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Claude subscription login, or Codex when explicitly selected, with the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Recordings and application data stay outside model access.
+Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Claude subscription login, or Codex or the free Antigravity login when explicitly selected, with the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Recordings and application data stay outside model access.
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
-The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
+The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [model and call experiments](coach-model-and-call-experiments.md) are requested work within this authorization. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
 ## Delivery discipline
 

@@ -1,7 +1,9 @@
 import asyncio
 import json
 import re
+import tempfile
 import threading
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +18,10 @@ class CliError(RuntimeError):
     pass
 
 
+def attempts_root() -> Path:
+    return Path(tempfile.gettempdir()).resolve() / "phrase-gym-coach"
+
+
 def write_step_files(attempt: Path, step: str, prompt: str, schema: dict[str, Any]) -> Path:
     attempt.mkdir(parents=True, mode=0o700, exist_ok=True)
     prompt_path = attempt / f"{step}-prompt.md"
@@ -24,7 +30,7 @@ def write_step_files(attempt: Path, step: str, prompt: str, schema: dict[str, An
     return prompt_path
 
 
-# Both CLIs run one step through the copied news-recap runner; adapters supply template values.
+# Every CLI runs one step through the copied news-recap runner; adapters supply template values.
 async def run_step(  # noqa: PLR0913
     agent: str,
     command_template: str,
@@ -36,6 +42,7 @@ async def run_step(  # noqa: PLR0913
     timeout: float,
     api_key_vars: list[str],
     error_line: re.Pattern[str],
+    before_check: Callable[[SubprocessResult], None] | None = None,
 ) -> SubprocessResult:
     stop_event = threading.Event()
     try:
@@ -59,9 +66,19 @@ async def run_step(  # noqa: PLR0913
         raise
     except SubprocessError as error:
         raise CliError(f"{agent}: {error} (during {step})") from error
+    if before_check:
+        before_check(result)
     if failure := agent_failure(result, agent, error_line):
         raise CliError(f"{failure} (during {step})")
     return result
+
+
+def json_envelope(stdout: str) -> dict[str, Any]:
+    try:
+        decoded = json.loads(stdout)
+    except ValueError:
+        return {}
+    return decoded if isinstance(decoded, dict) else {}
 
 
 def decode_object(content: str, label: str, step: str) -> dict[str, Any]:

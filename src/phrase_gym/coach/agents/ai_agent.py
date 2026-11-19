@@ -69,7 +69,8 @@ _KNOWN_ERRORS: list[tuple[re.Pattern[str], str | Callable[[str], str], re.Patter
     ),
     (
         re.compile(
-            r"\bnot logged in\b|please run /login|\bcodex login\b|\binvalid api key\b"
+            r"\bnot logged in(?:to Antigravity)?\b|please run /login|\bcodex login\b"
+            r"|\binvalid api key\b"
             r"|\bunauthorized\b|\boauth token\b.{0,40}\b(?:expired|revoked)\b",
             re.IGNORECASE,
         ),
@@ -85,14 +86,15 @@ _KNOWN_ERRORS: list[tuple[re.Pattern[str], str | Callable[[str], str], re.Patter
         None,
     ),
     (
-        re.compile(r"OverloadedError|overloaded_error", re.IGNORECASE),
+        re.compile(r"OverloadedError|overloaded_error|No capacity available", re.IGNORECASE),
         "service overloaded; submit the text again later",
         None,
     ),
     (
         # A bare 429 also matches PIDs and trace ids in agent logs.
         re.compile(
-            r"rate.?limit|too many requests|\b(status|code|http)\b\W{0,10}429",
+            r"rate.?limit|too many requests|\b(status|code|http)\b\W{0,10}429"
+            r"|exhausted your capacity",
             re.IGNORECASE,
         ),
         "rate limit hit; submit the text again later",
@@ -183,9 +185,8 @@ def _run_agent_cli(  # noqa: PLR0913
     run_args, command_head = build_run_args(
         command_template,
         os_name=None,
-        model="",
         prompt_file=prompt_file,
-        **values,
+        **{"model": "", **values},
     )
 
     # Coach may run Codex from a full path, so its base name decides.

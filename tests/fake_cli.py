@@ -1,4 +1,4 @@
-"""Stands in for `codex exec` or `claude -p`: answers Coach prompts from typed text, no model."""
+"""Fake `codex exec`, `claude -p` and `agy -p`; answer Coach prompts without a model."""
 
 import json
 import os
@@ -93,6 +93,13 @@ CLAUDE_FAILURES = {
     "usage-limit": "API Error: 429 Too Many Requests",
     "subscription-limit": "You've hit your 5-hour limit · resets 6pm (Europe/Belgrade)",
 }
+GEMINI_FAILURES = {
+    "echo-transcript": None,
+    "logged-out": "You are not logged into Antigravity.",
+    "usage-limit": "E1115 10:00:00.000000 1 client.go:1] RetryableQuotaError: You have "
+    "exhausted your capacity on this model.",
+    "subscription-limit": "Individual quota reached. Resets in 103h45m22s",
+}
 
 
 def typed_input(prompt: str) -> str:
@@ -100,14 +107,16 @@ def typed_input(prompt: str) -> str:
 
 
 def fail(vendor: str, typed: str, prompt: str) -> None:
-    failures = CODEX_FAILURES if vendor == "codex" else CLAUDE_FAILURES
+    failures = {"codex": CODEX_FAILURES, "gemini": GEMINI_FAILURES}.get(vendor, CLAUDE_FAILURES)
     for key, message in failures.items():
         if key not in typed:
             continue
         if message is None:
             print(f"user\n{prompt}\nI could not finish.", file=sys.stderr)
-        elif vendor == "codex" or message.startswith("API Error"):
+        elif vendor == "codex" or message.startswith(("API Error", "E1115")):
             print(message, file=sys.stderr)
+        elif vendor == "gemini":
+            print(json.dumps({"status": "ERROR", "response": "", "error": message}))
         else:
             print(
                 json.dumps(
@@ -122,6 +131,15 @@ def respond(vendor: str, arguments: list[str], answer_value: object | None, step
         output = Path(arguments[arguments.index("--output-last-message") + 1])
         output.write_text("{not json" if answer_value is None else json.dumps(answer_value))
         print(output.read_text())
+        return
+    if vendor == "gemini":
+        assert arguments[-2] == "-p", arguments
+        schema = Path(arguments[arguments.index("--json-schema") + 1])
+        assert schema.is_file(), schema
+        gemini: dict[str, object] = {"status": "SUCCESS", "response": "done"}
+        if answer_value is not None:
+            gemini["structured_output"] = answer_value
+        print(json.dumps(gemini))
         return
     envelope = {"type": "result", "subtype": "success", "is_error": False, "result": "done"}
     if answer_value is not None:

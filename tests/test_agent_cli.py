@@ -111,6 +111,16 @@ def test_summarise_ignores_429_inside_pids_and_trace_ids() -> None:
     assert _summarise_stderr(text) is None
 
 
+def test_summarise_names_antigravity_capacity_and_rate_failures() -> None:
+    busy = "ERROR: please try again in a minute. (UNAVAILABLE (code 503): No capacity available"
+    assert _summarise_stderr(busy) == "service overloaded; submit the text again later"
+    spent = "RetryableQuotaError: You have exhausted your capacity on this model."
+    assert _summarise_stderr(spent) == "rate limit hit; submit the text again later"
+    assert "not logged in" in (
+        _summarise_stderr("ERROR: You are not logged into Antigravity.") or ""
+    )
+
+
 def test_summarise_detects_real_429_status() -> None:
     text = "request failed with status 429\n"
     assert _summarise_stderr(text) == "rate limit hit; submit the text again later"

@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 
 from phrase_gym.coach.claude_cli import ClaudeCli
 from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
+from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.preparation import CardPreparer, PreparationError
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
 
@@ -49,13 +50,16 @@ class CoachApi:
             return json.load(response)
 
 
-CLI_CHOICES = ("claude", "codex")
+CLI_CHOICES = ("claude", "codex", "gemini")
 
 
 def configured_preparer(choice: str) -> CardPreparer:
     if choice == "codex":
         codex = CodexCli(coach_workspace(), os.environ.get("PHRASE_GYM_CODEX", "codex"))
         return CardPreparer(codex, codex.attempts)
+    if choice == "gemini":
+        gemini = GeminiCli(os.environ.get("PHRASE_GYM_AGY", "agy"))
+        return CardPreparer(gemini, gemini.attempts)
     claude = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"))
     return CardPreparer(claude, claude.attempts)
 

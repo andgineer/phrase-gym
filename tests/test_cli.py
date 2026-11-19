@@ -18,7 +18,10 @@ def test_run_dispatches_loopback_and_data_dir(monkeypatch, tmp_path):
     ]
 
 
-@pytest.mark.parametrize(("options", "selected"), [([], "claude"), (["--cli", "codex"], "codex")])
+@pytest.mark.parametrize(
+    ("options", "selected"),
+    [([], "claude"), (["--cli", "codex"], "codex"), (["--cli", "gemini"], "gemini")],
+)
 def test_coach_dispatches_to_separate_api_worker_with_the_chosen_cli(
     monkeypatch, options, selected
 ):
@@ -34,10 +37,11 @@ def test_coach_dispatches_to_separate_api_worker_with_the_chosen_cli(
 
 
 def test_coach_refuses_an_unknown_cli(monkeypatch, capsys):
-    monkeypatch.setattr(sys, "argv", ["phrase-gym", "coach", "--cli", "gemini"])
+    monkeypatch.setattr(cli, "run_coach", lambda *args, **kwargs: pytest.fail("Unexpected worker"))
+    monkeypatch.setattr(sys, "argv", ["phrase-gym", "coach", "--cli", "unsupported"])
     with pytest.raises(SystemExit):
         cli.main()
-    assert "invalid choice: 'gemini'" in capsys.readouterr().err
+    assert "invalid choice: 'unsupported'" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("command", ["install-coach", "uninstall-coach", "deploy"])

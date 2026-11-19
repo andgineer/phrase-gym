@@ -9,7 +9,11 @@ from typing import Any
 
 from platformdirs import user_cache_path
 
-from phrase_gym.coach.agents.config import _DEFAULT_AGENT_API_KEY_VARS, _DEFAULT_CODEX_CMD
+from phrase_gym.coach.agents.config import (
+    _DEFAULT_AGENT_API_KEY_VARS,
+    _DEFAULT_CODEX_CMD,
+    CODEX_MODEL,
+)
 from phrase_gym.coach.cli_steps import (
     STEP_TIMEOUT,
     CliError,
@@ -67,6 +71,7 @@ class CodexCli:
 
     def template_values(self, attempt: Path, step: str) -> dict[str, str | Path]:
         return {
+            "model": CODEX_MODEL,
             "default_permissions": shlex.quote(f'default_permissions="{PROFILE}"'),
             "permission_profile": shlex.quote(permission_profile(self.workspace, attempt)),
             "schema_file": attempt / f"{step}-schema.json",
