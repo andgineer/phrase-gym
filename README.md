@@ -5,18 +5,19 @@
 | Name                                              |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/phrase\_gym/\_\_about\_\_.py                  |        1 |        0 |    100% |           |
-| src/phrase\_gym/coach/agents/ai\_agent.py         |      114 |        8 |     93% |20-21, 57, 131-132, 141, 223-224 |
+| src/phrase\_gym/coach/agents/ai\_agent.py         |      114 |        8 |     93% |20-21, 57, 133-134, 143, 224-225 |
 | src/phrase\_gym/coach/agents/command\_template.py |       72 |       14 |     81% |18, 29, 41-42, 49, 66-67, 86, 88, 92, 95, 106-107, 109 |
-| src/phrase\_gym/coach/agents/config.py            |        4 |        0 |    100% |           |
+| src/phrase\_gym/coach/agents/config.py            |        8 |        0 |    100% |           |
 | src/phrase\_gym/coach/agents/subprocess.py        |       94 |       22 |     77% |119-134, 137-146, 149-151, 157-158, 174, 179-180, 194-195, 198-203 |
 | src/phrase\_gym/coach/bounded\_process.py         |       46 |        3 |     93% | 28, 79-80 |
 | src/phrase\_gym/coach/card\_checks.py             |       53 |        1 |     98% |        64 |
-| src/phrase\_gym/coach/claude\_cli.py              |       42 |        4 |     90% |66-67, 79-80 |
-| src/phrase\_gym/coach/cli\_steps.py               |       40 |        2 |     95% |    69, 75 |
-| src/phrase\_gym/coach/codex\_cli.py               |       47 |        1 |     98% |       100 |
+| src/phrase\_gym/coach/claude\_cli.py              |       33 |        2 |     94% |     68-69 |
+| src/phrase\_gym/coach/cli\_steps.py               |       52 |        2 |     96% |    86, 92 |
+| src/phrase\_gym/coach/codex\_cli.py               |       47 |        1 |     98% |       105 |
 | src/phrase\_gym/coach/companion\_checks.py        |       50 |        0 |    100% |           |
+| src/phrase\_gym/coach/gemini\_cli.py              |       76 |        6 |     92% |59-60, 123-124, 140-141 |
 | src/phrase\_gym/coach/hint\_checks.py             |      106 |        1 |     99% |        57 |
-| src/phrase\_gym/coach/main.py                     |       82 |       31 |     62% |41-49, 56-60, 74-84, 90, 101, 113-125 |
+| src/phrase\_gym/coach/main.py                     |       86 |       34 |     60% |42-50, 57-64, 78-88, 94, 105, 117-129 |
 | src/phrase\_gym/coach/preparation.py              |       73 |        2 |     97% |    61, 68 |
 | src/phrase\_gym/coach/speech.py                   |       86 |        8 |     91% |97, 113, 119, 134, 157-158, 164-165 |
 | src/phrase\_gym/server/allowance.py               |       24 |        0 |    100% |           |
@@ -68,7 +69,7 @@
 | src/phrase\_gym/server/storage.py                 |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                  |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py           |       51 |        0 |    100% |           |
-| **TOTAL**                                         | **2781** |  **146** | **95%** |           |
+| **TOTAL**                                         | **2868** |  **153** | **95%** |           |
 
 
 ## Setup coverage badge
