@@ -173,6 +173,7 @@ test('previous card review shows the saved grade or skip without advancing pract
   await expect(previous).toBeDisabled()
   await dock.getByRole('button', { name: 'Good', exact: true }).tap()
 
+  await expect(phrase).toHaveCount(0)
   await revealAnswer(page, true)
   const second = await phrase.innerText()
   const boxes = await dock.getByRole('button').evaluateAll((buttons) =>
@@ -203,6 +204,7 @@ test('previous card review shows the saved grade or skip without advancing pract
   expect(await totals()).toEqual(graded)
 
   await dock.getByRole('button', { name: 'Skip', exact: true }).tap()
+  await expect(phrase).toHaveCount(0)
   await revealAnswer(page, true)
   await previous.tap()
   await expect(review.getByRole('heading', { name: second })).toBeVisible()
