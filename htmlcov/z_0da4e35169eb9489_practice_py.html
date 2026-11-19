@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_0da4e35169eb9489_recordings_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-19 09:53 +0000
+            created at 2026-11-19 10:24 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -91,11 +91,11 @@
     <p class="run"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="key">from</span> <span class="nam">phrase_gym</span><span class="op">.</span><span class="nam">server</span><span class="op">.</span><span class="nam">extra</span> <span class="key">import</span> <span class="nam">ExtraPractice</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">phrase_gym</span><span class="op">.</span><span class="nam">server</span><span class="op">.</span><span class="nam">phrase_practice</span> <span class="key">import</span> <span class="nam">PhrasePractice</span><span class="op">,</span> <span class="nam">UnknownPhraseError</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">phrase_gym</span><span class="op">.</span><span class="nam">server</span><span class="op">.</span><span class="nam">practice_contracts</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">    <span class="nam">CompletionReceipt</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">CompletionRequest</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="nam">CompletionResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="nam">ExtraResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">GradeSkippedRequest</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">    <span class="nam">CompletionRequest</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">CompletionResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="nam">ExtraResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="nam">GradeSkippedRequest</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">GradeSkippedResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">    <span class="nam">OpenDaily</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">    <span class="nam">OpenExtra</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="nam">OpenPhrasePractice</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -181,7 +181,7 @@
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">            <span class="key">return</span> <span class="nam">completion</span><span class="op">.</span><span class="nam">complete</span><span class="op">(</span><span class="nam">request</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="op">@</span><span class="nam">router</span><span class="op">.</span><span class="nam">post</span><span class="op">(</span><span class="str">&quot;/grade-skipped&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">    <span class="key">def</span> <span class="nam">grade_skipped</span><span class="op">(</span><span class="nam">request</span><span class="op">:</span> <span class="nam">GradeSkippedRequest</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">CompletionReceipt</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">    <span class="key">def</span> <span class="nam">grade_skipped</span><span class="op">(</span><span class="nam">request</span><span class="op">:</span> <span class="nam">GradeSkippedRequest</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">GradeSkippedResult</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">        <span class="key">with</span> <span class="nam">conflicts</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">            <span class="key">return</span> <span class="nam">completion</span><span class="op">.</span><span class="nam">grade_skipped</span><span class="op">(</span><span class="nam">request</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -195,7 +195,7 @@
             <a class="nav" href="z_0da4e35169eb9489_recordings_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-19 09:53 +0000
+            created at 2026-11-19 10:24 +0000
         </p>
     </div>
 </footer>
