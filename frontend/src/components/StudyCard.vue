@@ -153,7 +153,7 @@ const progressValue = computed(() => {
             :disabled="busy || requesting || processing"
             @click="emit('complete', 'skipped')"
           >
-            <span aria-hidden="true">→</span>
+            <span class="skip-chevron" aria-hidden="true" />
           </button>
         </div>
       </div>

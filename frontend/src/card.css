@@ -114,7 +114,16 @@
   padding: 5px 2px;
 }
 .skip-rating {
-  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+}
+.skip-chevron {
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  border-top-right-radius: 1px;
+  transform: translateX(-2px) rotate(45deg);
 }
 .recording-history-dialog {
   bottom: auto;
