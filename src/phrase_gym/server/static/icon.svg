@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#f7f4ec"/><g fill="#294f43"><circle cx="32.000" cy="13.000" r="2.5"/><circle cx="41.500" cy="15.546" r="2.5"/><circle cx="48.454" cy="22.500" r="2.5"/><circle cx="51.000" cy="32.000" r="2.5"/><circle cx="48.454" cy="41.500" r="2.5"/><circle cx="41.500" cy="48.454" r="2.5"/><circle cx="32.000" cy="51.000" r="2.5"/><circle cx="22.500" cy="48.454" r="2.5"/><circle cx="15.546" cy="41.500" r="2.5"/><circle cx="13.000" cy="32.000" r="2.5"/><circle cx="15.546" cy="22.500" r="2.5"/><circle cx="22.500" cy="15.546" r="2.5"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#263C57"/>
+  <g transform="translate(214 211) scale(0.78)" fill="#F7F0DF">
+    <rect x="-49" y="-112" width="98" height="155" rx="49"/>
+    <path d="M-79-5v11a79 79 0 0 0 158 0V-5M0 85v47m-41 0h82" fill="none" stroke="#F7F0DF" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M116 390h89v-37h91v-40h88" fill="none" stroke="#B8D6E1" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
