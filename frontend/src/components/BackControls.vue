@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AudioIcon from './AudioIcon.vue'
-defineProps<{ disabled: boolean; hasTake: boolean; historyOpen: boolean }>()
-defineEmits<{ reference: []; mine: []; compare: []; history: [] }>()
+defineProps<{ disabled: boolean; hasTake: boolean }>()
+defineEmits<{ reference: []; mine: []; compare: [] }>()
 </script>
 <template>
   <div class="card-controls back-controls">
@@ -13,9 +13,6 @@ defineEmits<{ reference: []; mine: []; compare: []; history: [] }>()
     </button>
     <button :disabled="disabled || !hasTake" @click="$emit('compare')">
       <AudioIcon name="compare" /> Compare
-    </button>
-    <button aria-label="Recording history" :aria-expanded="historyOpen" @click="$emit('history')">
-      <AudioIcon name="history" /><span aria-hidden="true">{{ historyOpen ? '▴' : '▾' }}</span>
     </button>
   </div>
 </template>

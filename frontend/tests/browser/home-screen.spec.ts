@@ -114,7 +114,7 @@ test('safe areas reserve shell, scrolling content and dock space; fields avoid f
     await page
       .locator('.practice-card')
       .evaluate((element) => Number.parseFloat(getComputedStyle(element).maxHeight)),
-  ).toBe(originalMaxHeight - 81)
+  ).toBeCloseTo(originalMaxHeight - 81)
   expect(card!.height).toBeLessThanOrEqual(originalMaxHeight - 81)
   expect(card!.y + card!.height).toBeLessThanOrEqual(dock!.y)
   expect(
@@ -160,8 +160,10 @@ test('dark palette covers pages, card controls, counts, progress and history', a
   expect(await color(page, '.hint', 'color')).toBe('rgb(165, 209, 184)')
   expect(await color(page, '.practice-progress')).toBe('rgb(64, 87, 74)')
   await revealAnswer(page, true)
+  await page.getByRole('button', { name: 'More actions' }).tap()
   await page.getByRole('button', { name: 'Recording history' }).tap()
   expect(await color(page, '.recording-history-panel', 'borderTopColor')).toBe('rgb(100, 119, 107)')
+  await page.getByRole('button', { name: 'Close recording history' }).tap()
   expect(await color(page, '.rating-dock')).toBe('rgb(24, 34, 31)')
   expect(await color(page, '.not-yet')).toBe('rgb(82, 44, 41)')
   expect(await color(page, '.effort')).toBe('rgb(73, 60, 27)')

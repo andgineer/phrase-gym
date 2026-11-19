@@ -63,13 +63,20 @@ test('phone card keeps controls still across reveal, hint, history and explanati
   const backBounds = await fixedBounds()
   const ratings = page.locator('.rating-dock')
   const dock = await ratings.boundingBox()
+  const grade = (await ratings.getByRole('button', { name: 'Good', exact: true }).boundingBox())!
+  const skip = (await ratings.getByRole('button', { name: 'Skip', exact: true }).boundingBox())!
+  expect(skip.y).toBe(grade.y)
+  expect(skip.height).toBe(grade.height)
+  expect(skip.width).toBe(44)
+  expect(skip.width).toBeLessThan(grade.width)
+  expect(skip.x).toBeGreaterThan(grade.x + grade.width)
+  await page.getByRole('button', { name: 'More actions' }).tap()
   await page.getByRole('button', { name: 'Recording history' }).tap()
-  await expect(page.getByRole('region', { name: 'Saved recordings' })).toBeVisible()
-  expect(await mic.boundingBox()).toEqual(front)
-  expect(await row.boundingBox()).toEqual(backControls)
+  const history = page.getByRole('dialog', { name: 'Recording history' })
+  await expect(history.getByRole('region', { name: 'Saved recordings' })).toBeVisible()
   expect(await fixedBounds()).toEqual(backBounds)
-  expect(await ratings.boundingBox()).toEqual(dock)
-  await page.getByRole('button', { name: 'Recording history' }).tap()
+  await history.getByRole('button', { name: 'Close recording history' }).tap()
+  await expect(history).toHaveCount(0)
   const explanation = page.getByRole('button', { name: 'More explanation' })
   const link = await explanation.boundingBox()
   await explanation.tap()
@@ -79,9 +86,12 @@ test('phone card keeps controls still across reveal, hint, history and explanati
   expect(await fixedBounds()).toEqual(backBounds)
   expect(await ratings.boundingBox()).toEqual(dock)
   const content = page.locator('.card-content')
-  expect(await content.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
-    true,
-  )
+  const contentSize = await content.evaluate(({ clientHeight, scrollHeight }) => ({
+    clientHeight,
+    scrollHeight,
+  }))
+  expect(contentSize.clientHeight).toBeGreaterThan(320)
+  expect(contentSize.scrollHeight).toBeGreaterThan(contentSize.clientHeight)
   await content.evaluate((element) => {
     element.scrollTop = 100
   })

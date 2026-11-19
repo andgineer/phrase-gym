@@ -384,7 +384,6 @@ test('recovers complete pending takes and keeps comparison and completion respon
   for (const index of [0, 1]) {
     await revealAnswer(page)
     rated.push(await page.locator('article.study').getByTestId('practice-phrase').innerText())
-    await expect(page.getByText('How was your answer before you saw the phrase?')).toBeVisible()
     await rateNew(page, false, index !== 0)
     if (index === 0) {
       await expect.poll(() => completions).toBe(1)

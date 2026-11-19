@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 defineProps<{ disabled: boolean }>()
-const emit = defineEmits<{ remove: [] }>()
+const emit = defineEmits<{ remove: []; history: [] }>()
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 const toggle = ref<HTMLButtonElement | null>(null)
-function remove() {
+function choose(action: 'history' | 'remove') {
   open.value = false
-  emit('remove')
+  toggle.value?.focus()
+  if (action === 'history') emit('history')
+  else emit('remove')
 }
 function outside(event: PointerEvent) {
   if (!root.value?.contains(event.target as Node)) open.value = false
@@ -39,7 +41,8 @@ onUnmounted(() => {
       ⋯
     </button>
     <div v-if="open" class="card-menu-panel">
-      <button class="danger" @click="remove">Delete phrase…</button>
+      <button aria-haspopup="dialog" @click="choose('history')">Recording history</button>
+      <button class="danger" @click="choose('remove')">Delete phrase…</button>
     </div>
   </div>
 </template>

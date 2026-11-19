@@ -18,6 +18,8 @@
   z-index: 12;
   top: 100%;
   right: 0;
+  display: grid;
+  gap: 6px;
   padding: 6px;
   border-radius: 10px;
   background: #fffef9;
@@ -38,15 +40,11 @@
 }
 .card-controls {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin: 0 0 12px;
 }
-.front-controls {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.back-controls {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
+
 .card-controls button {
   display: flex;
   gap: 4px;
@@ -104,14 +102,10 @@
   padding: 8px 0 calc(12px + var(--safe-bottom));
   box-shadow: 0 -12px 18px #f7f4ec;
 }
-.rating-dock p {
-  margin: 0 0 6px;
-  font-size: 13px;
-  text-align: center;
-}
 .rating-dock .ratings {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 44px;
+  align-items: stretch;
   gap: 6px;
   margin: 0;
 }
@@ -120,12 +114,25 @@
   padding: 5px 2px;
 }
 .skip-rating {
-  display: block;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  padding: 4px;
-  margin-top: 4px;
+  font-size: 1.25rem;
+}
+.recording-history-dialog {
+  bottom: auto;
+  max-height: calc(90dvh - var(--safe-top) - var(--safe-bottom));
+  top: calc(5dvh + var(--safe-top));
+  left: max(calc(1rem + var(--safe-left)), calc((100vw - 38rem) / 2));
+  right: max(calc(1rem + var(--safe-right)), calc((100vw - 38rem) / 2));
+}
+.recording-history-dialog header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.recording-history-dialog h2 {
+  margin: 0;
 }
 .has-ratings {
   padding-bottom: 0;
@@ -176,7 +183,7 @@
 .has-ratings .practice-card {
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - 380px - var(--safe-top) - var(--safe-bottom));
+  max-height: calc(100dvh - 315px - var(--safe-top) - var(--safe-bottom));
   min-height: 230px;
 }
 .has-ratings .card-controls,
@@ -196,11 +203,6 @@
   background: #e0e2dc;
   color: #59645d;
   border-color: transparent;
-}
-@media (max-width: 540px) {
-  .back-controls button:nth-child(3) .audio-icon {
-    display: none;
-  }
 }
 @media (prefers-color-scheme: dark) {
   .start-actions button:disabled {

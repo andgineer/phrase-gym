@@ -3,7 +3,7 @@ import PhraseExplanation from './PhraseExplanation.vue'
 import FrontControls from './FrontControls.vue'
 import BackControls from './BackControls.vue'
 import CardMenu from './CardMenu.vue'
-import SavedHistoryPanel from './SavedHistoryPanel.vue'
+import RecordingHistoryDialog from './RecordingHistoryDialog.vue'
 import { computed, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
 import { returnDescription, returnSpan } from '../returnSpan'
@@ -69,7 +69,12 @@ const progressValue = computed(() => {
   <section class="practice-panel" :class="{ 'has-ratings': !front }">
     <div class="session-toolbar">
       <span data-testid="mode-line">{{ progressLine(card, progress) }}</span>
-      <CardMenu v-if="!front" :disabled="busy || audioBusy" @remove="emit('remove')" />
+      <CardMenu
+        v-if="!front"
+        :disabled="busy || audioBusy"
+        @history="historyOpen = true"
+        @remove="emit('remove')"
+      />
       <span v-else class="menu-space" />
     </div>
     <div class="practice-progress" aria-hidden="true">
@@ -88,11 +93,9 @@ const progressValue = computed(() => {
         v-else
         :disabled="audioBusy"
         :has-take="hasTake"
-        :history-open="historyOpen"
         @reference="emit('playPhrase')"
         @mine="emit('playMine')"
         @compare="emit('compare')"
-        @history="historyOpen = !historyOpen"
       />
       <MicrophoneButton
         :capturing="capturing"
@@ -102,12 +105,6 @@ const progressValue = computed(() => {
         @control="emit('control')"
       />
       <div class="card-content">
-        <SavedHistoryPanel
-          v-if="!front && historyOpen"
-          :phrase-id="card.phrase_id"
-          :disabled="audioBusy"
-          :play="play"
-        />
         <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
         <p v-if="pendingTakes" role="status">
           {{ pendingTakes }} take(s) waiting to save.
@@ -135,7 +132,6 @@ const progressValue = computed(() => {
         </template>
       </div>
       <div v-if="!front" class="rating-dock">
-        <p>How was your answer before you saw the phrase?</p>
         <div class="ratings">
           <button
             v-for="[outcome, label, style] in ratings"
@@ -150,15 +146,24 @@ const progressValue = computed(() => {
             }}</span
             >{{ label }}
           </button>
+          <button
+            class="skip-rating"
+            aria-label="Skip"
+            title="Skip"
+            :disabled="busy || requesting || processing"
+            @click="emit('complete', 'skipped')"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
-        <button
-          class="skip-rating"
-          :disabled="busy || requesting || processing"
-          @click="emit('complete', 'skipped')"
-        >
-          Skip
-        </button>
       </div>
     </article>
+    <RecordingHistoryDialog
+      v-if="!front && historyOpen"
+      :phrase-id="card.phrase_id"
+      :disabled="audioBusy"
+      :play="play"
+      @close="historyOpen = false"
+    />
   </section>
 </template>

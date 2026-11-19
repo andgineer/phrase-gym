@@ -6,7 +6,7 @@ The objective is easier access to useful language when speaking. This MVP loop m
 
 Design practice controls for a mobile phone screen. Keep visible button labels short, preferably one clear word; use a familiar icon to convey the action when useful. Reference playback must identify the reference audio and remain distinguishable from the learner's recording. Choose compact wording rather than expanding labels into explanatory phrases; fuller accessible names can clarify the action without taking screen space.
 
-The Daily entry button is labelled **Start**. Card controls sit above the text in fixed positions on both sides: **Hint / New cue / Reveal** on the front, **Ref / Mine / Compare / Recording history** on the back, then a full-width microphone in the same position. New cue, Mine and Compare keep their slots when disabled. Capture state appears inside the microphone. Ratings and Skip are docked at the bottom while card content scrolls; hints, history and explanations never move these controls. The back-side **More actions** menu opens **Delete phrase…** and closes on Escape or an outside tap.
+The Daily entry button is labelled **Start**. Card controls sit above the text in fixed positions on both sides: **Hint / New cue / Reveal** on the front, **Ref / Mine / Compare** on the back, then a full-width microphone in the same position. New cue, Mine and Compare keep their slots when disabled. Capture state appears inside the microphone. Ratings share a bottom row with the **Skip** arrow while card content scrolls. Hints, history and explanations never move these controls. The back-side **More actions** menu offers **Recording history** and **Delete phrase…** and closes on Escape or an outside tap.
 
 ## New phrases
 
