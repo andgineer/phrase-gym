@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowReactive, watch } from 'vue'
 import { takeTransfers } from '../takeTransfers'
 import type { StoredTake } from '../practiceTypes'
 import type { Outcome, Recording } from '../studyTypes'
@@ -10,29 +10,44 @@ export function usePracticeSession() {
   const practice = usePractice()
   const playback = usePlayback()
   const card = computed(() => practice.view.value.card)
-  // Takes of the open appearance stay playable here before their background upload finishes.
-  const localTakes = ref<StoredTake[]>([])
+  const reviewIndex = ref<number | null>(null)
+  const displayedCard = computed(() => {
+    const index = reviewIndex.value
+    return (index === null ? null : practice.reviewedCards.value[index]?.card) ?? card.value
+  })
+  // Keep just the latest local take per appearance while its review is available.
+  const localTakes = shallowReactive(new Map<string, StoredTake>())
   const completing = ref(false)
   let mediaScope = 0
   let compareOnStop: { scope: number; reference: boolean } | null = null
   // A learner who has listened with Ref on this card needs only their own takes replayed.
   let referenceHeard = false
 
-  // Any card change, including a reconcile after a conflict, cancels the old phrase's media.
+  watch(practice.reviewedCards, () => {
+    reviewIndex.value = null
+    localTakes.clear()
+  })
   watch(
     () => card.value?.view_token,
+    (token) => {
+      reviewIndex.value = null
+      if (!token) localTakes.clear()
+    },
+  )
+  watch(
+    () => displayedCard.value?.view_token,
     () => {
       mediaScope++
       compareOnStop = null
       referenceHeard = false
       playback.stop()
-      localTakes.value = []
     },
+    { flush: 'sync' },
   )
 
   const capture = useCapture({
     context: async () => {
-      const current = card.value
+      const current = displayedCard.value
       if (!current) throw new Error('No practice card is open')
       const { phrase_id, view_token, mode, kind, cue, hint } = current
       // IndexedDB cannot clone the card's reactive cue proxy.
@@ -40,9 +55,9 @@ export function usePracticeSession() {
     },
     retain: takeTransfers.retain,
     finished: async (take: StoredTake) => {
-      const current = card.value
+      const current = displayedCard.value
       const sameView = current?.view_token === take.view_token
-      if (sameView) localTakes.value = [...localTakes.value, take]
+      if (sameView) localTakes.set(take.view_token, take)
       const comparison = compareOnStop
       const shouldCompare =
         take.complete && comparison?.scope === mediaScope && sameView && !document.hidden
@@ -50,8 +65,8 @@ export function usePracticeSession() {
       compareOnStop = null
       void takeTransfers.flush()
       if (!shouldCompare) return
-      if (!current.revealed) await practice.reveal()
-      const revealed = card.value
+      if (!current.revealed && reviewIndex.value === null) await practice.reveal()
+      const revealed = displayedCard.value
       // Reveal can finish after navigation or cancellation; its old take must stay silent.
       if (
         scope === mediaScope &&
@@ -67,12 +82,15 @@ export function usePracticeSession() {
     failure: async () => {},
   })
 
-  const latestTake = computed<StoredTake | Recording | null>(
-    () => localTakes.value.at(-1) ?? card.value?.recordings.at(-1) ?? null,
-  )
+  const latestTake = computed<StoredTake | Recording | null>(() => {
+    const current = displayedCard.value
+    return current
+      ? (localTakes.get(current.view_token) ?? current.recordings.at(-1) ?? null)
+      : null
+  })
 
   function playReference() {
-    const reference = card.value?.answer?.reference_url
+    const reference = displayedCard.value?.answer?.reference_url
     if (!reference) return
     referenceHeard = true
     return playback.play(reference)
@@ -87,10 +105,23 @@ export function usePracticeSession() {
 
   function compareMine() {
     const take = latestTake.value
-    const reference = card.value?.answer?.reference_url
+    const reference = displayedCard.value?.answer?.reference_url
     if (!take || !reference) return
     if ('audio' in take) return playback.compareTake(take, reference)
     return playback.compare(take, reference)
+  }
+
+  function browse(index: number | null) {
+    if (
+      completing.value ||
+      practice.busy.value ||
+      capture.capturing.value ||
+      capture.requesting.value ||
+      capture.processing.value
+    )
+      return
+    capture.error.value = ''
+    reviewIndex.value = index
   }
 
   async function settleMedia() {
@@ -103,7 +134,7 @@ export function usePracticeSession() {
 
   async function complete(outcome: Outcome) {
     const target = card.value?.view_token
-    if (completing.value || practice.busy.value || !target) return
+    if (reviewIndex.value !== null || completing.value || practice.busy.value || !target) return
     completing.value = true
     try {
       await settleMedia()
@@ -137,6 +168,8 @@ export function usePracticeSession() {
     playback,
     capture,
     completing,
+    reviewIndex,
+    browse,
     latestTake,
     playReference,
     playMine,

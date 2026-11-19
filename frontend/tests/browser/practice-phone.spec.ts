@@ -204,7 +204,7 @@ test('session navigation lets a skipped card be graded without advancing the cur
   await expect(phrase).toBeFocused()
   await expect(page.getByTestId('mode-line')).toHaveText('1 / 5 new')
   await expect(page.getByRole('button', { name: 'Ref', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Record a take' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Record a take' })).toBeEnabled()
   await expect(dialog).toHaveCount(0)
   await expect(dock.getByRole('button', { name: 'Good', pressed: true })).toBeDisabled()
   await expect(dock.getByRole('button', { name: 'Again', pressed: false })).toBeDisabled()

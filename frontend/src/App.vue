@@ -116,8 +116,8 @@ onMounted(initialize)
       <StudyCard
         :card="card"
         :reviewed-cards="practice.reviewedCards.value"
+        :review-index="session.reviewIndex.value"
         :play="playback.play"
-        :compare-saved="playback.compare"
         :progress="practice.view.value.progress"
         :details-open="practice.view.value.detailsOpen"
         :capturing="capture.capturing.value"
@@ -132,7 +132,7 @@ onMounted(initialize)
         :practice-error="practice.error.value"
         :can-retry="practice.pending.value !== null"
         @control="session.controlAudio"
-        @stop-playback="playback.stop"
+        @browse="session.browse"
         @show="practice.reveal()"
         @details="practice.toggleDetails()"
         @new-cue="practice.newCue"

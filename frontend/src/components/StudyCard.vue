@@ -8,12 +8,13 @@ import SavedHistoryPanel from './SavedHistoryPanel.vue'
 import RatingButtons from './RatingButtons.vue'
 import { computed, nextTick, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
-import type { Card, Outcome, Progress, Rating, Recording, ReviewedCard } from '../studyTypes'
+import type { Card, Outcome, Progress, Rating, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
   card: Card
   reviewedCards: ReviewedCard[]
+  reviewIndex: number | null
   progress: Progress | null
   detailsOpen: boolean
   capturing: boolean
@@ -27,7 +28,6 @@ const props = defineProps<{
   takeError: string
   practiceError: string
   play: (url: string) => Promise<void>
-  compareSaved: (take: Recording, referenceUrl?: string) => Promise<void>
   canRetry: boolean
 }>()
 const emit = defineEmits<{
@@ -44,14 +44,13 @@ const emit = defineEmits<{
   compare: []
   retrySave: []
   retryCompletion: []
-  stopPlayback: []
+  browse: [index: number | null]
 }>()
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
 const historyOpen = ref(false)
-const reviewIndex = ref<number | null>(null)
 const previousDetailsOpen = ref(false)
 const reviewed = computed(() =>
-  reviewIndex.value === null ? null : props.reviewedCards[reviewIndex.value],
+  props.reviewIndex === null ? null : props.reviewedCards[props.reviewIndex],
 )
 const savedGrade = computed(() =>
   reviewed.value?.outcome === 'skipped' ? undefined : reviewed.value?.outcome,
@@ -60,21 +59,19 @@ const activeCard = computed(() => reviewed.value?.card ?? props.card)
 const activeProgress = computed(() => (reviewed.value ? reviewed.value.progress : props.progress))
 const front = computed(() => !activeCard.value.revealed)
 const showDock = computed(() => !front.value || props.reviewedCards.length > 0)
-const previousIndex = computed(() => (reviewIndex.value ?? props.reviewedCards.length) - 1)
-const savedTake = computed(() => reviewed.value?.card.recordings.at(-1))
+const previousIndex = computed(() => (props.reviewIndex ?? props.reviewedCards.length) - 1)
 const phraseHeading = ref<HTMLElement | null>(null)
 
 async function browse(index: number | null) {
-  emit('stopPlayback')
   historyOpen.value = false
   previousDetailsOpen.value = false
-  reviewIndex.value = index
+  emit('browse', index)
   await nextTick()
   phraseHeading.value?.focus()
 }
 
 function forward() {
-  const current = reviewIndex.value
+  const current = props.reviewIndex
   if (current === null) return emit('complete', 'skipped')
   const next = current + 1
   void browse(next < props.reviewedCards.length ? next : null)
@@ -86,28 +83,11 @@ function grade(rating: Rating) {
     emit('gradeSkipped', reviewed.value.completionId, rating)
 }
 
-function playReference() {
-  if (!reviewed.value) return emit('playPhrase')
-  const url = activeCard.value.answer?.reference_url
-  if (url) void props.play(url)
-}
-
-function playMine() {
-  if (!reviewed.value) return emit('playMine')
-  if (savedTake.value) void props.play(savedTake.value.url)
-}
-
-function compare() {
-  if (!reviewed.value) return emit('compare')
-  if (savedTake.value)
-    void props.compareSaved(savedTake.value, activeCard.value.answer?.reference_url)
-}
-
 watch(
   () => props.card.view_token,
   () => {
     historyOpen.value = false
-    reviewIndex.value = null
+    previousDetailsOpen.value = false
   },
 )
 const progressValue = computed(() => {
@@ -148,31 +128,25 @@ const progressValue = computed(() => {
       <BackControls
         v-else
         :disabled="audioBusy"
-        :has-take="reviewed ? !!savedTake : hasTake"
-        @reference="playReference"
-        @mine="playMine"
-        @compare="compare"
+        :has-take="hasTake"
+        @reference="emit('playPhrase')"
+        @mine="emit('playMine')"
+        @compare="emit('compare')"
       />
       <MicrophoneButton
         :capturing="capturing"
         :requesting="requesting"
         :playing="playing"
-        :disabled="
-          (reviewed && !playing) ||
-          (processing && !playing) ||
-          (busy && !capturing && !requesting && !playing)
-        "
-        @control="reviewed ? emit('stopPlayback') : emit('control')"
+        :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
+        @control="emit('control')"
       />
       <div class="card-content" :key="activeCard.view_token">
-        <template v-if="!reviewed">
-          <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
-          <p v-if="pendingTakes" role="status">
-            {{ pendingTakes }} take(s) waiting to save.
-            <button @click="emit('retrySave')">Retry save</button>
-          </p>
-          <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
-        </template>
+        <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
+        <p v-if="pendingTakes" role="status">
+          {{ pendingTakes }} take(s) waiting to save.
+          <button @click="emit('retrySave')">Retry save</button>
+        </p>
+        <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
         <p v-if="practiceError" role="alert" class="error">
           {{ practiceError }}
           <button v-if="canRetry && !reviewed" :disabled="busy" @click="emit('retryCompletion')">
@@ -221,7 +195,7 @@ const progressValue = computed(() => {
             class="rating-navigation"
             :aria-label="reviewed ? 'Next card' : 'Skip'"
             :title="reviewed ? 'Next card' : 'Skip'"
-            :disabled="busy || (!reviewed && (requesting || processing))"
+            :disabled="busy || requesting || processing || (!!reviewed && capturing)"
             @click="forward"
           >
             <span class="rating-chevron" aria-hidden="true" />
