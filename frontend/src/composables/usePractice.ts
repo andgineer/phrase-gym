@@ -16,6 +16,7 @@ import type {
   ExtraResult,
   Outcome,
   PracticeState,
+  Rating,
   ReviewedCard,
 } from '../studyTypes'
 
@@ -26,6 +27,7 @@ export function usePractice() {
   const view = ref(initialView())
   const reviewedCards = ref<ReviewedCard[]>([])
   const busy = ref(false)
+  const gradingSkipped = ref(false)
   const error = ref('')
   const pending = ref<PendingCompletion | null>(null)
   const pendingExtra = ref<PendingExtra | null>(null)
@@ -179,7 +181,12 @@ export function usePractice() {
         result.receipt.completion_id === request.completion_id &&
         outcome
       ) {
-        reviewedCards.value.push({ card: completed.card, progress: completed.progress, outcome })
+        reviewedCards.value.push({
+          card: completed.card,
+          progress: completed.progress,
+          outcome,
+          completionId: request.completion_id,
+        })
       }
     } catch (cause) {
       if (mine !== epoch) return
@@ -193,8 +200,28 @@ export function usePractice() {
     }
   }
 
+  async function gradeSkipped(completionId: string, rating: Rating) {
+    const skipped = reviewedCards.value.find((card) => card.completionId === completionId)
+    if (busy.value || gradingSkipped.value || skipped?.outcome !== 'skipped') return
+    const mine = epoch
+    gradingSkipped.value = true
+    error.value = ''
+    try {
+      const receipt = await post<CompletionResult['receipt']>('grade-skipped', {
+        completion_id: completionId,
+        rating,
+      })
+      if (mine === epoch && receipt.rating) skipped.outcome = receipt.rating
+    } catch (cause) {
+      if (mine === epoch) error.value = String(cause)
+    } finally {
+      if (mine === epoch) gradingSkipped.value = false
+    }
+  }
+
   function closeCard() {
     epoch++
+    gradingSkipped.value = false
     view.value = initialView()
     reviewedCards.value = []
     pending.value = null
@@ -214,6 +241,7 @@ export function usePractice() {
     view,
     reviewedCards,
     busy,
+    gradingSkipped,
     error,
     pending,
     pendingExtra,
@@ -227,6 +255,7 @@ export function usePractice() {
     toggleDetails: () => (view.value = { ...view.value, detailsOpen: !view.value.detailsOpen }),
     closeCard,
     complete,
+    gradeSkipped,
     retry,
   }
 }

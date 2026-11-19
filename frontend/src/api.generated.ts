@@ -362,6 +362,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/practice/grade-skipped": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grade Skipped */
+        post: operations["grade_skipped_api_practice_grade_skipped_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/practice/hint": {
         parameters: {
             query?: never;
@@ -681,6 +698,16 @@ export interface components {
             /** Replayed */
             replayed: boolean;
             state: components["schemas"]["PracticeState"] | null;
+        };
+        /** GradeSkippedRequest */
+        GradeSkippedRequest: {
+            /** Completion Id */
+            completion_id: string;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "not_yet" | "effort" | "got_it" | "easy";
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -1876,6 +1903,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeFacts"];
+                };
+            };
+        };
+    };
+    grade_skipped_api_practice_grade_skipped_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GradeSkippedRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompletionReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

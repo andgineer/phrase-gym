@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { returnDescription, returnSpan } from '../returnSpan'
-import type { Card, Outcome, Rating } from '../studyTypes'
+import type { Card, Rating } from '../studyTypes'
 
-defineProps<{ disabled: boolean; returnDays?: Card['return_days']; selected?: Outcome }>()
-defineEmits<{ complete: [outcome: Outcome] }>()
+defineProps<{ disabled: boolean; returnDays?: Card['return_days']; selected?: Rating }>()
+defineEmits<{ complete: [outcome: Rating] }>()
 
 const ratings: Array<[Rating, string, string]> = [
   ['not_yet', 'Again', 'not-yet'],

@@ -8,7 +8,7 @@ import SavedHistoryPanel from './SavedHistoryPanel.vue'
 import RatingButtons from './RatingButtons.vue'
 import { computed, nextTick, ref, watch } from 'vue'
 import { progressLine } from '../practiceReducer'
-import type { Card, Outcome, Progress, Recording, ReviewedCard } from '../studyTypes'
+import type { Card, Outcome, Progress, Rating, Recording, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
@@ -37,6 +37,7 @@ const emit = defineEmits<{
   newCue: []
   hint: []
   complete: [outcome: Outcome]
+  gradeSkipped: [completionId: string, rating: Rating]
   remove: []
   playPhrase: []
   playMine: []
@@ -51,6 +52,9 @@ const reviewIndex = ref<number | null>(null)
 const previousDetailsOpen = ref(false)
 const reviewed = computed(() =>
   reviewIndex.value === null ? null : props.reviewedCards[reviewIndex.value],
+)
+const savedGrade = computed(() =>
+  reviewed.value?.outcome === 'skipped' ? undefined : reviewed.value?.outcome,
 )
 const activeCard = computed(() => reviewed.value?.card ?? props.card)
 const activeProgress = computed(() => (reviewed.value ? reviewed.value.progress : props.progress))
@@ -74,6 +78,12 @@ function forward() {
   if (current === null) return emit('complete', 'skipped')
   const next = current + 1
   void browse(next < props.reviewedCards.length ? next : null)
+}
+
+function grade(rating: Rating) {
+  if (!reviewed.value) emit('complete', rating)
+  else if (reviewed.value.outcome === 'skipped')
+    emit('gradeSkipped', reviewed.value.completionId, rating)
 }
 
 function playReference() {
@@ -162,11 +172,13 @@ const progressValue = computed(() => {
             <button @click="emit('retrySave')">Retry save</button>
           </p>
           <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
-          <p v-if="practiceError" role="alert" class="error">
-            {{ practiceError }}
-            <button v-if="canRetry" :disabled="busy" @click="emit('retryCompletion')">Retry</button>
-          </p>
         </template>
+        <p v-if="practiceError" role="alert" class="error">
+          {{ practiceError }}
+          <button v-if="canRetry && !reviewed" :disabled="busy" @click="emit('retryCompletion')">
+            Retry
+          </button>
+        </p>
         <template v-if="front">
           <p ref="phraseHeading" tabindex="-1" class="practice-prompt">{{ card.cue?.situation }}</p>
           <p v-if="card.cue?.partner_line" class="partner-line">“{{ card.cue.partner_line }}”</p>
@@ -199,17 +211,17 @@ const progressValue = computed(() => {
           </button>
           <RatingButtons
             v-if="!front"
-            :disabled="!!reviewed || busy || requesting || processing"
-            :return-days="reviewed ? null : card.return_days"
-            :selected="reviewed?.outcome"
-            @complete="emit('complete', $event)"
+            :disabled="!!savedGrade || busy || requesting || processing"
+            :return-days="savedGrade ? null : activeCard.return_days"
+            :selected="savedGrade"
+            @complete="grade"
           />
           <button
             v-if="!front"
             class="rating-navigation"
             :aria-label="reviewed ? 'Next card' : 'Skip'"
             :title="reviewed ? 'Next card' : 'Skip'"
-            :disabled="!reviewed && (busy || requesting || processing)"
+            :disabled="busy || (!reviewed && (requesting || processing))"
             @click="forward"
           >
             <span class="rating-chevron" aria-hidden="true" />

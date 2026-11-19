@@ -158,7 +158,7 @@ test('Extra reopens two skipped phrases below the five-new allowance', async ({ 
   await expect(page.locator('.practice-prompt')).toBeVisible()
 })
 
-test('previous card review shows the saved grade or skip without advancing practice', async ({
+test('session navigation lets a skipped card be graded without advancing the current card', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 740 })
@@ -218,7 +218,7 @@ test('previous card review shows the saved grade or skip without advancing pract
   await expect(dialog).toHaveCount(0)
   await expect(page.getByText('Skipped without a grade')).toBeVisible()
   await expect(dock.getByRole('button', { pressed: true })).toHaveCount(0)
-  await expect(dock.getByRole('button', { name: 'Good', pressed: false })).toBeDisabled()
+  await expect(dock.getByRole('button', { name: 'Good', exact: true })).toBeEnabled()
   await previous.tap()
   await expect(phrase).toHaveText(first)
   await expect(previous).toBeDisabled()
@@ -226,9 +226,16 @@ test('previous card review shows the saved grade or skip without advancing pract
   await next.tap()
   await expect(phrase).toHaveText(second)
   await expect(page.getByText('Skipped without a grade')).toBeVisible()
+  const currentCue = await current()
+  expect(await totals()).toMatchObject({ completions: 2, got_it: 1, skipped: 1 })
+  await dock.getByRole('button', { name: 'Hard', exact: true }).tap()
+  await expect(dock.getByRole('button', { name: 'Hard', pressed: true })).toBeDisabled()
+  await expect(page.getByText('Skipped without a grade')).toHaveCount(0)
+  await expect(phrase).toHaveText(second)
   await next.tap()
   await expect(phrase).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Reveal', exact: true })).toBeEnabled()
   await expect(page.getByText('Skipped without a grade')).toHaveCount(0)
-  expect(await totals()).toMatchObject({ completions: 2, got_it: 1, skipped: 1 })
+  expect(await current()).toEqual(currentCue)
+  expect(await totals()).toMatchObject({ completions: 2, got_it: 1, effort: 1, skipped: 0 })
 })

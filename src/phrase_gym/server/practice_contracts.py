@@ -73,6 +73,11 @@ class CompletionRequest(ViewAction):
     outcome: Outcome
 
 
+class GradeSkippedRequest(StrictModel):
+    completion_id: OperationId
+    rating: Rating
+
+
 class CompletionReceipt(StrictModel):
     completion_id: str
     phrase_id: str

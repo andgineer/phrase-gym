@@ -215,3 +215,55 @@ def test_ratings_reach_fsrs_and_survive_in_facts(
     assert facts["today"]["new_attempts"] == 1 and facts["today"]["recalls"] == 0
     assert facts["today"][outcome] == facts["work"][outcome] == 1
     assert practice.log()[-1]["rating"] == outcome
+
+
+def test_grading_revealed_skip_replaces_it_without_advancing_or_consuming_a_slot(
+    practice: Practice,
+) -> None:
+    card = practice.card()
+    practice.reveal(card)
+    skipped = practice.finish(card, "skipped")
+    completion_id = skipped["receipt"]["completion_id"]
+    payload = {"completion_id": completion_id, "rating": "effort"}
+    path = "/api/practice/grade-skipped"
+    assert practice.phrase(card["phrase_id"])["last_review"] is None
+
+    result = practice.client.post(path, json=payload)
+    assert result.status_code == 200
+    receipt = result.json()
+    assert receipt == skipped["receipt"] | {
+        "rating": "effort",
+        "skipped": False,
+        "fsrs_updated": True,
+    }
+    assert practice.client.get("/api/practice/current").json() == skipped["state"]
+    [logged] = practice.log()
+    assert (logged["id"], logged["rating"], logged["skipped"]) == (completion_id, "effort", 0)
+    scheduled = practice.phrase(card["phrase_id"])
+    assert scheduled["last_review"] == practice.now.isoformat()
+    assert scheduled["fsrs_json"]
+    practice.later(minutes=10)
+    assert practice.client.post(path, json=payload).json() == receipt
+    assert practice.client.post(path, json=payload | {"rating": "easy"}).status_code == 409
+    assert practice.phrase(card["phrase_id"]) == scheduled
+    assert practice.finish(card, "skipped", completion_id)["receipt"] == skipped["receipt"]
+
+
+@pytest.mark.parametrize("revealed", [False, True])
+def test_grading_skip_requires_reveal_and_the_same_learning_day(
+    practice: Practice, revealed: bool
+) -> None:
+    card = practice.card()
+    if revealed:
+        practice.reveal(card)
+    skipped = practice.finish(card, "skipped")["receipt"]
+    if revealed:
+        practice.later(days=1)
+    response = practice.client.post(
+        "/api/practice/grade-skipped",
+        json={"completion_id": skipped["completion_id"], "rating": "got_it"},
+    )
+    assert response.status_code == 409
+    assert practice.phrase(card["phrase_id"])["last_review"] is None
+    [logged] = practice.log()
+    assert (logged["rating"], logged["skipped"]) == (None, 1)

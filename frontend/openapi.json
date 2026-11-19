@@ -489,6 +489,34 @@
         "title": "ExtraResult",
         "type": "object"
       },
+      "GradeSkippedRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "completion_id": {
+            "maxLength": 100,
+            "minLength": 8,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Completion Id",
+            "type": "string"
+          },
+          "rating": {
+            "enum": [
+              "not_yet",
+              "effort",
+              "got_it",
+              "easy"
+            ],
+            "title": "Rating",
+            "type": "string"
+          }
+        },
+        "required": [
+          "completion_id",
+          "rating"
+        ],
+        "title": "GradeSkippedRequest",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3047,6 +3075,44 @@
           }
         },
         "summary": "Practice Facts"
+      }
+    },
+    "/api/practice/grade-skipped": {
+      "post": {
+        "operationId": "grade_skipped_api_practice_grade_skipped_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeSkippedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Grade Skipped"
       }
     },
     "/api/practice/hint": {

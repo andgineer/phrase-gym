@@ -8,8 +8,10 @@ Design practice controls for a mobile phone screen. Keep visible button labels s
 
 The Daily entry button is labelled **Start**. Card controls sit above the text in fixed positions on both sides: **Hint / New cue / Reveal** on the front, **Ref / Mine / Compare** on the back, then a full-width microphone in the same position. New cue, Mine and Compare keep their slots when disabled. Capture state appears inside the microphone. Ratings share a bottom row with **Previous card** and **Skip** chevrons while card content scrolls.
 The chevrons navigate through acknowledged completions in the current run using the usual card.
-Review disables grading and highlights the saved grade or shows **Skipped without a grade**. The
-right chevron steps forward to the current card while preserving its state and the schedule. Hints, history and explanations never move these controls. The back-side **More actions** menu offers **Recording history** and **Delete phrase…** and closes on Escape or an outside tap.
+Cards with a saved grade show it highlighted in the disabled grading row. A skipped card shows
+**Skipped without a grade** and can be graded on the same learning day. Its grade replaces the skip
+in the practice log and uses the ordinary scheduling rules, preserving its single allowance slot
+and the current card. The right chevron steps forward to the current card. Hints, history and explanations never move these controls. The back-side **More actions** menu offers **Recording history** and **Delete phrase…** and closes on Escape or an outside tap.
 
 ## New phrases
 

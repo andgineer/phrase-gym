@@ -7,6 +7,11 @@ export type PracticeState = components['schemas']['PracticeState']
 export type Progress = components['schemas']['PracticeProgress']
 export type CompletionResult = components['schemas']['CompletionResult']
 export type Outcome = Exclude<components['schemas']['CompletionRequest']['outcome'], 'studied'>
-export type ReviewedCard = { card: Card; progress: Progress | null; outcome: Outcome }
+export type ReviewedCard = {
+  card: Card
+  progress: Progress | null
+  outcome: Outcome
+  completionId: string
+}
 export type RecordingPage = components['schemas']['RecordingPage']
 export type ExtraResult = components['schemas']['ExtraResult']
