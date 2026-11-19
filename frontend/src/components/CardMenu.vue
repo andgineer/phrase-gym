@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-defineProps<{ disabled: boolean; readOnly: boolean }>()
+defineProps<{ disabled: boolean; showHistory: boolean }>()
 const emit = defineEmits<{ remove: []; history: [] }>()
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
@@ -41,8 +41,10 @@ onUnmounted(() => {
       ⋯
     </button>
     <div v-if="open" class="card-menu-panel">
-      <button aria-haspopup="dialog" @click="choose('history')">Recording history</button>
-      <button v-if="!readOnly" class="danger" @click="choose('remove')">Delete phrase…</button>
+      <button v-if="showHistory" aria-haspopup="dialog" @click="choose('history')">
+        Recording history
+      </button>
+      <button class="danger" @click="choose('remove')">Delete phrase…</button>
     </div>
   </div>
 </template>

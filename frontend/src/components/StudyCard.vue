@@ -7,6 +7,7 @@ import PracticeDialog from './PracticeDialog.vue'
 import SavedHistoryPanel from './SavedHistoryPanel.vue'
 import RatingButtons from './RatingButtons.vue'
 import { computed, nextTick, ref, watch } from 'vue'
+import type { DeletionTarget } from '../libraryTypes'
 import { progressLine } from '../practiceReducer'
 import type { Card, Outcome, Progress, Rating, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
@@ -38,7 +39,7 @@ const emit = defineEmits<{
   hint: []
   complete: [outcome: Outcome]
   gradeSkipped: [completionId: string, rating: Rating]
-  remove: []
+  remove: [target: DeletionTarget]
   playPhrase: []
   playMine: []
   compare: []
@@ -104,14 +105,14 @@ const progressValue = computed(() => {
     <div class="session-toolbar">
       <span data-testid="mode-line">{{ progressLine(activeCard, activeProgress) }}</span>
       <CardMenu
-        v-if="!front"
         :key="activeCard.view_token"
-        :read-only="!!reviewed"
+        :show-history="!front"
         :disabled="busy || audioBusy"
         @history="historyOpen = true"
-        @remove="emit('remove')"
+        @remove="
+          emit('remove', { id: activeCard.phrase_id, text: activeCard.answer?.text ?? null })
+        "
       />
-      <span v-else class="menu-space" />
     </div>
     <div class="practice-progress" aria-hidden="true">
       <span :style="{ width: `${Math.min(progressValue * 100, 100)}%` }" />

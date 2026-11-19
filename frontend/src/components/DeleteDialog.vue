@@ -38,7 +38,7 @@ async function confirm() {
   } catch (cause) {
     if (cause instanceof ApiError && cause.status === 404) {
       await fileCleanup.refresh()
-      finish({ deleted_text: target.text, cleanup: fileCleanup.status.value })
+      finish({ deleted_text: target.text ?? '', cleanup: fileCleanup.status.value })
     } else error.value = String(cause)
   } finally {
     deleting.value = false
@@ -65,7 +65,9 @@ function closed() {
     @close="closed"
   >
     <template v-if="target">
-      <h2 id="delete-heading">Delete “{{ target.text }}”?</h2>
+      <h2 id="delete-heading">
+        {{ target.text ? `Delete “${target.text}”?` : 'Delete this phrase?' }}
+      </h2>
       <p>
         The phrase, its reference audio and its saved recordings will be permanently removed. This
         cannot be undone.

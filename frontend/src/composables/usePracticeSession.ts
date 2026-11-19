@@ -124,6 +124,17 @@ export function usePracticeSession() {
     reviewIndex.value = index
   }
 
+  function forgetDeletedPhrase(phraseId: string) {
+    reviewIndex.value = null
+    const history = practice.reviewedCards.value
+    for (let index = history.length - 1; index >= 0; index--) {
+      const reviewed = history[index]
+      if (reviewed?.card.phrase_id !== phraseId) continue
+      localTakes.delete(reviewed.card.view_token)
+      history.splice(index, 1)
+    }
+  }
+
   async function settleMedia() {
     mediaScope++
     compareOnStop = null
@@ -170,6 +181,7 @@ export function usePracticeSession() {
     completing,
     reviewIndex,
     browse,
+    forgetDeletedPhrase,
     latestTake,
     playReference,
     playMine,

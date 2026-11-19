@@ -62,15 +62,14 @@ async function navigate(next: Page) {
   practice.closeCard()
 }
 
-function removeCard() {
-  const current = card.value
-  if (current?.answer) pendingDelete.value = { id: current.phrase_id, text: current.answer.text }
-}
-
 async function deletedCard() {
+  const target = pendingDelete.value
   pendingDelete.value = null
+  if (!target) return
   await session.settleMedia()
-  if (card.value?.mode !== 'practice') return practice.openDaily()
+  session.forgetDeletedPhrase(target.id)
+  if (card.value?.phrase_id !== target.id) return
+  if (card.value.mode !== 'practice') return practice.openDaily()
   // The deleted phrase has no details to return to.
   show('library')
   detailsPhrase.value = null
@@ -139,7 +138,7 @@ onMounted(initialize)
         @hint="practice.hint"
         @complete="session.complete"
         @grade-skipped="practice.gradeSkipped"
-        @remove="removeCard"
+        @remove="pendingDelete = $event"
         @play-phrase="session.playReference"
         @play-mine="session.playMine"
         @compare="session.compareMine"

@@ -243,3 +243,58 @@ test('passing a new card leaves its slot free and offers it again on Start', asy
   await card(page).getByRole('button', { name: 'Reveal' }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveText('So far, so good.')
 })
+
+test('Delete is available before reveal and keeps the answer hidden in confirmation', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await importPackage(page, dailyPackage, 2)
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  const more = page.getByRole('button', { name: 'More actions' })
+  const remove = page.getByRole('button', { name: 'Delete phrase…' })
+  const confirm = page.getByRole('dialog', { name: 'Delete this phrase?' })
+  const prompt = card(page).locator('.practice-prompt')
+  const cue = await prompt.innerText()
+  await more.click()
+  await remove.click()
+  await expect(confirm).toBeVisible()
+  await expect(confirm).not.toContainText('So far, so good.')
+  await confirm.getByRole('button', { name: 'Cancel' }).click()
+  await expect(prompt).toHaveText(cue)
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
+  await more.click()
+  await remove.click()
+  await confirm.getByRole('button', { name: 'Delete permanently' }).click()
+  await expect(card(page).locator('.practice-prompt')).toHaveText('Situation for Nice to meet you.')
+})
+
+test('deleting a reviewed graded phrase keeps its history and the current card', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await importPackage(page, dailyPackage, 2)
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await revealAnswer(page)
+  const answer = page.getByTestId('practice-phrase')
+  await expect(answer).toHaveText('So far, so good.')
+  await card(page).getByRole('button', { name: 'Good', exact: true }).click()
+  await expect(answer).toHaveCount(0)
+  const previous = card(page).getByRole('button', { name: 'Previous card', exact: true })
+  await expect(previous).toBeEnabled()
+  const current = async () => (await page.request.get('/api/practice/current')).json()
+  const before = await current()
+  await previous.click()
+  await expect(answer).toHaveText('So far, so good.')
+  await page.getByRole('button', { name: 'More actions' }).click()
+  await page.getByRole('button', { name: 'Delete phrase…' }).click()
+  const confirm = page.getByRole('dialog', { name: 'Delete “So far, so good.”?' })
+  await confirm.getByRole('button', { name: 'Delete permanently' }).click()
+  await expect(answer).toHaveCount(0)
+  await expect(previous).toHaveCount(0)
+  expect(await current()).toEqual(before)
+  const { learning_date } = await (await page.request.get('/api/practice/facts')).json()
+  const history = await page.request.get(`/api/practice/studied?learning_date=${learning_date}`)
+  expect((await history.json()).items).toMatchObject([
+    { text: 'So far, so good.', phrase_id: null, rating: 'got_it' },
+  ])
+})

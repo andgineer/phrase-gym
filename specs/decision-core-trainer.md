@@ -11,7 +11,7 @@ The chevrons navigate through acknowledged completions in the current run using 
 Cards with a saved grade show it highlighted in the disabled grading row. A skipped card shows
 **Skipped without a grade** during this pass. A grade added there creates the first practice log
 entry for that card and uses the ordinary allowance and scheduling rules. It leaves the current
-card in place. The right chevron steps forward to the current card. Hints, history and explanations never move these controls. The back-side **More actions** menu offers **Recording history** and **Delete phrase…** and closes on Escape or an outside tap.
+card in place. The right chevron steps forward to the current card. Hints, history and explanations never move these controls. The **More actions** menu offers **Delete phrase…** on either side and **Recording history** after reveal. Escape or an outside tap closes it.
 
 ## New phrases
 
@@ -71,7 +71,7 @@ Each new or recall appearance chooses a random prepared cue, avoiding the phrase
 
 ## Deletion
 
-**Delete** in phrase details or on a revealed card back requires confirmation naming the phrase and stating that it, its reference and its saved recordings will be permanently removed. Cancel leaves the screen and current view unchanged. Confirmed deletion invalidates its active view, removes phrase and takes, and blocks late uploads from recreating it. Deletion on a revealed back advances without a grade or practice-log row; in phrase-specific Practice it returns to the Library because no details remain. Completed log rows keep their wording/lesson snapshots and a nullable phrase reference so past practice remains truthful. [Durable file cleanup](architecture.md#deletion-cleanup) handles interruption and unlink failure separately from the database transaction. A replacement phrase is a fresh import. There is no Suspend/Restore state. Never label a phrase fluent, automatic or mastered from a schedule or recording.
+**Delete** in phrase details or on either side of the displayed practice card requires confirmation. The confirmation names a visible phrase and uses generic wording while the answer is hidden. It states that the phrase, its reference and recordings will be permanently removed. Cancel leaves the screen and current view unchanged. Confirmed deletion invalidates its active view, removes phrase and takes, and blocks late uploads from recreating it. Deleting the current Daily or Extra card advances without a grade or practice-log row. Deleting an earlier card removes its appearances from session navigation and returns to the same current card. In phrase-specific Practice it returns to the Library. Completed log rows keep their wording/lesson snapshots and a nullable phrase reference so past practice remains truthful. [Durable file cleanup](architecture.md#deletion-cleanup) handles interruption and unlink failure separately from the database transaction. A replacement phrase is a fresh import. There is no Suspend/Restore state. Never label a phrase fluent, automatic or mastered from a schedule or recording.
 
 ## Evidence behind the loop
 

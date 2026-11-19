@@ -7,4 +7,4 @@ export type PhrasePage = components['schemas']['PhrasePage']
 export type PhraseDetails = components['schemas']['PhraseDetails']
 export type CleanupStatus = components['schemas']['CleanupStatus']
 export type DeletionResult = components['schemas']['DeletionResult']
-export type DeletionTarget = { id: string; text: string }
+export type DeletionTarget = { id: string; text: string | null }

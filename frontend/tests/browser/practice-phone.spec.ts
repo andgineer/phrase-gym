@@ -29,7 +29,7 @@ test('phone card keeps controls still across reveal, hint, history and explanati
         }),
       )
   const frontBounds = await fixedBounds()
-  expect(frontBounds).toHaveLength(4)
+  expect(frontBounds).toHaveLength(5)
   const front = await mic.boundingBox()
   const row = page.locator('.card-controls')
   const controls = await row.boundingBox()

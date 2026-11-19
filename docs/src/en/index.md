@@ -37,8 +37,9 @@ steps back through cards you graded or skipped during this run. Each saved grade
 the disabled grading row. You can record another take while reviewing a graded card. A skipped
 card shows **Skipped without a grade** and can still be graded during the same pass. Skipping uses no allowance or practice credit. A fresh pass can offer the
 phrase again. The right chevron steps forward through the session and returns to the current
-card. The back’s **More actions** menu offers **Recording history** and **Delete phrase…** with confirmation for deletion. Tap the
-microphone to record, then tap it again to finish. Finishing on the front reveals the answer and
+card. The **More actions** menu on either side lets you delete the displayed phrase after
+confirmation, including a phrase you already graded. The menu offers **Recording history** after
+reveal. Tap the microphone to record, then tap it again to finish. Finishing on the front reveals the answer and
 plays the reference followed by your recording. Recording on the back uses the same playback
 order. Once you press **Ref** on the back, finishing each later take on that card plays only your
 recording. **Recording history** opens a separate panel during practice. Use **Close**

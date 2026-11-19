@@ -30,7 +30,7 @@ test('front and back stops play reference then the full take, with saved history
     await actions.click()
     await history.click()
   }
-  await expect(actions).toHaveCount(0)
+  await expect(actions).toBeVisible()
   for (const index of [0, 1]) {
     const before = (await playedMedia(page)).length
     await card(page).getByRole('button', { name: 'Record a take' }).click()
@@ -69,7 +69,7 @@ test('front and back stops play reference then the full take, with saved history
   await expect(recordings.locator('.take')).toHaveCount(2)
   await recordings.getByRole('button', { name: 'Close recording history' }).click()
   await card(page).getByRole('button', { name: 'Good', exact: true }).click()
-  await expect(actions).toHaveCount(0)
+  await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await card(page).getByRole('button', { name: 'Reveal', exact: true }).click()
   await openHistory()
   await expect(recordings.getByText('No saved recordings yet.')).toBeVisible()
