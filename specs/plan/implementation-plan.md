@@ -10,7 +10,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The [model and call experiments](coach-model-and-call-experiments.md) own the measurements that choose the cheapest adequate Claude and Codex models, judge the free tier and cut the calls spent on one card. This work is independent of the interface stage and may run beside it.
 
-**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, and the preparation flow makes only the calls the measurements showed to matter.
+**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, every invocation pins a specific model and supported effort without silent replacement, and the preparation flow normally uses one call with at most one justified repair unless measurements show a concrete need for more. Optional richness is scored separately from learner-critical correctness.
 
 ## 5. Extend only the content the learner next needs
 
