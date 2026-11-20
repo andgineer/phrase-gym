@@ -138,8 +138,12 @@ test('recorded Daily keeps front and rehearsal takes and saves late uploads to t
 
   let releaseUpload!: () => void
   const uploadHeld = new Promise<void>((resolve) => (releaseUpload = resolve))
+  let uploadRequested = false
   await page.route('**/api/recordings', async (route) => {
-    if (route.request().method() === 'POST') await uploadHeld
+    if (route.request().method() === 'POST') {
+      uploadRequested = true
+      await uploadHeld
+    }
     await route.continue()
   })
   await card(page).getByRole('button', { name: 'Record a take' }).click()
@@ -148,9 +152,9 @@ test('recorded Daily keeps front and rehearsal takes and saves late uploads to t
   await expect(modeLine(page)).toHaveText('2 / 20 due')
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await expect(card(page).getByRole('button', { name: 'Record a take' })).toBeVisible()
-  await expect(page.getByText(/take\(s\) waiting to save/)).toBeVisible()
+  await expect.poll(() => uploadRequested).toBe(true)
   releaseUpload()
-  await expect(page.getByText(/take\(s\) waiting to save/)).toHaveCount(0)
+  await expect.poll(async () => (await savedTakes(page, 'So far, so good.')).length).toBe(2)
   const takes = await savedTakes(page, 'So far, so good.')
   expect(takes).toHaveLength(2)
   expect(takes.map((take: { mode: string; kind: string }) => [take.mode, take.kind])).toEqual([

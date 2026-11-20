@@ -251,9 +251,12 @@ test('recovers complete pending takes and keeps comparison and completion respon
 
   let failSave = true
   let failedSaves = 0
+  let releaseRetry!: () => void
+  const retryHeld = new Promise<void>((resolve) => (releaseRetry = resolve))
   await page.route('**/api/recordings', async (route) => {
     if (failSave && route.request().method() === 'POST') {
       failedSaves += 1
+      if (failedSaves === 2) await retryHeld
       await route.fulfill({ status: 503, json: { detail: 'Temporary save failure' } })
       return
     }
@@ -261,39 +264,15 @@ test('recovers complete pending takes and keeps comparison and completion respon
   })
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
-  await expect(
-    page.getByRole('alert').filter({ hasText: 'Audio remains on this device' }),
-  ).toBeVisible()
-  await page.evaluate(() => {
-    const host = window as unknown as { __retrySaveSettled?: boolean }
-    let cleared = false
-    const observer = new MutationObserver(() => {
-      const alert = document.querySelector('[role="alert"]')
-      const failed = alert?.textContent?.includes('Audio remains on this device') ?? false
-      cleared ||= !failed
-      if (cleared && failed) {
-        host.__retrySaveSettled = true
-        observer.disconnect()
-      }
-    })
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true })
-  })
+  const saveFailure = page.getByRole('alert').filter({ hasText: 'Audio remains on this device' })
+  await expect(saveFailure).toContainText('1 recording could not be saved.')
   await page.getByRole('button', { name: 'Retry save' }).click()
   await expect.poll(() => failedSaves).toBe(2)
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => (window as unknown as { __retrySaveSettled?: boolean }).__retrySaveSettled ?? false,
-      ),
-    )
-    .toBe(true)
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
-  )
+  await expect(saveFailure).toHaveCount(0)
+  await expect(page.getByText('Saving recording…')).toBeVisible()
+  releaseRetry()
+  await expect(saveFailure).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry save' })).toBeVisible()
   await page.goto('/?take-transfer-race=1')
   await expect
     .poll(() =>
@@ -636,13 +615,17 @@ test('automatic comparison can be stopped while upload is pending and late end c
   const uploadHeld = new Promise<void>((resolve) => {
     releaseUpload = resolve
   })
+  let uploadRequested = false
   await page.route('**/api/recordings', async (route) => {
-    if (route.request().method() === 'POST') await uploadHeld
+    if (route.request().method() === 'POST') {
+      uploadRequested = true
+      await uploadHeld
+    }
     await route.continue()
   })
   await page.getByRole('button', { name: 'Record a take' }).click()
   await page.getByRole('button', { name: 'Stop recording' }).click()
-  await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
+  await expect.poll(() => uploadRequested).toBe(true)
   await expect
     .poll(() =>
       page.evaluate(
@@ -664,7 +647,7 @@ test('automatic comparison can be stopped while upload is pending and late end c
     ),
   ).toBe(1)
   releaseUpload()
-  await expect(page.getByText('1 take(s) waiting to save.')).toHaveCount(0)
+  await expect.poll(async () => (await savedTakes(page, cards[1].text)).length).toBe(1)
   await page.getByRole('button', { name: 'Ref' }).click()
   await expect
     .poll(() =>

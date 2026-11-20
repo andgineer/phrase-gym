@@ -245,7 +245,7 @@ test('a take pending for a deleted phrase stays recoverable until discarded', as
   const card = page.locator('article.practice-card')
   await card.getByRole('button', { name: 'Record a take' }).tap()
   await card.getByRole('button', { name: 'Stop recording' }).tap()
-  await expect(page.getByText('1 take(s) waiting to save.')).toBeVisible()
+  await expect(page.getByRole('alert')).toContainText('1 recording could not be saved.')
 
   await page.getByRole('button', { name: 'Practice', exact: true }).tap()
   const waiting = page.getByTestId('pending-uploads')

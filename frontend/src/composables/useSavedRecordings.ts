@@ -8,7 +8,7 @@ export function useSavedRecordings(phraseId: () => string) {
     () => `/phrases/${encodeURIComponent(phraseId())}/recordings`,
     10,
   )
-  watch(takeTransfers.uploadingTakes, () => void takes.refresh())
+  watch(takeTransfers.savedRevision, () => void takes.refresh())
   watch(phraseId, () => void takes.reload(), { immediate: true })
   return takes
 }

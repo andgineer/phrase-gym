@@ -53,6 +53,7 @@ vi.mock('../src/api', async (importOriginal) => ({
 }))
 
 beforeEach(() => {
+  vi.resetModules()
   state.deleted = []
   state.entries = [{ key: `take-v2:${take.id}`, value: take }]
 })
@@ -65,20 +66,21 @@ test.each([410, 409, 413, 422])(
     await takeTransfers.flush()
     expect(takeTransfers.rejected.value).toEqual([
       {
+        status: 'rejected',
         id: take.id,
         key: `take-v2:${take.id}`,
         message: 'This phrase was deleted. Discard it from this device.',
       },
     ])
-    expect(takeTransfers.error.value).toBe('')
-    expect(takeTransfers.pendingTakes.value).toBe(1)
-    expect(takeTransfers.uploadingTakes.value).toBe(0)
+    expect(takeTransfers.failedCount.value).toBe(0)
+    expect(takeTransfers.pendingUploads.value).toBe(0)
     expect(state.deleted).toEqual([])
+    expect(state.entries).toHaveLength(1)
 
     await takeTransfers.discard(take.id)
     expect(state.deleted).toEqual([`take-v2:${take.id}`])
     expect(takeTransfers.rejected.value).toEqual([])
-    expect(takeTransfers.pendingTakes.value).toBe(0)
+    expect(state.entries).toEqual([])
   },
 )
 
@@ -91,8 +93,8 @@ test.each([
   state.failure = new ApiError(message, status)
   await takeTransfers.flush()
   expect(takeTransfers.rejected.value).toEqual([])
-  expect(takeTransfers.error.value).toContain('Audio remains on this device')
-  expect(takeTransfers.uploadingTakes.value).toBe(1)
+  expect(takeTransfers.failedCount.value).toBe(1)
+  expect(takeTransfers.pendingUploads.value).toBe(1)
   await takeTransfers.discard(take.id)
   expect(state.deleted).toEqual([])
 })

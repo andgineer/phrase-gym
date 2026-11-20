@@ -126,9 +126,9 @@ onMounted(initialize)
         :playing-url="playback.playingUrl.value"
         :busy="practice.busy.value || session.completing.value || practice.gradingSkipped.value"
         :has-take="session.latestTake.value !== null"
-        :pending-takes="takeTransfers.uploadingTakes.value"
+        :failed-takes="takeTransfers.failedCount.value"
+        :retrying-save="takeTransfers.retrying.value"
         :capture-error="capture.error.value"
-        :take-error="takeTransfers.error.value"
         :practice-error="practice.error.value"
         :can-retry="practice.pending.value !== null"
         @control="session.controlAudio"
@@ -143,7 +143,7 @@ onMounted(initialize)
         @play-phrase="session.playReference"
         @play-mine="session.playMine"
         @compare="session.compareMine"
-        @retry-save="takeTransfers.flush"
+        @retry-save="takeTransfers.retry"
         @retry-completion="practice.retry"
       />
     </template>

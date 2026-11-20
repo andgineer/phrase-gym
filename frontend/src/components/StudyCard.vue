@@ -23,9 +23,9 @@ const props = defineProps<{
   playingUrl: string | null
   busy: boolean
   hasTake: boolean
-  pendingTakes: number
+  failedTakes: number
+  retryingSave: boolean
   captureError: string
-  takeError: string
   practiceError: string
   playRecording: (take: Recording) => Promise<void>
   stopPlayback: () => void
@@ -166,11 +166,12 @@ const progressValue = computed(() => {
       />
       <div class="card-content" :key="activeCard.view_token">
         <p v-if="captureError" role="alert" class="error">{{ captureError }}</p>
-        <p v-if="pendingTakes" role="status">
-          {{ pendingTakes }} take(s) waiting to save.
-          <button @click="emit('retrySave')">Retry save</button>
+        <p v-if="failedTakes" role="alert" class="error">
+          {{ failedTakes }} {{ failedTakes === 1 ? 'recording' : 'recordings' }} could not be saved.
+          Audio remains on this device.
+          <button v-if="!retryingSave" @click="emit('retrySave')">Retry save</button>
         </p>
-        <p v-if="takeError" role="alert" class="error">{{ takeError }}</p>
+        <p v-if="retryingSave" role="status" class="muted">Saving recording…</p>
         <p v-if="practiceError" role="alert" class="error">
           {{ practiceError }}
           <button v-if="canRetry && !reviewed" :disabled="busy" @click="emit('retryCompletion')">

@@ -17,7 +17,7 @@ function state(value: PracticeFacts | null) {
     error: ref(''),
     listing: ref(false),
     studied: usePagedList<StudiedPhrase, StudiedPage>(() => '/unused'),
-    uploadingTakes: computed(() => pendingUploads.value),
+    pendingUploads: computed(() => pendingUploads.value),
     refresh: vi.fn(async () => {}),
     toggleList: vi.fn(async () => {}),
     dismiss: vi.fn(async () => {}),

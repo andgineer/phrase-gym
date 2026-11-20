@@ -53,7 +53,7 @@ export function usePracticeFacts() {
   }
 
   // A finished background upload turns a pending take into an available recording.
-  watch(takeTransfers.pendingTakes, () => void reload())
+  watch(takeTransfers.savedRevision, () => void reload())
   usePageReturn(() => void reload())
   onMounted(() => void reload())
 
@@ -62,7 +62,7 @@ export function usePracticeFacts() {
     error,
     listing,
     studied,
-    uploadingTakes: takeTransfers.uploadingTakes,
+    pendingUploads: takeTransfers.pendingUploads,
     refresh: () => reload(true),
     toggleList,
     dismiss,

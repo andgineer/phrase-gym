@@ -17,7 +17,7 @@ import {
 } from '../practiceFacts'
 
 const props = defineProps<{ message: string }>()
-const { facts, error, listing, studied, uploadingTakes, refresh, toggleList, dismiss } =
+const { facts, error, listing, studied, pendingUploads, refresh, toggleList, dismiss } =
   usePracticeFacts()
 // Facts of this mount confirm the learning date before an earlier message can be judged current.
 const currentMessage = computed(() => (facts.value || error.value ? props.message : ''))
@@ -33,7 +33,7 @@ const visible = computed(
     currentMessage.value ||
     practised.value ||
     week.value ||
-    uploadingTakes.value ||
+    pendingUploads.value ||
     error.value ||
     notices.value.length,
 )
@@ -75,8 +75,8 @@ defineExpose({ refresh })
         <p v-if="studied.error.value" role="alert" class="error">{{ studied.error.value }}</p>
       </template>
     </div>
-    <p v-if="uploadingTakes" class="muted" data-testid="pending-uploads">
-      {{ counted(uploadingTakes, 'recording') }} waiting to upload from this device
+    <p v-if="pendingUploads" class="muted" data-testid="pending-uploads">
+      {{ counted(pendingUploads, 'recording') }} waiting to upload from this device
     </p>
     <template v-if="facts && practised">
       <div class="facts-group">
