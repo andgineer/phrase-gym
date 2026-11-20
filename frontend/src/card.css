@@ -138,24 +138,6 @@
     font-size: 0.875rem;
   }
 }
-.practice-dialog {
-  bottom: auto;
-  max-height: calc(90dvh - var(--safe-top) - var(--safe-bottom));
-  top: calc(5dvh + var(--safe-top));
-  left: max(calc(1rem + var(--safe-left)), calc((100vw - 38rem) / 2));
-  right: max(calc(1rem + var(--safe-right)), calc((100vw - 38rem) / 2));
-}
-.practice-dialog header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.practice-dialog h2 {
-  margin: 0;
-}
 .has-ratings {
   padding-bottom: 0;
 }

@@ -84,7 +84,7 @@ class LibraryService:
                 connection,
                 RecordingRecord,
                 "SELECT * FROM recordings WHERE phrase_id=? "
-                "ORDER BY captured_at DESC, id DESC LIMIT ? OFFSET ?",
+                "ORDER BY julianday(captured_at) DESC, id DESC LIMIT ? OFFSET ?",
                 (phrase_id, limit + 1, offset),
             )
             items = [saved_recording(connection, row) for row in rows[:limit]]

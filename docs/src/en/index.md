@@ -46,9 +46,12 @@ move on while it uploads. Switching tabs finishes and keeps the take, and **Star
 regular card. A failed upload stays on the device for retry. The saved take includes the cue,
 help, and answer shown during the attempt.
 
-Choose **Recording history** in the revealed card's **More actions** menu or use the history icon
-in Library phrase details. Takes appear newest first, with the date and a **Mine** button.
-Close the practice history with **Close** or Escape.
+Choose **More actions → Recording history** on a revealed card to listen to earlier attempts.
+The recordings are grouped by date, newest first. Tap a time to play that take. Tap it again
+to stop, or tap another time to switch. **Show older recordings** loads earlier attempts.
+**Back to practice** or Escape stops playback and returns you to the same card.
+
+In Library phrase details, the history icon opens the saved takes inline. Choose **Mine** to listen.
 
 ## Find and practise one phrase
 

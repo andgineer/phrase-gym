@@ -1,6 +1,6 @@
 import json
 import sqlite3
-from datetime import datetime
+from datetime import UTC, datetime
 
 from phrase_gym.server.contracts import SavedRecording
 from phrase_gym.server.records import RecordingRecord, fetch_all
@@ -8,10 +8,11 @@ from phrase_gym.server.scheduling import learning_day
 
 
 def saved_recording(connection: sqlite3.Connection, row: RecordingRecord) -> SavedRecording:
+    captured = datetime.fromisoformat(row.captured_at)
     return SavedRecording(
         id=row.id,
-        captured_at=row.captured_at,
-        learning_date=learning_day(connection, datetime.fromisoformat(row.captured_at)),
+        captured_at=captured.astimezone(UTC).isoformat(timespec="milliseconds"),
+        learning_date=learning_day(connection, captured),
         mime_type=row.mime_type,
         duration_ms=row.duration_ms,
         complete=bool(row.complete),

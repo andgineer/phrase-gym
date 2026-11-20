@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { watch } from 'vue'
 import AudioIcon from './AudioIcon.vue'
-import { usePagedList } from '../composables/usePagedList'
-import { takeTransfers } from '../takeTransfers'
-import type { Recording, RecordingPage } from '../studyTypes'
+import { useSavedRecordings } from '../composables/useSavedRecordings'
 
 const props = defineProps<{
   phraseId: string
   disabled: boolean
   play: (url: string) => Promise<void>
 }>()
-const takes = usePagedList<Recording, RecordingPage>(
-  () => `/phrases/${encodeURIComponent(props.phraseId)}/recordings`,
-  10,
-)
-watch(takeTransfers.uploadingTakes, () => void takes.refresh())
-void takes.reload()
+const takes = useSavedRecordings(() => props.phraseId)
 </script>
 
 <template>

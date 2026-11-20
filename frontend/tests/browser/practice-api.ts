@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { Page } from '@playwright/test'
 import type { components } from '../../src/api.generated'
 import { expect } from './fixtures'
+import { silentReference } from './helpers'
 
 type Card = components['schemas']['PracticeCard']
 type State = components['schemas']['PracticeState']
@@ -49,7 +50,12 @@ export async function finishDaily(page: Page) {
   return completed
 }
 
-export async function seedTake(page: Page, card: Card) {
+export async function seedTake(
+  page: Page,
+  card: Card,
+  capturedAt = new Date().toISOString(),
+  durationMs: number | null = 600,
+) {
   const response = await page.request.post('/api/recordings', {
     data: {
       id: randomUUID(),
@@ -59,11 +65,11 @@ export async function seedTake(page: Page, card: Card) {
       kind: card.kind,
       cue: card.cue,
       hint: card.hint,
-      captured_at: new Date().toISOString(),
-      mime_type: 'audio/webm;codecs=opus',
-      duration_ms: 600,
+      captured_at: capturedAt,
+      mime_type: 'audio/wav',
+      duration_ms: durationMs,
       complete: true,
-      audio_base64: 'AQIDBA==',
+      audio_base64: silentReference(),
     },
   })
   expect(response.status()).toBe(200)

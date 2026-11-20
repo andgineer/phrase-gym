@@ -1,4 +1,4 @@
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { setAudioSession } from '../audioSession'
 import type { StoredTake } from '../practiceTypes'
 import type { Recording } from '../studyTypes'
@@ -7,7 +7,8 @@ type Clip = { url: string; durationMs?: number | null }
 
 export function usePlayback() {
   let playing: HTMLAudioElement | null = null
-  const active = ref(false)
+  const playingUrl = ref<string | null>(null)
+  const active = computed(() => playingUrl.value !== null)
   const error = ref('')
   let localUrl: string | null = null
   let comparisonTimer: number | null = null
@@ -25,7 +26,7 @@ export function usePlayback() {
       current.pause()
       current.src = ''
     }
-    active.value = false
+    playingUrl.value = null
     if (localUrl) URL.revokeObjectURL(localUrl)
     localUrl = null
     setAudioSession('auto')
@@ -37,7 +38,7 @@ export function usePlayback() {
     setAudioSession('playback')
     const audio = new Audio(clip.url)
     playing = audio
-    active.value = true
+    playingUrl.value = clip.url
     const advance = () => {
       if (playing !== audio) return
       clearTimer()
@@ -97,5 +98,5 @@ export function usePlayback() {
     document.removeEventListener('visibilitychange', background)
     stop()
   })
-  return { play, compare, compareTake, stop, active, error }
+  return { play, compare, compareTake, stop, active, playingUrl, error }
 }

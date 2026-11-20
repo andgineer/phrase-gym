@@ -248,8 +248,14 @@ def test_recording_dates_use_the_learning_timezone(client: TestClient) -> None:
     assert late.status_code == 200
     naive = upload_take(client, card, str(uuid4()), captured_at="2026-10-28T23:30:00")
     assert naive.status_code == 422
-    item = client.get(f"/api/phrases/{card['phrase_id']}/recordings").json()["items"][0]
-    assert item["learning_date"] == "2026-10-29"
+    earlier = upload_take(client, card, str(uuid4()), captured_at="2026-10-29T01:00:00+03:00")
+    assert earlier.status_code == 200
+    recordings = f"/api/phrases/{card['phrase_id']}/recordings"
+    newest = client.get(recordings, params={"limit": 1}).json()["items"][0]
+    assert newest["learning_date"] == "2026-10-29"
+    assert newest["captured_at"] == "2026-10-28T23:30:00.000+00:00"
+    older = client.get(recordings, params={"offset": 1}).json()["items"][0]
+    assert older["captured_at"] == "2026-10-28T22:00:00.000+00:00"
 
 
 def test_alternative_answers_stored_on_earlier_cards_stay_but_are_not_shown(

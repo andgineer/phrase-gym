@@ -5,9 +5,11 @@ const emit = defineEmits<{ remove: []; history: [] }>()
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 const toggle = ref<HTMLButtonElement | null>(null)
+const focusToggle = () => toggle.value?.focus()
+defineExpose({ focusToggle })
 function choose(action: 'history' | 'remove') {
   open.value = false
-  toggle.value?.focus()
+  focusToggle()
   if (action === 'history') emit('history')
   else emit('remove')
 }
@@ -17,7 +19,7 @@ function outside(event: PointerEvent) {
 function key(event: KeyboardEvent) {
   if (event.key === 'Escape' && open.value) {
     open.value = false
-    toggle.value?.focus()
+    focusToggle()
   }
 }
 onMounted(() => {
@@ -41,9 +43,7 @@ onUnmounted(() => {
       ⋯
     </button>
     <div v-if="open" class="card-menu-panel">
-      <button v-if="showHistory" aria-haspopup="dialog" @click="choose('history')">
-        Recording history
-      </button>
+      <button v-if="showHistory" @click="choose('history')">Recording history</button>
       <button class="danger" @click="choose('remove')">Delete phrase…</button>
     </div>
   </div>

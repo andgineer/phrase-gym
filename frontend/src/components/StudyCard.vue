@@ -3,13 +3,12 @@ import PhraseExplanation from './PhraseExplanation.vue'
 import FrontControls from './FrontControls.vue'
 import BackControls from './BackControls.vue'
 import CardMenu from './CardMenu.vue'
-import PracticeDialog from './PracticeDialog.vue'
-import SavedHistoryPanel from './SavedHistoryPanel.vue'
+import RecordingHistoryScreen from './RecordingHistoryScreen.vue'
 import RatingButtons from './RatingButtons.vue'
 import { computed, nextTick, ref, watch } from 'vue'
 import type { DeletionTarget } from '../libraryTypes'
 import { progressLine } from '../practiceReducer'
-import type { Card, Outcome, Progress, Rating, ReviewedCard } from '../studyTypes'
+import type { Card, Outcome, Progress, Rating, Recording, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
 
 const props = defineProps<{
@@ -21,14 +20,15 @@ const props = defineProps<{
   capturing: boolean
   requesting: boolean
   processing: boolean
-  playing: boolean
+  playingUrl: string | null
   busy: boolean
   hasTake: boolean
   pendingTakes: number
   captureError: string
   takeError: string
   practiceError: string
-  play: (url: string) => Promise<void>
+  playRecording: (take: Recording) => Promise<void>
+  stopPlayback: () => void
   canRetry: boolean
 }>()
 const emit = defineEmits<{
@@ -49,6 +49,18 @@ const emit = defineEmits<{
 }>()
 const audioBusy = computed(() => props.capturing || props.requesting || props.processing)
 const historyOpen = ref(false)
+const menu = ref<InstanceType<typeof CardMenu> | null>(null)
+
+function openHistory() {
+  props.stopPlayback()
+  historyOpen.value = true
+}
+
+async function closeHistory() {
+  historyOpen.value = false
+  await nextTick()
+  menu.value?.focusToggle()
+}
 const previousDetailsOpen = ref(false)
 const reviewed = computed(() =>
   props.reviewIndex === null ? null : props.reviewedCards[props.reviewIndex],
@@ -101,14 +113,23 @@ const progressValue = computed(() => {
 </script>
 
 <template>
-  <section class="practice-panel" :class="{ 'has-ratings': showDock }">
+  <RecordingHistoryScreen
+    v-if="historyOpen"
+    :phrase-id="activeCard.phrase_id"
+    :playing-url="playingUrl"
+    :play-recording="playRecording"
+    :stop-playback="stopPlayback"
+    @back="closeHistory"
+  />
+  <section v-show="!historyOpen" class="practice-panel" :class="{ 'has-ratings': showDock }">
     <div class="session-toolbar">
       <span data-testid="mode-line">{{ progressLine(activeCard, activeProgress) }}</span>
       <CardMenu
+        ref="menu"
         :key="activeCard.view_token"
         :show-history="!front"
         :disabled="busy || audioBusy"
-        @history="historyOpen = true"
+        @history="openHistory"
         @remove="
           emit('remove', { id: activeCard.phrase_id, text: activeCard.answer?.text ?? null })
         "
@@ -137,8 +158,10 @@ const progressValue = computed(() => {
       <MicrophoneButton
         :capturing="capturing"
         :requesting="requesting"
-        :playing="playing"
-        :disabled="(processing && !playing) || (busy && !capturing && !requesting && !playing)"
+        :playing="!!playingUrl"
+        :disabled="
+          (processing && !playingUrl) || (busy && !capturing && !requesting && !playingUrl)
+        "
         @control="emit('control')"
       />
       <div class="card-content" :key="activeCard.view_token">
@@ -204,12 +227,5 @@ const progressValue = computed(() => {
         </div>
       </div>
     </article>
-    <PracticeDialog
-      v-if="!front && historyOpen"
-      title="Recording history"
-      @close="historyOpen = false"
-    >
-      <SavedHistoryPanel :phrase-id="activeCard.phrase_id" :disabled="audioBusy" :play="play" />
-    </PracticeDialog>
   </section>
 </template>

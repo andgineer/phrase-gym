@@ -23,7 +23,7 @@ test('front and back stops play reference then the full take, with saved history
 }) => {
   const actions = page.getByRole('button', { name: 'More actions' })
   const history = page.getByRole('button', { name: 'Recording history', exact: true })
-  const recordings = page.getByRole('dialog', { name: 'Recording history' })
+  const recordings = page.getByRole('region', { name: 'Recording history' })
   async function openHistory() {
     await expect(recordings).toHaveCount(0)
     await expect(history).toHaveCount(0)
@@ -47,18 +47,17 @@ test('front and back stops play reference then the full take, with saved history
     await expect(card(page).getByRole('button', { name: 'Record a take' })).toBeVisible()
     await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(index + 1)
     await openHistory()
-    await expect(recordings.locator('.take')).toHaveCount(index + 1)
-    if (index === 0)
-      await recordings.getByRole('button', { name: 'Close recording history' }).click()
+    await expect(recordings.getByRole('listitem')).toHaveCount(index + 1)
+    if (index === 0) await recordings.getByRole('button', { name: 'Back to practice' }).click()
   }
-  const historyTake = recordings.locator('.take').first()
+  const historyTake = recordings.getByRole('listitem').first()
   const [latest] = await savedTakes(page, texts[0])
   const before = (await playedMedia(page)).length
-  await expect(historyTake.locator('time')).toHaveText(latest.learning_date)
+  await expect(historyTake.locator('time')).toHaveAttribute('datetime', latest.captured_at)
   await expect(historyTake.getByRole('button')).toHaveCount(1)
   await expect(historyTake).not.toContainText('Cue:')
   await expect(historyTake).not.toContainText('Answer then:')
-  await historyTake.getByRole('button', { name: 'Mine' }).click()
+  await historyTake.getByRole('button', { name: /^Play recording/ }).click()
   await expect
     .poll(async () => (await playedMedia(page)).slice(before))
     .toEqual([expect.stringContaining(latest.url)])
@@ -66,8 +65,8 @@ test('front and back stops play reference then the full take, with saved history
   await page.reload()
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   await openHistory()
-  await expect(recordings.locator('.take')).toHaveCount(2)
-  await recordings.getByRole('button', { name: 'Close recording history' }).click()
+  await expect(recordings.getByRole('listitem')).toHaveCount(2)
+  await recordings.getByRole('button', { name: 'Back to practice' }).click()
   await card(page).getByRole('button', { name: 'Good', exact: true }).click()
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await card(page).getByRole('button', { name: 'Reveal', exact: true }).click()
@@ -118,7 +117,7 @@ test('Ref on a back keeps replaying only each later take on that card; the next 
   await expect.poll(async () => (await savedTakes(page, texts[0])).length).toBe(3)
 })
 
-test('phone audio controls fit and the history dialog closes back to the same card', async ({
+test('phone audio controls fit and history returns to the same card', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 740 })
@@ -160,12 +159,13 @@ test('phone audio controls fit and the history dialog closes back to the same ca
   await finishClip(page)
   await actions.click()
   await page.getByRole('button', { name: 'Recording history', exact: true }).click()
-  const dialog = page.getByRole('dialog', { name: 'Recording history' })
-  const recordings = dialog.getByRole('region', { name: 'Saved recordings' })
-  await expect(recordings.locator('.take')).toHaveCount(1)
-  await expect(controls.locator('.recording-history-panel')).toHaveCount(0)
+  const recordings = page.getByRole('region', { name: 'Recording history' })
+  await expect(recordings.getByRole('listitem')).toHaveCount(1)
+  await expect(controls).toBeHidden()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(recordings.getByRole('button', { name: 'Back to practice' })).toBeFocused()
   await page.keyboard.press('Escape')
-  await expect(dialog).toHaveCount(0)
+  await expect(recordings).toHaveCount(0)
   await expect(actions).toBeFocused()
   await expect(microphone).toBeVisible()
 })
