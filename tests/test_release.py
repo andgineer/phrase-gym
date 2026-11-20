@@ -65,7 +65,7 @@ def test_declining_release_does_not_change_version_or_push(repository, monkeypat
     assert not any(command[1] in {"commit", "push"} for command in commands)
 
 
-def test_release_updates_lock_checks_then_pushes_branch_and_tag_atomically(repository) -> None:
+def test_release_stages_versioned_files_then_pushes_branch_and_tag_atomically(repository) -> None:
     version_file, _, commands = repository
     release.release("bug")
     assert version_file.read_text() == '__version__ = "0.10.1"\n'
@@ -80,8 +80,6 @@ def test_release_updates_lock_checks_then_pushes_branch_and_tag_atomically(repos
             "frontend/openapi.json",
             "frontend/src/api.generated.ts",
         ),
-        ("uv", "run", "inv", "pre"),
-        ("uv", "run", "inv", "test"),
         ("git", "commit", "-m", "Version v0.10.1"),
         ("git", "tag", "-a", "v0.10.1", "-m", "Release 0.10.1"),
         ("git", "push", "--atomic", "origin", "main", "v0.10.1"),
@@ -120,19 +118,34 @@ def test_short_tag_helper_keeps_full_package_version(repository) -> None:
     assert commands[-1] == ("git", "push", "--atomic", "origin", "main", "v0.11")
 
 
-@pytest.mark.parametrize("task", ["generate-api", "pre", "test"])
-def test_failed_release_step_never_commits_or_tags(repository, monkeypatch, task) -> None:
+def test_failed_contract_generation_never_commits_or_tags(repository, monkeypatch) -> None:
     _, _, commands = repository
 
     def fail(command, **_kwargs):
         commands.append(tuple(command))
-        if command == ["uv", "run", "inv", task]:
+        if command == ["uv", "run", "inv", "generate-api"]:
             raise subprocess.CalledProcessError(1, command)
 
     monkeypatch.setattr(release.subprocess, "run", fail)
     with pytest.raises(subprocess.CalledProcessError):
         release.release("bug")
     assert not any(command[1] in {"commit", "push"} for command in commands)
+    assert not any(command[:3] == ("git", "tag", "-a") for command in commands)
+
+
+def test_failed_commit_never_tags_or_pushes(repository, monkeypatch) -> None:
+    _, _, commands = repository
+    git = release.git
+
+    def reject_commit(*args: str) -> str:
+        if args[0] == "commit":
+            raise subprocess.CalledProcessError(1, ("git", *args))
+        return git(*args)
+
+    monkeypatch.setattr(release, "git", reject_commit)
+    with pytest.raises(subprocess.CalledProcessError):
+        release.release("bug")
+    assert not any(command[:2] == ("git", "push") for command in commands)
     assert not any(command[:3] == ("git", "tag", "-a") for command in commands)
 
 

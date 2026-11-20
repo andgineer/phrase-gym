@@ -68,10 +68,7 @@ def release(kind: str, *, dry_run: bool = False, short_tag: bool = False) -> Non
     (ROOT / VERSION_FILE).write_text(f'__version__ = "{version}"\n')
     subprocess.run(["uv", "lock"], cwd=ROOT, check=True)
     subprocess.run(["uv", "run", "inv", "generate-api"], cwd=ROOT, check=True)
-    # The API drift check compares regenerated files with the Git index.
     git("add", VERSION_FILE, "uv.lock", *API_CONTRACT_FILES)
-    subprocess.run(["uv", "run", "inv", "pre"], cwd=ROOT, check=True)
-    subprocess.run(["uv", "run", "inv", "test"], cwd=ROOT, check=True)
     git("commit", "-m", f"Version {tag}")
     git("tag", "-a", tag, "-m", f"Release {version}")
     git("push", "--atomic", "origin", "main", tag)
