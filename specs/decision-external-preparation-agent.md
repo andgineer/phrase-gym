@@ -8,7 +8,7 @@ The learner never handles packages or JSON: material comes either from an extern
 
 The external agent's submission is one documented UTF-8 JSON structure containing an input ID, source label/link, learning/card/help languages and phrases with stable item IDs, `text` for the complete wording, short explanation, retrieval cues and optional detailed explanation. Phrases also identify their lesson and carry recall hints and usage contexts. Each phrase belongs to one source-scoped lesson with a stable identity. One submission may contain several lessons. `Phrase` is the complete typed record in `phrases`; `phrase.text` is its wording string. Prepared support, reference audio and scheduling fields belong to that same phrase. A Card is only its visual client component, not another data entity. Source links are opaque attribution. Define the exact generated schema and a working external-agent example with implementation; this document does not freeze prototype API fields. Plain unprepared words, URLs alone and slot/dialogue structures are rejected with an explanation of the supported input.
 
-External preparation and later Coach prompts follow the [chunk content decision](decision-targeted-drilling.md#phrases)
+External batches and Coach cards with authored examples follow the [chunk content decision](decision-targeted-drilling.md#phrases)
 and the worked preparation rules in the [external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules).
 Cover every supplied source phrase. Select its transferable chunk first, then create natural
 gap cues and varied requested wording hints that help retrieve the exact studied expression.
@@ -24,9 +24,9 @@ Validate the whole submission before adding it. The preparation agent corrects v
 
 ## Reference speech
 
-For material Coach prepares, it synthesizes English reference audio with the existing local Piper installation/voice. No provider login is needed for speech. Use the [durable Phrase Gym handoff](architecture.md#responsibilities) so submission works while Coach is offline. Prepare audio once and save it; practice plays saved audio without inference. A batch is ready only when its phrases and all required reference audio are saved. Submission is saved at once whether or not Coach is running. Preparation is an offline process: the learner submits material when they choose and does not need its result the same day, so the browser never polls preparation and shows no progress; new phrases appear in the library once published. A failed preparation is printed by Coach and becomes a dismissible notice below the learner's cumulative work. The notice arrives with the practice facts the entry already loads (first load, after practice, on return to the page) and is never requested on its own. Dismissal removes the notice in Phrase Gym, so it stays dismissed on every device, and leaves the recorded result unchanged. Submitting the same material again requeues a failed preparation and removes its notice. An external agent can read a submission's result by its ID at any later time. Failed or interrupted imports do not leave half a batch in practice. The external-agent path requires complete validated references with the batch and publishes immediately. The external agent reuses supplied source recordings or chooses an available authorized TTS tool and natural voice for missing audio. The built-in Coach uses Piper; this does not constrain external agents to Piper.
+Coach synthesizes the complete revealed wording once, using local Piper for English. Practice plays the saved reference. Phrase Gym accepts text while Coach is offline and publishes a batch only after validation and receipt of all required audio. Bound concurrent preparation to personal-app scale and perform expensive work outside the transaction. Stable identities prevent duplicate phrases or references after interruption. See the [handoff](architecture.md#responsibilities).
 
-Preserve submitted text and diagnostic reason on failure. Bound concurrent preparation to personal-app scale. Coach performs expensive work outside Phrase Gym transactions; Phrase Gym validates the returned result and commits the ready batch in one transaction. Retry uses stable identities so a repeated submission or result does not duplicate phrases or references. Do not build a job dashboard, broker or general distributed recovery framework.
+An external agent supplies validated audio with its batch for immediate publication and can read the result by submission ID. It reuses supplied recordings or chooses an available authorized TTS tool and natural voice for missing audio.
 
 External agents trust the supplied source's phrase-to-recording association and preserve attribution.
 No listening, transcription, ASR or speech-quality analysis is required for routine preparation.
@@ -45,42 +45,33 @@ learner preference. Attended listening can be requested separately; automated te
 
 ## Coach page: typed phrases and words
 
-The **Coach** tab opens an ordinary page with a four-row **Phrase or word** box, an optional source-sentence helper and a full-width **Send** button, unavailable while the box is empty. Enter sends; pasted line breaks become spaces before submission, preserving the existing single-line request shape. Phrase Gym saves the text to Coach's inbox at once, whether or not Coach is running, then clears the box and briefly confirms. A note explains that Coach prepares a card later and it appears in Library under **Added with Coach**. There is no waiting-request list or browser preparation tracking. Opening Coach leaves an open card with the regular media-retention behavior; returning to Practice and opening Daily resumes its server view.
+The learner pastes a word, phrase or source sentence into **Phrase or word** and presses **Send** or Enter. A word or phrase can include an optional source sentence. The four-row box disables the full-width **Send** button while empty. Pasted line breaks become spaces for submission. Phrase Gym saves the request, clears the box and confirms it. A note explains that published cards appear in Library under **Added with Coach**, separate from course lessons. Opening Coach retains the open card's media as usual. Returning to Practice and opening Daily resumes its server view.
 
-A Library search with no match says **Not in your Library yet.** and offers **Send “…” to Coach** with the trimmed search text. Matching results end with **Not it? Send “…” to Coach**. Both submit through the same request and replace the action with the same confirmation or show an error. An empty library links to the Coach page.
+A Library search with no match says **Not in your Library yet.** and offers **Send “…” to Coach**. Matching results end with **Not it? Send “…” to Coach**. Both submit the trimmed search through the same route and show confirmation or an error. An empty library links to Coach. Words from echo-words can be submitted this way or in an external agent's package. Its storage and code stay read-only.
 
-Coach prepares a phrase as a chunk card under the [phrase rules](decision-targeted-drilling.md#phrases) and a single word as a word-sense card under the [word rules](decision-targeted-drilling.md#words-after-the-phrase-mvp). A word-sense card is an ordinary phrase record with two or three contexts as its cues; there is no separate word entity. Prepared items join one standing lesson, **Added with Coach**, kept apart from course lessons so source attribution stays honest. External agents always submit complete audio, so Coach's inbox holds only text sent from the browser.
+### Input decisions
 
-The typed text, compared without regard to letter case or repeated spaces, is the item's identity, so typing it again never creates a second card. The page confirms what happened: **Saved for Coach** for new text, for a failed preparation it retries and for text whose card the learner has since deleted; **Already waiting for Coach** while the same text is still waiting or being prepared; **Already in your Library** while its card exists. A different wording or a different source sentence is new material. Words from echo-words arrive the same way, sent from the Coach page or inside an external agent's package; there is no export-file import. Direct integration with that project's storage or code requires separate authorization. Its source stays read-only.
+Submissions from both Coach and Library capture the active learning language when the learner presses Send. Coach judges the text in that language. Cue and help languages follow [the learner's choices](decision-personal-preferences.md). English is the first implementation. Apply the same decision in each supported language.
 
-One bounded Coach request prepares the item under the content rules and current language choices. Cards are English with English help, like current course batches. The learner's already authenticated Claude Code CLI is Coach's default preparation CLI, and Codex is a qualified alternative chosen explicitly on the Coach command line. The Antigravity CLI's free Gemini tier is a third explicit choice for learners without a subscription; it is not qualified, and the [model and call experiments](plan/coach-model-and-call-experiments.md) decide whether it is usable. All use the same vendor-neutral prompts. There is no automatic provider switch or paid API fallback. Within Antigravity, automatic fallback to another available free-tier model is allowed; every invocation specifies its model and effort and logs any switch under the [CLI policy](architecture.md#local-access-and-privacy). Internal AI means preparation submitted through Phrase Gym and executed by Coach, not a requirement to run local LLM weights.
+| Submitted text | Coach outcome |
+|---|---|
+| Valid word or expression, including a regional spelling or inflected form | Preserve the wording. Use the source to identify the intended expression and any sense it establishes. A valid word alone can be practised for its form. |
+| Obvious typo with only one plausible correction in the available context | Use the corrected form automatically. Keep the original and show the learner the change, for example **definately → definitely**, in the Coach result. |
+| Wrong language, unintelligible text or several plausible corrections | Reject the input and keep it out of practice. A plausible guess is insufficient to change what the learner studies. |
 
-Like audio preparation, it runs offline: the browser does not track it, and a failure surfaces as the same dismissible notice. The notice suggests typing the same text again only when that can help, such as after a usage limit, login problem or timeout; when the input itself cannot become a card, it gives only the reason. Use the supplied context and agent judgment to choose the sense. If the input is insufficient to prepare a coherent card, fail the batch with the concrete reason; do not open a clarification conversation. A malformed model response never becomes a phrase. Keep submitted material so that submitting it again retries preparation. Reuse the same validation, audio and import path as external batches. Preparation never reads recordings or changes language preferences.
+A valid form with several meanings can support wording practice. Claim a particular meaning only when the available evidence supports it. A valid variant needs no correction to a preferred dialect. Coach never asks the learner to select a meaning, approve a correction or review a card before publication.
+
+### Results in Coach
+
+The **Coach** inbox shows rejected submissions with the original text, selected learning language, concrete reason and **Dismiss**. The learner may edit and submit new material if they choose. Repeating unchanged rejected input returns its existing result. Dismissal persists across devices and never requeues work or deletes its recorded result. Temporary login, quota, timeout, audio or other service failures have a distinct result with a reason and a retry when useful. Coach logs these failures, and Practice shows a dismissible notice below cumulative work with the practice facts already loaded. Resubmitting after a service failure retries it and clears that notice. An outage is insufficient evidence for a language rejection. The browser reads inbox results when Coach opens or refreshes, without progress polling or a live job dashboard.
+
+The learning language, submitted wording and optional source sentence identify repeat material. Ignore repeated spaces and inconsequential casing when comparing, but preserve distinctions such as German **Morgen** and **morgen**. Keep the submitted text. A duplicate reports **Already waiting for Coach** or **Already in your Library** as appropriate. A new submission, an explicit retry after a service failure, or a new submission after deletion of its card reports **Saved for Coach**. A different source or learning language can identify a different item.
 
 ### Coach prompts and evaluation
 
-The card content rules live in one shared file that both the Coach prompts and the
-[external-agent guide](../docs/src/en/agent-add-phrases.md#content-preparation-rules) include,
-so the two preparers follow one text. Batch coverage, source recordings and the API handoff stay
-in the external guide; how to read the learner's typed input stays in the Coach prompts.
-One vendor-neutral prompt set, the prepare, review and revise prompts with the shared content
-rules, serves every Coach CLI and the external guide. Prompts state content rules only; how a CLI
-reads the task file, returns structured output, restricts tools and reports errors belongs in
-its adapter. A prompt changes only to state a content rule more clearly for any capable agent,
-and a deterministic structural check is preferred where one can catch the problem.
-Use separate CLI sessions to prepare material and review it. Assess the review findings,
-apply useful corrections and check the changes before publication. A corrected card is reviewed
-again by a fresh session that sees only the card as it stands; Coach makes at most two reviews
-and two corrections per card and publishes only a card that passes its automatic checks. Coach is a headless worker:
-it takes inbox material, prepares it and publishes through the API. Neither Coach nor the external
-preparation agent requests learner opinions or produces preparation reports. Successful API
-publication completes the task; unresolved failures use the existing error path. Keep development
-and orchestration details in specs, not in external-agent instructions.
+Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same file of authoring rules for enriched content. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [CLI policy](architecture.md#local-access-and-privacy). A malformed response cannot authorize publication.
 
-Test prompt changes on separate development and held-out sets: tune on the development set,
-then check the frozen prompts on untouched test items. If a test finding informs a prompt
-change, move that item into the development set and use fresh held-out items next time.
-Keep actual outputs, reviewer findings and human judgments distinct.
+The [architecture comparison](plan/coach-model-and-call-experiments.md) determines how much recognition, generation and independent checking the runtime needs. Coach uses the ordinary API validation, audio and atomic publication path. Neither runtime path needs learner approval. Fresh semantic review of measured outputs belongs to development. Freeze the benchmark before evaluation and use fresh held-out inputs whenever a finding informs tuning.
 
 ## Repair and scope
 

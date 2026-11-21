@@ -2,7 +2,13 @@
 
 Phrase Gym helps an adult bring useful expressions and word senses into their own speech. It complements courses, listening, reading and real communication. Retrieval on a phrase prompt is an intermediate outcome, not evidence that a phrase was used naturally.
 
-Phrase Gym accepts externally prepared English phrase batches, and Coach prepares typed phrases and words into complete cards. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the content rules below define what a prepared phrase contains.
+Phrase Gym accepts externally prepared English phrase batches, and Coach prepares typed phrases and words into complete cards. Further languages follow; freer speaking needs its own activity design first. The [delivery ladder](plan/implementation-plan.md) defines scope; the phrase and word-sense rules describe cards with authored examples. The planned basic wording exercise below covers confirmed Coach targets without authored examples.
+
+## Basic wording practice
+
+A confirmed expression remains worth practising when Coach cannot establish a sense or trust a generated example. Before using a source sentence, confirm that its complete wording and grammar are acceptable in the learning language and that the target fits there. Replace the exact target span with a gap. For example, **We __________ that this will work** can cue **strongly believe** directly from the learner’s sentence. If the surroundings are faulty or uncertain, keep the confirmed word or phrase alone. Preserve the original separately and identify any corrected wording as a correction wherever it is shown. For a target alone, cue recall of its wording with a partial form, such as **def…ly** for **definitely**. A short target that has no useful partial form needs another safe wording cue. Keep a real retrieval task and conceal the complete answer, including any repetition elsewhere in the prompt. Use a generic instruction in the selected card language. The quoted source and the answer retain their learning-language forms. Reveal and voice the confirmed wording. This exercise makes no claim about an unstated sense, usage or translation.
+
+For an enriched card, wrong or unverified meaning, translation, grammar, register, speaker/listener role, source attribution or cue completion disqualifies the affected material. Drop it and retain the confirmed target for basic practice when necessary. An accurate but modest hint, similar examples or a missing optional contrast can still be useful. Improve those when economical. A misleading hint or a prompt that gives away the answer cannot serve as a fallback.
 
 ## Phrases
 
@@ -20,7 +26,7 @@ example context. This uses the current complete-example contract; it does not re
 editor, new target field, generated per-cue answers or automatic speech evaluation.
 
 The default cue is a natural sentence with the whole target chunk replaced by one constant-length
-gap and a short plain-English meaning gloss. The visible context carries the incidental proposition.
+gap and a short meaning gloss in the selected card language. The visible context carries the incidental proposition.
 Keep this a quick conversational response, not a scene-reading task. The gloss paraphrases the
 missing expression in ordinary language while preserving its intention and sentence frame;
 shortening must not turn neutral inquiry into positive expectation or preference into advice.
@@ -92,7 +98,7 @@ or guarantees spontaneous conversational transfer.
 
 ## Words after the phrase MVP
 
-Each word-sense entry teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. Choose the intended sense from the supplied context. If the input is insufficient to prepare a coherent entry, retain it as a preparation failure instead of opening a clarification conversation. Keep source identity so retrying the same entry does not duplicate it.
+Each word-sense entry teaches one intended sense through comprehensible chunks, a short definition and two or three different contexts. Choose the intended sense from the supplied context. When the sense is unresolved but the form is confirmed, Coach uses [basic wording practice](#basic-wording-practice). Keep source identity so retrying the same entry does not duplicate it.
 
 For English at the learner's stated B2 level, use a short English context with the target word missing, plus a sense cue if needed; ask the learner to say the complete chunk. For beginner German, use the Russian meaning of a short chunk and ask for the German chunk. Explain article/plural or another form only when relevant. Grade retrieval of the target sense/form, not an unrelated slip elsewhere in the sentence. The learner rates their own answer against the revealed target, and cards list no alternative answers; a close form that matters is mentioned in the explanation.
 

@@ -6,11 +6,9 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 ## Coach models and calls
 
-**Learner outcome:** a typed phrase becomes a card sooner and for less subscription quota, and a learner without a subscription knows whether the free Antigravity tier is worth using.
+The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
 
-The [model and call experiments](coach-model-and-call-experiments.md) own the measurements that choose the cheapest adequate Claude and Codex models, judge the free tier and cut the calls spent on one card. This work is independent of the interface stage and may run beside it.
-
-**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, every invocation specifies a model and supported effort with logged free-tier fallback allowed within Antigravity, and the preparation flow normally uses one call with at most one justified repair unless measurements show a concrete need for more. Optional richness is scored separately from learner-critical correctness.
+The next step is the [architecture comparison](coach-model-and-call-experiments.md) between program-built wording practice and model-authored examples with a separate verifier. Select the flow on observed errors, safe coverage, added learning material, time and quota. Report results by language and distinguish unmeasured configurations. Then implement the selected flow, Coach inbox outcomes and any required basic-card contract with matching audio and atomic publication. Qualify economical settings and the explicit alternative CLIs under the same plan.
 
 ## 5. Extend only the content the learner next needs
 
