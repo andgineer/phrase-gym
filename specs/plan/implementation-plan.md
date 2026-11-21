@@ -10,7 +10,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The [model and call experiments](coach-model-and-call-experiments.md) own the measurements that choose the cheapest adequate Claude and Codex models, judge the free tier and cut the calls spent on one card. This work is independent of the interface stage and may run beside it.
 
-**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, every invocation pins a specific model and supported effort without silent replacement, and the preparation flow normally uses one call with at most one justified repair unless measurements show a concrete need for more. Optional richness is scored separately from learner-critical correctness.
+**Exit:** each CLI is pinned to the cheapest model that passed, the Gemini option is either qualified or documented as not recommended with its measured reasons, every invocation specifies a model and supported effort with logged free-tier fallback allowed within Antigravity, and the preparation flow normally uses one call with at most one justified repair unless measurements show a concrete need for more. Optional richness is scored separately from learner-critical correctness.
 
 ## 5. Extend only the content the learner next needs
 
@@ -32,7 +32,7 @@ After the MVP, qualify Linux browser media playback and recording under the [pla
 
 ## Standing authorization for the local English demo
 
-Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Claude subscription login, or Codex or the free Antigravity login when explicitly selected, with the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Recordings and application data stay outside model access.
+Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Claude subscription login, or Codex or the free Antigravity login when explicitly selected, with the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Preparation payloads exclude recordings and application data; CLI execution uses the normal global user environment under the [access decision](../architecture.md#local-access-and-privacy).
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
