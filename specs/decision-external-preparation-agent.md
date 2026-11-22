@@ -71,7 +71,18 @@ The learning language, submitted wording and optional source sentence identify r
 
 Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same file of authoring rules for enriched content. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [provider and CLI policy](architecture.md#coach-provider-selection). A malformed response cannot authorize publication.
 
-The [architecture comparison](plan/coach-model-and-call-experiments.md) determines how much recognition, generation and independent checking the runtime needs. Coach uses the ordinary API validation, audio and atomic publication path. Neither runtime path needs learner approval. Fresh semantic review of measured outputs belongs to development. Freeze the benchmark before evaluation and use fresh held-out inputs whenever a finding informs tuning.
+### Preparation by provider
+
+The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-model-and-call-experiments.md).
+
+| Route | Preparation to qualify |
+|---|---|
+| OpenAI subscription | `gpt-5.6-luna` at low effort drafts the card. A separate `gpt-5.6-terra` call at low effort checks it. |
+| Anthropic subscription | `claude-haiku-5-5` at low effort drafts the card. A separate `claude-sonnet-5` call at low effort checks it. |
+| Gemini free | One recognition call with `gemini-3.8-flash-low` under the Antigravity routing policy. The program builds [basic wording practice](decision-targeted-drilling.md#basic-wording-practice) from the confirmed text. |
+| Gemini subscription | Preparation design remains open until measured on that subscription. |
+
+For subscription enrichment, the verifier checks the original submission, the learning language, target, correction, source sentence and every addition. Both calls must agree on the target and any correction. A disputed rejection or unresolved target ends with an inbox reason. Drop unsafe additions and use basic wording practice if the confirmed target stands on its own. An unavailable verifier is a service failure. Every published exercise requires validation, matching audio and atomic publication.
 
 ## Repair and scope
 
