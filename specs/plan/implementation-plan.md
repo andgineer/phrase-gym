@@ -8,7 +8,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
 
-The next step is the [architecture comparison](coach-model-and-call-experiments.md) between program-built wording practice and model-authored examples with a separate verifier. Select the flow on observed errors, safe coverage, added learning material, time and quota. Report results by language and distinguish unmeasured configurations. Then implement the selected flow, Coach inbox outcomes and any required basic-card contract with matching audio and atomic publication. Implement the [provider preference and routing order](../architecture.md#coach-provider-selection) and qualify each access tier under the same plan.
+The next step is the [architecture comparison](coach-model-and-call-experiments.md) between program-built wording practice and model-authored examples with a separate verifier. Compare both designs on all three available routes before selecting a common flow or a flow per route. Judge observed errors, safe coverage, added learning material, time and quota by route and language. Then implement the selected designs, Coach inbox outcomes and any required basic-card contract with matching audio and atomic publication. The [provider preference and routing order](../architecture.md#coach-provider-selection) applies independently of the benchmark.
 
 ## 5. Extend only the content the learner next needs
 
