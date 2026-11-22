@@ -1,6 +1,6 @@
 # Phrase Gym decisions
 
-Build a small adult personal trainer to bring useful expressions from courses and videos into the learner's own speech. Research-informed spoken retrieval, the retained Vue recorder/player, a Python backend, forgiving engagement and Coach preparation of typed phrases and words with Claude, Codex or the free Antigravity tier are in place; further languages follow. Freer speaking needs its own activity design first. Specs describe the intended product; code and operational docs describe what currently runs. Existing prototype behavior is not automatically a requirement.
+Build a small adult personal trainer to bring useful expressions from courses and videos into the learner's own speech. Research-informed spoken retrieval, the retained Vue recorder/player, a Python backend, forgiving engagement and Coach preparation of typed phrases and words are in place. The [provider selection](architecture.md#coach-provider-selection) defines the planned subscription and free routes. Further languages follow. Freer speaking needs its own activity design first. Specs describe the intended product; code and operational docs describe what currently runs. Existing prototype behavior is not automatically a requirement.
 
 Read in this order:
 

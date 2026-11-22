@@ -1,6 +1,6 @@
 # Delivery ladder
 
-The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. Coach prepares typed phrases and words into complete cards with Claude, Codex or the free Antigravity tier; content sources expand next. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
+The adult learner's goal is to bring useful expressions from courses and videos into their own speech. Daily and Extra provide repeatable bounded phrase recall with factual practice results, a streak and a forgiving weekly target. Coach prepares typed phrases and words into complete cards. Provider routing and richer content sources are planned below. The [practice and engagement decision](../decision-transfer-and-engagement.md) retains the behavior and evidence distinctions. Phrase recall is not freer speech; freer speech needs a distinct activity design before it can be scheduled or claimed.
 
 Every stage preserves the learner's existing database and upgrades it in place under the [data compatibility rule](../architecture.md#releases-and-data-compatibility); stages use current import packages and need no support for older import formats.
 
@@ -8,7 +8,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
 
-The next step is the [architecture comparison](coach-model-and-call-experiments.md) between program-built wording practice and model-authored examples with a separate verifier. Select the flow on observed errors, safe coverage, added learning material, time and quota. Report results by language and distinguish unmeasured configurations. Then implement the selected flow, Coach inbox outcomes and any required basic-card contract with matching audio and atomic publication. Qualify economical settings and the explicit alternative CLIs under the same plan.
+The next step is the [architecture comparison](coach-model-and-call-experiments.md) between program-built wording practice and model-authored examples with a separate verifier. Select the flow on observed errors, safe coverage, added learning material, time and quota. Report results by language and distinguish unmeasured configurations. Then implement the selected flow, Coach inbox outcomes and any required basic-card contract with matching audio and atomic publication. Implement the [provider preference and routing order](../architecture.md#coach-provider-selection) and qualify each access tier under the same plan.
 
 ## 5. Extend only the content the learner next needs
 
@@ -30,11 +30,11 @@ After the MVP, qualify Linux browser media playback and recording under the [pla
 
 ## Standing authorization for the local English demo
 
-Existing authorization for routine local English preparation and Piper runs continues. Reuse the selected Claude subscription login, or Codex or the free Antigravity login when explicitly selected, with the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Preparation payloads exclude recordings and application data; CLI execution uses the normal global user environment under the [access decision](../architecture.md#local-access-and-privacy).
+Existing authorization for routine local English preparation and Piper runs continues. Use existing authenticated access under the [provider selection](../architecture.md#coach-provider-selection), the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Preparation payloads exclude recordings and application data; CLI execution uses the normal global user environment under the [access decision](../architecture.md#local-access-and-privacy).
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
-The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [model and call experiments](coach-model-and-call-experiments.md) are requested work within this authorization. Paid API fallback, provider switching, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
+The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [model and call experiments](coach-model-and-call-experiments.md) are requested work within this authorization. Billable API access, switching outside the routing policy, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
 ## Delivery discipline
 

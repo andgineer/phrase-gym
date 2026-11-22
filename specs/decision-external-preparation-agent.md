@@ -69,7 +69,7 @@ The learning language, submitted wording and optional source sentence identify r
 
 ### Coach prompts and evaluation
 
-Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same file of authoring rules for enriched content. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [CLI policy](architecture.md#local-access-and-privacy). A malformed response cannot authorize publication.
+Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same file of authoring rules for enriched content. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [provider and CLI policy](architecture.md#coach-provider-selection). A malformed response cannot authorize publication.
 
 The [architecture comparison](plan/coach-model-and-call-experiments.md) determines how much recognition, generation and independent checking the runtime needs. Coach uses the ordinary API validation, audio and atomic publication path. Neither runtime path needs learner approval. Fresh semantic review of measured outputs belongs to development. Freeze the benchmark before evaluation and use fresh held-out inputs whenever a finding informs tuning.
 
