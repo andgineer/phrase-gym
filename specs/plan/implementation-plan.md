@@ -8,7 +8,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
 
-Qualify and implement the provisional [provider-specific preparation choices](../decision-external-preparation-agent.md#preparation-by-provider), the Coach inbox outcomes, and publication of basic or enriched cards with matching audio. The [remaining Coach work](coach-model-and-call-experiments.md) covers cue quality, language settings, package validation and provider routing.
+Follow the [Coach implementation plan](coach-implementation.md), starting with one basic English card through the existing Coach page, API and practice screen.
 
 ## 5. Extend only the content the learner next needs
 
@@ -34,7 +34,7 @@ Existing authorization for routine local English preparation and Piper runs cont
 
 Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
-The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [remaining Coach qualification](coach-model-and-call-experiments.md) follows these measurement rules. Billable API access, switching outside the routing policy, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
+The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [remaining Coach qualification](coach-implementation.md) follows these measurement rules. Billable API access, switching outside the routing policy, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
 ## Delivery discipline
 

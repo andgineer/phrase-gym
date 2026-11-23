@@ -90,7 +90,7 @@ Advance only when the service cannot complete the required work, for example bec
 
 Every tier follows the same language and publication rules. Free access may supply fewer examples or a verified basic exercise. It must complete the checks required for that exercise, including the independent verifier on a route selected for enrichment. Limited quota cannot justify publishing a partial or unchecked card.
 
-Every model call, including development review and retry, specifies an exact available model ID and supported effort. Record the requested and actual route, tier, model, effort and reason for any switch without account identifiers or secrets. Keep a small adapter interface, bounded execution, JSON results and output caps. CLI adapters use file-based prompt delivery. Reuse news-recap’s runner behavior without building a shared package. The [implementation plan](plan/coach-model-and-call-experiments.md#explicit-models-and-normal-cli-environment) covers qualification and removal of existing Coach-specific tool restrictions.
+Every model call, including development review and retry, specifies an exact available model ID and supported effort. Record the requested and actual route, tier, model, effort and reason for any switch without account identifiers or secrets. Keep a small adapter interface, bounded execution, JSON results and output caps. CLI adapters use file-based prompt delivery. Reuse news-recap’s runner behavior without building a shared package. The [implementation plan](plan/coach-implementation.md#4-route-requests-and-handle-service-failures) covers qualification and removal of existing Coach-specific tool restrictions.
 
 ## Backup and restore
 

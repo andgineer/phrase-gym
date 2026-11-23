@@ -12,6 +12,6 @@ Read in this order:
 6. [Preparation and speech](decision-external-preparation-agent.md): external-agent course batches and Coach preparation of typed phrases and words.
 7. [Language choices](decision-personal-preferences.md) and [local availability](decision-online-only.md).
 8. [Small application architecture](architecture.md): lightweight Phrase Gym, separate Coach, SQLite and stopped-app backup/restore.
-9. [Delivery ladder](plan/implementation-plan.md) and [unverified acceptance](open-problems.md).
+9. [Delivery ladder](plan/implementation-plan.md), [Coach implementation plan](plan/coach-implementation.md) and [unverified acceptance](open-problems.md).
 
 [Agent instructions](../AGENTS.md) and the [implementation handout](plan/orchestration-handout.md) govern delivery. [README](../README.md) introduces the project. The [installation guide](../docs/src/en/installation.md) covers launch and setup. Keep decisions and [development operations](development.md) here, user and external-agent guidance in `docs/src/`, and only remaining work in the plan.
