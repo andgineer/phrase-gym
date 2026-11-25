@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from phrase_gym.coach.basic_card import basic_card
 from phrase_gym.coach.preparation import Cli, PreparationError, render, schema
 from phrase_gym.server.coach_contracts import BasicCard
@@ -50,14 +52,26 @@ def recognized_card(answer: dict[str, Any], text: str) -> BasicCard:
     if answer["outcome"] == "reject":
         # A language decision about the input: typing it again cannot change it.
         raise PreparationError(answer["reason"].strip(), retry_helps=False)
+    target, original = answer["target"], answer["original_span"]
     source = answer["source"] if answer["source_usable"] else None
-    card = basic_card(answer["target"], answer["original_span"], source)
+    try:
+        card = basic_card(target, original, source)
+    except ValidationError:
+        # A source too long for a card still leaves the target to practise on its own.
+        card = None if source is None else _target_alone(target, original)
     if card is None:
         raise PreparationError(
-            "Coach could not make a cue that keeps the answer hidden.",
+            "Coach could not make a card that keeps the answer hidden.",
             retry_helps=False,
         )
     return card
+
+
+def _target_alone(target: str, original: str) -> BasicCard | None:
+    try:
+        return basic_card(target, original, None)
+    except ValidationError:
+        return None
 
 
 class Recognizer:

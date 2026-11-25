@@ -131,24 +131,38 @@ def test_a_rejected_model_with_no_other_flash_listed_fails_with_the_rejection(
     assert "invalid model selection" in (tmp_path / "a" / "recognize-stderr.log").read_text()
 
 
-def test_launches_run_one_at_a_time_and_start_spaced_apart() -> None:
+def run_paced(count: int, launch_seconds: float, delay: float) -> tuple[list[float], int]:
     starts: list[float] = []
-    active: list[int] = []
+    running = [0]
+    most_running = [0]
+    guard = threading.Lock()
 
     def launch() -> None:
-        starts.append(time.monotonic())
-        active.append(1)
-        assert len(active) == 1
-        time.sleep(0.05)
-        active.pop()
+        with guard:
+            starts.append(time.monotonic())
+            running[0] += 1
+            most_running[0] = max(most_running[0], running[0])
+        time.sleep(launch_seconds)
+        with guard:
+            running[0] -= 1
 
     stop = threading.Event()
-    threads = [threading.Thread(target=paced, args=(launch, 0.3, stop)) for _ in range(3)]
+    threads = [threading.Thread(target=paced, args=(launch, delay, stop)) for _ in range(count)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
-    assert len(starts) == 3
+    return starts, most_running[0]
+
+
+def test_launches_longer_than_the_spacing_still_run_one_at_a_time() -> None:
+    starts, most_running = run_paced(3, launch_seconds=0.3, delay=0.1)
+    assert (len(starts), most_running) == (3, 1)
+
+
+def test_short_launches_start_spaced_apart() -> None:
+    starts, most_running = run_paced(3, launch_seconds=0.02, delay=0.3)
+    assert (len(starts), most_running) == (3, 1)
     assert all(later - earlier >= 0.3 for earlier, later in itertools.pairwise(starts))
 
 

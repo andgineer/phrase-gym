@@ -66,6 +66,19 @@ test('a sent sentence becomes one basic card with its gap and matching reference
   expect(again.items[0].phrase_count).toBe(1)
 })
 
+test('a phrase sent alone is recalled from a partial form of every word', async ({ page }) => {
+  await page.goto('/')
+  await settled(page, await sendFromCoach(page, 'by and large'), 'added')
+  await tab(page, 'Practice').click()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  const card = page.locator('article.practice-card')
+  await expect(card.locator('.practice-instruction')).toHaveText('Say the missing wording.')
+  await expect(card.locator('.practice-prompt')).toHaveText('b… a… l…')
+  await expect(card).not.toContainText('large')
+  await revealAnswer(page)
+  await expect(page.getByTestId('practice-phrase')).toHaveText('by and large')
+})
+
 test('Coach and Library sends show corrections and rejections in the Coach inbox', async ({
   page,
 }) => {

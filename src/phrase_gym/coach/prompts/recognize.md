@@ -16,7 +16,7 @@ in context. Reject wrong-language or unintelligible input and ambiguous near-mis
 multiple senses is valid for wording practice.
 
 Copy a supplied source sentence exactly into source, or leave source empty when the input has
-none. Set source_usable true only if that complete source sentence as written is acceptable in
+none. When the input is only a sentence, copy it into source. Set source_usable true only if that complete source sentence as written is acceptable in
 learning_language and the exact target fits naturally there once. Never correct or paraphrase
 the source. Otherwise set source_usable false and retain a valid target alone.
 

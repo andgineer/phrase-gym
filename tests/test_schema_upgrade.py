@@ -252,7 +252,11 @@ INSERT INTO imports (package_id, content_hash, payload, status, error, created_a
   VALUES ('coach-rejected', 'h1', '{"text": "zzqx"}', 'error', 'Not English',
           '2026-11-01T10:00:00+00:00', 'coach', 0),
          ('coach-failed', 'h2', '{"text": "by and large"}', 'error', 'Codex is not logged in',
-          '2026-11-01T10:01:00+00:00', 'coach', 1);
+          '2026-11-01T10:01:00+00:00', 'coach', 1),
+         ('coach-seen', 'h3', '{"text": "fom"}', 'error', 'Several words fit',
+          '2026-11-01T10:02:00+00:00', 'coach', 0),
+         ('coach-seen-failure', 'h4', '{"text": "in the end"}', 'error', 'Timed out',
+          '2026-11-01T10:03:00+00:00', 'coach', 1);
 INSERT INTO import_notices VALUES ('coach-rejected', '2026-11-01T11:00:00+00:00'),
   ('coach-failed', '2026-11-01T11:01:00+00:00');
 """
@@ -266,8 +270,11 @@ INSERT INTO import_notices VALUES ('coach-rejected', '2026-11-01T11:00:00+00:00'
         kept = list(connection.execute("SELECT package_id, error, dismissed FROM imports"))
         columns = {row[1] for row in connection.execute("PRAGMA table_info(phrases)")}
     assert noticed == ["coach-failed"]
+    # A result whose notice was already dismissed stays dismissed in the Coach inbox.
     assert sorted(tuple(row) for row in kept) == [
         ("coach-failed", "Codex is not logged in", 0),
         ("coach-rejected", "Not English", 0),
+        ("coach-seen", "Several words fit", 1),
+        ("coach-seen-failure", "Timed out", 1),
     ]
     assert "instruction" in columns

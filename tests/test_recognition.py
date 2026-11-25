@@ -9,13 +9,17 @@ from phrase_gym.coach.recognition import recognition_problem, recognized_card
     ("target", "partial"),
     [
         ("definitely", "def…ly"),
-        ("strongly believe", "st…ly"),
+        ("strongly believe", "st…ly be…ve"),
+        ("by and large", "b… a… l…"),
+        ("in the end", "i… t… e…"),
+        ("take it for granted", "t… i… f… gr…ed"),
+        ("a lot", "… l…"),
         ("colour", "co…"),
         ("yet", "y…"),
         ("I", None),
     ],
 )
-def test_a_partial_form_keeps_most_of_the_longest_word_hidden(
+def test_a_partial_form_keeps_every_word_in_order_without_showing_any(
     target: str, partial: str | None
 ) -> None:
     assert partial_form(target) == partial
@@ -88,4 +92,18 @@ def test_a_rejection_is_a_language_decision() -> None:
     rejected = answer(outcome="reject", original_span="", target="", reason="Not English.")
     with pytest.raises(PreparationError, match="Not English.") as raised:
         recognized_card(rejected, "zzqx")
+    assert not raised.value.retry_helps
+
+
+def test_a_source_too_long_for_a_card_leaves_the_target_alone() -> None:
+    source = "We strongly believe " + "and so on " * 60 + "it."
+    accepted = answer(source=source, source_usable=True)
+    card = recognized_card(accepted, f"strongly believe — {source}")
+    assert (card.text, card.cue) == ("strongly believe", "st…ly be…ve")
+
+
+def test_a_target_too_long_for_a_card_is_a_decision_not_a_service_failure() -> None:
+    target = " ".join(["strongly"] * 30)
+    with pytest.raises(PreparationError) as raised:
+        recognized_card(answer(original_span=target, target=target), target)
     assert not raised.value.retry_helps

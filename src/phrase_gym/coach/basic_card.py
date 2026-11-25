@@ -5,7 +5,7 @@ from phrase_gym.server.coach_contracts import GAP, BasicCard, CoachCorrection
 
 INSTRUCTIONS = {"en": "Say the missing wording."}
 WORD_CHAR = r"[\w'’\-]"
-LETTER_RUN = re.compile(r"[^\W\d_]+")
+TARGET_WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*")
 LONG_WORD = 7
 
 
@@ -26,17 +26,21 @@ def gapped(source: str | None, target: str) -> str | None:
     return None if contains_target(masked, target) else masked
 
 
+def _fragment(word: str) -> str:
+    # Every word keeps a slot; a one-letter word shows nothing rather than the whole word.
+    if len(word) < 2:  # noqa: PLR2004
+        return "…"
+    head = word[: min(3, len(word) // 3 or 1)]
+    tail = word[-2:] if len(word) >= LONG_WORD else ""
+    return f"{head}…{tail}"
+
+
 def partial_form(target: str) -> str | None:
-    """A partial form of the target's longest word, such as def…ly for definitely."""
-    runs = [run.group() for run in LETTER_RUN.finditer(target)]
-    if not runs:
+    """Each word of the target shortened in order, such as st…ly be…ve for strongly believe."""
+    fragments = [_fragment(word.group()) for word in TARGET_WORD.finditer(target)]
+    if not any(fragment != "…" for fragment in fragments):
         return None
-    token = max(runs, key=len)
-    if len(token) < 2:  # noqa: PLR2004
-        return None
-    head = token[: min(3, len(token) // 3 or 1)]
-    tail = token[-2:] if len(token) >= LONG_WORD else ""
-    partial = f"{head}…{tail}"
+    partial = " ".join(fragments)
     return None if contains_target(partial, target) else partial
 
 

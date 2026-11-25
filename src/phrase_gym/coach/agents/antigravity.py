@@ -1,4 +1,4 @@
-"""Antigravity (agy) launch, pacing and Flash model fallback copied from news-recap's runner."""
+"""Antigravity (agy) launch and Flash model fallback copied from news-recap's runner."""
 
 import json
 import logging
@@ -143,7 +143,7 @@ def inject_agy_log_file(run_args: str | list[str], log_path: Path) -> str | list
     return run_args
 
 
-# The free tier shares a low capacity pool, so launches run one at a time and start spaced out.
+# Coach's own pacing from the routing decision: one launch at a time, starts spaced apart.
 _launch_lock = threading.Lock()
 _last_launch = [float("-inf")]
 
