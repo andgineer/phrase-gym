@@ -6,7 +6,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 ## Coach models and calls
 
-The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
+The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions), followed by German with Russian help.
 
 Follow the [Coach implementation plan](coach-implementation.md), starting with bringing the reviewed basic card, Coach inbox and Gemini free recognition to main from branch `coach-plan-trial`.
 
@@ -14,7 +14,7 @@ Follow the [Coach implementation plan](coach-implementation.md), starting with b
 
 **Learner outcome:** use the same workflow for another selected language or richer source material.
 
-Choose one concrete need at a time: German chunks with Russian cues/help; Serbian after resolving help preferences; or richer source material. Retain the complete-example import format and [chunk content decision](../decision-targeted-drilling.md#phrases). Verify that language's comprehension, prompts and one voice separately. A slot system or full dialogues require a demonstrated learning use, not parity with the prototypes.
+Choose one concrete need at a time: Serbian after resolving help preferences, or richer source material. German with Russian cues and help is [step 2 of the Coach plan](coach-implementation.md#2-add-german-with-russian-help). Retain the complete-example import format and [chunk content decision](../decision-targeted-drilling.md#phrases). Verify that language's comprehension, prompts and one voice separately. A slot system or full dialogues require a demonstrated learning use, not parity with the prototypes.
 
 **Exit:** one representative batch in the selected extension works through the existing complete loop. No all-language/platform matrix gates delivery.
 
@@ -32,7 +32,7 @@ After the MVP, qualify Linux browser media playback and recording under the [pla
 
 Existing authorization for routine local English preparation and Piper runs continues. Use existing authenticated access under the [provider selection](../architecture.md#coach-provider-selection), the normal user home, existing voice cache and private attempt storage. No repeated budget, temporary authentication environment or login approval is needed. Do not copy tokens or read repository .env files. Preparation payloads exclude recordings and application data; CLI execution uses the normal global user environment under the [access decision](../architecture.md#local-access-and-privacy).
 
-Routine inspection of supplied external-AI material and local English synthesis is within the demo. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
+Routine inspection of supplied external-AI material and local English synthesis is within the demo. The same authorization covers the German preparation runs and German Piper synthesis in [step 2 of the Coach plan](coach-implementation.md#2-add-german-with-russian-help), which the learner requested on 2026-11-25. Use the existing runtime bounds when running the prototype. The replacement needs bounded execution, limited output and explicit retry, not the old distributed accounting machinery. Do not bypass current counters or spin on quota/authentication failures.
 
 The first MVP does not require a provider call. If actual model preparation is measured, inspect every output and retain separate fresh semantic review; normal configuration/skills may load and customization isolation is not claimed. The [Coach measurement rules](coach-implementation.md#measurement-and-qualification) apply these rules. Billable API access, switching outside the routing policy, broader unrequested experiments, source mutation, login automation, native permission dialogs and deployment remain outside authorization. Repository pushes follow the [standing delivery authorization](../../AGENTS.md#git-secrets-and-deployment).
 
