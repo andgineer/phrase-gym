@@ -1,0 +1,1 @@
+Coach could not prepare “usage-limit”: Gemini: Antigravity API quota exhausted (rate limit) — reduce parallelism or wait (during recognize) (details: /tmp/pytest-of-runner/pytest-0/test_a_service_failure_is_a_se2/attempts/20261125-223020-883918-coach-d54185dc5815abde52fd64293e76a8ef)
