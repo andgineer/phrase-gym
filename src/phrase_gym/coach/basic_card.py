@@ -5,7 +5,8 @@ from pydantic import ValidationError
 from phrase_gym.coach.hint_checks import contains_words, words
 from phrase_gym.coach.messages import message
 from phrase_gym.coach.preparation import PreparationError
-from phrase_gym.server.coach_contracts import GAP, BasicCard, CoachCorrection
+from phrase_gym.server.coach_contracts import BasicCard, CoachCorrection
+from phrase_gym.server.sentence_gaps import GAP, realizes, shows_target
 
 WORD_CHAR = r"[\w'’\-]"
 TARGET_WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*")
@@ -17,27 +18,23 @@ def contains_target(text: str, target: str) -> bool:
     return bool(words(target) and contains_words(text, words(target)))
 
 
-def _gap(source: str, span: str, hidden: list[str]) -> str | None:
+def _gap(source: str, span: str, target: str) -> str | None:
+    if not realizes(span, target):
+        return None
     pattern = re.compile(rf"(?<!{WORD_CHAR}){re.escape(span)}(?!{WORD_CHAR})")
     matches = list(pattern.finditer(source))
     if len(matches) != 1:
         return None
     before, after = matches[0].span()
     masked = source[:before] + GAP + source[after:]
-    return None if any(contains_target(masked, answer) for answer in hidden) else masked
+    return None if shows_target(masked, target) else masked
 
 
 def gapped(source: str | None, target: str, span: str = "") -> str | None:
     """The source with its span realizing the target, even inflected, replaced by a gap."""
     if not source or GAP in source:
         return None
-    hidden = [target, span] if span.strip() else [target]
-    # A span of another length is not one realization of the whole target.
-    if span.strip() and len(words(span)) == len(words(target)):
-        masked = _gap(source, span, hidden)
-        if masked:
-            return masked
-    return _gap(source, target, hidden)
+    return (_gap(source, span, target) if span.strip() else None) or _gap(source, target, target)
 
 
 def _hidden(letters: str) -> str:

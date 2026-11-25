@@ -30,6 +30,9 @@ def work(text: str, native_language: str = "en") -> CoachWork:
         ("take it for granted", "t__e i_ f__ gr___ed"),
         ("a lot", "_ l__"),
         ("don't mind", "d__'t m__d"),
+        ("misunderstanding", "mis___________ng"),
+        ("responsibilities", "res___________es"),
+        ("straightforward", "str__________rd"),
         ("I", None),
     ],
 )
@@ -63,6 +66,8 @@ def test_a_gap_replaces_exactly_one_whole_target_span(
         ("came up with", "She __________ a brilliant plan overnight."),
         ("come up with", None),
         ("came", None),
+        ("up with a", None),
+        ("a brilliant plan", None),
         ("", None),
     ],
 )
@@ -80,6 +85,17 @@ def test_a_span_found_twice_falls_back_to_the_literal_target() -> None:
     assert gapped(leaky, "come up with", "came up with") is None
     assert gapped("We believe it, we believe.", "believe", "believe") is None
     assert gapped("Yes, I believe so.", "believe", "believed") == "Yes, I __________ so."
+
+
+def test_a_gap_is_refused_while_another_form_of_the_target_stays_visible() -> None:
+    source = "She came up with a plan, and he comes up with another."
+    assert gapped(source, "come up with", "came up with") is None
+
+
+@pytest.mark.parametrize("target", ["misunderstanding", "responsibilities", "straightforward"])
+def test_a_long_word_gets_a_partial_form_card(target: str) -> None:
+    card = basic_card(target, target, None, "en")
+    assert card and card.text == target and target[:3] in card.cue
 
 
 def test_a_card_reveals_the_source_only_when_its_gap_works() -> None:

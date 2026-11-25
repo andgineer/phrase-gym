@@ -5,12 +5,12 @@ from pydantic import Field, model_validator
 from phrase_gym.server.contracts import LearningLanguage, NativeLanguage
 from phrase_gym.server.import_contracts import IDENTITY_PATTERN, ImportPhrase, StrictModel
 from phrase_gym.server.search_terms import search_key
+from phrase_gym.server.sentence_gaps import gap_around, realizes, shows_target
 
 MAX_TYPED_LENGTH = 1000
 COACH_SOURCE_ID = "phrase-gym-coach"
 COACH_SOURCE_LABEL = "Added with Coach"
 COACH_LESSON_ID = "added-with-coach"
-GAP = "__________"
 
 
 class CoachRequest(StrictModel):
@@ -50,13 +50,12 @@ class BasicCard(StrictModel):
         target = search_key(self.target)
         if target in search_key(self.cue) or target in search_key(self.instruction):
             raise ValueError("the cue and instruction must conceal the target")
-        if GAP in self.cue:
-            # A sentence gap may hide an inflected form, such as came up with for come up with.
-            before, _, after = self.cue.partition(GAP)
+        if gap := gap_around(self.cue):
+            before, after = gap
             filled = self.text[len(before) : len(self.text) - len(after)]
             fits = self.text.startswith(before) and self.text.endswith(after)
-            if not fits or len(search_key(filled).split()) != len(target.split()):
-                raise ValueError("the revealed text must fill the gap with the target's words")
+            if not fits or not realizes(filled, self.target) or shows_target(self.cue, self.target):
+                raise ValueError("the revealed text must fill the gap with a form of the target")
         elif target not in search_key(self.text):
             raise ValueError("the revealed text must contain the target")
         if self.correction and self.correction.corrected != self.target:

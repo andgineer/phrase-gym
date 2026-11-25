@@ -17,8 +17,8 @@ from phrase_gym.coach.hint_checks import (
     words,
 )
 from phrase_gym.server.import_contracts import ImportPhrase
+from phrase_gym.server.sentence_gaps import GAP
 
-GAP = "__________"
 GAP_RUN = re.compile(r"_{2,}")
 CUE_COUNTS = {"phrase": (1, 2), "word": (2, 3)}
 

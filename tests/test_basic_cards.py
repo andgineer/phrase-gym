@@ -144,6 +144,8 @@ def test_a_failed_publication_leaves_no_partial_card(
         {"instruction": "Say strongly believe."},
         {"text": "We think this will work"},
         {"text": "We strongly believe it will work"},
+        {"text": "We totally doubt this will work"},
+        {"text": "We strongly believe this will work", "cue": "We strongly __________ will work"},
         {"correction": {"original": "strongly belive", "corrected": "strongly believed"}},
     ],
 )
@@ -152,6 +154,48 @@ def test_a_basic_result_must_conceal_the_target_and_reveal_it(
 ) -> None:
     request_id = claimed(client)
     assert post_result(client, request_id, basic(**changes)).status_code == 422
+    assert coach_phrases(client) == []
+
+
+@pytest.mark.parametrize(
+    ("target", "text", "cue"),
+    [
+        ("misunderstanding", "misunderstanding", "mis___________ng"),
+        (
+            "come up with",
+            "She came up with a brilliant plan overnight.",
+            "She __________ a brilliant plan overnight.",
+        ),
+    ],
+)
+def test_a_long_partial_form_or_an_inflected_gap_publishes(
+    client: TestClient, target: str, text: str, cue: str
+) -> None:
+    request_id = claimed(client)
+    card = basic(target=target, text=text, cue=cue)
+    assert post_result(client, request_id, card).json()["status"] == "added"
+
+
+@pytest.mark.parametrize(
+    ("text", "cue"),
+    [
+        (
+            "She came up with a brilliant plan overnight.",
+            "She came __________ brilliant plan overnight.",
+        ),
+        ("She came up with a brilliant plan overnight.", "She came up with __________ overnight."),
+        (
+            "She came up with a plan, and he comes up with another.",
+            "She __________ a plan, and he comes up with another.",
+        ),
+    ],
+)
+def test_a_gap_that_is_not_a_hidden_form_of_the_target_is_refused(
+    client: TestClient, text: str, cue: str
+) -> None:
+    request_id = claimed(client)
+    card = basic(target="come up with", text=text, cue=cue)
+    assert post_result(client, request_id, card).status_code == 422
     assert coach_phrases(client) == []
 
 

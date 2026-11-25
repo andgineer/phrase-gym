@@ -59,6 +59,8 @@ Main is English-only today:
   - **Separable verbs** split in a main clause (**Ich rufe dich an**). A cue therefore uses a frame where the verb stays whole, such as **Ich muss dich morgen __________** for **anrufen**. A sentence gap still covers one contiguous span only.
 - Paid-route German cards follow the [word-sense rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp) for beginner German. The cue gives the Russian meaning of a short chunk and asks for the German chunk. Glosses, short help and detailed help are in Russian. Recall hints keep German wording fragments, and the revealed sentence and the answer stay German.
 - Gemini free German cards are basic cards. The instruction and inbox reasons use the native-language messages Coach already renders. The fresh reviewer also checks the Russian texts. A bare noun stays as typed, because basic practice claims nothing beyond the wording. A sentence gap works as for English. A separable verb split in its sentence falls back to the partial form of the target.
+  - The revealed **Corrected from “…”.** line on a corrected card follows the language settings like the instruction; the server still renders it in English.
+  - A partial-form card's instruction asks for the whole word or phrase, such as «Произнесите слово или фразу целиком». The 2026-11-25 blind review found that «Произнесите пропущенное.» can read as "say only the missing letters".
 
 **Reference audio.**
 
