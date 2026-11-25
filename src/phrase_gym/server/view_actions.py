@@ -53,6 +53,8 @@ class ViewActions:
             view = require_view(connection, learning_day(connection, now), operation)
             phrase = view_phrase(connection, view)
             values = json.loads(phrase.cues_json if kind == "cue" else phrase.hints_json)
+            if not values:
+                raise PracticeConflictError("This card has no hints.")
             history = json.loads(view.operations_json)
             prior = history.get(operation.operation_id)
             if prior is not None:

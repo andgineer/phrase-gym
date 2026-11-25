@@ -33,8 +33,11 @@ class PracticeCard(StrictModel):
     mode: PracticeMode
     kind: ActiveCardKind
     revealed: bool
+    # A generic task line for basic Coach cards; authored cues explain themselves.
+    instruction: str | None
     cue: Cue | None
     other_cue_available: bool
+    hint_available: bool
     hint: str | None
     answer: CardAnswer | None
     # Null when another grade on this learning day would not reschedule the phrase.

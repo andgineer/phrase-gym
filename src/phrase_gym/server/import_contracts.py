@@ -15,8 +15,13 @@ class StrictModel(BaseModel):
 
 
 class Cue(StrictModel):
-    situation: str = Field(min_length=5, max_length=500)
+    situation: str = Field(min_length=1, max_length=500)
     partner_line: str | None = Field(default=None, min_length=1, max_length=300)
+
+
+class ImportCue(Cue):
+    # Authored cues need a real context; a basic Coach cue may be a short partial form.
+    situation: str = Field(min_length=5, max_length=500)
 
 
 def _distinct(values: list[str], label: str) -> list[str]:
@@ -31,15 +36,16 @@ def _distinct(values: list[str], label: str) -> list[str]:
 class ImportPhrase(StrictModel):
     item_id: str = Field(pattern=IDENTITY_PATTERN)
     text: str = Field(min_length=2, max_length=500)
-    explanation: str = Field(min_length=5, max_length=1000)
-    cues: list[Cue] = Field(min_length=1, max_length=3)
+    # An accurate short translation such as Russian «яд» is complete help without padding.
+    explanation: str = Field(min_length=1, max_length=1000)
+    cues: list[ImportCue] = Field(min_length=1, max_length=3)
     recall_hints: list[str] = Field(min_length=2, max_length=6)
     usage_contexts: list[str] = Field(min_length=1, max_length=6)
     detailed_explanation: str | None = Field(default=None, max_length=2000)
 
     @field_validator("cues")
     @classmethod
-    def cues_are_distinct(cls, cues: list[Cue]) -> list[Cue]:
+    def cues_are_distinct(cls, cues: list[ImportCue]) -> list[ImportCue]:
         _distinct([cue.situation for cue in cues], "cue situations")
         return cues
 

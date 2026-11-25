@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/coach/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inbox */
+        get: operations["inbox_api_coach_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/coach/requests": {
         parameters: {
             query?: never;
@@ -49,6 +66,40 @@ export interface paths {
         put?: never;
         /** Submit Text */
         post: operations["submit_text_api_coach_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/coach/requests/{request_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss */
+        post: operations["dismiss_api_coach_requests__request_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/coach/requests/{request_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry */
+        post: operations["retry_api_coach_requests__request_id__retry_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -537,6 +588,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * BasicCard
+         * @description Wording practice for a confirmed target, without authored meaning or examples.
+         */
+        BasicCard: {
+            correction?: components["schemas"]["CoachCorrection"] | null;
+            /** Cue */
+            cue: string;
+            /** Instruction */
+            instruction: string;
+            /** Target */
+            target: string;
+            /** Text */
+            text: string;
+        };
         /** CardAnswer */
         CardAnswer: {
             /** Detailed Explanation */
@@ -557,6 +623,13 @@ export interface components {
             /** Pending */
             pending: number;
         };
+        /** CoachCorrection */
+        CoachCorrection: {
+            /** Corrected */
+            corrected: string;
+            /** Original */
+            original: string;
+        };
         /** CoachFailure */
         CoachFailure: {
             /** Error */
@@ -567,14 +640,45 @@ export interface components {
              */
             retry_helps: boolean;
         };
+        /** CoachInbox */
+        CoachInbox: {
+            /** Items */
+            items: components["schemas"]["CoachOutcome"][];
+        };
+        /** CoachOutcome */
+        CoachOutcome: {
+            correction: components["schemas"]["CoachCorrection"] | null;
+            /**
+             * Learning Language
+             * @constant
+             */
+            learning_language: "en";
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "corrected" | "rejected" | "failed";
+            /** Reason */
+            reason: string | null;
+            /** Request Id */
+            request_id: string;
+            /** Text */
+            text: string;
+        };
         /** CoachRequest */
         CoachRequest: {
+            /**
+             * Learning Language
+             * @constant
+             */
+            learning_language: "en";
             /** Text */
             text: string;
         };
         /** CoachResult */
         CoachResult: {
-            phrase: components["schemas"]["ImportPhrase"];
+            basic?: components["schemas"]["BasicCard"] | null;
+            phrase?: components["schemas"]["ImportPhrase"] | null;
             /** Reference */
             reference: string;
             /** Result Id */
@@ -586,16 +690,28 @@ export interface components {
              * Outcome
              * @enum {string}
              */
-            outcome: "saved" | "waiting" | "in_library";
+            outcome: "saved" | "waiting" | "in_library" | "rejected";
             /** Request Id */
             request_id: string;
         };
         /** CoachWork */
         CoachWork: {
+            /**
+             * Learning Language
+             * @constant
+             */
+            learning_language: "en";
+            /**
+             * Native Language
+             * @enum {string}
+             */
+            native_language: "ru" | "en";
             /** Package Id */
             package_id: string;
             /** Text */
             text: string;
+            /** Translation */
+            translation: boolean;
         };
         /** CompletionReceipt */
         CompletionReceipt: {
@@ -726,6 +842,13 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** ImportCue */
+        ImportCue: {
+            /** Partner Line */
+            partner_line?: string | null;
+            /** Situation */
+            situation: string;
+        };
         /** ImportLesson */
         ImportLesson: {
             /** Lesson Id */
@@ -754,7 +877,7 @@ export interface components {
         /** ImportPhrase */
         ImportPhrase: {
             /** Cues */
-            cues: components["schemas"]["Cue"][];
+            cues: components["schemas"]["ImportCue"][];
             /** Detailed Explanation */
             detailed_explanation?: string | null;
             /** Explanation */
@@ -935,6 +1058,10 @@ export interface components {
             cue: components["schemas"]["Cue"] | null;
             /** Hint */
             hint: string | null;
+            /** Hint Available */
+            hint_available: boolean;
+            /** Instruction */
+            instruction: string | null;
             /**
              * Kind
              * @enum {string}
@@ -1307,6 +1434,26 @@ export interface operations {
             };
         };
     };
+    inbox_api_coach_inbox_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoachInbox"];
+                };
+            };
+        };
+    };
     submit_text_api_coach_requests_post: {
         parameters: {
             query?: never;
@@ -1319,6 +1466,68 @@ export interface operations {
                 "application/json": components["schemas"]["CoachRequest"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoachSubmission"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_api_coach_requests__request_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_api_coach_requests__request_id__retry_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

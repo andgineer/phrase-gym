@@ -41,6 +41,8 @@ class PhraseRecord(ScheduleRecord):
     position: int
     fsrs_json: str | None
     last_cue: int | None
+    # Set only on basic Coach cards, whose cue needs a generic instruction.
+    instruction: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,6 +128,8 @@ class ImportRecord:
     result_hash: str | None
     kind: str
     retry_helps: int
+    dismissed: int
+    correction_json: str | None
 
 
 # The record's fields must equal the query's columns; a mismatch raises instead of dropping data.

@@ -87,9 +87,17 @@ def coach_card(item_id: str, **changes: object) -> dict[str, object]:
 
 
 def prepare_typed(client: TestClient, typed: str, **changes: object) -> dict[str, Any]:
-    submitted = client.post("/api/coach/requests", json={"text": typed}).json()
+    submitted = client.post(
+        "/api/coach/requests", json={"text": typed, "learning_language": "en"}
+    ).json()
     work = client.post("/api/imports/coach/next").json()
-    assert work == {"package_id": submitted["request_id"], "text": typed.strip()}
+    assert work == {
+        "package_id": submitted["request_id"],
+        "text": typed.strip(),
+        "learning_language": "en",
+        "native_language": "ru",
+        "translation": False,
+    }
     response = client.post(
         f"/api/imports/{work['package_id']}/result",
         json={

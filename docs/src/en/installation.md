@@ -62,11 +62,16 @@ GPT-6.1 Sol at medium effort.
 
 Without a Claude or Codex subscription, `phrase-gym coach --cli gemini` uses the free tier of
 the [Antigravity CLI](https://antigravity.google/) (`agy`, logged in once with a Google account)
-on its strongest free model, Gemini Flash at high effort. Treat it as experimental: it has yet to pass
-the card-quality checks. The initial phrase run took over ten minutes and failed during revision
-when the service ran out of capacity. Free-tier usage is also subject to a quota. Antigravity
-blocks direct reads outside the attempt folder. Other tools have broader access, so prefer
-Claude or Codex when available.
+on Gemini 3.8 Flash at low effort. On this route Coach only checks your text: it confirms the
+word or phrase and fixes an obvious typo. You then get a basic card that asks you to fill the gap
+in your own sentence, even where the sentence changes the phrase's form (**She came up with a
+plan** for **come up with**), or to recall the words from a partial form that shows their first
+letters, the last letter of longer words and one `_` per hidden letter, such as **def_____ly** or
+**o_ t__ f___e**. It has no explanation or extra examples. The card's instruction and Coach's
+reasons use your native language from Settings. Coach runs `agy` the way news-recap does: one launch at a time, at
+least ten seconds apart, with its permission prompts skipped, so the model's tools are not
+limited to the preparation folder. If Antigravity renames the model, Coach switches to the
+cheapest listed Flash model for the rest of its run. Free-tier usage is subject to a quota.
 
 The `install-coach`, `uninstall-coach`, and `deploy` commands report that they are unavailable.
 The optional `coach` and `deploy` extras are reserved for future preparation and provisioning

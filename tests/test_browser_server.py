@@ -20,7 +20,9 @@ def test_reset_replaces_database_clock_rng_and_files(tmp_path, monkeypatch):
         publish(client, make_package())
         client.post("/__test/clock/2035-01-01T12:00:00+00:00").raise_for_status()
         assert old_app.state.daily.clock().year == 2035
-        client.post("/api/coach/requests", json={"text": "pending"}).raise_for_status()
+        client.post(
+            "/api/coach/requests", json={"text": "pending", "learning_language": "en"}
+        ).raise_for_status()
         assert server.coach_task is None
 
         client.post("/__test/reset", json={"coach_enabled": True}).raise_for_status()
@@ -56,10 +58,14 @@ def test_request_during_coach_drain_wakes_it_again_without_polling(tmp_path, mon
             transport=httpx.ASGITransport(app=server.control), base_url="http://testserver"
         ) as client:
             await client.post("/__test/reset", json={"coach_enabled": True})
-            await client.post("/api/coach/requests", json={"text": "first"})
+            await client.post(
+                "/api/coach/requests", json={"text": "first", "learning_language": "en"}
+            )
             try:
                 assert await asyncio.to_thread(entered.wait, 5)
-                await client.post("/api/coach/requests", json={"text": "second"})
+                await client.post(
+                    "/api/coach/requests", json={"text": "second", "learning_language": "en"}
+                )
             finally:
                 release.set()
             await server.coach_task
@@ -87,7 +93,9 @@ def test_reset_waits_for_inflight_coach_before_replacing_app(tmp_path, monkeypat
             transport=httpx.ASGITransport(app=server.control), base_url="http://testserver"
         ) as client:
             await client.post("/__test/reset", json={"coach_enabled": True})
-            await client.post("/api/coach/requests", json={"text": "first"})
+            await client.post(
+                "/api/coach/requests", json={"text": "first", "learning_language": "en"}
+            )
             try:
                 assert await asyncio.to_thread(entered.wait, 5)
                 old_app = server.app

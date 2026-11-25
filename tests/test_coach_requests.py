@@ -13,7 +13,7 @@ TYPED = "strongly believe — We strongly believe this will help."
 
 
 def submit(client: TestClient, text: str = TYPED) -> dict[str, str]:
-    response = client.post("/api/coach/requests", json={"text": text})
+    response = client.post("/api/coach/requests", json={"text": text, "learning_language": "en"})
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -46,7 +46,13 @@ def test_typed_text_waits_offline_and_survives_restart(
         assert client.post("/api/imports/coach/next").json()["text"] == TYPED
     with TestClient(create_app()) as client:
         work = client.post("/api/imports/coach/next").json()
-        assert work == {"package_id": saved["request_id"], "text": TYPED}
+        assert work == {
+            "package_id": saved["request_id"],
+            "text": TYPED,
+            "learning_language": "en",
+            "native_language": "ru",
+            "translation": False,
+        }
         first = client.post(
             f"/api/imports/{work['package_id']}/result", json=result(saved["request_id"])
         )
@@ -141,8 +147,18 @@ def test_invalid_results_never_become_phrases(client: TestClient) -> None:
 
 
 def test_blank_or_oversized_text_is_rejected(client: TestClient) -> None:
-    assert client.post("/api/coach/requests", json={"text": "   "}).status_code == 422
-    assert client.post("/api/coach/requests", json={"text": "x" * 1001}).status_code == 422
+    assert (
+        client.post(
+            "/api/coach/requests", json={"text": "   ", "learning_language": "en"}
+        ).status_code
+        == 422
+    )
+    assert (
+        client.post(
+            "/api/coach/requests", json={"text": "x" * 1001, "learning_language": "en"}
+        ).status_code
+        == 422
+    )
     assert client.post("/api/imports/coach/next").json() is None
 
 
@@ -156,3 +172,11 @@ def test_coach_routes_ignore_external_packages(
         client.post(f"/api/imports/{package_id}/result", json=result(str(package_id))).status_code
         == 404
     )
+
+
+def test_a_short_accurate_translation_is_a_complete_explanation(client: TestClient) -> None:
+    status = prepare_typed(client, "poison — We strongly believe this will help.", explanation="яд")
+    assert status["status"] == "added"
+    lesson = coach_lesson(client)["id"]
+    [phrase] = client.get("/api/phrases", params={"lesson_id": lesson}).json()["items"]
+    assert client.get(f"/api/phrases/{phrase['id']}").json()["explanation"] == "яд"

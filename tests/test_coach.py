@@ -55,16 +55,26 @@ Cli = ClaudeCli | CodexCli | GeminiCli
 LABEL = {ClaudeCli: "Claude", CodexCli: "Codex", GeminiCli: "Gemini"}
 
 
-@pytest.fixture(params=["claude", "codex", "gemini"])
-def cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
-    fake = str(fake_cli.executable(tmp_path, request.param))
-    if request.param == "claude":
+def fake_cli_for(vendor: str, tmp_path: Path) -> Cli:
+    fake = str(fake_cli.executable(tmp_path, vendor))
+    if vendor == "claude":
         return ClaudeCli(fake, timeout=10, attempts=tmp_path / "attempts")
-    if request.param == "gemini":
-        return GeminiCli(fake, timeout=10, attempts=tmp_path / "attempts")
+    if vendor == "gemini":
+        return GeminiCli(fake, timeout=10, attempts=tmp_path / "attempts", launch_delay=0)
     workspace = tmp_path / "workspace"
     workspace.mkdir()
     return CodexCli(workspace, fake, timeout=10)
+
+
+@pytest.fixture(params=["claude", "codex", "gemini"])
+def cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
+    return fake_cli_for(request.param, tmp_path)
+
+
+# Gemini free recognizes input for basic practice; the subscriptions still author enriched cards.
+@pytest.fixture(params=["claude", "codex"])
+def enriched_cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
+    return fake_cli_for(request.param, tmp_path)
 
 
 def run_coach_once(
@@ -73,7 +83,9 @@ def run_coach_once(
     text: str,
     speech: PiperSpeech | None = None,
 ) -> dict[str, object]:
-    package_id = client.post("/api/coach/requests", json={"text": text}).json()["request_id"]
+    package_id = client.post(
+        "/api/coach/requests", json={"text": text, "learning_language": "en"}
+    ).json()["request_id"]
     preparer = CardPreparer(cli, cli.attempts)
     assert process_once(ClientCoachApi(client), preparer, speech or PiperSpeech(None, fake=True))
     return client.get(f"/api/imports/{package_id}").json()
@@ -100,8 +112,9 @@ def stored(client: TestClient, text: str) -> dict[str, object]:
 
 
 def test_typed_phrase_and_word_are_prepared_reviewed_and_published(
-    client: TestClient, cli: Cli
+    client: TestClient, enriched_cli: Cli
 ) -> None:
+    cli = enriched_cli
     phrase = run_coach_once(client, cli, "strongly believe — We strongly believe it works.")
     word = run_coach_once(client, cli, "reluctant")
     assert (phrase["status"], phrase["added_count"]) == ("added", 1)
@@ -112,7 +125,10 @@ def test_typed_phrase_and_word_are_prepared_reviewed_and_published(
     assert attempts(cli) == []
 
 
-def test_review_findings_are_applied_before_publication(client: TestClient, cli: Cli) -> None:
+def test_review_findings_are_applied_before_publication(
+    client: TestClient, enriched_cli: Cli
+) -> None:
+    cli = enriched_cli
     assert run_coach_once(client, cli, "leaky")["status"] == "added"
     assert "leaky" not in stored(client, "She felt leaky today.")["hints"]
 
@@ -132,12 +148,6 @@ REASONS = {
         "subscription-limit": "Claude: usage limit reached; submit the text again after "
         "6pm (Europe/Belgrade) (during prepare)",
         "logged-out": f"Claude: {LOGIN} (during prepare)",
-    },
-    "Gemini": {
-        "malformed": "Gemini returned no structured answer during prepare",
-        "usage-limit": "Gemini: rate limit hit; submit the text again later (during prepare)",
-        "subscription-limit": "Gemini: usage limit reached; submit the text again after ",
-        "logged-out": f"Gemini: {LOGIN} (during prepare)",
     },
 }
 
@@ -159,11 +169,12 @@ REASONS = {
 )
 def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
     client: TestClient,
-    cli: Cli,
+    enriched_cli: Cli,
     capsys: pytest.CaptureFixture[str],
     text: str,
     reason: str,
 ) -> None:
+    cli = enriched_cli
     label = LABEL[type(cli)]
     reason = REASONS[label].get(reason, reason)
     if reason == "exited":
@@ -177,15 +188,19 @@ def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
     assert printed.startswith(f"Coach could not prepare “{text}”: {reason}")
     assert f"(details: {attempt})" in printed
     notices = client.get("/api/practice/facts").json()["notices"]
-    retry_helps = not text.startswith("insufficient")
-    assert [(notice["label"], notice["kind"], notice["retry_helps"]) for notice in notices] == [
-        (text, "coach", retry_helps)
-    ]
+    [outcome] = client.get("/api/coach/inbox").json()["items"]
+    if text.startswith("insufficient"):
+        assert notices == []
+        assert outcome["outcome"] == "rejected"
+    else:
+        assert [(notice["label"], notice["kind"]) for notice in notices] == [(text, "coach")]
+        assert outcome["outcome"] == "failed"
 
 
 def test_piper_failure_after_preparation_is_reported(
-    client: TestClient, cli: Cli, capsys: pytest.CaptureFixture[str]
+    client: TestClient, enriched_cli: Cli, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    cli = enriched_cli
     speech = PiperSpeech(None, fake=True, fake_failures=1)
     status = run_coach_once(client, cli, "by and large", speech)
     reason = "Synthetic preparation failure; correct the setup and retry"

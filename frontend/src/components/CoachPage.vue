@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import CoachInbox from './CoachInbox.vue'
+import { useCoachInbox } from '../composables/useCoachInbox'
 import { coachText, useCoachSubmission } from '../composables/useCoachSubmission'
 
 const text = ref('')
 const { sending, confirmation, error, submit } = useCoachSubmission()
+const inbox = useCoachInbox()
 async function send() {
-  if (await submit(text.value)) text.value = ''
+  const outcome = await submit(text.value)
+  if (!outcome) return
+  text.value = ''
+  // A repeated rejection or a resubmitted failure changes what the inbox shows.
+  if (outcome === 'rejected' || outcome === 'saved') void inbox.load()
 }
 function enter(event: KeyboardEvent) {
   if (event.isComposing) return
@@ -33,4 +40,11 @@ function enter(event: KeyboardEvent) {
     <p v-if="error" role="alert" class="error">{{ error }}</p>
   </form>
   <p class="muted">Coach prepares a card later. It appears in Library under Added with Coach.</p>
+  <CoachInbox
+    :items="inbox.items.value"
+    :busy="inbox.busy.value"
+    :error="inbox.error.value"
+    @dismiss="inbox.dismiss"
+    @retry="inbox.retry"
+  />
 </template>

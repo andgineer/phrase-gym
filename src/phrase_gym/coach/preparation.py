@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from phrase_gym.coach.card_checks import card_problems, phrase_of
+from phrase_gym.coach.messages import message
+from phrase_gym.server.coach_contracts import CoachWork
 from phrase_gym.server.import_contracts import ImportPhrase
 
 PROMPTS = files("phrase_gym.coach").joinpath("prompts")
@@ -34,7 +36,7 @@ def _resource(name: str) -> str:
     return PROMPTS.joinpath(name).read_text(encoding="utf-8")
 
 
-def _schema(name: str) -> dict[str, Any]:
+def schema(name: str) -> dict[str, Any]:
     return json.loads(_resource(name))
 
 
@@ -78,14 +80,14 @@ async def _review(cli: Cli, attempt: Path, step: str, typed: str, card: dict[str
         attempt,
         step,
         render("review.md", input=typed, draft=_shown(card)),
-        _schema("review.schema.json"),
+        schema("review.schema.json"),
     )
     return _findings(review)
 
 
 async def prepare_card(text: str, item_id: str, cli: Cli, attempt: Path) -> ImportPhrase:
     typed = _shown(text)
-    card_schema = _schema("card.schema.json")
+    card_schema = schema("card.schema.json")
     final = _ready(
         await cli.ask(attempt, "prepare", render("prepare.md", input=typed), card_schema),
     )
@@ -113,11 +115,16 @@ class CardPreparer:
         self.cli = cli
         self.attempts = attempts
 
-    async def prepare(self, text: str, item_id: str) -> ImportPhrase:
+    async def prepare(self, work: CoachWork) -> ImportPhrase:
+        if work.learning_language != "en":
+            raise PreparationError(
+                message("english_only", work.native_language),
+                retry_helps=False,
+            )
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
-        attempt = self.attempts / f"{stamp}-{item_id}"
+        attempt = self.attempts / f"{stamp}-{work.package_id}"
         try:
-            phrase = await prepare_card(text, item_id, self.cli, attempt)
+            phrase = await prepare_card(work.text, work.package_id, self.cli, attempt)
         except PreparationError as error:
             raise PreparationError(str(error), attempt, retry_helps=error.retry_helps) from error
         except (RuntimeError, OSError) as error:

@@ -11,7 +11,8 @@ SOURCE_SEPARATOR = " — "
 
 
 def executable(directory: Path, vendor: str = "codex") -> Path:
-    wrapper = directory / f"fake-{vendor}"
+    # The runner recognizes Antigravity by its command name.
+    wrapper = directory / ("agy" if vendor == "gemini" else f"fake-{vendor}")
     wrapper.write_text(
         f"#!{sys.executable}\nimport runpy\nrunpy.run_path({str(Path(__file__))!r}, "
         f"init_globals={{'VENDOR': {vendor!r}}}, run_name='__main__')\n"
@@ -50,6 +51,59 @@ def card(typed: str, step: str) -> dict[str, object]:
             "usage_contexts": ["coach test"],
             "detailed_explanation": None,
         },
+    }
+
+
+REJECTIONS = {
+    "zzqx": {
+        "English": "This is not an English word or expression.",
+        "Russian": "Это не английское слово и не выражение.",
+    },
+    "Guten Morgen": {
+        "English": "This is German, not English.",
+        "Russian": "Это немецкий текст, а не английский.",
+    },
+    "fom": {
+        "English": "“fom” could be several English words, such as from or form.",
+        "Russian": "«fom» может быть разными английскими словами, например from или form.",
+    },
+}
+CORRECTIONS = {"definately": "definitely", "belive": "believe"}
+INFLECTIONS = {"come up with": "came up with"}
+LONGEST_SENTENCE = 200
+
+
+def recognition(typed: dict[str, str]) -> dict[str, object]:
+    text = typed["text"]
+    rejected = next((reason for key, reason in REJECTIONS.items() if key in text), None)
+    if rejected:
+        return {
+            "outcome": "reject",
+            "original_span": "",
+            "target": "",
+            "source": "",
+            "source_span": "",
+            "source_usable": False,
+            "reason": rejected[typed["native_language"]],
+        }
+    original, _, source = text.partition(SOURCE_SEPARATOR)
+    # A short sentence offers a span; longer text stays one target that no card can hold.
+    if not source and len(text.split()) >= 4 and len(text) <= LONGEST_SENTENCE:
+        source, original = text, " ".join(text.split()[1:3])
+    target = original
+    for typo, fixed in CORRECTIONS.items():
+        target = target.replace(typo, fixed)
+    # A misspelled source sentence is faulty surroundings for the target.
+    usable = bool(source) and "tomorow" not in source
+    inflected = INFLECTIONS.get(target, target)
+    return {
+        "outcome": "accept",
+        "original_span": original,
+        "target": target,
+        "source": source,
+        "source_span": (inflected if inflected in source else target) if usable else "",
+        "source_usable": usable,
+        "reason": "",
     }
 
 
@@ -102,7 +156,7 @@ GEMINI_FAILURES = {
 }
 
 
-def typed_input(prompt: str) -> str:
+def typed_input(prompt: str) -> str | dict[str, str]:
     return json.loads(re.search(r"<learner_input>\n(.*?)\n</learner_input>", prompt, re.S)[1])
 
 
@@ -133,13 +187,11 @@ def respond(vendor: str, arguments: list[str], answer_value: object | None, step
         print(output.read_text())
         return
     if vendor == "gemini":
+        # news-recap's Antigravity command with the runner's log file.
         assert arguments[-2] == "-p", arguments
-        schema = Path(arguments[arguments.index("--json-schema") + 1])
-        assert schema.is_file(), schema
-        gemini: dict[str, object] = {"status": "SUCCESS", "response": "done"}
-        if answer_value is not None:
-            gemini["structured_output"] = answer_value
-        print(json.dumps(gemini))
+        assert {"--dangerously-skip-permissions", "--log-file"} <= set(arguments), arguments
+        response = "I could not decide." if answer_value is None else json.dumps(answer_value)
+        print(json.dumps({"status": "SUCCESS", "response": f"```json\n{response}\n```"}))
         return
     envelope = {"type": "result", "subtype": "success", "is_error": False, "result": "done"}
     if answer_value is not None:
@@ -160,11 +212,18 @@ def main() -> None:
         respond(vendor, arguments, {"environment": sorted(os.environ)}, step)
         return
     typed = typed_input(prompt)
-    fail(vendor, typed, prompt)
-    if "slow" in typed:
+    text = typed["text"] if isinstance(typed, dict) else typed
+    fail(vendor, text, prompt)
+    if "slow" in text:
         print(os.getpid(), file=sys.stderr, flush=True)
         time.sleep(30)
-    respond(vendor, arguments, None if "malformed" in typed else answer(typed, step), step)
+    if "malformed" in text:
+        value = None
+    elif isinstance(typed, dict):
+        value = recognition(typed)
+    else:
+        value = answer(typed, step)
+    respond(vendor, arguments, value, step)
 
 
 if __name__ == "__main__":

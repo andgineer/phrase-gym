@@ -240,3 +240,41 @@ INSERT INTO imports (package_id, content_hash, payload, status, error, created_a
     with Database(directory).read() as connection:
         row = connection.execute("SELECT error, retry_helps FROM imports").fetchone()
     assert tuple(row) == ("Codex is not logged in", 1)
+
+
+def test_coach_rejections_move_from_practice_notices_to_the_coach_inbox(tmp_path: Path) -> None:
+    directory = tmp_path / "data"
+    directory.mkdir()
+    rows = """
+INSERT INTO meta VALUES ('schema_version', '11');
+INSERT INTO imports (package_id, content_hash, payload, status, error, created_at, kind,
+  retry_helps)
+  VALUES ('coach-rejected', 'h1', '{"text": "zzqx"}', 'error', 'Not English',
+          '2026-11-01T10:00:00+00:00', 'coach', 0),
+         ('coach-failed', 'h2', '{"text": "by and large"}', 'error', 'Codex is not logged in',
+          '2026-11-01T10:01:00+00:00', 'coach', 1),
+         ('coach-seen', 'h3', '{"text": "fom"}', 'error', 'Several words fit',
+          '2026-11-01T10:02:00+00:00', 'coach', 0),
+         ('coach-seen-failure', 'h4', '{"text": "in the end"}', 'error', 'Timed out',
+          '2026-11-01T10:03:00+00:00', 'coach', 1);
+INSERT INTO import_notices VALUES ('coach-rejected', '2026-11-01T11:00:00+00:00'),
+  ('coach-failed', '2026-11-01T11:01:00+00:00');
+"""
+    with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
+        script = "".join(STEPS[version] for version in range(5, 12)) + rows
+        for statement in statements(script):
+            connection.execute(statement)
+        connection.commit()
+    with Database(directory).read() as connection:
+        noticed = [row[0] for row in connection.execute("SELECT package_id FROM import_notices")]
+        kept = list(connection.execute("SELECT package_id, error, dismissed FROM imports"))
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(phrases)")}
+    assert noticed == ["coach-failed"]
+    # A result whose notice was already dismissed stays dismissed in the Coach inbox.
+    assert sorted(tuple(row) for row in kept) == [
+        ("coach-failed", "Codex is not logged in", 0),
+        ("coach-rejected", "Not English", 0),
+        ("coach-seen", "Several words fit", 1),
+        ("coach-seen-failure", "Timed out", 1),
+    ]
+    assert "instruction" in columns

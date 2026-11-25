@@ -5,7 +5,11 @@ from datetime import UTC, datetime
 
 from phrase_gym.server.coach_contracts import COACH_SOURCE_ID
 from phrase_gym.server.import_contracts import PhrasePackage
-from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
+from phrase_gym.server.publication import (
+    package_batch,
+    publish_batch,
+    reject_identity_conflicts,
+)
 from phrase_gym.server.records import ImportRecord, fetch_one
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
 from phrase_gym.server.storage import Database
@@ -47,7 +51,7 @@ class Importer:
                 f"source_id {COACH_SOURCE_ID} is reserved for the Coach field; use another.",
             )
         payload = package.model_dump_json(exclude_none=True)
-        decoded = decode_references(package, references)
+        batch = package_batch(package, decode_references(package, references))
         digest = result_hash({"package": payload, "references": references})
         with self.database.write() as connection:
             previous = import_row(connection, package.package_id)
@@ -56,7 +60,7 @@ class Importer:
                     "This package_id has different content; use a new ID.",
                 )
             if previous is None:
-                reject_identity_conflicts(connection, package)
+                reject_identity_conflicts(connection, batch)
                 connection.execute(
                     "INSERT INTO imports (package_id, content_hash, payload, status, created_at, "
                     "kind) VALUES (?, ?, ?, 'pending', ?, 'package')",
@@ -65,8 +69,7 @@ class Importer:
                 publish_batch(
                     connection,
                     self.database.data_dir,
-                    package,
-                    decoded,
+                    batch,
                     (package.package_id, result_hash(references)),
                 )
         return self.status(package.package_id)

@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 from phrase_gym.coach.hint_checks import (
     FUNCTION_WORDS,
     GAP_TEXT,
@@ -57,7 +59,12 @@ def _companions(hints: list[str], target_text: str) -> list[list[str]]:
     return [sum(parse_hint(index, hint, target).companions, []) for index, hint in enumerate(hints)]
 
 
-def companion_problems(hints: list[str], target_text: str, cues: list[Cue], text: str) -> list[str]:
+def companion_problems(
+    hints: list[str],
+    target_text: str,
+    cues: Sequence[Cue],
+    text: str,
+) -> list[str]:
     problems = []
     companions = _companions(hints, target_text)
     glosses = [gloss for cue in cues for gloss in GLOSS.findall(cue.situation) if words(gloss)]
@@ -89,7 +96,7 @@ def companion_problems(hints: list[str], target_text: str, cues: list[Cue], text
     return problems
 
 
-def gloss_frame_problems(cues: list[Cue]) -> list[str]:
+def gloss_frame_problems(cues: Sequence[Cue]) -> list[str]:
     problems = []
     for index, cue in enumerate(cues):
         tail = cue.situation.split(GAP_TEXT, 1)[-1] if GAP_TEXT in cue.situation else ""
@@ -104,7 +111,7 @@ def gloss_frame_problems(cues: list[Cue]) -> list[str]:
     return problems
 
 
-def repeated_gloss_problems(cues: list[Cue]) -> list[str]:
+def repeated_gloss_problems(cues: Sequence[Cue]) -> list[str]:
     problems = []
     seen: dict[tuple[str, ...], int] = {}
     for index, cue in enumerate(cues):

@@ -8,7 +8,8 @@ _DEFAULT_AGENT_API_KEY_VARS: dict[str, list[str]] = {
 CLAUDE_MODEL = "--model claude-opus-5-5 --effort medium"
 CODEX_MODEL = "--model gpt-6.1-sol -c model_reasoning_effort=medium"
 # Antigravity's free tier serves only Gemini Flash; the effort is part of the model name.
-GEMINI_MODEL = "--model gemini-3.8-flash-high"
+GEMINI_MODEL = "--model gemini-3.8-flash-low"
+AGENT_LAUNCH_DELAY = {"gemini": 10.0}
 
 _DEFAULT_CODEX_CMD = (
     "codex exec {model} --ephemeral --color never "
@@ -24,9 +25,9 @@ _DEFAULT_CLAUDE_CMD = (
     "--setting-sources user "
     '-- "Read your task from {prompt_file} and execute it."'
 )
-# -p must come last: agy takes the token right after it as the prompt.
+# news-recap's Antigravity template; the runner adds --log-file. -p must come last.
 _DEFAULT_GEMINI_CMD = (
-    "agy {model} --log-file {log_file} --output-format json --json-schema {schema_file} "
+    "agy {model} --dangerously-skip-permissions --output-format json "
     '-p "Read your task from {prompt_file} and execute it."'
 )
 

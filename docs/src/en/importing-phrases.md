@@ -21,10 +21,19 @@ Typing the same text again never adds a second card. The field tells you when th
 **Already waiting for Coach** or **Already in your Library**. Text whose card you deleted is
 prepared again.
 
-If Coach cannot prepare a card, for example because the text contains no English phrase or word
-or because the Claude CLI is not logged in, it prints the reason in its terminal and the Practice page
-shows a notice below **Total**. Close it with **×** once you have read it. To retry, type the
-same text into Coach again.
+When Coach fixes an obvious typo, such as **definately → definitely**, the **Coach** page lists
+the change and the card says what it corrected. A valid variant, such as **colour**, keeps its form.
+
+If Coach cannot use the text, for example because it is not English, cannot be read, could be
+several different words or is too long for one card, the **Coach** page lists the text, its
+learning language and the reason in your native language.
+Close it with **Dismiss**. Typing the same text again shows that result instead of preparing it
+again, so change the text to try something else.
+
+If a service problem stops Coach, for example because the CLI is not logged in or ran out of
+quota, Coach prints the reason in its terminal, the **Coach** page offers **Retry**, and the
+Practice page shows a notice below **Total**. Close the notice with **×** once you have read it.
+Retrying from Coach or typing the same text again prepares it again.
 
 ## Ask your personal AI agent
 

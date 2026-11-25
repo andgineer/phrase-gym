@@ -51,7 +51,10 @@ test('Coach normalizes pasted lines, Enter sends, and errors preserve the draft'
   await field.fill('  by and large\nThe plan worked.  ')
   const request = page.waitForRequest('**/api/coach/requests')
   await field.press('Enter')
-  expect((await request).postDataJSON()).toEqual({ text: 'by and large The plan worked.' })
+  expect((await request).postDataJSON()).toEqual({
+    text: 'by and large The plan worked.',
+    learning_language: 'en',
+  })
   await expect(page.getByRole('status')).toContainText('Saved for Coach.')
   await expect(field).toHaveValue('')
   await page.route('**/api/coach/requests', (route) =>
@@ -75,7 +78,10 @@ test('Library offers Coach after an empty search and after matching results', as
   const button = page.getByRole('button', { name: /Send “a new expression” to Coach/ })
   const request = page.waitForRequest('**/api/coach/requests')
   await button.click()
-  expect((await request).postDataJSON()).toEqual({ text: 'a new expression' })
+  expect((await request).postDataJSON()).toEqual({
+    text: 'a new expression',
+    learning_language: 'en',
+  })
   await expect(page.locator('.library-coach')).toHaveText('Saved for Coach.')
   await phraseSearch(page).fill('good')
   await expect(page.getByRole('list', { name: 'Phrases' })).toBeVisible()
