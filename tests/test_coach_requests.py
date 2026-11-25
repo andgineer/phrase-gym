@@ -46,7 +46,7 @@ def test_typed_text_waits_offline_and_survives_restart(
         assert client.post("/api/imports/coach/next").json()["text"] == TYPED
     with TestClient(create_app()) as client:
         work = client.post("/api/imports/coach/next").json()
-        assert work == {"package_id": saved["request_id"], "text": TYPED}
+        assert work == {"package_id": saved["request_id"], "text": TYPED, "learning_language": "en"}
         first = client.post(
             f"/api/imports/{work['package_id']}/result", json=result(saved["request_id"])
         )

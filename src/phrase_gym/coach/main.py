@@ -5,14 +5,17 @@ import os
 import time
 import urllib.error
 import urllib.request
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import urlsplit
 
 from phrase_gym.coach.claude_cli import ClaudeCli
 from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
 from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.preparation import CardPreparer, PreparationError
+from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
+from phrase_gym.server.coach_contracts import BasicCard
+from phrase_gym.server.import_contracts import ImportPhrase
 
 MAX_TCP_PORT = 65_535
 
@@ -53,23 +56,36 @@ class CoachApi:
 CLI_CHOICES = ("claude", "codex", "gemini")
 
 
-def configured_preparer(choice: str) -> CardPreparer:
+class Preparer(Protocol):
+    async def prepare(
+        self,
+        text: str,
+        item_id: str,
+        learning_language: str,
+    ) -> ImportPhrase | BasicCard: ...
+
+
+def configured_preparer(choice: str) -> Preparer:
     if choice == "codex":
         codex = CodexCli(coach_workspace(), os.environ.get("PHRASE_GYM_CODEX", "codex"))
         return CardPreparer(codex, codex.attempts)
     if choice == "gemini":
         gemini = GeminiCli(os.environ.get("PHRASE_GYM_AGY", "agy"))
-        return CardPreparer(gemini, gemini.attempts)
+        return Recognizer(gemini, gemini.attempts)
     claude = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"))
     return CardPreparer(claude, claude.attempts)
 
 
-async def prepare(text: str, package_id: str, preparer: CardPreparer, speech: PiperSpeech) -> dict:
-    phrase = await preparer.prepare(text, package_id)
-    audio = await speech.synthesize(phrase.text)
+async def prepare(work: dict[str, str], preparer: Preparer, speech: PiperSpeech) -> dict:
+    package_id = work["package_id"]
+    card = await preparer.prepare(work["text"], package_id, work["learning_language"])
+    audio = await speech.synthesize(card.text)
     return {
         "result_id": package_id,
-        "phrase": phrase.model_dump(mode="json", exclude_none=True),
+        "basic" if isinstance(card, BasicCard) else "phrase": card.model_dump(
+            mode="json",
+            exclude_none=True,
+        ),
         "reference": base64.b64encode(audio).decode(),
     }
 
@@ -88,7 +104,7 @@ def refusal(error: urllib.error.HTTPError) -> str:
     return detail if isinstance(detail, str) and detail else str(error)
 
 
-def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> bool:
+def process_once(api: CoachApi, preparer: Preparer, speech: PiperSpeech) -> bool:
     work = api.post("coach/next")
     if work is None:
         return False
@@ -98,7 +114,7 @@ def process_once(api: CoachApi, preparer: CardPreparer, speech: PiperSpeech) -> 
     try:
         api.post(
             f"{package_id}/result",
-            asyncio.run(prepare(work["text"], package_id, preparer, speech)),
+            asyncio.run(prepare(work, preparer, speech)),
         )
         return True
     except urllib.error.HTTPError as error:

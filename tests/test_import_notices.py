@@ -56,7 +56,7 @@ def test_dismissing_an_absent_notice_changes_nothing(client: TestClient) -> None
     assert notices(client) == []
 
 
-def test_a_failure_retyping_cannot_fix_says_so_and_a_resubmission_resets_it(
+def test_a_language_decision_stays_in_coach_and_repeating_the_text_does_not_restart_it(
     client: TestClient,
 ) -> None:
     package_id = client.post("/api/coach/requests", json={"text": TYPED}).json()["request_id"]
@@ -65,7 +65,7 @@ def test_a_failure_retyping_cannot_fix_says_so_and_a_resubmission_resets_it(
         f"/api/imports/{package_id}/failure",
         json={"error": "No English word or expression was found.", "retry_helps": False},
     )
-    assert [notice["retry_helps"] for notice in notices(client)] == [False]
-    client.post("/api/coach/requests", json={"text": TYPED})
-    fail_preparation(client, "Claude reported a usage limit")
-    assert [notice["retry_helps"] for notice in notices(client)] == [True]
+    assert notices(client) == []
+    again = client.post("/api/coach/requests", json={"text": TYPED}).json()
+    assert again == {"request_id": package_id, "outcome": "rejected"}
+    assert client.post("/api/imports/coach/next").json() is None

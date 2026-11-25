@@ -13,6 +13,7 @@ PracticeMode = Literal["daily", "extra", "practice"]
 ActiveCardKind = Literal["new", "recall"]
 CardKind = Literal["first_study", "new", "recall"]
 ReturnPace = Literal["often", "balanced", "rarely"]
+LearningLanguage = Literal["en"]
 # Take identities become file names: no separators or dots, and lowercase so that IDs differing
 # only by case cannot share a file on case-insensitive filesystems.
 STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
@@ -43,6 +44,7 @@ class RecordingUpload(StrictModel):
 
 class Settings(StrictModel):
     native_language: Literal["ru", "en"]
+    learning_language: LearningLanguage = "en"
     learning_timezone: str = Field(min_length=1, max_length=64)
     card_language: Literal["en"]
     help_language: Literal["en"]

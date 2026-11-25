@@ -10,13 +10,16 @@ const props = defineProps<{
 }>()
 defineEmits<{ toggle: [] }>()
 const longerExplanation = computed(() => props.detailedExplanation?.trim())
+// Basic Coach cards carry no authored help, so they offer no explanation control.
+const authored = computed(() => !!longerExplanation.value || props.usageContexts.length > 0)
 </script>
 
 <template>
   <div class="answer-help">
-    <p><EmphasisText :text="explanation" /></p>
+    <p v-if="explanation"><EmphasisText :text="explanation" /></p>
     <p v-if="usageContexts.length" class="purpose">Used for: {{ usageContexts.join(' · ') }}</p>
     <button
+      v-if="authored"
       class="explain-link"
       :disabled="!longerExplanation"
       :aria-expanded="!!longerExplanation && open"

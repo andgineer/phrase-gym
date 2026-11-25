@@ -73,7 +73,7 @@ Coach automatically prepares the safest useful card permitted by the [content de
 
 ### Preparation by provider
 
-The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-implementation.md#5-qualify-what-learners-will-receive).
+The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-implementation.md#3-qualify-what-learners-will-receive).
 
 | Route | Preparation to qualify |
 |---|---|

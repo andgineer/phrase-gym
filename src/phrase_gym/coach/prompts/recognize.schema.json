@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outcome", "original_span", "target", "source", "source_usable", "reason"],
+  "properties": {
+    "outcome": {"type": "string", "enum": ["accept", "reject"]},
+    "original_span": {"type": "string"},
+    "target": {"type": "string"},
+    "source": {"type": "string"},
+    "source_usable": {"type": "boolean"},
+    "reason": {"type": "string"}
+  }
+}

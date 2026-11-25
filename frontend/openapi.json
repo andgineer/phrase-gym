@@ -1,6 +1,54 @@
 {
   "components": {
     "schemas": {
+      "BasicCard": {
+        "additionalProperties": false,
+        "description": "Wording practice for a confirmed target, without authored meaning or examples.",
+        "properties": {
+          "correction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoachCorrection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cue": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Cue",
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Instruction",
+            "type": "string"
+          },
+          "target": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Target",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "text",
+          "cue",
+          "instruction"
+        ],
+        "title": "BasicCard",
+        "type": "object"
+      },
       "CardAnswer": {
         "additionalProperties": false,
         "properties": {
@@ -71,6 +119,29 @@
         "title": "CleanupStatus",
         "type": "object"
       },
+      "CoachCorrection": {
+        "additionalProperties": false,
+        "properties": {
+          "corrected": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Corrected",
+            "type": "string"
+          },
+          "original": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Original",
+            "type": "string"
+          }
+        },
+        "required": [
+          "original",
+          "corrected"
+        ],
+        "title": "CoachCorrection",
+        "type": "object"
+      },
       "CoachFailure": {
         "additionalProperties": false,
         "properties": {
@@ -92,6 +163,81 @@
         "title": "CoachFailure",
         "type": "object"
       },
+      "CoachInbox": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CoachOutcome"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CoachInbox",
+        "type": "object"
+      },
+      "CoachOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "correction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoachCorrection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "learning_language": {
+            "const": "en",
+            "title": "Learning Language",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "corrected",
+              "rejected",
+              "failed"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "text",
+          "learning_language",
+          "outcome",
+          "reason",
+          "correction"
+        ],
+        "title": "CoachOutcome",
+        "type": "object"
+      },
       "CoachRequest": {
         "additionalProperties": false,
         "properties": {
@@ -111,8 +257,25 @@
       "CoachResult": {
         "additionalProperties": false,
         "properties": {
+          "basic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BasicCard"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "phrase": {
-            "$ref": "#/components/schemas/ImportPhrase"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImportPhrase"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "reference": {
             "title": "Reference",
@@ -126,7 +289,6 @@
         },
         "required": [
           "result_id",
-          "phrase",
           "reference"
         ],
         "title": "CoachResult",
@@ -139,7 +301,8 @@
             "enum": [
               "saved",
               "waiting",
-              "in_library"
+              "in_library",
+              "rejected"
             ],
             "title": "Outcome",
             "type": "string"
@@ -159,6 +322,11 @@
       "CoachWork": {
         "additionalProperties": false,
         "properties": {
+          "learning_language": {
+            "const": "en",
+            "title": "Learning Language",
+            "type": "string"
+          },
           "package_id": {
             "title": "Package Id",
             "type": "string"
@@ -170,7 +338,8 @@
         },
         "required": [
           "package_id",
-          "text"
+          "text",
+          "learning_language"
         ],
         "title": "CoachWork",
         "type": "object"
@@ -338,7 +507,7 @@
           },
           "situation": {
             "maxLength": 500,
-            "minLength": 5,
+            "minLength": 1,
             "title": "Situation",
             "type": "string"
           }
@@ -565,6 +734,35 @@
         "title": "Health",
         "type": "object"
       },
+      "ImportCue": {
+        "additionalProperties": false,
+        "properties": {
+          "partner_line": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Line"
+          },
+          "situation": {
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Situation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "situation"
+        ],
+        "title": "ImportCue",
+        "type": "object"
+      },
       "ImportLesson": {
         "additionalProperties": false,
         "properties": {
@@ -640,7 +838,7 @@
         "properties": {
           "cues": {
             "items": {
-              "$ref": "#/components/schemas/Cue"
+              "$ref": "#/components/schemas/ImportCue"
             },
             "maxItems": 3,
             "minItems": 1,
@@ -1237,6 +1435,21 @@
             ],
             "title": "Hint"
           },
+          "hint_available": {
+            "title": "Hint Available",
+            "type": "boolean"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          },
           "kind": {
             "enum": [
               "new",
@@ -1294,8 +1507,10 @@
           "mode",
           "kind",
           "revealed",
+          "instruction",
           "cue",
           "other_cue_available",
+          "hint_available",
           "hint",
           "answer",
           "return_days",
@@ -1983,6 +2198,12 @@
             "title": "Help Language",
             "type": "string"
           },
+          "learning_language": {
+            "const": "en",
+            "default": "en",
+            "title": "Learning Language",
+            "type": "string"
+          },
           "learning_timezone": {
             "maxLength": 64,
             "minLength": 1,
@@ -2277,6 +2498,24 @@
         "summary": "Retry Cleanup"
       }
     },
+    "/api/coach/inbox": {
+      "get": {
+        "operationId": "inbox_api_coach_inbox_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachInbox"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Inbox"
+      }
+    },
     "/api/coach/requests": {
       "post": {
         "operationId": "submit_text_api_coach_requests_post",
@@ -2313,6 +2552,82 @@
           }
         },
         "summary": "Submit Text"
+      }
+    },
+    "/api/coach/requests/{request_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_api_coach_requests__request_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss"
+      }
+    },
+    "/api/coach/requests/{request_id}/retry": {
+      "post": {
+        "operationId": "retry_api_coach_requests__request_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachSubmission"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry"
       }
     },
     "/api/health": {

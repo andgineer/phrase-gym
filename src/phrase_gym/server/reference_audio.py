@@ -28,7 +28,7 @@ def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str
     decoded: dict[str, bytes] = {}
     total = 0
     for item, value in audio.items():
-        decoded[item] = _decode_reference(item, value)
+        decoded[item] = decode_reference(item, value)
         total += len(decoded[item])
         if total > MAX_BATCH_REFERENCE_BYTES:
             raise ImportConflictError(
@@ -38,7 +38,7 @@ def decode_references(package: PhrasePackage, audio: dict[str, str]) -> dict[str
     return decoded
 
 
-def _decode_reference(item: str, value: str) -> bytes:
+def decode_reference(item: str, value: str) -> bytes:
     try:
         raw = base64.b64decode(value, validate=True)
         if not MIN_WAV_BYTES < len(raw) <= MAX_REFERENCE_BYTES:

@@ -59,6 +59,32 @@
   font-size: 17px;
   resize: vertical;
 }
+.coach-results {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.coach-results li {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #deded1;
+}
+.coach-results li:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+.coach-results p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.coach-result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 .coach-search-button {
   width: 100%;
 }

@@ -7,6 +7,7 @@ const confirmations: Record<CoachSubmission['outcome'], string> = {
   saved: 'Saved for Coach.',
   waiting: 'Already waiting for Coach.',
   in_library: 'Already in your Library.',
+  rejected: 'Already checked: Coach could not add this. Its reason is in Coach.',
 }
 
 export const coachText = (text: string) => text.replace(/[\r\n]+/g, ' ').trim()
@@ -23,9 +24,9 @@ export function useCoachSubmission() {
     error.value = ''
   }
 
-  async function submit(text: string) {
+  async function submit(text: string): Promise<CoachSubmission['outcome'] | null> {
     const typed = coachText(text)
-    if (!typed || sending.value) return false
+    if (!typed || sending.value) return null
     sending.value = true
     reset()
     try {
@@ -35,10 +36,10 @@ export function useCoachSubmission() {
       })
       confirmation.value = confirmations[saved.outcome]
       hideConfirmation = window.setTimeout(() => (confirmation.value = ''), 4000)
-      return true
+      return saved.outcome
     } catch (cause) {
       error.value = cause instanceof Error ? cause.message : String(cause)
-      return false
+      return null
     } finally {
       sending.value = false
     }

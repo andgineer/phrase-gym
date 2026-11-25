@@ -14,8 +14,10 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from phrase_gym.coach.claude_cli import ClaudeCli
-from phrase_gym.coach.main import CoachApi, process_once
+from phrase_gym.coach.gemini_cli import GeminiCli
+from phrase_gym.coach.main import CoachApi, Preparer, process_once
 from phrase_gym.coach.preparation import CardPreparer
+from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
 from tests import fake_cli
@@ -51,7 +53,7 @@ class BrowserServer:
             ]
         )
 
-    def new_app(self) -> None:
+    def new_app(self, route: str = "claude") -> None:
         self.generation += 1
         directory = self.directory / str(self.generation)
         directory.mkdir()
@@ -64,10 +66,14 @@ class BrowserServer:
             service.clock = lambda: self.simulated_time or datetime.now(UTC)
             if hasattr(service, "rng"):
                 service.rng = rng
-        cli = ClaudeCli(
-            str(fake_cli.executable(directory, "claude")), attempts=directory / "attempts"
-        )
-        self.preparer = CardPreparer(cli, cli.attempts)
+        self.preparer: Preparer
+        fake = str(fake_cli.executable(directory, route))
+        if route == "gemini":
+            gemini = GeminiCli(fake, attempts=directory / "attempts", launch_delay=0)
+            self.preparer = Recognizer(gemini, gemini.attempts)
+        else:
+            cli = ClaudeCli(fake, attempts=directory / "attempts")
+            self.preparer = CardPreparer(cli, cli.attempts)
         self.speech = PiperSpeech(None, fake=True)
 
     async def reset(self, request: Request) -> JSONResponse:
@@ -75,8 +81,9 @@ class BrowserServer:
         if self.coach_task is not None:
             await self.coach_task
         self.wake.clear()
-        self.new_app()
-        self.coach_enabled = (await request.json())["coach_enabled"]
+        settings = await request.json()
+        self.new_app(settings.get("coach_route", "claude"))
+        self.coach_enabled = settings["coach_enabled"]
         return JSONResponse({"generation": self.generation})
 
     async def set_clock(self, request: Request) -> JSONResponse:
@@ -94,7 +101,7 @@ class BrowserServer:
         if (
             self.coach_enabled
             and scope["method"] == "POST"
-            and scope["path"] == "/api/coach/requests"
+            and scope["path"].startswith("/api/coach/requests")
         ):
             self.wake.set()
             if self.coach_task is None or self.coach_task.done():

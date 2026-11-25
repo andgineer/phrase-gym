@@ -86,7 +86,7 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
   expect(statusReads).toEqual([])
 })
 
-test('a content failure has no retry line and bold help renders without asterisks', async ({
+test('a content rejection stays in Coach and bold help renders without asterisks', async ({
   page,
 }) => {
   await page.goto('/#coach')
@@ -105,10 +105,12 @@ test('a content failure has no retry line and bold help renders without asterisk
   await page.request.post(`/api/imports/${phrase}/result`, {
     data: { result_id: phrase, phrase: card(phrase), reference: silentReference() },
   })
+  await page.reload()
+  const results = page.getByRole('list', { name: 'Coach results' }).getByRole('listitem')
+  await expect(results).toContainText('This is a web address, not an English word.')
+  await expect(results.getByRole('button', { name: 'Retry' })).toHaveCount(0)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
-  const notices = page.getByRole('list', { name: 'Preparation problems' }).getByRole('listitem')
-  await expect(notices).toContainText('This is a web address, not an English word.')
-  await expect(notices).not.toContainText('Send the same text from the Coach page to retry.')
+  await expect(page.getByRole('list', { name: 'Preparation problems' })).toHaveCount(0)
 
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()
   await page.getByRole('list', { name: 'Phrases' }).getByRole('button').first().click()

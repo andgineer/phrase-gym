@@ -143,6 +143,7 @@ const progressValue = computed(() => {
         v-if="front"
         :disabled="busy || audioBusy"
         :other-cue="card.other_cue_available"
+        :hint="card.hint_available"
         @hint="emit('hint')"
         @new-cue="emit('newCue')"
         @reveal="emit('show')"
@@ -179,6 +180,7 @@ const progressValue = computed(() => {
           </button>
         </p>
         <template v-if="front">
+          <p v-if="card.instruction" class="muted practice-instruction">{{ card.instruction }}</p>
           <p ref="phraseHeading" tabindex="-1" class="practice-prompt">{{ card.cue?.situation }}</p>
           <p v-if="card.cue?.partner_line" class="partner-line">“{{ card.cue.partner_line }}”</p>
           <p v-if="card.hint" class="hint" role="status">Hint: {{ card.hint }}</p>

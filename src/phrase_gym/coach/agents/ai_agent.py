@@ -7,6 +7,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from phrase_gym.coach.agents.antigravity import inject_agy_log_file
 from phrase_gym.coach.agents.command_template import build_run_args
 from phrase_gym.coach.agents.config import INHERITED_ENVIRONMENT
 from phrase_gym.coach.agents.subprocess import SubprocessError, SubprocessResult, run_subprocess
@@ -189,9 +190,12 @@ def _run_agent_cli(  # noqa: PLR0913
         **{"model": "", **values},
     )
 
-    # Coach may run Codex from a full path, so its base name decides.
-    if Path(command_head).name == "codex":
+    # Coach may run a CLI from a full path, so its base name decides.
+    command_name = Path(command_head).name
+    if command_name == "codex":
         run_args = _inject_skip_git_flag(run_args)
+    elif command_name == "agy":
+        run_args = inject_agy_log_file(run_args, stderr_path)
 
     cmd_line = run_args if isinstance(run_args, str) else shlex.join(run_args)
     stdout_path.with_name(stdout_path.name.replace("stdout.log", "command.txt")).write_text(
@@ -212,6 +216,7 @@ def _run_agent_cli(  # noqa: PLR0913
             stdout_path=stdout_path,
             stderr_path=stderr_path,
             log_label=log_label,
+            monitor_stderr=command_name != "agy",
             stop_event=stop_event,
             max_output_bytes=MAX_OUTPUT_BYTES,
             error_line=error_line,

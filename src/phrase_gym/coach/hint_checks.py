@@ -1,4 +1,5 @@
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from phrase_gym.server.import_contracts import Cue
@@ -124,7 +125,7 @@ def _bare(token: str) -> bool:
     return token.casefold().replace("’", "'").strip("'\"") in FUNCTION_WORDS
 
 
-def hint_problems(index: int, hint: str, target_text: str, cues: list[Cue]) -> list[str]:
+def hint_problems(index: int, hint: str, target_text: str, cues: Sequence[Cue]) -> list[str]:
     target = [letters(word) for word in words(target_text) if letters(word)]
     parts = parse_hint(index, hint, target)
     problems = parts.problems
@@ -173,7 +174,7 @@ def hint_set_problems(hints: list[str], target_text: str, contrasted: list[str])
     return problems
 
 
-def gloss_problems(cues: list[Cue], target_text: str) -> list[str]:
+def gloss_problems(cues: Sequence[Cue], target_text: str) -> list[str]:
     target = words(target_text)
     return [
         f"cues.{index}: the gloss contains the answer “{target_text}”; paraphrase it instead"

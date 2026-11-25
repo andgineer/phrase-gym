@@ -1,10 +1,10 @@
 <script setup lang="ts">
-defineProps<{ disabled: boolean; otherCue: boolean }>()
+defineProps<{ disabled: boolean; otherCue: boolean; hint: boolean }>()
 defineEmits<{ hint: []; newCue: []; reveal: [] }>()
 </script>
 <template>
   <div class="card-controls front-controls">
-    <button class="tinted" :disabled="disabled" @click="$emit('hint')">
+    <button class="tinted" :disabled="disabled || !hint" @click="$emit('hint')">
       <svg
         class="audio-icon"
         aria-hidden="true"
