@@ -57,13 +57,12 @@ def _verified_cues(
         partner = example.partner_line.strip() or None
         cues.append({"situation": f"{masked} (={gloss})", "partner_line": partner})
         written.append(None if copied else text)
-    high = CUE_COUNTS[recognition.kind][1]
-    return cues[:high], written[:high]
+    return cues, written
 
 
 def _drop_first_flagged(
     card: dict[str, Any],
-    written: list[str | None],
+    pool: tuple[list[dict[str, Any]], list[str | None]],
     problems: list[str],
 ) -> bool:
     """Remove one named addition, since it may be what makes another look wrong."""
@@ -71,9 +70,12 @@ def _drop_first_flagged(
     if found is None:
         return False
     field, index = found[1], int(found[2])
-    del card[field][index]
     if field == "cues":
-        del written[index]
+        # Shown cues lead the pool, so the next approved spare takes the dropped cue's place.
+        for candidates in pool:
+            del candidates[index]
+    else:
+        del card[field][index]
     return True
 
 
@@ -89,14 +91,9 @@ def enriched_phrase(
     if not check.explanation_ok or not draft.explanation.strip():
         return None
     cues, written = _verified_cues(draft, check, recognition, source)
-    new = [text for text in written if text]
-    if not new:
-        # Without a new context the card would only repeat basic practice of the source.
-        return None
-    card = {
-        "text": source if source and gapped(source, target) else new[0],
+    high = CUE_COUNTS[recognition.kind][1]
+    card: dict[str, Any] = {
         "explanation": draft.explanation.strip(),
-        "cues": cues,
         "recall_hints": _verified_texts(
             draft.recall_hints,
             check.hints_ok,
@@ -113,11 +110,15 @@ def enriched_phrase(
     answer = {"kind": recognition.kind, "target": target, "card": card}
     # Each round drops one addition, so the number of additions bounds the rounds.
     for _ in range(1 + len(cues) + len(card["recall_hints"]) + len(card["usage_contexts"])):
-        if not any(written):
+        new = [text for text in written[:high] if text]
+        if not new:
+            # Without a new context the card would only repeat basic practice of the source.
             return None
+        card["cues"] = cues[:high]
+        card["text"] = source if source and gapped(source, target) else new[0]
         problems = card_problems(answer, item_id)
         if not problems:
             return phrase_of(card, item_id)
-        if not _drop_first_flagged(card, written, problems):
+        if not _drop_first_flagged(card, (cues, written), problems):
             return None
     return None

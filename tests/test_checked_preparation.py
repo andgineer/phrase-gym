@@ -159,6 +159,16 @@ def test_a_wrong_example_is_dropped_and_the_rest_of_the_card_stays(
     ]
 
 
+def test_a_spare_example_replaces_one_the_code_checks_drop(
+    client: TestClient, preparer: CheckedPreparer
+) -> None:
+    send(client, preparer, "strongly believe — We strongly believe it works, leaky-partner.")
+    assert stored(client)["cues"] == [
+        "We __________ it works, leaky-partner. (=sense 1)",
+        "We heard __________ again on the radio today. (=sense 3)",
+    ]
+
+
 def test_a_word_card_survives_one_doubted_example_without_a_source(
     client: TestClient, preparer: CheckedPreparer
 ) -> None:

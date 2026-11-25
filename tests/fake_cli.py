@@ -91,8 +91,14 @@ def draft(typed: dict[str, str]) -> dict[str, object]:
         examples.append(
             {"text": found["source"], "partner_line": "", "attribution": "source"},
         )
+    # "leaky-partner" makes the first new example's partner line give the answer away.
+    leaky = f"Do you {target}?" if "leaky-partner" in typed["text"] else ""
     examples += [
-        {"text": f"My friend said {target} at the meeting.", "attribution": "generated"},
+        {
+            "text": f"My friend said {target} at the meeting.",
+            "partner_line": leaky,
+            "attribution": "generated",
+        },
         {"text": f"We heard {target} again on the radio today.", "attribution": "generated"},
         {"text": f"Her teacher wrote {target} in the report.", "attribution": "generated"},
     ]
