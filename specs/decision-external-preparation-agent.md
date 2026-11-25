@@ -73,16 +73,22 @@ Coach automatically prepares the safest useful card permitted by the [content de
 
 ### Preparation by provider
 
-The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-implementation.md#5-qualify-what-learners-will-receive).
+Card quality on the paid routes comes from strong models. Weaker, cheaper models cannot produce quality cards, so token savings must come from how Coach calls the strong models, never from switching models.
 
-| Route | Preparation to qualify |
+| Route | Preparation |
 |---|---|
-| OpenAI subscription | `gpt-5.6-luna` at low effort drafts the card. A separate `gpt-5.6-terra` call at low effort checks it. |
-| Anthropic subscription | `claude-haiku-5-5` at low effort drafts the card. A separate `claude-sonnet-5` call at low effort checks it. |
+| OpenAI subscription | `gpt-6.1-sol` at medium effort prepares the card. Separate calls on the same model review it and revise it, for at most two review and revision rounds. |
+| Anthropic subscription | `claude-opus-5-5` at medium effort, in the same prepare, review and revise flow. |
 | Gemini free | One recognition call with `gemini-3.8-flash-low` under the Antigravity routing policy. The program builds [basic wording practice](decision-targeted-drilling.md#basic-wording-practice) from the confirmed text. |
 | Gemini subscription | Preparation design remains open until measured on that subscription. |
 
-For subscription enrichment, the verifier checks the original submission, the learning language, target, correction, source sentence and every addition. Both calls must agree on the target and any correction. A disputed rejection or unresolved target ends with an inbox reason. Drop unsafe additions and use basic wording practice if the confirmed target stands on its own. An unavailable verifier is a service failure. Every published exercise requires validation, matching audio and atomic publication.
+The paid routes keep this flow until a token-saving change passes measurement on the same held-out inputs with fresh blind semantic review: no fewer complete cards, no lower cue quality and no materially wrong result. A change that lowers card quality is rejected whatever it saves. Most of each paid call is CLI overhead and extra rounds spent fetching the task, not Coach content, which is where savings are sought first.
+
+On subscription routes the review checks the original submission, its learning language, target, correction, source sentence and every addition against the shared content rules, and the revision corrects what it finds. A card that still fails the mechanical checks after the last revision is not published. An unavailable or interrupted review or revision is a service failure, and its incomplete draft is discarded. Every published exercise requires validation, matching audio and atomic publication.
+
+Gemini free accepts lower card quality: a gap in the learner's own sentence or a partial form of the wording, without meaning cues or examples. Only language correctness is required there: keep valid input, correct only an obvious typo and reject wrong-language or unintelligible text. In the text-only proof of concept the free-route verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence; the wording-only exercise avoids those errors.
+
+**Evidence.** Branch `coach-plan-trial` on origin implements the cheaper alternative: `claude-haiku-5-5` writes and `claude-sonnet-5` checks, or `gpt-5.6-luna` writes and `gpt-5.6-terra` checks, all at low effort. On 12 held-out English inputs per route, judged blind by a fresh reviewer on 2026-11-25, the strong flow produced 10 full cards out of 12 on each route, with average cue quality 4.8 on Claude and 4.2 on Codex and no material error. The cheaper pairs produced 2 and 0 full cards, average cue quality 2.6 on both, and the Claude pair failed to correct **thier** to **their**. The weaker writers under-delivered: luna returned no examples, and haiku often returned too few hints for one justified checker rejection to leave a full card. Most of their cards fell back to letter skeletons such as **co…** for **colour**, which the reviewer judged unusable. They also missed the token goal, using 89.5% of the strong flow's tokens on Claude and 80% on Codex. Claude's list price fell to about 26%, but only because the models are cheaper, which does not justify the quality loss.
 
 ## Repair and scope
 
