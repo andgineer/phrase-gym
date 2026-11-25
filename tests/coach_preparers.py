@@ -24,10 +24,10 @@ def subscription_writer(vendor: str, directory: Path, timeout: float = 10) -> Su
 def checked_preparer(vendor: str, directory: Path, timeout: float = 10) -> CheckedPreparer:
     writer = subscription_writer(vendor, directory, timeout)
     checker = replace(writer, model=CLAUDE_CHECKER if vendor == "claude" else CODEX_CHECKER)
-    return CheckedPreparer(writer, checker, writer.attempts)
+    return CheckedPreparer(writer, checker, writer.attempts, directory / "usage")
 
 
 def free_recognizer(directory: Path, timeout: float = 10) -> Recognizer:
     fake = str(fake_cli.executable(directory, "gemini"))
     gemini = GeminiCli(fake, timeout=timeout, attempts=directory / "attempts", launch_delay=0)
-    return Recognizer(gemini, gemini.attempts)
+    return Recognizer(gemini, gemini.attempts, directory / "usage")

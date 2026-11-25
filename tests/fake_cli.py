@@ -9,6 +9,8 @@ from pathlib import Path
 
 SOURCE_SEPARATOR = " — "
 USAGE = {"input_tokens": 1200, "cache_read": 300, "cache_write": 40, "output": 90, "reasoning": 25}
+# Codex and Antigravity report cached prompt tokens inside their input count.
+INCLUSIVE_INPUT = USAGE["input_tokens"] + USAGE["cache_read"]
 
 
 def executable(directory: Path, vendor: str = "codex") -> Path:
@@ -92,6 +94,7 @@ def draft(typed: dict[str, str]) -> dict[str, object]:
     examples += [
         {"text": f"My friend said {target} at the meeting.", "attribution": "generated"},
         {"text": f"We heard {target} again on the radio today.", "attribution": "generated"},
+        {"text": f"Her teacher wrote {target} in the report.", "attribution": "generated"},
     ]
     first = target.split()[0]
     half = max(1, len(first) // 2)
@@ -108,7 +111,7 @@ def draft(typed: dict[str, str]) -> dict[str, object]:
             f"{first[: max(1, half - 1)]}... / garden",
             f"{first[:half]}... / station",
         ],
-        "usage_contexts": ["coach test"],
+        "usage_contexts": ["coach test", "fake practice"],
     }
 
 
@@ -129,7 +132,10 @@ def check(typed: dict[str, str], prompt: str) -> dict[str, object]:
             not ("unsafe-hint" in text and index == 0)
             for index in range(len(shown["recall_hints"]))
         ],
-        "usage_contexts_ok": [True for _ in shown["usage_contexts"]],
+        "usage_contexts_ok": [
+            not ("unsafe-context" in text and index == 0)
+            for index in range(len(shown["usage_contexts"]))
+        ],
         "reasons": ["The first new example changes the meaning."] if "unsafe" in text else [],
     }
 
@@ -195,9 +201,9 @@ def respond(vendor: str, arguments: list[str], answer_value: object | None) -> N
         output.write_text("{not json" if answer_value is None else json.dumps(answer_value))
         assert "--json" in arguments, arguments
         usage = {
-            "input_tokens": USAGE["input_tokens"],
+            "input_tokens": INCLUSIVE_INPUT,
             "cached_input_tokens": USAGE["cache_read"],
-            "cache_write_input_tokens": USAGE["cache_write"],
+            "cache_write_input_tokens": 0,
             "output_tokens": USAGE["output"],
             "reasoning_output_tokens": USAGE["reasoning"],
         }
@@ -209,7 +215,12 @@ def respond(vendor: str, arguments: list[str], answer_value: object | None) -> N
         assert arguments[-2] == "-p", arguments
         assert {"--dangerously-skip-permissions", "--log-file"} <= set(arguments), arguments
         response = "I could not decide." if answer_value is None else json.dumps(answer_value)
-        usage = {"input_tokens": USAGE["input_tokens"], "output_tokens": USAGE["output"]}
+        usage = {
+            "input_tokens": INCLUSIVE_INPUT,
+            "cache_read_tokens": USAGE["cache_read"],
+            "output_tokens": USAGE["output"],
+            "total_tokens": INCLUSIVE_INPUT + USAGE["output"],
+        }
         print(
             json.dumps(
                 {"status": "SUCCESS", "response": f"```json\n{response}\n```", "usage": usage}

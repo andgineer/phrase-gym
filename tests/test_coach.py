@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from phrase_gym.coach import codex_cli
+from phrase_gym.coach import cli_steps
 from phrase_gym.coach.agents.ai_agent import _inject_skip_git_flag
 from phrase_gym.coach.agents.command_template import build_run_args
 from phrase_gym.coach.claude_cli import ClaudeCli, template_values
@@ -187,14 +187,18 @@ def test_workspace_is_the_override_then_the_source_checkout_then_a_private_cache
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("PHRASE_GYM_COACH_WORKSPACE", str(tmp_path / "chosen"))
-    assert codex_cli.coach_workspace() == tmp_path / "chosen"
+    assert cli_steps.coach_workspace() == tmp_path / "chosen"
+    assert cli_steps.usage_root() == tmp_path / "chosen" / ".phrase-gym-coach" / "usage"
     monkeypatch.delenv("PHRASE_GYM_COACH_WORKSPACE")
-    assert codex_cli.coach_workspace() == Path(__file__).resolve().parents[1]
-    installed = tmp_path / "lib" / "site-packages" / "phrase_gym" / "coach" / "codex_cli.py"
+    checkout = Path(__file__).resolve().parents[1]
+    assert cli_steps.coach_workspace() == checkout
+    # Claude attempts stay outside the checkout, but its usage summaries join the ignored folder.
+    assert cli_steps.usage_root() == checkout / ".phrase-gym-coach" / "usage"
+    installed = tmp_path / "lib" / "site-packages" / "phrase_gym" / "coach" / "cli_steps.py"
     installed.parent.mkdir(parents=True)
-    monkeypatch.setattr(codex_cli, "__file__", str(installed))
-    monkeypatch.setattr(codex_cli, "user_cache_path", lambda name: tmp_path / "cache" / name)
-    assert codex_cli.coach_workspace() == tmp_path / "cache" / "phrase-gym-coach"
+    monkeypatch.setattr(cli_steps, "__file__", str(installed))
+    monkeypatch.setattr(cli_steps, "user_cache_path", lambda name: tmp_path / "cache" / name)
+    assert cli_steps.coach_workspace() == tmp_path / "cache" / "phrase-gym-coach"
 
 
 def test_cancelling_a_step_stops_the_cli_child_promptly(tmp_path: Path, cli: Cli) -> None:

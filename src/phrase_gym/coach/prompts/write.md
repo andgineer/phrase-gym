@@ -19,17 +19,18 @@ lists.
 
 - explanation: brief help about the target in help_language. An accurate short translation is
   enough; do not pad it.
-- examples: up to two short, complete and natural sentences in learning_language, each using
-  the EXACT accepted target once, with correct sense, grammar, speaker and listener roles and
-  register. Use genuinely different situations when possible. An example copied unchanged from
-  a usable source sentence has attribution source; every other example is new and has
-  attribution generated. Never rewrite a source and call it a quote.
+- examples: short, complete and natural sentences in learning_language, each using the EXACT
+  accepted target once, with correct sense, grammar, speaker and listener roles and register.
+  Write three new examples for a word and two for a phrase, so that one doubted example still
+  leaves a card. Use genuinely different situations. When the source sentence is usable, also
+  include it unchanged with attribution source; every other example is new and has attribution
+  generated. Never rewrite a source and call it a quote.
 - gloss: for each example, a short meaning cue in card_language that suits that sentence and
   does not contain the target. partner_line: an optional short line by the other speaker in
   learning_language, or an empty string.
-- recall_hints: two to four wording hints of at most 40 characters, each helping on its own to
+- recall_hints: three wording hints of at most 40 characters, each helping on its own to
   recover the expression without showing it.
-- usage_contexts: one or two short searchable uses in help_language.
+- usage_contexts: two short searchable uses in help_language.
 
 Never guess a meaning or translation, or change the script of the target.
 

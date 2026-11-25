@@ -19,7 +19,7 @@ def recognizer(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Recognizer:
     monkeypatch.setattr(antigravity, "_agy_model_switches", {})
     fake = str(fake_cli.executable(tmp_path, "gemini"))
     gemini = GeminiCli(fake, timeout=10, attempts=tmp_path / "attempts", launch_delay=0)
-    return Recognizer(gemini, gemini.attempts)
+    return Recognizer(gemini, gemini.attempts, tmp_path / "usage")
 
 
 def send(client: TestClient, recognizer: Recognizer, text: str) -> dict[str, object]:
@@ -56,13 +56,18 @@ def test_a_whole_sentence_becomes_a_source_gap(client: TestClient, recognizer: R
     assert answer["text"] == "We strongly believe this will work"
     assert inbox(client) == []
     # Only the usage summary outlives a published card's private trail.
-    assert [path.name for path in recognizer.attempts.iterdir()] == ["usage"]
-    [summary] = (recognizer.attempts / "usage").iterdir()
+    assert list(recognizer.attempts.iterdir()) == []
+    [summary] = recognizer.usage.iterdir()
     steps = json.loads(summary.read_text())["steps"]
     assert [(step["step"], step["model"], step["effort"]) for step in steps] == [
         ("recognize", "gemini-3.8-flash-low", "low")
     ]
-    assert steps[0]["usage"] == {"input_tokens": 1200, "output_tokens": 90}
+    assert steps[0]["usage"] == {
+        "input_tokens": 1200,
+        "cache_read_tokens": 300,
+        "output_tokens": 90,
+        "total_tokens": 1590,
+    }
 
 
 def test_a_target_with_its_source_sentence_gaps_that_sentence(

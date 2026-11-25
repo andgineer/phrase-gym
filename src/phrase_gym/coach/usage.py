@@ -55,16 +55,17 @@ def claude_usage(envelope: dict[str, Any]) -> dict[str, Any]:
     return found
 
 
+def _uncached(usage: dict[str, Any], cached: str) -> int | None:
+    # Codex and Antigravity count cached prompt tokens inside input; Claude reports them apart.
+    total, reused = usage.get("input_tokens"), usage.get(cached)
+    if not isinstance(total, int):
+        return None
+    return total - reused if isinstance(reused, int) else total
+
+
 def codex_usage(stdout: Path, stderr: Path) -> dict[str, int]:
     """Usage from `codex exec --json` turn events, or the plain transcript's total."""
     totals: dict[str, int] = {}
-    names = {
-        "input_tokens": "input_tokens",
-        "cached_input_tokens": "cache_read_tokens",
-        "cache_write_input_tokens": "cache_write_tokens",
-        "output_tokens": "output_tokens",
-        "reasoning_output_tokens": "reasoning_tokens",
-    }
     for line in _read(stdout).splitlines():
         if not line.startswith('{"type":"turn.completed"'):
             continue
@@ -72,10 +73,17 @@ def codex_usage(stdout: Path, stderr: Path) -> dict[str, int]:
             usage = json.loads(line).get("usage") or {}
         except ValueError:
             continue
-        totals["turns"] = totals.get("turns", 0) + 1
-        for source, name in names.items():
-            if isinstance(usage.get(source), int):
-                totals[name] = totals.get(name, 0) + usage[source]
+        turn = _counts(
+            {
+                "turns": 1,
+                "input_tokens": _uncached(usage, "cached_input_tokens"),
+                "cache_read_tokens": usage.get("cached_input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
+                "reasoning_tokens": usage.get("reasoning_output_tokens"),
+            },
+        )
+        for name, value in turn.items():
+            totals[name] = totals.get(name, 0) + value
     if not totals and (match := TOKENS_USED.search(_read(stderr))):
         totals["total_tokens"] = int(match[1].replace(",", ""))
     return totals
@@ -85,7 +93,7 @@ def gemini_usage(usage: dict[str, int] | None) -> dict[str, int]:
     usage = usage or {}
     return _counts(
         {
-            "input_tokens": usage.get("input_tokens"),
+            "input_tokens": _uncached(usage, "cache_read_tokens"),
             "cache_read_tokens": usage.get("cache_read_tokens"),
             "output_tokens": usage.get("output_tokens"),
             "reasoning_tokens": usage.get("thinking_tokens"),
@@ -103,7 +111,6 @@ def record_step(  # noqa: PLR0913
     elapsed: float,
     usage: dict[str, Any],
 ) -> None:
-    """One CLI step's requested model and effort, its time and whatever usage the CLI reported."""
     record = {
         "step": step,
         "cli": cli,
@@ -115,7 +122,7 @@ def record_step(  # noqa: PLR0913
     (attempt / f"{step}{USAGE_SUFFIX}").write_text(json.dumps(record), encoding="utf-8")
 
 
-def summarize(attempt: Path, request_id: str, outcome: str) -> Path:
+def summarize(attempt: Path, folder: Path, request_id: str, outcome: str) -> Path:
     """A small per-request usage file that outlives the attempt trail deleted after success."""
     steps = []
     for path in sorted(attempt.glob(f"*{USAGE_SUFFIX}"), key=lambda found: found.stat().st_mtime):
@@ -123,7 +130,6 @@ def summarize(attempt: Path, request_id: str, outcome: str) -> Path:
             steps.append(json.loads(path.read_text(encoding="utf-8")))
         except (OSError, ValueError):
             continue
-    folder = attempt.parent / "usage"
     folder.mkdir(parents=True, mode=0o700, exist_ok=True)
     summary = folder / f"{attempt.name}.json"
     content = {"request_id": request_id, "outcome": outcome, "steps": steps}

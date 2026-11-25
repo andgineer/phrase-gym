@@ -47,7 +47,6 @@ def render(template: str, **values: str) -> str:
 
 
 def learner_input(work: CoachWork) -> str:
-    """The typed text with the languages captured when the learner sent it."""
     typed = {
         "text": work.text,
         "learning_language": LANGUAGE_NAMES[work.learning_language],

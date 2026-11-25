@@ -60,9 +60,10 @@ def recognized_card(answer: dict[str, Any], work: CoachWork) -> BasicCard:
 class Recognizer:
     """One recognition call confirms the target; the program builds basic wording practice."""
 
-    def __init__(self, cli: Cli, attempts: Path):
+    def __init__(self, cli: Cli, attempts: Path, usage: Path):
         self.cli = cli
         self.attempts = attempts
+        self.usage = usage
 
     async def prepare(self, work: CoachWork) -> BasicCard:
         async def recognize(attempt: Path) -> BasicCard:
@@ -75,4 +76,10 @@ class Recognizer:
             )
             return recognized_card(answer, work)
 
-        return await run_attempt(self.attempts, work.package_id, recognize, lambda _: "basic")
+        return await run_attempt(
+            self.attempts,
+            self.usage,
+            work.package_id,
+            recognize,
+            lambda _: "basic",
+        )

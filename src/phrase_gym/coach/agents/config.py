@@ -4,8 +4,6 @@ _DEFAULT_AGENT_API_KEY_VARS: dict[str, list[str]] = {
     "gemini": ["ANTIGRAVITY_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"],
 }
 
-# Pinned so card quality does not follow the model the learner last chose for everyday work.
-# A small model writes the card; a separate, stronger call checks it against the input.
 CLAUDE_WRITER = "--model claude-haiku-5-5 --effort low"
 CLAUDE_CHECKER = "--model claude-sonnet-5 --effort low"
 CODEX_WRITER = "--model gpt-5.6-luna -c model_reasoning_effort=low"

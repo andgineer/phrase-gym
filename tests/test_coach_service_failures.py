@@ -78,7 +78,7 @@ def test_a_service_failure_keeps_its_reason_and_publishes_nothing(
     status = run_once(client, preparer, text)
     assert status["status"] == "error"
     assert str(status["error"]).startswith(reason)
-    [attempt] = [path for path in preparer.attempts.iterdir() if path.name != "usage"]
+    [attempt] = preparer.attempts.iterdir()
     printed = capsys.readouterr().out
     assert printed.startswith(f"Coach could not prepare “{text}”: {reason}")
     assert f"(details: {attempt})" in printed
@@ -86,7 +86,7 @@ def test_a_service_failure_keeps_its_reason_and_publishes_nothing(
     assert [(notice["label"], notice["kind"]) for notice in notices] == [(text, "coach")]
     [outcome] = client.get("/api/coach/inbox").json()["items"]
     assert outcome["outcome"] == "failed"
-    [summary] = (preparer.attempts / "usage").iterdir()
+    [summary] = preparer.usage.iterdir()
     recorded = json.loads(summary.read_text())
     assert recorded["outcome"].startswith(f"failed: {reason}")
     assert [step["step"] for step in recorded["steps"]] == ["write"]

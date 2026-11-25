@@ -1,5 +1,4 @@
 import json
-import os
 import re
 import shlex
 import tempfile
@@ -7,8 +6,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-from platformdirs import user_cache_path
 
 from phrase_gym.coach.agents.config import (
     _DEFAULT_AGENT_API_KEY_VARS,
@@ -27,15 +24,6 @@ from phrase_gym.coach.usage import codex_usage, record_step
 PROFILE = "phrase-gym-coach"
 # Events echo the prompt and learner text, so only Codex's own error lines and events count.
 ERROR_LINE = re.compile(r'^ERROR:.*$|^\{"type":"(?:error|turn\.failed)".*$', re.M)
-
-
-def coach_workspace() -> Path:
-    if configured := os.environ.get("PHRASE_GYM_COACH_WORKSPACE"):
-        return Path(configured)
-    checkout = Path(__file__).resolve().parents[3]
-    if (checkout / "pyproject.toml").is_file() and (checkout / "src" / "phrase_gym").is_dir():
-        return checkout
-    return user_cache_path("phrase-gym-coach")
 
 
 def _toml(value: str) -> str:

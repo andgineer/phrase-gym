@@ -17,7 +17,8 @@ from phrase_gym.coach.agents.config import (
 )
 from phrase_gym.coach.checked_preparation import CheckedPreparer, PreparedPhrase
 from phrase_gym.coach.claude_cli import ClaudeCli
-from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
+from phrase_gym.coach.cli_steps import coach_workspace, usage_root
+from phrase_gym.coach.codex_cli import CodexCli
 from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.preparation import PreparationError
 from phrase_gym.coach.recognition import Recognizer
@@ -71,12 +72,14 @@ def configured_preparer(choice: str) -> Preparer:
     if choice == "codex":
         codex = os.environ.get("PHRASE_GYM_CODEX", "codex")
         writer = CodexCli(coach_workspace(), codex, model=CODEX_WRITER)
-        return CheckedPreparer(writer, replace(writer, model=CODEX_CHECKER), writer.attempts)
+        checker = replace(writer, model=CODEX_CHECKER)
+        return CheckedPreparer(writer, checker, writer.attempts, usage_root())
     if choice == "gemini":
         gemini = GeminiCli(os.environ.get("PHRASE_GYM_AGY", "agy"))
-        return Recognizer(gemini, gemini.attempts)
+        return Recognizer(gemini, gemini.attempts, usage_root())
     writer = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"), model=CLAUDE_WRITER)
-    return CheckedPreparer(writer, replace(writer, model=CLAUDE_CHECKER), writer.attempts)
+    checker = replace(writer, model=CLAUDE_CHECKER)
+    return CheckedPreparer(writer, checker, writer.attempts, usage_root())
 
 
 def _card_fields(card: BasicCard | PreparedPhrase) -> dict[str, object]:

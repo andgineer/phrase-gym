@@ -45,12 +45,11 @@ def _kind(card: BasicCard | PreparedPhrase) -> str:
 
 
 class CheckedPreparer:
-    """A writer drafts the card; a separate checker judges the input and every addition."""
-
-    def __init__(self, writer: Cli, checker: Cli, attempts: Path):
+    def __init__(self, writer: Cli, checker: Cli, attempts: Path, usage: Path):
         self.writer = writer
         self.checker = checker
         self.attempts = attempts
+        self.usage = usage
 
     async def prepare(self, work: CoachWork) -> BasicCard | PreparedPhrase:
         async def write_and_check(attempt: Path) -> BasicCard | PreparedPhrase:
@@ -62,7 +61,9 @@ class CheckedPreparer:
                 schema("write.schema.json"),
             )
             draft = parse_draft(written, work.text)
-            shown = json.dumps(written, ensure_ascii=False, indent=2)
+            # The checker judges recognition independently, so it never sees the writer's.
+            additions = {key: value for key, value in written.items() if key != "recognition"}
+            shown = json.dumps(additions, ensure_ascii=False, indent=2)
             checked = await self.checker.ask(
                 attempt,
                 "check",
@@ -71,4 +72,4 @@ class CheckedPreparer:
             )
             return checked_card(draft, parse_check(checked, draft, work.text), work)
 
-        return await run_attempt(self.attempts, work.package_id, write_and_check, _kind)
+        return await run_attempt(self.attempts, self.usage, work.package_id, write_and_check, _kind)

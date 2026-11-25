@@ -6,8 +6,8 @@ Work alone and answer once; nobody will answer questions. Do not read or change 
 
 ## Decide recognition yourself
 
-Decide recognition from the learner input alone, even when the draft rejects it, and ignore the
-draft's recognition while you decide.
+Decide recognition from the learner input alone. The draft shows only the material the other
+session added, which is empty when it found nothing to add.
 
 {{recognition}}
 

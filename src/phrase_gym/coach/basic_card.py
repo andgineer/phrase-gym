@@ -78,7 +78,6 @@ def confirmed_card(
     card_language: str,
     help_language: str,
 ) -> BasicCard:
-    """Basic practice for a confirmed target; when none fits, the reason is a decision."""
     # A source too long for a card still leaves the target to practise on its own.
     for candidate in [source, None] if source else [None]:
         try:

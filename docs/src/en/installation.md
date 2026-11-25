@@ -52,10 +52,11 @@ Gym's API, has one session write the card and a second session check your text a
 meaning cue and hint the first one wrote, then generates the reference audio and publishes the
 card. Anything the check doubts is left out; if no checked example remains, you get the basic
 card described below for the Gemini route. When the two sessions disagree about what you meant,
-the **Coach** page lists the text with a reason instead of adding a card. A card usually takes
-under a minute. Coach prints a line for every preparation that fails, with the folder that keeps
-that attempt's prompts and answers. It also keeps a small private record of each request's model,
-time and reported token usage in that folder's `usage` subfolder.
+the **Coach** page lists the text with a reason instead of adding a card. Coach prints a line for
+every preparation that fails, with the folder that keeps that attempt's prompts and answers. It
+also keeps a small private record of each request's models, time and reported token usage in
+`.phrase-gym-coach/usage/`: inside the source checkout, or in a private cache folder for an
+installed Coach.
 Imports from an external AI agent arrive with complete audio and do not need Coach. Piper uses
 the separately pinned private environment described in the voice setup guide.
 

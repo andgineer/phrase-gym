@@ -114,9 +114,8 @@ def test_a_verified_example_reaches_practice_with_its_gap_gloss_and_reference(
     assert answer["explanation"] == "Target: strongly believe. A useful way to say it."
     assert speech.spoken == ["We strongly believe it works."]
     assert inbox(client) == []
-    attempts = preparer.attempts
-    assert [path.name for path in attempts.iterdir()] == ["usage"]
-    [summary] = (attempts / "usage").iterdir()
+    assert list(preparer.attempts.iterdir()) == []
+    [summary] = preparer.usage.iterdir()
     recorded = json.loads(summary.read_text())
     assert recorded["outcome"] == "enriched"
     steps = recorded["steps"]
@@ -156,7 +155,28 @@ def test_a_wrong_example_is_dropped_and_the_rest_of_the_card_stays(
     assert stored(client)["cues"] == [
         "She was __________ to go, unsafe-example. (=sense 1)",
         "We heard __________ again on the radio today. (=sense 3)",
+        "Her teacher wrote __________ in the report. (=sense 4)",
     ]
+
+
+def test_a_word_card_survives_one_doubted_example_without_a_source(
+    client: TestClient, preparer: CheckedPreparer
+) -> None:
+    send(client, preparer, "reluctant — She was reluctant to go tomorow, unsafe-example.")
+    assert stored(client)["text"] == "We heard reluctant again on the radio today."
+    assert stored(client)["cues"] == [
+        "We heard __________ again on the radio today. (=sense 2)",
+        "Her teacher wrote __________ in the report. (=sense 3)",
+    ]
+
+
+def test_a_doubted_usage_context_is_dropped_and_the_card_stays_enriched(
+    client: TestClient, preparer: CheckedPreparer
+) -> None:
+    send(client, preparer, "strongly believe — We strongly believe it works, unsafe-context.")
+    _, answer = practised(client)
+    assert answer["usage_contexts"] == ["fake practice"]
+    assert answer["explanation"] == "Target: strongly believe. A useful way to say it."
 
 
 def test_a_wrong_hint_is_dropped(client: TestClient, preparer: CheckedPreparer) -> None:
@@ -240,10 +260,22 @@ def test_an_unfinished_check_is_a_service_failure_and_nothing_is_published(
     [item] = inbox(client)
     assert item["outcome"] == "failed"
     assert [notice["label"] for notice in notices(client)] == [typed]
-    [attempt] = [path for path in preparer.attempts.iterdir() if path.name != "usage"]
+    [attempt] = preparer.attempts.iterdir()
     assert (attempt / "write-prompt.md").exists()
     retried = client.post(f"/api/coach/requests/{item['request_id']}/retry").json()
     assert retried["outcome"] == "saved"
+
+
+def test_the_checker_never_sees_the_writer_recognition(
+    client: TestClient, vendor: str, tmp_path: Path
+) -> None:
+    preparer = checked_preparer(vendor, tmp_path)
+    send(client, preparer, "strongly believe — We strongly believe it works, garbled.")
+    [attempt] = preparer.attempts.iterdir()
+    prompt = (attempt / "check-prompt.md").read_text()
+    shown = json.loads(prompt.split("<draft>\n", 1)[1].split("\n</draft>", 1)[0])
+    assert "recognition" not in shown
+    assert shown["recall_hints"] and shown["examples"]
 
 
 def test_a_malformed_check_judging_too_few_items_never_publishes(

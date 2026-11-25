@@ -1,11 +1,14 @@
 import asyncio
 import json
+import os
 import re
 import tempfile
 import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+
+from platformdirs import user_cache_path
 
 from phrase_gym.coach.agents.ai_agent import _run_agent_cli, agent_failure
 from phrase_gym.coach.agents.subprocess import SubprocessError, SubprocessResult
@@ -20,6 +23,20 @@ class CliError(RuntimeError):
 
 def attempts_root() -> Path:
     return Path(tempfile.gettempdir()).resolve() / "phrase-gym-coach"
+
+
+def coach_workspace() -> Path:
+    if configured := os.environ.get("PHRASE_GYM_COACH_WORKSPACE"):
+        return Path(configured)
+    checkout = Path(__file__).resolve().parents[3]
+    if (checkout / "pyproject.toml").is_file() and (checkout / "src" / "phrase_gym").is_dir():
+        return checkout
+    return user_cache_path("phrase-gym-coach")
+
+
+def usage_root() -> Path:
+    # Measurement files stay with the ignored private folder even when attempts live elsewhere.
+    return coach_workspace() / ".phrase-gym-coach" / "usage"
 
 
 def write_step_files(attempt: Path, step: str, prompt: str, schema: dict[str, Any]) -> Path:

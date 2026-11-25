@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from phrase_gym.coach.cli_steps import CliError
-from phrase_gym.coach.usage import claude_usage, codex_usage, model_and_effort
+from phrase_gym.coach.usage import claude_usage, codex_usage, gemini_usage, model_and_effort
 from tests.coach_preparers import subscription_writer
 
 
@@ -40,9 +40,8 @@ def test_codex_usage_sums_its_turn_events(tmp_path: Path) -> None:
     stdout.write_text("\n".join(json.dumps(event, separators=(",", ":")) for event in events))
     assert codex_usage(stdout, tmp_path / "missing.log") == {
         "turns": 2,
-        "input_tokens": 200,
+        "input_tokens": 120,
         "cache_read_tokens": 80,
-        "cache_write_tokens": 0,
         "output_tokens": 14,
         "reasoning_tokens": 6,
     }
@@ -90,3 +89,38 @@ def test_a_failed_step_still_records_its_model_and_time(vendor: str, tmp_path: P
     assert (record["step"], record["effort"]) == ("write", "low")
     assert record["model"] in {"claude-haiku-5-5", "gpt-5.6-luna"}
     assert record["elapsed_seconds"] > 0
+
+
+ADDITIVE = ("input_tokens", "cache_read_tokens", "cache_write_tokens", "output_tokens")
+
+
+def _consumed(recorded: dict[str, int]) -> int:
+    return sum(recorded.get(name, 0) for name in ADDITIVE)
+
+
+def test_every_cli_counts_each_token_once(tmp_path: Path) -> None:
+    claude = claude_usage(
+        {
+            "usage": {
+                "input_tokens": 4,
+                "cache_read_input_tokens": 300,
+                "cache_creation_input_tokens": 50,
+                "output_tokens": 20,
+            },
+        },
+    )
+    assert _consumed(claude) == 4 + 300 + 50 + 20
+    stdout = tmp_path / "stdout.log"
+    turn = {"input_tokens": 1000, "cached_input_tokens": 600, "output_tokens": 20}
+    stdout.write_text(json.dumps({"type": "turn.completed", "usage": turn}, separators=(",", ":")))
+    assert _consumed(codex_usage(stdout, tmp_path / "stderr.log")) == 1000 + 20
+    # The Antigravity envelope from a benchmark run: its total is input plus output.
+    gemini = gemini_usage(
+        {
+            "input_tokens": 15185,
+            "cache_read_tokens": 10665,
+            "output_tokens": 118,
+            "total_tokens": 15303,
+        }
+    )
+    assert _consumed(gemini) == gemini["total_tokens"] == 15303
