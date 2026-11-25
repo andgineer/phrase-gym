@@ -549,11 +549,16 @@ network; tools and servers from your own Codex settings are not covered. Coach r
 GPT-6.1 Sol at medium effort.</p>
 <p>Without a Claude or Codex subscription, <code>phrase-gym coach --cli gemini</code> uses the free tier of
 the <a href="https://antigravity.google/">Antigravity CLI</a> (<code>agy</code>, logged in once with a Google account)
-on its strongest free model, Gemini Flash at high effort. Treat it as experimental: it has yet to pass
-the card-quality checks. The initial phrase run took over ten minutes and failed during revision
-when the service ran out of capacity. Free-tier usage is also subject to a quota. Antigravity
-blocks direct reads outside the attempt folder. Other tools have broader access, so prefer
-Claude or Codex when available.</p>
+on Gemini 3.8 Flash at low effort. On this route Coach only checks your text: it confirms the
+word or phrase and fixes an obvious typo. You then get a basic card that asks you to fill the gap
+in your own sentence, even where the sentence changes the phrase's form (<strong>She came up with a
+plan</strong> for <strong>come up with</strong>), or to recall the words from a partial form that shows their first
+letters, the last letter of longer words and one <code>_</code> per hidden letter, such as <strong>def_____ly</strong> or
+<strong>o_ t__ f___e</strong>. It has no explanation or extra examples. The card's instruction and Coach's
+reasons use your native language from Settings. Coach runs <code>agy</code> the way news-recap does: one launch at a time, at
+least ten seconds apart, with its permission prompts skipped, so the model's tools are not
+limited to the preparation folder. If Antigravity renames the model, Coach switches to the
+cheapest listed Flash model for the rest of its run. Free-tier usage is subject to a quota.</p>
 <p>The <code>install-coach</code>, <code>uninstall-coach</code>, and <code>deploy</code> commands report that they are unavailable.
 The optional <code>coach</code> and <code>deploy</code> extras are reserved for future preparation and provisioning
 features. The core server and help need only the lean installation.</p>

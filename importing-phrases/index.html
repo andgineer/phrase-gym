@@ -541,10 +541,17 @@ preparation progress.</p>
 <p>Typing the same text again never adds a second card. The field tells you when the text is
 <strong>Already waiting for Coach</strong> or <strong>Already in your Library</strong>. Text whose card you deleted is
 prepared again.</p>
-<p>If Coach cannot prepare a card, for example because the text contains no English phrase or word
-or because the Claude CLI is not logged in, it prints the reason in its terminal and the Practice page
-shows a notice below <strong>Total</strong>. Close it with <strong>×</strong> once you have read it. To retry, type the
-same text into Coach again.</p>
+<p>When Coach fixes an obvious typo, such as <strong>definately → definitely</strong>, the <strong>Coach</strong> page lists
+the change and the card says what it corrected. A valid variant, such as <strong>colour</strong>, keeps its form.</p>
+<p>If Coach cannot use the text, for example because it is not English, cannot be read, could be
+several different words or is too long for one card, the <strong>Coach</strong> page lists the text, its
+learning language and the reason in your native language.
+Close it with <strong>Dismiss</strong>. Typing the same text again shows that result instead of preparing it
+again, so change the text to try something else.</p>
+<p>If a service problem stops Coach, for example because the CLI is not logged in or ran out of
+quota, Coach prints the reason in its terminal, the <strong>Coach</strong> page offers <strong>Retry</strong>, and the
+Practice page shows a notice below <strong>Total</strong>. Close the notice with <strong>×</strong> once you have read it.
+Retrying from Coach or typing the same text again prepares it again.</p>
 <h2 id="ask-your-personal-ai-agent">Ask your personal AI agent</h2>
 <p>Pass <a href="https://andgineer.github.io/phrase-gym/agent-add-phrases/">the agent instructions</a> to your AI agent; you do not need to read them.
 Tell it where to find your material and give it your Phrase Gym server address. It prepares the
