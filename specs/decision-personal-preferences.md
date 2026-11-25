@@ -1,22 +1,22 @@
 # Language choices
 
-Keep a small Settings page in Vue. The learner can read and change native language, learning timezone, per-language card/help language, the daily due and new phrase limits, [how often phrases come back](decision-core-trainer.md#scheduling-choices) and the [weekly target](decision-transfer-and-engagement.md#weekly-target); no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. The daily limits start at 20 due and five new phrases. Daily and Extra read their current values for allowance decisions; an increase can make more work available today. Each limit is a nonnegative integer, and both cannot be zero.
+Keep a small Settings page in Vue. The learner can read and change the native language, learning timezone, the translation choice for each learning language, the daily due and new phrase limits, [how often phrases come back](decision-core-trainer.md#scheduling-choices) and the [weekly target](decision-transfer-and-engagement.md#weekly-target); no external agent or profile API is required to edit them. Stated proficiency and a short preparation note are optional context. Navigation never changes these choices. The daily limits start at 20 due and five new phrases. Daily and Extra read their current values for allowance decisions; an increase can make more work available today. Each limit is a nonnegative integer, and both cannot be zero.
 
 Settings also stores the learner’s [Coach provider selection](architecture.md#coach-provider-selection), which applies across learning languages.
 
 The learner's current choices are:
 
-| Learning language | Stated proficiency | Card language | Short help | Optional detailed help |
-|---|---|---|---|---|
-| English | B2 | English | English | Russian |
-| German | A1 | Russian | Russian | Russian |
-| Serbian | Not stated | Serbian | Unresolved; no Russian | Russian |
+| Learning language | Stated proficiency | Translation in native language |
+|---|---|---|
+| English | B2 | Off |
+| German | A1 | On |
+| Serbian | Not stated | Off |
 
-Native language is Russian; learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults. The MVP only needs the English row. Unresolved Serbian help does not block English or German work; resolve it before adding Serbian preparation.
+The native language applies to the whole profile; this learner's is Russian. The learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults. The MVP only needs the English row.
 
-Card language controls retrieval cues; short help explains meaning/use after reveal and during study. Optional detailed explanation uses the native language and appears only on request. Neither answer-bearing layer is shown before an independent response. A detailed explanation and a proficiency questionnaire are not requirements for every MVP card.
+Each card has a meaning layer: the short meaning glosses on its cues and the short help shown during study and after reveal. With **Translation in native language** on, the meaning layer is in the native language. With it off, the meaning layer is in the learning language itself. The optional detailed explanation always uses the native language and appears only on request. A beginner needs translations they understand, while an advanced learner stays inside the language. Coach's own instructions and inbox reasons use the native language. Neither answer-bearing layer is shown before an independent response. A detailed explanation and a proficiency questionnaire are not requirements for every MVP card.
 
-Imported batches declare their languages and must match the selected choices; mismatch reports what to change instead of silently translating. Coach snapshots the learning, card and help languages at submission. The learning language determines whether the submitted form is valid. A German source remains German when Russian is selected for instructions and help. Changing Settings affects subsequent preparation, not existing cards or saved recording snapshots. Existing content can be replaced explicitly; no revision registry or automatic mass re-preparation is required.
+Imported batches declare their learning language and meaning-layer language and must match the selected choices; mismatch reports what to change instead of silently translating. Coach snapshots the learning language, native language and translation choice at submission. The learning language determines whether the submitted form is valid. A German source remains German when its meaning layer is Russian. Changing Settings affects subsequent preparation, not existing cards or saved recording snapshots. Existing content can be replaced explicitly; no revision registry or automatic mass re-preparation is required.
 
 Keep existing independent device/audio preferences where useful. UI language follows the native or current learning language as already supported by Vue; no new localization project is needed for the first English content path.
 

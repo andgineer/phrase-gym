@@ -14,15 +14,18 @@ Port the reviewed, gate-passing work from branch `coach-plan-trial`, which is ba
 - 06241314d: per-word partial forms, the fallback to the target alone when the source is too long, and dismissed results staying dismissed through schema step 12.
 - From 558e33905, the language and message parts only:
   - the separate inbox reason **The text is too long for one card.** It applies when a confirmed target cannot fit a card even on its own, and replaces "Coach could not make a card that keeps the answer hidden." for that case;
-  - the card and help languages captured with each submission and passed to Coach, with older requests read as English;
-  - one message table (`src/phrase_gym/coach/messages.py`) through which Coach renders the card instruction in the card language and its own inbox reasons in the help language;
+  - the language snapshot captured with each submission and passed to Coach, adapted to the [translation choice](../decision-personal-preferences.md):
+    - the snapshot holds the profile's native language and the learning language's **Translation in native language** setting, instead of 558e33905's card and help languages;
+    - English is the only learning language until step 2 adds the setting, so its choice is captured as off;
+    - older requests read as English with translation off;
+  - one message table (`src/phrase_gym/coach/messages.py`) through which Coach renders its card instruction and inbox reasons in the native language, with English and Russian texts. The recognition prompt also writes its rejection reason in the native language;
   - an explanation minimum of one character, so an accurate short translation such as Russian «яд» passes validation without padding.
 
   Do not bring that commit's writer/checker, cheaper models, `write`/`check` prompts or usage logging. Its basic-card and recognition changes come along only where these parts need them.
 
-Cherry-pick the two commits (`git cherry-pick 873e4818c 06241314d`) and drop their changes under `specs/`, which this plan and the decision supersede. Keep their `docs/src/` changes that describe the shipped behavior. Port the listed parts of 558e33905 by hand.
+Cherry-pick the two commits (`git cherry-pick 873e4818c 06241314d`) and drop their changes under `specs/`, which this plan and the decision supersede. Keep their `docs/src/` changes that describe the shipped behavior. Port the listed parts of 558e33905 by hand. Update the expected texts in the ported tests to the native-language messages.
 
-The paid prepare/review/revise flow (`src/phrase_gym/coach/preparation.py` and the `prepare.md`, `review.md` and `revise.md` prompts) keeps its models and rounds. It receives the captured card and help languages so that help is written in the help language. For English, the rendered prompts stay byte-identical to today's, so English results stay comparable with the 2026-11-25 baseline. Only English messages exist after this step; step 2 adds Russian.
+The paid prepare/review/revise flow (`src/phrase_gym/coach/preparation.py` and the `prepare.md`, `review.md` and `revise.md` prompts) keeps its models, its rounds and its rendered English prompts byte-identical in this step, so English results stay comparable with the 2026-11-25 baseline. Step 2 makes the prompts follow the captured choice.
 
 Then fix the basic cues that the blind review (`.phrase-gym-coach/compare-20261125/semantic-review.json`) judged unusable. Any other quality drop on this free mode is accepted.
 
@@ -34,7 +37,7 @@ Then fix the basic cues that the blind review (`.phrase-gym-coach/compare-202611
   - for words of seven or more letters, keep today's head of up to three letters and tail of two.
 
   This gives `c____r`, `t___r`, `rel____nt`, `def_____ly` and `o_ t__ f___e` for **on the fence**. The existing check that no cue contains the whole target still applies. Adjust the rule if the review below disagrees.
-- **Keep rejection reasons in plain words.** A reason names the language in ordinary words, such as "This is German, not English." It contains no internal field names; the trial showed a reason containing `learning_language`. State this in `recognize.md`.
+- **Keep rejection reasons in plain words.** A reason is in the native language and names the language in ordinary words, such as «Это немецкий текст, а не английский.» It contains no internal field names; the trial showed a reason containing `learning_language`. State this in `recognize.md`.
 
 **Acceptance check: software.** The ported browser and API tests pass on main. Through the existing Coach page and real server, the learner submits **We strongly believe this will work** and finds one card in **Added with Coach**. Practice shows **We __________ this will work**, and Reveal shows the sentence with its matching saved reference audio. More behavior must hold through the API and real browser for both the Coach and Library submission paths:
 
@@ -47,8 +50,8 @@ Then fix the basic cues that the blind review (`.phrase-gym-coach/compare-202611
 Unit tests cover:
 
 - the cue rules for `colour`, `their`, `on the fence`, and `come up with` with its sentence;
-- a request saved before the language snapshot reading as English;
-- messages rendered from the captured languages;
+- a request saved before the language snapshot reading as English with translation off;
+- instructions and inbox reasons rendered in the captured native language, in both Russian and English;
 - an explanation of «яд» passing validation.
 
 **Acceptance check: real Gemini free.** The recognition prompt has never had a real call. Run the 12 baseline inputs once each through Gemini free and review them blind under the [measurement rules](#measurement-and-qualification). Only language correctness is required, so the run needs:
@@ -61,7 +64,7 @@ Lower cue scores are otherwise accepted. Report each input's outcome, cue, score
 
 ## 2. Add German with Russian help
 
-The learner studies German now. The [language choices](../decision-personal-preferences.md) set German at A1 with Russian cues, short help and detailed help. This step brings German through the whole loop: Settings, Coach, cards, reference audio, Library and Practice.
+The learner studies German now. The [language choices](../decision-personal-preferences.md) set German at A1 with **Translation in native language** on, so its meaning layer (cue glosses and short help) is Russian, like the detailed help. This step brings German through the whole loop: Settings, Coach, cards, reference audio, Library and Practice.
 
 Main is English-only today:
 
@@ -73,9 +76,12 @@ Main is English-only today:
 
 **Settings and data.**
 
-- `de` becomes a learning language. Settings keep card, short-help and detailed-help languages per learning language, seeded from the learner's table: English uses en/en/ru and German uses ru/ru/ru. The Settings page selects the active learning language and edits each language's choices. Settings are one JSON document, so they need no upgrade step.
+- `de` becomes a learning language.
+- Settings replace the card and help languages with one native language for the profile and a **Translation in native language** choice per learning language. They are seeded from the learner's table: English off and German on.
+- The Settings page selects the active learning language and edits the native language and each language's choice.
+- Settings are one JSON document, so they need no upgrade step. A stored card or help language is ignored, and the next save drops it.
 - Each phrase records its learning language. A schema step adds it and marks existing phrases English.
-- External packages may declare `learning_language` `de` with Russian card and help languages when these match the learner's German choices. A mismatch reports what to change, as today. Update the language table in `docs/includes/agent-add-phrases.md`.
+- External packages replace `card_language` and `help_language` with one declared meaning-layer language. It must equal the native language when the learning language's choice is on, and the learning language when it is off: a German package declares `ru`, and an English package declares `en`. A mismatch reports what to change, as today. Bump the package `version` to 3, since older formats are rejected. Update the schema table in `docs/includes/agent-add-phrases.md` in the same commit; its detailed-help row already says native language.
 - **Two languages in Practice and Library.** No decision yet says how Daily, Extra and Library treat two learning languages. Confirm the rule with the user before building it, and record it in `specs/decision-personal-preferences.md` in the same commit. The recommended rule:
   - Daily, Extra and Library show only the active learning language.
   - Each language applies the daily due and new limits separately.
@@ -83,13 +89,14 @@ Main is English-only today:
 
 **Coach judges German.**
 
-- Recognition and the paid prompts receive the learning language, card and help languages and the stated level, instead of the fixed English and B2 wording.
-- Reword `content-rules.md` and `card-format.md` to speak of the learning, card and help languages. Put German notes in a section used only for German. `content-rules.md` is also part of the external-agent guide, so the guide gets the same rules.
+- Recognition and the paid prompts receive the learning language, the native language, the translation choice and the stated level, instead of the fixed English and B2 wording.
+- Coach writes the meaning layer in the native language when the choice is on and in the learning language when it is off. Detailed help is always in the native language. Today `card-format.md` asks for English detailed help, so English cards' detailed help becomes Russian with this step.
+- Reword `content-rules.md` and `card-format.md` to speak of the learning language, the meaning-layer language and the native language. Put German notes in a section used only for German. `content-rules.md` is also part of the external-agent guide, so the guide gets the same rules.
   - **Nouns:** a noun is practised with its article, and Russian help mentions gender and plural when relevant.
   - **Capitalisation is part of the word:** **Morgen** (утро) and **morgen** (завтра) are both valid and are never corrected into each other. A lowercase noun after an article, such as **das auto**, is an obvious typo.
   - **Separable verbs** split in a main clause (**Ich rufe dich an**). A cue therefore uses a frame where the verb stays whole, such as **Ich muss dich morgen __________** for **anrufen**. A sentence gap still covers one contiguous span only.
-- Paid-route German cards follow the [word-sense rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp) for beginner German. The cue gives the Russian meaning of a short chunk and asks for the German chunk. Glosses, hints and explanations are in Russian, while the revealed sentence and the answer stay German.
-- Gemini free German cards are basic cards. The instruction is Russian, and Coach's inbox reasons are Russian, so add Russian texts to the message table and have them reviewed by the fresh reviewer. A bare noun stays as typed, because basic practice claims nothing beyond the wording. A sentence gap works as for English. A separable verb split in its sentence falls back to the partial form of the target.
+- Paid-route German cards follow the [word-sense rules](../decision-targeted-drilling.md#words-after-the-phrase-mvp) for beginner German. The cue gives the Russian meaning of a short chunk and asks for the German chunk. Glosses, short help and detailed help are in Russian. Recall hints keep German wording fragments, and the revealed sentence and the answer stay German.
+- Gemini free German cards are basic cards. The instruction and inbox reasons use the native-language messages from step 1. The fresh reviewer also checks the Russian texts. A bare noun stays as typed, because basic practice claims nothing beyond the wording. A sentence gap works as for English. A separable verb split in its sentence falls back to the partial form of the target.
 
 **Reference audio.**
 
@@ -134,7 +141,7 @@ Run each input once on Claude (`claude-opus-5-5`), Codex (`gpt-6.1-sol`) and Gem
 
 Report results per route as in step 1, including paid-route token totals. These are the first German numbers and carry no target.
 
-Rewording the shared rules changes the English prompts. So also rerun the 12 English baseline inputs on both paid routes. Their quality must not fall below the 2026-11-25 review, and their token sums become the step 3 baseline.
+Rewording the shared rules changes the English prompts. So also rerun the 12 English baseline inputs on both paid routes. Their meaning layer must stay English and their detailed help must be Russian. Their quality must not fall below the 2026-11-25 review, and their token sums become the step 3 baseline.
 
 **Acceptance check: attended listening.** The learner listens to the German reference voice on a few of these cards. Report this separately from the software checks and the semantic review. Automated tests stay silent.
 
