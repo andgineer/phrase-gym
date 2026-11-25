@@ -43,7 +43,7 @@ Keep FSRS JSON, due and initial completion instants (`studied_at` preserves hist
 
 ## Daily allowance
 
-Use the learner's timezone, initially Europe/Belgrade. Store `daily_due_limit` and `daily_new_limit` settings, defaulting to 20 due and five new, as independent categories permitting up to 25 completions. Validate nonnegative integers and reject both zero. Daily reads their current values on entry and each next selection rather than snapshotting them into the session. An increase can make more eligible phrases available after the previous limit was reached; there is no stored complete flag.
+Each learning language has its own allowance: the limits apply separately to each language's completions, and Extra targets are kept per language. Use the learner's timezone, initially Europe/Belgrade. Store `daily_due_limit` and `daily_new_limit` settings, defaulting to 20 due and five new, as independent categories permitting up to 25 completions. Validate nonnegative integers and reject both zero. Daily reads their current values on entry and each next selection rather than snapshotting them into the session. An increase can make more eligible phrases available after the previous limit was reached; there is no stored complete flag.
 
 Count today's Daily and Extra completions from indexed `practice_log` rows: a first rated attempt consumes a new slot, and a rated later recall consumes a due slot. Historical ungraded first studies still consume their original new slots. Phrase-specific Practice consumes neither allowance. Opening, passing or abandoning a phrase consumes none.
 

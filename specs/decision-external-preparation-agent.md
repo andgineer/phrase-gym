@@ -51,7 +51,7 @@ A Library search with no match says **Not in your Library yet.** and offers **Se
 
 ### Input decisions
 
-Submissions from both Coach and Library capture the active learning language when the learner presses Send. Coach judges the text in that language. The meaning layer follows [the learner's translation choice](decision-personal-preferences.md), and detailed help uses the native language. English is the first implementation. Apply the same decision in each supported language.
+Submissions from both Coach and Library capture the learning language of the page in use when the learner presses Send. Coach judges the text in that language. The meaning layer follows [the learner's translation choice](decision-personal-preferences.md), and detailed help uses the native language. English is the first implementation. Apply the same decision in each supported language.
 
 | Submitted text | Coach outcome |
 |---|---|

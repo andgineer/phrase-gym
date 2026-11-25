@@ -14,6 +14,7 @@ The learner's current choices are:
 
 The native language applies to the whole profile; this learner's is Russian. The learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults. The MVP only needs the English row.
 
+
 Each card has a meaning layer: the short meaning glosses on its cues and the short help shown during study and after reveal. With **Translation in native language** on, the meaning layer is in the native language. With it off, the meaning layer is in the learning language itself. The optional detailed explanation always uses the native language and appears only on request. A beginner needs translations they understand, while an advanced learner stays inside the language. Coach's own instructions and inbox reasons use the native language. Neither answer-bearing layer is shown before an independent response. A detailed explanation and a proficiency questionnaire are not requirements for every MVP card.
 
 Imported batches declare their learning language and meaning-layer language and must match the selected choices; mismatch reports what to change instead of silently translating. Coach snapshots the learning language, native language and translation choice at submission. The learning language determines whether the submitted form is valid. A German source remains German when its meaning layer is Russian. Changing Settings affects subsequent preparation, not existing cards or saved recording snapshots. Existing content can be replaced explicitly; no revision registry or automatic mass re-preparation is required.
@@ -21,3 +22,9 @@ Imported batches declare their learning language and meaning-layer language and 
 Keep existing independent device/audio preferences where useful. UI language follows the native or current learning language as already supported by Vue; no new localization project is needed for the first English content path.
 
 [Research on translation and explanations](research/words-in-context.md#translation-or-l2-explanation) does not prove that advanced learners should avoid their native language. Comprehensibility and this learner's choices govern these settings. No source establishes a precise proficiency cutoff for switching prompt language.
+
+## Separate learning languages
+
+Each learning language is studied separately. Daily, Extra, Library and phrase-specific Practice show only the selected language's cards, and each language has its own daily due and new allowance under the same configured limits. The streak, the weekly target and **Progress** include practice in any language. Phrase Gym supports at most three learning languages at a time.
+
+The learner switches languages on the Practice start screen, where one button per learning language sits above the Start card and the selected one is highlighted. Settings holds no active-language choice. Each language's pages have their own bookmarkable address, so a bookmark opens practice in that language directly. An address that names no language opens English. Sends from Coach and from a Library search capture the language of the page in use.
