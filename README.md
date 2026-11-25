@@ -20,64 +20,65 @@
 | src/phrase\_gym/coach/companion\_checks.py          |       51 |        0 |    100% |           |
 | src/phrase\_gym/coach/gemini\_cli.py                |       52 |        0 |    100% |           |
 | src/phrase\_gym/coach/hint\_checks.py               |      107 |        1 |     99% |        58 |
-| src/phrase\_gym/coach/main.py                       |       92 |       29 |     68% |45-53, 65-66, 70-71, 90-100, 117, 129-141 |
+| src/phrase\_gym/coach/main.py                       |       95 |       29 |     69% |46-54, 66-67, 71-72, 94-104, 121, 133-145 |
 | src/phrase\_gym/coach/messages.py                   |        6 |        0 |    100% |           |
 | src/phrase\_gym/coach/preparation.py                |       77 |        3 |     96% |63, 70, 120 |
 | src/phrase\_gym/coach/recognition.py                |       45 |        0 |    100% |           |
-| src/phrase\_gym/coach/speech.py                     |       86 |        8 |     91% |97, 113, 119, 134, 157-158, 164-165 |
-| src/phrase\_gym/server/allowance.py                 |       24 |        0 |    100% |           |
+| src/phrase\_gym/coach/speech.py                     |       87 |        8 |     91% |99, 115, 121, 136, 159-160, 166-167 |
+| src/phrase\_gym/server/allowance.py                 |       27 |        0 |    100% |           |
 | src/phrase\_gym/server/api/coach.py                 |       55 |        3 |     95% |     54-56 |
 | src/phrase\_gym/server/api/deletion.py              |       18 |        0 |    100% |           |
-| src/phrase\_gym/server/api/facts.py                 |       15 |        0 |    100% |           |
-| src/phrase\_gym/server/api/imports.py               |       23 |        0 |    100% |           |
-| src/phrase\_gym/server/api/library.py               |       35 |        1 |     97% |        58 |
+| src/phrase\_gym/server/api/facts.py                 |       16 |        0 |    100% |           |
+| src/phrase\_gym/server/api/imports.py               |       25 |        0 |    100% |           |
+| src/phrase\_gym/server/api/library.py               |       36 |        1 |     97% |        61 |
 | src/phrase\_gym/server/api/paging.py                |        5 |        0 |    100% |           |
-| src/phrase\_gym/server/api/practice.py              |       67 |        0 |    100% |           |
+| src/phrase\_gym/server/api/practice.py              |       68 |        0 |    100% |           |
 | src/phrase\_gym/server/api/recordings.py            |       33 |        5 |     85% |24-25, 27, 29, 41 |
 | src/phrase\_gym/server/api/settings.py              |       18 |        2 |     89% |     22-23 |
 | src/phrase\_gym/server/app.py                       |       78 |        0 |    100% |           |
 | src/phrase\_gym/server/boundary.py                  |       61 |        6 |     90% |72-73, 78, 81-82, 92 |
-| src/phrase\_gym/server/coach\_cards.py              |       22 |        1 |     95% |        65 |
+| src/phrase\_gym/server/coach\_cards.py              |       23 |        1 |     96% |        66 |
 | src/phrase\_gym/server/coach\_contracts.py          |       53 |        1 |     98% |        60 |
 | src/phrase\_gym/server/coach\_inbox.py              |       29 |        0 |    100% |           |
-| src/phrase\_gym/server/coach\_requests.py           |       96 |        3 |     97% |93, 98, 167 |
-| src/phrase\_gym/server/completion.py                |       88 |        1 |     99% |       117 |
-| src/phrase\_gym/server/contracts.py                 |       56 |        0 |    100% |           |
-| src/phrase\_gym/server/current\_practice.py         |       24 |        0 |    100% |           |
-| src/phrase\_gym/server/daily.py                     |       29 |        0 |    100% |           |
-| src/phrase\_gym/server/deletion.py                  |       31 |        0 |    100% |           |
-| src/phrase\_gym/server/extra.py                     |       33 |        0 |    100% |           |
+| src/phrase\_gym/server/coach\_requests.py           |       99 |        3 |     97% |96, 101, 169 |
+| src/phrase\_gym/server/completion.py                |       90 |        1 |     99% |       118 |
+| src/phrase\_gym/server/contracts.py                 |       60 |        0 |    100% |           |
+| src/phrase\_gym/server/current\_practice.py         |       25 |        0 |    100% |           |
+| src/phrase\_gym/server/daily.py                     |       30 |        0 |    100% |           |
+| src/phrase\_gym/server/deletion.py                  |       32 |        0 |    100% |           |
+| src/phrase\_gym/server/extra.py                     |       34 |        0 |    100% |           |
 | src/phrase\_gym/server/facts\_contracts.py          |       14 |        0 |    100% |           |
 | src/phrase\_gym/server/file\_cleanup.py             |       44 |        0 |    100% |           |
-| src/phrase\_gym/server/import\_contracts.py         |       80 |        3 |     96% |29, 56, 63 |
+| src/phrase\_gym/server/import\_contracts.py         |       81 |        3 |     96% |30, 57, 64 |
 | src/phrase\_gym/server/import\_notices.py           |       16 |        0 |    100% |           |
-| src/phrase\_gym/server/importer.py                  |       42 |        1 |     98% |        59 |
-| src/phrase\_gym/server/lesson\_choices.py           |       25 |        0 |    100% |           |
-| src/phrase\_gym/server/library.py                   |       39 |        0 |    100% |           |
+| src/phrase\_gym/server/importer.py                  |       54 |        1 |     98% |        79 |
+| src/phrase\_gym/server/languages.py                 |        5 |        0 |    100% |           |
+| src/phrase\_gym/server/lesson\_choices.py           |       26 |        0 |    100% |           |
+| src/phrase\_gym/server/library.py                   |       42 |        0 |    100% |           |
 | src/phrase\_gym/server/main.py                      |       47 |        7 |     85% |17-21, 25, 62 |
 | src/phrase\_gym/server/phrase\_counts.py            |       12 |        0 |    100% |           |
-| src/phrase\_gym/server/phrase\_practice.py          |       29 |        0 |    100% |           |
-| src/phrase\_gym/server/practice\_contracts.py       |       29 |        0 |    100% |           |
-| src/phrase\_gym/server/practice\_facts.py           |       48 |        0 |    100% |           |
-| src/phrase\_gym/server/practice\_selection.py       |       43 |        1 |     98% |        77 |
-| src/phrase\_gym/server/practice\_state.py           |       31 |        1 |     97% |        47 |
-| src/phrase\_gym/server/practice\_today.py           |       43 |        1 |     98% |        70 |
-| src/phrase\_gym/server/practice\_views.py           |       58 |        1 |     98% |       129 |
-| src/phrase\_gym/server/publication.py               |       63 |        0 |    100% |           |
+| src/phrase\_gym/server/phrase\_practice.py          |       30 |        0 |    100% |           |
+| src/phrase\_gym/server/practice\_contracts.py       |       30 |        0 |    100% |           |
+| src/phrase\_gym/server/practice\_facts.py           |       50 |        0 |    100% |           |
+| src/phrase\_gym/server/practice\_selection.py       |       46 |        1 |     98% |        81 |
+| src/phrase\_gym/server/practice\_state.py           |       32 |        1 |     97% |        57 |
+| src/phrase\_gym/server/practice\_today.py           |       44 |        1 |     98% |        71 |
+| src/phrase\_gym/server/practice\_views.py           |       59 |        1 |     98% |       149 |
+| src/phrase\_gym/server/publication.py               |       64 |        0 |    100% |           |
 | src/phrase\_gym/server/recording\_store.py          |       50 |        2 |     96% |    42, 71 |
 | src/phrase\_gym/server/recording\_views.py          |       12 |        0 |    100% |           |
-| src/phrase\_gym/server/records.py                   |       28 |        0 |    100% |           |
+| src/phrase\_gym/server/records.py                   |       29 |        0 |    100% |           |
 | src/phrase\_gym/server/reference\_audio.py          |       42 |        6 |     86% |23-25, 52, 54, 56 |
 | src/phrase\_gym/server/scheduling.py                |       59 |        1 |     98% |        48 |
 | src/phrase\_gym/server/schema\_upgrade.py           |       38 |        0 |    100% |           |
 | src/phrase\_gym/server/search\_terms.py             |       10 |        0 |    100% |           |
 | src/phrase\_gym/server/sentence\_gaps.py            |       29 |        2 |     93% |     38-39 |
 | src/phrase\_gym/server/settings.py                  |       27 |        2 |     93% |     23-24 |
-| src/phrase\_gym/server/settings\_store.py           |       11 |        0 |    100% |           |
+| src/phrase\_gym/server/settings\_store.py           |       14 |        0 |    100% |           |
 | src/phrase\_gym/server/storage.py                   |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                    |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py             |       53 |        0 |    100% |           |
-| **TOTAL**                                           | **3299** |  **169** | **95%** |           |
+| **TOTAL**                                           | **3362** |  **169** | **95%** |           |
 
 
 ## Setup coverage badge
