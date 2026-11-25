@@ -93,6 +93,8 @@ def prepare_typed(client: TestClient, typed: str, **changes: object) -> dict[str
         "package_id": submitted["request_id"],
         "text": typed.strip(),
         "learning_language": "en",
+        "card_language": "en",
+        "help_language": "en",
     }
     response = client.post(
         f"/api/imports/{work['package_id']}/result",

@@ -13,7 +13,7 @@ import {
 const typedPhrase = 'strongly believe — We strongly believe it works.'
 const phraseText = 'We strongly believe it works.'
 const typedWord = 'reluctant'
-const wordText = 'She felt reluctant today.'
+const wordText = 'My friend said reluctant at the meeting.'
 
 const field = (page: Page) => page.getByRole('textbox', { name: 'Phrase or word for Coach' })
 const coachButton = (page: Page) => page.getByRole('button', { name: 'Send', exact: true })
@@ -86,7 +86,7 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   await expect(card.locator('.practice-prompt')).toContainText('__________')
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await revealAnswer(page)
-  await expect(page.getByTestId('practice-phrase')).toHaveText(/^(We strongly|She felt)/)
+  await expect(page.getByTestId('practice-phrase')).toHaveText(/^(We strongly|My friend said)/)
   await card.getByRole('button', { name: 'Good', exact: true }).click()
 
   await page.getByRole('navigation').getByRole('button', { name: 'Library', exact: true }).click()

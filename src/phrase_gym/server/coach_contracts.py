@@ -26,6 +26,8 @@ class CoachWork(StrictModel):
     package_id: str
     text: str
     learning_language: LearningLanguage
+    card_language: Literal["en"]
+    help_language: Literal["en"]
 
 
 class CoachCorrection(StrictModel):
@@ -58,13 +60,24 @@ class CoachResult(StrictModel):
     result_id: str = Field(pattern=IDENTITY_PATTERN)
     phrase: ImportPhrase | None = None
     basic: BasicCard | None = None
+    # A basic card carries its own correction; this one belongs to an authored phrase.
+    correction: CoachCorrection | None = None
     reference: str
 
     @model_validator(mode="after")
     def one_card(self) -> "CoachResult":
         if (self.phrase is None) == (self.basic is None):
             raise ValueError("a result carries either phrase or basic")
+        if self.correction is None:
+            return self
+        if self.phrase is None:
+            raise ValueError("a basic card keeps its correction inside the card")
+        if search_key(self.correction.corrected) not in search_key(self.phrase.text):
+            raise ValueError("a correction must end in the revealed wording")
         return self
+
+    def card_correction(self) -> CoachCorrection | None:
+        return self.basic.correction if self.basic else self.correction
 
 
 class CoachFailure(StrictModel):

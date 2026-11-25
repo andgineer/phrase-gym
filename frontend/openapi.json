@@ -267,6 +267,16 @@
               }
             ]
           },
+          "correction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoachCorrection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "phrase": {
             "anyOf": [
               {
@@ -322,6 +332,16 @@
       "CoachWork": {
         "additionalProperties": false,
         "properties": {
+          "card_language": {
+            "const": "en",
+            "title": "Card Language",
+            "type": "string"
+          },
+          "help_language": {
+            "const": "en",
+            "title": "Help Language",
+            "type": "string"
+          },
           "learning_language": {
             "const": "en",
             "title": "Learning Language",
@@ -339,7 +359,9 @@
         "required": [
           "package_id",
           "text",
-          "learning_language"
+          "learning_language",
+          "card_language",
+          "help_language"
         ],
         "title": "CoachWork",
         "type": "object"
@@ -859,7 +881,7 @@
           },
           "explanation": {
             "maxLength": 1000,
-            "minLength": 5,
+            "minLength": 1,
             "title": "Explanation",
             "type": "string"
           },

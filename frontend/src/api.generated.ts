@@ -673,6 +673,7 @@ export interface components {
         /** CoachResult */
         CoachResult: {
             basic?: components["schemas"]["BasicCard"] | null;
+            correction?: components["schemas"]["CoachCorrection"] | null;
             phrase?: components["schemas"]["ImportPhrase"] | null;
             /** Reference */
             reference: string;
@@ -691,6 +692,16 @@ export interface components {
         };
         /** CoachWork */
         CoachWork: {
+            /**
+             * Card Language
+             * @constant
+             */
+            card_language: "en";
+            /**
+             * Help Language
+             * @constant
+             */
+            help_language: "en";
             /**
              * Learning Language
              * @constant

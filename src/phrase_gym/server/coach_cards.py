@@ -5,6 +5,7 @@ from phrase_gym.server.coach_contracts import (
     COACH_SOURCE_ID,
     COACH_SOURCE_LABEL,
     BasicCard,
+    CoachCorrection,
     CoachResult,
 )
 from phrase_gym.server.import_contracts import ImportLesson, ImportPhrase, PhrasePackage
@@ -33,12 +34,12 @@ def coach_package(package_id: str, phrase: ImportPhrase) -> PhrasePackage:
     )
 
 
-def correction_note(card: BasicCard) -> str:
-    return f"Corrected from “{card.correction.original}”." if card.correction else ""
+def correction_note(correction: CoachCorrection | None) -> str:
+    return f"Corrected from “{correction.original}”." if correction else ""
 
 
 def _basic_content(card: BasicCard) -> dict[str, object]:
-    note = correction_note(card)
+    note = correction_note(card.correction)
     return {
         "source_label": COACH_SOURCE_LABEL,
         "source_link": None,
@@ -59,7 +60,11 @@ def coach_batch(package_id: str, result: CoachResult) -> Batch:
     if result.phrase is not None:
         if result.phrase.item_id != package_id:
             raise ImportConflictError(f"phrases.item_id must be {package_id}.")
-        package = coach_package(package_id, result.phrase)
+        phrase = result.phrase
+        if result.correction:
+            explanation = f"{phrase.explanation} {correction_note(result.correction)}"
+            phrase = phrase.model_copy(update={"explanation": explanation})
+        package = coach_package(package_id, phrase)
         return package_batch(package, decode_references(package, {package_id: result.reference}))
     if result.basic is None:
         raise ImportConflictError("A Coach result needs a card.")

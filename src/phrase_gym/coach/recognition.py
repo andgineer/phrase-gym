@@ -1,16 +1,11 @@
-import json
-import shutil
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from pydantic import ValidationError
+from phrase_gym.coach.attempts import run_attempt
+from phrase_gym.coach.basic_card import confirmed_card
+from phrase_gym.coach.preparation import Cli, PreparationError, learner_input, render, schema
+from phrase_gym.server.coach_contracts import BasicCard, CoachWork
 
-from phrase_gym.coach.basic_card import basic_card
-from phrase_gym.coach.preparation import Cli, PreparationError, render, schema
-from phrase_gym.server.coach_contracts import BasicCard
-
-LANGUAGE_NAMES = {"en": "English"}
 FIELDS = {
     "outcome": str,
     "original_span": str,
@@ -46,32 +41,20 @@ def recognition_problem(answer: dict[str, Any], text: str) -> str | None:
     return next((problem for failed, problem in checks if failed), None)
 
 
-def recognized_card(answer: dict[str, Any], text: str) -> BasicCard:
-    if problem := recognition_problem(answer, text):
+def recognized_card(answer: dict[str, Any], work: CoachWork) -> BasicCard:
+    if problem := recognition_problem(answer, work.text):
         raise PreparationError(problem)
     if answer["outcome"] == "reject":
         # A language decision about the input: typing it again cannot change it.
         raise PreparationError(answer["reason"].strip(), retry_helps=False)
-    target, original = answer["target"], answer["original_span"]
     source = answer["source"] if answer["source_usable"] else None
-    try:
-        card = basic_card(target, original, source)
-    except ValidationError:
-        # A source too long for a card still leaves the target to practise on its own.
-        card = None if source is None else _target_alone(target, original)
-    if card is None:
-        raise PreparationError(
-            "Coach could not make a card that keeps the answer hidden.",
-            retry_helps=False,
-        )
-    return card
-
-
-def _target_alone(target: str, original: str) -> BasicCard | None:
-    try:
-        return basic_card(target, original, None)
-    except ValidationError:
-        return None
+    return confirmed_card(
+        answer["target"],
+        answer["original_span"],
+        source,
+        work.card_language,
+        work.help_language,
+    )
 
 
 class Recognizer:
@@ -81,24 +64,15 @@ class Recognizer:
         self.cli = cli
         self.attempts = attempts
 
-    async def prepare(self, text: str, item_id: str, learning_language: str) -> BasicCard:
-        stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
-        attempt = self.attempts / f"{stamp}-{item_id}"
-        language = LANGUAGE_NAMES[learning_language]
-        typed = {"text": text, "learning_language": language, "help_language": language}
-        prompt = render("recognize.md", input=json.dumps(typed, ensure_ascii=False))
-        try:
+    async def prepare(self, work: CoachWork) -> BasicCard:
+        async def recognize(attempt: Path) -> BasicCard:
+            prompt = render("recognize.md", input=learner_input(work))
             answer = await self.cli.ask(
                 attempt,
                 "recognize",
                 prompt,
                 schema("recognize.schema.json"),
             )
-            card = recognized_card(answer, text)
-        except PreparationError as error:
-            raise PreparationError(str(error), attempt, retry_helps=error.retry_helps) from error
-        except (RuntimeError, OSError) as error:
-            raise PreparationError(str(error), attempt) from error
-        # Failed attempts stay for diagnosis; a published card needs no private trail.
-        shutil.rmtree(attempt, ignore_errors=True)
-        return card
+            return recognized_card(answer, work)
+
+        return await run_attempt(self.attempts, work.package_id, recognize, lambda _: "basic")

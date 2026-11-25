@@ -3,6 +3,17 @@ import pytest
 from phrase_gym.coach.basic_card import basic_card, gapped, partial_form
 from phrase_gym.coach.preparation import PreparationError
 from phrase_gym.coach.recognition import recognition_problem, recognized_card
+from phrase_gym.server.coach_contracts import CoachWork
+
+
+def work(text: str) -> CoachWork:
+    return CoachWork(
+        package_id="coach-1",
+        text=text,
+        learning_language="en",
+        card_language="en",
+        help_language="en",
+    )
 
 
 @pytest.mark.parametrize(
@@ -84,26 +95,26 @@ def test_malformed_recognition_cannot_publish_or_reject(
     found = recognition_problem(answer(**changes), "strongly believe")
     assert found is not None and problem in found
     with pytest.raises(PreparationError) as raised:
-        recognized_card(answer(**changes), "strongly believe")
+        recognized_card(answer(**changes), work("strongly believe"))
     assert raised.value.retry_helps
 
 
 def test_a_rejection_is_a_language_decision() -> None:
     rejected = answer(outcome="reject", original_span="", target="", reason="Not English.")
     with pytest.raises(PreparationError, match="Not English.") as raised:
-        recognized_card(rejected, "zzqx")
+        recognized_card(rejected, work("zzqx"))
     assert not raised.value.retry_helps
 
 
 def test_a_source_too_long_for_a_card_leaves_the_target_alone() -> None:
     source = "We strongly believe " + "and so on " * 60 + "it."
     accepted = answer(source=source, source_usable=True)
-    card = recognized_card(accepted, f"strongly believe — {source}")
+    card = recognized_card(accepted, work(f"strongly believe — {source}"))
     assert (card.text, card.cue) == ("strongly believe", "st…ly be…ve")
 
 
 def test_a_target_too_long_for_a_card_is_a_decision_not_a_service_failure() -> None:
     target = " ".join(["strongly"] * 30)
-    with pytest.raises(PreparationError) as raised:
-        recognized_card(answer(original_span=target, target=target), target)
+    with pytest.raises(PreparationError, match="The text is too long for one card.") as raised:
+        recognized_card(answer(original_span=target, target=target), work(target))
     assert not raised.value.retry_helps

@@ -13,14 +13,10 @@ from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
-from phrase_gym.coach.claude_cli import ClaudeCli
-from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.main import CoachApi, Preparer, process_once
-from phrase_gym.coach.preparation import CardPreparer
-from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
-from tests import fake_cli
+from tests.coach_preparers import checked_preparer, free_recognizer
 
 CLOCKED_SERVICES = (
     "current",
@@ -66,14 +62,11 @@ class BrowserServer:
             service.clock = lambda: self.simulated_time or datetime.now(UTC)
             if hasattr(service, "rng"):
                 service.rng = rng
-        self.preparer: Preparer
-        fake = str(fake_cli.executable(directory, route))
-        if route == "gemini":
-            gemini = GeminiCli(fake, attempts=directory / "attempts", launch_delay=0)
-            self.preparer = Recognizer(gemini, gemini.attempts)
-        else:
-            cli = ClaudeCli(fake, attempts=directory / "attempts")
-            self.preparer = CardPreparer(cli, cli.attempts)
+        self.preparer: Preparer = (
+            free_recognizer(directory, timeout=600)
+            if route == "gemini"
+            else checked_preparer(route, directory, timeout=600)
+        )
         self.speech = PiperSpeech(None, fake=True)
 
     async def reset(self, request: Request) -> JSONResponse:

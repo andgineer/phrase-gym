@@ -165,6 +165,29 @@ def test_a_result_carries_exactly_one_card(client: TestClient) -> None:
     assert coach_phrases(client) == []
 
 
+@pytest.mark.parametrize(
+    ("card", "correction"),
+    [
+        ("basic", {"original": "strongly belive", "corrected": "strongly believe"}),
+        ("phrase", {"original": "strongly belive", "corrected": "firmly believe"}),
+    ],
+    ids=["beside a basic card", "absent from the revealed wording"],
+)
+def test_a_phrase_correction_must_belong_to_the_revealed_wording(
+    client: TestClient, card: str, correction: dict[str, str]
+) -> None:
+    request_id = claimed(client)
+    body = basic() if card == "basic" else coach_card(request_id)
+    result = {
+        "result_id": request_id,
+        card: body,
+        "correction": correction,
+        "reference": silent_reference(),
+    }
+    assert client.post(f"/api/imports/{request_id}/result", json=result).status_code == 422
+    assert coach_phrases(client) == []
+
+
 def test_a_corrected_wording_is_identified_on_the_card_and_in_the_coach_inbox(
     client: TestClient,
 ) -> None:

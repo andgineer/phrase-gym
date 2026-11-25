@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recognition", "explanation", "examples", "recall_hints", "usage_contexts"],
+  "properties": {
+    "recognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "original_span",
+        "target",
+        "source",
+        "source_usable",
+        "kind",
+        "reason"
+      ],
+      "properties": {
+        "outcome": {"type": "string", "enum": ["accept", "reject"]},
+        "original_span": {"type": "string"},
+        "target": {"type": "string"},
+        "source": {"type": "string"},
+        "source_usable": {"type": "boolean"},
+        "kind": {"type": "string", "enum": ["word", "phrase"]},
+        "reason": {"type": "string"}
+      }
+    },
+    "explanation": {"type": "string"},
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "gloss", "partner_line", "attribution"],
+        "properties": {
+          "text": {"type": "string"},
+          "gloss": {"type": "string"},
+          "partner_line": {"type": "string"},
+          "attribution": {"type": "string", "enum": ["source", "generated"]}
+        }
+      }
+    },
+    "recall_hints": {"type": "array", "items": {"type": "string"}},
+    "usage_contexts": {"type": "array", "items": {"type": "string"}}
+  }
+}

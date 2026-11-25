@@ -109,7 +109,7 @@ def test_dismissing_a_failure_in_coach_also_clears_its_practice_notice(client: T
     assert (inbox(client), notices(client)) == ([], [])
 
 
-def test_submissions_capture_the_active_learning_language(client: TestClient) -> None:
+def test_submissions_capture_the_active_languages(client: TestClient) -> None:
     assert client.get("/api/settings").json()["learning_language"] == "en"
     package_id = client.post("/api/coach/requests", json={"text": "by and large"}).json()[
         "request_id"
@@ -121,8 +121,10 @@ def test_submissions_capture_the_active_learning_language(client: TestClient) ->
         payload = connection.execute(
             "SELECT payload FROM imports WHERE package_id=?", (package_id,)
         ).fetchone()[0]
-    assert json.loads(payload) == {"text": "by and large", "learning_language": "en"}
-    assert client.post("/api/imports/coach/next").json()["learning_language"] == "en"
+    languages = {"learning_language": "en", "card_language": "en", "help_language": "en"}
+    assert json.loads(payload) == {"text": "by and large", **languages}
+    work = client.post("/api/imports/coach/next").json()
+    assert {name: work[name] for name in languages} == languages
 
 
 def test_a_request_saved_before_languages_were_recorded_is_english(client: TestClient) -> None:
@@ -133,4 +135,10 @@ def test_a_request_saved_before_languages_were_recorded_is_english(client: TestC
             "'2026-11-01T10:00:00+00:00', 'coach')"
         )
     work = client.post("/api/imports/coach/next").json()
-    assert work == {"package_id": "coach-old", "text": "by and large", "learning_language": "en"}
+    assert work == {
+        "package_id": "coach-old",
+        "text": "by and large",
+        "learning_language": "en",
+        "card_language": "en",
+        "help_language": "en",
+    }

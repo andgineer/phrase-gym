@@ -158,7 +158,10 @@ def _error_detail(result: SubprocessResult, error_line: re.Pattern[str]) -> str:
                 envelope = None
             text = line
             if isinstance(envelope, dict):
-                text = str(envelope.get("result") or envelope.get("error") or "")
+                error = envelope.get("error")
+                if isinstance(error, dict):
+                    error = error.get("message")
+                text = str(envelope.get("result") or error or envelope.get("message") or "")
             if text.strip():
                 return text.strip()[:300]
     return ""

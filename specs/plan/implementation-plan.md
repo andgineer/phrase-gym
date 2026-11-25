@@ -8,7 +8,7 @@ Every stage preserves the learner's existing database and upgrades it in place u
 
 The learner can paste material and leave. Coach keeps a valid expression useful, corrects a uniquely identifiable typo and explains in its inbox why rejected input did not become practice. English comes first under the [Coach decision](../decision-external-preparation-agent.md#input-decisions).
 
-Basic English cards, the Coach inbox and Gemini free recognition are in place. Follow the [Coach implementation plan](coach-implementation.md) for checked subscription examples, provider routing and qualification.
+Basic English cards, the Coach inbox, Gemini free recognition and checked subscription examples are in place. Follow the [Coach implementation plan](coach-implementation.md) for provider routing and qualification.
 
 ## 5. Extend only the content the learner next needs
 

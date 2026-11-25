@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -54,7 +55,14 @@ def test_a_whole_sentence_becomes_a_source_gap(client: TestClient, recognizer: R
     assert card["instruction"] == "Say the missing wording."
     assert answer["text"] == "We strongly believe this will work"
     assert inbox(client) == []
-    assert not list(recognizer.attempts.iterdir())
+    # Only the usage summary outlives a published card's private trail.
+    assert [path.name for path in recognizer.attempts.iterdir()] == ["usage"]
+    [summary] = (recognizer.attempts / "usage").iterdir()
+    steps = json.loads(summary.read_text())["steps"]
+    assert [(step["step"], step["model"], step["effort"]) for step in steps] == [
+        ("recognize", "gemini-3.8-flash-low", "low")
+    ]
+    assert steps[0]["usage"] == {"input_tokens": 1200, "output_tokens": 90}
 
 
 def test_a_target_with_its_source_sentence_gaps_that_sentence(

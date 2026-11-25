@@ -11,11 +11,14 @@ from. Press **Send** or Enter. Pasted line breaks become spaces. For example, tr
 Coach choose the right meaning; without it, Coach uses the most common useful one.
 
 Phrase Gym saves the text at once, even if [Coach is offline](installation.md#preparation-with-coach).
-It clears the field and briefly confirms. Your practice continues meanwhile. Coach later prepares a complete
-card: a phrase becomes a card for its reusable chunk, and a single word becomes a card for one of
-its meanings with two or three example contexts. Each card gets reference audio and appears in
-the **Added with Coach** lesson, apart from your course lessons. Phrase Gym does not show
-preparation progress.
+It clears the field and briefly confirms. Your practice continues meanwhile. With a Claude or
+Codex subscription, Coach later prepares a card with a short explanation, example sentences that
+hide the word or phrase behind a gap with a brief meaning cue, and hints you can ask for. A
+separate check confirms each part first; anything it doubts is left out. When no checked example
+remains, or on the free Gemini route, you get a basic card that asks you to fill the gap in your
+own sentence or to recall the wording from a partial form. Each card gets reference audio and
+appears in the **Added with Coach** lesson, apart from your course lessons. Phrase Gym does not
+show preparation progress.
 
 Typing the same text again never adds a second card. The field tells you when the text is
 **Already waiting for Coach** or **Already in your Library**. Text whose card you deleted is
@@ -26,6 +29,7 @@ the change and the card says what it corrected. A valid variant, such as **colou
 
 If Coach cannot use the text, for example because it is not English, cannot be read or could be
 several different words, the **Coach** page lists the text, its learning language and the reason.
+The same happens when Coach's two checks cannot agree on one word or phrase for your text.
 Close it with **Dismiss**. Typing the same text again shows that result instead of preparing it
 again, so change the text to try something else.
 

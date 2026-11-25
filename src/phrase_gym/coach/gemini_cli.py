@@ -1,6 +1,7 @@
 import asyncio
 import shlex
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ from phrase_gym.coach.cli_steps import (
     decode_object,
     write_step_files,
 )
+from phrase_gym.coach.usage import gemini_usage, record_step
 
 
 def answer_object(response: str, step: str) -> dict[str, Any]:
@@ -57,12 +59,26 @@ class GeminiCli:
         # The prompt states the answer shape; the schema file stays with the attempt for review.
         write_step_files(attempt, step, prompt, schema)
         stop_event = threading.Event()
+        launched: list[str] = [self.model]
+        usage: dict[str, int] | None = None
+        started = time.monotonic()
         try:
-            result = await asyncio.to_thread(self._launch, attempt, step, stop_event)
+            result, usage = await asyncio.to_thread(
+                self._launch,
+                attempt,
+                step,
+                stop_event,
+                launched,
+            )
         except asyncio.CancelledError:
             # The worker thread outlives the cancelled await; the event makes it stop the child.
             stop_event.set()
             raise
+        finally:
+            elapsed = time.monotonic() - started
+            flags = launched[-1]
+            found = gemini_usage(usage)
+            record_step(attempt, step, cli="agy", flags=flags, elapsed=elapsed, usage=found)
         if failure := agy_failure(result, "Gemini"):
             raise CliError(f"{failure} (during {step})")
         response = result.stdout_path.read_text(errors="replace")
@@ -70,8 +86,16 @@ class GeminiCli:
         (attempt / f"{step}-answer.json").write_text(response, encoding="utf-8")
         return answer
 
-    def _launch(self, attempt: Path, step: str, stop_event: threading.Event) -> SubprocessResult:
+    def _launch(
+        self,
+        attempt: Path,
+        step: str,
+        stop_event: threading.Event,
+        launched: list[str],
+    ) -> tuple[SubprocessResult, dict[str, int] | None]:
         def launch(model: str) -> SubprocessResult:
+            launched.append(model)
+
             def run() -> SubprocessResult:
                 return _run_agent_cli(
                     prompt_file=attempt / f"{step}-prompt.md",
@@ -91,5 +115,4 @@ class GeminiCli:
             except SubprocessError as error:
                 raise CliError(f"Gemini: {error} (during {step})") from error
 
-        result, _ = launch_agy(launch, self.model, self.command_template, f"Gemini {step}")
-        return result
+        return launch_agy(launch, self.model, self.command_template, f"Gemini {step}")

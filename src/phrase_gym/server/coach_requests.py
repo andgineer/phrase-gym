@@ -32,6 +32,16 @@ def request_language(row: ImportRecord) -> LearningLanguage:
     return json.loads(row.payload).get("learning_language", "en")
 
 
+def request_languages(row: ImportRecord) -> dict[str, str]:
+    """The languages captured at submission; requests saved before the snapshot used English."""
+    payload = json.loads(row.payload)
+    return {
+        "learning_language": request_language(row),
+        "card_language": payload.get("card_language", "en"),
+        "help_language": payload.get("help_language", "en"),
+    }
+
+
 def coach_row(connection: sqlite3.Connection, package_id: str) -> ImportRecord:
     row = import_row(connection, package_id)
     if row is None or row.kind != "coach":
@@ -82,13 +92,19 @@ class CoachRequests:
         if not text:
             raise ValueError("Type a phrase or word for Coach.")
         with self.database.write() as connection:
-            language = read_settings(connection).learning_language
+            settings = read_settings(connection)
+            language = settings.learning_language
             package_id = request_id(text, language)
             row = import_row(connection, package_id)
             if row is not None and row.kind != "coach":
                 raise ImportConflictError(f"{package_id} already names an external package.")
             if row is None:
-                payload = {"text": text, "learning_language": language}
+                payload = {
+                    "text": text,
+                    "learning_language": language,
+                    "card_language": settings.card_language,
+                    "help_language": settings.help_language,
+                }
                 connection.execute(
                     "INSERT INTO imports (package_id, content_hash, payload, status, created_at, "
                     "kind) VALUES (?, ?, ?, 'pending', ?, 'coach')",
@@ -116,7 +132,7 @@ class CoachRequests:
             return {
                 "package_id": row.package_id,
                 "text": json.loads(row.payload)["text"],
-                "learning_language": request_language(row),
+                **request_languages(row),
             }
 
     def fail(self, package_id: str, message: str, retry_helps: bool = True) -> dict[str, object]:
@@ -135,11 +151,15 @@ class CoachRequests:
 
     def publish(self, package_id: str, result: CoachResult) -> dict[str, object]:
         kind, card = ("phrase", result.phrase) if result.phrase else ("basic", result.basic)
-        digest = result_hash(
-            {kind: card.model_dump(mode="json") if card else None, "reference": result.reference},
-        )
+        hashed = {
+            kind: card.model_dump(mode="json") if card else None,
+            "reference": result.reference,
+        }
+        if result.correction:
+            hashed["correction"] = result.correction.model_dump(mode="json")
+        digest = result_hash(hashed)
         batch = coach_batch(package_id, result)
-        correction = result.basic.correction if result.basic else None
+        correction = result.card_correction()
         with self.database.write() as connection:
             row = coach_row(connection, package_id)
             if row.status == "added":

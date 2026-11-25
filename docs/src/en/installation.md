@@ -33,8 +33,9 @@ It needs two things on the same Mac:
 
 - The [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), installed and logged in
   once with your Claude subscription (run `claude` and log in). Coach uses your normal Claude
-  login and settings, always runs Claude Opus 5.5 at medium effort whatever model you use
-  elsewhere, and never uses an API key. The model gets only a file-reading
+  login and settings, whatever model you use elsewhere: Claude Haiku 5.5 writes each card and a
+  separate Claude Sonnet 5 session checks it, both at low effort. Coach never uses an API key.
+  The model gets only a file-reading
   tool that works inside the current preparation's folder; reading `.env` files, your home
   directory and your learning data is refused. Read-allow rules, tools and servers you add in
   your own Claude settings can widen that restriction; Coach does not isolate them.
@@ -47,9 +48,14 @@ PHRASE_GYM_PIPER_CONFIG=/absolute/path/to/piper-voice.json phrase-gym coach
 ```
 
 For a source checkout, use `uv run phrase-gym coach`. Coach receives typed text through Phrase
-Gym's API, prepares a card with Claude in separate preparation and review sessions, generates its
-reference audio and publishes it. A card usually takes a few minutes. Coach prints a line for
-every preparation that fails, with the folder that keeps that attempt's prompts and answers.
+Gym's API, has one session write the card and a second session check your text and every example,
+meaning cue and hint the first one wrote, then generates the reference audio and publishes the
+card. Anything the check doubts is left out; if no checked example remains, you get the basic
+card described below for the Gemini route. When the two sessions disagree about what you meant,
+the **Coach** page lists the text with a reason instead of adding a card. A card usually takes
+under a minute. Coach prints a line for every preparation that fails, with the folder that keeps
+that attempt's prompts and answers. It also keeps a small private record of each request's model,
+time and reported token usage in that folder's `usage` subfolder.
 Imports from an external AI agent arrive with complete audio and do not need Coach. Piper uses
 the separately pinned private environment described in the voice setup guide.
 
@@ -57,8 +63,8 @@ To prepare with the [Codex CLI](https://developers.openai.com/codex/cli) instead
 with `codex login` and start Coach with `phrase-gym coach --cli codex`. Coach uses the same card rules for each CLI and keeps the CLI you select. Commands from the
 Codex model run in a restricted sandbox that can read only the current preparation's files and
 cannot read `.env` files, your home directory or your learning data, write files or reach the
-network; tools and servers from your own Codex settings are not covered. Coach runs Codex on
-GPT-6.1 Sol at medium effort.
+network; tools and servers from your own Codex settings are not covered. On Codex, GPT-5.6 Luna
+writes each card and a separate GPT-5.6 Terra session checks it, both at low effort.
 
 Without a Claude or Codex subscription, `phrase-gym coach --cli gemini` uses the free tier of
 the [Antigravity CLI](https://antigravity.google/) (`agy`, logged in once with a Google account)

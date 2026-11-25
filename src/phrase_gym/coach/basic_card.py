@@ -1,9 +1,12 @@
 import re
 
+from pydantic import ValidationError
+
 from phrase_gym.coach.hint_checks import contains_words, words
+from phrase_gym.coach.messages import message
+from phrase_gym.coach.preparation import PreparationError
 from phrase_gym.server.coach_contracts import GAP, BasicCard, CoachCorrection
 
-INSTRUCTIONS = {"en": "Say the missing wording."}
 WORD_CHAR = r"[\w'’\-]"
 TARGET_WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*")
 LONG_WORD = 7
@@ -51,7 +54,7 @@ def basic_card(
     card_language: str = "en",
 ) -> BasicCard | None:
     """Wording practice from the confirmed target; None when no cue can conceal the answer."""
-    instruction = INSTRUCTIONS[card_language]
+    instruction = message("instruction", card_language)
     masked = gapped(source, target)
     cue = masked or partial_form(target)
     if not cue or contains_target(instruction, target):
@@ -66,3 +69,25 @@ def basic_card(
         instruction=instruction,
         correction=correction,
     )
+
+
+def confirmed_card(
+    target: str,
+    original: str,
+    source: str | None,
+    card_language: str,
+    help_language: str,
+) -> BasicCard:
+    """Basic practice for a confirmed target; when none fits, the reason is a decision."""
+    # A source too long for a card still leaves the target to practise on its own.
+    for candidate in [source, None] if source else [None]:
+        try:
+            card = basic_card(target, original, candidate, card_language)
+        except ValidationError as error:
+            if all(problem["type"] == "string_too_long" for problem in error.errors()):
+                continue
+            card = None
+        if card is None:
+            raise PreparationError(message("no_safe_cue", help_language), retry_helps=False)
+        return card
+    raise PreparationError(message("too_long", help_language), retry_helps=False)

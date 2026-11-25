@@ -1,5 +1,4 @@
 import asyncio
-import json
 import os
 import tempfile
 import time
@@ -7,21 +6,16 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 from phrase_gym.coach import codex_cli
 from phrase_gym.coach.agents.ai_agent import _inject_skip_git_flag
 from phrase_gym.coach.agents.command_template import build_run_args
-from phrase_gym.coach.agents.config import CLAUDE_MODEL, CODEX_MODEL
 from phrase_gym.coach.claude_cli import ClaudeCli, template_values
 from phrase_gym.coach.cli_steps import CliError, attempts_root
 from phrase_gym.coach.codex_cli import CodexCli
 from phrase_gym.coach.gemini_cli import GeminiCli
-from phrase_gym.coach.main import CoachApi, process_once
-from phrase_gym.coach.preparation import CardPreparer
-from phrase_gym.coach.speech import PiperSpeech
+from phrase_gym.coach.main import CoachApi
 from tests import fake_cli
-from tests.coach_client import ClientCoachApi
 
 
 @pytest.mark.parametrize(
@@ -71,149 +65,13 @@ def cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
     return fake_cli_for(request.param, tmp_path)
 
 
-# Gemini free recognizes input for basic practice; the subscriptions still author enriched cards.
-@pytest.fixture(params=["claude", "codex"])
-def enriched_cli(request: pytest.FixtureRequest, tmp_path: Path) -> Cli:
-    return fake_cli_for(request.param, tmp_path)
-
-
-def run_coach_once(
-    client: TestClient,
-    cli: Cli,
-    text: str,
-    speech: PiperSpeech | None = None,
-) -> dict[str, object]:
-    package_id = client.post("/api/coach/requests", json={"text": text}).json()["request_id"]
-    preparer = CardPreparer(cli, cli.attempts)
-    assert process_once(ClientCoachApi(client), preparer, speech or PiperSpeech(None, fake=True))
-    return client.get(f"/api/imports/{package_id}").json()
-
-
-def attempts(cli: Cli) -> list[Path]:
-    return sorted(cli.attempts.iterdir()) if cli.attempts.exists() else []
-
-
-def coach_phrases(client: TestClient) -> list[dict[str, object]]:
-    lessons = client.get("/api/lessons").json()["items"]
-    coach = [lesson["id"] for lesson in lessons if lesson["title"] == "Added with Coach"]
-    if not coach:
-        return []
-    return client.get("/api/phrases", params={"lesson_id": coach[0]}).json()["items"]
-
-
-def stored(client: TestClient, text: str) -> dict[str, object]:
-    with client.app.state.database.read() as connection:
-        row = connection.execute(
-            "SELECT cues_json, hints_json FROM phrases WHERE text=?", (text,)
-        ).fetchone()
-    return {"cues": json.loads(row["cues_json"]), "hints": json.loads(row["hints_json"])}
-
-
-def test_typed_phrase_and_word_are_prepared_reviewed_and_published(
-    client: TestClient, enriched_cli: Cli
-) -> None:
-    cli = enriched_cli
-    phrase = run_coach_once(client, cli, "strongly believe — We strongly believe it works.")
-    word = run_coach_once(client, cli, "reluctant")
-    assert (phrase["status"], phrase["added_count"]) == ("added", 1)
-    assert (word["status"], word["added_count"]) == ("added", 1)
-    texts = sorted(item["text"] for item in coach_phrases(client))
-    assert texts == ["She felt reluctant today.", "We strongly believe it works."]
-    assert len(stored(client, "She felt reluctant today.")["cues"]) == 3
-    assert attempts(cli) == []
-
-
-def test_review_findings_are_applied_before_publication(
-    client: TestClient, enriched_cli: Cli
-) -> None:
-    cli = enriched_cli
-    assert run_coach_once(client, cli, "leaky")["status"] == "added"
-    assert "leaky" not in stored(client, "She felt leaky today.")["hints"]
-
-
-LOGIN = "not logged in; log in to the CLI in a terminal, then submit the text again"
-REASONS = {
-    "Codex": {
-        "malformed": "Codex returned malformed JSON during prepare",
-        "usage-limit": "Codex: rate limit hit; submit the text again later (during prepare)",
-        "subscription-limit": "Codex: usage limit reached; submit the text again after "
-        "Nov 13th, 2026 4:58 PM (during prepare)",
-        "logged-out": f"Codex: {LOGIN} (during prepare)",
-    },
-    "Claude": {
-        "malformed": "Claude returned no structured answer during prepare",
-        "usage-limit": "Claude: rate limit hit; submit the text again later (during prepare)",
-        "subscription-limit": "Claude: usage limit reached; submit the text again after "
-        "6pm (Europe/Belgrade) (during prepare)",
-        "logged-out": f"Claude: {LOGIN} (during prepare)",
-    },
-}
-
-
-@pytest.mark.parametrize(
-    ("text", "reason"),
-    [
-        ("insufficient zzz", "No English word or expression was found in the input."),
-        ("malformed reply", "malformed"),
-        ("usage-limit", "usage-limit"),
-        ("subscription-limit", "subscription-limit"),
-        ("stubborn", "The prepared card failed its checks: recall_hints.0: the hint gives"),
-        ("logged-out", "logged-out"),
-        (
-            "unauthorized quota: usage limit reached, please run /login echo-transcript",
-            "exited",
-        ),
-    ],
-)
-def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
-    client: TestClient,
-    enriched_cli: Cli,
-    capsys: pytest.CaptureFixture[str],
-    text: str,
-    reason: str,
-) -> None:
-    cli = enriched_cli
-    label = LABEL[type(cli)]
-    reason = REASONS[label].get(reason, reason)
-    if reason == "exited":
-        reason = f"{label}: agent exit code 1 (during prepare)"
-    status = run_coach_once(client, cli, text)
-    assert status["status"] == "error"
-    assert str(status["error"]).startswith(reason)
-    assert coach_phrases(client) == []
-    [attempt] = attempts(cli)
-    printed = capsys.readouterr().out
-    assert printed.startswith(f"Coach could not prepare “{text}”: {reason}")
-    assert f"(details: {attempt})" in printed
-    notices = client.get("/api/practice/facts").json()["notices"]
-    [outcome] = client.get("/api/coach/inbox").json()["items"]
-    if text.startswith("insufficient"):
-        assert notices == []
-        assert outcome["outcome"] == "rejected"
-    else:
-        assert [(notice["label"], notice["kind"]) for notice in notices] == [(text, "coach")]
-        assert outcome["outcome"] == "failed"
-
-
-def test_piper_failure_after_preparation_is_reported(
-    client: TestClient, enriched_cli: Cli, capsys: pytest.CaptureFixture[str]
-) -> None:
-    cli = enriched_cli
-    speech = PiperSpeech(None, fake=True, fake_failures=1)
-    status = run_coach_once(client, cli, "by and large", speech)
-    reason = "Synthetic preparation failure; correct the setup and retry"
-    assert (status["status"], status["error"]) == ("error", reason)
-    assert capsys.readouterr().out == f"Coach could not prepare “by and large”: {reason}\n"
-    assert run_coach_once(client, cli, "by and large")["status"] == "added"
-
-
 def test_missing_cli_and_timeout_fail_with_concrete_reasons(tmp_path: Path, cli: Cli) -> None:
     label = LABEL[type(cli)]
     missing = replace(cli, executable="definitely-not-an-installed-cli")
     with pytest.raises(CliError, match=f"{label}: Agent command not found"):
         asyncio.run(missing.ask(tmp_path / "a", "prepare", "x", {}))
     slow = replace(cli, timeout=1)
-    prompt = '<learner_input>\n"slow"\n</learner_input>'
+    prompt = '<learner_input>\n{"text": "slow"}\n</learner_input>'
     with pytest.raises(CliError, match=f"{label}: agent timed out \\(during prepare\\)"):
         asyncio.run(slow.ask(tmp_path / "b", "prepare", prompt, {}))
     assert (tmp_path / "b" / "prepare-stderr.log").exists()
@@ -253,9 +111,9 @@ def test_claude_reads_only_the_attempt_with_home_and_env_files_denied(tmp_path: 
         "claude",
         "-p",
         "--model",
-        "claude-opus-5-5",
+        "claude-haiku-5-5",
         "--effort",
-        "medium",
+        "low",
         "--output-format",
         "json",
         "--json-schema",
@@ -308,15 +166,12 @@ def test_codex_runs_with_reads_limited_to_the_attempt_and_env_files_denied(
         "exec",
         "--skip-git-repo-check",
         "--model",
-        "gpt-6.1-sol",
+        "gpt-5.6-luna",
         "-c",
-        "model_reasoning_effort=medium",
+        "model_reasoning_effort=low",
         "--ephemeral",
     ]
-    assert (CLAUDE_MODEL, CODEX_MODEL) == (
-        "--model claude-opus-5-5 --effort medium",
-        "--model gpt-6.1-sol -c model_reasoning_effort=medium",
-    )
+    assert "--json" in arguments
     profile = arguments[arguments.index('default_permissions="phrase-gym-coach"') + 2]
     assert profile == (
         "permissions.phrase-gym-coach.filesystem={"
@@ -344,7 +199,7 @@ def test_workspace_is_the_override_then_the_source_checkout_then_a_private_cache
 
 def test_cancelling_a_step_stops_the_cli_child_promptly(tmp_path: Path, cli: Cli) -> None:
     attempt = tmp_path / "stop"
-    prompt = '<learner_input>\n"slow"\n</learner_input>'
+    prompt = '<learner_input>\n{"text": "slow"}\n</learner_input>'
 
     async def cancel_while_running() -> None:
         task = asyncio.create_task(cli.ask(attempt, "prepare", prompt, {}))

@@ -73,7 +73,7 @@ Coach automatically prepares the safest useful card permitted by the [content de
 
 ### Preparation by provider
 
-The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-implementation.md#3-qualify-what-learners-will-receive).
+The text-only proof of concept supports the following provisional choices for implementation. Both subscription routes added useful examples while retaining every valid input in the sample. On Gemini free the verifier accepted both a misleading synonym and a gloss that reversed the action in its sentence. The wording-only exercise avoided those errors. These choices still need [production qualification](plan/coach-implementation.md#2-qualify-what-learners-will-receive).
 
 | Route | Preparation to qualify |
 |---|---|
@@ -82,7 +82,7 @@ The text-only proof of concept supports the following provisional choices for im
 | Gemini free | One recognition call with `gemini-3.8-flash-low` under the Antigravity routing policy. The program builds [basic wording practice](decision-targeted-drilling.md#basic-wording-practice) from the confirmed text. |
 | Gemini subscription | Preparation design remains open until measured on that subscription. |
 
-For subscription enrichment, the verifier checks the original submission, the learning language, target, correction, source sentence and every addition. Both calls must agree on the target and any correction. A disputed rejection or unresolved target ends with an inbox reason. Drop unsafe additions and use basic wording practice if the confirmed target stands on its own. An unavailable verifier is a service failure. Every published exercise requires validation, matching audio and atomic publication.
+For subscription enrichment, the verifier checks the original submission, the learning language, target, correction, source sentence and every addition. Both calls must agree on the target and any correction. A disputed rejection or unresolved target ends with an inbox reason. Use the source sentence only when both calls find it usable. Drop unsafe additions and use basic wording practice if the confirmed target stands on its own. An enriched card keeps the checked explanation and at least one checked new example; without one, the confirmed target gets basic practice. An unavailable verifier or a malformed answer from either call is a service failure. Every published exercise requires validation, matching audio and atomic publication.
 
 ## Repair and scope
 

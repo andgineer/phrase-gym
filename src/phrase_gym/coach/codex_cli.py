@@ -3,6 +3,7 @@ import os
 import re
 import shlex
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,7 @@ from platformdirs import user_cache_path
 from phrase_gym.coach.agents.config import (
     _DEFAULT_AGENT_API_KEY_VARS,
     _DEFAULT_CODEX_CMD,
-    CODEX_MODEL,
+    CODEX_WRITER,
 )
 from phrase_gym.coach.cli_steps import (
     STEP_TIMEOUT,
@@ -21,10 +22,11 @@ from phrase_gym.coach.cli_steps import (
     run_step,
     write_step_files,
 )
+from phrase_gym.coach.usage import codex_usage, record_step
 
 PROFILE = "phrase-gym-coach"
-# The transcript echoes the prompt and learner text, so only Codex's own error lines count.
-ERROR_LINE = re.compile(r"^ERROR:.*$", re.M)
+# Events echo the prompt and learner text, so only Codex's own error lines and events count.
+ERROR_LINE = re.compile(r'^ERROR:.*$|^\{"type":"(?:error|turn\.failed)".*$', re.M)
 
 
 def coach_workspace() -> Path:
@@ -60,6 +62,7 @@ class CodexCli:
     workspace: Path
     executable: str = "codex"
     timeout: float = STEP_TIMEOUT
+    model: str = CODEX_WRITER
 
     @property
     def attempts(self) -> Path:
@@ -71,7 +74,7 @@ class CodexCli:
 
     def template_values(self, attempt: Path, step: str) -> dict[str, str | Path]:
         return {
-            "model": CODEX_MODEL,
+            "model": self.model,
             "default_permissions": shlex.quote(f'default_permissions="{PROFILE}"'),
             "permission_profile": shlex.quote(permission_profile(self.workspace, attempt)),
             "schema_file": attempt / f"{step}-schema.json",
@@ -89,17 +92,23 @@ class CodexCli:
         write_step_files(attempt, step, prompt, schema)
         answer = attempt / f"{step}-answer.json"
         answer.unlink(missing_ok=True)
-        await run_step(
-            "Codex",
-            self.command_template,
-            self.template_values(attempt, step),
-            attempt=attempt,
-            step=step,
-            cwd=self.workspace,
-            timeout=self.timeout,
-            api_key_vars=_DEFAULT_AGENT_API_KEY_VARS["codex"],
-            error_line=ERROR_LINE,
-        )
+        started = time.monotonic()
+        try:
+            await run_step(
+                "Codex",
+                self.command_template,
+                self.template_values(attempt, step),
+                attempt=attempt,
+                step=step,
+                cwd=self.workspace,
+                timeout=self.timeout,
+                api_key_vars=_DEFAULT_AGENT_API_KEY_VARS["codex"],
+                error_line=ERROR_LINE,
+            )
+        finally:
+            elapsed = time.monotonic() - started
+            usage = codex_usage(attempt / f"{step}-stdout.log", attempt / f"{step}-stderr.log")
+            record_step(attempt, step, cli="codex", flags=self.model, elapsed=elapsed, usage=usage)
         content = answer.read_text(errors="replace") if answer.is_file() else ""
         if not content.strip():
             raise CliError(f"Codex returned no answer (during {step})")

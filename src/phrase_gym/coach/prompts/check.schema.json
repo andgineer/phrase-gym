@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recognition",
+    "explanation_ok",
+    "example_ok",
+    "hints_ok",
+    "usage_contexts_ok",
+    "reasons"
+  ],
+  "properties": {
+    "recognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "original_span",
+        "target",
+        "source",
+        "source_usable",
+        "kind",
+        "reason"
+      ],
+      "properties": {
+        "outcome": {"type": "string", "enum": ["accept", "reject"]},
+        "original_span": {"type": "string"},
+        "target": {"type": "string"},
+        "source": {"type": "string"},
+        "source_usable": {"type": "boolean"},
+        "kind": {"type": "string", "enum": ["word", "phrase"]},
+        "reason": {"type": "string"}
+      }
+    },
+    "explanation_ok": {"type": "boolean"},
+    "example_ok": {"type": "array", "items": {"type": "boolean"}},
+    "hints_ok": {"type": "array", "items": {"type": "boolean"}},
+    "usage_contexts_ok": {"type": "array", "items": {"type": "boolean"}},
+    "reasons": {"type": "array", "items": {"type": "string"}}
+  }
+}

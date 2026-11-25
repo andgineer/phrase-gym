@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 SOURCE_SEPARATOR = " — "
+USAGE = {"input_tokens": 1200, "cache_read": 300, "cache_write": 40, "output": 90, "reasoning": 25}
 
 
 def executable(directory: Path, vendor: str = "codex") -> Path:
@@ -19,39 +20,6 @@ def executable(directory: Path, vendor: str = "codex") -> Path:
     )
     wrapper.chmod(0o755)
     return wrapper
-
-
-def card(typed: str, step: str) -> dict[str, object]:
-    target, _, source = typed.partition(SOURCE_SEPARATOR)
-    word = len(target.split()) == 1
-    first = target.split()[0]
-    half = max(1, len(first) // 2)
-    leaky = (
-        "stubborn" in typed
-        or ("leaky" in typed and step == "prepare")
-        or ("sticky" in typed and step in ("prepare", "revise"))
-    )
-    cues = [
-        {"situation": f"Context {index}: __________ here. (=sense {index})", "partner_line": None}
-        for index in range(1, 4 if word else 3)
-    ]
-    return {
-        "outcome": "ready",
-        "reason": "",
-        "kind": "word" if word else "phrase",
-        "target": target,
-        "card": {
-            "text": source or (f"She felt {target} today." if word else target),
-            "explanation": f"Target: {target}. A useful way to say it.",
-            "cues": cues,
-            "recall_hints": [
-                target if leaky else f"{first[:half]}... / one",
-                f"{first[: max(1, half - 1)]}... / two",
-            ],
-            "usage_contexts": ["coach test"],
-            "detailed_explanation": None,
-        },
-    }
 
 
 REJECTIONS = {
@@ -91,31 +59,79 @@ def recognition(typed: dict[str, str]) -> dict[str, object]:
     }
 
 
-def answer(typed: str, step: str) -> dict[str, object]:
-    if step.startswith("review"):
-        findings = []
-        # "leaky" is fixed by the first revision; "picky" and "stubborn" keep drawing findings;
-        # "sticky" keeps its leak through the first revision while the second review stays silent.
-        first_only = ("leaky", "sticky", "giveup")
-        first = step == "review" and any(word in typed for word in first_only)
-        if first or "stubborn" in typed or "picky" in typed:
-            findings = [
-                {
-                    "field": "recall_hints.0",
-                    "problem": "The hint gives the whole target.",
-                    "correction": "Use a partial form.",
-                }
-            ]
-        return {"findings": findings}
-    if "insufficient" in typed or ("giveup" in typed and step.startswith("revise")):
+def judged(typed: dict[str, str], step: str) -> dict[str, object]:
+    """The writer's or checker's recognition; markers in the text make the two disagree."""
+    text = typed["text"]
+    found = recognition(typed)
+    if f"{step}-rejects" in text:
+        found = {**found, "outcome": "reject", "original_span": "", "target": ""}
+        found.update(source="", source_usable=False, reason="This is not an English expression.")
+    if step == "check" and "check-target" in text and found["outcome"] == "accept":
+        found = {**found, "target": str(found["target"]).split()[0]}
+        found["original_span"] = found["target"]
+    target = str(found["target"])
+    return {**found, "kind": "word" if len(target.split()) == 1 else "phrase"}
+
+
+def draft(typed: dict[str, str]) -> dict[str, object]:
+    found = judged(typed, "write")
+    target = str(found["target"])
+    if found["outcome"] == "reject":
         return {
-            "outcome": "insufficient",
-            "reason": "No English word or expression was found in the input.",
-            "kind": "phrase",
-            "target": "",
-            "card": None,
+            "recognition": found,
+            "explanation": "",
+            "examples": [],
+            "recall_hints": [],
+            "usage_contexts": [],
         }
-    return card(typed, step)
+    examples = []
+    if found["source_usable"]:
+        examples.append(
+            {"text": found["source"], "partner_line": "", "attribution": "source"},
+        )
+    examples += [
+        {"text": f"My friend said {target} at the meeting.", "attribution": "generated"},
+        {"text": f"We heard {target} again on the radio today.", "attribution": "generated"},
+    ]
+    first = target.split()[0]
+    half = max(1, len(first) // 2)
+    terse = "terse" in typed["text"]
+    return {
+        "recognition": found,
+        "explanation": "яд" if terse else f"Target: {target}. A useful way to say it.",
+        "examples": [
+            {"partner_line": "", **example, "gloss": f"sense {index}"}
+            for index, example in enumerate(examples, start=1)
+        ],
+        "recall_hints": [
+            f"{first[:half]}... / morning",
+            f"{first[: max(1, half - 1)]}... / garden",
+            f"{first[:half]}... / station",
+        ],
+        "usage_contexts": ["coach test"],
+    }
+
+
+def check(typed: dict[str, str], prompt: str) -> dict[str, object]:
+    text = typed["text"]
+    shown = json.loads(re.search(r"<draft>\n(.*?)\n</draft>", prompt, re.S)[1])
+    examples = shown["examples"]
+    generated = [index for index, item in enumerate(examples) if item["attribution"] == "generated"]
+    # "unsafe-example" doubts the first new example, "unsafe-new" every new example.
+    unsafe = (
+        generated if "unsafe-new" in text else generated[:1] if "unsafe-example" in text else []
+    )
+    return {
+        "recognition": judged(typed, "check"),
+        "explanation_ok": "unsafe-meaning" not in text,
+        "example_ok": [index not in unsafe for index in range(len(examples))],
+        "hints_ok": [
+            not ("unsafe-hint" in text and index == 0)
+            for index in range(len(shown["recall_hints"]))
+        ],
+        "usage_contexts_ok": [True for _ in shown["usage_contexts"]],
+        "reasons": ["The first new example changes the meaning."] if "unsafe" in text else [],
+    }
 
 
 CODEX_FAILURES = {
@@ -124,6 +140,11 @@ CODEX_FAILURES = {
     "usage-limit": "ERROR: unexpected status 429 Too Many Requests",
     "subscription-limit": "ERROR: You've hit your usage limit. Visit "
     "https://chatgpt.com/settings/usage or try again at Nov 13th, 2026 4:58 PM.",
+    # Codex's --json events are compact JSON lines on stdout.
+    "event-limit": json.dumps(
+        {"type": "error", "message": "You've hit your usage limit. Try again later."},
+        separators=(",", ":"),
+    ),
 }
 CLAUDE_FAILURES = {
     "echo-transcript": None,
@@ -140,17 +161,21 @@ GEMINI_FAILURES = {
 }
 
 
-def typed_input(prompt: str) -> str | dict[str, str]:
+def typed_input(prompt: str) -> dict[str, str]:
     return json.loads(re.search(r"<learner_input>\n(.*?)\n</learner_input>", prompt, re.S)[1])
 
 
-def fail(vendor: str, typed: str, prompt: str) -> None:
+def fail(vendor: str, text: str, prompt: str, step: str) -> None:
     failures = {"codex": CODEX_FAILURES, "gemini": GEMINI_FAILURES}.get(vendor, CLAUDE_FAILURES)
+    if step == "check" and "checker-limit" in text:
+        text = "subscription-limit"
     for key, message in failures.items():
-        if key not in typed:
+        if key not in text:
             continue
         if message is None:
             print(f"user\n{prompt}\nI could not finish.", file=sys.stderr)
+        elif message.startswith("{"):
+            print(message)
         elif vendor == "codex" or message.startswith(("API Error", "E1115")):
             print(message, file=sys.stderr)
         elif vendor == "gemini":
@@ -164,23 +189,64 @@ def fail(vendor: str, typed: str, prompt: str) -> None:
         sys.exit(1)
 
 
-def respond(vendor: str, arguments: list[str], answer_value: object | None, step: str) -> None:
+def respond(vendor: str, arguments: list[str], answer_value: object | None) -> None:
     if vendor == "codex":
         output = Path(arguments[arguments.index("--output-last-message") + 1])
         output.write_text("{not json" if answer_value is None else json.dumps(answer_value))
-        print(output.read_text())
+        assert "--json" in arguments, arguments
+        usage = {
+            "input_tokens": USAGE["input_tokens"],
+            "cached_input_tokens": USAGE["cache_read"],
+            "cache_write_input_tokens": USAGE["cache_write"],
+            "output_tokens": USAGE["output"],
+            "reasoning_output_tokens": USAGE["reasoning"],
+        }
+        print(json.dumps({"type": "turn.started"}))
+        print(json.dumps({"type": "turn.completed", "usage": usage}, separators=(",", ":")))
         return
     if vendor == "gemini":
         # news-recap's Antigravity command with the runner's log file.
         assert arguments[-2] == "-p", arguments
         assert {"--dangerously-skip-permissions", "--log-file"} <= set(arguments), arguments
         response = "I could not decide." if answer_value is None else json.dumps(answer_value)
-        print(json.dumps({"status": "SUCCESS", "response": f"```json\n{response}\n```"}))
+        usage = {"input_tokens": USAGE["input_tokens"], "output_tokens": USAGE["output"]}
+        print(
+            json.dumps(
+                {"status": "SUCCESS", "response": f"```json\n{response}\n```", "usage": usage}
+            )
+        )
         return
-    envelope = {"type": "result", "subtype": "success", "is_error": False, "result": "done"}
+    model = arguments[arguments.index("--model") + 1]
+    envelope = {
+        "type": "result",
+        "subtype": "success",
+        "is_error": False,
+        "result": "done",
+        "num_turns": 2,
+        "total_cost_usd": 0.01,
+        "usage": {
+            "input_tokens": USAGE["input_tokens"],
+            "cache_read_input_tokens": USAGE["cache_read"],
+            "cache_creation_input_tokens": USAGE["cache_write"],
+            "output_tokens": USAGE["output"],
+            "output_tokens_details": {"thinking_tokens": USAGE["reasoning"]},
+        },
+        "modelUsage": {model: {"outputTokens": USAGE["output"]}},
+    }
     if answer_value is not None:
         envelope["structured_output"] = answer_value
     print(json.dumps(envelope))
+
+
+def answer(step: str, typed: dict[str, str], prompt: str) -> dict[str, object] | None:
+    text = typed["text"]
+    if "malformed" in text or (step == "check" and "garbled" in text):
+        return None
+    if step == "write":
+        return draft(typed)
+    if step == "check":
+        return check(typed, prompt)
+    return recognition(typed)
 
 
 def main() -> None:
@@ -193,21 +259,15 @@ def main() -> None:
     step = prompt_path.name.removesuffix("-prompt.md")
     prompt = prompt_path.read_text()
     if prompt == "ECHO-ENVIRONMENT":
-        respond(vendor, arguments, {"environment": sorted(os.environ)}, step)
+        respond(vendor, arguments, {"environment": sorted(os.environ)})
         return
     typed = typed_input(prompt)
-    text = typed["text"] if isinstance(typed, dict) else typed
-    fail(vendor, text, prompt)
-    if "slow" in text:
+    text = typed["text"]
+    fail(vendor, text, prompt, step)
+    if "slow" in text or (step == "check" and "sluggish" in text):
         print(os.getpid(), file=sys.stderr, flush=True)
         time.sleep(30)
-    if "malformed" in text:
-        value = None
-    elif isinstance(typed, dict):
-        value = recognition(typed)
-    else:
-        value = answer(typed, step)
-    respond(vendor, arguments, value, step)
+    respond(vendor, arguments, answer(step, typed, prompt))
 
 
 if __name__ == "__main__":

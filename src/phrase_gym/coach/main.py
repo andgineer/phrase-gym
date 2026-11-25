@@ -5,17 +5,24 @@ import os
 import time
 import urllib.error
 import urllib.request
+from dataclasses import replace
 from typing import Any, Protocol
 from urllib.parse import urlsplit
 
+from phrase_gym.coach.agents.config import (
+    CLAUDE_CHECKER,
+    CLAUDE_WRITER,
+    CODEX_CHECKER,
+    CODEX_WRITER,
+)
+from phrase_gym.coach.checked_preparation import CheckedPreparer, PreparedPhrase
 from phrase_gym.coach.claude_cli import ClaudeCli
 from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
 from phrase_gym.coach.gemini_cli import GeminiCli
-from phrase_gym.coach.preparation import CardPreparer, PreparationError
+from phrase_gym.coach.preparation import PreparationError
 from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech, configured_speech
-from phrase_gym.server.coach_contracts import BasicCard
-from phrase_gym.server.import_contracts import ImportPhrase
+from phrase_gym.server.coach_contracts import BasicCard, CoachWork
 
 MAX_TCP_PORT = 65_535
 
@@ -57,35 +64,37 @@ CLI_CHOICES = ("claude", "codex", "gemini")
 
 
 class Preparer(Protocol):
-    async def prepare(
-        self,
-        text: str,
-        item_id: str,
-        learning_language: str,
-    ) -> ImportPhrase | BasicCard: ...
+    async def prepare(self, work: CoachWork) -> BasicCard | PreparedPhrase: ...
 
 
 def configured_preparer(choice: str) -> Preparer:
     if choice == "codex":
-        codex = CodexCli(coach_workspace(), os.environ.get("PHRASE_GYM_CODEX", "codex"))
-        return CardPreparer(codex, codex.attempts)
+        codex = os.environ.get("PHRASE_GYM_CODEX", "codex")
+        writer = CodexCli(coach_workspace(), codex, model=CODEX_WRITER)
+        return CheckedPreparer(writer, replace(writer, model=CODEX_CHECKER), writer.attempts)
     if choice == "gemini":
         gemini = GeminiCli(os.environ.get("PHRASE_GYM_AGY", "agy"))
         return Recognizer(gemini, gemini.attempts)
-    claude = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"))
-    return CardPreparer(claude, claude.attempts)
+    writer = ClaudeCli(os.environ.get("PHRASE_GYM_CLAUDE", "claude"), model=CLAUDE_WRITER)
+    return CheckedPreparer(writer, replace(writer, model=CLAUDE_CHECKER), writer.attempts)
 
 
-async def prepare(work: dict[str, str], preparer: Preparer, speech: PiperSpeech) -> dict:
-    package_id = work["package_id"]
-    card = await preparer.prepare(work["text"], package_id, work["learning_language"])
-    audio = await speech.synthesize(card.text)
+def _card_fields(card: BasicCard | PreparedPhrase) -> dict[str, object]:
+    if isinstance(card, BasicCard):
+        return {"basic": card.model_dump(mode="json", exclude_none=True)}
+    fields: dict[str, object] = {"phrase": card.phrase.model_dump(mode="json", exclude_none=True)}
+    if card.correction:
+        fields["correction"] = card.correction.model_dump(mode="json")
+    return fields
+
+
+async def prepare(work: CoachWork, preparer: Preparer, speech: PiperSpeech) -> dict:
+    card = await preparer.prepare(work)
+    text = card.text if isinstance(card, BasicCard) else card.phrase.text
+    audio = await speech.synthesize(text)
     return {
-        "result_id": package_id,
-        "basic" if isinstance(card, BasicCard) else "phrase": card.model_dump(
-            mode="json",
-            exclude_none=True,
-        ),
+        "result_id": work.package_id,
+        **_card_fields(card),
         "reference": base64.b64encode(audio).decode(),
     }
 
@@ -105,10 +114,11 @@ def refusal(error: urllib.error.HTTPError) -> str:
 
 
 def process_once(api: CoachApi, preparer: Preparer, speech: PiperSpeech) -> bool:
-    work = api.post("coach/next")
-    if work is None:
+    found = api.post("coach/next")
+    if found is None:
         return False
-    package_id = work["package_id"]
+    work = CoachWork.model_validate(found)
+    package_id = work.package_id
     details = ""
     retry_helps = True
     try:
@@ -124,7 +134,7 @@ def process_once(api: CoachApi, preparer: Preparer, speech: PiperSpeech) -> bool
         if isinstance(error, PreparationError):
             retry_helps = error.retry_helps
             details = f" (details: {error.attempt})" if error.attempt else ""
-    print(f"Coach could not prepare “{work['text']}”: {reason}{details}", flush=True)
+    print(f"Coach could not prepare “{work.text}”: {reason}{details}", flush=True)
     api.post(f"{package_id}/failure", {"error": reason, "retry_helps": retry_helps})
     return True
 
