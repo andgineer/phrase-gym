@@ -1,0 +1,1 @@
+Coach could not prepare “Guten Morgen”: Это немецкий текст, а не английский. (details: /tmp/pytest-of-runner/pytest-0/test_rejected_input_explains_i1/attempts/20261125-215647-064648-coach-05767df27911463cfbe841efb9f41bc4)
