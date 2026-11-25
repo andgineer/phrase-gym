@@ -591,7 +591,7 @@ Do not request learner feedback or approval, or produce learner-facing preparati
 </ol>
 <h2 id="content-preparation-rules">Content preparation rules</h2>
 <p>Prepare material for every phrase in the supplied source. Do not sample, choose only the easiest
-items or exclude phrases. Identify the reusable chunk in each phrase. Use version 2 packages,
+items or exclude phrases. Identify the reusable chunk in each phrase. Use version 3 packages,
 normally 5–10 cards per batch; batch size controls delivery, not source coverage. Split larger
 sources across packages and continue until all source phrases are covered. Group them into the
 course's lessons and preserve attribution and stable identities. A preparation or access failure
@@ -897,7 +897,7 @@ product choices, not a proven optimum or evidence of automatic conversational us
 </tr>
 <tr>
 <td><code>version</code></td>
-<td>Exactly <code>2</code>; other versions fail clearly</td>
+<td>Exactly <code>3</code>; other versions fail clearly</td>
 </tr>
 <tr>
 <td><code>package_id</code></td>
@@ -917,15 +917,11 @@ product choices, not a proven optimum or evidence of automatic conversational us
 </tr>
 <tr>
 <td><code>learning_language</code></td>
-<td><code>en</code></td>
+<td><code>en</code> (English) or <code>de</code> (German)</td>
 </tr>
 <tr>
-<td><code>card_language</code></td>
-<td><code>en</code></td>
-</tr>
-<tr>
-<td><code>help_language</code></td>
-<td><code>en</code></td>
+<td><code>meaning_language</code></td>
+<td>Language of the explanations and cue glosses. Read <code>GET /api/settings</code>: when <code>translation</code> is on for the learning language, use the learner's <code>native_language</code>; when it is off, use the learning language itself. Today that means <code>en</code> for English and <code>ru</code> for German. A mismatch is rejected with what to change</td>
 </tr>
 <tr>
 <td><code>lessons</code></td>
@@ -1012,7 +1008,7 @@ explicitly arranged. Prepare all references before submitting the package.</p>
 <h2 id="api-handoff">API handoff</h2>
 <p>Send <code>POST /api/imports</code> with this request shape:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"package"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"phrase-gym.package"</span><span class="p">,</span><span class="w"> </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"remaining package fields"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"package"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"phrase-gym.package"</span><span class="p">,</span><span class="w"> </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"remaining package fields"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">"references"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"phrase-item-id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"base64-encoded WAV bytes"</span><span class="w"> </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
