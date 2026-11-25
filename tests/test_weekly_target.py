@@ -27,7 +27,7 @@ def many(count: int) -> Package:
 
 
 def facts(practice: Practice) -> dict[str, Any]:
-    response = practice.client.get("/api/practice/facts")
+    response = practice.client.get("/api/practice/facts?language=en")
     assert response.status_code == 200, response.text
     return response.json()
 

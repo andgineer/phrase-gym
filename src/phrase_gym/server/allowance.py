@@ -1,5 +1,6 @@
 import sqlite3
 
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_contracts import PracticeProgress
 from phrase_gym.server.settings_store import read_settings
 
@@ -11,18 +12,30 @@ def _effective(limit: int, target: int | None) -> int:
     return 0 if limit == 0 else max(limit, target or 0)
 
 
-def daily_progress(connection: sqlite3.Connection, day: str) -> PracticeProgress:
+def _stored_targets(
+    connection: sqlite3.Connection,
+    day: str,
+    language: LearningLanguage,
+) -> sqlite3.Row | None:
+    return connection.execute(
+        "SELECT due_target, new_target FROM extra_targets WHERE learning_date=? AND language=?",
+        (day, language),
+    ).fetchone()
+
+
+def daily_progress(
+    connection: sqlite3.Connection,
+    day: str,
+    language: LearningLanguage,
+) -> PracticeProgress:
     settings = read_settings(connection)
     due_limit, new_limit = settings.daily_due_limit, settings.daily_new_limit
-    target = connection.execute(
-        "SELECT due_target, new_target FROM extra_targets WHERE learning_date=?",
-        (day,),
-    ).fetchone()
+    target = _stored_targets(connection, day, language)
     completed = dict(
         connection.execute(
-            "SELECT kind, COUNT(*) FROM practice_log WHERE learning_date=? "
+            "SELECT kind, COUNT(*) FROM practice_log WHERE language=? AND learning_date=? "
             "AND skipped=0 AND mode IN (?, ?) GROUP BY kind",
-            (day, *ALLOWANCE_MODES),
+            (language, day, *ALLOWANCE_MODES),
         ).fetchall(),
     )
     return PracticeProgress(
@@ -40,21 +53,22 @@ def _extended(limit: int, completed: int, target: int) -> int:
     return max(limit if completed < limit else completed + limit, target)
 
 
-def extend_targets(connection: sqlite3.Connection, day: str) -> tuple[int, int]:
+def extend_targets(
+    connection: sqlite3.Connection,
+    day: str,
+    language: LearningLanguage,
+) -> tuple[int, int]:
     settings = read_settings(connection)
     due_limit, new_limit = settings.daily_due_limit, settings.daily_new_limit
-    stored = connection.execute(
-        "SELECT due_target, new_target FROM extra_targets WHERE learning_date=?",
-        (day,),
-    ).fetchone()
-    progress = daily_progress(connection, day)
+    stored = _stored_targets(connection, day, language)
+    progress = daily_progress(connection, day, language)
     targets = (
         _extended(due_limit, progress.due_completed, stored["due_target"] if stored else 0),
         _extended(new_limit, progress.new_completed, stored["new_target"] if stored else 0),
     )
     connection.execute(
-        "INSERT OR REPLACE INTO extra_targets (learning_date, due_target, new_target) "
-        "VALUES (?,?,?)",
-        (day, *targets),
+        "INSERT OR REPLACE INTO extra_targets (learning_date, language, due_target, new_target) "
+        "VALUES (?,?,?,?)",
+        (day, language, *targets),
     )
     return targets

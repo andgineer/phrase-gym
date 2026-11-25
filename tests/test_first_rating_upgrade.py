@@ -42,10 +42,25 @@ def test_upgrade_closes_old_study_view_and_preserves_history_retries_and_pending
         connection.execute("ALTER TABLE imports DROP COLUMN dismissed")
         connection.execute("ALTER TABLE imports DROP COLUMN correction_json")
         connection.execute("ALTER TABLE phrases DROP COLUMN instruction")
+        # Schema 6 had no learning languages: one view and one Extra target per day.
+        connection.execute("DROP INDEX phrases_by_language")
+        connection.execute("ALTER TABLE phrases DROP COLUMN language")
+        connection.execute("DROP INDEX practice_log_by_language")
+        connection.execute("ALTER TABLE practice_log DROP COLUMN language")
+        connection.execute("DROP INDEX current_view_by_token")
+        connection.execute("ALTER TABLE current_view RENAME TO language_view")
+        connection.execute("DROP TABLE extra_targets")
         connection.execute("DROP TABLE settings")
+        old_tables = ("CREATE TABLE settings", "INSERT INTO settings", "CREATE TABLE current_view")
         for statement in statements(STEPS[5]):
-            if statement.lstrip().startswith(("CREATE TABLE settings", "INSERT INTO settings")):
+            if statement.lstrip().startswith((*old_tables, "CREATE TABLE extra_targets")):
                 connection.execute(statement)
+        connection.execute(
+            "INSERT INTO current_view SELECT 1, traversal_id, learning_date, origin, lesson_id, "
+            "skipped_json, phrase_id, view_token, kind, practice, revealed, cue_index, "
+            "hint_index, operations_json FROM language_view"
+        )
+        connection.execute("DROP TABLE language_view")
         connection.execute("UPDATE current_view SET kind='first_study', revealed=1, cue_index=NULL")
         connection.execute(
             "INSERT INTO operations VALUES (?, 'completion', ?, ?)",
@@ -72,7 +87,7 @@ def test_upgrade_closes_old_study_view_and_preserves_history_retries_and_pending
         assert upload_take(restarted, legacy, str(uuid4())).status_code == 200
         [take] = restarted.get(f"/api/phrases/{card['phrase_id']}/recordings").json()["items"]
         assert take["kind"] == "first_study" and take["cue"] is None
-        work = restarted.get("/api/practice/facts").json()["work"]
+        work = restarted.get("/api/practice/facts?language=en").json()["work"]
         assert work["first_meetings"] == 1 and work["new_attempts"] == work["recalls"] == 0
         assert sum(work[key] for key in ("easy", "got_it", "effort", "not_yet")) == 0
         fresh = upgraded.card()

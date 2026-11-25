@@ -27,9 +27,22 @@
   background: transparent;
   font-size: 0.9rem;
 }
-.page-tabs button[aria-current='page'] {
+.page-tabs button[aria-current='page'],
+.language-tabs button[aria-current='true'] {
   background: #fffef9;
   box-shadow: 0 2px 7px #24423418;
+}
+.language-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.language-tabs button {
+  padding: 6px 12px;
+  margin: 0;
+  border-color: transparent;
+  background: transparent;
 }
 .visually-hidden {
   position: absolute;
@@ -115,6 +128,7 @@
     background: #1e2d26;
   }
   .page-tabs button[aria-current='page'],
+  .language-tabs button[aria-current='true'],
   .coach-page textarea {
     background: #25352e;
     color: #e9eee9;

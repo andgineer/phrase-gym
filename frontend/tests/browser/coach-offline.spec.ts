@@ -63,7 +63,7 @@ test('typed text waits for offline Coach; failures arrive with the facts and can
   await expect(notices).toContainText('Send the same text from the Coach page to retry.')
   await page.getByRole('button', { name: `Dismiss notice about ${typed}` }).click()
   await expect(notices).toHaveCount(0)
-  const facts = await (await page.request.get('/api/practice/facts')).json()
+  const facts = await (await page.request.get('/api/practice/facts?language=en')).json()
   expect(facts.notices).toEqual([])
 
   await page.getByRole('navigation').getByRole('button', { name: 'Coach', exact: true }).click()

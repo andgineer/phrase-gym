@@ -12,7 +12,12 @@ from phrase_gym.server.publication import (
 )
 from phrase_gym.server.records import ImportRecord, fetch_one
 from phrase_gym.server.reference_audio import ImportConflictError, decode_references
+from phrase_gym.server.settings_store import read_settings
 from phrase_gym.server.storage import Database
+
+
+class LanguageMismatchError(ValueError):
+    pass
 
 
 def now() -> str:
@@ -29,6 +34,21 @@ def import_row(connection: sqlite3.Connection, package_id: str) -> ImportRecord 
         ImportRecord,
         "SELECT * FROM imports WHERE package_id=?",
         (package_id,),
+    )
+
+
+def require_meaning_language(connection: sqlite3.Connection, package: PhrasePackage) -> None:
+    settings = read_settings(connection)
+    language = package.learning_language
+    expected = settings.meaning_language(language)
+    if package.meaning_language == expected:
+        return
+    choice = "on" if settings.translates(language) else "off"
+    raise LanguageMismatchError(
+        f"meaning_language must be {expected}: Translation in native language is {choice} "
+        f"for learning_language {language} in Settings, so cue glosses and short help are "
+        f"in {expected}. Rewrite them in {expected} and declare meaning_language "
+        f"{expected}; nothing was imported.",
     )
 
 
@@ -60,6 +80,7 @@ class Importer:
                     "This package_id has different content; use a new ID.",
                 )
             if previous is None:
+                require_meaning_language(connection, package)
                 reject_identity_conflicts(connection, batch)
                 connection.execute(
                     "INSERT INTO imports (package_id, content_hash, payload, status, created_at, "

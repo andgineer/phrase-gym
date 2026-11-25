@@ -1,12 +1,25 @@
 import { expect, it } from 'vitest'
-import { pageFromHash } from '../src/composables/useAppNavigation'
+import { addressFromHash, hashFor } from '../src/composables/useAppNavigation'
 import { coachText } from '../src/composables/useCoachSubmission'
 
-it('selects only supported pages from the URL', () => {
-  for (const page of ['coach', 'library', 'settings']) {
-    expect(pageFromHash(`#${page}`)).toBe(page)
+it('reads the learning language and page from the address', () => {
+  for (const page of ['coach', 'library', 'settings'] as const) {
+    expect(addressFromHash(`#de/${page}`)).toEqual({ language: 'de', page })
+    expect(addressFromHash(hashFor('de', page))).toEqual({ language: 'de', page })
+    // Bookmarks from before learning languages open English.
+    expect(addressFromHash(`#${page}`)).toEqual({ language: 'en', page })
   }
-  for (const hash of ['', '#practice', '#other']) expect(pageFromHash(hash)).toBe('entry')
+  expect(addressFromHash('#de')).toEqual({ language: 'de', page: 'entry' })
+  expect(addressFromHash('#en')).toEqual({ language: 'en', page: 'entry' })
+  expect(addressFromHash('#de/other')).toEqual({ language: 'de', page: 'entry' })
+  for (const hash of ['', '#practice', '#other', '#fr', '#fr/library', '#library/de'])
+    expect(addressFromHash(hash)).toEqual({ language: 'en', page: 'entry' })
+})
+
+it('keeps an open card at its language’s Practice address', () => {
+  expect(hashFor('de', 'card')).toBe('#de')
+  expect(hashFor('en', 'entry')).toBe('#en')
+  expect(hashFor('en', 'settings')).toBe('#en/settings')
 })
 
 it('keeps pasted Coach material in the existing single-line request shape', () => {

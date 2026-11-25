@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from phrase_gym.server.contracts import ActiveCardKind, CardKind, PracticeMode
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_contracts import Rating
 
 
@@ -43,6 +44,7 @@ class PhraseRecord(ScheduleRecord):
     last_cue: int | None
     # Set only on basic Coach cards, whose cue needs a generic instruction.
     instruction: str | None
+    language: LearningLanguage
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,7 +66,7 @@ class LessonRecord:
 
 @dataclass(frozen=True, slots=True)
 class ViewRecord:
-    id: int
+    language: LearningLanguage
     traversal_id: str
     learning_date: str
     origin: PracticeMode
@@ -113,6 +115,7 @@ class PracticeLogRecord:
     skipped: int
     fsrs_updated: int
     mode: PracticeMode
+    language: LearningLanguage
 
 
 @dataclass(frozen=True, slots=True)

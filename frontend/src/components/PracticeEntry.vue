@@ -3,8 +3,10 @@ import { toRef, watch } from 'vue'
 import LessonPicker from './LessonPicker.vue'
 import PracticeFacts from './PracticeFacts.vue'
 import { usePracticeToday } from '../composables/usePracticeToday'
+import type { LearningLanguage } from '../languages'
 
 const props = defineProps<{
+  language: LearningLanguage
   message: string
   error: string
   busy: boolean
@@ -12,7 +14,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ daily: []; extra: []; retryExtra: [] }>()
 const lessonId = defineModel<string>('lessonId', { default: '' })
-const { today, error: countsError, refresh } = usePracticeToday(toRef(lessonId))
+const { today, error: countsError, refresh } = usePracticeToday(toRef(lessonId), props.language)
 watch(
   () => props.busy,
   (busy) => {
@@ -23,7 +25,7 @@ watch(
 
 <template>
   <section class="card session-entry">
-    <LessonPicker v-model="lessonId" compact />
+    <LessonPicker v-model="lessonId" :language="language" compact />
     <div class="start-summary">
       <div v-if="today && today.due_count + today.new_count" class="waiting-counts">
         <span
@@ -62,5 +64,5 @@ watch(
     {{ error }}
     <button v-if="canRetryExtra" :disabled="busy" @click="emit('retryExtra')">Retry</button>
   </p>
-  <PracticeFacts :message="message.includes('was saved') ? message : ''" />
+  <PracticeFacts :language="language" :message="message.includes('was saved') ? message : ''" />
 </template>

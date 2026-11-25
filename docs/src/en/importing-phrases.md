@@ -6,7 +6,7 @@ filling in individual phrase cards or handling any file.
 ## Type a phrase or word for Coach
 
 Open the **Coach** tab and type a phrase or word, optionally followed by the sentence it came
-from. Press **Send** or Enter. Pasted line breaks become spaces. For example, try
+from. Coach reads it in the language whose pages you are on, such as German at `#de/coach`. Press **Send** or Enter. Pasted line breaks become spaces. For example, try
 `take it with a grain of salt — I'd take his estimate with a grain of salt`. The sentence helps
 Coach choose the right meaning; without it, Coach uses the most common useful one.
 
@@ -35,6 +35,10 @@ If a service problem stops Coach, for example because the CLI is not logged in o
 quota, Coach prints the reason in its terminal, the **Coach** page offers **Retry**, and the
 Practice page shows a notice below **Total**. Close the notice with **×** once you have read it.
 Retrying from Coach or typing the same text again prepares it again.
+
+Coach cannot prepare German cards yet. German text you send waits in the **Coach** page with
+**Retry** and the reason that Coach has no voice for the language; retry it once Coach supports
+German. German phrases prepared by your AI agent already work.
 
 ## Ask your personal AI agent
 

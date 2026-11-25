@@ -27,7 +27,10 @@ def inbox(client: TestClient) -> list[dict[str, object]]:
 
 
 def notices(client: TestClient) -> list[str]:
-    return [notice["label"] for notice in client.get("/api/practice/facts").json()["notices"]]
+    return [
+        notice["label"]
+        for notice in client.get("/api/practice/facts?language=en").json()["notices"]
+    ]
 
 
 REASON = "“fom” could be several English words, such as from or form."
@@ -49,7 +52,7 @@ def test_a_rejection_shows_original_language_reason_and_stays_out_of_practice(
         }
     ]
     assert notices(client) == []
-    assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
+    assert client.get("/api/lessons?language=en").json()["all_lessons"]["phrase_count"] == 0
 
 
 def test_repeating_rejected_text_returns_its_result_without_restarting_work(
@@ -122,7 +125,7 @@ def test_submissions_capture_the_page_language_and_the_native_language(
     submitted = {"text": "by and large", "learning_language": "en"}
     package_id = client.post("/api/coach/requests", json=submitted).json()["request_id"]
     # English requests keep the identity they had before the language was recorded.
-    assert package_id == request_id("by and large")
+    assert package_id == request_id("by and large", "en")
     assert request_id("by and large", "de") != package_id
     with client.app.state.database.read() as connection:
         payload = connection.execute(
@@ -138,7 +141,7 @@ def test_submissions_capture_the_page_language_and_the_native_language(
 
 
 def test_a_submission_must_name_a_supported_learning_language(client: TestClient) -> None:
-    for language in ({}, {"learning_language": "de"}):
+    for language in ({}, {"learning_language": "fr"}):
         response = client.post("/api/coach/requests", json={"text": "Tisch", **language})
         assert response.status_code == 422
     assert client.post("/api/imports/coach/next").json() is None

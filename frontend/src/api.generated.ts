@@ -650,9 +650,9 @@ export interface components {
             correction: components["schemas"]["CoachCorrection"] | null;
             /**
              * Learning Language
-             * @constant
+             * @enum {string}
              */
-            learning_language: "en";
+            learning_language: "en" | "de";
             /**
              * Outcome
              * @enum {string}
@@ -669,9 +669,9 @@ export interface components {
         CoachRequest: {
             /**
              * Learning Language
-             * @constant
+             * @enum {string}
              */
-            learning_language: "en";
+            learning_language: "en" | "de";
             /** Text */
             text: string;
         };
@@ -698,9 +698,9 @@ export interface components {
         CoachWork: {
             /**
              * Learning Language
-             * @constant
+             * @enum {string}
              */
-            learning_language: "en";
+            learning_language: "en" | "de";
             /**
              * Native Language
              * @enum {string}
@@ -954,11 +954,21 @@ export interface components {
         };
         /** OpenDaily */
         OpenDaily: {
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "en" | "de";
             /** Lesson Id */
             lesson_id?: string | null;
         };
         /** OpenExtra */
         OpenExtra: {
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "en" | "de";
             /** Lesson Id */
             lesson_id?: string | null;
             /** Operation Id */
@@ -999,27 +1009,22 @@ export interface components {
         /** PhrasePackage */
         PhrasePackage: {
             /**
-             * Card Language
-             * @constant
-             */
-            card_language: "en";
-            /**
              * Format
              * @constant
              */
             format: "phrase-gym.package";
             /**
-             * Help Language
-             * @constant
-             */
-            help_language: "en";
-            /**
              * Learning Language
-             * @constant
+             * @enum {string}
              */
-            learning_language: "en";
+            learning_language: "en" | "de";
             /** Lessons */
             lessons: components["schemas"]["ImportLesson"][];
+            /**
+             * Meaning Language
+             * @enum {string}
+             */
+            meaning_language: "en" | "de" | "ru";
             /** Package Id */
             package_id: string;
             /** Source Id */
@@ -1032,7 +1037,7 @@ export interface components {
              * Version
              * @constant
              */
-            version: 2;
+            version: 3;
         };
         /** PhrasePage */
         PhrasePage: {
@@ -1297,20 +1302,10 @@ export interface components {
         };
         /** Settings */
         Settings: {
-            /**
-             * Card Language
-             * @constant
-             */
-            card_language: "en";
             /** Daily Due Limit */
             daily_due_limit: number;
             /** Daily New Limit */
             daily_new_limit: number;
-            /**
-             * Help Language
-             * @constant
-             */
-            help_language: "en";
             /** Learning Timezone */
             learning_timezone: string;
             /**
@@ -1323,6 +1318,7 @@ export interface components {
              * @enum {string}
              */
             return_pace: "often" | "balanced" | "rarely";
+            translation: components["schemas"]["TranslationChoices"];
             /** Weekly Target */
             weekly_target: number | null;
             /** Weekly Target Paused */
@@ -1359,6 +1355,16 @@ export interface components {
             skipped: boolean;
             /** Text */
             text: string;
+        };
+        /**
+         * TranslationChoices
+         * @description Whether each learning language's meaning layer is in the native language.
+         */
+        TranslationChoices: {
+            /** De */
+            de: boolean;
+            /** En */
+            en: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -1756,7 +1762,8 @@ export interface operations {
     };
     lesson_choices_api_lessons_get: {
         parameters: {
-            query?: {
+            query: {
+                language: "en" | "de";
                 query?: string;
                 lesson_id?: string | null;
                 offset?: number;
@@ -1790,7 +1797,8 @@ export interface operations {
     };
     find_phrases_api_phrases_get: {
         parameters: {
-            query?: {
+            query: {
+                language: "en" | "de";
                 query?: string;
                 lesson_id?: string | null;
                 offset?: number;
@@ -2017,7 +2025,9 @@ export interface operations {
     };
     current_view_api_practice_current_get: {
         parameters: {
-            query?: never;
+            query: {
+                language: "en" | "de";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2031,6 +2041,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2103,7 +2122,9 @@ export interface operations {
     };
     practice_facts_api_practice_facts_get: {
         parameters: {
-            query?: never;
+            query: {
+                language: "en" | "de";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2117,6 +2138,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeFacts"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2256,6 +2286,7 @@ export interface operations {
     studied_phrases_api_practice_studied_get: {
         parameters: {
             query: {
+                language: "en" | "de";
                 learning_date: string;
                 offset?: number;
                 limit?: number;
@@ -2288,7 +2319,8 @@ export interface operations {
     };
     today_counts_api_practice_today_get: {
         parameters: {
-            query?: {
+            query: {
+                language: "en" | "de";
                 lesson_id?: string | null;
             };
             header?: never;

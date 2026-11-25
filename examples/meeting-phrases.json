@@ -1,13 +1,12 @@
 {
   "format": "phrase-gym.package",
-  "version": 2,
+  "version": 3,
   "package_id": "course-meetings-unit-1-v2",
   "source_id": "course-meetings-unit-1",
   "source_label": "Meetings course · Unit 1",
   "source_link": "https://example.com/course/meetings/unit-1",
   "learning_language": "en",
-  "card_language": "en",
-  "help_language": "en",
+  "meaning_language": "en",
   "lessons": [
     {
       "lesson_id": "running-a-meeting",

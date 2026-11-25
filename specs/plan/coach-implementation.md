@@ -8,46 +8,16 @@ Steps 1–3 run in order. Step 4 runs only if step 2 misses its token target.
 
 ## 1. Add German with Russian help
 
-The learner studies German now. The [language choices](../decision-personal-preferences.md) set German at A1 with **Translation in native language** on, so its meaning layer (cue glosses and short help) is Russian, like the detailed help. This step brings German through the whole loop: Settings, Coach, cards, reference audio, Library and Practice.
+The learner studies German now. The [language choices](../decision-personal-preferences.md) set German at A1 with **Translation in native language** on, so its meaning layer (cue glosses and short help) is Russian, like the detailed help. German already works as a separate learning language with its own pages, allowances and figures, and an external German package with Russian help can be studied. What remains is Coach: German cards, Russian help and German reference audio.
 
-Main is English-only today:
+Where main stands:
 
-- Settings hold one card language and one help language, both typed `Literal["en"]` (`src/phrase_gym/server/contracts.py`).
-- Import packages accept only `en` (`src/phrase_gym/server/import_contracts.py`).
-- Phrases store no learning language.
-- Coach and Library sends carry the page's learning language, which the server accepts only as `en`. Each request snapshots the native language and a translation choice that is always captured as off (`src/phrase_gym/server/coach_requests.py`). Every page sends `en` (`pageLanguage` in `frontend/src/composables/useCoachSubmission.ts`).
+- Settings hold the native language and a translation choice per learning language. Each Coach request snapshots both with its learning language, and `CoachWork` carries them to Coach.
+- Coach fails every German request before any model call with the retryable service reason "no reference voice for this language yet" (`VOICED_LANGUAGES` in `src/phrase_gym/coach/speech.py`, checked in `prepare` in `src/phrase_gym/coach/main.py`). Remove that gate once Coach can judge German and speak it.
+- `CardPreparer` still answers a non-English request with the `english_only` language rejection (`src/phrase_gym/coach/preparation.py`).
 - `src/phrase_gym/coach/speech.py` rejects any Piper voice that is not `en-US`.
 - `prepare.md`, `card-format.md` and `content-rules.md` say "English" and "B2" throughout.
-
-**Settings and data.**
-
-- `de` becomes a learning language.
-- Settings replace the card and help languages with one native language for the profile and a **Translation in native language** choice per learning language. They are seeded from the learner's table: English off and German on.
-- The Settings page edits the native language and each language's translation choice. It has no active-language control.
-- Settings are one JSON document, so they need no upgrade step. A stored card or help language is ignored, and the next save drops it.
-- Each phrase records its learning language. A schema step adds it and marks existing phrases English.
-- External packages replace `card_language` and `help_language` with one declared meaning-layer language. It must equal the native language when the learning language's choice is on, and the learning language when it is off: a German package declares `ru`, and an English package declares `en`. A mismatch reports what to change, as today. Bump the package `version` to 3, since older formats are rejected. Update the schema table in `docs/includes/agent-add-phrases.md` in the same commit; its detailed-help row already says native language.
-
-**Separate languages, language buttons and addresses.** Follow [separate learning languages](../decision-personal-preferences.md#separate-learning-languages).
-
-- **Language buttons.** In `frontend/src/App.vue`, replace the Practice start screen's `<p class="eyebrow">English</p>` with one button per supported learning language, at most three, in the same place. Highlight the selected one with `aria-current`. Build them from the existing eyebrow and tab styles: AGENTS.md requires adapting the retained shell, not redesigning it. Study cards show no buttons, as they show no eyebrow today.
-- **Addresses.** Navigation is hash-based today (`pageFromHash` and `show` in `frontend/src/composables/useAppNavigation.ts`), so add the language as the first hash segment:
-
-  | Address | Opens |
-  |---|---|
-  | `#en`, `#de` | Practice in that language |
-  | `#de/library`, `#de/coach`, `#de/settings` | The other tabs, keeping the language |
-  | `/`, `#library`, `#coach`, `#settings` | English, so old bookmarks keep working |
-  | An unknown or unsupported language code | English Practice |
-
-  A hash keeps one served page, so the server needs no fallback routes. Tabs and the brand link keep the current language segment, and a language button switches to `#<lang>`. All of them use `history.replaceState`, as tabs do today, and add no history entries. An open card keeps its language's Practice address.
-- **Server scope.** Today's counts, Daily, Extra, phrase-specific Practice, practice facts, the Library search and lessons take the page's learning language, for example as a `language` query parameter. Coach and Library sends take it from the address, and the request snapshot reads the language's translation choice from Settings. Regenerate the OpenAPI types.
-- **Data.**
-  - Each `practice_log` row records its learning language, through the same schema step as phrases, with existing rows marked English.
-  - Allowances count each language's completions separately under the shared limits.
-  - Extra targets are keyed by date and language.
-  - Each language keeps its own current view, so English and German Daily resume independently.
-- **Practice facts.** **Today**, **Total** and **In long-term memory** describe the selected language. **Progress**, the streak and the weekly target count every language. The Coach inbox keeps listing each result with its language.
+- German request identity keeps capitals, so **Morgen** and **morgen** are already separate submissions.
 
 **Coach judges German.**
 
@@ -71,27 +41,9 @@ Main is English-only today:
 
 **Acceptance check: software.** Through the real server and both browser engines:
 
-- the learner presses the German button on the Practice start screen and submits **Tisch** from Coach and from a Library search;
-- the card appears in Library and Practice with a Russian instruction or cue, and Reveal shows the German wording with its German reference audio;
+- **Tisch** sent from `#de/coach` and from a `#de/library` search becomes a card that appears in Library and Practice with a Russian instruction or cue, and Reveal shows the German wording with its German reference audio;
 - English cards keep working;
-- an external German package with Russian help is accepted, and a mismatched one is rejected with what to change;
-- the schema upgrade carries an existing database forward, with every phrase marked English;
-- **Morgen** and **morgen** are separate submissions;
-- a missing German voice gives a retryable service failure;
-- opening `#de`, `#de/library` and `#de/coach` directly, as a bookmark would, shows German pages with German highlighted, and a reload keeps them;
-- `/`, `#library`, `#coach` and `#settings` open the English pages;
-- switching with the language buttons changes the address without adding a history entry, and Start shows that language's due and new counts;
-- a send from `#de/coach` or a `#de/library` search creates a German request, and a send from the `#en` pages creates an English one;
-- the Library and Daily show only the selected language's cards;
-- Settings shows no active-language control.
-
-Server tests on a simulated clock check that:
-
-- finishing English Daily at its limits leaves German's allowance whole;
-- Extra in German leaves English's targets unchanged;
-- each language's Daily resumes its own view;
-- **Today** and **Total** are per language;
-- a German-only practice day extends the streak and counts toward the weekly target.
+- a missing German voice gives a retryable service failure, and English keeps working.
 
 **Acceptance check: real providers.** Fix a held-out German set before editing any prompt, and never use it during prompt work. The proposed set:
 

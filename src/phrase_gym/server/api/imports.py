@@ -5,7 +5,7 @@ from phrase_gym.server.import_contracts import (
     ImportStatus,
 )
 from phrase_gym.server.import_notices import ImportNotices
-from phrase_gym.server.importer import Importer
+from phrase_gym.server.importer import Importer, LanguageMismatchError
 from phrase_gym.server.reference_audio import ImportConflictError
 
 
@@ -18,6 +18,8 @@ def import_routes(importer: Importer, notices: ImportNotices) -> APIRouter:
             return ImportStatus.model_validate(importer.submit(request.package, request.references))
         except ImportConflictError as error:
             raise HTTPException(409, str(error)) from error
+        except LanguageMismatchError as error:
+            raise HTTPException(422, str(error)) from error
 
     @router.get("/{package_id}")
     def import_status(package_id: str) -> ImportStatus:

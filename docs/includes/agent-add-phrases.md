@@ -30,7 +30,7 @@ Do not request learner feedback or approval, or produce learner-facing preparati
 ## Content preparation rules
 
 Prepare material for every phrase in the supplied source. Do not sample, choose only the easiest
-items or exclude phrases. Identify the reusable chunk in each phrase. Use version 2 packages,
+items or exclude phrases. Identify the reusable chunk in each phrase. Use version 3 packages,
 normally 5–10 cards per batch; batch size controls delivery, not source coverage. Split larger
 sources across packages and continue until all source phrases are covered. Group them into the
 course's lessons and preserve attribution and stable identities. A preparation or access failure
@@ -57,14 +57,13 @@ product choices, not a proven optimum or evidence of automatic conversational us
 | Field | Requirement |
 |---|---|
 | `format` | Exactly `phrase-gym.package` |
-| `version` | Exactly `2`; other versions fail clearly |
+| `version` | Exactly `3`; other versions fail clearly |
 | `package_id` | Stable ID for this exact package content; letters, digits, `.`, `_`, `-` |
 | `source_id` | Stable identity for the course/unit/source |
 | `source_label` | Short learner-readable attribution |
 | `source_link` | Optional absolute HTTP(S) attribution URL |
-| `learning_language` | `en` |
-| `card_language` | `en` |
-| `help_language` | `en` |
+| `learning_language` | `en` (English) or `de` (German) |
+| `meaning_language` | Language of the explanations and cue glosses. Read `GET /api/settings`: when `translation` is on for the learning language, use the learner's `native_language`; when it is off, use the learning language itself. Today that means `en` for English and `ru` for German. A mismatch is rejected with what to change |
 | `lessons` | 1–20 lessons with at most 50 phrases in total; an ordinary batch has 5–10 phrases |
 
 All reference audio for one package must fit one 9 MiB budget: about 3.5 minutes of speech at 22,050 Hz. Fifty long sentences can exceed it;
@@ -132,7 +131,7 @@ Send `POST /api/imports` with this request shape:
 
 ```json
 {
-  "package": { "format": "phrase-gym.package", "version": 2, "...": "remaining package fields" },
+  "package": { "format": "phrase-gym.package", "version": 3, "...": "remaining package fields" },
   "references": { "phrase-item-id": "base64-encoded WAV bytes" }
 }
 ```

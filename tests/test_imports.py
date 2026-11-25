@@ -36,7 +36,7 @@ def test_external_agent_supplies_complete_references_without_coach(
     assert response.json()["added_count"] == 5
     assert client.post("/api/imports", json=supplied).json() == response.json()
     assert client.post("/api/imports/coach/next").json() is None
-    card = client.post("/api/practice/daily", json={}).json()["card"]
+    card = client.post("/api/practice/daily", json={"language": "en"}).json()["card"]
     card = client.post(
         "/api/practice/reveal", json={key: card[key] for key in ("view_token", "phrase_id")}
     ).json()
@@ -222,7 +222,7 @@ def test_mixed_lessons_publish_together_and_reuse_lesson_identity(client: TestCl
     assert publish(client, first)["added_count"] == 3
     later = make_package("course-meetings-v2", [lesson("small-talk", "Small talk", [phrase(4)])])
     assert publish(client, later)["added_count"] == 1
-    lessons = client.get("/api/lessons").json()
+    lessons = client.get("/api/lessons?language=en").json()
     assert [(item["title"], item["phrase_count"]) for item in lessons["items"]] == [
         ("Small talk", 3),
         ("Meetings", 1),
@@ -260,7 +260,7 @@ def test_same_lesson_and_item_ids_under_another_source_are_separate(
         "other-source",
     )
     assert publish(client, other)["added_count"] == 1
-    titles = [item["title"] for item in client.get("/api/lessons").json()["items"]]
+    titles = [item["title"] for item in client.get("/api/lessons?language=en").json()["items"]]
     assert titles == ["Meetings", "Different title"]
     assert table_count(client.app.state.database, "phrases") == 6
 
@@ -313,7 +313,9 @@ def test_case_only_item_ids_keep_distinct_audio(tmp_path: Path) -> None:
 def test_documented_example_imports_three_lessons(client: TestClient) -> None:
     example = json.loads(Path("examples/meeting-phrases.json").read_text())
     assert publish(client, example)["added_count"] == 6
-    titles = [item["title"] for item in client.get("/api/lessons").json()["items"]]
+    titles = [item["title"] for item in client.get("/api/lessons?language=en").json()["items"]]
     assert titles == ["Running a meeting", "Scheduling", "Small talk"]
-    found = client.get("/api/phrases", params={"query": "progress update"}).json()["items"]
+    found = client.get(
+        "/api/phrases", params={"language": "en", "query": "progress update"}
+    ).json()["items"]
     assert [item["text"] for item in found] == ["So far, so good."]

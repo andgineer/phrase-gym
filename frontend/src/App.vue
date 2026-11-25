@@ -15,12 +15,13 @@ import TakeRejections from './components/TakeRejections.vue'
 import StudyCard from './components/StudyCard.vue'
 import { usePracticeSession } from './composables/usePracticeSession'
 import { useDatedMessage } from './learningDay'
+import { learningLanguages, type LearningLanguage } from './languages'
 
-const session = usePracticeSession()
+const { screen, language, show, select } = useAppNavigation(navigate)
+const session = usePracticeSession(language)
 const { practice, playback, capture } = session
 const initialized = ref(false)
 const startupError = ref('')
-const { screen, show, select } = useAppNavigation(navigate)
 const lessonId = ref('')
 const entryKey = ref(0)
 const pendingDelete = ref<DeletionTarget | null>(null)
@@ -52,10 +53,13 @@ async function practisePhrase(phraseId: string) {
   await start(() => practice.openPhrase(phraseId))
 }
 
-async function navigate(next: Page) {
+async function navigate(next: Page, nextLanguage: LearningLanguage) {
   await session.leave()
   void takeTransfers.flush()
   detailsPhrase.value = null
+  // A lesson choice belongs to the language it was made in.
+  if (nextLanguage !== language.value) lessonId.value = ''
+  language.value = nextLanguage
   if (next === 'entry') entryKey.value++
   show(next)
   // The entry never holds a card, so a failed open cannot fall back to a stale one.
@@ -92,19 +96,20 @@ onMounted(initialize)
 </script>
 
 <template>
-  <AppShell :screen="screen" :initialized="initialized" @navigate="select">
+  <AppShell :screen="screen" :language="language" :initialized="initialized" @navigate="select">
     <CleanupNotice v-if="initialized" />
     <TakeRejections />
     <p v-if="startupError" class="error" role="alert">
       {{ startupError }} <button @click="initialize">Retry connection</button>
     </p>
     <p v-else-if="!initialized" role="status">Loading…</p>
-    <CoachPage v-else-if="screen === 'coach'" />
+    <CoachPage v-else-if="screen === 'coach'" :language="language" />
     <SettingsPanel v-else-if="screen === 'settings'" />
     <LibraryPanel
       v-else-if="screen === 'library'"
       :key="entryKey"
       v-model:lesson-id="lessonId"
+      :language="language"
       :disabled="practice.busy.value"
       v-model:opened="detailsPhrase"
       :play="playback.play"
@@ -114,6 +119,7 @@ onMounted(initialize)
     <template v-else-if="screen === 'card' && card">
       <StudyCard
         :card="card"
+        :language="language"
         :reviewed-cards="practice.reviewedCards.value"
         :review-index="session.reviewIndex.value"
         :play-recording="playback.compare"
@@ -148,10 +154,21 @@ onMounted(initialize)
       />
     </template>
     <template v-else>
-      <p class="eyebrow">English</p>
+      <nav class="language-tabs" aria-label="Learning language">
+        <button
+          v-for="item in learningLanguages"
+          :key="item.code"
+          class="eyebrow"
+          :aria-current="item.code === language ? 'true' : undefined"
+          @click="select('entry', item.code)"
+        >
+          {{ item.name }}
+        </button>
+      </nav>
       <PracticeEntry
         :key="entryKey"
         v-model:lesson-id="lessonId"
+        :language="language"
         :message="entryMessage"
         :error="practice.error.value"
         :busy="practice.busy.value"

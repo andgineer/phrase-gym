@@ -6,6 +6,7 @@ import type {
   PracticeState,
   Progress,
 } from './studyTypes'
+import type { LearningLanguage } from './languages'
 
 export type PracticeView = {
   card: Card | null
@@ -13,7 +14,11 @@ export type PracticeView = {
   message: string
   detailsOpen: boolean
 }
-export type PendingExtra = { operation_id: string; lesson_id: string | null }
+export type PendingExtra = {
+  operation_id: string
+  language: LearningLanguage
+  lesson_id: string | null
+}
 export type PendingCompletion = {
   completion_id: string
   view_token: string

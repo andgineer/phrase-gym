@@ -126,7 +126,7 @@ def test_live_limit_increase_after_apparent_exhaustion(practice: Practice) -> No
 def test_stored_extra_target_extends_but_zero_setting_disables(practice: Practice) -> None:
     publish(practice.client, many(9))
     with practice.database.write() as connection:
-        connection.execute("INSERT INTO extra_targets VALUES ('2026-10-28', 0, 7)")
+        connection.execute("INSERT INTO extra_targets VALUES ('2026-10-28', 'en', 0, 7)")
     practice.rate_all_new()
     assert len(practice.log()) == 7
     practice.set_limits(due=20, new=0)
@@ -170,7 +170,8 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
         ),
     )
     lessons = {
-        item["title"]: item["id"] for item in practice.client.get("/api/lessons").json()["items"]
+        item["title"]: item["id"]
+        for item in practice.client.get("/api/lessons?language=en").json()["items"]
     }
     current = practice.card(lessons["First"])
     resumed = practice.card(lessons["Second"])
@@ -182,7 +183,7 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
     assert after["message"] == "Today's practice is complete. Next due: 2026-10-29."
     assert (
         practice.client.post(
-            "/api/practice/daily", json={"lesson_id": "missing-lesson"}
+            "/api/practice/daily", json={"language": "en", "lesson_id": "missing-lesson"}
         ).status_code
         == 404
     )
@@ -190,7 +191,7 @@ def test_lesson_choice_affects_the_next_view_not_the_current_phrase(practice: Pr
 
 def test_nothing_waiting_and_empty_lesson_messages(practice: Practice) -> None:
     publish(practice.client, make_package(lessons=[lesson("only", "Only", [phrase(1)])]))
-    lesson_id = practice.client.get("/api/lessons").json()["items"][0]["id"]
+    lesson_id = practice.client.get("/api/lessons?language=en").json()["items"][0]["id"]
     practice.rate_all_new()
     practice.later(days=1)
     waiting = practice.card()

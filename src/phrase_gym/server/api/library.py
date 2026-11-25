@@ -10,6 +10,7 @@ from phrase_gym.server.contracts import (
     PhrasePage,
     RecordingPage,
 )
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.lesson_choices import LessonChoices
 from phrase_gym.server.library import LibraryService
 
@@ -21,21 +22,23 @@ def library_routes(library: LibraryService, lessons: LessonChoices) -> APIRouter
 
     @router.get("/lessons")
     def lesson_choices(
+        language: LearningLanguage,
         query: SearchText = "",
         lesson_id: str | None = None,
         offset: Offset = 0,
         limit: Limit = 20,
     ) -> LessonPage:
-        return lessons.page(query, lesson_id, offset, limit)
+        return lessons.page(language, query, lesson_id, offset, limit)
 
     @router.get("/phrases")
     def find_phrases(
+        language: LearningLanguage,
         query: SearchText = "",
         lesson_id: str | None = None,
         offset: Offset = 0,
         limit: Limit = 20,
     ) -> PhrasePage:
-        return library.phrases(query, lesson_id, offset, limit)
+        return library.phrases(language, query, lesson_id, offset, limit)
 
     @router.get("/phrases/{phrase_id}")
     def phrase_details(phrase_id: str) -> PhraseDetails:

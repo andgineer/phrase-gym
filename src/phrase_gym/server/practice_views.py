@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from phrase_gym.server.contracts import PracticeMode
 from phrase_gym.server.import_contracts import Cue
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_contracts import (
     CardAnswer,
     PracticeCard,
@@ -40,8 +41,13 @@ def require_lesson(connection: sqlite3.Connection, lesson_id: str | None) -> Non
         raise UnknownLessonError(lesson_id)
 
 
-def load_view(connection: sqlite3.Connection) -> ViewRecord | None:
-    return fetch_one(connection, ViewRecord, "SELECT * FROM current_view WHERE id=1")
+def load_view(connection: sqlite3.Connection, language: LearningLanguage) -> ViewRecord | None:
+    return fetch_one(
+        connection,
+        ViewRecord,
+        "SELECT * FROM current_view WHERE language=?",
+        (language,),
+    )
 
 
 def view_mode(view: ViewRecord) -> PracticeMode:
@@ -51,16 +57,23 @@ def view_mode(view: ViewRecord) -> PracticeMode:
 def start_traversal(
     connection: sqlite3.Connection,
     day: str,
+    language: LearningLanguage,
     origin: str,
     lesson_id: str | None,
 ) -> None:
-    # Pass receipts only support retries and grading within their traversal.
-    connection.execute("DELETE FROM operations WHERE kind IN ('pass', 'revealed_pass')")
+    # Pass receipts only support retries and grading within their traversal; another
+    # language's traversal keeps its own.
     connection.execute(
-        "INSERT OR REPLACE INTO current_view (id, traversal_id, learning_date, origin, "
+        "DELETE FROM operations WHERE kind IN ('pass', 'revealed_pass') AND "
+        "json_extract(result_json, '$.phrase_id') NOT IN "
+        "(SELECT id FROM phrases WHERE language<>?)",
+        (language,),
+    )
+    connection.execute(
+        "INSERT OR REPLACE INTO current_view (language, traversal_id, learning_date, origin, "
         "lesson_id, skipped_json, phrase_id, view_token, kind, practice, revealed, cue_index, "
-        "hint_index, operations_json) VALUES (1,?,?,?,?,'[]',NULL,NULL,NULL,0,0,NULL,NULL,'{}')",
-        (str(uuid4()), day, origin, lesson_id),
+        "hint_index, operations_json) VALUES (?,?,?,?,?,'[]',NULL,NULL,NULL,0,0,NULL,NULL,'{}')",
+        (language, str(uuid4()), day, origin, lesson_id),
     )
 
 
@@ -82,20 +95,27 @@ def show_phrase(
     # Every appearance gets a fresh token, even when the same phrase is shown again.
     connection.execute(
         "UPDATE current_view SET phrase_id=?, view_token=?, kind=?, practice=?, revealed=?, "
-        "cue_index=?, hint_index=NULL, operations_json='{}' WHERE id=1",
-        (phrase.id, str(uuid4()), kind, int(practice), 0, cue_index),
+        "cue_index=?, hint_index=NULL, operations_json='{}' WHERE language=?",
+        (phrase.id, str(uuid4()), kind, int(practice), 0, cue_index, phrase.language),
     )
 
 
-def clear_phrase(connection: sqlite3.Connection) -> None:
+def clear_phrase(connection: sqlite3.Connection, language: LearningLanguage) -> None:
     connection.execute(
         "UPDATE current_view SET phrase_id=NULL, view_token=NULL, kind=NULL, practice=0, "
-        "revealed=0, cue_index=NULL, hint_index=NULL, operations_json='{}' WHERE id=1",
+        "revealed=0, cue_index=NULL, hint_index=NULL, operations_json='{}' WHERE language=?",
+        (language,),
     )
 
 
 def require_view(connection: sqlite3.Connection, day: str, action: ViewAction) -> ViewRecord:
-    view = load_view(connection)
+    # A view token names its language's view, so card actions need no language of their own.
+    view = fetch_one(
+        connection,
+        ViewRecord,
+        "SELECT * FROM current_view WHERE view_token=?",
+        (action.view_token,),
+    )
     if (
         view is None
         or view.learning_date != day

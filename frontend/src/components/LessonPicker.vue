@@ -3,8 +3,10 @@ import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'v
 import { usePagedList } from '../composables/usePagedList'
 import { onLearningDayChange } from '../learningDay'
 import type { LessonChoice, LessonPage } from '../libraryTypes'
+import type { LearningLanguage } from '../languages'
+import { hashFor } from '../composables/useAppNavigation'
 
-defineProps<{ compact?: boolean }>()
+const props = defineProps<{ language: LearningLanguage; compact?: boolean }>()
 const selected = defineModel<string>({ default: '' })
 const query = ref('')
 const text = ref('')
@@ -15,7 +17,7 @@ const field = ref<HTMLInputElement | null>(null)
 const listId = useId()
 const optionId = (index: number) => `${listId}-${index}`
 const lessons = usePagedList<LessonChoice, LessonPage>(() => {
-  const params = new URLSearchParams({ query: query.value.trim() })
+  const params = new URLSearchParams({ language: props.language, query: query.value.trim() })
   if (selected.value) params.set('lesson_id', selected.value)
   return `/lessons?${params}`
 })
@@ -145,7 +147,7 @@ defineExpose({ reload: lessons.reload })
 
 <template>
   <div v-if="empty" class="lesson-picker">
-    <p>Add your first phrase with <a href="#coach">Coach</a> to begin.</p>
+    <p>Add your first phrase with <a :href="hashFor(language, 'coach')">Coach</a> to begin.</p>
   </div>
   <div v-else ref="root" :class="['lesson-picker', { compact }]" @focusout="leave">
     <div class="lesson-combo">

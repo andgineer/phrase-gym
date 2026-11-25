@@ -33,8 +33,8 @@ def _pass_card(connection: sqlite3.Connection, view: ViewRecord, phrase_id: str)
     if not view.practice:
         passed = json.loads(view.skipped_json)
         connection.execute(
-            "UPDATE current_view SET skipped_json=? WHERE id=1",
-            (json.dumps([*passed, phrase_id]),),
+            "UPDATE current_view SET skipped_json=? WHERE language=?",
+            (json.dumps([*passed, phrase_id]), view.language),
         )
 
 
@@ -63,8 +63,8 @@ def _log_grade(
 ) -> None:
     connection.execute(
         "INSERT INTO practice_log (id, phrase_id, phrase_text, lesson_title, "
-        "completed_at, learning_date, kind, rating, skipped, fsrs_updated, mode) "
-        "VALUES (?,?,?,?,?,?,?,?,0,?,?) ON CONFLICT(id) DO UPDATE SET "
+        "completed_at, learning_date, kind, rating, skipped, fsrs_updated, mode, language) "
+        "VALUES (?,?,?,?,?,?,?,?,0,?,?,?) ON CONFLICT(id) DO UPDATE SET "
         "completed_at=excluded.completed_at, rating=excluded.rating, skipped=0, "
         "fsrs_updated=excluded.fsrs_updated",
         (
@@ -78,6 +78,7 @@ def _log_grade(
             receipt.rating,
             int(receipt.fsrs_updated),
             receipt.mode,
+            phrase.language,
         ),
     )
 
@@ -146,21 +147,22 @@ class PracticeCompletion:
             )
             if view.practice:
                 # Practice returns to details; the next Daily selects a fresh regular view.
-                clear_phrase(connection)
+                clear_phrase(connection, view.language)
                 state = PracticeState(
                     card=None,
-                    progress=daily_progress(connection, day),
+                    progress=daily_progress(connection, day, view.language),
                     message=None,
                 )
             else:
-                advance(connection, now, day, self.rng)
-                state = practice_state(connection, now, day)
+                advance(connection, now, day, view.language, self.rng)
+                state = practice_state(connection, now, day, view.language)
             return CompletionResult(receipt=receipt, replayed=False, state=state)
 
     def grade_skipped(self, request: GradeSkippedRequest) -> GradeSkippedResult:
         with self.database.write() as connection:
             row = connection.execute(
-                "SELECT practice_log.rating, practice_log.fsrs_updated, operations.result_json "
+                "SELECT practice_log.rating, practice_log.fsrs_updated, practice_log.language, "
+                "operations.result_json "
                 "FROM operations LEFT JOIN practice_log ON practice_log.id=operations.id "
                 "WHERE operations.id=? AND operations.kind IN ('revealed_pass', 'revealed_skip')",
                 (request.completion_id,),
@@ -173,6 +175,7 @@ class PracticeCompletion:
             if row["rating"] and row["rating"] != request.rating:
                 raise PracticeConflictError("This card already has a saved grade.")
             updated = bool(row["fsrs_updated"])
+            language = row["language"]
             phrase = None
             if not row["rating"]:
                 phrase = fetch_one(
@@ -187,9 +190,13 @@ class PracticeCompletion:
                         "This skipped card is no longer available to grade.",
                     )
                 updated = _apply_rating(connection, phrase, request.rating, now)
+                language = phrase.language
             grade = receipt.model_copy(
                 update={"rating": request.rating, "skipped": False, "fsrs_updated": updated},
             )
             if phrase is not None:
                 _log_grade(connection, grade, phrase, now)
-            return GradeSkippedResult(receipt=grade, progress=daily_progress(connection, day))
+            return GradeSkippedResult(
+                receipt=grade,
+                progress=daily_progress(connection, day, language),
+            )

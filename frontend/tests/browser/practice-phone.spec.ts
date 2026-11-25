@@ -154,9 +154,9 @@ test('Start offers both passed phrases again without using either slot', async (
   expect(new Set(passed).size).toBe(2)
   await expect(start).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Extra', exact: true })).toHaveCount(0)
-  const counts = await (await page.request.get('/api/practice/today')).json()
+  const counts = await (await page.request.get('/api/practice/today?language=en')).json()
   expect(counts).toMatchObject({ new_count: 2, due_count: 0 })
-  const facts = await (await page.request.get('/api/practice/facts')).json()
+  const facts = await (await page.request.get('/api/practice/facts?language=en')).json()
   expect(facts.today).toMatchObject({ completions: 0, skipped: 0 })
   expect(facts.streak.current).toBe(0)
   await start.tap()
@@ -196,8 +196,9 @@ test('session navigation lets a skipped card be graded without advancing the cur
   expect(boxes.at(-1)!.right).toBeLessThanOrEqual(320)
   const next = dock.getByRole('button', { name: 'Next card', exact: true })
   const dialog = page.getByRole('dialog')
-  const current = async () => (await page.request.get('/api/practice/current')).json()
-  const totals = async () => (await (await page.request.get('/api/practice/facts')).json()).today
+  const current = async () => (await page.request.get('/api/practice/current?language=en')).json()
+  const totals = async () =>
+    (await (await page.request.get('/api/practice/facts?language=en')).json()).today
   const before = await current()
   const graded = await totals()
 

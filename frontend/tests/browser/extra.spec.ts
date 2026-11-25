@@ -135,7 +135,9 @@ test.describe('mobile', () => {
   test('mobile Extra and Practice capture and replay takes', async ({ page }) => {
     await page.goto('/')
     await importPackage(page, extraPackage, 3, true)
-    await page.request.post('/api/practice/extra', { data: { operation_id: 'mobile-extra-setup' } })
+    await page.request.post('/api/practice/extra', {
+      data: { operation_id: 'mobile-extra-setup', language: 'en' },
+    })
     await page.reload()
     await page.getByRole('button', { name: 'Start', exact: true }).tap()
     await expect(modeLine(page)).toHaveText('Extra · 1 / 5 new')

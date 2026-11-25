@@ -2,8 +2,8 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from phrase_gym.server.contracts import LearningLanguage, NativeLanguage
 from phrase_gym.server.import_contracts import IDENTITY_PATTERN, ImportPhrase, StrictModel
+from phrase_gym.server.languages import LearningLanguage, NativeLanguage
 from phrase_gym.server.search_terms import search_key
 from phrase_gym.server.sentence_gaps import gap_around, realizes, shows_target
 

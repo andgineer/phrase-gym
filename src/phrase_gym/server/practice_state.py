@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 
 from phrase_gym.server.allowance import daily_progress
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
 from phrase_gym.server.practice_contracts import PracticeProgress, PracticeState
 from phrase_gym.server.practice_views import load_view, practice_card, view_phrase
@@ -15,7 +16,11 @@ def finished_message(
     progress: PracticeProgress,
 ) -> str:
     lesson = view.lesson_id
-    clause, parameters = (" WHERE lesson_id=?", (lesson,)) if lesson else ("", ())
+    clause, parameters = (
+        (" WHERE language=? AND lesson_id=?", (view.language, lesson))
+        if lesson
+        else (" WHERE language=?", (view.language,))
+    )
     phrases = fetch_all(
         connection,
         ScheduleRecord,
@@ -40,9 +45,14 @@ def finished_message(
     return f"{finished} Next due: {summary.next_due}."
 
 
-def practice_state(connection: sqlite3.Connection, now: datetime, day: str) -> PracticeState:
-    view = load_view(connection)
-    progress = daily_progress(connection, day)
+def practice_state(
+    connection: sqlite3.Connection,
+    now: datetime,
+    day: str,
+    language: LearningLanguage,
+) -> PracticeState:
+    view = load_view(connection, language)
+    progress = daily_progress(connection, day, language)
     if view is None or view.learning_date != day:
         return PracticeState(card=None, progress=progress, message=None)
     if view.phrase_id:

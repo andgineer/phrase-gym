@@ -19,7 +19,7 @@ def many(count: int) -> Package:
 
 
 def facts(practice: Practice) -> dict[str, Any]:
-    response = practice.client.get("/api/practice/facts")
+    response = practice.client.get("/api/practice/facts?language=en")
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -34,7 +34,7 @@ ZERO_TOTALS = dict.fromkeys(
 def studied(practice: Practice, day: str, offset: int = 0, limit: int = 10) -> dict[str, Any]:
     response = practice.client.get(
         "/api/practice/studied",
-        params={"learning_date": day, "offset": offset, "limit": limit},
+        params={"language": "en", "learning_date": day, "offset": offset, "limit": limit},
     )
     assert response.status_code == 200, response.text
     return response.json()
@@ -154,7 +154,9 @@ def test_today_list_pages_chronologically_with_outcome_and_snapshot(practice: Pr
     assert [item["text"] for item in second["items"] + third["items"]] == rated[2:]
     assert third["next_offset"] is None
     assert studied(practice, "2026-10-27")["items"] == []
-    bad = practice.client.get("/api/practice/studied", params={"learning_date": "yesterday"})
+    bad = practice.client.get(
+        "/api/practice/studied", params={"language": "en", "learning_date": "yesterday"}
+    )
     assert bad.status_code == 422
 
 
@@ -305,7 +307,7 @@ def test_timezone_change_keeps_stored_learning_dates(practice: Practice) -> None
 
 def library(practice: Practice) -> dict[str, int]:
     found = facts(practice)["library"]
-    lessons = practice.client.get("/api/lessons").json()["all_lessons"]
+    lessons = practice.client.get("/api/lessons?language=en").json()["all_lessons"]
     assert (found["phrase_count"], found["new_count"], found["due_count"]) == (
         lessons["phrase_count"],
         lessons["new_count"],

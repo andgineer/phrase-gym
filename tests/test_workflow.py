@@ -77,7 +77,7 @@ def test_study_recordings_and_restart(
 def test_local_boundary_rejects_unrelated_websites(client: TestClient) -> None:
     response = client.post(
         "/api/practice/daily",
-        json={},
+        json={"language": "en"},
         headers={"origin": "https://attacker.example", "sec-fetch-site": "cross-site"},
     )
     assert response.status_code == 403

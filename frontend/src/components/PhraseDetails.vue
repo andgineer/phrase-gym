@@ -5,9 +5,11 @@ import { onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { DeletionTarget, PhraseDetails } from '../libraryTypes'
 import SavedHistory from './SavedHistory.vue'
+import type { LearningLanguage } from '../languages'
 
 const props = defineProps<{
   phraseId: string
+  language: LearningLanguage
   disabled: boolean
   play: (url: string) => Promise<void>
 }>()
@@ -30,7 +32,7 @@ onMounted(async () => {
     <button class="quiet back" @click="emit('back')">← Back</button>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <template v-if="phrase">
-      <h1 lang="en">{{ phrase.text }}</h1>
+      <h1 :lang="language">{{ phrase.text }}</h1>
       <div class="row-actions">
         <button class="primary" :disabled="disabled" @click="emit('practice', phrase.id)">
           Practice

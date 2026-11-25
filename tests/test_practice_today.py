@@ -8,11 +8,7 @@ from tests.practice_client import Practice
 
 
 def today(practice: Practice, lesson_id: str | None = None) -> dict[str, Any]:
-    response = practice.client.get(
-        "/api/practice/today", params={"lesson_id": lesson_id} if lesson_id else {}
-    )
-    assert response.status_code == 200
-    return response.json()
+    return practice.today(lesson_id)
 
 
 def test_today_caps_counts_and_extra_extension_without_opening_a_view(client: TestClient) -> None:
@@ -51,7 +47,9 @@ def test_today_skips_lesson_resume_phrase_practice_and_rollover(client: TestClie
             ]
         ),
     )
-    lessons = {row["title"]: row["id"] for row in client.get("/api/lessons").json()["items"]}
+    lessons = {
+        row["title"]: row["id"] for row in client.get("/api/lessons?language=en").json()["items"]
+    }
     assert today(practice, lessons["Two"])["new_count"] == 1
     card = practice.card(lessons["One"])
     practice.reveal(card)
@@ -69,7 +67,7 @@ def test_today_skips_lesson_resume_phrase_practice_and_rollover(client: TestClie
     assert today(practice, lessons["Two"])["new_count"] == 1
     practice.later(days=1)
     assert today(practice, lessons["One"])["new_count"] == 2
-    assert client.get("/api/practice/today?lesson_id=missing").status_code == 404
+    assert client.get("/api/practice/today?language=en&lesson_id=missing").status_code == 404
 
 
 def test_today_zero_limits_and_no_extra_when_nothing_remains(client: TestClient) -> None:

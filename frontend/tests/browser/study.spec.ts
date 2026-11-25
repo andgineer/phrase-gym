@@ -33,14 +33,13 @@ const lessons = (phrases: Phrase[]) => [{ lesson_id: 'unit-1', title: 'Meetings'
 
 const phrasePackage = {
   format: 'phrase-gym.package',
-  version: 2,
+  version: 3,
   package_id: 'browser-five-phrases-v1',
   source_id: 'browser-course-unit-1',
   source_label: 'Browser course · Unit 1',
   source_link: 'https://example.test/course/1',
   learning_language: 'en',
-  card_language: 'en',
-  help_language: 'en',
+  meaning_language: 'en',
   lessons: lessons(cards),
 }
 

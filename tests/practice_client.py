@@ -40,26 +40,38 @@ class Practice:
     def later(self, **delta: float) -> None:
         self.now += timedelta(**delta)
 
-    def daily(self, lesson_id: str | None = None) -> dict[str, Any]:
-        response = self.client.post("/api/practice/daily", json={"lesson_id": lesson_id})
+    def daily(self, lesson_id: str | None = None, language: str = "en") -> dict[str, Any]:
+        response = self.client.post(
+            "/api/practice/daily", json={"language": language, "lesson_id": lesson_id}
+        )
         assert response.status_code == 200, response.text
         return response.json()
 
-    def card(self, lesson_id: str | None = None) -> Card:
-        card = self.daily(lesson_id)["card"]
+    def card(self, lesson_id: str | None = None, language: str = "en") -> Card:
+        card = self.daily(lesson_id, language)["card"]
         assert card, "Daily offered no card"
         return card
 
     def press_extra(
-        self, lesson_id: str | None = None, operation_id: str | None = None
+        self,
+        lesson_id: str | None = None,
+        operation_id: str | None = None,
+        language: str = "en",
     ) -> httpx.Response:
-        body = {"operation_id": operation_id or str(uuid4()), "lesson_id": lesson_id}
+        body = {
+            "operation_id": operation_id or str(uuid4()),
+            "language": language,
+            "lesson_id": lesson_id,
+        }
         return self.client.post("/api/practice/extra", json=body)
 
     def extra(
-        self, lesson_id: str | None = None, operation_id: str | None = None
+        self,
+        lesson_id: str | None = None,
+        operation_id: str | None = None,
+        language: str = "en",
     ) -> dict[str, Any]:
-        response = self.press_extra(lesson_id, operation_id)
+        response = self.press_extra(lesson_id, operation_id, language)
         assert response.status_code == 200, response.text
         return response.json()
 
@@ -99,6 +111,17 @@ class Practice:
     def rate(self, card: Card, outcome: str, completion_id: str | None = None) -> dict[str, Any]:
         self.reveal(card)
         return self.finish(card, outcome, completion_id)
+
+    def today(self, lesson_id: str | None = None, language: str = "en") -> dict[str, Any]:
+        query = {"language": language} | ({"lesson_id": lesson_id} if lesson_id else {})
+        response = self.client.get("/api/practice/today", params=query)
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def facts(self, language: str = "en") -> dict[str, Any]:
+        response = self.client.get("/api/practice/facts", params={"language": language})
+        assert response.status_code == 200, response.text
+        return response.json()
 
     def rate_all_new(self) -> None:
         state = self.daily()

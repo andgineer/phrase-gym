@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from phrase_gym.server.import_contracts import ImportPhrase, PhrasePackage
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.reference_audio import ImportConflictError
 from phrase_gym.server.search_terms import search_key
 from phrase_gym.server.storage import write_private
@@ -25,6 +26,7 @@ class Batch:
     package_id: str
     source_id: str
     source_label: str
+    language: LearningLanguage
     lessons: list[tuple[str, str]]
     phrases: list[BatchPhrase]
 
@@ -57,6 +59,7 @@ def package_batch(package: PhrasePackage, decoded: dict[str, bytes]) -> Batch:
         package_id=package.package_id,
         source_id=package.source_id,
         source_label=package.source_label,
+        language=package.learning_language,
         lessons=[(lesson.lesson_id, lesson.title) for lesson in package.lessons],
         phrases=[
             BatchPhrase(
@@ -156,6 +159,7 @@ def publish_batch(
                     "lesson_id": lesson_ids[phrase.lesson_key],
                     "source_id": batch.source_id,
                     "item_id": phrase.item_id,
+                    "language": batch.language,
                     **phrase.content,
                     "reference_path": str(destination),
                     "created_at": created_at,

@@ -29,7 +29,7 @@ def result(package_id: str, **changes: object) -> dict[str, object]:
 def coach_lesson(client: TestClient) -> dict[str, object]:
     [item] = [
         lesson
-        for lesson in client.get("/api/lessons").json()["items"]
+        for lesson in client.get("/api/lessons?language=en").json()["items"]
         if lesson["title"] == "Added with Coach"
     ]
     return item
@@ -41,7 +41,7 @@ def test_typed_text_waits_offline_and_survives_restart(
     monkeypatch.setenv("PHRASE_GYM_DATA_DIR", str(tmp_path))
     with TestClient(create_app()) as client:
         saved = submit(client, f"  {TYPED}  ")
-        assert saved == {"request_id": request_id(TYPED), "outcome": "saved"}
+        assert saved == {"request_id": request_id(TYPED, "en"), "outcome": "saved"}
         assert client.get(f"/api/imports/{saved['request_id']}").json()["status"] == "pending"
         assert client.post("/api/imports/coach/next").json()["text"] == TYPED
     with TestClient(create_app()) as client:
@@ -90,7 +90,9 @@ def test_resubmitting_the_same_text_reports_its_state_without_duplicates(
 
 def test_deleted_card_is_prepared_again_when_its_text_is_resubmitted(client: TestClient) -> None:
     prepare_typed(client, TYPED)
-    [phrase] = client.get("/api/phrases", params={"query": "strongly"}).json()["items"]
+    [phrase] = client.get("/api/phrases", params={"language": "en", "query": "strongly"}).json()[
+        "items"
+    ]
     assert client.delete(f"/api/phrases/{phrase['id']}").status_code == 200
     assert submit(client)["outcome"] == "saved"
     assert prepare_typed(client, TYPED)["added_count"] == 1
@@ -115,10 +117,12 @@ def test_typed_phrase_and_word_share_one_coach_lesson_apart_from_courses(
         cues=word_contexts,
         recall_hints=["relu... / to", "re... / -ant"],
     )
-    titles = [lesson["title"] for lesson in client.get("/api/lessons").json()["items"]]
+    titles = [lesson["title"] for lesson in client.get("/api/lessons?language=en").json()["items"]]
     assert titles == ["Meetings", "Added with Coach"]
     assert coach_lesson(client)["phrase_count"] == 2
-    found = client.get("/api/phrases", params={"query": "reluctant"}).json()["items"]
+    found = client.get("/api/phrases", params={"language": "en", "query": "reluctant"}).json()[
+        "items"
+    ]
     details = client.get(f"/api/phrases/{found[0]['id']}").json()
     assert details["source_label"] == "Added with Coach"
     practice = Practice(client)
@@ -142,7 +146,7 @@ def test_invalid_results_never_become_phrases(client: TestClient) -> None:
     assert client.post(url, json=no_hints).status_code == 422
     unknown = result(package_id, target_chunk="strongly believe")
     assert client.post(url, json=unknown).status_code == 422
-    assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
+    assert client.get("/api/lessons?language=en").json()["all_lessons"]["phrase_count"] == 0
     assert client.get(f"/api/imports/{package_id}").json()["status"] == "preparing"
 
 
@@ -178,5 +182,7 @@ def test_a_short_accurate_translation_is_a_complete_explanation(client: TestClie
     status = prepare_typed(client, "poison — We strongly believe this will help.", explanation="яд")
     assert status["status"] == "added"
     lesson = coach_lesson(client)["id"]
-    [phrase] = client.get("/api/phrases", params={"lesson_id": lesson}).json()["items"]
+    [phrase] = client.get("/api/phrases", params={"language": "en", "lesson_id": lesson}).json()[
+        "items"
+    ]
     assert client.get(f"/api/phrases/{phrase['id']}").json()["explanation"] == "яд"

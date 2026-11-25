@@ -20,7 +20,7 @@ def publish_many(client: TestClient, count: int) -> list[str]:
 def first_cards(client: TestClient, presses: int) -> list[tuple[str, str]]:
     cards = []
     for _ in range(presses):
-        body = {"operation_id": str(uuid4()), "lesson_id": None}
+        body = {"operation_id": str(uuid4()), "language": "en", "lesson_id": None}
         response = client.post("/api/practice/extra", json=body)
         assert response.status_code == 200, response.text
         card = response.json()["state"]["card"]

@@ -2,6 +2,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 
 from phrase_gym.server.allowance import daily_progress
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_contracts import PracticeState
 from phrase_gym.server.practice_views import (
     StaleViewError,
@@ -18,12 +19,12 @@ class CurrentPractice:
         self.database = database
         self.clock = clock or (lambda: datetime.now(UTC))
 
-    def read(self) -> PracticeState:
+    def read(self, language: LearningLanguage) -> PracticeState:
         # Reconciliation only reads, so it never closes another tab's Practice or an old view.
         now = self.clock()
         with self.database.snapshot() as connection:
             day = learning_day(connection, now)
-            view = load_view(connection)
+            view = load_view(connection, language)
             phrase = None
             if (
                 view is not None
@@ -36,4 +37,8 @@ class CurrentPractice:
                 except StaleViewError:
                     phrase = None
             card = practice_card(connection, view, phrase, now) if view and phrase else None
-            return PracticeState(card=card, progress=daily_progress(connection, day), message=None)
+            return PracticeState(
+                card=card,
+                progress=daily_progress(connection, day, language),
+                message=None,
+            )

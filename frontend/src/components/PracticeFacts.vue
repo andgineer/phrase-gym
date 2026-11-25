@@ -15,10 +15,12 @@ import {
   totalTitle,
   weekLine,
 } from '../practiceFacts'
+import type { LearningLanguage } from '../languages'
+import { hashFor } from '../composables/useAppNavigation'
 
-const props = defineProps<{ message: string }>()
+const props = defineProps<{ language: LearningLanguage; message: string }>()
 const { facts, error, listing, studied, pendingUploads, refresh, toggleList, dismiss } =
-  usePracticeFacts()
+  usePracticeFacts(props.language)
 // Facts of this mount confirm the learning date before an earlier message can be judged current.
 const currentMessage = computed(() => (facts.value || error.value ? props.message : ''))
 const today = computed(() => facts.value?.today)
@@ -44,7 +46,8 @@ defineExpose({ refresh })
   <section v-if="visible" class="card practice-facts" aria-label="Practice facts">
     <p v-if="currentMessage" role="status" class="entry-message">
       <template v-if="currentMessage === 'Add your first phrase with Coach to begin.'"
-        >Add your first phrase with <a href="#coach">Coach</a> to begin.</template
+        >Add your first phrase with <a :href="hashFor(language, 'coach')">Coach</a> to
+        begin.</template
       >
       <template v-else>{{ currentMessage }}</template>
     </p>
@@ -67,7 +70,7 @@ defineExpose({ refresh })
       <template v-if="listing">
         <ul class="phrase-list studied-list" aria-label="Today’s phrases">
           <li v-for="item in studied.items.value" :key="item.completion_id">
-            <strong lang="en">{{ item.text }}</strong>
+            <strong :lang="language">{{ item.text }}</strong>
             <span class="muted">{{ studiedLine(item) }}</span>
           </li>
         </ul>

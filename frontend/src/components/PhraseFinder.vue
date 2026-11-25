@@ -3,16 +3,18 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { usePagedList } from '../composables/usePagedList'
 import LibraryCoach from './LibraryCoach.vue'
 import type { PhrasePage, PhraseSummary } from '../libraryTypes'
+import type { LearningLanguage } from '../languages'
 
-const props = defineProps<{ lessonId: string; disabled: boolean }>()
+const props = defineProps<{ language: LearningLanguage; lessonId: string; disabled: boolean }>()
 const emit = defineEmits<{ open: [phraseId: string] }>()
 const query = defineModel<string>('query', { default: '' })
 const searching = computed(() => query.value.trim() !== '')
-const phrases = usePagedList<PhraseSummary, PhrasePage>(() =>
-  searching.value
-    ? `/phrases?query=${encodeURIComponent(query.value.trim())}`
-    : `/phrases${props.lessonId ? `?lesson_id=${encodeURIComponent(props.lessonId)}` : ''}`,
-)
+const phrases = usePagedList<PhraseSummary, PhrasePage>(() => {
+  const params = new URLSearchParams({ language: props.language })
+  if (searching.value) params.set('query', query.value.trim())
+  else if (props.lessonId) params.set('lesson_id', props.lessonId)
+  return `/phrases?${params}`
+})
 const queryPending = ref(false)
 let debounce: number | undefined
 
@@ -62,7 +64,7 @@ defineExpose({ reload: phrases.reload })
           :disabled="disabled"
           @click="emit('open', phrase.id)"
         >
-          <strong :id="`phrase-result-${index}`" lang="en">{{ phrase.text }}</strong>
+          <strong :id="`phrase-result-${index}`" :lang="language">{{ phrase.text }}</strong>
           <span :id="`phrase-result-${index}-use`" class="purpose"
             >Used for: {{ phrase.usage_contexts.join(' · ') }}</span
           >
@@ -92,6 +94,7 @@ defineExpose({ reload: phrases.reload })
         !phrases.error.value
       "
       :text="query.trim()"
+      :language="language"
       :has-results="phrases.items.value.length > 0"
     />
     <button v-if="!queryPending && phrases.nextOffset.value !== null" @click="phrases.more">

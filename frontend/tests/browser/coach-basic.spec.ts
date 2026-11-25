@@ -37,7 +37,7 @@ test('a sent sentence becomes one basic card with its gap and matching reference
   await settled(page, await sendFromCoach(page, sentence), 'added')
   await tab(page, 'Library').click()
   await expect(libraryPhrase(page, sentence)).toBeVisible()
-  const lessons = await (await page.request.get('/api/lessons')).json()
+  const lessons = await (await page.request.get('/api/lessons?language=en')).json()
   expect(lessons.items).toEqual([
     expect.objectContaining({ title: 'Added with Coach', phrase_count: 1 }),
   ])
@@ -52,7 +52,9 @@ test('a sent sentence becomes one basic card with its gap and matching reference
   await revealAnswer(page)
   await expect(page.getByTestId('practice-phrase')).toHaveText(sentence)
   await expect(card.getByRole('button', { name: /More explanation/ })).toHaveCount(0)
-  const { card: current } = await (await page.request.get('/api/practice/current')).json()
+  const { card: current } = await (
+    await page.request.get('/api/practice/current?language=en')
+  ).json()
   const before = (await playedMedia(page)).length
   await card.getByRole('button', { name: 'Ref', exact: true }).click()
   await expect
@@ -62,7 +64,7 @@ test('a sent sentence becomes one basic card with its gap and matching reference
     )
 
   await sendFromCoach(page, sentence, 'Already in your Library.')
-  const again = await (await page.request.get('/api/lessons')).json()
+  const again = await (await page.request.get('/api/lessons?language=en')).json()
   expect(again.items[0].phrase_count).toBe(1)
 })
 

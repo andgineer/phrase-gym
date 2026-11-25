@@ -42,8 +42,9 @@ class ExtraPractice:
             require_lesson(connection, request.lesson_id)
             now = self.clock()
             day = learning_day(connection, now)
-            due_target, new_target = extend_targets(connection, day)
-            start_traversal(connection, day, "extra", request.lesson_id)
+            language = request.language
+            due_target, new_target = extend_targets(connection, day, language)
+            start_traversal(connection, day, language, "extra", request.lesson_id)
             receipt = ExtraReceipt(
                 operation_id=request.operation_id,
                 learning_date=day,
@@ -55,9 +56,9 @@ class ExtraPractice:
                 "VALUES (?, 'extra', ?, ?)",
                 (request.operation_id, payload, receipt.model_dump_json()),
             )
-            advance(connection, now, day, self.rng)
+            advance(connection, now, day, language, self.rng)
             return ExtraResult(
                 receipt=receipt,
                 replayed=False,
-                state=practice_state(connection, now, day),
+                state=practice_state(connection, now, day, language),
             )

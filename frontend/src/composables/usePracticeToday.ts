@@ -2,9 +2,11 @@ import { onMounted, ref, watch, type Ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
 import { observeLearningDay, onLearningDayChange } from '../learningDay'
+import type { LearningLanguage } from '../languages'
 import { usePageReturn } from './usePageReturn'
 
-export function usePracticeToday(lessonId: Ref<string>) {
+// The entry remounts when its language changes, so the language is fixed for this instance.
+export function usePracticeToday(lessonId: Ref<string>, language: LearningLanguage) {
   const today = ref<components['schemas']['PracticeToday'] | null>(null)
   const error = ref('')
   let sequence = 0
@@ -12,9 +14,9 @@ export function usePracticeToday(lessonId: Ref<string>) {
     const request = ++sequence
     today.value = null
     try {
-      const result = await api<components['schemas']['PracticeToday']>(
-        `/practice/today${lessonId.value ? `?lesson_id=${encodeURIComponent(lessonId.value)}` : ''}`,
-      )
+      const params = new URLSearchParams({ language })
+      if (lessonId.value) params.set('lesson_id', lessonId.value)
+      const result = await api<components['schemas']['PracticeToday']>(`/practice/today?${params}`)
       if (request !== sequence) return
       today.value = result
       error.value = ''

@@ -7,6 +7,7 @@ from phrase_gym.server.contracts import (
     PhraseSummary,
     RecordingPage,
 )
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.recording_views import saved_recording
 from phrase_gym.server.records import RecordingRecord, ShownPhraseRecord, fetch_all, fetch_one
 from phrase_gym.server.scheduling import effective_due, learning_day
@@ -18,10 +19,19 @@ class LibraryService:
     def __init__(self, database: Database):
         self.database = database
 
-    def phrases(self, query: str, lesson_id: str | None, offset: int, limit: int) -> PhrasePage:
+    def phrases(
+        self,
+        language: LearningLanguage,
+        query: str,
+        lesson_id: str | None,
+        offset: int,
+        limit: int,
+    ) -> PhrasePage:
         terms = query_terms(query)
         clause, parameters = word_prefix_filter("phrases.search_text", terms)
         primary, primary_parameters = word_prefix_filter("phrases.search_primary", terms)
+        clause += " AND phrases.language=?"
+        parameters.append(language)
         if lesson_id:
             clause += " AND phrases.lesson_id=?"
             parameters.append(lesson_id)

@@ -10,7 +10,7 @@ def fail_preparation(client: TestClient, error: str) -> str:
 
 
 def notices(client: TestClient) -> list[dict[str, str]]:
-    return client.get("/api/practice/facts").json()["notices"]
+    return client.get("/api/practice/facts?language=en").json()["notices"]
 
 
 def test_failure_notice_arrives_with_practice_facts_until_dismissed(client: TestClient) -> None:

@@ -70,7 +70,8 @@ def search(client: TestClient, query: str, **params: object) -> list[dict[str, o
     offset: int | None = 0
     while offset is not None:
         page = client.get(
-            "/api/phrases", params={"query": query, "offset": offset, "limit": 100, **params}
+            "/api/phrases",
+            params={"language": "en", "query": query, "offset": offset, "limit": 100, **params},
         ).json()
         found.extend(page["items"])
         offset = page["next_offset"]
@@ -101,10 +102,10 @@ def test_thousand_phrase_mixed_lesson_search(client: TestClient) -> None:
     assert [item["text"] for item in exact] == ["Useful expression number 994."]
     assert time.perf_counter() - started < 5
 
-    first_page = client.get("/api/phrases", params={"limit": 20}).json()
+    first_page = client.get("/api/phrases", params={"language": "en", "limit": 20}).json()
     assert first_page["next_offset"] == 20
     assert first_page["items"][0]["text"] == "Useful expression number 0."
-    lessons = client.get("/api/lessons", params={"query": "unit 3 b"}).json()
+    lessons = client.get("/api/lessons", params={"language": "en", "query": "unit 3 b"}).json()
     assert [item["title"] for item in lessons["items"]] == ["Unit 3 B"]
     only = search(client, "", lesson_id=lessons["items"][0]["id"])
     assert len(only) == 25
@@ -125,12 +126,12 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         ),
     )
     practice = Practice(client)
-    greetings_id = client.get("/api/lessons").json()["items"][0]["id"]
+    greetings_id = client.get("/api/lessons?language=en").json()["items"][0]["id"]
     card = practice.reveal(practice.card(greetings_id))
     assert practice.phrase(card["phrase_id"])["item_id"] in ("meeting-1", "meeting-2")
     practice.rate(card, "not_yet")
 
-    first = client.get("/api/lessons", params={"limit": 2}).json()
+    first = client.get("/api/lessons", params={"language": "en", "limit": 2}).json()
     assert [item["title"] for item in first["items"]] == ["Greetings", "Small talk"]
     assert first["next_offset"] == 2
     assert first["items"][0] | {"id": ""} == {
@@ -149,31 +150,40 @@ def test_lesson_choices_are_paged_searchable_and_counted(
         "next_due": "2026-10-29",
     }
     assert first["items"][1]["next_due"] is None
-    rest = client.get("/api/lessons", params={"offset": 2, "limit": 2}).json()
+    rest = client.get("/api/lessons", params={"language": "en", "offset": 2, "limit": 2}).json()
     assert [item["title"] for item in rest["items"]] == ["Meetings"]
     assert rest["next_offset"] is None
-    assert client.get("/api/lessons", params={"query": "sma"}).json()["items"][0]["title"] == (
-        "Small talk"
+    assert client.get("/api/lessons", params={"language": "en", "query": "sma"}).json()["items"][0][
+        "title"
+    ] == ("Small talk")
+    assert (
+        client.get("/api/lessons", params={"language": "en", "query": "nothing"}).json()["items"]
+        == []
     )
-    assert client.get("/api/lessons", params={"query": "nothing"}).json()["items"] == []
     assert first["selected"] is None
     greetings = first["items"][0]
     hidden = client.get(
         "/api/lessons",
-        params={"query": "nothing", "lesson_id": greetings["id"], "offset": 2, "limit": 1},
+        params={
+            "language": "en",
+            "query": "nothing",
+            "lesson_id": greetings["id"],
+            "offset": 2,
+            "limit": 1,
+        },
     ).json()
     assert hidden["items"] == []
     assert hidden["selected"] == greetings
-    missing = client.get("/api/lessons", params={"lesson_id": "unknown"}).json()
+    missing = client.get("/api/lessons", params={"language": "en", "lesson_id": "unknown"}).json()
     assert missing["selected"] is None
 
     practice.later(days=1)
-    tomorrow = client.get("/api/lessons").json()
+    tomorrow = client.get("/api/lessons?language=en").json()
     assert tomorrow["items"][0]["due_count"] == 1
     assert tomorrow["items"][0]["next_due"] is None
     assert tomorrow["all_lessons"]["due_count"] == 1
-    assert client.get("/api/lessons", params={"limit": 0}).status_code == 422
-    assert client.get("/api/lessons", params={"limit": 101}).status_code == 422
+    assert client.get("/api/lessons", params={"language": "en", "limit": 0}).status_code == 422
+    assert client.get("/api/lessons", params={"language": "en", "limit": 101}).status_code == 422
 
 
 def test_details_show_lesson_source_reference_due_and_paged_recordings(
@@ -232,8 +242,8 @@ def test_lookup_makes_no_scheduling_writes(client: TestClient, tmp_path: Path) -
     review = practice.card()
     assert review["kind"] == "recall"
     before = snapshot(tmp_path)
-    client.get("/api/lessons", params={"query": "meet"})
-    client.get("/api/phrases", params={"query": "phrase number"})
+    client.get("/api/lessons", params={"language": "en", "query": "meet"})
+    client.get("/api/phrases", params={"language": "en", "query": "phrase number"})
     client.get(f"/api/phrases/{review['phrase_id']}")
     client.get(f"/api/phrases/{review['phrase_id']}/recordings")
     client.get(f"/api/phrases/{review['phrase_id']}/reference")

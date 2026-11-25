@@ -4,6 +4,7 @@ from pydantic import Field
 
 from phrase_gym.server.contracts import ActiveCardKind, CardKind, PracticeMode, SavedRecording
 from phrase_gym.server.import_contracts import Cue, StrictModel
+from phrase_gym.server.languages import LearningLanguage
 
 Rating = Literal["not_yet", "effort", "got_it", "easy"]
 
@@ -59,6 +60,7 @@ class PracticeState(StrictModel):
 
 
 class OpenDaily(StrictModel):
+    language: LearningLanguage
     lesson_id: str | None = Field(default=None, max_length=100)
 
 
@@ -105,6 +107,7 @@ class GradeSkippedResult(StrictModel):
 
 class OpenExtra(StrictModel):
     operation_id: OperationId
+    language: LearningLanguage
     lesson_id: str | None = Field(default=None, max_length=100)
 
 

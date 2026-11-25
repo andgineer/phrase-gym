@@ -194,7 +194,10 @@
             ]
           },
           "learning_language": {
-            "const": "en",
+            "enum": [
+              "en",
+              "de"
+            ],
             "title": "Learning Language",
             "type": "string"
           },
@@ -242,7 +245,10 @@
         "additionalProperties": false,
         "properties": {
           "learning_language": {
-            "const": "en",
+            "enum": [
+              "en",
+              "de"
+            ],
             "title": "Learning Language",
             "type": "string"
           },
@@ -329,7 +335,10 @@
         "additionalProperties": false,
         "properties": {
           "learning_language": {
-            "const": "en",
+            "enum": [
+              "en",
+              "de"
+            ],
             "title": "Learning Language",
             "type": "string"
           },
@@ -1124,6 +1133,14 @@
       "OpenDaily": {
         "additionalProperties": false,
         "properties": {
+          "language": {
+            "enum": [
+              "en",
+              "de"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
           "lesson_id": {
             "anyOf": [
               {
@@ -1137,12 +1154,23 @@
             "title": "Lesson Id"
           }
         },
+        "required": [
+          "language"
+        ],
         "title": "OpenDaily",
         "type": "object"
       },
       "OpenExtra": {
         "additionalProperties": false,
         "properties": {
+          "language": {
+            "enum": [
+              "en",
+              "de"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
           "lesson_id": {
             "anyOf": [
               {
@@ -1164,7 +1192,8 @@
           }
         },
         "required": [
-          "operation_id"
+          "operation_id",
+          "language"
         ],
         "title": "OpenExtra",
         "type": "object"
@@ -1281,23 +1310,16 @@
       "PhrasePackage": {
         "additionalProperties": false,
         "properties": {
-          "card_language": {
-            "const": "en",
-            "title": "Card Language",
-            "type": "string"
-          },
           "format": {
             "const": "phrase-gym.package",
             "title": "Format",
             "type": "string"
           },
-          "help_language": {
-            "const": "en",
-            "title": "Help Language",
-            "type": "string"
-          },
           "learning_language": {
-            "const": "en",
+            "enum": [
+              "en",
+              "de"
+            ],
             "title": "Learning Language",
             "type": "string"
           },
@@ -1309,6 +1331,15 @@
             "minItems": 1,
             "title": "Lessons",
             "type": "array"
+          },
+          "meaning_language": {
+            "enum": [
+              "en",
+              "de",
+              "ru"
+            ],
+            "title": "Meaning Language",
+            "type": "string"
           },
           "package_id": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$",
@@ -1341,7 +1372,7 @@
             "title": "Source Link"
           },
           "version": {
-            "const": 2,
+            "const": 3,
             "title": "Version",
             "type": "integer"
           }
@@ -1353,8 +1384,7 @@
           "source_id",
           "source_label",
           "learning_language",
-          "card_language",
-          "help_language",
+          "meaning_language",
           "lessons"
         ],
         "title": "PhrasePackage",
@@ -2196,11 +2226,6 @@
       "Settings": {
         "additionalProperties": false,
         "properties": {
-          "card_language": {
-            "const": "en",
-            "title": "Card Language",
-            "type": "string"
-          },
           "daily_due_limit": {
             "maximum": 500.0,
             "minimum": 0.0,
@@ -2212,11 +2237,6 @@
             "minimum": 0.0,
             "title": "Daily New Limit",
             "type": "integer"
-          },
-          "help_language": {
-            "const": "en",
-            "title": "Help Language",
-            "type": "string"
           },
           "learning_timezone": {
             "maxLength": 64,
@@ -2241,6 +2261,9 @@
             "title": "Return Pace",
             "type": "string"
           },
+          "translation": {
+            "$ref": "#/components/schemas/TranslationChoices"
+          },
           "weekly_target": {
             "anyOf": [
               {
@@ -2262,8 +2285,7 @@
         "required": [
           "native_language",
           "learning_timezone",
-          "card_language",
-          "help_language",
+          "translation",
           "daily_due_limit",
           "daily_new_limit",
           "return_pace",
@@ -2379,6 +2401,26 @@
           "skipped"
         ],
         "title": "StudiedPhrase",
+        "type": "object"
+      },
+      "TranslationChoices": {
+        "additionalProperties": false,
+        "description": "Whether each learning language's meaning layer is in the native language.",
+        "properties": {
+          "de": {
+            "title": "De",
+            "type": "boolean"
+          },
+          "en": {
+            "title": "En",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "en",
+          "de"
+        ],
+        "title": "TranslationChoices",
         "type": "object"
       },
       "ValidationError": {
@@ -2906,6 +2948,19 @@
         "parameters": [
           {
             "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "query",
             "required": false,
             "schema": {
@@ -2984,6 +3039,19 @@
       "get": {
         "operationId": "find_phrases_api_phrases_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          },
           {
             "in": "query",
             "name": "query",
@@ -3314,6 +3382,21 @@
     "/api/practice/current": {
       "get": {
         "operationId": "current_view_api_practice_current_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3324,6 +3407,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Current View"
@@ -3408,6 +3501,21 @@
     "/api/practice/facts": {
       "get": {
         "operationId": "practice_facts_api_practice_facts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3418,6 +3526,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Practice Facts"
@@ -3581,6 +3699,19 @@
         "parameters": [
           {
             "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "learning_date",
             "required": true,
             "schema": {
@@ -3642,6 +3773,19 @@
       "get": {
         "operationId": "today_counts_api_practice_today_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "enum": [
+                "en",
+                "de"
+              ],
+              "title": "Language",
+              "type": "string"
+            }
+          },
           {
             "in": "query",
             "name": "lesson_id",

@@ -27,13 +27,12 @@ const phrase = (item_id: string, text: string, extra: object = {}) => ({
 })
 const dailyPackage = {
   format: 'phrase-gym.package',
-  version: 2,
+  version: 3,
   package_id: 'daily-browser-v1',
   source_id: 'daily-browser-source',
   source_label: 'Daily course',
   learning_language: 'en',
-  card_language: 'en',
-  help_language: 'en',
+  meaning_language: 'en',
   lessons: [
     {
       lesson_id: 'small-talk',
@@ -216,7 +215,7 @@ test('Easy uses the fourth FSRS rating and persists in practice facts', async ({
     await expect(card(page).getByRole('button', { name, exact: true })).toBeVisible()
   await card(page).getByRole('button', { name: 'Easy', exact: true }).click()
   await expect(modeLine(page)).toHaveText('2 / 20 due')
-  const response = await page.request.get('/api/practice/facts')
+  const response = await page.request.get('/api/practice/facts?language=en')
   const facts = await response.json()
   expect(facts.today.easy).toBe(1)
   expect(facts.work.easy).toBe(1)
@@ -238,7 +237,7 @@ test('passing a new card leaves its slot free and offers it again on Start', asy
   await expect(page.getByTestId('practice-phrase')).toHaveCount(0)
   await rateNew(page)
   await expect(card(page)).toHaveCount(0)
-  const response = await page.request.get('/api/practice/facts')
+  const response = await page.request.get('/api/practice/facts?language=en')
   const facts = await response.json()
   expect(facts.today).toMatchObject({ new_attempts: 1, recalls: 0, skipped: 0, not_yet: 1 })
   expect(facts.library).toMatchObject({ new_count: 1, later_count: 1, due_count: 0 })
@@ -285,7 +284,7 @@ test('deleting a reviewed graded phrase keeps its history and the current card',
   await expect(answer).toHaveCount(0)
   const previous = card(page).getByRole('button', { name: 'Previous card', exact: true })
   await expect(previous).toBeEnabled()
-  const current = async () => (await page.request.get('/api/practice/current')).json()
+  const current = async () => (await page.request.get('/api/practice/current?language=en')).json()
   const before = await current()
   await previous.click()
   await expect(answer).toHaveText('So far, so good.')
@@ -296,8 +295,10 @@ test('deleting a reviewed graded phrase keeps its history and the current card',
   await expect(answer).toHaveCount(0)
   await expect(previous).toHaveCount(0)
   expect(await current()).toEqual(before)
-  const { learning_date } = await (await page.request.get('/api/practice/facts')).json()
-  const history = await page.request.get(`/api/practice/studied?learning_date=${learning_date}`)
+  const { learning_date } = await (await page.request.get('/api/practice/facts?language=en')).json()
+  const history = await page.request.get(
+    `/api/practice/studied?language=en&learning_date=${learning_date}`,
+  )
   expect((await history.json()).items).toMatchObject([
     { text: 'So far, so good.', phrase_id: null, rating: 'got_it' },
   ])

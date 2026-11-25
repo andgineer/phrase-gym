@@ -15,13 +15,12 @@ const texts = [
 ]
 const factsPackage = {
   format: 'phrase-gym.package',
-  version: 2,
+  version: 3,
   package_id: 'facts-browser-v1',
   source_id: 'facts-browser-source',
   source_label: 'Facts course',
   learning_language: 'en',
-  card_language: 'en',
-  help_language: 'en',
+  meaning_language: 'en',
   lessons: [
     {
       lesson_id: 'small-talk',
@@ -180,7 +179,7 @@ test('an open entry recomputes facts and counts when it returns on a new learnin
 
   await setClock(page, 24)
   const listed = page.waitForRequest((request) =>
-    request.url().includes('/api/practice/studied?learning_date=2026-11-03'),
+    request.url().includes('/api/practice/studied?language=en&learning_date=2026-11-03'),
   )
   await page.evaluate(() => {
     document.dispatchEvent(new Event('visibilitychange'))
@@ -243,7 +242,7 @@ test('returning on the same day keeps loaded pages and a later lesson; a new day
 
   await setClock(page, 24)
   const newList = page.waitForRequest((request) =>
-    request.url().includes('/api/practice/studied?learning_date=2026-11-03'),
+    request.url().includes('/api/practice/studied?language=en&learning_date=2026-11-03'),
   )
   const refreshed = page.waitForRequest((request) => {
     const url = new URL(request.url())
@@ -301,7 +300,7 @@ test('the completion message stays visible when the entry facts cannot load', as
   await press(page, 'Start')
   await revealAnswer(page)
   await expect(card(page).getByTestId('practice-phrase')).toBeVisible()
-  await page.route('**/api/practice/facts', (route) => route.fulfill({ status: 503, json: {} }))
+  await page.route('**/api/practice/facts?*', (route) => route.fulfill({ status: 503, json: {} }))
   await rateNew(page)
   await expect(facts(page).getByRole('alert')).toHaveText('Error: Request failed (503)')
   await expect(page.getByText("Today's practice is complete.", { exact: true })).toBeVisible()

@@ -17,7 +17,7 @@ def practice(client: TestClient) -> Practice:
 
 
 def current(practice: Practice) -> dict[str, Any]:
-    response = practice.client.get("/api/practice/current")
+    response = practice.client.get("/api/practice/current?language=en")
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -43,7 +43,7 @@ def test_current_returns_todays_regular_view_without_changing_anything(
 
 
 def test_current_leaves_an_open_practice_view_and_its_traversal_alone(practice: Practice) -> None:
-    lessons = practice.client.get("/api/lessons").json()["items"]
+    lessons = practice.client.get("/api/lessons?language=en").json()["items"]
     daily = practice.card(lessons[0]["id"])
     card = practice.practise(practice.rows("SELECT id FROM phrases ORDER BY position")[2]["id"])
     before = stored(practice)

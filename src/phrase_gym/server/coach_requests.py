@@ -3,10 +3,10 @@ import json
 import sqlite3
 
 from phrase_gym.server.coach_cards import coach_batch
-from phrase_gym.server.coach_contracts import COACH_SOURCE_ID, CoachResult
-from phrase_gym.server.contracts import LearningLanguage
+from phrase_gym.server.coach_contracts import COACH_SOURCE_ID, CoachResult, CoachWork
 from phrase_gym.server.import_notices import clear_notice, record_notice
 from phrase_gym.server.importer import import_row, now, public_status, result_hash
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.publication import publish_batch, reject_identity_conflicts
 from phrase_gym.server.records import ImportRecord, fetch_one
 from phrase_gym.server.reference_audio import ImportConflictError
@@ -20,11 +20,12 @@ def normalized(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
-def request_id(text: str, learning_language: str = "en") -> str:
+def request_id(text: str, learning_language: LearningLanguage) -> str:
     # English requests keep the identity they had before the language was recorded.
     key = normalized(text)
     if learning_language != "en":
-        key = f"{learning_language}\n{key}"
+        # German capitalisation tells words apart, as in Morgen (morning) and morgen (tomorrow).
+        key = f"{learning_language}\n{' '.join(text.split())}"
     return "coach-" + hashlib.sha256(key.encode()).hexdigest()[:32]
 
 
@@ -32,14 +33,16 @@ def request_language(row: ImportRecord) -> LearningLanguage:
     return json.loads(row.payload).get("learning_language", "en")
 
 
-def request_languages(row: ImportRecord) -> dict[str, object]:
+def request_work(row: ImportRecord) -> CoachWork:
     """The languages captured at submission; older requests read as English, translation off."""
     payload = json.loads(row.payload)
-    return {
-        "learning_language": request_language(row),
-        "native_language": payload.get("native_language", "en"),
-        "translation": payload.get("translation", False),
-    }
+    return CoachWork(
+        package_id=row.package_id,
+        text=payload["text"],
+        learning_language=request_language(row),
+        native_language=payload.get("native_language", "en"),
+        translation=payload.get("translation", False),
+    )
 
 
 def coach_row(connection: sqlite3.Connection, package_id: str) -> ImportRecord:
@@ -97,12 +100,12 @@ class CoachRequests:
             if row is not None and row.kind != "coach":
                 raise ImportConflictError(f"{package_id} already names an external package.")
             if row is None:
+                settings = read_settings(connection)
                 payload = {
                     "text": text,
                     "learning_language": language,
-                    "native_language": read_settings(connection).native_language,
-                    # English has no translation choice until a second language adds it.
-                    "translation": False,
+                    "native_language": settings.native_language,
+                    "translation": settings.translates(language),
                 }
                 connection.execute(
                     "INSERT INTO imports (package_id, content_hash, payload, status, created_at, "
@@ -128,11 +131,7 @@ class CoachRequests:
                 "UPDATE imports SET status='preparing' WHERE package_id=?",
                 (row.package_id,),
             )
-            return {
-                "package_id": row.package_id,
-                "text": json.loads(row.payload)["text"],
-                **request_languages(row),
-            }
+            return request_work(row).model_dump()
 
     def fail(self, package_id: str, message: str, retry_helps: bool = True) -> dict[str, object]:
         with self.database.write() as connection:
@@ -153,7 +152,10 @@ class CoachRequests:
         digest = result_hash(
             {kind: card.model_dump(mode="json") if card else None, "reference": result.reference},
         )
-        batch = coach_batch(package_id, result)
+        with self.database.read() as connection:
+            work = request_work(coach_row(connection, package_id))
+        # The audio is decoded before the write lock; a request's languages never change.
+        batch = coach_batch(work, result)
         correction = result.basic.correction if result.basic else None
         with self.database.write() as connection:
             row = coach_row(connection, package_id)

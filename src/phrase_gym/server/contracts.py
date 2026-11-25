@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from pydantic import Field, field_validator, model_validator
 
 from phrase_gym.server.import_contracts import Cue, StrictModel
+from phrase_gym.server.languages import LearningLanguage, MeaningLanguage, NativeLanguage
 
 PAGE_LIMIT = 100
 MAX_DAILY_LIMIT = 500
@@ -13,8 +14,6 @@ PracticeMode = Literal["daily", "extra", "practice"]
 ActiveCardKind = Literal["new", "recall"]
 CardKind = Literal["first_study", "new", "recall"]
 ReturnPace = Literal["often", "balanced", "rarely"]
-LearningLanguage = Literal["en"]
-NativeLanguage = Literal["ru", "en"]
 # Take identities become file names: no separators or dots, and lowercase so that IDs differing
 # only by case cannot share a file on case-insensitive filesystems.
 STORED_ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{7,99}$"
@@ -43,11 +42,17 @@ class RecordingUpload(StrictModel):
         return value
 
 
+class TranslationChoices(StrictModel):
+    """Whether each learning language's meaning layer is in the native language."""
+
+    en: bool
+    de: bool
+
+
 class Settings(StrictModel):
     native_language: NativeLanguage
     learning_timezone: str = Field(min_length=1, max_length=64)
-    card_language: Literal["en"]
-    help_language: Literal["en"]
+    translation: TranslationChoices
     daily_due_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
     daily_new_limit: int = Field(ge=0, le=MAX_DAILY_LIMIT)
     return_pace: ReturnPace
@@ -66,6 +71,12 @@ class Settings(StrictModel):
         if self.weekly_target is None:
             self.weekly_target_paused = False
         return self
+
+    def translates(self, language: LearningLanguage) -> bool:
+        return getattr(self.translation, language)
+
+    def meaning_language(self, language: LearningLanguage) -> MeaningLanguage:
+        return self.native_language if self.translates(language) else language
 
 
 class ReturnPaceChoice(StrictModel):

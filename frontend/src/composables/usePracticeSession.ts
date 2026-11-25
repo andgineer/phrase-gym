@@ -1,4 +1,5 @@
-import { computed, ref, shallowReactive, watch } from 'vue'
+import { computed, ref, shallowReactive, watch, type Ref } from 'vue'
+import type { LearningLanguage } from '../languages'
 import { takeTransfers } from '../takeTransfers'
 import type { StoredTake } from '../practiceTypes'
 import type { Outcome, Recording } from '../studyTypes'
@@ -6,8 +7,8 @@ import { useCapture } from './useCapture'
 import { usePlayback } from './usePlayback'
 import { usePractice } from './usePractice'
 
-export function usePracticeSession() {
-  const practice = usePractice()
+export function usePracticeSession(language: Ref<LearningLanguage>) {
+  const practice = usePractice(language)
   const playback = usePlayback()
   const card = computed(() => practice.view.value.card)
   const reviewIndex = ref<number | null>(null)

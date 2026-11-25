@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
+import { learningLanguages } from '../languages'
 
 type Settings = components['schemas']['Settings']
 type PaceChoice = components['schemas']['ReturnPaceChoice']
@@ -109,7 +110,17 @@ async function save() {
         </label>
         <p class="muted">Any rating counts the day. A missed day or week owes nothing.</p>
       </fieldset>
-      <p>English cards and short English help are selected for this MVP.</p>
+      <fieldset class="settings-group">
+        <legend>Translation in native language</legend>
+        <label v-for="item in learningLanguages" :key="item.code" class="settings-option">
+          <input v-model="settings.translation[item.code]" type="checkbox" />
+          <span>{{ item.name }}</span>
+        </label>
+        <p class="muted">
+          On: cue glosses and short help use your native language. Off: they stay in the language
+          you learn. Longer explanations always use your native language.
+        </p>
+      </fieldset>
       <button @click="save">Save settings</button>
     </template>
     <p v-if="message" role="status">{{ message }}</p>

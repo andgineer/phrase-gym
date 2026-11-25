@@ -53,7 +53,12 @@ def test_extra_targets_follow_limits_and_todays_completions(
         "new_allowance": expected[1],
     }
     assert practice.rows("SELECT * FROM extra_targets") == [
-        {"learning_date": "2026-10-28", "due_target": expected[0], "new_target": expected[1]}
+        {
+            "learning_date": "2026-10-28",
+            "language": "en",
+            "due_target": expected[0],
+            "new_target": expected[1],
+        }
     ]
 
 
@@ -188,7 +193,7 @@ def test_changed_payload_or_another_action_under_one_id_conflicts(practice: Prac
         practice.client,
         make_package(lessons=[lesson("a", "A", [phrase(1)]), lesson("b", "B", [phrase(2)])]),
     )
-    lesson_id = practice.client.get("/api/lessons").json()["items"][0]["id"]
+    lesson_id = practice.client.get("/api/lessons?language=en").json()["items"][0]["id"]
     operation = str(uuid4())
     card = practice.extra(operation_id=operation)["state"]["card"]
     assert practice.press_extra(lesson_id, operation).status_code == 409

@@ -1,3 +1,4 @@
+import type { LearningLanguage } from '../src/languages'
 import { nextTick, ref } from 'vue'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { ApiError, api } from '../src/api'
@@ -105,7 +106,7 @@ function answerCompletion(next: Card | null) {
 }
 
 it('a second tap while the take is finishing sends one completion for the original card', async () => {
-  const session = usePracticeSession()
+  const session = usePracticeSession(ref<LearningLanguage>('en'))
   session.practice.view.value = openedState(state(card('a')))
   media.capture.capturing.value = true
   answerCompletion(card('b', false))
@@ -124,7 +125,7 @@ it('a second tap while the take is finishing sends one completion for the origin
 })
 
 it('waits for a stop already in progress before sending the rating', async () => {
-  const session = usePracticeSession()
+  const session = usePracticeSession(ref<LearningLanguage>('en'))
   session.practice.view.value = openedState(state(card('a')))
   media.capture.capturing.value = true
   const stopped = session.capture.stop()
@@ -141,7 +142,7 @@ it('waits for a stop already in progress before sending the rating', async () =>
 })
 
 it('drops a completion whose card was replaced while the take was finishing', async () => {
-  const session = usePracticeSession()
+  const session = usePracticeSession(ref<LearningLanguage>('en'))
   session.practice.view.value = openedState(state(card('a')))
   media.capture.capturing.value = true
   answerCompletion(null)
@@ -154,7 +155,7 @@ it('drops a completion whose card was replaced while the take was finishing', as
 })
 
 it('cancels old-phrase playback when a conflict reconciles to another card', async () => {
-  const session = usePracticeSession()
+  const session = usePracticeSession(ref<LearningLanguage>('en'))
   session.practice.view.value = openedState(state(card('a', false)))
   await nextTick()
   media.stopPlayback.mockClear()
@@ -168,7 +169,7 @@ it('cancels old-phrase playback when a conflict reconciles to another card', asy
 })
 
 it('Stop retains the finishing take and cancels playback before leaving the card', async () => {
-  const session = usePracticeSession()
+  const session = usePracticeSession(ref<LearningLanguage>('en'))
   session.practice.view.value = openedState(state({ ...card('a', false), mode: 'extra' }))
   media.capture.capturing.value = true
   let left = false

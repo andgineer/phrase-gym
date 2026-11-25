@@ -1,3 +1,5 @@
+import type { LearningLanguage } from '../src/languages'
+import { ref } from 'vue'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { ApiError, api } from '../src/api'
 import { usePractice } from '../src/composables/usePractice'
@@ -75,7 +77,7 @@ it('labels progress by mode and card kind', () => {
 })
 
 it('completes once while saving and advances to the returned card', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('first', { revealed: true })))
   let release!: (value: CompletionResult) => void
   vi.mocked(api).mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
@@ -99,7 +101,7 @@ it('completes once while saving and advances to the returned card', async () => 
 })
 
 it('keeps the card after a failed save and retries with the same completion ID', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('first', { revealed: true })))
   vi.mocked(api).mockRejectedValueOnce(new ApiError('Service unavailable', 503))
   await practice.complete('effort')
@@ -119,14 +121,18 @@ it('keeps the card after a failed save and retries with the same completion ID',
 })
 
 it('reconciles a stale view conflict by reading the current view, never reopening Daily', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api).mockResolvedValueOnce(state(card('first', { revealed: true })))
   await practice.openDaily('lesson-1')
   vi.mocked(api)
     .mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
     .mockResolvedValueOnce(state(card('replacement')))
   await practice.complete('skipped')
-  expect(paths()).toEqual(['/practice/daily', '/practice/complete', '/practice/current'])
+  expect(paths()).toEqual([
+    '/practice/daily',
+    '/practice/complete',
+    '/practice/current?language=en',
+  ])
   expect(vi.mocked(api).mock.calls[2]![1]).toBeUndefined()
   expect(practice.view.value.card?.view_token).toBe('replacement')
   expect(practice.error.value).toContain('changed in another tab')
@@ -134,7 +140,7 @@ it('reconciles a stale view conflict by reading the current view, never reopenin
 })
 
 it('sends new operation IDs for cue and hint and applies only the open card', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('first')))
   vi.mocked(api)
     .mockResolvedValueOnce(card('first', { hint: 'far' }))

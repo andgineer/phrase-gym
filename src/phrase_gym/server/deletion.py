@@ -27,7 +27,7 @@ class PhraseDeletion:
     def commit(self, phrase_id: str) -> str | None:
         with self.database.write() as connection:
             phrase = connection.execute(
-                "SELECT text, reference_path FROM phrases WHERE id=?",
+                "SELECT text, reference_path, language FROM phrases WHERE id=?",
                 (phrase_id,),
             ).fetchone()
             if phrase is None:
@@ -41,8 +41,9 @@ class PhraseDeletion:
                 [(path, phrase_id, instant) for path in paths],
             )
             connection.execute("DELETE FROM recordings WHERE phrase_id=?", (phrase_id,))
-            if (view := load_view(connection)) and view.phrase_id == phrase_id:
-                clear_phrase(connection)
+            view = load_view(connection, phrase["language"])
+            if view and view.phrase_id == phrase_id:
+                clear_phrase(connection, view.language)
             # Completed practice keeps its wording snapshot; the log's phrase reference is nulled.
             connection.execute("DELETE FROM phrases WHERE id=?", (phrase_id,))
             connection.execute(

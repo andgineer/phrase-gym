@@ -37,10 +37,11 @@ class PhrasePractice:
                 raise UnknownPhraseError(phrase_id)
             now = self.clock()
             day = learning_day(connection, now)
-            view = load_view(connection)
+            language = phrase.language
+            view = load_view(connection, language)
             origin = view.origin if view is not None and view.learning_date == day else "daily"
-            start_traversal(connection, day, origin, None)
-            # Replacing the active phrase closes any unfinished regular view ungraded.
+            start_traversal(connection, day, language, origin, None)
+            # Replacing the active phrase closes its language's unfinished regular view ungraded.
             kind = "recall" if phrase.studied_at else "new"
             show_phrase(connection, phrase, kind, self.rng, practice=True)
-            return practice_state(connection, now, day)
+            return practice_state(connection, now, day, language)

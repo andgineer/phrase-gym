@@ -21,7 +21,8 @@ export async function setSettings(page: Page, changes: Partial<Settings>) {
   expect(response.status()).toBe(200)
 }
 
-export const startDaily = (page: Page) => post<State>(page, 'daily', { lesson_id: null })
+export const startDaily = (page: Page, language: 'en' | 'de' = 'en') =>
+  post<State>(page, 'daily', { language, lesson_id: null })
 
 export async function completeCard(page: Page, card: Card, outcome: Outcome = 'not_yet') {
   const identity = { phrase_id: card.phrase_id, view_token: card.view_token }
@@ -36,8 +37,8 @@ export async function completeCard(page: Page, card: Card, outcome: Outcome = 'n
 }
 
 // Prerequisite history uses the real API; browser specs exercise only their target interaction.
-export async function finishDaily(page: Page) {
-  let state = await startDaily(page)
+export async function finishDaily(page: Page, language: 'en' | 'de' = 'en') {
+  let state = await startDaily(page, language)
   const completed: Card[] = []
   while (state.card) {
     const revealed = await post<Card>(page, 'reveal', {

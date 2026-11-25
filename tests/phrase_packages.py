@@ -29,17 +29,17 @@ def make_package(
     package_id: str = "course-meetings-v1",
     lessons: list[dict[str, object]] | None = None,
     source_id: str = "course-meetings",
+    language: str = "en",
 ) -> Package:
     return {
         "format": "phrase-gym.package",
-        "version": 2,
+        "version": 3,
         "package_id": package_id,
         "source_id": source_id,
         "source_label": "Course · Meetings",
         "source_link": "https://example.test/meetings",
-        "learning_language": "en",
-        "card_language": "en",
-        "help_language": "en",
+        "learning_language": language,
+        "meaning_language": "ru" if language == "de" else language,
         "lessons": lessons
         or [lesson("unit-1", "Meetings", [phrase(index) for index in range(1, 6)])],
     }

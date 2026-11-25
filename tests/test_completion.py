@@ -211,7 +211,7 @@ def test_ratings_reach_fsrs_and_survive_in_facts(
     ).review_card(FsrsCard(), rating, review_datetime=practice.now)
     assert saved["stability"] == expected.stability
     assert saved["difficulty"] == expected.difficulty
-    facts = practice.client.get("/api/practice/facts").json()
+    facts = practice.client.get("/api/practice/facts?language=en").json()
     assert facts["today"]["new_attempts"] == 1 and facts["today"]["recalls"] == 0
     assert facts["today"][outcome] == facts["work"][outcome] == 1
     assert practice.log()[-1]["rating"] == outcome
@@ -239,7 +239,7 @@ def test_grading_a_passed_card_logs_the_grade_without_advancing(
         "fsrs_updated": True,
     }
     assert grade["progress"]["new_completed"] == 1
-    assert practice.client.get("/api/practice/current").json() == skipped["state"] | {
+    assert practice.client.get("/api/practice/current?language=en").json() == skipped["state"] | {
         "progress": grade["progress"],
     }
     [logged] = practice.log()

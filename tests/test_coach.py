@@ -96,11 +96,13 @@ def attempts(cli: Cli) -> list[Path]:
 
 
 def coach_phrases(client: TestClient) -> list[dict[str, object]]:
-    lessons = client.get("/api/lessons").json()["items"]
+    lessons = client.get("/api/lessons?language=en").json()["items"]
     coach = [lesson["id"] for lesson in lessons if lesson["title"] == "Added with Coach"]
     if not coach:
         return []
-    return client.get("/api/phrases", params={"lesson_id": coach[0]}).json()["items"]
+    return client.get("/api/phrases", params={"language": "en", "lesson_id": coach[0]}).json()[
+        "items"
+    ]
 
 
 def stored(client: TestClient, text: str) -> dict[str, object]:
@@ -187,7 +189,7 @@ def test_failed_preparation_keeps_its_reason_and_publishes_nothing(
     printed = capsys.readouterr().out
     assert printed.startswith(f"Coach could not prepare “{text}”: {reason}")
     assert f"(details: {attempt})" in printed
-    notices = client.get("/api/practice/facts").json()["notices"]
+    notices = client.get("/api/practice/facts?language=en").json()["notices"]
     [outcome] = client.get("/api/coach/inbox").json()["items"]
     if text.startswith("insufficient"):
         assert notices == []

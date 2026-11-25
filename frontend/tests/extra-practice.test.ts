@@ -1,3 +1,5 @@
+import type { LearningLanguage } from '../src/languages'
+import { ref } from 'vue'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { ApiError, api } from '../src/api'
 import { usePractice } from '../src/composables/usePractice'
@@ -69,7 +71,7 @@ it('applies a fresh Extra result and reconciles a replayed one', () => {
 })
 
 it('gives every deliberate Extra press its own operation ID', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api).mockImplementation(async (_path, init) =>
     extraResult(JSON.parse(String(init!.body)).operation_id, card('x')),
   )
@@ -82,7 +84,7 @@ it('gives every deliberate Extra press its own operation ID', async () => {
 })
 
 it('retries a lost Extra response with the same ID and reconciles the replay', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api).mockRejectedValueOnce(new TypeError('Failed to fetch'))
   await practice.openExtra(null)
   expect(practice.error.value).toContain('retry it')
@@ -92,7 +94,7 @@ it('retries a lost Extra response with the same ID and reconciles the replay', a
     .mockResolvedValueOnce({ receipt: receipt(id), replayed: true, state: null })
     .mockResolvedValueOnce(state(card('newer')))
   await practice.retryExtra()
-  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current'])
+  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current?language=en'])
   expect(body(1)).toEqual(body(0))
   expect(practice.view.value.card?.view_token).toBe('newer')
   expect(practice.pendingExtra.value).toBeNull()
@@ -100,7 +102,7 @@ it('retries a lost Extra response with the same ID and reconciles the replay', a
 })
 
 it('drops a rejected Extra press and explains an empty result at once', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api).mockRejectedValueOnce(new ApiError('Lesson not found', 404))
   await practice.openExtra('gone')
   expect(practice.pendingExtra.value).toBeNull()
@@ -115,7 +117,7 @@ it('drops a rejected Extra press and explains an empty result at once', async ()
 })
 
 it('opens phrase Practice and closes its card after the rating', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api).mockResolvedValueOnce(state(card('p', { mode: 'practice' })))
   await practice.openPhrase('phrase-p')
   expect(body(0)).toEqual({ phrase_id: 'phrase-p' })
@@ -130,7 +132,7 @@ it('opens phrase Practice and closes its card after the rating', async () => {
 })
 
 it('closes a stale or replayed Practice card without opening Daily', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('p', { mode: 'practice' })))
   vi.mocked(api).mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
   await practice.complete('effort')
@@ -147,4 +149,18 @@ it('closes a stale or replayed Practice card without opening Daily', async () =>
   expect(paths()).toEqual(['/practice/complete', '/practice/complete'])
   expect(practice.view.value.card).toBeNull()
   expect(practice.error.value).toBe('')
+})
+
+it('opens Daily and Extra in the page language', async () => {
+  const practice = usePractice(ref<LearningLanguage>('de'))
+  vi.mocked(api)
+    .mockResolvedValueOnce(state(card('daily')))
+    .mockImplementationOnce(async (_path, init) =>
+      extraResult(JSON.parse(String(init!.body)).operation_id, card('extra')),
+    )
+  await practice.openDaily(null)
+  await practice.openExtra(null)
+  expect(paths()).toEqual(['/practice/daily', '/practice/extra'])
+  expect(body(0)).toEqual({ language: 'de', lesson_id: null })
+  expect(body(1).language).toBe('de')
 })

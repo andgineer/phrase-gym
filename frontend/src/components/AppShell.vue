@@ -2,9 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
-import type { Page, Screen } from '../composables/useAppNavigation'
+import { hashFor, type Page, type Screen } from '../composables/useAppNavigation'
+import type { LearningLanguage } from '../languages'
 
-defineProps<{ screen: Screen; initialized: boolean }>()
+defineProps<{ screen: Screen; language: LearningLanguage; initialized: boolean }>()
 const emit = defineEmits<{ navigate: [page: Page] }>()
 const pages: { page: Page; label: string }[] = [
   { page: 'entry', label: 'Practice' },
@@ -25,7 +26,11 @@ onMounted(async () => {
 <template>
   <div class="shell">
     <div class="brand-row">
-      <a class="brand" href="/" @click.prevent="emit('navigate', 'entry')">
+      <a
+        class="brand"
+        :href="hashFor(language, 'entry')"
+        @click.prevent="emit('navigate', 'entry')"
+      >
         Phrase Gym<span>◌</span>
       </a>
       <span v-if="version" class="muted app-version">v{{ version }}</span>

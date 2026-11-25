@@ -56,13 +56,14 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   const stop = card.getByRole('button', { name: 'Stop recording' })
   await expect(stop).toBeVisible()
 
-  const beforeLeave = (await (await page.request.get('/api/practice/current')).json()).card
+  const beforeLeave = (await (await page.request.get('/api/practice/current?language=en')).json())
+    .card
   const wordRequest = await submitToCoach(page, typedWord)
   await expect(card).toHaveCount(0)
   await expect.poll(async () => (await savedTakes(page, phraseText)).length).toBe(1)
   await page.getByRole('navigation').getByRole('button', { name: 'Practice' }).click()
   await page.getByRole('button', { name: 'Start', exact: true }).click()
-  const resumed = (await (await page.request.get('/api/practice/current')).json()).card
+  const resumed = (await (await page.request.get('/api/practice/current?language=en')).json()).card
   expect(resumed.view_token).toBe(beforeLeave.view_token)
   await revealAnswer(page)
   await expect(card.getByRole('heading', { name: phraseText })).toBeVisible()
@@ -74,7 +75,7 @@ test('a typed phrase and word reach Added with Coach while practice continues', 
   await revealAnswer(page)
   await expect(card.getByRole('heading', { name: wordText })).toBeVisible()
   await rateNew(page)
-  const lessons = await (await page.request.get('/api/lessons')).json()
+  const lessons = await (await page.request.get('/api/lessons?language=en')).json()
   expect(lessons.items).toEqual([
     expect.objectContaining({ title: 'Added with Coach', phrase_count: 2 }),
   ])

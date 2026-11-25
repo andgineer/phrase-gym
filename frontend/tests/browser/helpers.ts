@@ -51,7 +51,7 @@ export function playedMedia(page: Page) {
 }
 
 export async function phraseId(page: Page, text: string): Promise<string> {
-  const found = await page.request.get(`/api/phrases?query=${encodeURIComponent(text)}`)
+  const found = await page.request.get(`/api/phrases?language=en&query=${encodeURIComponent(text)}`)
   return (await found.json()).items[0].id
 }
 

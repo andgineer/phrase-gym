@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 from phrase_gym.server.allowance import daily_progress
 from phrase_gym.server.import_contracts import StrictModel
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_selection import due_phrases, new_phrases
 from phrase_gym.server.practice_state import finished_message
 from phrase_gym.server.practice_views import load_view, require_lesson
@@ -26,34 +27,34 @@ class TodayPractice:
         self.database = database
         self.clock = clock or (lambda: datetime.now(UTC))
 
-    def read(self, lesson_id: str | None) -> PracticeToday:
+    def read(self, language: LearningLanguage, lesson_id: str | None) -> PracticeToday:
         now = self.clock()
         with self.database.snapshot() as connection:
             require_lesson(connection, lesson_id)
             day = learning_day(connection, now)
-            current = load_view(connection)
+            current = load_view(connection, language)
             view = ViewRecord(
-                1,
-                "",
-                day,
-                "daily",
-                lesson_id,
-                "[]",
-                None,
-                None,
-                None,
-                0,
-                0,
-                None,
-                None,
-                "{}",
+                language=language,
+                traversal_id="",
+                learning_date=day,
+                origin="daily",
+                lesson_id=lesson_id,
+                skipped_json="[]",
+                phrase_id=None,
+                view_token=None,
+                kind=None,
+                practice=0,
+                revealed=0,
+                cue_index=None,
+                hint_index=None,
+                operations_json="{}",
             )
             if current is not None and current.learning_date == day:
                 passed = (
                     current.skipped_json if current.phrase_id and not current.practice else "[]"
                 )
                 view = replace(current, lesson_id=lesson_id, skipped_json=passed)
-            progress = daily_progress(connection, day)
+            progress = daily_progress(connection, day, language)
             due_left = max(progress.due_allowance - progress.due_completed, 0)
             new_left = max(progress.new_allowance - progress.new_completed, 0)
             due = due_phrases(connection, view, now)

@@ -7,6 +7,7 @@ from phrase_gym.server.completion import PracticeCompletion
 from phrase_gym.server.current_practice import CurrentPractice
 from phrase_gym.server.daily import DailyPractice
 from phrase_gym.server.extra import ExtraPractice
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.phrase_practice import PhrasePractice, UnknownPhraseError
 from phrase_gym.server.practice_contracts import (
     CompletionRequest,
@@ -49,18 +50,18 @@ def practice_entry_routes(
     router = APIRouter(prefix="/api/practice")
 
     @router.get("/today")
-    def today_counts(lesson_id: str | None = None) -> PracticeToday:
+    def today_counts(language: LearningLanguage, lesson_id: str | None = None) -> PracticeToday:
         with conflicts():
-            return today.read(lesson_id)
+            return today.read(language, lesson_id)
 
     @router.get("/current")
-    def current_view() -> PracticeState:
-        return current.read()
+    def current_view(language: LearningLanguage) -> PracticeState:
+        return current.read(language)
 
     @router.post("/daily")
     def open_daily(request: OpenDaily) -> PracticeState:
         with conflicts():
-            return daily.open(request.lesson_id)
+            return daily.open(request.language, request.lesson_id)
 
     @router.post("/extra")
     def open_extra(request: OpenExtra) -> ExtraResult:

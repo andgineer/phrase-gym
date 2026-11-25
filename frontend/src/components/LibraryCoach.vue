@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useCoachSubmission } from '../composables/useCoachSubmission'
+import type { LearningLanguage } from '../languages'
 
-const props = defineProps<{ text: string; hasResults: boolean }>()
-const { sending, confirmation, error, submit, reset } = useCoachSubmission()
+const props = defineProps<{ text: string; language: LearningLanguage; hasResults: boolean }>()
+const { sending, confirmation, error, submit, reset } = useCoachSubmission(props.language)
 // A completed request belongs to its search, even if the learner edits during submission.
 let submitted = ''
 async function send() {

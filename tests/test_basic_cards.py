@@ -43,12 +43,14 @@ def post_result(
 
 
 def coach_phrases(client: TestClient) -> list[dict[str, object]]:
-    lessons = client.get("/api/lessons").json()["items"]
+    lessons = client.get("/api/lessons?language=en").json()["items"]
     return [
         phrase
         for lesson in lessons
         if lesson["title"] == "Added with Coach"
-        for phrase in client.get("/api/phrases", params={"lesson_id": lesson["id"]}).json()["items"]
+        for phrase in client.get(
+            "/api/phrases", params={"language": "en", "lesson_id": lesson["id"]}
+        ).json()["items"]
     ]
 
 
@@ -132,7 +134,7 @@ def test_a_failed_publication_leaves_no_partial_card(
         post_result(client, request_id, basic())
     monkeypatch.undo()
     assert reference_files(tmp_path) == []
-    assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
+    assert client.get("/api/lessons?language=en").json()["all_lessons"]["phrase_count"] == 0
     assert client.get(f"/api/imports/{request_id}").json()["status"] == "preparing"
     assert post_result(client, request_id, basic()).json()["status"] == "added"
 

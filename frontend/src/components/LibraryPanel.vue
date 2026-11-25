@@ -5,8 +5,10 @@ import LessonPicker from './LessonPicker.vue'
 import DeleteDialog from './DeleteDialog.vue'
 import PhraseDetails from './PhraseDetails.vue'
 import PhraseFinder from './PhraseFinder.vue'
+import type { LearningLanguage } from '../languages'
 
 const props = defineProps<{
+  language: LearningLanguage
   disabled: boolean
   play: (url: string) => Promise<void>
   stopPlayback: () => void
@@ -40,6 +42,7 @@ async function deleted(result: DeletionResult) {
     v-if="opened"
     :key="opened"
     :phrase-id="opened"
+    :language="language"
     :disabled="disabled"
     :play="play"
     @back="open(null)"
@@ -51,11 +54,14 @@ async function deleted(result: DeletionResult) {
     <PhraseFinder
       ref="finder"
       v-model:query="query"
+      :language="language"
       :lesson-id="lessonId"
       :disabled="disabled"
       @open="open"
     >
-      <template #lesson><LessonPicker ref="picker" v-model="lessonId" compact /></template>
+      <template #lesson
+        ><LessonPicker ref="picker" v-model="lessonId" :language="language" compact
+      /></template>
     </PhraseFinder>
   </section>
   <DeleteDialog :target="pendingDelete" @cancel="pendingDelete = null" @deleted="deleted" />

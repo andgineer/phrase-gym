@@ -11,6 +11,7 @@ from phrase_gym.server.facts_contracts import (
     StudiedPhrase,
 )
 from phrase_gym.server.import_notices import import_notices
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
 from phrase_gym.server.records import PracticeLogRecord, ScheduleRecord, fetch_all
 from phrase_gym.server.scheduling import learning_day, learning_zone
@@ -28,19 +29,25 @@ def _day_bounds(connection: sqlite3.Connection, day: str) -> tuple[str, str]:
     return start.astimezone(UTC).isoformat(), end.astimezone(UTC).isoformat()
 
 
-def _recordings(connection: sqlite3.Connection, day: str | None) -> int:
-    if day is None:
+def _recordings(connection: sqlite3.Connection, today: tuple[str, LearningLanguage] | None) -> int:
+    if today is None:
         return connection.execute("SELECT COUNT(*) FROM recordings").fetchone()[0]
+    day, language = today
     # Takes carry the capturing device's offset; julianday compares them as instants.
     return connection.execute(
-        "SELECT COUNT(*) FROM recordings "
-        "WHERE julianday(captured_at)>=julianday(?) AND julianday(captured_at)<julianday(?)",
-        _day_bounds(connection, day),
+        "SELECT COUNT(*) FROM recordings JOIN phrases ON phrases.id=recordings.phrase_id "
+        "WHERE phrases.language=? AND julianday(captured_at)>=julianday(?) "
+        "AND julianday(captured_at)<julianday(?)",
+        (language, *_day_bounds(connection, day)),
     ).fetchone()[0]
 
 
-def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
-    clause, parameters = ("AND learning_date=? ", (day,)) if day else ("", ())
+def _totals(
+    connection: sqlite3.Connection,
+    today: tuple[str, LearningLanguage] | None,
+) -> PracticeTotals:
+    """Today's figures for one language, or everything done in every language."""
+    clause, parameters = ("AND learning_date=? AND language=? ", today) if today else ("", ())
     rows = connection.execute(
         "SELECT kind, rating, COUNT(*) AS count FROM practice_log "  # noqa: S608
         f"WHERE skipped=0 {clause}GROUP BY kind, rating",
@@ -60,20 +67,26 @@ def _totals(connection: sqlite3.Connection, day: str | None) -> PracticeTotals:
         got_it=ratings.get("got_it", 0),
         effort=ratings.get("effort", 0),
         not_yet=ratings.get("not_yet", 0),
-        recordings=_recordings(connection, day),
+        recordings=_recordings(connection, today),
     )
 
 
-def _library(connection: sqlite3.Connection, now: datetime) -> LibraryCounts:
+def _library(
+    connection: sqlite3.Connection,
+    now: datetime,
+    language: LearningLanguage,
+) -> LibraryCounts:
     rows = fetch_all(
         connection,
         ScheduleRecord,
-        f"SELECT {SCHEDULE_COLUMNS} FROM phrases",  # noqa: S608
+        f"SELECT {SCHEDULE_COLUMNS} FROM phrases WHERE language=?",  # noqa: S608
+        (language,),
     )
     summary = schedule_summary(connection, rows, now)
     long_term = connection.execute(
-        "SELECT COUNT(*) FROM phrases WHERE json_extract(fsrs_json, '$.stability')>=?",
-        (LONG_TERM_STABILITY_DAYS,),
+        "SELECT COUNT(*) FROM phrases WHERE language=? "
+        "AND json_extract(fsrs_json, '$.stability')>=?",
+        (language, LONG_TERM_STABILITY_DAYS),
     ).fetchone()[0]
     return LibraryCounts(
         phrase_count=summary.phrase_count,
@@ -89,10 +102,11 @@ class PracticeFactsService:
         self.database = database
         self.clock = clock or (lambda: datetime.now(UTC))
 
-    def facts(self) -> PracticeFacts:
+    def facts(self, language: LearningLanguage) -> PracticeFacts:
         with self.database.snapshot() as connection:
             now = self.clock()
             day = learning_day(connection, now)
+            # The streak, the weekly target and Progress count practice in every language.
             dates = [
                 row[0]
                 for row in connection.execute(
@@ -103,23 +117,29 @@ class PracticeFactsService:
                 learning_date=day,
                 streak=practice_streak(dates, day),
                 week=practice_week(dates, day, read_settings(connection)),
-                today=_totals(connection, day),
+                today=_totals(connection, (day, language)),
                 work=CumulativeWork(
                     **_totals(connection, None).model_dump(),
                     practice_days=len(dates),
                 ),
-                library=_library(connection, now),
+                library=_library(connection, now, language),
                 notices=import_notices(connection),
             )
 
-    def studied(self, learning_date: str, offset: int, limit: int) -> StudiedPage:
+    def studied(
+        self,
+        language: LearningLanguage,
+        learning_date: str,
+        offset: int,
+        limit: int,
+    ) -> StudiedPage:
         with self.database.read() as connection:
             rows = fetch_all(
                 connection,
                 PracticeLogRecord,
-                "SELECT * FROM practice_log WHERE learning_date=? AND skipped=0 "
+                "SELECT * FROM practice_log WHERE language=? AND learning_date=? AND skipped=0 "
                 "ORDER BY completed_at, rowid LIMIT ? OFFSET ?",
-                (learning_date, limit + 1, offset),
+                (language, learning_date, limit + 1, offset),
             )
         return StudiedPage(
             items=[

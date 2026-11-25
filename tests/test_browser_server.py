@@ -31,7 +31,7 @@ def test_reset_replaces_database_clock_rng_and_files(tmp_path, monkeypatch):
         assert server.app.state.daily.clock().date() == datetime.now(UTC).date()
         assert server.app.state.daily.rng is not old_rng
         assert server.app.state.daily.rng.random() == old_rng.random()
-        assert client.get("/api/lessons").json()["items"] == []
+        assert client.get("/api/lessons?language=en").json()["items"] == []
         assert client.post("/api/imports/coach/next").json() is None
         assert not list(server.app.state.database.data_dir.rglob("*.wav"))
         assert server.preparer.attempts.parent == server.app.state.database.data_dir

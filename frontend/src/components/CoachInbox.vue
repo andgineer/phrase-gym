@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { CoachOutcome } from '../composables/useCoachInbox'
+import { languageName } from '../languages'
 
 defineProps<{ items: CoachOutcome[]; busy: string | null; error: string }>()
 const emit = defineEmits<{ dismiss: [requestId: string]; retry: [requestId: string] }>()
-const languages: Record<CoachOutcome['learning_language'], string> = { en: 'English' }
 </script>
 
 <template>
@@ -18,7 +18,7 @@ const languages: Record<CoachOutcome['learning_language'], string> = { en: 'Engl
           <strong :lang="item.learning_language">“{{ item.text }}”</strong>
         </p>
         <p class="muted">
-          {{ languages[item.learning_language] }} ·
+          {{ languageName(item.learning_language) }} ·
           <template v-if="item.outcome === 'corrected'">Corrected and added with Coach</template>
           <template v-else-if="item.outcome === 'rejected'">Not added</template>
           <template v-else>Coach could not finish</template>

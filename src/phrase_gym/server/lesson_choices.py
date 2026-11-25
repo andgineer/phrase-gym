@@ -2,6 +2,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 
 from phrase_gym.server.contracts import LessonChoice, LessonPage
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.phrase_counts import SCHEDULE_COLUMNS, schedule_summary
 from phrase_gym.server.records import LessonRecord, LessonScheduleRecord, fetch_all, fetch_one
 from phrase_gym.server.search_terms import query_terms, word_prefix_filter
@@ -13,16 +14,26 @@ class LessonChoices:
         self.database = database
         self.clock = clock or (lambda: datetime.now(UTC))
 
-    def page(self, query: str, lesson_id: str | None, offset: int, limit: int) -> LessonPage:
+    def page(
+        self,
+        language: LearningLanguage,
+        query: str,
+        lesson_id: str | None,
+        offset: int,
+        limit: int,
+    ) -> LessonPage:
         clause, parameters = word_prefix_filter("search_text", query_terms(query))
         now = self.clock()
         with self.database.read() as connection:
+            # A lesson belongs to the languages of its phrases; one left empty shows in each.
             lessons = fetch_all(
                 connection,
                 LessonRecord,
-                f"SELECT * FROM lessons WHERE {clause} "  # noqa: S608
+                f"SELECT * FROM lessons WHERE {clause} AND ("  # noqa: S608
+                "EXISTS (SELECT 1 FROM phrases WHERE lesson_id=lessons.id AND language=?) "
+                "OR NOT EXISTS (SELECT 1 FROM phrases WHERE lesson_id=lessons.id)) "
                 "ORDER BY created_at, position, title, id LIMIT ? OFFSET ?",
-                (*parameters, limit + 1, offset),
+                (*parameters, language, limit + 1, offset),
             )
             selected = (
                 fetch_one(
@@ -37,7 +48,8 @@ class LessonChoices:
             phrases = fetch_all(
                 connection,
                 LessonScheduleRecord,
-                f"SELECT lesson_id, {SCHEDULE_COLUMNS} FROM phrases",  # noqa: S608
+                f"SELECT lesson_id, {SCHEDULE_COLUMNS} FROM phrases WHERE language=?",  # noqa: S608
+                (language,),
             )
             by_lesson: dict[str, list[LessonScheduleRecord]] = {}
             for row in phrases:

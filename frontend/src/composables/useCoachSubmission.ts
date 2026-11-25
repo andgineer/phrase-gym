@@ -1,11 +1,10 @@
 import { onUnmounted, ref } from 'vue'
 import { api } from '../api'
 import type { components } from '../api.generated'
+import type { LearningLanguage } from '../languages'
 
 type CoachSubmission = components['schemas']['CoachSubmission']
 type CoachRequest = components['schemas']['CoachRequest']
-// Every page is English until a second learning language gives pages their own address.
-const pageLanguage: CoachRequest['learning_language'] = 'en'
 const confirmations: Record<CoachSubmission['outcome'], string> = {
   saved: 'Saved for Coach.',
   waiting: 'Already waiting for Coach.',
@@ -15,7 +14,8 @@ const confirmations: Record<CoachSubmission['outcome'], string> = {
 
 export const coachText = (text: string) => text.replace(/[\r\n]+/g, ' ').trim()
 
-export function useCoachSubmission() {
+// A send captures the language of the page in use; a language switch remounts the page.
+export function useCoachSubmission(pageLanguage: LearningLanguage) {
   const sending = ref(false)
   const confirmation = ref('')
   const error = ref('')

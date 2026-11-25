@@ -36,8 +36,11 @@ class ViewActions:
         now = self.clock()
         with self.database.write() as connection:
             view = require_view(connection, learning_day(connection, now), action)
-            connection.execute("UPDATE current_view SET revealed=1 WHERE id=1")
-            view = load_view(connection) or view
+            connection.execute(
+                "UPDATE current_view SET revealed=1 WHERE language=?",
+                (view.language,),
+            )
+            view = load_view(connection, view.language) or view
             return practice_card(connection, view, view_phrase(connection, view), now)
 
     def new_cue(self, operation: ViewOperation) -> PracticeCard:
@@ -72,13 +75,14 @@ class ViewActions:
             history[operation.operation_id] = {"kind": kind, "choice": choice}
             retained = dict(list(history.items())[-MAX_VIEW_OPERATIONS:])
             connection.execute(
-                f"UPDATE current_view SET {column}=?, operations_json=? WHERE id=1",  # noqa: S608
-                (choice, json.dumps(retained)),
+                f"UPDATE current_view SET {column}=?, operations_json=? "  # noqa: S608
+                "WHERE language=?",
+                (choice, json.dumps(retained), view.language),
             )
             if kind == "cue":
                 connection.execute(
                     "UPDATE phrases SET last_cue=? WHERE id=?",
                     (choice, phrase.id),
                 )
-            view = load_view(connection) or view
+            view = load_view(connection, view.language) or view
             return practice_card(connection, view, phrase, now)

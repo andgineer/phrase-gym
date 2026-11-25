@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
+from phrase_gym.server.languages import LearningLanguage, MeaningLanguage
 from phrase_gym.server.search_terms import search_key
 
 IDENTITY_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$"
@@ -79,14 +80,14 @@ class ImportLesson(StrictModel):
 
 class PhrasePackage(StrictModel):
     format: Literal["phrase-gym.package"]
-    version: Literal[2]
+    version: Literal[3]
     package_id: str = Field(pattern=IDENTITY_PATTERN)
     source_id: str = Field(pattern=IDENTITY_PATTERN)
     source_label: str = Field(min_length=1, max_length=200)
     source_link: HttpUrl | None = None
-    learning_language: Literal["en"]
-    card_language: Literal["en"]
-    help_language: Literal["en"]
+    learning_language: LearningLanguage
+    # Cue glosses and short help; checked against the learner's translation choice on import.
+    meaning_language: MeaningLanguage
     lessons: list[ImportLesson] = Field(min_length=1, max_length=20)
 
     @field_validator("lessons")

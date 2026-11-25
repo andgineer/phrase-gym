@@ -6,6 +6,7 @@ from phrase_gym.server.coach_contracts import (
     COACH_SOURCE_LABEL,
     BasicCard,
     CoachResult,
+    CoachWork,
 )
 from phrase_gym.server.import_contracts import ImportLesson, ImportPhrase, PhrasePackage
 from phrase_gym.server.publication import Batch, BatchPhrase, package_batch
@@ -17,16 +18,15 @@ from phrase_gym.server.reference_audio import (
 from phrase_gym.server.search_terms import search_key
 
 
-def coach_package(package_id: str, phrase: ImportPhrase) -> PhrasePackage:
+def coach_package(work: CoachWork, phrase: ImportPhrase) -> PhrasePackage:
     return PhrasePackage(
         format="phrase-gym.package",
-        version=2,
-        package_id=package_id,
+        version=3,
+        package_id=work.package_id,
         source_id=COACH_SOURCE_ID,
         source_label=COACH_SOURCE_LABEL,
-        learning_language="en",
-        card_language="en",
-        help_language="en",
+        learning_language=work.learning_language,
+        meaning_language=work.native_language if work.translation else work.learning_language,
         lessons=[
             ImportLesson(lesson_id=COACH_LESSON_ID, title=COACH_SOURCE_LABEL, phrases=[phrase]),
         ],
@@ -55,11 +55,12 @@ def _basic_content(card: BasicCard) -> dict[str, object]:
     }
 
 
-def coach_batch(package_id: str, result: CoachResult) -> Batch:
+def coach_batch(work: CoachWork, result: CoachResult) -> Batch:
+    package_id = work.package_id
     if result.phrase is not None:
         if result.phrase.item_id != package_id:
             raise ImportConflictError(f"phrases.item_id must be {package_id}.")
-        package = coach_package(package_id, result.phrase)
+        package = coach_package(work, result.phrase)
         return package_batch(package, decode_references(package, {package_id: result.reference}))
     if result.basic is None:
         raise ImportConflictError("A Coach result needs a card.")
@@ -67,6 +68,7 @@ def coach_batch(package_id: str, result: CoachResult) -> Batch:
         package_id=package_id,
         source_id=COACH_SOURCE_ID,
         source_label=COACH_SOURCE_LABEL,
+        language=work.learning_language,
         lessons=[(COACH_LESSON_ID, COACH_SOURCE_LABEL)],
         phrases=[
             BatchPhrase(

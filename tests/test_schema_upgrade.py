@@ -8,7 +8,7 @@ import pytest
 
 from phrase_gym.server import main as cli
 from phrase_gym.server import schema_upgrade
-from phrase_gym.server.contracts import Settings
+from phrase_gym.server.contracts import Settings, TranslationChoices
 from phrase_gym.server.schema_upgrade import STEPS, statements
 from phrase_gym.server.settings_store import read_settings
 from phrase_gym.server.storage import Database
@@ -76,8 +76,7 @@ def test_schema_5_database_is_upgraded_in_place_after_a_backup(
         assert read_settings(connection) == Settings(
             native_language="ru",
             learning_timezone="Europe/Belgrade",
-            card_language="en",
-            help_language="en",
+            translation=TranslationChoices(en=False, de=True),
             daily_due_limit=9,
             daily_new_limit=5,
             return_pace="balanced",
@@ -278,3 +277,30 @@ INSERT INTO import_notices VALUES ('coach-rejected', '2026-11-01T11:00:00+00:00'
         ("coach-seen-failure", "Timed out", 1),
     ]
     assert "instruction" in columns
+
+
+def test_existing_practice_becomes_english_when_learning_languages_arrive(tmp_path: Path) -> None:
+    directory = tmp_path / "data"
+    directory.mkdir()
+    rows = """
+INSERT INTO extra_targets VALUES ('2026-10-31', 40, 10);
+INSERT INTO current_view VALUES (1, 'traversal-1', '2026-10-31', 'extra', 'lesson-1', '[]',
+  'phrase-1', 'view-token-1', 'recall', 0, 1, 0, NULL, '{}');
+"""
+    with closing(sqlite3.connect(directory / "phrase-gym.sqlite3")) as connection:
+        script = "".join(STEPS[version] for version in range(5, 13))
+        learner = SCHEMA_5_ROWS.split("UPDATE settings")[0].replace("'5'", "'12'", 1)
+        for statement in statements(script + learner + rows):
+            connection.execute(statement)
+        connection.commit()
+    with Database(directory).read() as connection:
+        phrases = list(connection.execute("SELECT id, language FROM phrases"))
+        log = list(connection.execute("SELECT id, language FROM practice_log"))
+        targets = list(connection.execute("SELECT * FROM extra_targets"))
+        view = connection.execute(
+            "SELECT language, view_token, phrase_id, origin, revealed FROM current_view"
+        ).fetchall()
+    assert [tuple(row) for row in phrases] == [("phrase-1", "en")]
+    assert [tuple(row) for row in log] == [("log-1", "en")]
+    assert [tuple(row) for row in targets] == [("2026-10-31", "en", 40, 10)]
+    assert [tuple(row) for row in view] == [("en", "view-token-1", "phrase-1", "extra", 1)]

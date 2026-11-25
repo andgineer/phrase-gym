@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime
 
 from phrase_gym.server.allowance import daily_progress
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.practice_views import clear_phrase, load_view, show_phrase
 from phrase_gym.server.records import PhraseRecord, ViewRecord, fetch_all
 from phrase_gym.server.scheduling import effective_due
@@ -11,7 +12,9 @@ from phrase_gym.server.scheduling import effective_due
 
 def _lesson_filter(view: ViewRecord) -> tuple[str, tuple[str, ...]]:
     lesson = view.lesson_id
-    return (" AND lesson_id=?", (lesson,)) if lesson else ("", ())
+    if lesson:
+        return " AND language=? AND lesson_id=?", (view.language, lesson)
+    return " AND language=?", (view.language,)
 
 
 def due_phrases(
@@ -51,7 +54,7 @@ def draw_phrase(
     day: str,
     rng: random.Random,
 ) -> tuple[PhraseRecord, str] | None:
-    progress = daily_progress(connection, day)
+    progress = daily_progress(connection, day, view.language)
     due_left = max(progress.due_allowance - progress.due_completed, 0)
     new_left = max(progress.new_allowance - progress.new_completed, 0)
     # FSRS needs the longest-due phrases reviewed first; only their order within the session varies.
@@ -70,14 +73,15 @@ def advance(
     connection: sqlite3.Connection,
     now: datetime,
     day: str,
+    language: LearningLanguage,
     rng: random.Random,
 ) -> None:
-    view = load_view(connection)
+    view = load_view(connection, language)
     if view is None:
         return
     drawn = draw_phrase(connection, view, now, day, rng)
     if drawn is None:
-        clear_phrase(connection)
+        clear_phrase(connection, language)
         return
     phrase, kind = drawn
     show_phrase(connection, phrase, kind, rng)

@@ -1,5 +1,6 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { ApiError, api } from '../api'
+import type { LearningLanguage } from '../languages'
 import {
   completedPractice,
   extendedPractice,
@@ -24,7 +25,8 @@ import type {
 const changed = 'This card changed in another tab or a new day began.'
 const practiceClosed = 'This Practice card changed in another tab or a new day began.'
 
-export function usePractice() {
+// Daily, Extra and reconciliation use the page's language; a card's own token names its view.
+export function usePractice(language: Ref<LearningLanguage>) {
   const view = ref(initialView())
   const reviewedCards = ref<ReviewedCard[]>([])
   const busy = ref(false)
@@ -63,7 +65,7 @@ export function usePractice() {
 
   function openDaily(lesson: string | null = lessonId) {
     lessonId = lesson
-    return load('daily', { lesson_id: lesson })
+    return load('daily', { language: language.value, lesson_id: lesson })
   }
 
   const openPhrase = (phraseId: string) => load('phrase', { phrase_id: phraseId })
@@ -73,7 +75,7 @@ export function usePractice() {
     const mine = epoch
     busy.value = true
     try {
-      const state = await api<PracticeState>('/practice/current')
+      const state = await api<PracticeState>(`/practice/current?language=${language.value}`)
       if (mine !== epoch) return null
       view.value = openedState(state)
       pending.value = null
@@ -132,7 +134,11 @@ export function usePractice() {
     if (busy.value) return false
     lessonId = lesson
     // Every deliberate press gets its own operation ID; only Retry reuses one.
-    pendingExtra.value = { operation_id: crypto.randomUUID(), lesson_id: lesson }
+    pendingExtra.value = {
+      operation_id: crypto.randomUUID(),
+      language: language.value,
+      lesson_id: lesson,
+    }
     return sendExtra(pendingExtra.value)
   }
 

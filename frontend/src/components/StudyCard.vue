@@ -10,9 +10,11 @@ import type { DeletionTarget } from '../libraryTypes'
 import { progressLine } from '../practiceReducer'
 import type { Card, Outcome, Progress, Rating, Recording, ReviewedCard } from '../studyTypes'
 import MicrophoneButton from './MicrophoneButton.vue'
+import type { LearningLanguage } from '../languages'
 
 const props = defineProps<{
   card: Card
+  language: LearningLanguage
   reviewedCards: ReviewedCard[]
   reviewIndex: number | null
   progress: Progress | null
@@ -186,7 +188,7 @@ const progressValue = computed(() => {
           <p v-if="card.hint" class="hint" role="status">Hint: {{ card.hint }}</p>
         </template>
         <template v-else-if="activeCard.answer">
-          <h2 ref="phraseHeading" tabindex="-1" lang="en" data-testid="practice-phrase">
+          <h2 ref="phraseHeading" tabindex="-1" :lang="language" data-testid="practice-phrase">
             {{ activeCard.answer.text }}
           </h2>
           <p v-if="reviewed?.outcome === 'skipped'" class="muted">Skipped without a grade</p>

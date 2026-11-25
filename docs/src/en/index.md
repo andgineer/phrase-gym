@@ -1,12 +1,22 @@
 # Phrase Gym
 
-Practise saying useful English phrases from your lessons, videos, and conversations. Each card
+Practise saying useful English or German phrases from your lessons, videos, and conversations. Each card
 starts with a situation and a hidden answer. Say the phrase from memory, hear the reference,
 and rate your recall to schedule the next review.
 
 Start with [installation](installation.md), then [add your phrases](importing-phrases.md).
 The **Practice**, **Library**, **Coach**, and **Settings** tabs switch pages. The Phrase Gym name
 returns to Practice. Reloading keeps the selected page, and every page shows the installed version.
+
+## Learning languages
+
+Each language you learn, English and German, is practised separately. Choose it with its button
+above **Start** on the Practice page; the selected one is highlighted. Daily, Extra, Library and
+the words you send to Coach then use that language only, and each language has its own daily
+limits. Every language has its own address, so you can bookmark it: `#de` opens German practice,
+and `#de/library`, `#de/coach` and `#de/settings` open the other pages in German. An address
+without a language, such as an older bookmark, opens English. Switching languages or pages does
+not add entries to the browser's back history.
 
 ## Daily and extra practice
 
@@ -75,6 +85,8 @@ recordings, with pending takes counted separately. **See today’s phrases** inc
 from cards you completed and later deleted. **Progress** adds up your practice days, ratings,
 and recordings. **Total** shows how many phrases are due now, due later, or new. It also shows
 a long-term memory count based on the scheduler's estimate of each phrase's stability.
+**Today** and **Total** describe the selected language; **Progress**, the streak, and the weekly
+target count practice in every language.
 
 A day with at least one rating counts toward the streak. The current streak still shows
 yesterday's run until you practise today. Missing a full day resets the current streak. The
@@ -83,6 +95,10 @@ Set a weekly target of one to six days in **Settings** and pause or change it an
 Monday starts a fresh week. The target affects only the progress display.
 
 **Settings** also holds your native language, learning timezone, daily limits, and return pace.
+**Translation in native language** is chosen for each language you learn. On, cue glosses and
+short help come in your native language; off, they stay in the language you learn. Longer
+explanations always use your native language. It starts off for English and on for German, and
+it applies to phrases added afterwards.
 Pick **Often**, **Balanced**, or **Rarely**. The choices show how often a phrase rated **Good**
 each time would come back in its first month and year.
 

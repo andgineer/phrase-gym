@@ -27,14 +27,13 @@ const phrase = (item_id: string, text: string, usage_contexts: string[], situati
 function organizedPackage(packageId: string) {
   return {
     format: 'phrase-gym.package',
-    version: 2,
+    version: 3,
     package_id: packageId,
     source_id: `${packageId}-source`,
     source_label: 'Mobile course',
     source_link: 'https://example.test/mobile',
     learning_language: 'en',
-    card_language: 'en',
-    help_language: 'en',
+    meaning_language: 'en',
     lessons: [
       {
         lesson_id: 'small-talk',
@@ -168,7 +167,8 @@ test('mobile import, lesson choice, search, details and confirmed Delete', async
   await expect(details.getByRole('heading', { name: 'So far, so good.' })).toBeVisible()
 
   const phraseId = await page.evaluate(
-    async () => (await (await fetch('/api/phrases?query=so%20far')).json()).items[0].id as string,
+    async () =>
+      (await (await fetch('/api/phrases?language=en&query=so%20far')).json()).items[0].id as string,
   )
   await details.getByRole('button', { name: 'Delete', exact: true }).tap()
   const confirm = page.getByRole('dialog', { name: 'Delete “So far, so good.”?' })

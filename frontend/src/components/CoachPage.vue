@@ -3,9 +3,11 @@ import { ref } from 'vue'
 import CoachInbox from './CoachInbox.vue'
 import { useCoachInbox } from '../composables/useCoachInbox'
 import { coachText, useCoachSubmission } from '../composables/useCoachSubmission'
+import type { LearningLanguage } from '../languages'
 
+const props = defineProps<{ language: LearningLanguage }>()
 const text = ref('')
-const { sending, confirmation, error, submit } = useCoachSubmission()
+const { sending, confirmation, error, submit } = useCoachSubmission(props.language)
 const inbox = useCoachInbox()
 async function send() {
   const outcome = await submit(text.value)

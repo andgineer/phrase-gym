@@ -216,7 +216,7 @@ test('a graded card can record and replay a new take without changing the curren
   const next = controls.getByRole('button', { name: 'Next card', exact: true })
   const microphone = controls.getByRole('button', { name: 'Record a take' })
   const good = controls.getByRole('button', { name: 'Good', exact: true })
-  const current = async () => (await page.request.get('/api/practice/current')).json()
+  const current = async () => (await page.request.get('/api/practice/current?language=en')).json()
 
   await controls.getByRole('button', { name: 'Reveal', exact: true }).click()
   await expect(phrase).toHaveText(texts[0])
@@ -252,6 +252,6 @@ test('a graded card can record and replay a new take without changing the curren
   await controls.getByRole('button', { name: 'Mine', exact: true }).click()
   await expect.poll(async () => (await playedMedia(page)).length).toBe(beforeReplay + 1)
   await finishClip(page)
-  const facts = await (await page.request.get('/api/practice/facts')).json()
+  const facts = await (await page.request.get('/api/practice/facts?language=en')).json()
   expect(facts.today).toMatchObject({ completions: 1, got_it: 1, recordings: 1 })
 })

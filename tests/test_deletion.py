@@ -57,9 +57,11 @@ def test_delete_removes_phrase_reference_takes_and_open_view(
     assert practice.log() == []
     assert client.get(f"/api/phrases/{opened['phrase_id']}").status_code == 404
     assert client.delete(f"/api/phrases/{opened['phrase_id']}").status_code == 404
-    found = client.get("/api/phrases", params={"query": "phrase number"}).json()["items"]
+    found = client.get("/api/phrases", params={"language": "en", "query": "phrase number"}).json()[
+        "items"
+    ]
     assert len(found) == 4 and text not in [item["text"] for item in found]
-    assert client.get("/api/lessons").json()["items"][0]["phrase_count"] == 4
+    assert client.get("/api/lessons?language=en").json()["items"][0]["phrase_count"] == 4
 
 
 def test_late_upload_for_deleted_phrase_fails_without_orphan(

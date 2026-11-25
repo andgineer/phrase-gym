@@ -12,7 +12,8 @@ test('listen across days and return to the same reviewed card', async ({ page },
   await importPackage(page, extraPackage, 3)
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   await revealAnswer(page)
-  const current = async () => (await (await page.request.get('/api/practice/current')).json()).card
+  const current = async () =>
+    (await (await page.request.get('/api/practice/current?language=en')).json()).card
   const first = await current()
   const today = new Date().toISOString().slice(0, 10)
   for (let minute = 0; minute < 10; minute++)

@@ -3,15 +3,18 @@ import { api } from '../api'
 import { takeTransfers } from '../takeTransfers'
 import type { PracticeFacts, StudiedPage, StudiedPhrase } from '../factsTypes'
 import { observeLearningDay } from '../learningDay'
+import type { LearningLanguage } from '../languages'
 import { usePageReturn } from './usePageReturn'
 import { usePagedList } from './usePagedList'
 
-export function usePracticeFacts() {
+// Today and Total describe this language; Progress and the streak count every language.
+export function usePracticeFacts(language: LearningLanguage) {
   const facts = shallowRef<PracticeFacts | null>(null)
   const error = ref('')
   const listing = ref(false)
   const studied = usePagedList<StudiedPhrase, StudiedPage>(
-    () => `/practice/studied?learning_date=${facts.value?.learning_date ?? ''}`,
+    () =>
+      `/practice/studied?language=${language}&learning_date=${facts.value?.learning_date ?? ''}`,
     5,
   )
   let sequence = 0
@@ -20,7 +23,7 @@ export function usePracticeFacts() {
   async function reload(list = false) {
     const request = ++sequence
     try {
-      const next = await api<PracticeFacts>('/practice/facts')
+      const next = await api<PracticeFacts>(`/practice/facts?language=${language}`)
       if (request !== sequence) return
       const newDay = facts.value !== null && facts.value.learning_date !== next.learning_date
       observeLearningDay(next.learning_date)

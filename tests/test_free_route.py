@@ -76,7 +76,9 @@ def test_an_inflected_target_gaps_its_form_in_the_sentence(
     card, answer = practised(client)
     assert card["cue"]["situation"] == "She __________ a brilliant plan overnight."
     assert answer["text"] == sentence
-    [found] = client.get("/api/phrases", params={"query": "come up with"}).json()["items"]
+    [found] = client.get("/api/phrases", params={"language": "en", "query": "come up with"}).json()[
+        "items"
+    ]
     assert found["text"] == sentence
 
 
@@ -138,7 +140,7 @@ def test_rejected_input_explains_itself_in_coach_and_is_not_restarted(
             "correction": None,
         }
     ]
-    assert client.get("/api/practice/facts").json()["notices"] == []
+    assert client.get("/api/practice/facts?language=en").json()["notices"] == []
     again = client.post(
         "/api/coach/requests", json={"text": typed, "learning_language": "en"}
     ).json()
@@ -162,11 +164,11 @@ def test_a_service_failure_is_a_separate_retryable_result_with_a_practice_notice
     assert status["status"] == "error" and str(status["error"]).startswith(reason)
     [item] = inbox(client)
     assert item["outcome"] == "failed"
-    [notice] = client.get("/api/practice/facts").json()["notices"]
+    [notice] = client.get("/api/practice/facts?language=en").json()["notices"]
     assert (notice["label"], notice["retry_helps"]) == (typed, True)
     retried = client.post(f"/api/coach/requests/{status['package_id']}/retry").json()
     assert retried["outcome"] == "saved"
-    assert client.get("/api/practice/facts").json()["notices"] == []
+    assert client.get("/api/practice/facts?language=en").json()["notices"] == []
 
 
 def test_failed_speech_publishes_nothing_and_stays_retryable(
@@ -175,7 +177,7 @@ def test_failed_speech_publishes_nothing_and_stays_retryable(
     client.post("/api/coach/requests", json={"text": "definitely", "learning_language": "en"})
     speech = PiperSpeech(None, fake=True, fake_failures=1)
     assert process_once(ClientCoachApi(client), recognizer, speech)
-    assert client.get("/api/lessons").json()["all_lessons"]["phrase_count"] == 0
+    assert client.get("/api/lessons?language=en").json()["all_lessons"]["phrase_count"] == 0
     [item] = inbox(client)
     assert item["outcome"] == "failed"
 
@@ -191,4 +193,4 @@ def test_a_target_too_long_for_a_card_is_a_native_language_decision(
     )
     [item] = inbox(client)
     assert item["outcome"] == "rejected"
-    assert client.get("/api/practice/facts").json()["notices"] == []
+    assert client.get("/api/practice/facts?language=en").json()["notices"] == []

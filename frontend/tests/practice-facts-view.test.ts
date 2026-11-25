@@ -24,7 +24,8 @@ function state(value: PracticeFacts | null) {
   }
 }
 let model = state(facts())
-const render = (message = '') => renderToString(createSSRApp(PracticeFactsView, { message }))
+const render = (message = '') =>
+  renderToString(createSSRApp(PracticeFactsView, { language: 'en', message }))
 const emptyTotals = { ...facts().today }
 for (const field of Object.keys(emptyTotals)) emptyTotals[field as keyof typeof emptyTotals] = 0
 

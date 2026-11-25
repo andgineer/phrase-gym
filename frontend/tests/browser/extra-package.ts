@@ -14,13 +14,12 @@ const phrase = (item_id: string, text: string) => ({
 export const texts = ['So far, so good.', 'Nice to meet you.', 'That works for me.']
 export const extraPackage = {
   format: 'phrase-gym.package',
-  version: 2,
+  version: 3,
   package_id: 'extra-browser-v1',
   source_id: 'extra-browser-source',
   source_label: 'Extra course',
   learning_language: 'en',
-  card_language: 'en',
-  help_language: 'en',
+  meaning_language: 'en',
   lessons: [
     {
       lesson_id: 'small-talk',

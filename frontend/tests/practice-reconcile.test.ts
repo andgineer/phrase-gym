@@ -1,3 +1,5 @@
+import type { LearningLanguage } from '../src/languages'
+import { ref } from 'vue'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { ApiError, api } from '../src/api'
 import { usePractice } from '../src/composables/usePractice'
@@ -31,12 +33,12 @@ const card = (token: string): Card => ({
 })
 const state = (current: Card | null): PracticeState => ({ card: current, progress, message: null })
 const paths = () => vi.mocked(api).mock.calls.map(([path]) => path)
-const posted = () => paths().filter((path) => path !== '/practice/current')
+const posted = () => paths().filter((path) => path !== '/practice/current?language=en')
 const operation = (call: number) =>
   JSON.parse(String(vi.mocked(api).mock.calls[call]![1]!.body)).operation_id
 
 it('acknowledges a replayed completion without a current card and opens nothing', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('a')))
   vi.mocked(api)
     .mockImplementationOnce(async (_path, init) => ({
@@ -46,14 +48,14 @@ it('acknowledges a replayed completion without a current card and opens nothing'
     }))
     .mockResolvedValueOnce(state(null))
   await practice.complete('got_it')
-  expect(paths()).toEqual(['/practice/complete', '/practice/current'])
+  expect(paths()).toEqual(['/practice/complete', '/practice/current?language=en'])
   expect(practice.view.value.card).toBeNull()
   expect(practice.view.value.message).toBe('Your answer was saved. Press Start to continue.')
   expect(practice.error.value).toBe('')
 })
 
 it('acknowledges a replayed Extra when another tab owns the view', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api)
     .mockRejectedValueOnce(new TypeError('Failed to fetch'))
     .mockImplementationOnce(async () => ({
@@ -65,13 +67,13 @@ it('acknowledges a replayed Extra when another tab owns the view', async () => {
   await practice.openExtra(null)
   await practice.retryExtra()
   expect(operation(1)).toBe(operation(0))
-  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current'])
+  expect(paths()).toEqual(['/practice/extra', '/practice/extra', '/practice/current?language=en'])
   expect(practice.view.value.card).toBeNull()
   expect(practice.view.value.message).toBe('Extra was saved. Press Start to continue.')
 })
 
 it('a conflicting hint shows the current card read without changing it', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('old')))
   vi.mocked(api)
     .mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
@@ -83,7 +85,7 @@ it('a conflicting hint shows the current card read without changing it', async (
 })
 
 it('a conflicting rating with no current regular card returns to entry', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('old')))
   vi.mocked(api)
     .mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
@@ -95,7 +97,7 @@ it('a conflicting rating with no current regular card returns to entry', async (
 })
 
 it('a failed current-view read leaves an actionable error', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('old')))
   vi.mocked(api)
     .mockRejectedValueOnce(new ApiError('This card is no longer current.', 409))
@@ -107,7 +109,7 @@ it('a failed current-view read leaves an actionable error', async () => {
 })
 
 it('any later open abandons a failed Extra press so its Retry cannot resend it', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api)
     .mockRejectedValueOnce(new TypeError('Failed to fetch'))
     .mockResolvedValueOnce(state(card('daily')))
@@ -133,7 +135,7 @@ it('any later open abandons a failed Extra press so its Retry cannot resend it',
 })
 
 it('drops a completion result that arrives after the learner left its card', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   practice.view.value = openedState(state(card('left')))
   let release!: (value: unknown) => void
   vi.mocked(api).mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
@@ -151,7 +153,7 @@ it('drops a completion result that arrives after the learner left its card', asy
 })
 
 it('reports a shown card only for the open that produced it', async () => {
-  const practice = usePractice()
+  const practice = usePractice(ref<LearningLanguage>('en'))
   vi.mocked(api)
     .mockResolvedValueOnce(state(card('daily')))
     .mockResolvedValueOnce(state(null))
