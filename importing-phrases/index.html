@@ -543,19 +543,25 @@ preparation progress.</p>
 prepared again.</p>
 <p>When Coach fixes an obvious typo, such as <strong>definately → definitely</strong>, the <strong>Coach</strong> page lists
 the change and the card says what it corrected. A valid variant, such as <strong>colour</strong>, keeps its form.</p>
-<p>If Coach cannot use the text, for example because it is not English, cannot be read, could be
-several different words or is too long for one card, the <strong>Coach</strong> page lists the text, its
-learning language and the reason. With Gemini free the reason is in your native language; with
-Claude or Codex it is still in English.
+<p>If Coach cannot use the text, for example because it is not in the language you are learning on
+that page, cannot be read, could be several different words or is too long for one card, the
+<strong>Coach</strong> page lists the text, its learning language and the reason in your native language.
 Close it with <strong>Dismiss</strong>. Typing the same text again shows that result instead of preparing it
 again, so change the text to try something else.</p>
 <p>If a service problem stops Coach, for example because the CLI is not logged in or ran out of
 quota, Coach prints the reason in its terminal, the <strong>Coach</strong> page offers <strong>Retry</strong>, and the
 Practice page shows a notice below <strong>Total</strong>. Close the notice with <strong>×</strong> once you have read it.
 Retrying from Coach or typing the same text again prepares it again.</p>
-<p>Coach cannot prepare German cards yet. German text you send waits in the <strong>Coach</strong> page with
-<strong>Retry</strong> and the reason that Coach has no voice for the language; retry it once Coach supports
-German. German phrases prepared by your AI agent already work.</p>
+<p>German cards follow your German choices in <strong>Settings</strong>. With <strong>Translation in native language</strong>
+on, which is where German starts, a card asks in your native language for the German word or
+phrase: its cue gives the meaning and its short help explains it in your native language, while
+the answer, the example sentence and the reference audio stay German. A noun is practised with its article, such as
+<strong>die Tür</strong>, and the help mentions gender and plural where useful. Capital letters count:
+<strong>essen</strong> (to eat) and <strong>das Essen</strong> (food) are different words, and Coach keeps the one you typed.
+English cards keep their English cues and short help; the longer explanation behind <strong>More
+explanation</strong> is in your native language for every language. The German reference voice is set
+up as described in the <a href="../piper-voice/">voice setup guide</a>; without it, German text waits in the
+<strong>Coach</strong> page with <strong>Retry</strong> and the reason that Coach has no voice for the language yet.</p>
 <h2 id="ask-your-personal-ai-agent">Ask your personal AI agent</h2>
 <p>Pass <a href="https://andgineer.github.io/phrase-gym/agent-add-phrases/">the agent instructions</a> to your AI agent; you do not need to read them.
 Tell it where to find your material and give it your Phrase Gym server address. It prepares the

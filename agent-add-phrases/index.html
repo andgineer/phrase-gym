@@ -500,6 +500,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#german-cards" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        German cards
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -601,6 +612,12 @@ supplied with each source example as its reference audio.</p>
 <strong>totally convinced</strong>, <strong>Trust me</strong>, or <strong>Here's another great thing about that</strong>. An entire
 sentence about AI or onboarding is a study example, not automatically the learning target.
 A single word is prepared as one word-sense card, described after the phrase rules.</p>
+<p>Every card uses three language layers. The answer, the example <code>text</code>, the wording around each
+cue gap and the wording fragments in hints are in the learning language. The meaning layer, which
+is every cue gloss, <code>explanation</code> and <code>usage_contexts</code>, is in the native language when the learner
+has turned on translation for this learning language, and otherwise in the learning language
+itself. <code>detailed_explanation</code> is always in the learner's native language. The examples in these
+rules are English cards with an English meaning layer; apply the same rules in every language.</p>
 <h3 id="select-the-chunk-before-writing-the-cue">Select the chunk before writing the cue</h3>
 <p>In each source example, identify the useful conventional expression and its boundaries.
 Choose a coherent chunk that serves a transferable purpose, such as expressing confidence,
@@ -620,7 +637,7 @@ Do not add a <code>target_chunk</code> field or other undocumented fields.
 A changed context in a cue is an authored exercise, never a quotation attributed to the source.</p>
 <h3 id="build-a-natural-gap-cue">Build a natural gap cue</h3>
 <p>Keep the exercise fast: a short conversational line with one <code>__________</code> gap, followed by a
-plain-English meaning gloss in <code>(=...)</code>. The gap hides the whole selected chunk. Visible words
+plain meaning gloss in <code>(=...)</code>, written in the meaning-layer language. The gap hides the whole selected chunk. Visible words
 provide incidental context; an optional <code>partner_line</code> supplies the other person's short turn.
 Do not replace this format with a scene description, role instructions or a paragraph to analyze.
 For a complete routine, the response may be just the gap and gloss. Use a constant gap length,
@@ -641,9 +658,11 @@ referent: make it explicit in the partner turn or omit that optional turn. Check
 with speaker labels: the learner's "you" addresses the partner, and the partner's "you"
 addresses the learner. A request checking whether the partner can do work must not follow a
 partner turn assigning that work to the learner. Keep any follow-up question short. Another natural expression may fit; do not distort the cue to force
-one unique English answer or label a sensible alternative a language error.</p>
+one unique answer or label a sensible alternative a language error.</p>
 <h3 id="make-the-gloss-immediately-understandable">Make the gloss immediately understandable</h3>
-<p>The gloss paraphrases the missing expression's meaning in ordinary English. It is not an
+<p>The gloss gives the missing expression's meaning in ordinary words of the meaning-layer
+language: a paraphrase when that is the learning language, a natural translation of the chunk
+when it is the native language. It is not an
 instruction to the learner, a grammatical analysis or an abstract label. Prefer <code>=How is your
 day so far?</code> to <code>=Ask about today up to now</code>, and <code>=That can be tough</code> to <code>=Recognize a real
 difficulty</code>. Use enough words to make the meaning clear; shortest is not automatically best.</p>
@@ -813,13 +832,14 @@ examples, visible context does not need to be memorized as part of the expressio
 <p>A word-sense card teaches one sense of one word through short comprehensible chunks. It uses
 the same fields as a phrase card; there is no separate word structure or extra field.</p>
 <p>Choose the intended sense from the supplied context, such as the sentence the word came from.
-Without context, choose the most common useful sense for a B2 learner. Teach only that sense on
+Without context, choose the most common useful sense for the learner's level. Teach only that sense on
 the card; another sense needs its own card.</p>
 <ul>
 <li><code>text</code>: the supplied source sentence unchanged when there is one; otherwise one short,
   natural sentence that uses the word in the chosen sense. It is the revealed example.</li>
 <li><code>explanation</code>: name the word and its part of speech, then define the chosen sense in plain
-  English that is easier than the word itself, for example <strong>reluctant</strong> (adjective):
+  words of the meaning-layer language that are easier than the word itself, for example
+  <strong>reluctant</strong> (adjective):
   unwilling and slow to do something because you do not want to. Mention article, plural or
   another form only when it matters for using the word.</li>
 <li><code>cues</code>: two or three short contexts with different propositions. Each replaces the target
@@ -870,6 +890,33 @@ practical default; a definition the learner understands is not yet spoken retrie
    Do not append repeated disclaimers to learner explanations. Study precedes recall;
    requested help is supported retrieval.</li>
 </ol>
+<p>For German material, also apply these notes:</p>
+<h3 id="german-cards">German cards</h3>
+<p>These notes apply only when the learning language is German. A beginner's cue gives the meaning
+of a short chunk in the meaning-layer language and asks for the German chunk. The answer, the
+revealed <code>text</code> and the wording fragments in hints stay German. The examples below assume a
+Russian meaning layer.</p>
+<ul>
+<li><strong>Nouns:</strong> practise a noun with its definite article, such as <strong>die Tür</strong>, and make the article
+  part of the <code>target</code> and of the gap. When it helps, the explanation names the gender and the
+  plural, for example <strong>die Tür</strong> (женский род, мн. ч. <strong>die Türen</strong>). When the gender depends on
+  the sense, choose the sense from the context and give the article of that sense, as for
+  <strong>der Leiter</strong> (руководитель) and <strong>die Leiter</strong> (лестница). Prefer cue frames in which the
+  answer keeps the article as studied, usually as the subject: <code>__________ ist offen. (=дверь)</code>.</li>
+<li><strong>Capitalisation is part of the word.</strong> A capitalised noun and a lowercase word with the same
+  letters are different words, such as <strong>das Essen</strong> (еда) and <strong>essen</strong> (есть), or <strong>der Arm</strong>
+  (рука) and <strong>arm</strong> (бедный). Keep the form the learner typed and never correct one into the
+  other. A noun written in lowercase directly after an article, such as <strong>die tür</strong>, is an
+  obvious typo for <strong>die Tür</strong>.</li>
+<li><strong>Separable verbs</strong> split in a main clause: <strong>einkaufen</strong> becomes <strong>Ich kaufe heute ein</strong>. A gap
+  covers one contiguous span only, so a cue for a separable verb uses a frame in which the verb
+  stays whole, such as after a modal verb: <code>Ich muss heute noch __________. (=сходить за
+  покупками)</code> for <strong>einkaufen</strong>. Never gap only the stem or only the prefix.</li>
+<li><strong>Beginner frames:</strong> build the visible German frame from a few very common words, or give the
+  gap alone with its gloss. The gloss translates the missing chunk as the frame uses it.</li>
+<li><strong>Hints</strong> combine a German fragment of the target with a German companion, such as
+  <code>T... / aufmachen</code> for <strong>die Tür</strong>, under the measured hint rules above.</li>
+</ul>
 <p>For a course batch, also check:</p>
 <ol>
 <li><strong>Competing chunks:</strong> try likely competing chunks from the entire source, not just this

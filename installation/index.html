@@ -530,7 +530,7 @@ It needs two things on the same Mac:</p>
   tool that works inside the current preparation's folder; reading <code>.env</code> files, your home
   directory and your learning data is refused. Read-allow rules, tools and servers you add in
   your own Claude settings can widen that restriction; Coach does not isolate them.</li>
-<li>A local English <a href="../piper-voice/">Piper voice</a> for the reference audio.</li>
+<li>Local English and German <a href="../piper-voice/">Piper voices</a> for the reference audio.</li>
 </ul>
 <p>Run Coach in another terminal:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PHRASE_GYM_PIPER_CONFIG</span><span class="o">=</span>/absolute/path/to/piper-voice.json<span class="w"> </span>phrase-gym<span class="w"> </span>coach
@@ -554,8 +554,10 @@ word or phrase and fixes an obvious typo. You then get a basic card that asks yo
 in your own sentence, even where the sentence changes the phrase's form (<strong>She came up with a
 plan</strong> for <strong>come up with</strong>), or to recall the words from a partial form that shows their first
 letters, the last letter of longer words and one <code>_</code> per hidden letter, such as <strong>def_____ly</strong> or
-<strong>o_ t__ f___e</strong>. It has no explanation or extra examples. The card's instruction and Coach's
-reasons use your native language from Settings. Coach runs <code>agy</code> the way news-recap does: one launch at a time, at
+<strong>o_ t__ f___e</strong>; a partial-form card asks you to say the whole word or phrase. It has no
+explanation or extra examples, and a German noun stays as you typed it, without an added
+article. The card's instruction, the note on a corrected word and Coach's reasons use your native
+language from Settings. Coach runs <code>agy</code> the way news-recap does: one launch at a time, at
 least ten seconds apart, with its permission prompts skipped, so the model's tools are not
 limited to the preparation folder. If Antigravity renames the model, Coach switches to the
 cheapest listed Flash model for the rest of its run. Free-tier usage is subject to a quota.</p>

@@ -27,7 +27,7 @@
     
     
       
-        <title>Set up Coach’s English voice - Phrase Gym</title>
+        <title>Set up Coach’s voices - Phrase Gym</title>
       
     
     
@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#set-up-coachs-english-voice" class="md-skip">
+        <a href="#set-up-coachs-voices" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Set up Coach’s English voice
+              Set up Coach’s voices
             
           </span>
         </div>
@@ -430,35 +430,82 @@
   
 
 
-<h1 id="set-up-coachs-english-voice">Set up Coach’s English voice</h1>
-<p>The separately running Coach expects <code>PHRASE_GYM_PIPER_CONFIG</code> to name a private JSON file outside the
-repository. Piper itself is a separately pinned environment.</p>
+<h1 id="set-up-coachs-voices">Set up Coach’s voices</h1>
+<p>Coach speaks every card's revealed wording with a local Piper voice for that card's learning
+language: one English voice and one German voice. The separately running Coach expects
+<code>PHRASE_GYM_PIPER_CONFIG</code> to name a private JSON file outside the repository. Piper itself is a
+separately pinned environment.</p>
 <p>On the learner's macOS machine, create that private environment outside every repository with the
 same Python minor version as Phrase Gym and these exact packages:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">PIPER</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/Library/Application Support/io.github.andgineer.Phrase-Gym/piper-1.8.0"</span>
+<div class="highlight"><pre><span></span><code><span class="nv">PIPER</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/Library/Application Support/io.github.andgineer.Phrase-Gym-Coach/piper-1.8.0"</span>
 python3.13<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span><span class="s2">"</span><span class="nv">$PIPER</span><span class="s2">"</span>
 <span class="s2">"</span><span class="nv">$PIPER</span><span class="s2">/bin/python"</span><span class="w"> </span>-I<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>--only-binary<span class="o">=</span>:all:<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>piper-tts<span class="o">==</span><span class="m">1</span>.8.0<span class="w"> </span><span class="nv">onnxruntime</span><span class="o">==</span><span class="m">1</span>.31.0<span class="w"> </span><span class="nv">flatbuffers</span><span class="o">==</span><span class="m">25</span>.12.19<span class="w"> </span><span class="nv">numpy</span><span class="o">==</span><span class="m">2</span>.5.4<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="nv">packaging</span><span class="o">==</span><span class="m">25</span>.0<span class="w"> </span><span class="nv">pathvalidate</span><span class="o">==</span><span class="m">3</span>.3.1<span class="w"> </span><span class="nv">protobuf</span><span class="o">==</span><span class="m">7</span>.36.2
 <span class="s2">"</span><span class="nv">$PIPER</span><span class="s2">/bin/python"</span><span class="w"> </span>-I<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>check
 </code></pre></div>
-<p>Download the selected model and adjacent JSON configuration outside the repository, calculate both
-SHA-256 values, and create the private voice file with this shape:</p>
+<p>Download each voice's model and adjacent JSON configuration outside the repository. The German
+voice is <code>de_DE-thorsten-medium</code> from Piper's voice collection at revision <code>v1.0.0</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">VOICES</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/Library/Caches/io.github.andgineer.Phrase-Gym-Coach/voices"</span>
+<span class="nv">SOURCE</span><span class="o">=</span>https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">"</span><span class="nv">$VOICES</span><span class="s2">/thorsten-medium"</span>
+curl<span class="w"> </span>-fL<span class="w"> </span>-o<span class="w"> </span><span class="s2">"</span><span class="nv">$VOICES</span><span class="s2">/thorsten-medium/de_DE-thorsten-medium.onnx"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">/de_DE-thorsten-medium.onnx"</span>
+curl<span class="w"> </span>-fL<span class="w"> </span>-o<span class="w"> </span><span class="s2">"</span><span class="nv">$VOICES</span><span class="s2">/thorsten-medium/de_DE-thorsten-medium.onnx.json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">"</span><span class="nv">$SOURCE</span><span class="s2">/de_DE-thorsten-medium.onnx.json"</span>
+shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">256</span><span class="w"> </span><span class="s2">"</span><span class="nv">$VOICES</span><span class="s2">"</span>/thorsten-medium/*
+</code></pre></div>
+<p>The German files must have these SHA-256 values:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>SHA-256</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>de_DE-thorsten-medium.onnx</code></td>
+<td><code>7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819</code></td>
+</tr>
+<tr>
+<td><code>de_DE-thorsten-medium.onnx.json</code></td>
+<td><code>974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85</code></td>
+</tr>
+</tbody>
+</table>
+<p>Calculate the SHA-256 values of the English voice you selected in the same way, then create the
+private voice file with one entry per learning language:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"executable"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/piper/bin/python"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"runtime_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.8.0"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/en_US-ljspeech-medium.onnx"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"model_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"64-lowercase-hex-digits"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"config"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/en_US-ljspeech-medium.onnx.json"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"config_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"64-lowercase-hex-digits"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"voice"</span><span class="p">:</span><span class="w"> </span><span class="s2">"en_US-ljspeech-medium"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"locale"</span><span class="p">:</span><span class="w"> </span><span class="s2">"en-US"</span>
+<span class="w">  </span><span class="nt">"voices"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/en_US-ljspeech-medium.onnx"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"model_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"64-lowercase-hex-digits"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"config"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/en_US-ljspeech-medium.onnx.json"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"config_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"64-lowercase-hex-digits"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"voice"</span><span class="p">:</span><span class="w"> </span><span class="s2">"en_US-ljspeech-medium"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"locale"</span><span class="p">:</span><span class="w"> </span><span class="s2">"en-US"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"de"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/de_DE-thorsten-medium.onnx"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"model_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"config"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/de_DE-thorsten-medium.onnx.json"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"config_sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"voice"</span><span class="p">:</span><span class="w"> </span><span class="s2">"de_DE-thorsten-medium"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"locale"</span><span class="p">:</span><span class="w"> </span><span class="s2">"de-DE"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Coach verifies the exact installed <code>piper-tts</code> version against <code>runtime_version</code>, model/config
-hashes, and English locale. It streams the selected interpreter's output under hard 8 MiB audio,
-64 KiB diagnostic, and 60-second limits, terminates a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic publication. Automated tests use a silent fake child and never invoke
-real Piper.</p>
+<p>Coach verifies the exact installed <code>piper-tts</code> version against <code>runtime_version</code>, each voice's
+model/config hashes, and that the voice's locale matches its learning language: <code>en-US</code> for
+English and <code>de-DE</code> for German. Without a voice for a card's language, Coach reports in the Coach
+inbox that it has no voice for that language yet, before any model call; <strong>Retry</strong> prepares the
+card once the voice is added, and the other language keeps working. Coach streams the selected
+interpreter's output under hard 8 MiB audio, 64 KiB diagnostic, and 60-second limits, terminates
+a process that exceeds a bound, and sends WAV references to the Phrase Gym API for atomic
+publication. Automated tests use a silent fake child and never invoke real Piper.</p>
 
 
 
