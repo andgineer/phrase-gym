@@ -11,7 +11,7 @@
 | src/phrase\_gym/coach/agents/command\_template.py   |       72 |       14 |     81% |18, 29, 41-42, 49, 66-67, 86, 88, 92, 95, 106-107, 109 |
 | src/phrase\_gym/coach/agents/config.py              |        9 |        0 |    100% |           |
 | src/phrase\_gym/coach/agents/subprocess.py          |       94 |       22 |     77% |119-134, 137-146, 149-151, 157-158, 174, 179-180, 194-195, 198-203 |
-| src/phrase\_gym/coach/basic\_card.py                |       61 |        1 |     98% |       104 |
+| src/phrase\_gym/coach/basic\_card.py                |       63 |        1 |     98% |       107 |
 | src/phrase\_gym/coach/bounded\_process.py           |       46 |        3 |     93% | 28, 79-80 |
 | src/phrase\_gym/coach/card\_checks.py               |       53 |        1 |     98% |        64 |
 | src/phrase\_gym/coach/claude\_cli.py                |       33 |        2 |     94% |     68-69 |
@@ -79,7 +79,7 @@
 | src/phrase\_gym/server/storage.py                   |      102 |        2 |     98% |   74, 145 |
 | src/phrase\_gym/server/streak.py                    |       23 |        0 |    100% |           |
 | src/phrase\_gym/server/view\_actions.py             |       53 |        0 |    100% |           |
-| **TOTAL**                                           | **3399** |  **168** | **95%** |           |
+| **TOTAL**                                           | **3401** |  **168** | **95%** |           |
 
 
 ## Setup coverage badge
