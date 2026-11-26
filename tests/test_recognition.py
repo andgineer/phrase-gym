@@ -87,6 +87,13 @@ def test_a_span_found_twice_falls_back_to_the_literal_target() -> None:
     assert gapped("Yes, I believe so.", "believe", "believed") == "Yes, I __________ so."
 
 
+def test_a_target_that_is_its_whole_source_gets_a_partial_form() -> None:
+    assert gapped("Wie geht's?", "Wie geht's?", "Wie geht's?") is None
+    card = basic_card("Wie geht's?", "Wie geht's?", "Wie geht's?", "ru", "Wie geht's?")
+    assert card and (card.text, card.cue) == ("Wie geht's?", "W__ g___'s?")
+    assert card.instruction == "Произнесите слово или фразу целиком."
+
+
 def test_a_gap_is_refused_while_another_form_of_the_target_stays_visible() -> None:
     source = "She came up with a plan, and he comes up with another."
     assert gapped(source, "come up with", "came up with") is None

@@ -26,6 +26,9 @@ def _gap(source: str, span: str, target: str) -> str | None:
     if len(matches) != 1:
         return None
     before, after = matches[0].span()
+    # A gap over the whole source leaves nothing to recall from, so a partial form serves better.
+    if not any(character.isalpha() for character in source[:before] + source[after:]):
+        return None
     masked = source[:before] + GAP + source[after:]
     return None if shows_target(masked, target) else masked
 

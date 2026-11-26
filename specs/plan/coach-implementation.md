@@ -38,7 +38,7 @@ Change prompt delivery for Claude and Codex only. Keep models, effort, the prepa
 - An over-limit prompt and a `.cmd` shim each select the file fallback.
 - The Gemini command is unchanged.
 
-**Acceptance check: measurement.** Rerun the main Claude and main Codex arms on the 12 baseline inputs under the [measurement rules](#measurement-and-qualification). The token baseline is the 2026-11-26 English rerun with the language-neutral rules in `.phrase-gym-coach/german-step-20261126` (`metrics.tsv`, `summary.md`), whose summed totals per route are the baseline sums. The target is per route:
+**Acceptance check: measurement.** Rerun the main Claude and main Codex arms on the 12 baseline inputs under the [measurement rules](#measurement-and-qualification). The token baseline is the 2026-11-26 English rerun with the language-neutral rules in `.phrase-gym-coach/german-step-20261126` (`metrics.tsv`, `summary.md`): 892,051 total tokens on Claude (3.25 calls per request) and 1,545,048 on Codex (2.17 calls per request), which give targets of 624,435 and 1,081,533. The target is per route:
 
 - total tokens at most 70% of the baseline sum;
 - no fewer full cards and no lower average cue quality than the baseline outputs scored in the same blind batch (the 2026-11-25 main flow had 10 of 12 on both routes, average cue quality 4.8 on Claude and 4.2 on Codex; the German-step blind review rescored those outputs beside the rerun);
