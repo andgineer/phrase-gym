@@ -1,0 +1,1 @@
+Coach could not prepare “I am very tired”: Это английский текст, а не немецкий. (details: /tmp/pytest-of-runner/pytest-0/test_english_typed_for_german_0/attempts/20261126-164914-035464-coach-32eba4fbf4013c84417994429443fb77)
