@@ -14,7 +14,7 @@ const confirmations: Record<CoachSubmission['outcome'], string> = {
 
 export const coachText = (text: string) => text.replace(/[\r\n]+/g, ' ').trim()
 
-// A send captures the language of the page in use; a language switch remounts the page.
+// A send captures the page's language; App remounts the page that uses this when it changes.
 export function useCoachSubmission(pageLanguage: LearningLanguage) {
   const sending = ref(false)
   const confirmation = ref('')

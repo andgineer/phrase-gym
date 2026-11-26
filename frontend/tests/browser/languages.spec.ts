@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import { extraPackage, texts as englishTexts } from './extra-package'
 import { publishPackage, rateNew, revealAnswer } from './helpers'
-import { finishDaily } from './practice-api'
+import { finishDaily, setSettings } from './practice-api'
 
 test.use({ coachEnabled: false })
 
@@ -232,4 +232,53 @@ test.describe('with Coach running', () => {
     await expect(results).toContainText('У Coach пока нет голоса для этого языка.')
     await expect(results.getByRole('button', { name: 'Retry' })).toBeVisible()
   })
+})
+
+const changeHash = (page: Page, next: string) =>
+  page.evaluate((value) => (window.location.hash = value), next)
+
+test('an address changed while the Library is open shows the new language', async ({ page }) => {
+  await page.goto('/')
+  await seedBoth(page)
+  await page.goto('/#en/library')
+  await expect(libraryTexts(page)).toHaveText(englishTexts)
+  await changeHash(page, '#de/library')
+  await expect(tab(page, 'Library')).toHaveAttribute('aria-current', 'page')
+  await expect(libraryTexts(page)).toHaveText(germanTexts)
+  await page.getByRole('searchbox', { name: 'Search phrases or concepts' }).fill('Stuhl')
+  await page.getByRole('button', { name: 'Send “Stuhl” to Coach' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Saved for Coach.' })).toBeVisible()
+  const work = await (await page.request.post('/api/imports/coach/next')).json()
+  expect(work).toMatchObject({ text: 'Stuhl', learning_language: 'de' })
+})
+
+test('an address changed while Coach is open sends in the new language', async ({ page }) => {
+  await page.goto('/#en/coach')
+  const field = page.getByRole('textbox', { name: 'Phrase or word for Coach' })
+  await field.fill('draft')
+  await changeHash(page, '#de/coach')
+  // The remounted page starts empty, which shows it now belongs to German.
+  await expect(field).toHaveValue('')
+  await field.fill('Tisch')
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Saved for Coach.' })).toBeVisible()
+  const work = await (await page.request.post('/api/imports/coach/next')).json()
+  expect(work).toMatchObject({ text: 'Tisch', learning_language: 'de' })
+})
+
+test('a failed English Extra cannot be retried from the German page', async ({ page }) => {
+  await page.goto('/')
+  await seedBoth(page)
+  await setSettings(page, { daily_due_limit: 1, daily_new_limit: 1 })
+  await finishDaily(page, 'en')
+  await page.goto('/#en')
+  await page.route('**/api/practice/extra', (route) => route.fulfill({ status: 503, json: {} }))
+  await page.getByRole('button', { name: 'Extra', exact: true }).click()
+  const retry = page.getByRole('button', { name: 'Retry', exact: true })
+  await expect(retry).toBeVisible()
+  await languageButton(page, 'German').click()
+  await expect(languageButton(page, 'German')).toHaveAttribute('aria-current', 'true')
+  await expect(counts(page)).toContainText('1 new')
+  await expect(retry).toHaveCount(0)
+  await expect(page.getByText('Extra was not confirmed')).toHaveCount(0)
 })

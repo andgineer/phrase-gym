@@ -12,8 +12,8 @@ returns to Practice. Reloading keeps the selected page, and every page shows the
 
 Each language you learn, English and German, is practised separately. Choose it with its button
 above **Start** on the Practice page; the selected one is highlighted. Daily, Extra, Library and
-the words you send to Coach then use that language only, and each language has its own daily
-limits. Every language has its own address, so you can bookmark it: `#de` opens German practice,
+the words you send to Coach then use that language only, and each language gets its own daily
+allowance under the limits set in Settings. Every language has its own address, so you can bookmark it: `#de` opens German practice,
 and `#de/library`, `#de/coach` and `#de/settings` open the other pages in German. An address
 without a language, such as an older bookmark, opens English. Switching languages or pages does
 not add entries to the browser's back history.

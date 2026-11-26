@@ -229,6 +229,12 @@ export function usePractice(language: Ref<LearningLanguage>) {
     }
   }
 
+  // A failed Extra press belongs to its language; another language's page cannot retry it.
+  function forgetExtra() {
+    pendingExtra.value = null
+    error.value = ''
+  }
+
   function closeCard() {
     epoch++
     gradingSkipped.value = false
@@ -264,6 +270,7 @@ export function usePractice(language: Ref<LearningLanguage>) {
     hint: () => act('hint', { operation_id: crypto.randomUUID() }),
     toggleDetails: () => (view.value = { ...view.value, detailsOpen: !view.value.detailsOpen }),
     closeCard,
+    forgetExtra,
     complete,
     gradeSkipped,
     retry,

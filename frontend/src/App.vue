@@ -57,8 +57,12 @@ async function navigate(next: Page, nextLanguage: LearningLanguage) {
   await session.leave()
   void takeTransfers.flush()
   detailsPhrase.value = null
-  // A lesson choice belongs to the language it was made in.
-  if (nextLanguage !== language.value) lessonId.value = ''
+  // A lesson choice, a failed Extra and every mounted page belong to their language.
+  if (nextLanguage !== language.value) {
+    lessonId.value = ''
+    practice.forgetExtra()
+    entryKey.value++
+  }
   language.value = nextLanguage
   if (next === 'entry') entryKey.value++
   show(next)
@@ -103,7 +107,7 @@ onMounted(initialize)
       {{ startupError }} <button @click="initialize">Retry connection</button>
     </p>
     <p v-else-if="!initialized" role="status">Loading…</p>
-    <CoachPage v-else-if="screen === 'coach'" :language="language" />
+    <CoachPage v-else-if="screen === 'coach'" :key="entryKey" :language="language" />
     <SettingsPanel v-else-if="screen === 'settings'" />
     <LibraryPanel
       v-else-if="screen === 'library'"
