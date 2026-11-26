@@ -39,6 +39,10 @@ supplied with each source example as its reference audio.
 
 --8<-- "content-rules.md"
 
+For German material, also apply these notes:
+
+--8<-- "content-rules-de.md"
+
 For a course batch, also check:
 
 1. **Competing chunks:** try likely competing chunks from the entire source, not just this

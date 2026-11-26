@@ -216,9 +216,16 @@ def test_a_result_carries_exactly_one_card(client: TestClient) -> None:
     assert coach_phrases(client) == []
 
 
+@pytest.mark.parametrize(
+    ("native_language", "note"),
+    [("ru", "Исправлено, было: «definately»."), ("en", "Corrected from “definately”.")],
+)
 def test_a_corrected_wording_is_identified_on_the_card_and_in_the_coach_inbox(
-    client: TestClient,
+    client: TestClient, native_language: str, note: str
 ) -> None:
+    settings = client.get("/api/settings").json()
+    changed = settings | {"native_language": native_language}
+    assert client.put("/api/settings", json=changed).status_code == 200
     request_id = claimed(client, "definately")
     correction = {"original": "definately", "corrected": "definitely"}
     card = basic(target="definitely", text="definitely", cue="def…ly", correction=correction)
@@ -227,7 +234,7 @@ def test_a_corrected_wording_is_identified_on_the_card_and_in_the_coach_inbox(
     shown = practice.card()
     assert shown["cue"] == {"situation": "def…ly", "partner_line": None}
     answer = practice.reveal(shown)["answer"]
-    assert (answer["text"], answer["explanation"]) == ("definitely", "Corrected from “definately”.")
+    assert (answer["text"], answer["explanation"]) == ("definitely", note)
     [item] = client.get("/api/coach/inbox").json()["items"]
     assert item == {
         "request_id": request_id,

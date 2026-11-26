@@ -5,8 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from phrase_gym.coach.basic_card import confirmed_card
-from phrase_gym.coach.messages import LANGUAGE_NAMES
-from phrase_gym.coach.preparation import Cli, PreparationError, render, schema
+from phrase_gym.coach.preparation import Cli, PreparationError
+from phrase_gym.coach.prompt_text import (
+    LANGUAGE_NAMES,
+    STATED_LEVELS,
+    language_values,
+    render,
+    schema,
+)
 from phrase_gym.server.coach_contracts import BasicCard, CoachWork
 
 FIELDS = {
@@ -66,6 +72,7 @@ def learner_input(work: CoachWork) -> str:
         "text": work.text,
         "learning_language": LANGUAGE_NAMES[work.learning_language],
         "native_language": LANGUAGE_NAMES[work.native_language],
+        "level": STATED_LEVELS[work.learning_language],
     }
     return json.dumps(typed, ensure_ascii=False)
 
@@ -80,7 +87,7 @@ class Recognizer:
     async def prepare(self, work: CoachWork) -> BasicCard:
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         attempt = self.attempts / f"{stamp}-{work.package_id}"
-        prompt = render("recognize.md", input=learner_input(work))
+        prompt = render("recognize.md", **language_values(work), input=learner_input(work))
         try:
             answer = await self.cli.ask(
                 attempt,

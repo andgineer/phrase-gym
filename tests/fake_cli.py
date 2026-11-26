@@ -21,7 +21,16 @@ def executable(directory: Path, vendor: str = "codex") -> Path:
     return wrapper
 
 
-def card(typed: str, step: str) -> dict[str, object]:
+# The fake writes each layer in the language the prompt names, as a model would.
+EXAMPLES = {"German": "Das ist {}."}
+MEANING_WORDS = {"Russian": ("значение", "Цель"), "German": ("Bedeutung", "Ziel")}
+
+
+def card(
+    typed: str, step: str, layers: tuple[str, str] = ("English", "English")
+) -> dict[str, object]:
+    learning, meaning = layers
+    sense, label = MEANING_WORDS.get(meaning, ("sense", "Target"))
     target, _, source = typed.partition(SOURCE_SEPARATOR)
     word = len(target.split()) == 1
     first = target.split()[0]
@@ -32,7 +41,7 @@ def card(typed: str, step: str) -> dict[str, object]:
         or ("sticky" in typed and step in ("prepare", "revise"))
     )
     cues = [
-        {"situation": f"Context {index}: __________ here. (=sense {index})", "partner_line": None}
+        {"situation": f"Context {index}: __________ here. (={sense} {index})", "partner_line": None}
         for index in range(1, 4 if word else 3)
     ]
     return {
@@ -41,8 +50,9 @@ def card(typed: str, step: str) -> dict[str, object]:
         "kind": "word" if word else "phrase",
         "target": target,
         "card": {
-            "text": source or (f"She felt {target} today." if word else target),
-            "explanation": f"Target: {target}. A useful way to say it.",
+            "text": source
+            or (EXAMPLES.get(learning, "She felt {} today.").format(target) if word else target),
+            "explanation": f"{label}: {target}.",
             "cues": cues,
             "recall_hints": [
                 target if leaky else f"{first[:half]}... / one",
@@ -63,19 +73,33 @@ REJECTIONS = {
         "English": "This is German, not English.",
         "Russian": "Это немецкий текст, а не английский.",
     },
+    "I am very tired": {
+        "English": "This is English, not German.",
+        "Russian": "Это английский текст, а не немецкий.",
+    },
     "fom": {
         "English": "“fom” could be several English words, such as from or form.",
         "Russian": "«fom» может быть разными английскими словами, например from или form.",
     },
 }
-CORRECTIONS = {"definately": "definitely", "belive": "believe"}
+CORRECTIONS = {"definately": "definitely", "belive": "believe", "die tür": "die Tür"}
 INFLECTIONS = {"come up with": "came up with"}
 LONGEST_SENTENCE = 200
 
 
 def recognition(typed: dict[str, str]) -> dict[str, object]:
     text = typed["text"]
-    rejected = next((reason for key, reason in REJECTIONS.items() if key in text), None)
+    # Each fake rejection judges text that is not in the requested learning language.
+    foreign = {"Guten Morgen": "English", "I am very tired": "German"}
+    rejected = next(
+        (
+            reason
+            for key, reason in REJECTIONS.items()
+            if key in text
+            and foreign.get(key, typed["learning_language"]) == typed["learning_language"]
+        ),
+        None,
+    )
     if rejected:
         return {
             "outcome": "reject",
@@ -107,7 +131,7 @@ def recognition(typed: dict[str, str]) -> dict[str, object]:
     }
 
 
-def answer(typed: str, step: str) -> dict[str, object]:
+def answer(typed: str, step: str, layers: tuple[str, str]) -> dict[str, object]:
     if step.startswith("review"):
         findings = []
         # "leaky" is fixed by the first revision; "picky" and "stubborn" keep drawing findings;
@@ -131,7 +155,7 @@ def answer(typed: str, step: str) -> dict[str, object]:
             "target": "",
             "card": None,
         }
-    return card(typed, step)
+    return card(typed, step, layers)
 
 
 CODEX_FAILURES = {
@@ -222,7 +246,10 @@ def main() -> None:
     elif isinstance(typed, dict):
         value = recognition(typed)
     else:
-        value = answer(typed, step)
+        learning = re.search(r"Learning language: (\w+),", prompt)
+        meaning = re.search(r"Meaning-layer language: (\w+)\.", prompt)
+        layers = (learning[1] if learning else "English", meaning[1] if meaning else "English")
+        value = answer(typed, step, layers)
     respond(vendor, arguments, value, step)
 
 

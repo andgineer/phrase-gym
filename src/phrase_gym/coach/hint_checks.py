@@ -11,7 +11,39 @@ GAP_TEXT = "__________"
 BOLD = re.compile(r"\*\*(.+?)\*\*")
 MIN_OPENING_WORDS = 2
 # Words that dangle at a hint's end; prepositions such as "to" or "about" may still end one.
-FUNCTION_WORDS = frozenset(
+# German articles and conjunctions sit beside English ones; "sein" and "ihr" are left out
+# because they also work as a verb and a pronoun.
+GERMAN_FUNCTION_WORDS = frozenset(
+    [
+        "der",
+        "die",
+        "das",
+        "den",
+        "dem",
+        "des",
+        "ein",
+        "eine",
+        "einen",
+        "einem",
+        "einer",
+        "eines",
+        "und",
+        "oder",
+        "aber",
+        "mein",
+        "meine",
+        "dein",
+        "deine",
+        "seine",
+        "ihre",
+        "unser",
+        "unsere",
+        "dieser",
+        "diese",
+        "dieses",
+    ],
+)
+FUNCTION_WORDS = GERMAN_FUNCTION_WORDS | frozenset(
     [
         "a",
         "an",
@@ -48,7 +80,7 @@ def contains_words(text: str, target: list[str]) -> bool:
 
 
 def letters(text: str) -> str:
-    return re.sub(r"[^a-z]", "", text.casefold())
+    return re.sub(r"[\W\d_]", "", text.casefold())
 
 
 def _fragment(token: str) -> tuple[re.Pattern[str], int] | None:

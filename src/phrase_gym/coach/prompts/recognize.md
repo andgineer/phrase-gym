@@ -6,7 +6,9 @@ Work alone and answer once; nobody will answer questions. Do not read or change 
 
 The input text may hold a word or expression alone, a word or expression followed by the
 sentence the learner met it in, or only that sentence. Judge the wording in learning_language,
-not in native_language.
+not in native_language. level is the learner's stated level in learning_language.
+
+{{recognition_notes}}
 
 Preserve valid wording exactly, including regional spellings, script, capitalization and
 inflected forms. Copy the target as typed into original_span; it must be a contiguous span of
@@ -28,8 +30,8 @@ source_span empty.
 
 Return accept with an empty reason. For a rejection use empty original_span, target, source and
 source_span, source_usable false and a brief concrete reason written in native_language for the
-learner. Use plain words: name languages in ordinary words, for example "This is German text,
-not English." Never mention field names or other terms from these instructions.
+learner. Use plain words: name languages in ordinary words, for example "This is Spanish
+text, not {{learning_language}}." Never mention field names or other terms from these instructions.
 
 <learner_input>
 {{input}}

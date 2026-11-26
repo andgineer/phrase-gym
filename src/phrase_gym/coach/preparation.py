@@ -1,18 +1,13 @@
 import json
-import re
 import shutil
 from datetime import UTC, datetime
-from importlib.resources import files
 from pathlib import Path
 from typing import Any, Protocol
 
 from phrase_gym.coach.card_checks import card_problems, phrase_of
-from phrase_gym.coach.messages import message
+from phrase_gym.coach.prompt_text import language_values, render, schema
 from phrase_gym.server.coach_contracts import CoachWork
 from phrase_gym.server.import_contracts import ImportPhrase
-
-PROMPTS = files("phrase_gym.coach").joinpath("prompts")
-PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 
 
 class PreparationError(RuntimeError):
@@ -30,21 +25,6 @@ class Cli(Protocol):
         prompt: str,
         schema: dict[str, Any],
     ) -> dict[str, Any]: ...
-
-
-def _resource(name: str) -> str:
-    return PROMPTS.joinpath(name).read_text(encoding="utf-8")
-
-
-def schema(name: str) -> dict[str, Any]:
-    return json.loads(_resource(name))
-
-
-def render(template: str, **values: str) -> str:
-    shared = {"rules": _resource("content-rules.md"), "card_format": _resource("card-format.md")}
-    fields = {**shared, **values}
-    # One pass keeps placeholder-like text inside learner input or model output literal.
-    return PLACEHOLDER.sub(lambda match: fields[match[1]].strip(), _resource(template))
 
 
 def _shown(value: object) -> str:
@@ -75,30 +55,27 @@ def _findings(review: dict[str, Any]) -> list[dict[str, Any]]:
 REVISION_ROUNDS = (("review", "revise"), ("review-2", "revise-2"))
 
 
-async def _review(cli: Cli, attempt: Path, step: str, typed: str, card: dict[str, Any]) -> list:
-    review = await cli.ask(
-        attempt,
-        step,
-        render("review.md", input=typed, draft=_shown(card)),
-        schema("review.schema.json"),
-    )
-    return _findings(review)
-
-
-async def prepare_card(text: str, item_id: str, cli: Cli, attempt: Path) -> ImportPhrase:
-    typed = _shown(text)
+async def prepare_card(work: CoachWork, cli: Cli, attempt: Path) -> ImportPhrase:
+    item_id = work.package_id
+    values = {**language_values(work), "input": _shown(work.text)}
     card_schema = schema("card.schema.json")
     final = _ready(
-        await cli.ask(attempt, "prepare", render("prepare.md", input=typed), card_schema),
+        await cli.ask(attempt, "prepare", render("prepare.md", **values), card_schema),
     )
     for review_step, revise_step in REVISION_ROUNDS:
         problems = card_problems(final, item_id)
-        findings = await _review(cli, attempt, review_step, typed, final)
+        review = await cli.ask(
+            attempt,
+            review_step,
+            render("review.md", **values, draft=_shown(final)),
+            schema("review.schema.json"),
+        )
+        findings = _findings(review)
         if not findings and not problems:
             break
         prompt = render(
             "revise.md",
-            input=typed,
+            **values,
             draft=_shown(final),
             findings=_shown(findings),
             problems=_shown(problems),
@@ -116,15 +93,10 @@ class CardPreparer:
         self.attempts = attempts
 
     async def prepare(self, work: CoachWork) -> ImportPhrase:
-        if work.learning_language != "en":
-            raise PreparationError(
-                message("english_only", work.native_language),
-                retry_helps=False,
-            )
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         attempt = self.attempts / f"{stamp}-{work.package_id}"
         try:
-            phrase = await prepare_card(work.text, work.package_id, self.cli, attempt)
+            phrase = await prepare_card(work, self.cli, attempt)
         except PreparationError as error:
             raise PreparationError(str(error), attempt, retry_helps=error.retry_helps) from error
         except (RuntimeError, OSError) as error:

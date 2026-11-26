@@ -6,11 +6,17 @@ import { createSilentContext } from './silent-playback'
 type WorkerServer = { url: string; logs: () => string }
 
 export const test = base.extend<
-  { server: void; coachEnabled: boolean; coachRoute: 'claude' | 'gemini' },
+  {
+    server: void
+    coachEnabled: boolean
+    coachRoute: 'claude' | 'gemini'
+    coachVoices: ('en' | 'de')[]
+  },
   { workerServer: WorkerServer }
 >({
   coachEnabled: [true, { option: true }],
   coachRoute: ['claude', { option: true }],
+  coachVoices: [['en', 'de'], { option: true }],
   workerServer: [
     async ({}, use, workerInfo) => {
       const url = workerInfo.project.use.baseURL
@@ -57,13 +63,17 @@ export const test = base.extend<
     { scope: 'worker' },
   ],
   server: [
-    async ({ workerServer, coachEnabled, coachRoute }, use, testInfo) => {
+    async ({ workerServer, coachEnabled, coachRoute, coachVoices }, use, testInfo) => {
       const offset = workerServer.logs().length
       try {
         const response = await fetch(`${workerServer.url}/__test/reset`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ coach_enabled: coachEnabled, coach_route: coachRoute }),
+          body: JSON.stringify({
+            coach_enabled: coachEnabled,
+            coach_route: coachRoute,
+            coach_voices: coachVoices,
+          }),
         })
         expect(response.ok).toBe(true)
         await use()

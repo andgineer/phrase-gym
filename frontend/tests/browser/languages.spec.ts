@@ -213,27 +213,6 @@ test('Settings edits the native language and each translation choice', async ({ 
   expect(settings.translation).toEqual({ en: true, de: true })
 })
 
-test.describe('with Coach running', () => {
-  test.use({ coachEnabled: true })
-
-  test('a German send waits for a German voice as a retryable failure', async ({ page }) => {
-    await page.goto('/#de/coach')
-    await page.getByRole('textbox', { name: 'Phrase or word for Coach' }).fill('Tisch')
-    await page.getByRole('button', { name: 'Send', exact: true }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Saved for Coach.' })).toBeVisible()
-    const results = page.getByRole('list', { name: 'Coach results' })
-    await expect
-      .poll(async () => {
-        await page.reload()
-        return results.count()
-      })
-      .toBe(1)
-    await expect(results).toContainText('German · Coach could not finish')
-    await expect(results).toContainText('У Coach пока нет голоса для этого языка.')
-    await expect(results.getByRole('button', { name: 'Retry' })).toBeVisible()
-  })
-})
-
 const changeHash = (page: Page, next: string) =>
   page.evaluate((value) => (window.location.hash = value), next)
 

@@ -51,8 +51,11 @@ def phrases_of(package: Package) -> list[dict[str, Any]]:
 
 def references(package: Package) -> dict[str, str]:
     speech = PiperSpeech(None, fake=True)
+    language = package["learning_language"]
     return {
-        item["item_id"]: base64.b64encode(asyncio.run(speech.synthesize(item["text"]))).decode()
+        item["item_id"]: base64.b64encode(
+            asyncio.run(speech.synthesize(item["text"], language)),
+        ).decode()
         for item in phrases_of(package)
     }
 
@@ -68,7 +71,9 @@ def publish(client: TestClient, package: Package) -> dict[str, Any]:
 
 
 def silent_reference() -> str:
-    return base64.b64encode(asyncio.run(PiperSpeech(None, fake=True).synthesize("x"))).decode()
+    return base64.b64encode(
+        asyncio.run(PiperSpeech(None, fake=True).synthesize("x", "en"))
+    ).decode()
 
 
 def coach_card(item_id: str, **changes: object) -> dict[str, object]:

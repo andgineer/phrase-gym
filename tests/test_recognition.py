@@ -127,8 +127,19 @@ def test_an_inflected_sentence_gap_reveals_the_sentence_and_studies_the_target()
 def test_the_instruction_is_in_the_captured_native_language(
     language: str, instruction: str
 ) -> None:
+    sentence = "We strongly believe it works."
+    found = answer(source=sentence, source_span="strongly believe", source_usable=True)
+    card = recognized_card(found, work(f"strongly believe — {sentence}", language))
+    assert (card.cue, card.instruction) == ("We __________ it works.", instruction)
+
+
+@pytest.mark.parametrize(
+    ("language", "instruction"),
+    [("en", "Say the whole word or phrase."), ("ru", "Произнесите слово или фразу целиком.")],
+)
+def test_a_partial_form_asks_for_the_whole_wording(language: str, instruction: str) -> None:
     card = recognized_card(answer(), work("strongly believe", language))
-    assert card.instruction == instruction
+    assert (card.cue, card.instruction) == ("st____ly be___ve", instruction)
 
 
 def answer(**changes: object) -> dict[str, object]:

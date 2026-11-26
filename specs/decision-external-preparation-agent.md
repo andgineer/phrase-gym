@@ -24,7 +24,7 @@ Validate the whole submission before adding it. The preparation agent corrects v
 
 ## Reference speech
 
-Coach synthesizes the complete revealed wording once, using local Piper for English. Practice plays the saved reference. Phrase Gym accepts text while Coach is offline and publishes a batch only after validation and receipt of all required audio. Bound concurrent preparation to personal-app scale and perform expensive work outside the transaction. Stable identities prevent duplicate phrases or references after interruption. See the [handoff](architecture.md#responsibilities).
+Coach synthesizes the complete revealed wording once, using a local Piper voice for the card's learning language; each learning language has its own voice. A language without a configured voice is a retryable service failure reported before any model call, never a language rejection, and the other languages keep working. Practice plays the saved reference. Phrase Gym accepts text while Coach is offline and publishes a batch only after validation and receipt of all required audio. Bound concurrent preparation to personal-app scale and perform expensive work outside the transaction. Stable identities prevent duplicate phrases or references after interruption. See the [handoff](architecture.md#responsibilities).
 
 An external agent supplies validated audio with its batch for immediate publication and can read the result by submission ID. It reuses supplied recordings or chooses an available authorized TTS tool and natural voice for missing audio.
 
@@ -51,7 +51,7 @@ A Library search with no match says **Not in your Library yet.** and offers **Se
 
 ### Input decisions
 
-Submissions from both Coach and Library capture the learning language of the page in use when the learner presses Send. Coach judges the text in that language. The meaning layer follows [the learner's translation choice](decision-personal-preferences.md), and detailed help uses the native language. English is the first implementation. Apply the same decision in each supported language.
+Submissions from both Coach and Library capture the learning language of the page in use when the learner presses Send. Coach judges the text in that language. The meaning layer follows [the learner's translation choice](decision-personal-preferences.md), and detailed help uses the native language. English and German apply it today; apply the same decision in each further language.
 
 | Submitted text | Coach outcome |
 |---|---|
@@ -69,7 +69,7 @@ The learning language, submitted wording and optional source sentence identify r
 
 ### Coach prompts and evaluation
 
-Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same file of authoring rules for enriched content. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [provider and CLI policy](architecture.md#coach-provider-selection). A malformed response cannot authorize publication.
+Coach automatically prepares the safest useful card permitted by the [content decision](decision-targeted-drilling.md#basic-wording-practice). A word-sense card remains an ordinary phrase record. Coach prompts and the external-agent guide use the same files of authoring rules for enriched content: language-neutral rules that speak of the learning, meaning-layer and native languages, plus a section for each language that needs its own notes. German notes cover nouns practised with their article, capitalisation as part of the word (**essen** and **das Essen** are both valid and never corrected into each other, while a lowercase noun after an article is an obvious typo) and separable verbs, whose cue frame keeps the verb whole because a gap covers one contiguous span. Keep language judgments in vendor-neutral prompts and mechanical contract checks in code. Adapters own structured result delivery and bounded execution under the [provider and CLI policy](architecture.md#coach-provider-selection). A malformed response cannot authorize publication.
 
 ### Preparation by provider
 

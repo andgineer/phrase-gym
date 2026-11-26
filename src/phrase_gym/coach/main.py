@@ -14,7 +14,7 @@ from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.messages import message
 from phrase_gym.coach.preparation import CardPreparer, PreparationError
 from phrase_gym.coach.recognition import Recognizer
-from phrase_gym.coach.speech import VOICED_LANGUAGES, PiperSpeech, configured_speech
+from phrase_gym.coach.speech import MissingVoiceError, PiperSpeech, configured_speech
 from phrase_gym.server.coach_contracts import BasicCard, CoachWork
 from phrase_gym.server.import_contracts import ImportPhrase
 
@@ -75,11 +75,13 @@ def configured_preparer(choice: str) -> Preparer:
 async def prepare(work: dict[str, object], preparer: Preparer, speech: PiperSpeech) -> dict:
     claimed = CoachWork.model_validate(work)
     package_id = claimed.package_id
-    if claimed.learning_language not in VOICED_LANGUAGES:
-        # A service gap, not a language decision: the same text is prepared once a voice exists.
-        raise PreparationError(message("no_voice", claimed.native_language))
+    try:
+        speech.check_voice(claimed.learning_language)
+    except MissingVoiceError as error:
+        # A setup gap, not a language decision: the same text is prepared once a voice exists.
+        raise PreparationError(message("no_voice", claimed.native_language)) from error
     card = await preparer.prepare(claimed)
-    audio = await speech.synthesize(card.text)
+    audio = await speech.synthesize(card.text, claimed.learning_language)
     return {
         "result_id": package_id,
         "basic" if isinstance(card, BasicCard) else "phrase": card.model_dump(

@@ -38,7 +38,7 @@ It needs two things on the same Mac:
   tool that works inside the current preparation's folder; reading `.env` files, your home
   directory and your learning data is refused. Read-allow rules, tools and servers you add in
   your own Claude settings can widen that restriction; Coach does not isolate them.
-- A local English [Piper voice](piper-voice.md) for the reference audio.
+- Local English and German [Piper voices](piper-voice.md) for the reference audio.
 
 Run Coach in another terminal:
 
@@ -67,8 +67,10 @@ word or phrase and fixes an obvious typo. You then get a basic card that asks yo
 in your own sentence, even where the sentence changes the phrase's form (**She came up with a
 plan** for **come up with**), or to recall the words from a partial form that shows their first
 letters, the last letter of longer words and one `_` per hidden letter, such as **def_____ly** or
-**o_ t__ f___e**. It has no explanation or extra examples. The card's instruction and Coach's
-reasons use your native language from Settings. Coach runs `agy` the way news-recap does: one launch at a time, at
+**o_ t__ f___e**; a partial-form card asks you to say the whole word or phrase. It has no
+explanation or extra examples, and a German noun stays as you typed it, without an added
+article. The card's instruction, the note on a corrected word and Coach's reasons use your native
+language from Settings. Coach runs `agy` the way news-recap does: one launch at a time, at
 least ten seconds apart, with its permission prompts skipped, so the model's tools are not
 limited to the preparation folder. If Antigravity renames the model, Coach switches to the
 cheapest listed Flash model for the rest of its run. Free-tier usage is subject to a quota.

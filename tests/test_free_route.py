@@ -108,7 +108,10 @@ def test_an_obvious_typo_is_corrected_and_shown_in_coach(
 ) -> None:
     send(client, recognizer, "definately")
     _, answer = practised(client)
-    assert (answer["text"], answer["explanation"]) == ("definitely", "Corrected from “definately”.")
+    assert (answer["text"], answer["explanation"]) == (
+        "definitely",
+        "Исправлено, было: «definately».",
+    )
     [item] = inbox(client)
     assert (item["outcome"], item["text"], item["correction"]) == (
         "corrected",

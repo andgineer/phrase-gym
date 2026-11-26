@@ -24,10 +24,9 @@ prepared again.
 When Coach fixes an obvious typo, such as **definately → definitely**, the **Coach** page lists
 the change and the card says what it corrected. A valid variant, such as **colour**, keeps its form.
 
-If Coach cannot use the text, for example because it is not English, cannot be read, could be
-several different words or is too long for one card, the **Coach** page lists the text, its
-learning language and the reason. With Gemini free the reason is in your native language; with
-Claude or Codex it is still in English.
+If Coach cannot use the text, for example because it is not in the language you are learning on
+that page, cannot be read, could be several different words or is too long for one card, the
+**Coach** page lists the text, its learning language and the reason in your native language.
 Close it with **Dismiss**. Typing the same text again shows that result instead of preparing it
 again, so change the text to try something else.
 
@@ -36,9 +35,16 @@ quota, Coach prints the reason in its terminal, the **Coach** page offers **Retr
 Practice page shows a notice below **Total**. Close the notice with **×** once you have read it.
 Retrying from Coach or typing the same text again prepares it again.
 
-Coach cannot prepare German cards yet. German text you send waits in the **Coach** page with
-**Retry** and the reason that Coach has no voice for the language; retry it once Coach supports
-German. German phrases prepared by your AI agent already work.
+German cards follow your German choices in **Settings**. With **Translation in native language**
+on, which is where German starts, a card asks in your native language for the German word or
+phrase: its cue gives the meaning and its short help explains it in your native language, while
+the answer, the example sentence and the reference audio stay German. A noun is practised with its article, such as
+**die Tür**, and the help mentions gender and plural where useful. Capital letters count:
+**essen** (to eat) and **das Essen** (food) are different words, and Coach keeps the one you typed.
+English cards keep their English cues and short help; the longer explanation behind **More
+explanation** is in your native language for every language. The German reference voice is set
+up as described in the [voice setup guide](piper-voice.md); without it, German text waits in the
+**Coach** page with **Retry** and the reason that Coach has no voice for the language yet.
 
 ## Ask your personal AI agent
 

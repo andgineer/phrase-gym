@@ -9,6 +9,7 @@ from phrase_gym.server.coach_contracts import (
     CoachWork,
 )
 from phrase_gym.server.import_contracts import ImportLesson, ImportPhrase, PhrasePackage
+from phrase_gym.server.languages import NativeLanguage
 from phrase_gym.server.publication import Batch, BatchPhrase, package_batch
 from phrase_gym.server.reference_audio import (
     ImportConflictError,
@@ -33,12 +34,19 @@ def coach_package(work: CoachWork, phrase: ImportPhrase) -> PhrasePackage:
     )
 
 
-def correction_note(card: BasicCard) -> str:
-    return f"Corrected from “{card.correction.original}”." if card.correction else ""
+# Like the card's instruction, the note speaks the native language captured with the request.
+CORRECTION_NOTES: dict[NativeLanguage, str] = {
+    "en": "Corrected from “{}”.",
+    "ru": "Исправлено, было: «{}».",
+}
 
 
-def _basic_content(card: BasicCard) -> dict[str, object]:
-    note = correction_note(card)
+def correction_note(card: BasicCard, language: NativeLanguage) -> str:
+    return CORRECTION_NOTES[language].format(card.correction.original) if card.correction else ""
+
+
+def _basic_content(card: BasicCard, language: NativeLanguage) -> dict[str, object]:
+    note = correction_note(card, language)
     return {
         "source_label": COACH_SOURCE_LABEL,
         "source_link": None,
@@ -74,7 +82,7 @@ def coach_batch(work: CoachWork, result: CoachResult) -> Batch:
             BatchPhrase(
                 COACH_LESSON_ID,
                 package_id,
-                _basic_content(result.basic),
+                _basic_content(result.basic, work.native_language),
                 decode_reference(package_id, result.reference),
             ),
         ],

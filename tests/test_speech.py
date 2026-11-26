@@ -11,10 +11,18 @@ import pytest
 
 import phrase_gym.coach.speech as speech_module
 from phrase_gym.coach.bounded_process import run_bounded
-from phrase_gym.coach.speech import PiperSpeech
+from phrase_gym.coach.speech import MissingVoiceError, PiperSpeech
+from phrase_gym.server.languages import LearningLanguage
+
+LOCALE_CODES = {"en": "en_US", "de": "de_DE"}
 
 
-def voice_setup(tmp_path: Path, mode: str = "success", version: str = "1.8.0") -> Path:
+def voice_setup(
+    tmp_path: Path,
+    mode: str = "success",
+    version: str = "1.8.0",
+    languages: tuple[str, ...] = ("en",),
+) -> Path:
     executable = tmp_path / "fake-piper"
     executable.write_text(
         f"""#!{sys.executable}
@@ -34,38 +42,61 @@ elif {mode!r} == 'success':
 """
     )
     executable.chmod(executable.stat().st_mode | stat.S_IXUSR)
-    model = tmp_path / "voice.onnx"
-    config = tmp_path / "voice.onnx.json"
-    model.write_bytes(b"model")
-    config.write_text(json.dumps({"language": {"code": "en_US"}, "audio": {"sample_rate": 22_050}}))
+    voices = {}
+    for language in languages:
+        model = tmp_path / f"{language}.onnx"
+        config = tmp_path / f"{language}.onnx.json"
+        model.write_bytes(f"{language} model".encode())
+        code = LOCALE_CODES[language]
+        config.write_text(
+            json.dumps({"language": {"code": code}, "audio": {"sample_rate": 22_050}})
+        )
+        voices[language] = {
+            "model": str(model),
+            "model_sha256": hashlib.sha256(model.read_bytes()).hexdigest(),
+            "config": str(config),
+            "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+            "voice": f"test-{language}",
+            "locale": code.replace("_", "-"),
+        }
     voice = tmp_path / "piper-voice.json"
     voice.write_text(
-        json.dumps(
-            {
-                "executable": str(executable),
-                "runtime_version": "1.8.0",
-                "model": str(model),
-                "model_sha256": hashlib.sha256(model.read_bytes()).hexdigest(),
-                "config": str(config),
-                "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
-                "voice": "test",
-                "locale": "en-US",
-            }
-        )
+        json.dumps({"executable": str(executable), "runtime_version": "1.8.0", "voices": voices})
     )
     return voice
 
 
 # The runtime identity check gets min(max(timeout, 1), 10) seconds, so a generous timeout keeps
 # a slow Python child start under load from failing tests that are not about timeouts.
-def synthesize(path: Path, timeout: float = 30) -> bytes:
-    return asyncio.run(PiperSpeech(path, timeout=timeout).synthesize("A complete phrase."))
+def synthesize(path: Path, timeout: float = 30, language: LearningLanguage = "en") -> bytes:
+    speech = PiperSpeech(path, timeout=timeout)
+    return asyncio.run(speech.synthesize("A complete phrase.", language))
 
 
 def test_verified_runtime_produces_bounded_wav(tmp_path: Path) -> None:
     result = synthesize(voice_setup(tmp_path))
     assert result.startswith(b"RIFF")
     assert len(result) == 244
+
+
+def test_each_learning_language_speaks_with_its_own_voice(tmp_path: Path) -> None:
+    voice_path = voice_setup(tmp_path, languages=("en", "de"))
+    assert synthesize(voice_path, language="de").startswith(b"RIFF")
+    assert synthesize(voice_path, language="en").startswith(b"RIFF")
+    PiperSpeech(voice_path).check_voice("de")
+
+
+def test_a_missing_voice_is_named_while_the_other_language_keeps_working(tmp_path: Path) -> None:
+    voice_path = voice_setup(tmp_path, languages=("en",))
+    with pytest.raises(MissingVoiceError, match="de-DE"):
+        PiperSpeech(voice_path).check_voice("de")
+    with pytest.raises(MissingVoiceError):
+        synthesize(voice_path, language="de")
+    assert synthesize(voice_path, language="en").startswith(b"RIFF")
+    fake = PiperSpeech(None, fake=True, fake_voices=("en",))
+    with pytest.raises(MissingVoiceError):
+        fake.check_voice("de")
+    fake.check_voice("en")
 
 
 @pytest.mark.parametrize(
@@ -101,20 +132,25 @@ def test_runtime_version_must_match_configuration(tmp_path: Path) -> None:
 def test_hash_locale_and_malformed_configuration_fail_before_synthesis(tmp_path: Path) -> None:
     voice_path = voice_setup(tmp_path)
     voice = json.loads(voice_path.read_text())
-    voice["model_sha256"] = "0" * 64
+    voice["voices"]["en"]["model_sha256"] = "0" * 64
     voice_path.write_text(json.dumps(voice))
     with pytest.raises(RuntimeError, match="checksum"):
         synthesize(voice_path)
 
     voice_path = voice_setup(tmp_path)
-    config = Path(json.loads(voice_path.read_text())["config"])
+    config = Path(json.loads(voice_path.read_text())["voices"]["en"]["config"])
     settings = json.loads(config.read_text())
     settings["language"]["code"] = "de_DE"
     config.write_text(json.dumps(settings))
     voice = json.loads(voice_path.read_text())
-    voice["config_sha256"] = hashlib.sha256(config.read_bytes()).hexdigest()
+    voice["voices"]["en"]["config_sha256"] = hashlib.sha256(config.read_bytes()).hexdigest()
     voice_path.write_text(json.dumps(voice))
-    with pytest.raises(RuntimeError, match="English"):
+    with pytest.raises(RuntimeError, match="must be en-US"):
+        synthesize(voice_path)
+
+    voice["voices"] = {"en": {"model": "only a model"}}
+    voice_path.write_text(json.dumps(voice))
+    with pytest.raises(RuntimeError, match="malformed"):
         synthesize(voice_path)
 
     voice_path.write_text("not json")

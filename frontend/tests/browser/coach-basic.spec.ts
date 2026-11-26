@@ -74,7 +74,9 @@ test('a phrase sent alone is recalled from a partial form of every word', async 
   await tab(page, 'Practice').click()
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   const card = page.locator('article.practice-card')
-  await expect(card.locator('.practice-instruction')).toHaveText('Произнесите пропущенное.')
+  await expect(card.locator('.practice-instruction')).toHaveText(
+    'Произнесите слово или фразу целиком.',
+  )
   await expect(card.locator('.practice-prompt')).toHaveText('b_ a__ l___e')
   await expect(card).not.toContainText('large')
   await revealAnswer(page)

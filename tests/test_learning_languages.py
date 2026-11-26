@@ -4,11 +4,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from phrase_gym.coach.main import process_once
-from phrase_gym.coach.speech import PiperSpeech
-from phrase_gym.server.coach_contracts import BasicCard, CoachWork
 from phrase_gym.server.coach_requests import request_id
-from tests.coach_client import ClientCoachApi
 from tests.phrase_packages import (
     Package,
     lesson,
@@ -276,28 +272,6 @@ def test_a_german_submission_snapshots_its_translation_choice_and_keeps_capitals
         "native_language": "ru",
         "translation": True,
     }
-
-
-class UnusedPreparer:
-    async def prepare(self, work: CoachWork) -> BasicCard:
-        raise AssertionError(f"{work.text} needs no model call without a reference voice")
-
-
-def test_german_coach_work_waits_for_a_voice_as_a_retryable_service_failure(
-    client: TestClient,
-) -> None:
-    sent = client.post("/api/coach/requests", json={"text": "Tisch", "learning_language": "de"})
-    package_id = sent.json()["request_id"]
-    assert process_once(ClientCoachApi(client), UnusedPreparer(), PiperSpeech(None, fake=True))
-    [item] = client.get("/api/coach/inbox").json()["items"]
-    assert item["learning_language"] == "de" and item["outcome"] == "failed"
-    assert (
-        item["reason"] == "У Coach пока нет голоса для этого языка. Повторите, когда он появится."
-    )
-    [notice] = client.get("/api/practice/facts", params={"language": "en"}).json()["notices"]
-    assert notice["package_id"] == package_id and notice["retry_helps"]
-    retried = client.post(f"/api/coach/requests/{package_id}/retry").json()
-    assert retried == {"request_id": package_id, "outcome": "saved"}
 
 
 def test_a_published_german_coach_card_is_german(client: TestClient) -> None:

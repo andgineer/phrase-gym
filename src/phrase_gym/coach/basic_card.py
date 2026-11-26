@@ -68,9 +68,10 @@ def basic_card(
     span: str = "",
 ) -> BasicCard | None:
     """Wording practice from the confirmed target; None when no cue can conceal the answer."""
-    instruction = message("instruction", native_language)
     masked = gapped(source, target, span)
     cue = masked or partial_form(target)
+    # A partial form shows letters, so its instruction asks for all of the wording.
+    instruction = message("instruction" if masked else "whole_instruction", native_language)
     if not cue or contains_target(instruction, target):
         return None
     correction = (

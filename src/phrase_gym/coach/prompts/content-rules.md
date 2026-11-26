@@ -3,6 +3,13 @@ The learning goal is to retrieve reusable wording in speech: for example, **stro
 sentence about AI or onboarding is a study example, not automatically the learning target.
 A single word is prepared as one word-sense card, described after the phrase rules.
 
+Every card uses three language layers. The answer, the example `text`, the wording around each
+cue gap and the wording fragments in hints are in the learning language. The meaning layer, which
+is every cue gloss, `explanation` and `usage_contexts`, is in the native language when the learner
+has turned on translation for this learning language, and otherwise in the learning language
+itself. `detailed_explanation` is always in the learner's native language. The examples in these
+rules are English cards with an English meaning layer; apply the same rules in every language.
+
 ### Select the chunk before writing the cue
 
 In each source example, identify the useful conventional expression and its boundaries.
@@ -26,7 +33,7 @@ A changed context in a cue is an authored exercise, never a quotation attributed
 ### Build a natural gap cue
 
 Keep the exercise fast: a short conversational line with one `__________` gap, followed by a
-plain-English meaning gloss in `(=...)`. The gap hides the whole selected chunk. Visible words
+plain meaning gloss in `(=...)`, written in the meaning-layer language. The gap hides the whole selected chunk. Visible words
 provide incidental context; an optional `partner_line` supplies the other person's short turn.
 Do not replace this format with a scene description, role instructions or a paragraph to analyze.
 For a complete routine, the response may be just the gap and gloss. Use a constant gap length,
@@ -48,11 +55,13 @@ referent: make it explicit in the partner turn or omit that optional turn. Check
 with speaker labels: the learner's "you" addresses the partner, and the partner's "you"
 addresses the learner. A request checking whether the partner can do work must not follow a
 partner turn assigning that work to the learner. Keep any follow-up question short. Another natural expression may fit; do not distort the cue to force
-one unique English answer or label a sensible alternative a language error.
+one unique answer or label a sensible alternative a language error.
 
 ### Make the gloss immediately understandable
 
-The gloss paraphrases the missing expression's meaning in ordinary English. It is not an
+The gloss gives the missing expression's meaning in ordinary words of the meaning-layer
+language: a paraphrase when that is the learning language, a natural translation of the chunk
+when it is the native language. It is not an
 instruction to the learner, a grammatical analysis or an abstract label. Prefer `=How is your
 day so far?` to `=Ask about today up to now`, and `=That can be tough` to `=Recognize a real
 difficulty`. Use enough words to make the meaning clear; shortest is not automatically best.
@@ -190,13 +199,14 @@ A word-sense card teaches one sense of one word through short comprehensible chu
 the same fields as a phrase card; there is no separate word structure or extra field.
 
 Choose the intended sense from the supplied context, such as the sentence the word came from.
-Without context, choose the most common useful sense for a B2 learner. Teach only that sense on
+Without context, choose the most common useful sense for the learner's level. Teach only that sense on
 the card; another sense needs its own card.
 
 - `text`: the supplied source sentence unchanged when there is one; otherwise one short,
   natural sentence that uses the word in the chosen sense. It is the revealed example.
 - `explanation`: name the word and its part of speech, then define the chosen sense in plain
-  English that is easier than the word itself, for example **reluctant** (adjective):
+  words of the meaning-layer language that are easier than the word itself, for example
+  **reluctant** (adjective):
   unwilling and slow to do something because you do not want to. Mention article, plural or
   another form only when it matters for using the word.
 - `cues`: two or three short contexts with different propositions. Each replaces the target

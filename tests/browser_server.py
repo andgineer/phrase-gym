@@ -20,6 +20,7 @@ from phrase_gym.coach.preparation import CardPreparer
 from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.app import create_app
+from phrase_gym.server.languages import LEARNING_LANGUAGES
 from tests import fake_cli
 
 CLOCKED_SERVICES = (
@@ -53,7 +54,7 @@ class BrowserServer:
             ]
         )
 
-    def new_app(self, route: str = "claude") -> None:
+    def new_app(self, route: str = "claude", voices: tuple[str, ...] = LEARNING_LANGUAGES) -> None:
         self.generation += 1
         directory = self.directory / str(self.generation)
         directory.mkdir()
@@ -74,7 +75,7 @@ class BrowserServer:
         else:
             cli = ClaudeCli(fake, attempts=directory / "attempts")
             self.preparer = CardPreparer(cli, cli.attempts)
-        self.speech = PiperSpeech(None, fake=True)
+        self.speech = PiperSpeech(None, fake=True, fake_voices=voices)
 
     async def reset(self, request: Request) -> JSONResponse:
         # A preparation must finish against its original app before the next test replaces it.
@@ -82,7 +83,8 @@ class BrowserServer:
             await self.coach_task
         self.wake.clear()
         settings = await request.json()
-        self.new_app(settings.get("coach_route", "claude"))
+        voices = tuple(settings.get("coach_voices", LEARNING_LANGUAGES))
+        self.new_app(settings.get("coach_route", "claude"), voices)
         self.coach_enabled = settings["coach_enabled"]
         return JSONResponse({"generation": self.generation})
 
