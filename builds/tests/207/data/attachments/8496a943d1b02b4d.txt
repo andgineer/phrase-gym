@@ -1,0 +1,1 @@
+Coach could not prepare “fom”: «fom» может быть разными английскими словами, например from или form. (details: /tmp/pytest-of-runner/pytest-0/test_rejected_input_explains_i2/attempts/20261128-111740-738619-coach-b194fb14c9a90964b4bd09d1d84ad24e)

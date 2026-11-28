@@ -1,0 +1,1 @@
+Coach could not prepare “malformed”: Gemini returned no JSON object during recognize (details: /tmp/pytest-of-runner/pytest-0/test_a_service_failure_is_a_se3/attempts/20261128-111741-729717-coach-60ec9bb7299d85e0cdd35d4058fabd7c)

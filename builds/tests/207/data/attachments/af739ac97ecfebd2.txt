@@ -1,0 +1,1 @@
+ERROR    phrase_gym.coach.agents.antigravity:antigravity.py:89 Gemini recognize: antigravity rejected '--model gemini-3.8-flash-low' and lists no other Flash model

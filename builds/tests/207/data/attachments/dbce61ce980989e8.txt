@@ -1,0 +1,1 @@
+WARNING  phrase_gym.coach.agents.antigravity:antigravity.py:96 Gemini recognize: antigravity rejected '--model gemini-3.8-flash-low' — switching to '--model gemini-3.9-flash-low' for the rest of this run

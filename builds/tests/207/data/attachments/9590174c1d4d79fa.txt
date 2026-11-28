@@ -1,0 +1,1 @@
+Coach could not prepare “zzqx”: Это не английское слово и не выражение. (details: /tmp/pytest-of-runner/pytest-0/test_rejected_input_explains_i0/attempts/20261128-111740-283775-coach-379eb7cad3d7ed0b089af8e74604da14)
