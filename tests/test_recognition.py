@@ -219,3 +219,35 @@ def test_inbox_reasons_have_english_and_russian_texts() -> None:
     assert message("too_long", "en") == "The text is too long for one card."
     assert message("too_long", "ru") == "Текст слишком длинный для одной карточки."
     assert message("no_safe_cue", "ru") != message("no_safe_cue", "en")
+
+
+@pytest.mark.parametrize(("target", "partial"), [("See", "S_e"), ("Tee", "T_e"), ("an", "a_")])
+def test_a_lone_short_word_keeps_a_partial_form_without_showing_itself(
+    target: str, partial: str
+) -> None:
+    card = basic_card(target, target, None, "ru")
+    assert card and card.cue == partial and card.text == target
+
+
+def test_short_words_inside_a_phrase_keep_their_reviewed_form() -> None:
+    assert partial_form("on the fence") == "o_ t__ f___e"
+
+
+def test_a_separable_verb_split_in_its_sentence_falls_back_to_a_partial_form() -> None:
+    sentence = "Ich rufe dich morgen an."
+    found = answer(
+        original_span="anrufen",
+        target="anrufen",
+        source=sentence,
+        source_span="rufe",
+        source_usable=True,
+    )
+    card = recognized_card(found, work(f"anrufen — {sentence}", "ru"))
+    assert (card.text, card.cue) == ("anrufen", "an___en")
+    assert card.instruction == "Произнесите слово или фразу целиком."
+
+
+@pytest.mark.parametrize("target", ["word", "phrase", "whole"])
+def test_an_instruction_naming_the_target_falls_back_to_the_plain_one(target: str) -> None:
+    card = basic_card(target, target, None, "en")
+    assert card and card.instruction == "Say the missing wording."

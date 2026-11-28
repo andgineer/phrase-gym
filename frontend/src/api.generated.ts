@@ -678,6 +678,7 @@ export interface components {
         /** CoachResult */
         CoachResult: {
             basic?: components["schemas"]["BasicCard"] | null;
+            correction?: components["schemas"]["CoachCorrection"] | null;
             phrase?: components["schemas"]["ImportPhrase"] | null;
             /** Reference */
             reference: string;

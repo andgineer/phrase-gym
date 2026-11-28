@@ -21,11 +21,14 @@ target choice and sense, every completed cue, every gloss, every hint on its own
 competing answers, explanation and help. Apply the measured hint limits and the gloss rules to
 every card, however short the target. Check that every hint companion is a collocate, situation
 or sentence frame in the target's own sense, and that no two cues repeat one sentence frame.
-Check that every field is written in the language its layer requires and that the meaning-layer
-and native-language texts are accurate and natural. Report only concrete problems that would
-mislead or weaken the learner's practice, each with the field, the problem and a specific
-correction that itself satisfies the content rules. Do not report matters of taste or rewrite
-fields that already work. Return an empty `findings` list when the card needs no change.
+Check `correction`: it is null when the typed wording is valid, including a regional spelling,
+capitalisation or colloquial variant, and it names the exact typed span and its single plausible
+correction when the input has an obvious typo. Check that every field is written in the language
+its layer requires and that the meaning-layer and native-language texts are accurate and natural.
+Report only concrete problems that would mislead or weaken the learner's practice, each with the
+field, the problem and a specific correction that itself satisfies the content rules. Do not
+report matters of taste or rewrite fields that already work. Return an empty `findings` list when
+the card needs no change.
 
 ## Content rules
 

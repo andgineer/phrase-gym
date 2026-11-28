@@ -6,6 +6,7 @@ from phrase_gym.coach.card_checks import card_problems
 from phrase_gym.coach.companion_checks import companion_problems, gloss_frame_problems
 from phrase_gym.server.import_contracts import Cue
 
+TYPED = "strongly believe"
 GOOD_CUES = [
     {"situation": "We __________ that the plan will work. (=We truly think)", "partner_line": None},
     {"situation": "I __________ she is right. (=I am sure)", "partner_line": "Is Ana right?"},
@@ -31,7 +32,7 @@ def answer(kind: str = "phrase", target: str = "strongly believe", **card: Any) 
 
 
 def test_a_well_formed_phrase_card_has_no_problems() -> None:
-    assert card_problems(answer(), "coach-1") == []
+    assert card_problems(answer(), "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
@@ -96,7 +97,9 @@ def test_a_well_formed_phrase_card_has_no_problems() -> None:
     ],
 )
 def test_structural_problems_are_named(changed: dict[str, Any], problem: str) -> None:
-    assert any(found.startswith(problem) for found in card_problems(changed, "coach-1"))
+    assert any(
+        found.startswith(problem) for found in card_problems(changed, "coach-1", TYPED, "en")
+    )
 
 
 GERMAN_CUES = [
@@ -117,7 +120,7 @@ def german(**card: Any) -> dict[str, Any]:
 
 
 def test_a_german_noun_card_with_its_article_and_fragments_passes() -> None:
-    assert card_problems(german(), "coach-1") == []
+    assert card_problems(german(), "coach-1", "Tür", "de") == []
 
 
 @pytest.mark.parametrize(
@@ -128,7 +131,7 @@ def test_a_german_noun_card_with_its_article_and_fragments_passes() -> None:
     ],
 )
 def test_german_hints_count_umlauts_and_articles(hints: list[str], problem: str) -> None:
-    found = card_problems(german(recall_hints=hints), "coach-1")
+    found = card_problems(german(recall_hints=hints), "coach-1", "Tür", "de")
     assert any(item.startswith(problem) for item in found), found
 
 
@@ -145,7 +148,7 @@ def test_german_hints_count_umlauts_and_articles(hints: list[str], problem: str)
 )
 def test_measured_hints_from_the_rules_pass(target: str, hint: str) -> None:
     hints = [hint, "zz... / other"]
-    assert card_problems(answer(target=target, recall_hints=hints), "coach-1") == []
+    assert card_problems(answer(target=target, recall_hints=hints), "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
@@ -161,7 +164,9 @@ def test_measured_hints_from_the_rules_pass(target: str, hint: str) -> None:
     ],
 )
 def test_hints_that_give_away_short_targets_are_rejected(target: str, hint: str) -> None:
-    problems = card_problems(answer(target=target, recall_hints=[hint, "zz... / other"]), "c-1")
+    problems = card_problems(
+        answer(target=target, recall_hints=[hint, "zz... / other"]), "c-1", TYPED, "en"
+    )
     assert any(problem.startswith("recall_hints.0") for problem in problems)
 
 
@@ -187,7 +192,7 @@ def short_answer(target: str, kind: str, hints: list[str], **card: Any) -> dict[
 def test_short_targets_can_still_meet_every_hint_rule(
     target: str, kind: str, hints: list[str]
 ) -> None:
-    assert card_problems(short_answer(target, kind, hints), "coach-1") == []
+    assert card_problems(short_answer(target, kind, hints), "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
@@ -227,7 +232,10 @@ def test_short_targets_can_still_meet_every_hint_rule(
 def test_hint_set_rules_name_the_problem(changes: dict[str, Any], problem: str) -> None:
     extra = {key: value for key, value in changes.items() if key not in {"target", "kind", "hints"}}
     found = card_problems(
-        short_answer(changes["target"], changes["kind"], changes["hints"], **extra), "coach-1"
+        short_answer(changes["target"], changes["kind"], changes["hints"], **extra),
+        "coach-1",
+        TYPED,
+        "en",
     )
     assert found and any(item.startswith(problem) for item in found)
 
@@ -239,7 +247,7 @@ def test_bold_parts_of_the_target_are_not_treated_as_contrasts() -> None:
         ["up to / choose", "you / either way"],
         explanation="**It's up to you** means you decide; **up to** marks whose choice it is.",
     )
-    assert card_problems(card, "coach-1") == []
+    assert card_problems(card, "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
@@ -252,14 +260,16 @@ def test_bold_parts_of_the_target_are_not_treated_as_contrasts() -> None:
 )
 def test_function_words_that_introduce_the_target_are_not_dangling(target: str, hint: str) -> None:
     card = short_answer(target, "word", [hint, "zz... / other"])
-    assert card_problems(card, "coach-1") == []
+    assert card_problems(card, "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
     ("target", "hint"), [("pitch", "pi... / edit a"), ("draft", "dr... / edit a")]
 )
 def test_a_hint_that_really_ends_on_an_article_still_fails(target: str, hint: str) -> None:
-    problems = card_problems(short_answer(target, "word", [hint, "zz... / other"]), "coach-1")
+    problems = card_problems(
+        short_answer(target, "word", [hint, "zz... / other"]), "coach-1", TYPED, "en"
+    )
     assert any("ends with the bare word “a”" in problem for problem in problems)
 
 
@@ -347,7 +357,7 @@ RISE_CUES = [
 def test_companion_and_gloss_frame_rules_name_the_problem(
     card: dict[str, Any], problem: str
 ) -> None:
-    assert any(found.startswith(problem) for found in card_problems(card, "coach-1"))
+    assert any(found.startswith(problem) for found in card_problems(card, "coach-1", TYPED, "en"))
 
 
 @pytest.mark.parametrize(
@@ -364,7 +374,7 @@ def test_very_short_words_can_meet_the_companion_rules(
     card = word_card(
         target, text, hints, ["We __________ there. (=one)", "They __________ again. (=two)"]
     )
-    assert card_problems(card, "coach-1") == []
+    assert card_problems(card, "coach-1", TYPED, "en") == []
 
 
 @pytest.mark.parametrize(
@@ -381,4 +391,39 @@ def test_a_phrasal_verb_gloss_may_end_on_its_particle(target: str, cue: str) -> 
 def test_an_empty_gloss_is_not_repeated_by_every_companion() -> None:
     cues = [Cue(situation="Prices __________ again. (=)", partner_line=None)]
     hints = ["ri... / sharp increase", "ri... / sea levels"]
-    assert companion_problems(hints, "rise", cues, "Prices rise.") == []
+    assert companion_problems(hints, "rise", cues, "Prices rise.", "en") == []
+
+
+def test_function_words_follow_the_cards_learning_language() -> None:
+    english = answer(recall_hints=["firm / bel...", "strongly / den"])
+    assert card_problems(english, "coach-1", TYPED, "en") == []
+    german_end = german(recall_hints=["T... / aufmachen", "T... / klingeln den"])
+    found = card_problems(german_end, "coach-1", "Tür", "de")
+    assert any(item.startswith("recall_hints.1: “klingeln den” ends") for item in found), found
+    english_end = answer(recall_hints=["firm / bel...", "strongly / the"])
+    assert any(
+        "ends with the bare word" in item for item in card_problems(english_end, "c-1", TYPED, "en")
+    )
+    assert not any("ends with" in item for item in card_problems(english_end, "c-1", TYPED, "de"))
+
+
+@pytest.mark.parametrize(
+    ("correction", "problem"),
+    [
+        (None, None),
+        ({"original": "strongly beleive", "corrected": "strongly believe"}, None),
+        ({"original": "beleive", "corrected": "believe"}, None),
+        ({"original": "strongly believe", "corrected": "strongly believe"}, "must differ"),
+        ({"original": "stongly", "corrected": "strongly"}, "copied exactly from the input"),
+        ({"original": "beleive", "corrected": "belief"}, "the target or a part of it"),
+        ({"original": "beleive"}, "give the original and corrected wording"),
+    ],
+)
+def test_a_correction_names_the_typed_span_and_the_target(
+    correction: dict[str, str] | None, problem: str | None
+) -> None:
+    found = card_problems(
+        {**answer(), "correction": correction}, "coach-1", "strongly beleive", "en"
+    )
+    corrections = [item for item in found if item.startswith("correction")]
+    assert corrections == [] if problem is None else any(problem in item for item in corrections)

@@ -199,3 +199,26 @@ time.sleep(30)
     pid = asyncio.run(scenario())
     with pytest.raises(ProcessLookupError):
         os.kill(pid, 0)
+
+
+def test_a_german_voice_must_speak_german(tmp_path: Path) -> None:
+    voice_path = voice_setup(tmp_path, languages=("en", "de"))
+    voice = json.loads(voice_path.read_text())
+    voice["voices"]["de"] = voice["voices"]["en"]
+    voice_path.write_text(json.dumps(voice))
+    with pytest.raises(RuntimeError, match="must be de-DE"):
+        synthesize(voice_path, language="de")
+
+
+def test_an_old_single_voice_file_names_the_move(tmp_path: Path) -> None:
+    voice_path = voice_setup(tmp_path)
+    voice = json.loads(voice_path.read_text())
+    voice_path.write_text(json.dumps({**voice.pop("voices")["en"], **voice}))
+    with pytest.raises(RuntimeError, match="old single-voice format; move its voice fields"):
+        PiperSpeech(voice_path).check_voice("en")
+
+
+def test_a_missing_voice_file_is_named(tmp_path: Path) -> None:
+    missing = tmp_path / "absent.json"
+    with pytest.raises(RuntimeError, match=f"voice file {missing} does not exist"):
+        PiperSpeech(missing).check_voice("en")

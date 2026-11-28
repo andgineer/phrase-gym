@@ -29,7 +29,7 @@ check findings are mandatory: the card cannot be published until they are fixed.
 the whole card again with the checklist, because a correction can break another field. Change
 only what the findings and the checklist require; leave every other field exactly as it was.
 
-Keep `kind` and `target` unless a finding shows the target was chosen wrongly. When the input
+Keep `kind`, `target` and `correction` unless a finding shows that one of them is wrong. When the input
 supplies a source sentence, keep it unchanged in `text`. If the input turns out to be
 insufficient for a coherent card, set `outcome` to `insufficient` with a short concrete reason.
 

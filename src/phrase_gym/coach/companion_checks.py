@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
+from phrase_gym.coach.check_words import MINOR_WORDS
 from phrase_gym.coach.hint_checks import (
-    FUNCTION_WORDS,
     GAP_TEXT,
     GLOSS,
     contains_words,
@@ -10,75 +10,29 @@ from phrase_gym.coach.hint_checks import (
     words,
 )
 from phrase_gym.server.import_contracts import Cue
+from phrase_gym.server.languages import LearningLanguage
 
-# Small grammatical words never count as the substance a companion shares or borrows.
-MINOR_WORDS = FUNCTION_WORDS | frozenset(
-    [
-        "to",
-        "of",
-        "for",
-        "with",
-        "in",
-        "on",
-        "at",
-        "by",
-        "from",
-        "about",
-        "into",
-        "over",
-        "up",
-        "out",
-        "me",
-        "you",
-        "him",
-        "her",
-        "us",
-        "them",
-        "it",
-        "i",
-        "we",
-        "they",
-        "is",
-        "are",
-        "be",
-        "do",
-        *[
-            "zu",
-            "von",
-            "mit",
-            "auf",
-            "für",
-            "im",
-            "am",
-            "ich",
-            "du",
-            "er",
-            "sie",
-            "es",
-            "wir",
-            "mich",
-            "dich",
-            "mir",
-            "dir",
-            "uns",
-            "ist",
-            "sind",
-        ],
-    ],
-)
 # Words that are also verb particles ("carry on", "get on", "take over") are left out, because a
 # phrasal-verb gloss may legitimately end on one before a prepositional continuation.
 FINAL_PREPOSITIONS = frozenset(["about", "of", "for", "to", "with", "at", "by", "from", "into"])
 PREPOSITIONS = FINAL_PREPOSITIONS | {"on", "in", "over"}
 
 
-def _content(companions: list[str]) -> set[str]:
-    return {word for word in words(" ".join(companions)) if word.strip("'") not in MINOR_WORDS}
+def _content(companions: list[str], language: LearningLanguage) -> set[str]:
+    minor = MINOR_WORDS[language]
+    return {word for word in words(" ".join(companions)) if word.strip("'") not in minor}
 
 
-def _companions(hints: list[str], target_text: str) -> list[list[str]]:
+def _companions(
+    hints: list[str],
+    target_text: str,
+    language: LearningLanguage,
+) -> list[list[str]]:
     target = [letters(word) for word in words(target_text) if letters(word)]
-    return [sum(parse_hint(index, hint, target).companions, []) for index, hint in enumerate(hints)]
+    return [
+        sum(parse_hint(index, hint, target, language).companions, [])
+        for index, hint in enumerate(hints)
+    ]
 
 
 def companion_problems(
@@ -86,9 +40,10 @@ def companion_problems(
     target_text: str,
     cues: Sequence[Cue],
     text: str,
+    language: LearningLanguage,
 ) -> list[str]:
     problems = []
-    companions = _companions(hints, target_text)
+    companions = _companions(hints, target_text, language)
     glosses = [gloss for cue in cues for gloss in GLOSS.findall(cue.situation) if words(gloss)]
     seen: dict[str, int] = {}
     for index, own in enumerate(companions):
@@ -101,14 +56,14 @@ def companion_problems(
                     f"recall_hints.{index}: “{' '.join(own)}” repeats a cue gloss; "
                     "use a collocate, situation or sentence frame instead",
                 )
-        for word in sorted(_content(own)):
+        for word in sorted(_content(own, language)):
             if word in seen:
                 problems.append(
                     f"recall_hints.{index}: it shares “{word}” with recall_hints.{seen[word]}; "
                     "give each hint different companion words",
                 )
             seen.setdefault(word, index)
-    used = [_content(own) for own in companions if _content(own)]
+    used = [found for own in companions if (found := _content(own, language))]
     source = set(words(text))
     if len(hints) > 1 and len(used) == len(hints) and all(found <= source for found in used):
         problems.append(

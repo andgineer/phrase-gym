@@ -12,7 +12,7 @@ The learner's current choices are:
 | German | A1 | On |
 | Serbian | Not stated | Off |
 
-The native language applies to the whole profile; this learner's is Russian. The learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults.
+Until Settings stores proficiency, Coach uses these stated levels, English B2 and German A1. The native language applies to the whole profile; this learner's is Russian. The learning timezone is Europe/Belgrade. These are this learner's initial values, not universal defaults.
 
 
 Each card has a meaning layer: the short meaning glosses on its cues and the short help shown during study and after reveal. With **Translation in native language** on, the meaning layer is in the native language. With it off, the meaning layer is in the learning language itself. The optional detailed explanation always uses the native language and appears only on request. A beginner needs translations they understand, while an advanced learner stays inside the language. Coach's own instructions and inbox reasons use the native language. Neither answer-bearing layer is shown before an independent response. A detailed explanation and a proficiency questionnaire are not requirements for every MVP card.

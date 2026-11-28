@@ -31,7 +31,11 @@ def card(
 ) -> dict[str, object]:
     learning, meaning = layers
     sense, label = MEANING_WORDS.get(meaning, ("sense", "Target"))
-    target, _, source = typed.partition(SOURCE_SEPARATOR)
+    original, _, source = typed.partition(SOURCE_SEPARATOR)
+    target = original
+    for typo, fixed in CORRECTIONS.items():
+        target = target.replace(typo, fixed)
+    correction = {"original": original, "corrected": target} if target != original else None
     word = len(target.split()) == 1
     first = target.split()[0]
     half = max(1, len(first) // 2)
@@ -49,6 +53,7 @@ def card(
         "reason": "",
         "kind": "word" if word else "phrase",
         "target": target,
+        "correction": correction,
         "card": {
             "text": source
             or (EXAMPLES.get(learning, "She felt {} today.").format(target) if word else target),
@@ -153,6 +158,7 @@ def answer(typed: str, step: str, layers: tuple[str, str]) -> dict[str, object]:
             "reason": "No English word or expression was found in the input.",
             "kind": "phrase",
             "target": "",
+            "correction": None,
             "card": None,
         }
     return card(typed, step, layers)

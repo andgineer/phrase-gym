@@ -3,7 +3,7 @@ import re
 from pydantic import ValidationError
 
 from phrase_gym.coach.hint_checks import contains_words, words
-from phrase_gym.coach.messages import message
+from phrase_gym.coach.messages import Message, message
 from phrase_gym.coach.preparation import PreparationError
 from phrase_gym.server.coach_contracts import BasicCard, CoachCorrection
 from phrase_gym.server.sentence_gaps import GAP, realizes, shows_target
@@ -11,6 +11,7 @@ from phrase_gym.server.sentence_gaps import GAP, realizes, shows_target
 WORD_CHAR = r"[\w'’\-]"
 TARGET_WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*")
 TAIL_LETTER_WORD = 4
+SHORT_ALONE = 3
 LONG_WORD = 7
 
 
@@ -44,20 +45,23 @@ def _hidden(letters: str) -> str:
     return "".join("_" if character.isalpha() else character for character in letters)
 
 
-def _fragment(word: str) -> str:
+def _fragment(word: str, alone: bool) -> str:
     # A one-letter word shows only its slot; showing it would show the whole word.
     if len(word) < 2:  # noqa: PLR2004
         return "_"
+    # A lone short word fits too many words by its first letter alone, as S__ for See.
+    tail_from = SHORT_ALONE if alone else TAIL_LETTER_WORD
     if len(word) >= LONG_WORD:
         head, tail = min(3, len(word) // 3), 2
     else:
-        head, tail = 1, 1 if len(word) >= TAIL_LETTER_WORD else 0
+        head, tail = 1, 1 if len(word) >= tail_from else 0
     return word[:head] + _hidden(word[head : len(word) - tail]) + word[len(word) - tail :]
 
 
 def partial_form(target: str) -> str | None:
     """Each word shortened in place with one _ per hidden letter, such as o_ t__ f___e."""
-    partial = TARGET_WORD.sub(lambda word: _fragment(word.group()), target)
+    alone = len(TARGET_WORD.findall(target)) == 1
+    partial = TARGET_WORD.sub(lambda word: _fragment(word.group(), alone), target)
     if not any(character.isalpha() for character in partial):
         return None
     return None if contains_target(partial, target) else partial
@@ -73,9 +77,12 @@ def basic_card(
     """Wording practice from the confirmed target; None when no cue can conceal the answer."""
     masked = gapped(source, target, span)
     cue = masked or partial_form(target)
-    # A partial form shows letters, so its instruction asks for all of the wording.
-    instruction = message("instruction" if masked else "whole_instruction", native_language)
-    if not cue or contains_target(instruction, target):
+    # A partial form shows letters, so its instruction asks for all of the wording; when that
+    # instruction would name the target itself, the plain one serves instead.
+    keys: list[Message] = ["instruction"] if masked else ["whole_instruction", "instruction"]
+    instructions = [message(key, native_language) for key in keys]
+    instruction = next((text for text in instructions if not contains_target(text, target)), None)
+    if not cue or instruction is None:
         return None
     correction = (
         CoachCorrection(original=original, corrected=target) if original != target else None

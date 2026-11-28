@@ -1,12 +1,13 @@
 import json
 import shutil
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
 from phrase_gym.coach.card_checks import card_problems, phrase_of
 from phrase_gym.coach.prompt_text import language_values, render, schema
-from phrase_gym.server.coach_contracts import CoachWork
+from phrase_gym.server.coach_contracts import CoachCorrection, CoachWork
 from phrase_gym.server.import_contracts import ImportPhrase
 
 
@@ -55,15 +56,30 @@ def _findings(review: dict[str, Any]) -> list[dict[str, Any]]:
 REVISION_ROUNDS = (("review", "revise"), ("review-2", "revise-2"))
 
 
-async def prepare_card(work: CoachWork, cli: Cli, attempt: Path) -> ImportPhrase:
+@dataclass(frozen=True)
+class PreparedPhrase:
+    phrase: ImportPhrase
+    correction: CoachCorrection | None
+
+
+def prepared(answer: dict[str, Any], item_id: str) -> PreparedPhrase:
+    correction = answer.get("correction")
+    return PreparedPhrase(
+        phrase_of(answer["card"], item_id),
+        CoachCorrection.model_validate(correction) if correction else None,
+    )
+
+
+async def prepare_card(work: CoachWork, cli: Cli, attempt: Path) -> PreparedPhrase:
     item_id = work.package_id
+    language = work.learning_language
     values = {**language_values(work), "input": _shown(work.text)}
     card_schema = schema("card.schema.json")
     final = _ready(
         await cli.ask(attempt, "prepare", render("prepare.md", **values), card_schema),
     )
     for review_step, revise_step in REVISION_ROUNDS:
-        problems = card_problems(final, item_id)
+        problems = card_problems(final, item_id, work.text, language)
         review = await cli.ask(
             attempt,
             review_step,
@@ -81,10 +97,10 @@ async def prepare_card(work: CoachWork, cli: Cli, attempt: Path) -> ImportPhrase
             problems=_shown(problems),
         )
         final = _ready(await cli.ask(attempt, revise_step, prompt, card_schema))
-    problems = card_problems(final, item_id)
+    problems = card_problems(final, item_id, work.text, language)
     if problems:
         raise PreparationError("The prepared card failed its checks: " + "; ".join(problems))
-    return phrase_of(final["card"], item_id)
+    return prepared(final, item_id)
 
 
 class CardPreparer:
@@ -92,7 +108,7 @@ class CardPreparer:
         self.cli = cli
         self.attempts = attempts
 
-    async def prepare(self, work: CoachWork) -> ImportPhrase:
+    async def prepare(self, work: CoachWork) -> PreparedPhrase:
         stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
         attempt = self.attempts / f"{stamp}-{work.package_id}"
         try:

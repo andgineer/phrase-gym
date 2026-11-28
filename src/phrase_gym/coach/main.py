@@ -12,11 +12,10 @@ from phrase_gym.coach.claude_cli import ClaudeCli
 from phrase_gym.coach.codex_cli import CodexCli, coach_workspace
 from phrase_gym.coach.gemini_cli import GeminiCli
 from phrase_gym.coach.messages import message
-from phrase_gym.coach.preparation import CardPreparer, PreparationError
+from phrase_gym.coach.preparation import CardPreparer, PreparationError, PreparedPhrase
 from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import MissingVoiceError, PiperSpeech, configured_speech
 from phrase_gym.server.coach_contracts import BasicCard, CoachWork
-from phrase_gym.server.import_contracts import ImportPhrase
 
 MAX_TCP_PORT = 65_535
 
@@ -58,7 +57,7 @@ CLI_CHOICES = ("claude", "codex", "gemini")
 
 
 class Preparer(Protocol):
-    async def prepare(self, work: CoachWork) -> ImportPhrase | BasicCard: ...
+    async def prepare(self, work: CoachWork) -> PreparedPhrase | BasicCard: ...
 
 
 def configured_preparer(choice: str) -> Preparer:
@@ -81,15 +80,21 @@ async def prepare(work: dict[str, object], preparer: Preparer, speech: PiperSpee
         # A setup gap, not a language decision: the same text is prepared once a voice exists.
         raise PreparationError(message("no_voice", claimed.native_language)) from error
     card = await preparer.prepare(claimed)
-    audio = await speech.synthesize(card.text, claimed.learning_language)
-    return {
+    audio = await speech.synthesize(
+        card.phrase.text if isinstance(card, PreparedPhrase) else card.text,
+        claimed.learning_language,
+    )
+    result: dict[str, object] = {
         "result_id": package_id,
-        "basic" if isinstance(card, BasicCard) else "phrase": card.model_dump(
-            mode="json",
-            exclude_none=True,
-        ),
         "reference": base64.b64encode(audio).decode(),
     }
+    if isinstance(card, BasicCard):
+        result["basic"] = card.model_dump(mode="json", exclude_none=True)
+        return result
+    result["phrase"] = card.phrase.model_dump(mode="json", exclude_none=True)
+    if card.correction:
+        result["correction"] = card.correction.model_dump(mode="json")
+    return result
 
 
 def refusal(error: urllib.error.HTTPError) -> str:

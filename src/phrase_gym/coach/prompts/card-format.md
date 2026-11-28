@@ -25,10 +25,17 @@ expression itself, written as the learner would say it, and a word card's `text`
 natural sentence using the word in the chosen sense. Coach speaks `text` aloud as the reference
 audio, so keep it a complete, natural spoken unit.
 
+Keep valid wording as typed, including regional spellings, capitalisation, inflected forms and
+colloquial variants; never change a valid form into a preferred one. When the typed word or
+expression has an obvious typo with only one plausible correction in context, prepare the card
+for the corrected wording and set `correction` to the `original` span copied exactly from the
+input and its `corrected` wording, which is the `target` or the part of it that replaces the
+typo. The learner sees this correction. Otherwise set `correction` to null.
+
 Use the supplied context and your judgment to choose the sense or meaning. Set `outcome` to
 `insufficient` only when no coherent {{learning_language}} card can be prepared, for example when
-the input has no {{learning_language}} word or expression, mixes several unrelated targets, or is
-unreadable. Then give a short concrete `reason` addressed to the learner that says what went
+the input has no {{learning_language}} word or expression, mixes several unrelated targets, has a
+typo with several plausible corrections, or is unreadable. Then give a short concrete `reason` addressed to the learner that says what went
 wrong and what to do, such as "No word or expression in {{learning_language}} was found. Type a
 word or phrase in {{learning_language}}.", written in {{native_language}}. The learner sees the
 reason next to their text, so do not quote the input in it. Set `card` to null. Otherwise set

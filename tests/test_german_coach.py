@@ -13,6 +13,7 @@ from phrase_gym.coach.preparation import CardPreparer
 from phrase_gym.coach.recognition import Recognizer
 from phrase_gym.coach.speech import PiperSpeech
 from phrase_gym.server.coach_contracts import CoachWork
+from phrase_gym.server.languages import LearningLanguage
 from tests import fake_cli
 from tests.coach_client import ClientCoachApi
 from tests.practice_client import Practice
@@ -129,3 +130,49 @@ def test_a_missing_german_voice_is_a_retryable_failure_while_english_keeps_worki
     assert retried["outcome"] == "saved"
     assert process_once(ClientCoachApi(client), preparer, PiperSpeech(None, fake=True))
     assert revealed(client)[1]["text"] == "Tisch"
+
+
+@pytest.mark.parametrize(
+    ("vendor", "language", "typed", "corrected", "note"),
+    [
+        ("claude", "de", "die tür", "die Tür", "Исправлено, было: «die tür»."),
+        ("codex", "en", "definately", "definitely", "Исправлено, было: «definately»."),
+    ],
+)
+def test_a_paid_correction_is_noted_on_the_card_and_in_the_coach_inbox(  # noqa: PLR0913
+    client: TestClient,
+    tmp_path: Path,
+    vendor: str,
+    language: str,
+    typed: str,
+    corrected: str,
+    note: str,
+) -> None:
+    assert send(client, paid_preparer(vendor, tmp_path), typed, language)["status"] == "added"
+    _, answer = revealed(client, language)
+    assert answer["explanation"].endswith(f": {corrected}. {note}")
+    [item] = client.get("/api/coach/inbox").json()["items"]
+    assert (item["outcome"], item["text"], item["correction"]) == (
+        "corrected",
+        typed,
+        {"original": typed, "corrected": corrected},
+    )
+
+
+class SpySpeech(PiperSpeech):
+    def __init__(self) -> None:
+        super().__init__(None, fake=True)
+        self.spoken: list[tuple[str, str]] = []
+
+    async def synthesize(self, text: str, language: LearningLanguage) -> bytes:
+        self.spoken.append((text, language))
+        return await super().synthesize(text, language)
+
+
+def test_coach_speaks_each_card_in_its_own_learning_language(
+    client: TestClient, tmp_path: Path, recognizer: Recognizer
+) -> None:
+    speech = SpySpeech()
+    send(client, paid_preparer("claude", tmp_path), "Tisch", speech=speech)
+    send(client, recognizer, "colour", "en", speech)
+    assert speech.spoken == [("Das ist Tisch.", "de"), ("colour", "en")]

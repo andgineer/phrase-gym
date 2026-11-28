@@ -246,3 +246,48 @@ def test_a_corrected_wording_is_identified_on_the_card_and_in_the_coach_inbox(
     }
     assert client.post(f"/api/coach/requests/{request_id}/dismiss").status_code == 200
     assert client.get("/api/coach/inbox").json()["items"] == []
+
+
+def phrase_result(request_id: str, correction: dict[str, str] | None, **card: object) -> dict:
+    result = {
+        "result_id": request_id,
+        "phrase": coach_card(request_id, **card),
+        "reference": silent_reference(),
+    }
+    return result | ({"correction": correction} if correction else {})
+
+
+@pytest.mark.parametrize(
+    "correction",
+    [
+        {"original": "stongly believe", "corrected": "strongly doubt"},
+        {"original": "strongly believe", "corrected": "strongly believe"},
+    ],
+)
+def test_a_phrase_correction_must_change_to_wording_the_card_reveals(
+    client: TestClient, correction: dict[str, str]
+) -> None:
+    request_id = claimed(client, "stongly believe")
+    response = client.post(
+        f"/api/imports/{request_id}/result", json=phrase_result(request_id, correction)
+    )
+    assert response.status_code == 422
+    basic_with_both = {"result_id": request_id, "basic": basic(), "reference": silent_reference()}
+    basic_with_both["correction"] = {"original": "stongly", "corrected": "strongly"}
+    assert client.post(f"/api/imports/{request_id}/result", json=basic_with_both).status_code == 422
+
+
+def test_a_phrase_correction_is_noted_on_the_card_and_kept_for_the_coach_inbox(
+    client: TestClient,
+) -> None:
+    request_id = claimed(client, "stongly believe")
+    correction = {"original": "stongly believe", "corrected": "strongly believe"}
+    result = phrase_result(request_id, correction)
+    response = client.post(f"/api/imports/{request_id}/result", json=result)
+    assert response.status_code == 200, response.text
+    again = client.post(f"/api/imports/{request_id}/result", json=result)
+    assert again.status_code == 200, again.text
+    answer = Practice(client).reveal(Practice(client).card())["answer"]
+    assert answer["explanation"].endswith("Исправлено, было: «stongly believe».")
+    [item] = client.get("/api/coach/inbox").json()["items"]
+    assert (item["outcome"], item["correction"]) == ("corrected", correction)

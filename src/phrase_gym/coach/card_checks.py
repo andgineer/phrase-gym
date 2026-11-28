@@ -17,6 +17,7 @@ from phrase_gym.coach.hint_checks import (
     words,
 )
 from phrase_gym.server.import_contracts import ImportPhrase
+from phrase_gym.server.languages import LearningLanguage
 from phrase_gym.server.sentence_gaps import GAP
 
 GAP_RUN = re.compile(r"_{2,}")
@@ -54,7 +55,33 @@ def _cue_problems(phrase: ImportPhrase, kind: str, target: list[str]) -> list[st
     return problems
 
 
-def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
+def correction_problems(answer: dict[str, Any], typed: str) -> list[str]:
+    correction = answer.get("correction")
+    if correction is None:
+        return []
+    if not isinstance(correction, dict) or any(
+        not isinstance(correction.get(key), str) or not correction[key].strip()
+        for key in ("original", "corrected")
+    ):
+        return ["correction: give the original and corrected wording, or null"]
+    original, corrected = correction["original"], correction["corrected"]
+    checks = [
+        (original == corrected, "correction: the corrected wording must differ from the original"),
+        (original not in typed, "correction: the original must be copied exactly from the input"),
+        (
+            corrected not in str(answer.get("target") or ""),
+            "correction: the corrected wording must be the target or a part of it",
+        ),
+    ]
+    return [problem for failed, problem in checks if failed]
+
+
+def card_problems(
+    answer: dict[str, Any],
+    item_id: str,
+    typed: str,
+    language: LearningLanguage,
+) -> list[str]:
     """Structural checks; semantic quality stays with the reviewer."""
     card = answer.get("card")
     if not isinstance(card, dict):
@@ -69,18 +96,24 @@ def card_problems(answer: dict[str, Any], item_id: str) -> list[str]:
         phrase = phrase_of(card, item_id)
     except ValidationError as error:
         return _validation_problems(error)
-    problems = _cue_problems(phrase, kind, target)
+    problems = correction_problems(answer, typed) + _cue_problems(phrase, kind, target)
     problems += [
         f"recall_hints.{index}: the hint gives the complete target"
         for index, hint in enumerate(phrase.recall_hints)
         if contains_words(hint, target)
     ]
-    for index, hint in enumerate(phrase.recall_hints):
-        problems += hint_problems(index, hint, str(answer["target"]), phrase.cues)
-    contrasted = bold_expressions(phrase.explanation, phrase.detailed_explanation)
     target_text = str(answer["target"])
-    problems += hint_set_problems(phrase.recall_hints, target_text, contrasted)
-    problems += companion_problems(phrase.recall_hints, target_text, phrase.cues, phrase.text)
+    for index, hint in enumerate(phrase.recall_hints):
+        problems += hint_problems(index, hint, target_text, phrase.cues, language)
+    contrasted = bold_expressions(phrase.explanation, phrase.detailed_explanation)
+    problems += hint_set_problems(phrase.recall_hints, target_text, contrasted, language)
+    problems += companion_problems(
+        phrase.recall_hints,
+        target_text,
+        phrase.cues,
+        phrase.text,
+        language,
+    )
     problems += gloss_frame_problems(phrase.cues)
     problems += repeated_gloss_problems(phrase.cues)
     problems += gloss_problems(phrase.cues, target_text)

@@ -6,6 +6,7 @@
     "reason",
     "kind",
     "target",
+    "correction",
     "card"
   ],
   "properties": {
@@ -28,6 +29,29 @@
     },
     "target": {
       "type": "string"
+    },
+    "correction": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "original",
+            "corrected"
+          ],
+          "properties": {
+            "original": {
+              "type": "string"
+            },
+            "corrected": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "card": {
       "anyOf": [

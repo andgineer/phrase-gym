@@ -279,6 +279,16 @@
               }
             ]
           },
+          "correction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoachCorrection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "phrase": {
             "anyOf": [
               {

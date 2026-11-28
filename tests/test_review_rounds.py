@@ -57,8 +57,9 @@ def test_a_corrected_card_is_reviewed_again_before_publication(
     cli: Cli, tmp_path: Path, text: str, steps: list[str]
 ) -> None:
     attempt = tmp_path / "attempt"
-    phrase = asyncio.run(prepare_card(typed(text), cli, attempt))
-    assert phrase.text == f"She felt {text} today."
+    prepared = asyncio.run(prepare_card(typed(text), cli, attempt))
+    assert prepared.phrase.text == f"She felt {text} today."
+    assert prepared.correction is None
     assert calls(attempt) == steps
 
 

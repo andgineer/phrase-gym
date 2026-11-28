@@ -2,7 +2,9 @@ import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
+from phrase_gym.coach.check_words import FUNCTION_WORDS
 from phrase_gym.server.import_contracts import Cue
+from phrase_gym.server.languages import LearningLanguage
 
 ELLIPSIS = re.compile(r"\.\.\.|…")
 WORD = re.compile(r"[\w']+")
@@ -10,62 +12,6 @@ GLOSS = re.compile(r"\(=([^)]*)\)")
 GAP_TEXT = "__________"
 BOLD = re.compile(r"\*\*(.+?)\*\*")
 MIN_OPENING_WORDS = 2
-# Words that dangle at a hint's end; prepositions such as "to" or "about" may still end one.
-# German articles and conjunctions sit beside English ones; "sein" and "ihr" are left out
-# because they also work as a verb and a pronoun.
-GERMAN_FUNCTION_WORDS = frozenset(
-    [
-        "der",
-        "die",
-        "das",
-        "den",
-        "dem",
-        "des",
-        "ein",
-        "eine",
-        "einen",
-        "einem",
-        "einer",
-        "eines",
-        "und",
-        "oder",
-        "aber",
-        "mein",
-        "meine",
-        "dein",
-        "deine",
-        "seine",
-        "ihre",
-        "unser",
-        "unsere",
-        "dieser",
-        "diese",
-        "dieses",
-    ],
-)
-FUNCTION_WORDS = GERMAN_FUNCTION_WORDS | frozenset(
-    [
-        "a",
-        "an",
-        "the",
-        "and",
-        "or",
-        "but",
-        "my",
-        "your",
-        "his",
-        "her",
-        "its",
-        "our",
-        "their",
-        "this",
-        "that",
-        "these",
-        "those",
-        "some",
-        "any",
-    ],
-)
 # A shortened word may show at most half its letters; over a quarter of the target stays hidden.
 MIN_HIDDEN_SHARE = 0.25
 
@@ -123,7 +69,12 @@ class HintParts:
     dangling: list[str] = field(default_factory=list)
 
 
-def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
+def parse_hint(
+    index: int,
+    hint: str,
+    target: list[str],
+    language: LearningLanguage,
+) -> HintParts:
     parts = HintParts()
     free = list(range(len(target)))
     for chunk in re.split(r"[/,]", hint):
@@ -135,7 +86,7 @@ def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
                 companions.append(token)
                 continue
             # Function words right before a target word belong to it ("make a pi...").
-            while companions and _bare(companions[-1]):
+            while companions and _bare(companions[-1], language):
                 companions.pop()
             word, shown = matched
             free.remove(word)
@@ -148,18 +99,24 @@ def parse_hint(index: int, hint: str, target: list[str]) -> HintParts:
                     "letters of a target word; show at most half",
                 )
         parts.companions.append(companions)
-        if tokens and companions and tokens[-1] == companions[-1] and _bare(tokens[-1]):
+        if tokens and companions and tokens[-1] == companions[-1] and _bare(tokens[-1], language):
             parts.dangling.append(" ".join(companions))
     return parts
 
 
-def _bare(token: str) -> bool:
-    return token.casefold().replace("’", "'").strip("'\"") in FUNCTION_WORDS
+def _bare(token: str, language: LearningLanguage) -> bool:
+    return token.casefold().replace("’", "'").strip("'\"") in FUNCTION_WORDS[language]
 
 
-def hint_problems(index: int, hint: str, target_text: str, cues: Sequence[Cue]) -> list[str]:
+def hint_problems(
+    index: int,
+    hint: str,
+    target_text: str,
+    cues: Sequence[Cue],
+    language: LearningLanguage,
+) -> list[str]:
     target = [letters(word) for word in words(target_text) if letters(word)]
-    parts = parse_hint(index, hint, target)
+    parts = parse_hint(index, hint, target, language)
     problems = parts.problems
     visible = [f"{cue.situation} {cue.partner_line or ''}" for cue in cues]
     for companions in parts.companions:
@@ -192,12 +149,17 @@ def bold_expressions(*texts: str | None) -> list[str]:
     return [found.strip() for text in texts if text for found in BOLD.findall(text)]
 
 
-def hint_set_problems(hints: list[str], target_text: str, contrasted: list[str]) -> list[str]:
+def hint_set_problems(
+    hints: list[str],
+    target_text: str,
+    contrasted: list[str],
+    language: LearningLanguage,
+) -> list[str]:
     problems = []
     for index, hint in enumerate(hints):
         for expression in contrasted:
             other = words(expression)
-            own = set(words(target_text)) | FUNCTION_WORDS
+            own = set(words(target_text)) | FUNCTION_WORDS[language]
             if other and not set(other) <= own and contains_words(hint, other):
                 problems.append(
                     f"recall_hints.{index}: it contains “{expression}”, the expression this "

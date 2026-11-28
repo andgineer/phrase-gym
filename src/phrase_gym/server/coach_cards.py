@@ -1,10 +1,13 @@
 import json
 
+from pydantic import ValidationError
+
 from phrase_gym.server.coach_contracts import (
     COACH_LESSON_ID,
     COACH_SOURCE_ID,
     COACH_SOURCE_LABEL,
     BasicCard,
+    CoachCorrection,
     CoachResult,
     CoachWork,
 )
@@ -41,12 +44,25 @@ CORRECTION_NOTES: dict[NativeLanguage, str] = {
 }
 
 
-def correction_note(card: BasicCard, language: NativeLanguage) -> str:
-    return CORRECTION_NOTES[language].format(card.correction.original) if card.correction else ""
+def correction_note(correction: CoachCorrection | None, language: NativeLanguage) -> str:
+    return CORRECTION_NOTES[language].format(correction.original) if correction else ""
+
+
+def _noted(phrase: ImportPhrase, note: str) -> ImportPhrase:
+    if not note:
+        return phrase
+    try:
+        return ImportPhrase.model_validate(
+            {**phrase.model_dump(), "explanation": f"{phrase.explanation} {note}"},
+        )
+    except ValidationError as error:
+        raise ImportConflictError(
+            "The explanation leaves no room for the correction note.",
+        ) from error
 
 
 def _basic_content(card: BasicCard, language: NativeLanguage) -> dict[str, object]:
-    note = correction_note(card, language)
+    note = correction_note(card.correction, language)
     return {
         "source_label": COACH_SOURCE_LABEL,
         "source_link": None,
@@ -68,7 +84,8 @@ def coach_batch(work: CoachWork, result: CoachResult) -> Batch:
     if result.phrase is not None:
         if result.phrase.item_id != package_id:
             raise ImportConflictError(f"phrases.item_id must be {package_id}.")
-        package = coach_package(work, result.phrase)
+        note = correction_note(result.correction, work.native_language)
+        package = coach_package(work, _noted(result.phrase, note))
         return package_batch(package, decode_references(package, {package_id: result.reference}))
     if result.basic is None:
         raise ImportConflictError("A Coach result needs a card.")

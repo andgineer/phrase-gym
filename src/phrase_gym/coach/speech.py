@@ -16,6 +16,10 @@ MAX_SAMPLE_RATE = 48_000
 LOCALES: dict[LearningLanguage, str] = {"en": "en-US", "de": "de-DE"}
 RUNTIME_FIELDS = ("executable", "runtime_version")
 VOICE_FIELDS = ("model", "model_sha256", "config", "config_sha256")
+OLD_FORMAT = (
+    "The voice file uses the old single-voice format; move its voice fields under voices.en "
+    "(see the voice setup guide)"
+)
 
 
 class MissingVoiceError(RuntimeError):
@@ -136,9 +140,13 @@ class PiperSpeech:
             raise RuntimeError(
                 "Piper is not configured. Set PHRASE_GYM_PIPER_CONFIG to the voice JSON path.",
             )
+        if not self.config_path.is_file():
+            raise RuntimeError(f"The Piper voice file {self.config_path} does not exist")
         try:
             runtime = _strings(json.loads(self.config_path.read_text()), RUNTIME_FIELDS)
             voices = runtime.get("voices")
+            if voices is None and "model" in runtime:
+                raise RuntimeError(OLD_FORMAT)
             if not isinstance(voices, dict):
                 raise TypeError
             if language not in voices:

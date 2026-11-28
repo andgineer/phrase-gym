@@ -149,14 +149,19 @@ class CoachRequests:
 
     def publish(self, package_id: str, result: CoachResult) -> dict[str, object]:
         kind, card = ("phrase", result.phrase) if result.phrase else ("basic", result.basic)
-        digest = result_hash(
-            {kind: card.model_dump(mode="json") if card else None, "reference": result.reference},
-        )
+        hashed = {
+            kind: card.model_dump(mode="json") if card else None,
+            "reference": result.reference,
+        }
+        if result.correction:
+            # Only added when present, so results published before corrections keep their hash.
+            hashed["correction"] = result.correction.model_dump(mode="json")
+        digest = result_hash(hashed)
         with self.database.read() as connection:
             work = request_work(coach_row(connection, package_id))
         # The audio is decoded before the write lock; a request's languages never change.
         batch = coach_batch(work, result)
-        correction = result.basic.correction if result.basic else None
+        correction = result.corrected()
         with self.database.write() as connection:
             row = coach_row(connection, package_id)
             if row.status == "added":

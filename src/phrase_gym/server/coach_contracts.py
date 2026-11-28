@@ -67,13 +67,25 @@ class CoachResult(StrictModel):
     result_id: str = Field(pattern=IDENTITY_PATTERN)
     phrase: ImportPhrase | None = None
     basic: BasicCard | None = None
+    # A prepared phrase card's own correction; a basic card carries its correction itself.
+    correction: CoachCorrection | None = None
     reference: str
 
     @model_validator(mode="after")
     def one_card(self) -> "CoachResult":
         if (self.phrase is None) == (self.basic is None):
             raise ValueError("a result carries either phrase or basic")
+        if self.correction and self.phrase is None:
+            raise ValueError("only a phrase result carries a separate correction")
+        if self.correction and self.correction.original == self.correction.corrected:
+            raise ValueError("a correction must change the wording")
+        revealed = search_key(self.phrase.text) if self.phrase else ""
+        if self.correction and search_key(self.correction.corrected) not in revealed:
+            raise ValueError("the revealed text must contain the corrected wording")
         return self
+
+    def corrected(self) -> CoachCorrection | None:
+        return self.basic.correction if self.basic else self.correction
 
 
 class CoachFailure(StrictModel):
