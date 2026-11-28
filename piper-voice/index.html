@@ -498,6 +498,9 @@ private voice file with one entry per learning language:</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>A voice file written for an earlier Coach names a single English voice at its top level. Coach
+then reports that it uses the old single-voice format: keep <code>executable</code> and <code>runtime_version</code>
+where they are and move the other fields under <code>voices.en</code>.</p>
 <p>Coach verifies the exact installed <code>piper-tts</code> version against <code>runtime_version</code>, each voice's
 model/config hashes, and that the voice's locale matches its learning language: <code>en-US</code> for
 English and <code>de-DE</code> for German. Without a voice for a card's language, Coach reports in the Coach
