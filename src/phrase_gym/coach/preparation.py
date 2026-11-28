@@ -59,6 +59,7 @@ REVISION_ROUNDS = (("review", "revise"), ("review-2", "revise-2"))
 @dataclass(frozen=True)
 class PreparedPhrase:
     phrase: ImportPhrase
+    target: str
     correction: CoachCorrection | None
 
 
@@ -66,6 +67,7 @@ def prepared(answer: dict[str, Any], item_id: str) -> PreparedPhrase:
     correction = answer.get("correction")
     return PreparedPhrase(
         phrase_of(answer["card"], item_id),
+        str(answer["target"]),
         CoachCorrection.model_validate(correction) if correction else None,
     )
 

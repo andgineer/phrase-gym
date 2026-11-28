@@ -55,6 +55,10 @@ def _cue_problems(phrase: ImportPhrase, kind: str, target: list[str]) -> list[st
     return problems
 
 
+def _whole_words(part: str, whole: str) -> bool:
+    return part in whole and contains_words(whole, words(part))
+
+
 def correction_problems(answer: dict[str, Any], typed: str) -> list[str]:
     correction = answer.get("correction")
     if correction is None:
@@ -65,12 +69,16 @@ def correction_problems(answer: dict[str, Any], typed: str) -> list[str]:
     ):
         return ["correction: give the original and corrected wording, or null"]
     original, corrected = correction["original"], correction["corrected"]
+    target = str(answer.get("target") or "")
     checks = [
         (original == corrected, "correction: the corrected wording must differ from the original"),
-        (original not in typed, "correction: the original must be copied exactly from the input"),
         (
-            corrected not in str(answer.get("target") or ""),
-            "correction: the corrected wording must be the target or a part of it",
+            not _whole_words(original, typed),
+            "correction: the original must be whole words copied exactly from the input",
+        ),
+        (
+            not _whole_words(corrected, target),
+            "correction: the corrected wording must be the target or whole words of it",
         ),
     ]
     return [problem for failed, problem in checks if failed]

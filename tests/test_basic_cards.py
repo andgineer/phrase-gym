@@ -248,33 +248,71 @@ def test_a_corrected_wording_is_identified_on_the_card_and_in_the_coach_inbox(
     assert client.get("/api/coach/inbox").json()["items"] == []
 
 
-def phrase_result(request_id: str, correction: dict[str, str] | None, **card: object) -> dict:
+def phrase_result(
+    request_id: str,
+    correction: dict[str, str] | None,
+    target: str | None = "strongly believe",
+    **card: object,
+) -> dict:
     result = {
         "result_id": request_id,
         "phrase": coach_card(request_id, **card),
         "reference": silent_reference(),
     }
-    return result | ({"correction": correction} if correction else {})
+    if correction:
+        result["correction"] = correction
+    return result | ({"target": target} if correction and target else {})
 
 
 @pytest.mark.parametrize(
-    "correction",
+    ("correction", "target"),
     [
-        {"original": "stongly believe", "corrected": "strongly doubt"},
-        {"original": "strongly believe", "corrected": "strongly believe"},
+        ({"original": "stongly believe", "corrected": "strongly doubt"}, "strongly believe"),
+        ({"original": "strongly believe", "corrected": "strongly believe"}, "strongly believe"),
+        ({"original": "stongly", "corrected": "strong"}, "strongly believe"),
+        ({"original": "stongly believe", "corrected": "strongly believe"}, None),
     ],
 )
-def test_a_phrase_correction_must_change_to_wording_the_card_reveals(
-    client: TestClient, correction: dict[str, str]
+def test_a_phrase_correction_must_change_the_input_into_whole_words_of_the_target(
+    client: TestClient, correction: dict[str, str], target: str | None
 ) -> None:
     request_id = claimed(client, "stongly believe")
+    url = f"/api/imports/{request_id}/result"
+    assert client.post(url, json=phrase_result(request_id, correction, target)).status_code == 422
+    basic_with_both = {"result_id": request_id, "basic": basic(), "reference": silent_reference()}
+    basic_with_both["correction"] = {"original": "stongly", "corrected": "strongly"}
+    assert client.post(url, json=basic_with_both).status_code == 422
+
+
+def test_a_correction_whose_original_was_not_typed_is_refused(client: TestClient) -> None:
+    request_id = claimed(client, "stongly believe")
+    correction = {"original": "s", "corrected": "strongly believe"}
     response = client.post(
         f"/api/imports/{request_id}/result", json=phrase_result(request_id, correction)
     )
-    assert response.status_code == 422
-    basic_with_both = {"result_id": request_id, "basic": basic(), "reference": silent_reference()}
-    basic_with_both["correction"] = {"original": "stongly", "corrected": "strongly"}
-    assert client.post(f"/api/imports/{request_id}/result", json=basic_with_both).status_code == 422
+    assert response.status_code == 409
+    assert coach_phrases(client) == []
+
+
+@pytest.mark.parametrize(
+    ("language", "typed", "target", "text"),
+    [
+        ("de", "das auto", "das Auto", "Wir fahren mit dem Auto."),
+        ("en", "comming", "come", "She is coming home."),
+    ],
+)
+def test_a_correction_describes_the_target_even_when_the_example_inflects_it(
+    client: TestClient, language: str, typed: str, target: str, text: str
+) -> None:
+    sent = client.post("/api/coach/requests", json={"text": typed, "learning_language": language})
+    request_id = sent.json()["request_id"]
+    client.post("/api/imports/coach/next")
+    correction = {"original": typed, "corrected": target}
+    result = phrase_result(request_id, correction, target, text=text)
+    response = client.post(f"/api/imports/{request_id}/result", json=result)
+    assert response.status_code == 200, response.text
+    [item] = client.get("/api/coach/inbox").json()["items"]
+    assert (item["outcome"], item["correction"]) == ("corrected", correction)
 
 
 def test_a_phrase_correction_is_noted_on_the_card_and_kept_for_the_coach_inbox(

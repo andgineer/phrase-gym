@@ -19,8 +19,10 @@ The preparing session followed the card format and content rules below.
 Inspect the draft strictly against the content rules below, especially the inspection checklist:
 target choice and sense, every completed cue, every gloss, every hint on its own with every cue,
 competing answers, explanation and help. Apply the measured hint limits and the gloss rules to
-every card, however short the target. Check that every hint companion is a collocate, situation
-or sentence frame in the target's own sense, and that no two cues repeat one sentence frame.
+every card, however short the target. Insert the target exactly as written into every cue: a
+cue that needs a plural or another inflected form of it is a problem. Check that every hint
+companion is a collocate, situation or sentence frame in the target's own sense, and that no two
+cues repeat one sentence frame.
 Check `correction`: it is null when the typed wording is valid, including a regional spelling,
 capitalisation or colloquial variant, and it names the exact typed span and its single plausible
 correction when the input has an obvious typo. Check that every field is written in the language

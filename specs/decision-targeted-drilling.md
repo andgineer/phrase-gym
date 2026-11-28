@@ -38,7 +38,7 @@ more efficient. (=We are completely sure)** asks for **totally convinced**. Gram
 these two taught chunks without revealing either lexical core; other natural English answers
 remain possible. For a complete routine, a brief exchange with the response blank can work.
 
-Prefer two genuinely different contexts that accept the same unchanged chunk; one is acceptable
+Every gap takes the target exactly as written, so a cue whose sentence needs a plural or another inflected form of it is a language error. Prefer two genuinely different contexts that accept the same unchanged chunk; one is acceptable
 when a second would be forced. Keep prompts comprehensible without learning incidental vocabulary.
 A partner line is optional. Check every completed cue for naturalness, grammar and meaning, then
 try likely competing chunks from the whole source. Natural alternatives can remain; a requested

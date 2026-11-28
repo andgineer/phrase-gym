@@ -684,6 +684,8 @@ export interface components {
             reference: string;
             /** Result Id */
             result_id: string;
+            /** Target */
+            target?: string | null;
         };
         /** CoachSubmission */
         CoachSubmission: {

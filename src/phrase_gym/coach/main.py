@@ -94,6 +94,7 @@ async def prepare(work: dict[str, object], preparer: Preparer, speech: PiperSpee
     result["phrase"] = card.phrase.model_dump(mode="json", exclude_none=True)
     if card.correction:
         result["correction"] = card.correction.model_dump(mode="json")
+        result["target"] = card.target
     return result
 
 

@@ -67,8 +67,10 @@ class CoachResult(StrictModel):
     result_id: str = Field(pattern=IDENTITY_PATTERN)
     phrase: ImportPhrase | None = None
     basic: BasicCard | None = None
-    # A prepared phrase card's own correction; a basic card carries its correction itself.
+    # A prepared phrase card's own correction of the input into its studied target; a basic card
+    # carries its correction itself.
     correction: CoachCorrection | None = None
+    target: str | None = Field(default=None, min_length=1, max_length=200)
     reference: str
 
     @model_validator(mode="after")
@@ -79,9 +81,11 @@ class CoachResult(StrictModel):
             raise ValueError("only a phrase result carries a separate correction")
         if self.correction and self.correction.original == self.correction.corrected:
             raise ValueError("a correction must change the wording")
-        revealed = search_key(self.phrase.text) if self.phrase else ""
-        if self.correction and search_key(self.correction.corrected) not in revealed:
-            raise ValueError("the revealed text must contain the corrected wording")
+        if self.correction and (
+            self.target is None
+            or search_key(self.correction.corrected) not in search_key(self.target)
+        ):
+            raise ValueError("the corrected wording must be the target or whole words of it")
         return self
 
     def corrected(self) -> CoachCorrection | None:

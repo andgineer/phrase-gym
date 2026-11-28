@@ -415,7 +415,9 @@ def test_function_words_follow_the_cards_learning_language() -> None:
         ({"original": "beleive", "corrected": "believe"}, None),
         ({"original": "strongly believe", "corrected": "strongly believe"}, "must differ"),
         ({"original": "stongly", "corrected": "strongly"}, "copied exactly from the input"),
-        ({"original": "beleive", "corrected": "belief"}, "the target or a part of it"),
+        ({"original": "beleive", "corrected": "belief"}, "the target or whole words of it"),
+        ({"original": "beleive", "corrected": "believ"}, "the target or whole words of it"),
+        ({"original": "e", "corrected": "believe"}, "whole words copied exactly from the input"),
         ({"original": "beleive"}, "give the original and corrected wording"),
     ],
 )

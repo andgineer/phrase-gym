@@ -33,8 +33,11 @@ A changed context in a cue is an authored exercise, never a quotation attributed
 ### Build a natural gap cue
 
 Keep the exercise fast: a short conversational line with one `__________` gap, followed by a
-plain meaning gloss in `(=...)`, written in the meaning-layer language. The gap hides the whole selected chunk. Visible words
-provide incidental context; an optional `partner_line` supplies the other person's short turn.
+plain meaning gloss in `(=...)`, written in the meaning-layer language. The gap hides the whole
+selected chunk. Each gap takes the target exactly as written: never write a cue whose sentence
+needs a plural or another inflected form of it, such as `three other __________` for **colour**.
+Visible words provide incidental context; an optional `partner_line` supplies the other person's
+short turn.
 Do not replace this format with a scene description, role instructions or a paragraph to analyze.
 For a complete routine, the response may be just the gap and gloss. Use a constant gap length,
 not one underscore per letter or word. Do not reveal target initials or assemble part of the
@@ -210,7 +213,8 @@ the card; another sense needs its own card.
   unwilling and slow to do something because you do not want to. Mention article, plural or
   another form only when it matters for using the word.
 - `cues`: two or three short contexts with different propositions. Each replaces the target
-  word, in the form that context needs, with one `__________` gap and adds a short sense gloss
+  word with one `__________` gap in a frame that takes the word exactly as studied, and adds a
+  short sense gloss
   in `(=...)` when the context alone would allow other words. The learner says the completed
   chunk; rating concerns the target sense and form, not unrelated slips elsewhere.
 - `recall_hints`: meaningful partial forms with an ordinary associated word, such as
@@ -229,7 +233,8 @@ practical default; a definition the learner understands is not yet spoken retrie
 1. **Useful target:** check that the selected chunk is worth reusing beyond this example.
    Check the boundaries; hide its complete lexical core rather than only an easy filler word.
    For a word-sense card, check that every cue, the definition and the example use one sense.
-2. **Completion:** insert the target into every cue and read the whole sentence. Check grammar,
+2. **Completion:** insert the target exactly as written into every cue and read the whole
+   sentence; a cue that needs a plural or another inflected form of it fails. Check grammar,
    naturalness, intended meaning and a coherent referent for words such as “that” or “it”.
    Read the gloss as a quick meaning cue: reject instructions, cryptic labels, changed intentions
    or a different question/frame. Compare both glosses; vary naturally without semantic drift.

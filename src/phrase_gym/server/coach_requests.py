@@ -156,6 +156,7 @@ class CoachRequests:
         if result.correction:
             # Only added when present, so results published before corrections keep their hash.
             hashed["correction"] = result.correction.model_dump(mode="json")
+            hashed["target"] = result.target
         digest = result_hash(hashed)
         with self.database.read() as connection:
             work = request_work(coach_row(connection, package_id))

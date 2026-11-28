@@ -81,6 +81,11 @@ def _basic_content(card: BasicCard, language: NativeLanguage) -> dict[str, objec
 
 def coach_batch(work: CoachWork, result: CoachResult) -> Batch:
     package_id = work.package_id
+    correction = result.corrected()
+    if correction and search_key(correction.original) not in search_key(work.text):
+        raise ImportConflictError(
+            "The corrected original must be whole words of the submitted text.",
+        )
     if result.phrase is not None:
         if result.phrase.item_id != package_id:
             raise ImportConflictError(f"phrases.item_id must be {package_id}.")
